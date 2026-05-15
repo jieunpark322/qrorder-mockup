@@ -57,6 +57,36 @@
 
   /* Basis bar */
   .basis-bar{display:flex;align-items:center;gap:8px;margin:0 0 14px;padding:10px 14px;background:#fff;border:1px solid var(--line);border-radius:10px;font-size:12px;color:var(--ink-2);}
+
+  /* 매출 집계 기준 + 기간 선택 통합 컴포넌트 */
+  .basis-combo{background:linear-gradient(135deg,#fafcff 0%,#fff 100%);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;padding:14px 18px;}
+  .basis-combo .bc-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .basis-combo .bc-row + .bc-row{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+  .basis-combo .lbl-pill{font-size:11px;color:#1b64da;font-weight:800;background:var(--blue-50);padding:6px 10px;border-radius:6px;letter-spacing:.02em;display:inline-flex;align-items:center;gap:5px;}
+  .basis-combo .ico-i{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;cursor:pointer;color:var(--blue);font-weight:700;background:#fff;border:1px solid var(--blue-100);transition:all .12s;font-size:12px;}
+  .basis-combo .ico-i:hover{background:var(--blue-50);}
+  .basis-combo .period-line{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .basis-combo .date-nav{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);}
+  .basis-combo .date-nav .arr{padding:4px 8px;color:var(--ink-3);cursor:pointer;border-radius:6px;font-size:13px;}
+  .basis-combo .date-nav .arr:hover{background:var(--bg-2);color:var(--ink);}
+  .basis-combo .date-nav b{font-weight:700;font-variant-numeric:tabular-nums;}
+  .basis-combo .range-line{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);flex-wrap:wrap;}
+  .basis-combo .range-line .rng-time{display:flex;align-items:center;gap:6px;color:var(--ink);}
+  .basis-combo .range-line .rng-time b{font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+  .basis-combo .range-line .rng-time .arr{color:var(--ink-3);font-weight:600;}
+  .basis-combo .range-line .note{color:var(--ink-3);font-size:12px;}
+
+  /* Basis info modal 내부 블록 */
+  .ib-block{margin-bottom:18px;}
+  .ib-block h4{margin:0 0 6px;font-size:14px;font-weight:800;color:var(--ink);}
+  .ib-block p{margin:0 0 10px;font-size:13px;color:var(--ink-2);line-height:1.6;}
+  .ib-block .ex-card{padding:12px 14px;background:var(--bg-2);border-radius:10px;font-size:12px;color:var(--ink-2);line-height:1.7;}
+  .ib-block .ex-card b{display:block;color:var(--ink);margin-bottom:6px;font-size:13px;}
+  .ib-block .ex-card ul{margin:6px 0 0;padding-left:18px;}
+  .ib-block .ex-card li{margin-bottom:3px;}
+  .ib-block.important{padding:16px 18px;background:linear-gradient(135deg,#f6f3ff,#fafcff);border:1px solid #e3d8ff;border-radius:12px;margin-bottom:0;}
+  .ib-block.important h4{color:#6b3eaa;}
+  .ib-block .agent-tip{margin-top:10px;padding:10px 14px;background:#fff;border-radius:8px;font-size:13px;font-weight:700;color:#6b3eaa;border:1px dashed #c4a5ff;font-family:'Pretendard',sans-serif;}
   .basis-bar .ico{width:18px;height:18px;border-radius:50%;background:var(--blue-50);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
   .basis-bar b{color:var(--ink);}
   .basis-bar .sep{color:var(--line);}
@@ -221,6 +251,14 @@
   .modal-head .close{background:none;border:none;font-size:20px;color:var(--ink-3);cursor:pointer;padding:0;width:28px;height:28px;border-radius:50%;}
   .modal-head .close:hover{background:var(--bg-2);color:var(--ink);}
   .modal-sub{font-size:12px;color:var(--ink-3);margin-bottom:18px;}
+
+  /* Export option card (모달 내 선택지) */
+  .opt-card{padding:16px;border:2px solid var(--line);border-radius:12px;cursor:pointer;text-align:center;transition:all .12s;background:#fff;}
+  .opt-card:hover{border-color:var(--ink-4);}
+  .opt-card.on{border-color:var(--blue);background:#fafcff;box-shadow:0 0 0 3px rgba(49,130,246,.08);}
+  .opt-card .ico-lg{font-size:24px;margin-bottom:6px;}
+  .opt-card .ttl{font-weight:700;font-size:14px;}
+  .opt-card .sub-ttl{font-size:11px;color:var(--ink-3);margin-top:4px;}
 
   /* Receipt */
   .receipt{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:16px;font-size:12px;}
@@ -393,29 +431,23 @@ const CHANNEL = [
 ];
 
 // 주문 (오늘 5/15 일부)
+// 주문 데이터 — date(결제일) 필드 추가. 1년 초과 거래는 카드번호 검색 차단 + 전체 마스킹
 const ORDERS = [
-  { id:'#20260515-0046', time:'10:24', channel:'테이블 4',   ch:'매장', menu:'아메리카노 외 2건',     pay:'💳 신한 ****1234',  amt:26400, status:'완료',     stl:'정산예정 5/20', card:'4141201234', tid:'tid_3f8a_5a13' },
-  { id:'#20260515-0045', time:'10:18', channel:'포장',       ch:'포장', menu:'카페라떼, 크루아상',     pay:'🟡 카카오페이',     amt:12000, status:'완료',     stl:'정산예정 5/20' },
-  { id:'#20260515-0044', time:'10:12', channel:'테이블 2',   ch:'매장', menu:'자몽에이드',             pay:'💳 KB ****5678',    amt:8000,  status:'전체취소', stl:'제외',           card:'5388005678' },
-  { id:'#20260515-0043', time:'09:58', channel:'테이블 6',   ch:'매장', menu:'아메리카노 외 4건',     pay:'💳 VISA (해외)',    amt:27420, status:'완료',     stl:'정산예정 5/21', currency:'USD 19.90' },
-  { id:'#20260515-0042', time:'09:42', channel:'테이블 1',   ch:'매장', menu:'카페라떼',               pay:'🟢 네이버페이',     amt:5500,  status:'부분취소', stl:'정산예정 5/20' },
-  { id:'#20260515-0041', time:'09:21', channel:'테이블 3',   ch:'매장', menu:'아메리카노, 크루아상',   pay:'💳 삼성 ****9012',  amt:10000, status:'완료',     stl:'정산예정 5/20', card:'4523019012' },
-  { id:'#20260515-0040', time:'08:55', channel:'포장',       ch:'포장', menu:'아메리카노 × 3',         pay:'🟡 카카오페이',     amt:12000, status:'완료',     stl:'정산예정 5/20' },
-  { id:'#20260515-0039', time:'08:32', channel:'테이블 2',   ch:'매장', menu:'치즈케이크, 카페라떼',   pay:'💵 현금',           amt:12500, status:'완료',     stl:'−' },
-  { id:'#20260515-0038', time:'08:14', channel:'테이블 5',   ch:'매장', menu:'아메리카노 × 2',         pay:'💳 신한 ****1234',  amt:8000,  status:'완료',     stl:'정산예정 5/20', card:'4141201234' },
-  { id:'#20260515-0037', time:'07:58', channel:'배달',       ch:'배달', menu:'카페라떼 외 3건',        pay:'🟡 카카오페이',     amt:32000, status:'완료',     stl:'정산예정 5/20' },
-  { id:'#20260515-0036', time:'07:42', channel:'포장',       ch:'포장', menu:'아메리카노, 크루아상',   pay:'🟢 네이버페이',     amt:10000, status:'완료',     stl:'정산예정 5/20' },
-  { id:'#20260515-0035', time:'07:28', channel:'테이블 4',   ch:'매장', menu:'카푸치노',                pay:'💳 KB ****5678',    amt:5000,  status:'완료',     stl:'정산예정 5/20', card:'5388005678' },
-];
-
-// 취소·환불 (이번 달)
-const CANCELS = [
-  { time:'5/15 10:32', order:'#20260515-0044', type:'전체취소', amt:-8000,  reason:'매장 실수', memo:'시럽 빠뜨림',  by:'홍길동', day:'5/15', stl:'5/20 회차 제외' },
-  { time:'5/15 09:42', order:'#20260515-0042', type:'부분취소', amt:-500,   reason:'고객 요청', memo:'',             by:'홍길동', day:'5/15', stl:'5/20 회차 일부 제외' },
-  { time:'5/14 14:22', order:'#20260514-0072', type:'전체취소', amt:-6400,  reason:'메뉴 품절', memo:'재료 소진',     by:'홍길동', day:'5/14', stl:'5/22 회차 차감', afterSettle:true },
-  { time:'5/13 11:08', order:'#20260513-0033', type:'전체취소', amt:-15000, reason:'시스템 오류', memo:'결제 중복', by:'운영팀', day:'5/13', stl:'5/21 회차 차감' },
-  { time:'5/12 18:42', order:'#20260512-0089', type:'전체취소', amt:-22000, reason:'고객 요청', memo:'',             by:'홍길동', day:'5/12', stl:'5/15 회차 제외' },
-  { time:'5/10 09:14', order:'#20260510-0012', type:'부분취소', amt:-3500,  reason:'매장 실수', memo:'잘못 만듦',     by:'홍길동', day:'5/10', stl:'5/13 회차 일부 제외' },
+  { id:'#20260515-0046', date:'2026-05-15', time:'10:24', channel:'테이블 4',   ch:'매장', menu:'아메리카노 외 2건',     issuer:'신한', amt:26400, status:'완료',     stl:'정산예정 5/20', card:'4141201234', tid:'tid_3f8a5a13b002xyz' },
+  { id:'#20260515-0045', date:'2026-05-15', time:'10:18', channel:'포장',       ch:'포장', menu:'카페라떼, 크루아상',    issuer:'카카오페이', amt:12000, status:'완료',     stl:'정산예정 5/20' },
+  { id:'#20260515-0044', date:'2026-05-15', time:'10:12', channel:'테이블 2',   ch:'매장', menu:'자몽에이드',           issuer:'KB',   amt:8000,  status:'전체취소', stl:'제외',           card:'5388005678' },
+  { id:'#20260515-0043', date:'2026-05-15', time:'09:58', channel:'테이블 6',   ch:'매장', menu:'아메리카노 외 4건',     issuer:'VISA (해외)', amt:27420, status:'완료',     stl:'정산예정 5/21', card:'4111001234', currency:'USD 19.90' },
+  { id:'#20260515-0042', date:'2026-05-15', time:'09:42', channel:'테이블 1',   ch:'매장', menu:'카페라떼',               issuer:'네이버페이', amt:5500,  status:'부분취소', stl:'정산예정 5/20' },
+  { id:'#20260515-0041', date:'2026-05-15', time:'09:21', channel:'테이블 3',   ch:'매장', menu:'아메리카노, 크루아상',   issuer:'삼성', amt:10000, status:'완료',     stl:'정산예정 5/20', card:'4523019012' },
+  { id:'#20260515-0040', date:'2026-05-15', time:'08:55', channel:'포장',       ch:'포장', menu:'아메리카노 × 3',         issuer:'카카오페이', amt:12000, status:'완료',     stl:'정산예정 5/20' },
+  { id:'#20260515-0039', date:'2026-05-15', time:'08:32', channel:'테이블 2',   ch:'매장', menu:'치즈케이크, 카페라떼',   issuer:'현금', amt:12500, status:'완료',     stl:'−' },
+  { id:'#20260515-0038', date:'2026-05-15', time:'08:14', channel:'테이블 5',   ch:'매장', menu:'아메리카노 × 2',         issuer:'신한', amt:8000,  status:'완료',     stl:'정산예정 5/20', card:'4141201234' },
+  { id:'#20260515-0037', date:'2026-05-15', time:'07:58', channel:'배달',       ch:'배달', menu:'카페라떼 외 3건',        issuer:'카카오페이', amt:32000, status:'완료',     stl:'정산예정 5/20' },
+  { id:'#20260515-0036', date:'2026-05-15', time:'07:42', channel:'포장',       ch:'포장', menu:'아메리카노, 크루아상',   issuer:'네이버페이', amt:10000, status:'완료',     stl:'정산예정 5/20' },
+  { id:'#20260515-0035', date:'2026-05-15', time:'07:28', channel:'테이블 4',   ch:'매장', menu:'카푸치노',                issuer:'KB',   amt:5000,  status:'완료',     stl:'정산예정 5/20', card:'5388005678' },
+  // === 1년 초과 거래 샘플 (카드 검색 불가, 카드번호 전체 마스킹) ===
+  { id:'#20250410-0218', date:'2025-04-10', time:'14:22', channel:'테이블 2',   ch:'매장', menu:'아메리카노 외 1건',     issuer:'신한', amt:8500,  status:'완료',     stl:'정산완료',         card:'4141209999', _expired:true },
+  { id:'#20241102-0061', date:'2024-11-02', time:'18:14', channel:'포장',       ch:'포장', menu:'카페라떼 × 2',           issuer:'KB',   amt:9000,  status:'완료',     stl:'정산완료',         card:'5388008888', _expired:true },
 ];
 
 /* ============================================================
@@ -439,7 +471,9 @@ const state = {
   orderAmountMax: '',
   orderDateFilter: 'today',
   orderStatusFilter: 'all',
-  cancelReason: '전체',
+  orderAdvancedOpen: false,         // 세부 검색 접기/펴기
+  exportMethod: 'file',             // 파일 다운로드 / 메일 발송 — 공통 export 모달
+  exportFormat: 'excel',            // excel / csv
   // charts holders
   charts: {},
 };
@@ -450,6 +484,39 @@ const state = {
 const fmt = n => (n==null ? '−' : new Intl.NumberFormat('ko-KR').format(Math.round(n)));
 const fmtSigned = n => (n>=0 ? '+' : '') + fmt(n);
 const sum = (a, k) => a.reduce((s,x)=>s+(x[k]||0),0);
+
+/* === 보안 정책 헬퍼 — 카드번호 등 민감정보 사전 차단 === */
+const TODAY_DATE = '2026-05-15';
+const STORE_EMAIL = 'hong****@gmail.com';
+function isWithinYear(dateStr){
+  if (!dateStr) return false;
+  const diff = (new Date(TODAY_DATE) - new Date(dateStr)) / (1000*60*60*24);
+  return diff <= 365;
+}
+// 카드번호 표시 마스킹 — 1년 초과 시 전체 마스킹, 그 외에는 끝 4자리만 노출
+function maskCard(o){
+  if (!o.card) return null;
+  if (!isWithinYear(o.date)) return '****-****-****-****';
+  return '****-****-****-' + o.card.slice(-4);
+}
+// 결제수단 라벨 — 1년 초과 거래는 끝 4자리도 마스킹
+function payLabel(o){
+  const ico = { '신한':'💳','KB':'💳','삼성':'💳','VISA (해외)':'💳','카카오페이':'🟡','네이버페이':'🟢','현금':'💵' }[o.issuer] || '💳';
+  if (!o.card) return `${ico} ${o.issuer}`;
+  if (!isWithinYear(o.date)) return `${ico} ${o.issuer} ****`;
+  return `${ico} ${o.issuer} ****${o.card.slice(-4)}`;
+}
+// 결제번호(tid) 마스킹 — 앞 8자 + 끝 4자만 노출
+function maskTid(tid){
+  if (!tid) return 'tid_********';
+  if (tid.length<=12) return tid.slice(0,4)+'****';
+  return tid.slice(0,8) + '****' + tid.slice(-4);
+}
+// 사업자번호 마스킹
+function maskBizNo(bizNo){
+  if (!bizNo) return '';
+  return bizNo.replace(/^(\d{3})-(\d{2})-(\d{2})(\d{3})$/, '$1-**-**$4');
+}
 
 function periodDays(){
   if (state.overviewPeriod==='day') return [DAY[14]]; // 5/15
@@ -497,7 +564,6 @@ function renderApp(){
     'overview':    { fn:renderOverview,    url:'admin.qrorder.softment.co.kr/sales' },
     'detail':      { fn:renderDetail,      url:'admin.qrorder.softment.co.kr/sales/detail' },
     'orders':      { fn:renderOrders,      url:'admin.qrorder.softment.co.kr/orders' },
-    'cancels':     { fn:renderCancels,     url:'admin.qrorder.softment.co.kr/cancels' },
     'stl-dash':    { fn:renderStlDash,     url:'admin.qrorder.softment.co.kr/settlements' },
     'stl-list':    { fn:renderStlList,     url:'admin.qrorder.softment.co.kr/settlements/list' },
     'stl-detail':  { fn:renderStlDetail,   url:'admin.qrorder.softment.co.kr/settlements/STL-2026051901' },
@@ -517,7 +583,6 @@ function renderSidebar(){
   const items = [
     { type:'grp', label:'주문관리' },
     { type:'a', key:'orders',     ic:'📋', label:'주문 내역' },
-    { type:'a', key:'cancels',    ic:'↩️', label:'취소·환불' },
     { type:'grp', label:'매출관리' },
     { type:'a', key:'overview',   ic:'📊', label:'매출 한눈에 보기' },
     { type:'a', key:'detail',     ic:'🔎', label:'매출 상세 보기' },
@@ -554,41 +619,43 @@ function renderOverview(main){
   const net = gross - disc - ref;
   const avgPrice = Math.round(net / ordCnt);
 
+  // 기간별 시간 범위 + 중앙 라벨 (요일 포함)
+  let rangeStart, rangeEnd, centerLabel;
+  if (state.overviewPeriod==='day') {
+    rangeStart='5/15(금) 03:00'; rangeEnd='5/16(토) 02:59';
+    centerLabel='2026년 5월 15일 (금)';
+  } else if (state.overviewPeriod==='week') {
+    rangeStart='5/9(토) 03:00'; rangeEnd='5/16(토) 02:59';
+    centerLabel='5월 9일(토) ~ 5월 15일(금)';
+  } else if (state.overviewPeriod==='month') {
+    rangeStart='5/1(금) 03:00'; rangeEnd='5/16(토) 02:59';
+    centerLabel='2026년 5월';
+  } else {
+    rangeStart='시작일 03:00'; rangeEnd='종료일+1 02:59';
+    centerLabel='사용자 지정';
+  }
+
   main.innerHTML = `
     <div class="crumb">매출관리 › 매출 한눈에 보기</div>
-    <div class="basis-bar">
-      <span class="ico">i</span>
-      매출 기준 — <b>마감 03:00 (에이전트 설정)</b>
-      <span class="sep">|</span>
-      <b>환불은 결제일 기준 반영</b>
-      <span class="sep">|</span>
-      정산 <b>D+3 영업일</b>
-    </div>
     <div class="toolbar">
       <div>
         <h2>매출 한눈에 보기</h2>
-        <div class="page-sub">${periodLabel()} · 마지막 동기화 1분 전</div>
+        <div class="page-sub">마지막 동기화 1분 전</div>
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="alert('데이터를 새로고침했어요')">⟳ 새로고침</button>
-        <button class="btn-primary" onclick="alert('Excel 파일로 다운로드를 시작했어요')">⬇ Excel 다운로드</button>
+        <button class="btn-primary" onclick='openExport(${days.length}, "매출 한눈에 보기")'>📤 내보내기</button>
       </div>
     </div>
 
-    <div class="period-strip">
-      <div class="seg">
-        <div class="b ${state.overviewPeriod==='day'?'on':''}"   onclick="setOverviewPeriod('day')">일</div>
-        <div class="b ${state.overviewPeriod==='week'?'on':''}"  onclick="setOverviewPeriod('week')">주</div>
-        <div class="b ${state.overviewPeriod==='month'?'on':''}" onclick="setOverviewPeriod('month')">월</div>
-        <div class="b ${state.overviewPeriod==='custom'?'on':''}"onclick="setOverviewPeriod('custom')">기간 선택</div>
-      </div>
-      <div class="date-nav">
-        <span class="arr" onclick="alert('이전 기간으로 이동')">◀</span>
-        <b>${periodLabel().replace(/\\(.*\\)/,'').trim()}</b>
-        <span class="arr" onclick="alert('다음 기간으로 이동')">▶</span>
-      </div>
-      <span class="rng">${periodRange()}</span>
-    </div>
+    ${basisCombo({
+      periods:[{key:'day',label:'일'},{key:'week',label:'주'},{key:'month',label:'월'},{key:'custom',label:'기간 선택'}],
+      current: state.overviewPeriod,
+      onChange:'setOverviewPeriod',
+      centerLabel: centerLabel,
+      startTime: rangeStart,
+      endTime: rangeEnd,
+    })}
 
     <!-- KPI 흐름 (총매출 → 취소·환불 → 순매출) -->
     <div class="kpi-flow">
@@ -617,20 +684,20 @@ function renderOverview(main){
         <div class="num">${fmt(ordCnt)}건</div>
         <div class="sub">결제건수 동일 · 객단가 ${fmt(avgPrice)}원</div>
       </div>
-      <div class="pc-card clickable" onclick="setSection('cancels')">
+      <div class="pc-card clickable" onclick="state.orderStatusFilter='cancel-all';state.orderDateFilter='month';setSection('orders');">
         <div class="label">취소·환불 <span style="color:var(--ink-4);">›</span></div>
         <div class="num neg">${refCnt}건 / −${fmt(ref)}원</div>
-        <div class="sub">취소율 ${(ref/gross*100).toFixed(1)}%</div>
+        <div class="sub">취소율 ${(ref/gross*100).toFixed(1)}% · 주문 내역에서 보기 ›</div>
       </div>
       <div class="pc-card clickable" onclick="setSection('stl-detail')">
         <div class="label">다음 정산 <span style="color:var(--ink-4);">›</span></div>
         <div class="num" style="font-size:18px;line-height:1.3;">5/19(화)<br/>1,098,200원</div>
         <div class="sub" style="color:var(--blue);">영업일 5/14 분 · 자세히 ›</div>
       </div>
-      <div class="pc-card">
-        <div class="label">사업자 정보</div>
-        <div class="num" style="font-size:18px;color:var(--amber);">⚠️ 14일 후 만료</div>
-        <div class="sub">5/30까지 갱신 필요</div>
+      <div class="pc-card clickable" onclick="setSection('stl-list')">
+        <div class="label">이번 달 누적 정산 <span style="color:var(--ink-4);">›</span></div>
+        <div class="num" style="font-size:22px;">11,350,000원</div>
+        <div class="sub">5회 송금 완료 · D+3 영업일 기준</div>
       </div>
     </div>
 
@@ -729,10 +796,6 @@ function renderDetail(main){
 
   main.innerHTML = `
     <div class="crumb">매출관리 › 매출 상세 보기 › ${tabName}</div>
-    <div class="basis-bar">
-      <span class="ico">i</span>
-      매출 기준 — <b>마감 03:00</b> · <b>환불 결제일 기준</b>
-    </div>
 
     <div class="toolbar">
       <div>
@@ -740,8 +803,7 @@ function renderDetail(main){
         <div class="page-sub">${tabName} — 깊게 보고, 표로 받아가세요.</div>
       </div>
       <div class="left">
-        <button class="btn-primary" onclick="alert('Excel 다운로드 (현재 탭 데이터 + 적용된 필터 기준)')">⬇ Excel</button>
-        <button class="btn-ghost" onclick="alert('CSV 다운로드 (현재 탭 데이터 + 적용된 필터 기준)')">⬇ CSV</button>
+        <button class="btn-primary" onclick='openExport(15, "매출 상세 · " + ${JSON.stringify(tabName)})'>📤 내보내기</button>
       </div>
     </div>
 
@@ -809,20 +871,18 @@ function renderDetailPeriod(body){
   const avgPrice = Math.round(tot.net / tot.ocnt);
 
   body.innerHTML = `
-    <div class="period-strip">
-      <div class="seg">
-        <div class="b ${state.detailGroup==='day'?'on':''}"   onclick="setDetailGroup('day')">일간</div>
-        <div class="b ${state.detailGroup==='week'?'on':''}"  onclick="setDetailGroup('week')">주간</div>
-        <div class="b ${state.detailGroup==='month'?'on':''}" onclick="setDetailGroup('month')">월간</div>
-        <div class="b ${state.detailGroup==='custom'?'on':''}"onclick="setDetailGroup('custom')">기간 선택</div>
-      </div>
-      <div class="date-nav">
-        <span class="arr" onclick="alert('이전 기간')">◀</span>
-        <b>${state.detailGroup==='day'?'2026년 5월':state.detailGroup==='week'?'2026년 5월':state.detailGroup==='month'?'최근 3개월':'사용자 지정 (5/9~5/15)'}</b>
-        <span class="arr" onclick="alert('다음 기간')">▶</span>
-      </div>
-      <span class="rng">${state.detailGroup==='day'?'15일':state.detailGroup==='week'?'3주':state.detailGroup==='month'?'3개월':'7일'} · 결제일 기준</span>
-    </div>
+    ${basisCombo({
+      periods:[{key:'day',label:'일간'},{key:'week',label:'주간'},{key:'month',label:'월간'},{key:'custom',label:'기간 선택'}],
+      current: state.detailGroup,
+      onChange:'setDetailGroup',
+      centerLabel:
+        state.detailGroup==='day'   ? '2026년 5월 (5/1 금 ~ 5/15 금)'
+      : state.detailGroup==='week'  ? '2026년 5월 (3개 주)'
+      : state.detailGroup==='month' ? '최근 3개월 (2026 3월 ~ 5월)'
+      :                                '사용자 지정 (5/9 토 ~ 5/15 금)',
+      startTime: state.detailGroup==='day' ? '5/1(금) 03:00' : state.detailGroup==='week' ? '5/1(금) 03:00' : state.detailGroup==='month' ? '3/1(일) 03:00' : '5/9(토) 03:00',
+      endTime:   state.detailGroup==='day' ? '5/16(토) 02:59' : state.detailGroup==='week' ? '5/16(토) 02:59' : state.detailGroup==='month' ? '5/31(일) 02:59' : '5/16(토) 02:59',
+    })}
 
     <div class="panel" style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
       <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
@@ -944,15 +1004,14 @@ function renderDetailPeriod(body){
 // 시간대별
 function renderDetailHour(body){
   body.innerHTML = `
-    <div class="period-strip">
-      <div class="seg">
-        <div class="b on">오늘 (5/15)</div>
-        <div class="b" onclick="alert('어제 5/14 시간대 데이터를 불러와요')">어제</div>
-        <div class="b" onclick="alert('이번 주 평균 시간대 데이터')">이번 주 평균</div>
-        <div class="b" onclick="alert('날짜 선택기')">날짜 선택</div>
-      </div>
-      <span class="rng">영업일 5/15 · 05:00 ~ 다음날 04:59</span>
-    </div>
+    ${basisCombo({
+      periods:[{key:'today',label:'오늘'},{key:'yesterday',label:'어제'},{key:'week-avg',label:'이번 주 평균'},{key:'pick',label:'날짜 선택'}],
+      current:'today',
+      onChange:'alert',
+      centerLabel:'2026년 5월 15일 (금)',
+      startTime:'5/15(금) 03:00',
+      endTime:'5/16(토) 02:59',
+    })}
 
     <div class="panel">
       <h3>시간대별 매출 <span class="h-act"><span class="unit-tag">단위 · 원</span><span class="h-sub">오늘 vs 4주 동요일 평균</span></span></h3>
@@ -1021,13 +1080,14 @@ function renderDetailMenu(body){
   const tot = filtered.reduce((a,m)=>{a.qty+=m.qty;a.amt+=m.amt;a.refund+=m.refund;a.refundCnt+=m.refundCnt;return a;},{qty:0,amt:0,refund:0,refundCnt:0});
 
   body.innerHTML = `
-    <div class="period-strip">
-      <div class="seg">
-        <div class="b">일간</div><div class="b">주간</div><div class="b on">월간</div><div class="b">기간 선택</div>
-      </div>
-      <div class="date-nav"><span class="arr">◀</span><b>2026년 5월</b><span class="arr">▶</span></div>
-      <span class="rng">2026-05-01 ~ 2026-05-15</span>
-    </div>
+    ${basisCombo({
+      periods:[{key:'day',label:'일간'},{key:'week',label:'주간'},{key:'month',label:'월간'},{key:'custom',label:'기간 선택'}],
+      current:'month',
+      onChange:'alert',
+      centerLabel:'2026년 5월 (5/1 금 ~ 5/15 금)',
+      startTime:'5/1(금) 03:00',
+      endTime:'5/16(토) 02:59',
+    })}
 
     <div class="panel" style="padding:12px 18px;margin-bottom:14px;">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -1092,13 +1152,14 @@ function renderDetailMenu(body){
 function renderDetailCategory(body){
   const tot = CATEGORY.reduce((a,c)=>{a.qty+=c.qty;a.amt+=c.amt;return a;},{qty:0,amt:0});
   body.innerHTML = `
-    <div class="period-strip">
-      <div class="seg">
-        <div class="b">일간</div><div class="b">주간</div><div class="b on">월간</div><div class="b">기간 선택</div>
-      </div>
-      <div class="date-nav"><span class="arr">◀</span><b>2026년 5월</b><span class="arr">▶</span></div>
-      <span class="rng">2026-05-01 ~ 2026-05-15</span>
-    </div>
+    ${basisCombo({
+      periods:[{key:'day',label:'일간'},{key:'week',label:'주간'},{key:'month',label:'월간'},{key:'custom',label:'기간 선택'}],
+      current:'month',
+      onChange:'alert',
+      centerLabel:'2026년 5월 (5/1 금 ~ 5/15 금)',
+      startTime:'5/1(금) 03:00',
+      endTime:'5/16(토) 02:59',
+    })}
 
     <div class="grid-3-2" style="margin-bottom:14px;">
       <div class="panel tight">
@@ -1153,13 +1214,14 @@ function renderDetailMethod(body){
   const totAmt = sum(METHOD, 'amt');
   const totCnt = sum(METHOD, 'cnt');
   body.innerHTML = `
-    <div class="period-strip">
-      <div class="seg">
-        <div class="b">일간</div><div class="b">주간</div><div class="b on">월간</div><div class="b">기간 선택</div>
-      </div>
-      <div class="date-nav"><span class="arr">◀</span><b>2026년 5월</b><span class="arr">▶</span></div>
-      <span class="rng">2026-05-01 ~ 2026-05-15</span>
-    </div>
+    ${basisCombo({
+      periods:[{key:'day',label:'일간'},{key:'week',label:'주간'},{key:'month',label:'월간'},{key:'custom',label:'기간 선택'}],
+      current:'month',
+      onChange:'alert',
+      centerLabel:'2026년 5월 (5/1 금 ~ 5/15 금)',
+      startTime:'5/1(금) 03:00',
+      endTime:'5/16(토) 02:59',
+    })}
 
     <div class="grid-3-2" style="margin-bottom:14px;">
       <div class="panel tight">
@@ -1232,84 +1294,136 @@ function renderDetailMethod(body){
 function renderOrders(main){
   // 필터링
   let rows = ORDERS;
+
+  // 기간 필터 (오늘/어제/이번 주/이번 달/전체)
+  if (state.orderDateFilter==='today')      rows = rows.filter(o=>o.date===TODAY_DATE);
+  else if (state.orderDateFilter==='yesterday') rows = rows.filter(o=>o.date==='2026-05-14');
+  else if (state.orderDateFilter==='week')  rows = rows.filter(o=>o.date>='2026-05-09' && o.date<='2026-05-15');
+  else if (state.orderDateFilter==='month') rows = rows.filter(o=>o.date.startsWith('2026-05'));
+  // 'all' 인 경우 1년 초과 거래까지 모두 노출
+
+  // 상태 필터
+  if (state.orderStatusFilter==='cancel-all') rows = rows.filter(o=>o.status==='전체취소' || o.status==='부분취소');
+  else if (state.orderStatusFilter!=='all')   rows = rows.filter(o=>o.status===state.orderStatusFilter);
+
+  // 검색
   if (state.orderSearch){
     const q = state.orderSearch.toLowerCase();
     rows = rows.filter(o=>(o.id+' '+(o.tid||'')).toLowerCase().includes(q));
   }
+
+  // 🔒 카드번호 검색은 결제일로부터 1년 이내만 적용 — 그 이상은 사전 차단
   if (state.orderCardValue){
     const v = state.orderCardValue;
     rows = rows.filter(o=>{
       if (!o.card) return false;
+      if (!isWithinYear(o.date)) return false; // 보안 정책 차단
       if (state.orderCardMode==='last4') return o.card.endsWith(v);
       return o.card.startsWith(v);
     });
   }
+
+  // 금액 범위
   if (state.orderAmountMin) rows = rows.filter(o=>o.amt >= Number(state.orderAmountMin));
   if (state.orderAmountMax) rows = rows.filter(o=>o.amt <= Number(state.orderAmountMax));
-  if (state.orderStatusFilter!=='all') rows = rows.filter(o=>o.status===state.orderStatusFilter);
 
   const total = rows.reduce((a,r)=>a+r.amt,0);
 
   main.innerHTML = `
     <div class="crumb">주문관리 › 주문 내역</div>
-    <div class="basis-bar">
-      <span class="ico">i</span>
-      매출 기준 — <b>마감 03:00</b> · <b>환불 결제일 기준</b>
+
+    <div class="basis-bar" style="background:#fffaf0;border-color:#ffe0a3;color:#7a4d00;">
+      <span class="ico" style="background:#fff3d4;color:#a25e00;">🔒</span>
+      <b>개인정보 보호 정책</b> — 카드번호 검색·표시는 결제일로부터 <b>1년 이내</b> 거래에만 적용돼요. 1년 초과 거래는 카드번호가 <b>전체 마스킹</b>되고, 카드번호로 검색해도 결과에 포함되지 않아요. 결제번호(tid)도 일부만 노출됩니다.
     </div>
+
+    ${(() => {
+      let s, e;
+      if (state.orderDateFilter==='today')         { s='5/15(금) 03:00'; e='5/16(토) 02:59'; }
+      else if (state.orderDateFilter==='yesterday'){ s='5/14(목) 03:00'; e='5/15(금) 02:59'; }
+      else if (state.orderDateFilter==='week')     { s='5/9(토) 03:00';  e='5/16(토) 02:59'; }
+      else if (state.orderDateFilter==='month')    { s='5/1(금) 03:00';  e='5/16(토) 02:59'; }
+      else                                          { s='전체';            e='전체'; }
+      return basisCard(s, e);
+    })()}
+
     <div class="toolbar">
-      <div><h2>주문 내역</h2><div class="page-sub">${rows.length}건 · ${fmt(total)}원</div></div>
+      <div><h2>주문 내역</h2><div class="page-sub">${rows.length}건 조회 · ${fmt(total)}원</div></div>
       <div class="left">
-        <button class="btn-primary" onclick="alert('Excel 다운로드 (필터된 ${rows.length}건)')">⬇ Excel</button>
-        <button class="btn-ghost" onclick="alert('지정한 이메일로 발송할게요')">📧 이메일 발송</button>
+        <button class="btn-primary" onclick='openExport(${rows.length}, "주문 내역")'>📤 내보내기</button>
       </div>
     </div>
 
+    <!-- 1차 필터: 기간 + 상태 (가장 자주 쓰는 빠른 선택) -->
     <div class="search-wrap">
-      <div class="row">
-        <span class="field-label">검색</span>
-        <input class="input" id="ord-search" placeholder="🔍 주문번호 또는 결제번호 입력 (예: #20260515-0046, tid_3f8a...)" value="${state.orderSearch}" oninput="state.orderSearch=this.value" style="flex:1;min-width:280px;" />
-        <button class="btn-primary" onclick="renderApp()">검색</button>
-      </div>
-      <div class="row">
-        <span class="field-label">카드번호</span>
-        <div class="seg sm">
-          <div class="b ${state.orderCardMode==='first6'?'on':''}" onclick="setCardMode('first6')">앞 6자리</div>
-          <div class="b ${state.orderCardMode==='last4'?'on':''}" onclick="setCardMode('last4')">끝 4자리</div>
-        </div>
-        <input class="input" id="ord-card" placeholder="${state.orderCardMode==='first6'?'예) 414120':'예) 1234'}" value="${state.orderCardValue}" oninput="state.orderCardValue=this.value" maxlength="${state.orderCardMode==='first6'?6:4}" style="width:160px;font-variant-numeric:tabular-nums;" />
-        <span style="font-size:11px;color:var(--ink-3);">${state.orderCardMode==='first6'?'카드사·BIN 식별':'영수증 끝 4자리'}로 찾기</span>
-      </div>
-      <div class="row">
-        <span class="field-label">금액 범위</span>
-        <input class="input" placeholder="최소" value="${state.orderAmountMin}" oninput="state.orderAmountMin=this.value" style="width:120px;" />
-        <span style="color:var(--ink-3);">~</span>
-        <input class="input" placeholder="최대" value="${state.orderAmountMax}" oninput="state.orderAmountMax=this.value" style="width:120px;" />
-        <span style="font-size:13px;color:var(--ink-3);">원</span>
-        <span class="chip" onclick="state.orderAmountMin='10000';renderApp()">≥ 10,000원</span>
-        <span class="chip" onclick="state.orderAmountMin='30000';renderApp()">≥ 30,000원</span>
-        <span class="chip" onclick="state.orderAmountMin='50000';renderApp()">≥ 50,000원</span>
-      </div>
       <div class="row">
         <span class="field-label">기간</span>
         <span class="chip ${state.orderDateFilter==='today'?'on':''}" onclick="state.orderDateFilter='today';renderApp()">오늘 (5/15)</span>
         <span class="chip ${state.orderDateFilter==='yesterday'?'on':''}" onclick="state.orderDateFilter='yesterday';renderApp()">어제</span>
         <span class="chip ${state.orderDateFilter==='week'?'on':''}" onclick="state.orderDateFilter='week';renderApp()">이번 주</span>
         <span class="chip ${state.orderDateFilter==='month'?'on':''}" onclick="state.orderDateFilter='month';renderApp()">이번 달</span>
-        <span class="chip" onclick="alert('날짜 범위 선택기')">기간 선택</span>
+        <span class="chip ${state.orderDateFilter==='all'?'on':''}" onclick="state.orderDateFilter='all';renderApp()">전체</span>
+        <span class="chip" onclick="alert('날짜 범위 선택기')">📅 기간 직접 선택</span>
       </div>
       <div class="row">
         <span class="field-label">상태</span>
         <span class="chip ${state.orderStatusFilter==='all'?'on':''}" onclick="state.orderStatusFilter='all';renderApp()">전체</span>
         <span class="chip ${state.orderStatusFilter==='완료'?'on':''}" onclick="state.orderStatusFilter='완료';renderApp()">완료</span>
-        <span class="chip ${state.orderStatusFilter==='부분취소'?'on':''}" onclick="state.orderStatusFilter='부분취소';renderApp()">부분취소</span>
-        <span class="chip ${state.orderStatusFilter==='전체취소'?'on':''}" onclick="state.orderStatusFilter='전체취소';renderApp()">전체취소</span>
+        <span class="chip ${state.orderStatusFilter==='cancel-all'?'on':''}" onclick="state.orderStatusFilter='cancel-all';renderApp()">취소·환불 전체</span>
+        <span class="chip ${state.orderStatusFilter==='전체취소'?'on':''}" onclick="state.orderStatusFilter='전체취소';renderApp()">전체취소만</span>
+        <span class="chip ${state.orderStatusFilter==='부분취소'?'on':''}" onclick="state.orderStatusFilter='부분취소';renderApp()">부분취소만</span>
         <span style="color:var(--line);">|</span>
         <button class="btn-ghost" onclick="resetOrderFilters()" style="padding:7px 14px;font-size:12px;">필터 초기화</button>
       </div>
     </div>
 
+    <!-- 2차 필터: 세부 검색 (접기/펴기) -->
+    <div class="panel" style="padding:0;margin-bottom:14px;">
+      <div onclick="toggleOrderAdvanced()" style="padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;">
+        <div style="font-size:13px;font-weight:700;color:var(--ink);">
+          🔍 세부 검색
+          <span style="font-weight:500;color:var(--ink-3);font-size:12px;margin-left:6px;">주문번호 · 결제번호 · 카드번호 · 금액 범위 · 정밀 기간</span>
+          ${state.orderCardValue||state.orderAmountMin||state.orderAmountMax||state.orderSearch ? `<span style="margin-left:8px;font-size:11px;background:var(--blue);color:#fff;padding:2px 7px;border-radius:6px;font-weight:700;">필터 적용 중</span>`:''}
+        </div>
+        <span style="color:var(--ink-3);font-size:13px;">${state.orderAdvancedOpen?'▲ 접기':'▼ 펼치기'}</span>
+      </div>
+      ${state.orderAdvancedOpen ? `
+        <div style="padding:0 18px 18px;border-top:1px solid var(--line-2);">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;">
+            <span class="field-label">검색</span>
+            <input class="input" placeholder="🔍 주문번호 또는 결제번호 (예: #20260515-0046, tid_3f8a...)" value="${state.orderSearch}" oninput="state.orderSearch=this.value" style="flex:1;min-width:280px;" />
+            <button class="btn-primary" onclick="renderApp()">검색</button>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+            <span class="field-label">카드번호</span>
+            <div class="seg sm">
+              <div class="b ${state.orderCardMode==='first6'?'on':''}" onclick="setCardMode('first6')">앞 6자리</div>
+              <div class="b ${state.orderCardMode==='last4'?'on':''}" onclick="setCardMode('last4')">끝 4자리</div>
+            </div>
+            <input class="input" placeholder="${state.orderCardMode==='first6'?'예) 414120':'예) 1234'}" value="${state.orderCardValue}" oninput="state.orderCardValue=this.value" maxlength="${state.orderCardMode==='first6'?6:4}" style="width:160px;font-variant-numeric:tabular-nums;" />
+            <span style="font-size:11px;color:#a25e00;background:#fff3d4;padding:4px 8px;border-radius:6px;">🔒 결제일로부터 1년 이내 거래만 검색돼요</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+            <span class="field-label">금액 범위</span>
+            <input class="input" placeholder="최소" value="${state.orderAmountMin}" oninput="state.orderAmountMin=this.value" style="width:140px;" />
+            <span style="color:var(--ink-3);">~</span>
+            <input class="input" placeholder="최대" value="${state.orderAmountMax}" oninput="state.orderAmountMax=this.value" style="width:140px;" />
+            <span style="font-size:13px;color:var(--ink-3);">원</span>
+            <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+            <span class="field-label">정밀 기간</span>
+            <input class="input" type="date" value="2026-05-01" style="width:160px;" />
+            <span style="color:var(--ink-3);">~</span>
+            <input class="input" type="date" value="2026-05-15" style="width:160px;" />
+            <button class="btn-ghost" onclick="alert('지정 기간 적용')" style="padding:8px 14px;">적용</button>
+          </div>
+        </div>
+      `:''}
+    </div>
+
     <div class="panel tight">
-      <h3>주문 목록 <span class="h-sub">${rows.length}건 조회됨</span></h3>
+      <h3>주문 목록 <span class="h-sub">${rows.length}건 조회됨 · 1년 초과 거래는 카드번호가 마스킹돼요</span></h3>
       <table class="t">
         <thead>
           <tr>
@@ -1327,11 +1441,11 @@ function renderOrders(main){
         <tbody>
           ${rows.length===0 ? `<tr class="empty-row"><td colspan="9">조건에 맞는 주문이 없어요.</td></tr>` : rows.slice(0,state.orderRowsPerPage).map(o=>`
             <tr class="clickable" onclick='openOrderDetail(${JSON.stringify(o)})'>
-              <td>5/15 ${o.time}</td>
+              <td>${o.date.slice(5).replace('-','/')} ${o.time}${!isWithinYear(o.date)?'<div style="font-size:10px;color:var(--amber);margin-top:2px;">🔒 1년 초과</div>':''}</td>
               <td>${o.id}</td>
               <td>${o.channel}</td>
               <td>${o.menu}</td>
-              <td>${o.pay}</td>
+              <td>${payLabel(o)}</td>
               <td class="num"><b>${fmt(o.amt)}</b>${o.currency?`<div style="color:var(--ink-3);font-size:11px;">(${o.currency})</div>`:''}</td>
               <td><span class="pill ${o.status==='완료'?'done':o.status==='전체취소'?'cancel':'partial'}">${o.status}</span></td>
               <td><span class="pill ${o.stl.includes('완료')?'done':o.stl==='제외'||o.stl==='−'?'hold':'pending'}">${o.stl}</span></td>
@@ -1352,75 +1466,7 @@ function renderOrders(main){
   `;
 }
 
-/* ====================== 취소·환불 ====================== */
-function renderCancels(main){
-  const reasons = ['전체','고객 요청','매장 실수','메뉴 품절','시스템 오류','기타'];
-  let rows = state.cancelReason==='전체' ? CANCELS : CANCELS.filter(c=>c.reason===state.cancelReason);
-
-  main.innerHTML = `
-    <div class="crumb">주문관리 › 취소·환불</div>
-    <div class="basis-bar">
-      <span class="ico">i</span>
-      매출 기준 — <b>마감 03:00</b> · <b>환불 결제일 기준</b> (환불은 원래 결제일 매출에서 차감)
-    </div>
-    <div class="toolbar">
-      <div><h2>취소·환불 내역</h2><div class="page-sub">2026-05-01 ~ 2026-05-15 · 24건 / −650,000원</div></div>
-      <div class="left"><button class="btn-primary" onclick="alert('Excel 다운로드')">⬇ Excel</button></div>
-    </div>
-
-    <div class="kpi-row">
-      <div class="pc-card"><div class="label">이번 달 환불액</div><div class="num neg">−650,000원</div><div class="sub">취소율 2.3% (전월 2.6%)</div></div>
-      <div class="pc-card"><div class="label">전체취소</div><div class="num">18건</div><div class="sub">−532,000원</div></div>
-      <div class="pc-card"><div class="label">부분취소</div><div class="num">6건</div><div class="sub">−118,000원</div></div>
-      <div class="pc-card"><div class="label">정산 후 환불</div><div class="num">3건</div><div class="sub">다음 회차에서 차감</div></div>
-    </div>
-
-    <div class="panel" style="padding:12px 18px;margin-bottom:14px;">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <span style="font-size:12px;color:var(--ink-3);font-weight:700;">사유</span>
-        ${reasons.map(r=>`<span class="chip ${state.cancelReason===r?'on':''}" onclick="state.cancelReason='${r}';renderApp()">${r}</span>`).join('')}
-      </div>
-    </div>
-
-    <div class="panel tight">
-      <h3>취소·환불 내역</h3>
-      <table class="t">
-        <thead>
-          <tr><th>취소일시</th><th>주문번호</th><th>구분</th><th class="num">취소액</th><th>사유</th><th>메모</th><th>처리자</th><th>매출 반영일</th><th>정산 영향</th></tr>
-        </thead>
-        <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="9">해당 사유의 취소·환불이 없어요.</td></tr>` : rows.map(c=>`
-            <tr>
-              <td>${c.time}</td>
-              <td>${c.order}</td>
-              <td><span class="pill ${c.type==='전체취소'?'cancel':'partial'}">${c.type}</span></td>
-              <td class="num neg"><b>${fmt(c.amt)}</b></td>
-              <td>${c.reason}</td>
-              <td style="font-size:12px;color:var(--ink-2);">${c.memo||'−'}</td>
-              <td>${c.by}</td>
-              <td>${c.day}<br/><span style="font-size:11px;color:var(--ink-3);">(결제일)</span></td>
-              <td>
-                <span class="pill ${c.stl.includes('회차 차감')?'partial':'pending'}">${c.stl}</span>
-                ${c.afterSettle?'<div style="font-size:11px;color:var(--amber);margin-top:3px;">⚠️ 정산 후 환불</div>':''}
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-      <div class="table-footer">
-        <div class="rows-control">
-          <span>표시 개수</span>${rowsSelect('orderRowsPerPage')}
-          <span class="cnt">총 <b>${rows.length}</b>건 조회</span>
-        </div>
-        ${paginationStatic(1, 1)}
-      </div>
-    </div>
-
-    <div class="banner-info">
-      💡 환불은 항상 <b>원래 결제일 매출</b>에서 차감해요. 5/14 결제 → 5/15 환불 시, 5/14 매출이 감소합니다.
-    </div>
-  `;
-}
+/* 취소·환불 페이지는 주문 내역에 통합돼서 제거됨. 상태 필터로 "취소·환불 전체" 선택. */
 
 /* ====================== 정산 대시보드 ====================== */
 function renderStlDash(main){
@@ -1429,11 +1475,6 @@ function renderStlDash(main){
     <h2>정산 대시보드</h2>
     <div class="page-sub">2026년 5월 15일(금) · 정산 계좌 신한은행 ****1234 · 정산 주기 <b>D+3 영업일</b></div>
     <div style="height:18px;"></div>
-
-    <div class="banner-warn">
-      <b>⚠️ 사업자등록증 만료까지 14일</b> · 사업자정보가 만료되면 다음 회차부터 정산이 보류돼요.
-      <span style="font-weight:700;text-decoration:underline;cursor:pointer;" onclick="alert('사업자정보 갱신 페이지')">갱신하러 가기 ›</span>
-    </div>
 
     <div class="grid-3-2">
       <div>
@@ -1478,11 +1519,11 @@ function renderStlDash(main){
       <div class="panel">
         <h3>알림</h3>
         <div style="font-size:13px;color:var(--ink-2);line-height:1.8;">
-          ⚠️ <b>사업자등록증 만료 14일 전</b> — 5월 30일 전 갱신 필요<br/>
+          📅 <b>5/19(화) 정산 예정</b> — 1,098,200원<br/>
           ✅ 5월 15일 정산 완료 (1,098,000원)<br/>
           ✅ 5월 14일 정산 완료 (872,000원)<br/>
           📨 4월분 세금계산서 자동 발행 완료 (5/1)<br/>
-          📅 <b>5/19(화) 정산 예정</b> — 1,098,200원
+          🏦 정산계좌 신한 ****1234 · 본인 인증 완료
         </div>
       </div>
     </div>
@@ -1517,7 +1558,7 @@ function renderStlList(main){
     <div class="crumb">정산관리 › 정산 예정/완료</div>
     <div class="toolbar">
       <div><h2>정산 예정/완료</h2><div class="page-sub">D+3 영업일 송금 · ${list.length}개 회차</div></div>
-      <div class="left"><button class="btn-primary" onclick="alert('Excel 다운로드')">⬇ Excel</button></div>
+      <div class="left"><button class="btn-primary" onclick='openExport(${list.length}, "정산 회차 목록")'>📤 내보내기</button></div>
     </div>
     <div class="panel" style="padding:12px 18px;margin-bottom:14px;">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -1568,7 +1609,7 @@ function renderStlDetail(main){
       <div class="left">
         <span class="chip">통합 보기</span>
         <span class="chip on">상세 보기 (분리)</span>
-        <button class="btn-primary" onclick="alert('Excel 다운로드')">⬇ Excel</button>
+        <button class="btn-primary" onclick='openExport(312, "정산 회차 STL-2026051901 거래 명세")'>📤 내보내기</button>
       </div>
     </div>
 
@@ -1785,9 +1826,9 @@ function renderTax(main){
             <div style="text-align:center;font-weight:800;color:var(--ink);font-size:14px;margin-bottom:14px;">전자세금계산서</div>
             <div style="display:grid;grid-template-columns:60px 1fr;gap:6px 12px;">
               <span>공급자</span><b>(주)소프트먼트</b>
-              <span>사업자번호</span><b>123-45-67890</b>
+              <span>사업자번호</span><b>${maskBizNo('123-45-67890')}</b>
               <span>공급받는자</span><b>${STORE.name}</b>
-              <span>사업자번호</span><b>987-65-43210</b>
+              <span>사업자번호</span><b>${maskBizNo('987-65-43210')} <span style="font-size:10px;color:var(--ink-3);font-weight:500;cursor:pointer;" onclick="alert('🔒 본인 인증 후 전체 번호 표시')">🔓 전체보기</span></b>
             </div>
             <hr style="border:none;border-top:1px solid var(--line);margin:10px 0;"/>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
@@ -1823,9 +1864,8 @@ function renderBank(main){
           <div class="holder">예금주 홍길동 · 사업자 대표명과 일치</div>
           <span class="vtag">✓ 본인 인증 완료 · 2026-02-14</span>
         </div>
-        <div style="display:flex;gap:8px;margin-top:14px;">
-          <button class="btn-ghost" style="flex:1;" onclick="alert('통장 사본 PDF 보기')">통장 사본 보기</button>
-          <button class="btn-primary" style="flex:1;" onclick="alert('계좌 변경 4단계 흐름 시작 (1원 인증 + OTP)')">계좌 변경하기</button>
+        <div style="margin-top:14px;">
+          <button class="btn-primary" style="width:100%;" onclick="alert('계좌 변경 4단계 흐름 시작 (1원 인증 + OTP)')">계좌 변경하기</button>
         </div>
         <div class="panel tight" style="margin-top:18px;">
           <h3>변경 이력</h3>
@@ -1948,20 +1988,222 @@ function resetOrderFilters(){
   state.orderSearch=''; state.orderCardValue=''; state.orderAmountMin=''; state.orderAmountMax='';
   state.orderDateFilter='today'; state.orderStatusFilter='all'; renderApp();
 }
+function toggleOrderAdvanced(){ state.orderAdvancedOpen = !state.orderAdvancedOpen; renderApp(); }
+
+// ========== 매출 집계 기준 안내 — 모든 매출 화면 상단 공통 컴포넌트 ==========
+// 시간 범위를 명확하게 보여주고 ⓘ 클릭 시 상세 설명 모달
+function basisCard(startTime, endTime){
+  return `
+    <div class="basis-combo">
+      <div class="bc-row">
+        <span class="lbl-pill">📊 매출 집계 기준</span>
+        <span class="ico-i" onclick="openBasisInfo()">ⓘ 자세히</span>
+      </div>
+      <div class="bc-row">
+        <div class="range-line">
+          <div class="rng-time">
+            <b>${startTime}</b><span class="arr">~</span><b>${endTime}</b>
+          </div>
+          <span class="note">· 환불은 결제한 날 매출에서 차감</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 요일 헬퍼 — 2026년 기준
+const DOW = ['일','월','화','수','목','금','토'];
+function dowOf(m, d){
+  return DOW[new Date(2026, m-1, d).getDay()];
+}
+
+// 매출 집계 기준 + 기간 토글 + 날짜 네비 통합 컴포넌트
+// opts: {periods:[{key,label}], current, onChange, centerLabel, prevAction, nextAction, startTime, endTime}
+function basisCombo(opts){
+  return `
+    <div class="basis-combo">
+      <div class="bc-row">
+        <span class="lbl-pill">📊 매출 집계 기준</span>
+        <span class="ico-i" onclick="openBasisInfo()">ⓘ 자세히</span>
+      </div>
+      <div class="bc-row">
+        <div class="period-line">
+          <div class="seg">
+            ${opts.periods.map(p=>`<div class="b ${opts.current===p.key?'on':''}" onclick="${opts.onChange}('${p.key}')">${p.label}</div>`).join('')}
+          </div>
+          <div class="date-nav">
+            <span class="arr" onclick="alert('이전 기간으로 이동')">◀</span>
+            <b>${opts.centerLabel}</b>
+            <span class="arr" onclick="alert('다음 기간으로 이동')">▶</span>
+          </div>
+        </div>
+      </div>
+      <div class="bc-row">
+        <div class="range-line">
+          <div class="rng-time">
+            <b>${opts.startTime}</b><span class="arr">~</span><b>${opts.endTime}</b>
+          </div>
+          <span class="note">· 환불은 결제한 날 매출에서 차감</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openBasisInfo(){
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div>
+        <h3>📊 매출 집계 기준 안내</h3>
+        <div class="modal-sub">매출이 어떻게 산정되는지 알려드려요</div>
+      </div>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="ib-block">
+      <h4>① 영업일 시간 범위</h4>
+      <p>매장이 설정한 <b>마감 시각</b>을 기준으로 24시간이 1영업일이에요.</p>
+      <div class="ex-card">
+        <b>예시 — 마감 시각이 새벽 3시일 때</b>
+        <ul>
+          <li>5월 15일 영업일 = <b>5/15 03:00 ~ 5/16 02:59</b></li>
+          <li>5/16 새벽 2시 30분 주문 → <b>5/15 매출</b>로 잡혀요</li>
+          <li>5/16 새벽 3시 30분 주문 → <b>5/16 매출</b>로 넘어가요</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ib-block">
+      <h4>② 환불 처리 방식</h4>
+      <p>환불은 <b>원래 결제한 날</b> 매출에서 차감돼요. 환불이 발생한 날이 아니에요.</p>
+      <div class="ex-card">
+        <b>예시 — 5/14 결제 / 5/15 환불</b>
+        <ul>
+          <li>5/14에 10,000원 결제 후 → 5/15에 환불 처리</li>
+          <li>5/14 매출에서 <b>−10,000원 차감</b> (5/14 매출 감소)</li>
+          <li>5/15 매출에는 영향 없음</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ib-block important">
+      <h4>📍 기준을 바꾸고 싶다면</h4>
+      <p>매출 마감 시각·환불 반영 기준 같은 운영 설정은 <b>매장 키오스크의 에이전트 프로그램</b>에서 직접 설정할 수 있어요. 변경한 내용은 다음 영업일부터 반영됩니다.</p>
+      <div class="agent-tip">🖥 에이전트 → 환경설정 → 매출 기준</div>
+    </div>
+
+    <button class="btn-primary" style="width:100%;margin-top:14px;" onclick="closeModal()">확인했어요</button>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+
+// ========== 통합 내보내기 모달 ==========
+// 모든 화면의 다운로드 버튼이 이 모달 하나로 통일됨
+// 받는 방법: 파일 / 메일  ×  파일 형식: Excel / CSV
+function openExport(rowsCount, source){
+  state.exportMethod = 'file';
+  state.exportFormat = 'excel';
+  renderExportModal(rowsCount, source);
+}
+function renderExportModal(rowsCount, source){
+  const modal = document.getElementById('modal');
+  const fmtFmt = state.exportFormat==='excel' ? 'Excel (.xlsx)' : 'CSV (.csv)';
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div>
+        <h3>📤 ${source} 내보내기</h3>
+        <div class="modal-sub">${fmt(rowsCount)}건 · 적용된 필터·정렬 기준 그대로 저장돼요</div>
+      </div>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:8px;">① 받는 방법</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="opt-card ${state.exportMethod==='file'?'on':''}" onclick='setExport("method","file",${rowsCount},${JSON.stringify(source)})'>
+          <div class="ico-lg">📂</div>
+          <div class="ttl">파일로 받기</div>
+          <div class="sub-ttl">지금 이 PC로 바로 다운로드</div>
+        </div>
+        <div class="opt-card ${state.exportMethod==='email'?'on':''}" onclick='setExport("method","email",${rowsCount},${JSON.stringify(source)})'>
+          <div class="ico-lg">📧</div>
+          <div class="ttl">메일로 받기</div>
+          <div class="sub-ttl">등록된 이메일로 발송</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:8px;">② 파일 형식</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="opt-card ${state.exportFormat==='excel'?'on':''}" onclick='setExport("format","excel",${rowsCount},${JSON.stringify(source)})'>
+          <div class="ico-lg">📊</div>
+          <div class="ttl">Excel (.xlsx)</div>
+          <div class="sub-ttl">서식 + 합계 행 포함</div>
+        </div>
+        <div class="opt-card ${state.exportFormat==='csv'?'on':''}" onclick='setExport("format","csv",${rowsCount},${JSON.stringify(source)})'>
+          <div class="ico-lg">📄</div>
+          <div class="ttl">CSV (.csv)</div>
+          <div class="sub-ttl">순수 데이터 · 외부 시스템 호환</div>
+        </div>
+      </div>
+    </div>
+
+    ${state.exportMethod==='email' ? `
+      <div style="padding:14px 16px;background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border:1px solid var(--blue-100);border-radius:10px;margin-bottom:14px;">
+        <div style="font-size:11px;color:#1b64da;font-weight:700;margin-bottom:4px;">📧 받는 이메일 (점주 등록 주소)</div>
+        <div style="font-size:16px;font-weight:800;">${STORE_EMAIL}</div>
+        <div style="font-size:11px;color:var(--blue);margin-top:6px;cursor:pointer;text-decoration:underline;" onclick="closeModal();alert('🔒 본인 인증 후 이메일 주소 변경 페이지로 이동합니다.');">받을 메일 변경하기 ›</div>
+      </div>
+    ` : ''}
+
+    <div class="info-card" style="background:#fffaf0;border-color:#ffe0a3;color:#7a4d00;font-size:11px;line-height:1.6;">
+      🔒 <b>보안 안내</b> — 1년 초과 거래의 카드번호·결제번호는 마스킹된 채 저장돼요. 다운로드/발송 시각·요청자·필터 조건은 감사 로그에 3년간 보관됩니다.
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
+      <button class="btn-primary" style="flex:2;" onclick='confirmExport(${rowsCount}, ${JSON.stringify(source)})'>
+        ${state.exportMethod==='file' ? '⬇' : '✉️'} ${fmtFmt}로 ${state.exportMethod==='file' ? '다운로드' : '메일 보내기'}
+      </button>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function setExport(key, val, cnt, src){
+  if (key==='method') state.exportMethod = val;
+  if (key==='format') state.exportFormat = val;
+  renderExportModal(cnt, src);
+}
+function confirmExport(cnt, src){
+  const fmtFmt = state.exportFormat==='excel' ? 'Excel(.xlsx)' : 'CSV(.csv)';
+  const action = state.exportMethod==='file'
+    ? `다운로드를 시작했어요`
+    : `${STORE_EMAIL} 주소로 발송했어요 (1~2분 안에 도착)`;
+  closeModal();
+  alert(`✅ ${src} ${fmt(cnt)}건을 ${fmtFmt}으로 ${action}.`);
+}
 
 function openOrderDetail(o){
+  const within = isWithinYear(o.date);
+  const cardLine = o.card ? (within
+    ? `<div class="r-line"><span>카드번호</span><b>****-****-****-${o.card.slice(-4)}</b></div>`
+    : `<div class="r-line"><span>카드번호</span><b>****-****-****-****</b><span style="font-size:11px;color:var(--amber);margin-left:6px;">🔒 1년 초과 마스킹</span></div>`) : '';
+
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-head">
       <div>
         <h3>주문 상세 — ${o.id}</h3>
-        <div class="modal-sub">2026년 5월 15일 ${o.time} · 영업일 5/15 · ${o.channel}</div>
+        <div class="modal-sub">${o.date} ${o.time} · 영업일 ${o.date.slice(5).replace('-','/')} · ${o.channel}</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
+    ${!within ? `<div class="info-card" style="background:#fffaf0;border-color:#ffe0a3;color:#7a4d00;margin-bottom:12px;">🔒 <b>결제일로부터 1년 초과 거래</b> — 보안 정책에 따라 카드번호·결제번호 일부가 마스킹돼 표시돼요. 마스킹 해제는 운영팀 본인 인증을 통해서만 가능합니다.</div>`:''}
     <div class="receipt">
       <div class="r-line"><span>주문번호</span><b>${o.id}</b></div>
-      <div class="r-line"><span>결제번호 (tid)</span><b style="font-size:11px;font-family:monospace;">${o.tid||'tid_3f8a_xxxxxxxx'}</b></div>
+      <div class="r-line"><span>결제번호 (tid)</span><b style="font-size:11px;font-family:monospace;">${maskTid(o.tid||'tid_3f8a5a13b002xyz')}</b></div>
       <div class="r-line"><span>채널</span><b>${o.channel} (${o.ch})</b></div>
       <hr/>
       <div class="r-line"><span>주문 메뉴</span><b>${o.menu}</b></div>
@@ -1969,15 +2211,19 @@ function openOrderDetail(o){
       <div class="r-line"><span><b>결제금액</b></span><b style="font-size:15px;color:var(--blue);">${fmt(o.amt)}원</b></div>
       ${o.currency?`<div class="r-line"><span>외화</span><b>${o.currency}</b></div>`:''}
       <hr/>
-      <div class="r-line"><span>결제수단</span><b>${o.pay}</b></div>
-      ${o.card?`<div class="r-line"><span>카드번호</span><b>${o.card.slice(0,4)}-${o.card.slice(4,6)}**-****-${o.card.slice(-4)}</b></div>`:''}
-      <div class="r-line"><span>매입일 (예정)</span><b>5/16 (영업일)</b></div>
-      <div class="r-line"><span>정산 회차</span><b style="color:var(--blue);cursor:pointer;" onclick="closeModal();setSection('stl-detail');">STL-2026052001 ›</b></div>
+      <div class="r-line"><span>결제수단</span><b>${payLabel(o)}</b></div>
+      ${cardLine}
+      <div class="r-line"><span>매입일 (예정)</span><b>${within?'5/16 (영업일)':'정산완료'}</b></div>
+      <div class="r-line"><span>정산 회차</span><b style="color:var(--blue);cursor:pointer;" onclick="closeModal();setSection('stl-detail');">${within?'STL-2026052001':'완료된 회차'} ›</b></div>
     </div>
     <div style="margin-top:14px;display:flex;gap:8px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeModal()">🖨️ 영수증 출력</button>
-      <button class="btn-ghost" style="flex:1;" onclick="alert('부분 취소 시트 진입')">부분 취소</button>
-      <button class="btn-danger" style="flex:1;" onclick="alert('전체 취소 확인 사항: 고객 카드로 환불 영업일 3~5일 소요')">전체 취소</button>
+      ${within && o.status==='완료' ? `
+        <button class="btn-ghost" style="flex:1;" onclick="alert('부분 취소 시트 진입')">부분 취소</button>
+        <button class="btn-danger" style="flex:1;" onclick="alert('전체 취소 확인 사항: 고객 카드로 환불 영업일 3~5일 소요')">전체 취소</button>
+      ` : !within ? `
+        <button class="btn-ghost" style="flex:1;opacity:.5;cursor:not-allowed;" disabled>🔒 취소 기간 만료</button>
+      ` : ''}
     </div>
   `;
   document.getElementById('modal-bg').classList.add('on');

@@ -254,11 +254,22 @@
 
   /* Export option card (모달 내 선택지) */
   .opt-card{padding:16px;border:2px solid var(--line);border-radius:12px;cursor:pointer;text-align:center;transition:all .12s;background:#fff;}
-  .opt-card:hover{border-color:var(--ink-4);}
+  .opt-card:hover{border-color:var(--blue);transform:translateY(-1px);box-shadow:0 4px 12px rgba(49,130,246,.1);}
   .opt-card.on{border-color:var(--blue);background:#fafcff;box-shadow:0 0 0 3px rgba(49,130,246,.08);}
   .opt-card .ico-lg{font-size:24px;margin-bottom:6px;}
   .opt-card .ttl{font-weight:700;font-size:14px;}
   .opt-card .sub-ttl{font-size:11px;color:var(--ink-3);margin-top:4px;}
+
+  /* Step transition animation — 사용자가 sub-step 흐름을 인지하도록 */
+  @keyframes step-in-fwd { from {opacity:0;transform:translateX(40px);} to {opacity:1;transform:translateX(0);} }
+  @keyframes step-in-bk  { from {opacity:0;transform:translateX(-40px);} to {opacity:1;transform:translateX(0);} }
+  .modal-step.fwd { animation: step-in-fwd .28s cubic-bezier(.2,0,.2,1); }
+  .modal-step.bk  { animation: step-in-bk  .28s cubic-bezier(.2,0,.2,1); }
+
+  /* 선택된 받는 방법 카드 — Step 2 상단에 표시 */
+  .selected-method{padding:14px 16px;background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border:1px solid var(--blue-100);border-radius:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .12s;}
+  .selected-method:hover{border-color:var(--blue);background:linear-gradient(135deg,#dfecff,#eaf4ff);}
+  .selected-method .check{width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
 
   /* Receipt */
   .receipt{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:16px;font-size:12px;}
@@ -472,8 +483,14 @@ const state = {
   orderDateFilter: 'today',
   orderStatusFilter: 'all',
   orderAdvancedOpen: false,         // 세부 검색 접기/펴기
-  exportMethod: 'file',             // 파일 다운로드 / 메일 발송 — 공통 export 모달
+  exportStep: 1,                    // 1: 받는 방법 / 2: 파일 형식
+  exportMethod: null,               // file | email
   exportFormat: 'excel',            // excel / csv
+  exportDateRange: '',              // 조회 기간 안내 문구
+  exportAnimDir: 'fwd',             // 단계 전환 방향 — fwd | bk
+  customStart: '2026-05-01',        // 기간 선택 모달 — 시작일
+  customEnd:   '2026-05-15',        // 기간 선택 모달 — 종료일
+  customTarget: null,                // 'overview' | 'detail' | 'orders'
   // charts holders
   charts: {},
 };
@@ -522,6 +539,13 @@ function periodDays(){
   if (state.overviewPeriod==='day') return [DAY[14]]; // 5/15
   if (state.overviewPeriod==='week') return DAY.slice(8); // 5/9 ~ 5/15
   if (state.overviewPeriod==='month') return DAY;
+  if (state.overviewPeriod==='custom') {
+    return DAY.filter(d => {
+      const [m, dd] = d.d.split('/').map(Number);
+      const dt = `2026-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+      return dt >= state.customStart && dt <= state.customEnd;
+    });
+  }
   return DAY;
 }
 
@@ -630,9 +654,14 @@ function renderOverview(main){
   } else if (state.overviewPeriod==='month') {
     rangeStart='5/1(금) 03:00'; rangeEnd='5/16(토) 02:59';
     centerLabel='2026년 5월';
-  } else {
-    rangeStart='시작일 03:00'; rangeEnd='종료일+1 02:59';
-    centerLabel='사용자 지정';
+  } else { // custom
+    const s = new Date(state.customStart);
+    const e = new Date(state.customEnd);
+    const eNext = new Date(e); eNext.setDate(e.getDate()+1);
+    rangeStart = `${s.getMonth()+1}/${s.getDate()}(${DOW[s.getDay()]}) 03:00`;
+    rangeEnd   = `${eNext.getMonth()+1}/${eNext.getDate()}(${DOW[eNext.getDay()]}) 02:59`;
+    const diff = Math.round((e - s) / (1000*60*60*24)) + 1;
+    centerLabel = `${s.getMonth()+1}월 ${s.getDate()}일(${DOW[s.getDay()]}) ~ ${e.getMonth()+1}월 ${e.getDate()}일(${DOW[e.getDay()]}) · ${diff}일간`;
   }
 
   main.innerHTML = `
@@ -644,7 +673,7 @@ function renderOverview(main){
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="alert('데이터를 새로고침했어요')">⟳ 새로고침</button>
-        <button class="btn-primary" onclick='openExport(${days.length}, "매출 한눈에 보기")'>📤 내보내기</button>
+        <button class="btn-primary" onclick='openExport(${days.length}, "매출 한눈에 보기", ${JSON.stringify(centerLabel)})'>📤 내보내기</button>
       </div>
     </div>
 
@@ -803,7 +832,7 @@ function renderDetail(main){
         <div class="page-sub">${tabName} — 깊게 보고, 표로 받아가세요.</div>
       </div>
       <div class="left">
-        <button class="btn-primary" onclick='openExport(15, "매출 상세 · " + ${JSON.stringify(tabName)})'>📤 내보내기</button>
+        <button class="btn-primary" onclick='openExport(15, "매출 상세 · " + ${JSON.stringify(tabName)}, "2026년 5월 1일(금) ~ 5월 15일(금)")'>📤 내보내기</button>
       </div>
     </div>
 
@@ -855,8 +884,12 @@ function renderDetailPeriod(body){
       { ...enrichDay({...m4, d:'', w:''}), label:'2026년 4월' },
       { ...enrichDay({...m3, d:'', w:''}), label:'2026년 3월' },
     ];
-  } else {
-    rows = DAY.slice(-7).map(d=>enrichDay(d));
+  } else { // custom — 시작일 ~ 종료일 사이의 일별 데이터
+    rows = DAY.filter(d => {
+      const [m, dd] = d.d.split('/').map(Number);
+      const dt = `2026-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+      return dt >= state.customStart && dt <= state.customEnd;
+    }).map(d=>enrichDay(d));
     rows.forEach(r=>r.label = `${r.d} (${r.w})`);
   }
 
@@ -870,6 +903,18 @@ function renderDetailPeriod(body){
   },{});
   const avgPrice = Math.round(tot.net / tot.ocnt);
 
+  // custom 모드 라벨/범위 계산
+  let cCenter='', cStart='', cEnd='';
+  if (state.detailGroup==='custom'){
+    const s = new Date(state.customStart);
+    const e = new Date(state.customEnd);
+    const eNext = new Date(e); eNext.setDate(e.getDate()+1);
+    const diff = Math.round((e - s) / (1000*60*60*24)) + 1;
+    cCenter = `${s.getMonth()+1}월 ${s.getDate()}일(${DOW[s.getDay()]}) ~ ${e.getMonth()+1}월 ${e.getDate()}일(${DOW[e.getDay()]}) · ${diff}일간`;
+    cStart  = `${s.getMonth()+1}/${s.getDate()}(${DOW[s.getDay()]}) 03:00`;
+    cEnd    = `${eNext.getMonth()+1}/${eNext.getDate()}(${DOW[eNext.getDay()]}) 02:59`;
+  }
+
   body.innerHTML = `
     ${basisCombo({
       periods:[{key:'day',label:'일간'},{key:'week',label:'주간'},{key:'month',label:'월간'},{key:'custom',label:'기간 선택'}],
@@ -879,9 +924,9 @@ function renderDetailPeriod(body){
         state.detailGroup==='day'   ? '2026년 5월 (5/1 금 ~ 5/15 금)'
       : state.detailGroup==='week'  ? '2026년 5월 (3개 주)'
       : state.detailGroup==='month' ? '최근 3개월 (2026 3월 ~ 5월)'
-      :                                '사용자 지정 (5/9 토 ~ 5/15 금)',
-      startTime: state.detailGroup==='day' ? '5/1(금) 03:00' : state.detailGroup==='week' ? '5/1(금) 03:00' : state.detailGroup==='month' ? '3/1(일) 03:00' : '5/9(토) 03:00',
-      endTime:   state.detailGroup==='day' ? '5/16(토) 02:59' : state.detailGroup==='week' ? '5/16(토) 02:59' : state.detailGroup==='month' ? '5/31(일) 02:59' : '5/16(토) 02:59',
+      :                                cCenter,
+      startTime: state.detailGroup==='day' ? '5/1(금) 03:00' : state.detailGroup==='week' ? '5/1(금) 03:00' : state.detailGroup==='month' ? '3/1(일) 03:00' : cStart,
+      endTime:   state.detailGroup==='day' ? '5/16(토) 02:59' : state.detailGroup==='week' ? '5/16(토) 02:59' : state.detailGroup==='month' ? '5/31(일) 02:59' : cEnd,
     })}
 
     <div class="panel" style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
@@ -1295,11 +1340,12 @@ function renderOrders(main){
   // 필터링
   let rows = ORDERS;
 
-  // 기간 필터 (오늘/어제/이번 주/이번 달/전체)
+  // 기간 필터 (오늘/어제/이번 주/이번 달/전체/사용자 지정)
   if (state.orderDateFilter==='today')      rows = rows.filter(o=>o.date===TODAY_DATE);
   else if (state.orderDateFilter==='yesterday') rows = rows.filter(o=>o.date==='2026-05-14');
   else if (state.orderDateFilter==='week')  rows = rows.filter(o=>o.date>='2026-05-09' && o.date<='2026-05-15');
   else if (state.orderDateFilter==='month') rows = rows.filter(o=>o.date.startsWith('2026-05'));
+  else if (state.orderDateFilter==='custom') rows = rows.filter(o=>o.date>=state.customStart && o.date<=state.customEnd);
   // 'all' 인 경우 1년 초과 거래까지 모두 노출
 
   // 상태 필터
@@ -1343,14 +1389,27 @@ function renderOrders(main){
       else if (state.orderDateFilter==='yesterday'){ s='5/14(목) 03:00'; e='5/15(금) 02:59'; }
       else if (state.orderDateFilter==='week')     { s='5/9(토) 03:00';  e='5/16(토) 02:59'; }
       else if (state.orderDateFilter==='month')    { s='5/1(금) 03:00';  e='5/16(토) 02:59'; }
-      else                                          { s='전체';            e='전체'; }
+      else if (state.orderDateFilter==='custom')   {
+        const cs = new Date(state.customStart);
+        const ce = new Date(state.customEnd);
+        const ceN = new Date(ce); ceN.setDate(ce.getDate()+1);
+        s = `${cs.getMonth()+1}/${cs.getDate()}(${DOW[cs.getDay()]}) 03:00`;
+        e = `${ceN.getMonth()+1}/${ceN.getDate()}(${DOW[ceN.getDay()]}) 02:59`;
+      } else                                        { s='전체';            e='전체'; }
       return basisCard(s, e);
     })()}
 
     <div class="toolbar">
       <div><h2>주문 내역</h2><div class="page-sub">${rows.length}건 조회 · ${fmt(total)}원</div></div>
       <div class="left">
-        <button class="btn-primary" onclick='openExport(${rows.length}, "주문 내역")'>📤 내보내기</button>
+        <button class="btn-primary" onclick='openExport(${rows.length}, "주문 내역", ${JSON.stringify(
+          state.orderDateFilter==='today'?'오늘 (2026년 5월 15일 금)':
+          state.orderDateFilter==='yesterday'?'어제 (2026년 5월 14일 목)':
+          state.orderDateFilter==='week'?'이번 주 (5/9 토 ~ 5/15 금)':
+          state.orderDateFilter==='month'?'이번 달 (2026년 5월 1일 ~ 5월 15일)':
+          state.orderDateFilter==='custom'?`사용자 지정 (${state.customStart} ~ ${state.customEnd})`:
+          '전체 기간'
+        )})'>📤 내보내기</button>
       </div>
     </div>
 
@@ -1363,7 +1422,7 @@ function renderOrders(main){
         <span class="chip ${state.orderDateFilter==='week'?'on':''}" onclick="state.orderDateFilter='week';renderApp()">이번 주</span>
         <span class="chip ${state.orderDateFilter==='month'?'on':''}" onclick="state.orderDateFilter='month';renderApp()">이번 달</span>
         <span class="chip ${state.orderDateFilter==='all'?'on':''}" onclick="state.orderDateFilter='all';renderApp()">전체</span>
-        <span class="chip" onclick="alert('날짜 범위 선택기')">📅 기간 직접 선택</span>
+        <span class="chip ${state.orderDateFilter==='custom'?'on':''}" onclick="openDateRangePicker('orders')">📅 기간 직접 선택${state.orderDateFilter==='custom'?` (${state.customStart.slice(5)} ~ ${state.customEnd.slice(5)})`:''}</span>
       </div>
       <div class="row">
         <span class="field-label">상태</span>
@@ -1413,10 +1472,11 @@ function renderOrders(main){
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
             <span class="field-label">정밀 기간</span>
-            <input class="input" type="date" value="2026-05-01" style="width:160px;" />
+            <input class="input" type="date" id="ord-dt-start" value="${state.orderDateFilter==='custom'?state.customStart:'2026-05-01'}" max="${TODAY_DATE}" style="width:160px;" />
             <span style="color:var(--ink-3);">~</span>
-            <input class="input" type="date" value="2026-05-15" style="width:160px;" />
-            <button class="btn-ghost" onclick="alert('지정 기간 적용')" style="padding:8px 14px;">적용</button>
+            <input class="input" type="date" id="ord-dt-end" value="${state.orderDateFilter==='custom'?state.customEnd:'2026-05-15'}" max="${TODAY_DATE}" style="width:160px;" />
+            <button class="btn-primary" onclick="applyOrderInlineRange()" style="padding:8px 14px;">적용</button>
+            <button class="btn-ghost" onclick="openDateRangePicker('orders')" style="padding:8px 14px;">📅 캘린더로 보기</button>
           </div>
         </div>
       `:''}
@@ -1558,7 +1618,7 @@ function renderStlList(main){
     <div class="crumb">정산관리 › 정산 예정/완료</div>
     <div class="toolbar">
       <div><h2>정산 예정/완료</h2><div class="page-sub">D+3 영업일 송금 · ${list.length}개 회차</div></div>
-      <div class="left"><button class="btn-primary" onclick='openExport(${list.length}, "정산 회차 목록")'>📤 내보내기</button></div>
+      <div class="left"><button class="btn-primary" onclick='openExport(${list.length}, "정산 회차 목록", "최근 ${list.length}개 회차")'>📤 내보내기</button></div>
     </div>
     <div class="panel" style="padding:12px 18px;margin-bottom:14px;">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -1609,7 +1669,7 @@ function renderStlDetail(main){
       <div class="left">
         <span class="chip">통합 보기</span>
         <span class="chip on">상세 보기 (분리)</span>
-        <button class="btn-primary" onclick='openExport(312, "정산 회차 STL-2026051901 거래 명세")'>📤 내보내기</button>
+        <button class="btn-primary" onclick='openExport(312, "정산 회차 거래 명세", "영업일 5/14 (목) · 송금 예정 5/19 (화)")'>📤 내보내기</button>
       </div>
     </div>
 
@@ -1973,9 +2033,15 @@ function paginationStatic(cur, total){
    EVENT HANDLERS
    ============================================================ */
 function setSection(s){ state.section = s; renderApp(); }
-function setOverviewPeriod(p){ state.overviewPeriod = p; renderApp(); }
+function setOverviewPeriod(p){
+  if (p === 'custom') { openDateRangePicker('overview'); return; }
+  state.overviewPeriod = p; renderApp();
+}
 function setDetailTab(t){ state.section='detail'; state.detailTab = t; renderApp(); }
-function setDetailGroup(g){ state.detailGroup = g; renderApp(); }
+function setDetailGroup(g){
+  if (g === 'custom') { openDateRangePicker('detail'); return; }
+  state.detailGroup = g; renderApp();
+}
 function toggleDetailCancel(){ state.detailIncludeCancel = !state.detailIncludeCancel; renderApp(); }
 function toggleDetailCompare(){ state.detailCompare = !state.detailCompare; renderApp(); }
 function setDetailCategory(c){
@@ -1989,6 +2055,17 @@ function resetOrderFilters(){
   state.orderDateFilter='today'; state.orderStatusFilter='all'; renderApp();
 }
 function toggleOrderAdvanced(){ state.orderAdvancedOpen = !state.orderAdvancedOpen; renderApp(); }
+function applyOrderInlineRange(){
+  const s = document.getElementById('ord-dt-start').value;
+  const e = document.getElementById('ord-dt-end').value;
+  if (!s || !e) { alert('시작일과 종료일을 모두 선택해주세요'); return; }
+  if (s > e)    { alert('종료일이 시작일보다 빠를 수 없어요'); return; }
+  if (e > TODAY_DATE) { alert('아직 오지 않은 날짜는 선택할 수 없어요'); return; }
+  state.customStart = s;
+  state.customEnd = e;
+  state.orderDateFilter = 'custom';
+  renderApp();
+}
 
 // ========== 매출 집계 기준 안내 — 모든 매출 화면 상단 공통 컴포넌트 ==========
 // 시간 범위를 명확하게 보여주고 ⓘ 클릭 시 상세 설명 모달
@@ -2098,91 +2175,241 @@ function openBasisInfo(){
   document.getElementById('modal-bg').classList.add('on');
 }
 
-// ========== 통합 내보내기 모달 ==========
-// 모든 화면의 다운로드 버튼이 이 모달 하나로 통일됨
-// 받는 방법: 파일 / 메일  ×  파일 형식: Excel / CSV
-function openExport(rowsCount, source){
-  state.exportMethod = 'file';
-  state.exportFormat = 'excel';
-  renderExportModal(rowsCount, source);
+// ========== 기간 직접 선택 — 캘린더 모달 ==========
+// 매출 한눈에 보기 / 매출 상세 보기 / 주문 내역 어디서든 동일하게 동작
+function openDateRangePicker(target){
+  state.customTarget = target;
+  renderDatePicker();
 }
-function renderExportModal(rowsCount, source){
+function renderDatePicker(){
   const modal = document.getElementById('modal');
-  const fmtFmt = state.exportFormat==='excel' ? 'Excel (.xlsx)' : 'CSV (.csv)';
   modal.innerHTML = `
     <div class="modal-head">
       <div>
-        <h3>📤 ${source} 내보내기</h3>
-        <div class="modal-sub">${fmt(rowsCount)}건 · 적용된 필터·정렬 기준 그대로 저장돼요</div>
+        <h3>📅 기간 직접 선택</h3>
+        <div class="modal-sub">시작일과 종료일을 정해주세요. 빠른 선택도 가능해요.</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
 
     <div style="margin-bottom:16px;">
-      <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:8px;">① 받는 방법</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div class="opt-card ${state.exportMethod==='file'?'on':''}" onclick='setExport("method","file",${rowsCount},${JSON.stringify(source)})'>
-          <div class="ico-lg">📂</div>
-          <div class="ttl">파일로 받기</div>
-          <div class="sub-ttl">지금 이 PC로 바로 다운로드</div>
-        </div>
-        <div class="opt-card ${state.exportMethod==='email'?'on':''}" onclick='setExport("method","email",${rowsCount},${JSON.stringify(source)})'>
-          <div class="ico-lg">📧</div>
-          <div class="ttl">메일로 받기</div>
-          <div class="sub-ttl">등록된 이메일로 발송</div>
-        </div>
+      <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:8px;">빠른 선택</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="chip" onclick="setQuickRange('today')">오늘</span>
+        <span class="chip" onclick="setQuickRange('yesterday')">어제</span>
+        <span class="chip" onclick="setQuickRange(7)">지난 7일</span>
+        <span class="chip" onclick="setQuickRange(14)">지난 14일</span>
+        <span class="chip" onclick="setQuickRange(30)">지난 30일</span>
+        <span class="chip" onclick="setQuickRange('thisMonth')">이번 달</span>
+        <span class="chip" onclick="setQuickRange('lastMonth')">지난 달</span>
+        <span class="chip" onclick="setQuickRange('thisQuarter')">이번 분기</span>
+        <span class="chip" onclick="setQuickRange('lastQuarter')">지난 분기</span>
       </div>
     </div>
 
     <div style="margin-bottom:16px;">
-      <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:8px;">② 파일 형식</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div class="opt-card ${state.exportFormat==='excel'?'on':''}" onclick='setExport("format","excel",${rowsCount},${JSON.stringify(source)})'>
-          <div class="ico-lg">📊</div>
-          <div class="ttl">Excel (.xlsx)</div>
-          <div class="sub-ttl">서식 + 합계 행 포함</div>
-        </div>
-        <div class="opt-card ${state.exportFormat==='csv'?'on':''}" onclick='setExport("format","csv",${rowsCount},${JSON.stringify(source)})'>
-          <div class="ico-lg">📄</div>
-          <div class="ttl">CSV (.csv)</div>
-          <div class="sub-ttl">순수 데이터 · 외부 시스템 호환</div>
-        </div>
+      <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:8px;">날짜 직접 선택</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <input type="date" id="dp-start" class="input" value="${state.customStart}" max="${TODAY_DATE}" style="flex:1;" oninput="onDateChange()" />
+        <span style="color:var(--ink-3);">~</span>
+        <input type="date" id="dp-end" class="input" value="${state.customEnd}" max="${TODAY_DATE}" style="flex:1;" oninput="onDateChange()" />
       </div>
     </div>
 
-    ${state.exportMethod==='email' ? `
-      <div style="padding:14px 16px;background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border:1px solid var(--blue-100);border-radius:10px;margin-bottom:14px;">
-        <div style="font-size:11px;color:#1b64da;font-weight:700;margin-bottom:4px;">📧 받는 이메일 (점주 등록 주소)</div>
-        <div style="font-size:16px;font-weight:800;">${STORE_EMAIL}</div>
-        <div style="font-size:11px;color:var(--blue);margin-top:6px;cursor:pointer;text-decoration:underline;" onclick="closeModal();alert('🔒 본인 인증 후 이메일 주소 변경 페이지로 이동합니다.');">받을 메일 변경하기 ›</div>
-      </div>
-    ` : ''}
-
-    <div class="info-card" style="background:#fffaf0;border-color:#ffe0a3;color:#7a4d00;font-size:11px;line-height:1.6;">
-      🔒 <b>보안 안내</b> — 1년 초과 거래의 카드번호·결제번호는 마스킹된 채 저장돼요. 다운로드/발송 시각·요청자·필터 조건은 감사 로그에 3년간 보관됩니다.
+    <div class="info-card" style="background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border-color:var(--blue-100);color:#1b64da;" id="dp-preview-wrap">
+      <div style="font-size:11px;font-weight:700;margin-bottom:6px;">📊 선택한 기간</div>
+      <div id="dp-preview" style="color:var(--ink);font-size:14px;font-weight:700;">${getRangePreview(state.customStart, state.customEnd)}</div>
     </div>
 
     <div style="display:flex;gap:8px;margin-top:14px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
-      <button class="btn-primary" style="flex:2;" onclick='confirmExport(${rowsCount}, ${JSON.stringify(source)})'>
-        ${state.exportMethod==='file' ? '⬇' : '✉️'} ${fmtFmt}로 ${state.exportMethod==='file' ? '다운로드' : '메일 보내기'}
-      </button>
+      <button class="btn-primary" style="flex:2;" onclick="applyDateRange()">📅 이 기간으로 보기</button>
     </div>
   `;
   document.getElementById('modal-bg').classList.add('on');
 }
+function onDateChange(){
+  const s = document.getElementById('dp-start').value;
+  const e = document.getElementById('dp-end').value;
+  state.customStart = s;
+  state.customEnd = e;
+  document.getElementById('dp-preview').innerHTML = getRangePreview(s, e);
+}
+function getRangePreview(s, e){
+  if (!s || !e) return '시작일과 종료일을 선택해주세요';
+  if (s > e) return '<span style="color:var(--red);">종료일이 시작일보다 빠를 수 없어요</span>';
+  if (e > TODAY_DATE) return '<span style="color:var(--red);">아직 오지 않은 날짜는 선택할 수 없어요</span>';
+  const start = new Date(s);
+  const end = new Date(e);
+  const diff = Math.round((end - start) / (1000*60*60*24)) + 1;
+  const sLabel = `${start.getMonth()+1}월 ${start.getDate()}일(${DOW[start.getDay()]})`;
+  const eLabel = `${end.getMonth()+1}월 ${end.getDate()}일(${DOW[end.getDay()]})`;
+  return `${sLabel} ~ ${eLabel} <span style="color:var(--ink-3);font-weight:500;font-size:12px;margin-left:4px;">· ${diff}일간</span>`;
+}
+function setQuickRange(period){
+  const today = new Date(TODAY_DATE);
+  let start, end;
+  if (typeof period === 'number'){
+    end = new Date(today);
+    start = new Date(today);
+    start.setDate(today.getDate() - period + 1);
+  } else if (period==='today'){
+    start = new Date(today); end = new Date(today);
+  } else if (period==='yesterday'){
+    start = new Date(today); start.setDate(today.getDate() - 1);
+    end = new Date(start);
+  } else if (period==='thisMonth'){
+    start = new Date(today.getFullYear(), today.getMonth(), 1);
+    end = new Date(today);
+  } else if (period==='lastMonth'){
+    start = new Date(today.getFullYear(), today.getMonth()-1, 1);
+    end = new Date(today.getFullYear(), today.getMonth(), 0);
+  } else if (period==='thisQuarter'){
+    const q = Math.floor(today.getMonth()/3);
+    start = new Date(today.getFullYear(), q*3, 1);
+    end = new Date(today);
+  } else if (period==='lastQuarter'){
+    const q = Math.floor(today.getMonth()/3);
+    start = new Date(today.getFullYear(), (q-1)*3, 1);
+    end = new Date(today.getFullYear(), q*3, 0);
+  }
+  state.customStart = start.toISOString().slice(0,10);
+  state.customEnd = end.toISOString().slice(0,10);
+  renderDatePicker();
+}
+function applyDateRange(){
+  if (state.customStart > state.customEnd){
+    alert('종료일이 시작일보다 빠를 수 없어요'); return;
+  }
+  if (state.customEnd > TODAY_DATE){
+    alert('아직 오지 않은 날짜는 선택할 수 없어요'); return;
+  }
+  if (state.customTarget === 'overview') state.overviewPeriod = 'custom';
+  if (state.customTarget === 'detail')   state.detailGroup = 'custom';
+  if (state.customTarget === 'orders')   state.orderDateFilter = 'custom';
+  closeModal();
+  renderApp();
+}
+
+// ========== 통합 내보내기 모달 — 2단계 흐름 ==========
+// Step 1: 받는 방법 (파일/메일)  →  Step 2: 파일 형식 (엑셀/CSV)
+function openExport(rowsCount, source, dateRange){
+  state.exportStep = 1;
+  state.exportMethod = null;
+  state.exportFormat = 'excel';
+  state.exportDateRange = dateRange || '';
+  state.exportAnimDir = 'fwd';
+  renderExportModal(rowsCount, source);
+}
+function renderExportModal(rowsCount, source){
+  const modal = document.getElementById('modal');
+  const animClass = state.exportAnimDir === 'bk' ? 'bk' : 'fwd';
+
+  if (state.exportStep === 1) {
+    // Step 1 — 받는 방법
+    modal.innerHTML = `
+      <div class="modal-head">
+        <div>
+          <h3>📤 ${source}</h3>
+          <div class="modal-sub">${fmt(rowsCount)}건</div>
+        </div>
+        <button class="close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-step ${animClass}">
+        ${state.exportDateRange ? `
+          <div style="padding:14px 16px;background:#fafcff;border:1px solid var(--blue-100);border-radius:10px;margin-bottom:18px;">
+            <div style="font-size:11px;color:#1b64da;font-weight:700;margin-bottom:6px;">📅 지금 조회한 기간</div>
+            <div style="font-size:14px;color:var(--ink);font-weight:700;line-height:1.4;">${state.exportDateRange}</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">이 기간 기준으로 보내드려요</div>
+          </div>
+        ` : ''}
+
+        <div style="margin-bottom:12px;font-size:14px;font-weight:700;color:var(--ink);">어떻게 받을까요?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div class="opt-card" onclick='setExport("method","file",${rowsCount},${JSON.stringify(source)})'>
+            <div class="ico-lg">📂</div>
+            <div class="ttl">파일로 받기</div>
+          </div>
+          <div class="opt-card" onclick='setExport("method","email",${rowsCount},${JSON.stringify(source)})'>
+            <div class="ico-lg">📧</div>
+            <div class="ttl">메일로 받기</div>
+          </div>
+        </div>
+
+        <button class="btn-ghost" style="width:100%;" onclick="closeModal()">취소</button>
+      </div>
+    `;
+  } else {
+    // Step 2 — 파일 형식 + 선택된 방법 카드 상단 표시
+    const isFile = state.exportMethod === 'file';
+    const action = isFile ? '받기' : '보내기';
+    const methodIco = isFile ? '📂' : '📧';
+    const methodLabel = isFile ? '파일로 받기' : '메일로 받기';
+
+    modal.innerHTML = `
+      <div class="modal-head">
+        <div>
+          <h3>📤 ${source}</h3>
+          <div class="modal-sub">${fmt(rowsCount)}건</div>
+        </div>
+        <button class="close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-step ${animClass}">
+        <div class="selected-method" onclick='setExport("back",null,${rowsCount},${JSON.stringify(source)})'>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="check">✓</div>
+            <div style="font-size:22px;">${methodIco}</div>
+            <div>
+              <div style="font-size:14px;font-weight:800;">${methodLabel}</div>
+              ${!isFile ? `<div style="font-size:12px;color:var(--ink-2);margin-top:2px;">${STORE_EMAIL}</div>` : ''}
+            </div>
+          </div>
+          <span style="font-size:12px;color:var(--blue);font-weight:700;padding:6px 12px;border-radius:6px;background:#fff;">변경</span>
+        </div>
+
+        <div style="margin:18px 0 12px;font-size:14px;font-weight:700;color:var(--ink);">어떤 형식?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div class="opt-card ${state.exportFormat==='excel'?'on':''}" onclick='setExport("format","excel",${rowsCount},${JSON.stringify(source)})'>
+            <div class="ico-lg">📊</div>
+            <div class="ttl">엑셀</div>
+          </div>
+          <div class="opt-card ${state.exportFormat==='csv'?'on':''}" onclick='setExport("format","csv",${rowsCount},${JSON.stringify(source)})'>
+            <div class="ico-lg">📄</div>
+            <div class="ttl">CSV</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
+          <button class="btn-primary" style="flex:2;" onclick='confirmExport(${rowsCount}, ${JSON.stringify(source)})'>${action}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('modal-bg').classList.add('on');
+}
 function setExport(key, val, cnt, src){
-  if (key==='method') state.exportMethod = val;
-  if (key==='format') state.exportFormat = val;
+  if (key==='method') {
+    state.exportMethod = val;
+    state.exportStep = 2;
+    state.exportAnimDir = 'fwd';
+  } else if (key==='format') {
+    state.exportFormat = val;
+  } else if (key==='back') {
+    state.exportStep = 1;
+    state.exportMethod = null;
+    state.exportAnimDir = 'bk';
+  }
   renderExportModal(cnt, src);
 }
 function confirmExport(cnt, src){
-  const fmtFmt = state.exportFormat==='excel' ? 'Excel(.xlsx)' : 'CSV(.csv)';
-  const action = state.exportMethod==='file'
-    ? `다운로드를 시작했어요`
-    : `${STORE_EMAIL} 주소로 발송했어요 (1~2분 안에 도착)`;
+  const fmtName = state.exportFormat==='excel' ? '엑셀' : 'CSV';
+  const isFile = state.exportMethod==='file';
   closeModal();
-  alert(`✅ ${src} ${fmt(cnt)}건을 ${fmtFmt}으로 ${action}.`);
+  alert(`✅ ${src} ${fmt(cnt)}건 ${fmtName}로 ${isFile?'다운로드':'발송'} 완료`);
 }
 
 function openOrderDetail(o){

@@ -441,19 +441,27 @@ const HOUR_AVG = [ // 4주 동요일 평균
 ];
 
 // 결제수단 (이번 달)
+// 결제수단 — 1depth(메인) + 2depth(sub) 구조
 const METHOD = [
-  { name:'카드 (국내)',   key:'card_d',  cnt:628, amt:16840000, color:'#3182f6', sub:[
-    { name:'일시불', cnt:620, amt:16650000 },
-    { name:'할부',   cnt:8,   amt:190000   },
+  { name:'카드',         key:'card',    cnt:662, amt:17756800, color:'#3182f6', sub:[
+    { name:'국내',  cnt:628, amt:16840000 },
+    { name:'해외',  cnt:34,  amt:916800, usd:666.30 },
   ]},
-  { name:'카드 (해외)',   key:'card_o',  cnt:34,  amt:916800,   color:'#5e9dff', usd:666.30 },
-  { name:'카카오페이',     key:'kakao',   cnt:196, amt:5155200,  color:'#f5b347' },
-  { name:'네이버페이',     key:'naver',   cnt:116, amt:3150400,  color:'#1eb18d' },
-  { name:'토스페이',       key:'toss',    cnt:0,   amt:0,        color:'#3182f6' },
-  { name:'현금',           key:'cash',    cnt:42,  amt:1150000,  color:'#9aa5b1' },
-  { name:'계좌이체',       key:'transfer',cnt:20,  amt:282000,   color:'#b0b8c1' },
-  { name:'자체 포인트',     key:'point',   cnt:24,  amt:720000,   color:'#8b5cf6' },
-  { name:'모바일 상품권',   key:'voucher', cnt:12,  amt:425600,   color:'#f04452' },
+  { name:'카카오페이',   key:'kakao',   cnt:196, amt:5155200,  color:'#f5b347', sub:[
+    { name:'머니', cnt:80,  amt:2150000 },
+    { name:'페이', cnt:116, amt:3005200 },
+  ]},
+  { name:'네이버페이',   key:'naver',   cnt:116, amt:3150400,  color:'#1eb18d', sub:[
+    { name:'머니', cnt:42, amt:1140000 },
+    { name:'페이', cnt:74, amt:2010400 },
+  ]},
+  { name:'토스페이',     key:'toss',    cnt:23,  amt:615000,   color:'#0064FF', sub:[
+    { name:'페이', cnt:23, amt:615000 },
+  ]},
+  { name:'현금',         key:'cash',    cnt:42,  amt:1150000,  color:'#9aa5b1' },
+  { name:'계좌이체',     key:'transfer',cnt:20,  amt:282000,   color:'#b0b8c1' },
+  { name:'자체 포인트',  key:'point',   cnt:24,  amt:720000,   color:'#8b5cf6' },
+  { name:'모바일 상품권',key:'voucher', cnt:12,  amt:425600,   color:'#f04452' },
 ];
 
 // 메뉴 (이번 달)
@@ -498,7 +506,7 @@ const ORDERS = [
       {name:'카페라떼',   qty:1, price:5500, options:['ICE','오트밀크 +500']},
       {name:'치즈케이크', qty:1, price:7400, options:[]},
     ] },
-  { id:'#20260515-0045', date:'2026-05-15', time:'10:18', channel:'포장',       ch:'포장', menu:'카페라떼 외 1건',    issuer:'카카오페이', amt:12000, status:'완료',     stl:'정산예정 5/20',
+  { id:'#20260515-0045', date:'2026-05-15', time:'10:18', channel:'포장',       ch:'포장', menu:'카페라떼 외 1건',    issuer:'카카오페이', paySub:'페이', amt:12000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'카페라떼', qty:1, price:5500, options:['ICE','오트밀크 +500']},
       {name:'크루아상', qty:1, price:6000, options:[]},
@@ -515,7 +523,7 @@ const ORDERS = [
       {name:'크루아상',   qty:1, price:4420, options:[]},
       {name:'치즈케이크', qty:1, price:7800, options:[]},
     ] },
-  { id:'#20260515-0042', date:'2026-05-15', time:'09:42', channel:'테이블 1',   ch:'매장', menu:'카페라떼',               issuer:'네이버페이', amt:5500,  status:'부분취소', stl:'정산예정 5/20', cancelDate:'2026-05-15', cancelTime:'11:08', refundAmt:2500,
+  { id:'#20260515-0042', date:'2026-05-15', time:'09:42', channel:'테이블 1',   ch:'매장', menu:'카페라떼',               issuer:'네이버페이', paySub:'머니', amt:5500,  status:'부분취소', stl:'정산예정 5/20', cancelDate:'2026-05-15', cancelTime:'11:08', refundAmt:2500,
     items:[
       {name:'카페라떼', qty:1, price:5500, options:['ICE','시럽 추가 +500','샷 추가 +500']},
     ],
@@ -527,7 +535,7 @@ const ORDERS = [
       {name:'아메리카노', qty:1, price:4500, options:['HOT','샷 추가 +500']},
       {name:'크루아상',   qty:1, price:5000, options:[]},
     ] },
-  { id:'#20260515-0040', date:'2026-05-15', time:'08:55', channel:'포장',       ch:'포장', menu:'아메리카노',         issuer:'카카오페이', amt:12000, status:'완료',     stl:'정산예정 5/20',
+  { id:'#20260515-0040', date:'2026-05-15', time:'08:55', channel:'포장',       ch:'포장', menu:'아메리카노',         issuer:'카카오페이', paySub:'머니', amt:12000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'아메리카노', qty:3, price:4000, options:['HOT']},
     ] },
@@ -540,19 +548,19 @@ const ORDERS = [
     items:[
       {name:'아메리카노', qty:2, price:4000, options:['HOT']},
     ] },
-  { id:'#20260515-0037', date:'2026-05-15', time:'07:58', channel:'배달',       ch:'배달', menu:'카페라떼 외 3건',        issuer:'카카오페이', amt:32000, status:'완료',     stl:'정산예정 5/20',
+  { id:'#20260515-0037', date:'2026-05-15', time:'07:58', channel:'배달',       ch:'배달', menu:'카페라떼 외 3건',        issuer:'카카오페이', paySub:'페이', amt:32000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'카페라떼',   qty:2, price:6000, options:['ICE','오트밀크 +500']},
       {name:'아메리카노', qty:1, price:5000, options:['HOT']},
       {name:'크루아상',   qty:1, price:5500, options:[]},
       {name:'치즈케이크', qty:1, price:8500, options:[]},
     ] },
-  { id:'#20260515-0036', date:'2026-05-15', time:'07:42', channel:'포장',       ch:'포장', menu:'아메리카노 외 1건',   issuer:'네이버페이', amt:10000, status:'완료',     stl:'정산예정 5/20',
+  { id:'#20260515-0036', date:'2026-05-15', time:'07:42', channel:'포장',       ch:'포장', menu:'아메리카노 외 1건',   issuer:'네이버페이', paySub:'페이', amt:10000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'아메리카노', qty:1, price:5000, options:['HOT']},
       {name:'크루아상',   qty:1, price:5000, options:[]},
     ] },
-  { id:'#20260515-0035', date:'2026-05-15', time:'07:28', channel:'테이블 4',   ch:'매장', menu:'카푸치노',                issuer:'KB',   amt:5000,  status:'완료',     stl:'정산예정 5/20', card:'5388005678',
+  { id:'#20260515-0035', date:'2026-05-15', time:'07:28', channel:'테이블 4',   ch:'매장', menu:'카푸치노',                issuer:'토스페이', paySub:'페이', amt:5000,  status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'카푸치노', qty:1, price:5000, options:['HOT']},
     ] },
@@ -626,10 +634,33 @@ function maskCard(o){
   const l = o.card.slice(-4);    // 끝 4자리
   return `${f.slice(0,4)}-${f.slice(4,6)}**-****-${l}`;
 }
-// 결제수단 라벨 — 카드사·페이명만 (카드번호는 주문 상세 모달의 별도 라인에서 노출)
+// 결제수단 분류 — 1depth(메인) / 2depth(서브)
+// 메인: 카드 / 카카오페이 / 네이버페이 / 토스페이 / 현금
+// 서브: 카드면 카드사명, 페이면 머니/페이 등
+const CARD_ISSUERS = ['신한','KB','삼성','현대','롯데','BC','하나','농협','우리','시티','외환','VISA (해외)','MASTER (해외)'];
+function payMain(o){
+  if (CARD_ISSUERS.includes(o.issuer)) return '카드';
+  return o.issuer; // 카카오페이 / 네이버페이 / 토스페이 / 현금 그대로
+}
+function payMainIco(main){
+  return { '카드':'💳','카카오페이':'🟡','네이버페이':'🟢','토스페이':'🔵','현금':'💵' }[main] || '💳';
+}
+function paySub(o){
+  // 카드: 카드사명, 페이: paySub(머니/페이), 현금: 없음
+  if (CARD_ISSUERS.includes(o.issuer)) return o.issuer;
+  if (o.issuer === '현금') return '';
+  return o.paySub || '';
+}
+// 결제수단 라벨 — 1depth만 (표·요약용). 2depth는 paySub()으로 별도 노출.
 function payLabel(o){
-  const ico = { '신한':'💳','KB':'💳','삼성':'💳','VISA (해외)':'💳','카카오페이':'🟡','네이버페이':'🟢','현금':'💵' }[o.issuer] || '💳';
-  return `${ico} ${o.issuer}`;
+  const main = payMain(o);
+  return `${payMainIco(main)} ${main}`;
+}
+// 결제수단 라벨 — 1depth + 2depth (상세 모달용)
+function payLabelFull(o){
+  const main = payMain(o);
+  const sub = paySub(o);
+  return sub ? `${payMainIco(main)} ${main} · ${sub}` : `${payMainIco(main)} ${main}`;
 }
 // 결제번호(tid) 마스킹 — 앞 8자 + 끝 4자만 노출
 function maskTid(tid){
@@ -699,7 +730,6 @@ function renderApp(){
     'stl-dash':    { fn:renderStlDash,     url:'admin.qrorder.softment.co.kr/settlements' },
     'stl-list':    { fn:renderStlList,     url:'admin.qrorder.softment.co.kr/settlements/list' },
     'stl-detail':  { fn:renderStlDetail,   url:'admin.qrorder.softment.co.kr/settlements/STL-2026051901' },
-    'hold':        { fn:renderHold,        url:'admin.qrorder.softment.co.kr/holds' },
     'fee':         { fn:renderFee,         url:'admin.qrorder.softment.co.kr/fees' },
     'tax':         { fn:renderTax,         url:'admin.qrorder.softment.co.kr/tax-invoices' },
     'bank':        { fn:renderBank,        url:'admin.qrorder.softment.co.kr/bank-account' },
@@ -721,7 +751,6 @@ function renderSidebar(){
     { type:'grp', label:'정산관리' },
     { type:'a', key:'stl-dash',   ic:'💰', label:'정산 대시보드' },
     { type:'a', key:'stl-list',   ic:'📆', label:'정산 예정/완료', n:2 },
-    { type:'a', key:'hold',       ic:'⏸️', label:'보류 내역' },
     { type:'a', key:'fee',        ic:'📑', label:'수수료·세금' },
     { type:'a', key:'tax',        ic:'🧾', label:'세금계산서' },
     { type:'a', key:'bank',       ic:'🏦', label:'정산계좌' },
@@ -1501,7 +1530,7 @@ function renderDetailMethod(body){
                 <td class="num"><b>${fmt(m.amt)}원</b></td>
                 <td class="num">${(m.amt/totAmt*100).toFixed(1)}%</td>
                 <td class="num">${fmt(Math.round(m.amt/m.cnt))}원</td>
-                <td class="num">${m.key==='card_d'?'2.1':m.key==='card_o'?'1.8':m.key==='kakao'?'1.5':'0'}%</td>
+                <td class="num">${ {card:'2.0', kakao:'1.5', naver:'1.2', toss:'0.9', cash:'0', transfer:'0', point:'0', voucher:'0'}[m.key] || '0' }%</td>
               </tr>
               ${m.sub?m.sub.map(s=>`
                 <tr style="background:#fafbfc;">
@@ -1571,8 +1600,8 @@ function renderOrders(main){
   // 채널 필터 (매장/포장/배달)
   if (state.orderChannelFilter!=='all') rows = rows.filter(o=>o.ch===state.orderChannelFilter);
 
-  // 결제수단 필터
-  if (state.orderPayFilter!=='all') rows = rows.filter(o=>o.issuer===state.orderPayFilter);
+  // 결제수단 필터 (1depth 기준 매칭 — 카드/카카오페이/네이버페이/토스페이/현금)
+  if (state.orderPayFilter!=='all') rows = rows.filter(o=>payMain(o)===state.orderPayFilter);
 
   // 정산상태 필터
   if (state.orderStlFilter!=='all') {
@@ -1739,12 +1768,10 @@ function renderOrders(main){
             <span class="field-label" style="padding-top:7px;">결제수단</span>
             <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1;">
               <span class="chip ${state.orderPayFilter==='all'?'on':''}" onclick="state.orderPayFilter='all';renderApp()">전체</span>
-              <span class="chip ${state.orderPayFilter==='신한'?'on':''}" onclick="state.orderPayFilter='신한';renderApp()">💳 신한</span>
-              <span class="chip ${state.orderPayFilter==='KB'?'on':''}" onclick="state.orderPayFilter='KB';renderApp()">💳 KB</span>
-              <span class="chip ${state.orderPayFilter==='삼성'?'on':''}" onclick="state.orderPayFilter='삼성';renderApp()">💳 삼성</span>
-              <span class="chip ${state.orderPayFilter==='VISA (해외)'?'on':''}" onclick="state.orderPayFilter='VISA (해외)';renderApp()">💳 VISA (해외)</span>
+              <span class="chip ${state.orderPayFilter==='카드'?'on':''}" onclick="state.orderPayFilter='카드';renderApp()">💳 카드</span>
               <span class="chip ${state.orderPayFilter==='카카오페이'?'on':''}" onclick="state.orderPayFilter='카카오페이';renderApp()">🟡 카카오페이</span>
               <span class="chip ${state.orderPayFilter==='네이버페이'?'on':''}" onclick="state.orderPayFilter='네이버페이';renderApp()">🟢 네이버페이</span>
+              <span class="chip ${state.orderPayFilter==='토스페이'?'on':''}" onclick="state.orderPayFilter='토스페이';renderApp()">🔵 토스페이</span>
               <span class="chip ${state.orderPayFilter==='현금'?'on':''}" onclick="state.orderPayFilter='현금';renderApp()">💵 현금</span>
             </div>
           </div>
@@ -1874,8 +1901,8 @@ function renderStlDash(main){
           </div>
         </div>
         <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);margin-top:14px;">
-          <div class="pc-card"><div class="label">이번 달 누적</div><div class="num" style="font-size:22px;">11,350,000원</div><div class="sub">5회 정산</div></div>
-          <div class="pc-card clickable" onclick="setSection('hold')"><div class="label">보류금 ›</div><div class="num" style="font-size:22px;color:var(--amber);">30,000원</div><div class="sub">2건</div></div>
+          <div class="pc-card"><div class="label">이번 달 누적 정산</div><div class="num" style="font-size:22px;">11,350,000원</div><div class="sub">5회 정산</div></div>
+          <div class="pc-card"><div class="label">회차 평균 송금액</div><div class="num" style="font-size:22px;">2,270,000원</div><div class="sub">최근 5회 평균</div></div>
           <div class="pc-card clickable" onclick="setSection('fee')"><div class="label">이번 달 수수료 ›</div><div class="num" style="font-size:22px;">248,500원</div><div class="sub">청구서 ⬇</div></div>
         </div>
       </div>
@@ -1993,36 +2020,31 @@ function renderStlDetail(main){
         <div class="page-sub">대상 거래 <b style="color:var(--ink);">영업일 5/14 (5/14 03:00 ~ 5/15 02:59)</b> · 송금 예정 <b style="color:var(--ink);">5/19(화) — D+3</b> · 신한 ****1234</div>
       </div>
       <div class="left">
-        <span class="chip">통합 보기</span>
-        <span class="chip on">상세 보기 (분리)</span>
         <button class="btn-primary" onclick='openExport(312, "정산 회차 거래 명세", "영업일 5/14 (목) · 송금 예정 5/19 (화)")'>📤 내보내기</button>
       </div>
     </div>
 
     <div class="grid-3-2">
       <div class="panel">
-        <h3>차감 명세 <span class="h-act"><span class="unit-tag">단위 · 원</span><span class="h-sub">1차 PG 원가 + 마진 분리</span></span></h3>
+        <h3>차감 명세 <span class="h-act"><span class="unit-tag">단위 · 원</span></span></h3>
         <table class="deduct">
           <tr><td>총 매출 <span class="ttx">(결제 승인 합 · 312건)</span></td><td class="pos">+2,540,000</td></tr>
           <tr><td>취소·환불 <span class="ttx">(정산 전 취소 분)</span></td><td class="neg">−180,000</td></tr>
           <tr class="sum"><td>거래 순액 (A)</td><td>2,360,000</td></tr>
-          <tr><td>카드 수수료(국내) <span class="ttx">통합 2.0% = PG 1.4% + 마진 0.6%</span></td><td class="neg">−47,200</td></tr>
-          <tr><td>카드 수수료(해외) <span class="ttx">통합 3.5%</span></td><td class="neg">−9,800</td></tr>
+          <tr><td>카드 수수료(국내) <span class="ttx">요율 2.0%</span></td><td class="neg">−47,200</td></tr>
+          <tr><td>카드 수수료(해외) <span class="ttx">요율 3.5%</span></td><td class="neg">−9,800</td></tr>
           <tr><td>간편결제 수수료</td><td class="neg">−12,300</td></tr>
-          <tr><td>플랫폼 이용료 <span class="ttx">0.1%</span></td><td class="neg">−2,360</td></tr>
-          <tr><td>부가세 <span class="ttx">수수료·이용료 10%</span></td><td class="neg">−7,166</td></tr>
-          <tr class="sum"><td>차감 합 (B)</td><td>−78,826</td></tr>
-          <tr><td>보류금 신규 <span class="ttx">차지백 분쟁 1건</span></td><td class="neg">−20,000</td></tr>
-          <tr><td>보류금 해제 <span class="ttx">5/3 회차 해제 분</span></td><td class="pos">+5,000</td></tr>
+          <tr><td>부가세 <span class="ttx">수수료의 10%</span></td><td class="neg">−6,930</td></tr>
+          <tr class="sum"><td>수수료·세금 합 (B)</td><td>−76,230</td></tr>
           <tr><td>이전 회차 환불 차감 <span class="ttx">5/11분 환불 1건</span></td><td class="neg">−15,000</td></tr>
-          <tr class="final"><td>송금액</td><td style="color:var(--blue);">2,251,174원</td></tr>
+          <tr class="final"><td>송금액</td><td style="color:var(--blue);">2,268,770원</td></tr>
         </table>
       </div>
       <div>
         <div class="pc-card blue" style="margin-bottom:14px;">
           <div class="label">💸 송금 예정</div>
           <div style="font-size:13px;color:var(--ink-2);">5월 19일 화요일 오전 (D+3)</div>
-          <div style="font-size:28px;font-weight:800;color:#1b64da;margin-top:8px;letter-spacing:-.02em;">2,251,174원</div>
+          <div style="font-size:28px;font-weight:800;color:#1b64da;margin-top:8px;letter-spacing:-.02em;">2,268,770원</div>
           <div style="font-size:12px;color:var(--ink-2);margin-top:10px;padding-top:10px;border-top:1px solid var(--blue-100);">
             <b>신한은행 ****1234</b><br/>예금주: 홍길동
           </div>
@@ -2047,14 +2069,14 @@ function renderStlDetail(main){
       <table class="t">
         <thead><tr><th>시각</th><th>결제번호</th><th>수단</th><th class="num">금액</th><th class="num">수수료</th><th class="num">VAT</th><th class="num">정산 반영</th><th>상태</th></tr></thead>
         <tbody>
-          <tr class="clickable"><td>5/14 09:18</td><td>tid_3f8a...01</td><td>💳 신한</td><td class="num">26,400</td><td class="num">−528</td><td class="num">−53</td><td class="num">25,819</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>5/14 09:42</td><td>tid_3f8a...02</td><td>🟡 카카오</td><td class="num">12,000</td><td class="num">−276</td><td class="num">−28</td><td class="num">11,696</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>5/14 10:12</td><td>tid_3f8a...03</td><td>💳 KB</td><td class="num">8,000</td><td class="num">0</td><td class="num">0</td><td class="num">−</td><td><span class="pill cancel">취소(전)</span></td></tr>
-          <tr class="clickable"><td>5/14 10:24</td><td>tid_3f8a...04</td><td>💳 VISA (해외)</td><td class="num">27,420<br/><span style="font-size:11px;color:var(--ink-3);">($19.90)</span></td><td class="num">−959</td><td class="num">−96</td><td class="num">26,365</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>5/14 11:08</td><td>tid_3f8a...05</td><td>🟢 네이버</td><td class="num">5,500</td><td class="num">−132</td><td class="num">−13</td><td class="num">5,355</td><td><span class="pill partial">부분취소</span></td></tr>
-          <tr class="clickable"><td>5/14 11:42</td><td>tid_3f8a...06</td><td>💳 삼성</td><td class="num">14,500</td><td class="num">−290</td><td class="num">−29</td><td class="num">14,181</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>5/14 23:14</td><td>tid_3f8a...07</td><td>💳 신한</td><td class="num">18,200</td><td class="num">−364</td><td class="num">−36</td><td class="num">17,800</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable" style="background:#fff5f0;"><td>5/15 01:42<br/><span style="font-size:11px;color:var(--amber);">새벽 거래</span></td><td>tid_3f8a...08</td><td>🟡 카카오</td><td class="num">9,500</td><td class="num">−219</td><td class="num">−22</td><td class="num">9,259</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>5/14 09:18</td><td>tid_3f8a...01</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">26,400</td><td class="num">−528</td><td class="num">−53</td><td class="num">25,819</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>5/14 09:42</td><td>tid_3f8a...02</td><td>🟡 카카오페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">12,000</td><td class="num">−276</td><td class="num">−28</td><td class="num">11,696</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>5/14 10:12</td><td>tid_3f8a...03</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· KB</span></td><td class="num">8,000</td><td class="num">0</td><td class="num">0</td><td class="num">−</td><td><span class="pill cancel">취소(전)</span></td></tr>
+          <tr class="clickable"><td>5/14 10:24</td><td>tid_3f8a...04</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 해외 (VISA)</span></td><td class="num">27,420<br/><span style="font-size:11px;color:var(--ink-3);">($19.90)</span></td><td class="num">−959</td><td class="num">−96</td><td class="num">26,365</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>5/14 11:08</td><td>tid_3f8a...05</td><td>🟢 네이버페이 <span style="color:var(--ink-3);font-size:11px;">· 머니</span></td><td class="num">5,500</td><td class="num">−132</td><td class="num">−13</td><td class="num">5,355</td><td><span class="pill partial">부분취소</span></td></tr>
+          <tr class="clickable"><td>5/14 11:42</td><td>tid_3f8a...06</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 삼성</span></td><td class="num">14,500</td><td class="num">−290</td><td class="num">−29</td><td class="num">14,181</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>5/14 23:14</td><td>tid_3f8a...07</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">18,200</td><td class="num">−364</td><td class="num">−36</td><td class="num">17,800</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable" style="background:#fff5f0;"><td>5/15 01:42<br/><span style="font-size:11px;color:var(--amber);">새벽 거래</span></td><td>tid_3f8a...08</td><td>🔵 토스페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">9,500</td><td class="num">−219</td><td class="num">−22</td><td class="num">9,259</td><td><span class="pill done">반영</span></td></tr>
         </tbody>
       </table>
       <div class="table-footer">
@@ -2068,60 +2090,6 @@ function renderStlDetail(main){
   `;
 }
 
-/* ====================== 보류 내역 ====================== */
-function renderHold(main){
-  main.innerHTML = `
-    <div class="crumb">정산관리 › 보류 내역</div>
-    <div class="toolbar">
-      <div><h2>보류 내역</h2><div class="page-sub">현재 보류 2건 · 30,000원</div></div>
-    </div>
-    <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
-      <div class="pc-card"><div class="label">현재 보류 금액</div><div class="num" style="color:var(--amber);">30,000원</div><div class="sub">2건</div></div>
-      <div class="pc-card"><div class="label">이번 달 해제</div><div class="num pos">+5,000원</div><div class="sub">1건</div></div>
-      <div class="pc-card"><div class="label">평균 보류 기간</div><div class="num">7.2일</div><div class="sub">최근 6개월</div></div>
-    </div>
-    <div class="panel tight">
-      <h3>현재 보류 중</h3>
-      <table class="t">
-        <thead><tr><th>보류 ID</th><th>사유</th><th>관련 거래</th><th class="num">금액</th><th>등록일</th><th>예상 해제일</th><th>액션</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>HLD-20260510-001</td>
-            <td><b>차지백 분쟁</b><div style="font-size:11px;color:var(--ink-3);margin-top:2px;">카드사 이의제기 접수</div></td>
-            <td style="color:var(--blue);font-weight:600;cursor:pointer;" onclick="setSection('orders')">#20260507-0023 ›</td>
-            <td class="num neg"><b>−20,000원</b></td>
-            <td>2026-05-10</td>
-            <td>카드사 확인 후</td>
-            <td><button class="btn-ghost" onclick="alert('운영팀 채널 이동')">이의신청</button></td>
-          </tr>
-          <tr>
-            <td>HLD-20260512-002</td>
-            <td><b>분쟁 의심 거래</b><div style="font-size:11px;color:var(--ink-3);margin-top:2px;">중복 결제 확인 중</div></td>
-            <td style="color:var(--blue);font-weight:600;cursor:pointer;" onclick="setSection('orders')">#20260512-0089 ›</td>
-            <td class="num neg"><b>−10,000원</b></td>
-            <td>2026-05-12</td>
-            <td>2026-05-19</td>
-            <td><button class="btn-ghost" onclick="alert('운영팀 채널 이동')">이의신청</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="banner-info" style="margin-top:14px;">
-      💬 <b>이 거래만 잠시 멈춰뒀어요.</b> 운영팀이 확인하면 곧 풀려요. 평균 7일 안에 처리돼요.
-    </div>
-    <div class="panel tight" style="margin-top:14px;">
-      <h3>최근 해제된 보류</h3>
-      <table class="t">
-        <thead><tr><th>보류 ID</th><th>사유</th><th class="num">금액</th><th>등록일</th><th>해제일</th><th>반영 회차</th></tr></thead>
-        <tbody>
-          <tr class="clickable" onclick="setSection('stl-detail')"><td>HLD-20260418-005</td><td>차지백 분쟁 해제</td><td class="num pos"><b>+5,000원</b></td><td>2026-04-18</td><td>2026-05-08</td><td style="color:var(--blue);">STL-2026051301 ›</td></tr>
-          <tr class="clickable" onclick="setSection('stl-detail')"><td>HLD-20260330-002</td><td>분쟁 의심 해제</td><td class="num pos"><b>+12,000원</b></td><td>2026-03-30</td><td>2026-04-12</td><td style="color:var(--blue);">STL-2026041501 ›</td></tr>
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
 /* ====================== 수수료·세금 ====================== */
 function renderFee(main){
   main.innerHTML = `
@@ -2129,13 +2097,11 @@ function renderFee(main){
     <div class="toolbar">
       <div><h2>수수료·세금</h2></div>
       <div class="left">
-        <span class="chip on">통합 보기</span>
-        <span class="chip" onclick="alert('PG 원가 / 소프트먼트 마진 분리 표시')">상세 보기</span>
         <button class="btn-primary" onclick="alert('월간 명세서 PDF 다운로드')">⬇ 월간 명세서 PDF</button>
       </div>
     </div>
     <div class="banner-info" style="margin-bottom:14px;">
-      ✨ <b>영세·중소 우대 요율 적용 중</b> — 최근 1년 매출 3억 원 이하 구간이라 1차 PG 원가가 인하돼 있어요.
+      ✨ <b>영세·중소 우대 요율 적용 중</b> — 최근 1년 매출 3억 원 이하 구간으로 결제 수수료가 우대 요율로 적용되고 있어요.
     </div>
     <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
       <div class="pc-card"><div class="label">이번 달 수수료</div><div class="num">248,500원</div><div class="sub">부가세 포함 273,350원</div></div>
@@ -2143,17 +2109,17 @@ function renderFee(main){
       <div class="pc-card"><div class="label">이번 달 부가세</div><div class="num">24,850원</div><div class="sub">수수료의 10%</div></div>
     </div>
     <div class="panel tight">
-      <h3>결제수단별 수수료 정책</h3>
+      <h3>결제수단별 적용 요율</h3>
       <table class="fee-table">
-        <thead><tr><th>결제수단</th><th>통합 요율</th><th>PG 원가</th><th>마진</th><th>이번 달 거래액</th><th>이번 달 수수료</th><th>효력 발생일</th></tr></thead>
+        <thead><tr><th>결제수단</th><th>적용 요율</th><th class="num">이번 달 거래액</th><th class="num">이번 달 수수료</th><th>효력 발생일</th></tr></thead>
         <tbody>
-          <tr><td>💳 카드 (국내)</td><td><b>2.0%</b></td><td>1.4%</td><td>0.6%</td><td>16,840,000</td><td>336,800</td><td>2026-01-01</td></tr>
-          <tr><td>💳 카드 (해외)</td><td><b>3.5%</b></td><td>2.5%</td><td>1.0%</td><td>916,800</td><td>32,088</td><td>2026-01-01</td></tr>
-          <tr><td>🟡 카카오페이</td><td><b>2.3%</b></td><td>2.0%</td><td>0.3%</td><td>5,155,200</td><td>118,570</td><td>2026-01-01</td></tr>
-          <tr><td>🟢 네이버페이</td><td><b>2.4%</b></td><td>2.0%</td><td>0.4%</td><td>3,150,400</td><td>75,610</td><td>2026-01-01</td></tr>
-          <tr><td>🏦 계좌이체</td><td><b>1.5%</b></td><td>1.2%</td><td>0.3%</td><td>282,000</td><td>4,230</td><td>2026-01-01</td></tr>
-          <tr><td>플랫폼 이용료</td><td colspan="3" style="text-align:left;color:var(--ink-2);"><b>거래액의 0.1%</b> (전체 공통)</td><td>26,344,400</td><td>26,344</td><td>2026-01-01</td></tr>
-          <tr class="total"><td>합계</td><td>−</td><td>−</td><td>−</td><td>26,344,400</td><td><b>593,642</b></td><td>−</td></tr>
+          <tr><td>💳 카드 (국내)</td><td><b>2.0%</b></td><td class="num">16,840,000</td><td class="num">336,800</td><td>2026-01-01</td></tr>
+          <tr><td>💳 카드 (해외)</td><td><b>3.5%</b></td><td class="num">916,800</td><td class="num">32,088</td><td>2026-01-01</td></tr>
+          <tr><td>🟡 카카오페이</td><td><b>2.3%</b></td><td class="num">5,155,200</td><td class="num">118,570</td><td>2026-01-01</td></tr>
+          <tr><td>🟢 네이버페이</td><td><b>2.4%</b></td><td class="num">3,150,400</td><td class="num">75,610</td><td>2026-01-01</td></tr>
+          <tr><td>🔵 토스페이</td><td><b>2.3%</b></td><td class="num">615,000</td><td class="num">14,145</td><td>2026-01-01</td></tr>
+          <tr><td>🏦 계좌이체</td><td><b>1.5%</b></td><td class="num">282,000</td><td class="num">4,230</td><td>2026-01-01</td></tr>
+          <tr class="total"><td>합계</td><td>−</td><td class="num">26,344,400</td><td class="num"><b>567,298</b></td><td>−</td></tr>
         </tbody>
       </table>
     </div>
@@ -2822,7 +2788,7 @@ function openOrderDetail(o){
       ${amountBlock}
       ${o.currency?`<div class="r-line"><span>외화</span><b>${o.currency}</b></div>`:''}
       <hr/>
-      <div class="r-line"><span>결제수단</span><b>${payLabel(o)}</b></div>
+      <div class="r-line"><span>결제수단</span><b>${payLabelFull(o)}</b></div>
       ${cardLine}
       <div class="r-line"><span>매입일 (예정)</span><b>${isCancelAll?'−':within?'5/16 (영업일)':'정산완료'}</b></div>
       <div class="r-line"><span>정산 회차</span><b style="color:var(--blue);cursor:pointer;" onclick="closeModal();setSection('stl-detail');">${isCancelAll?'정산 제외':within?'STL-2026052001':'완료된 회차'} ›</b></div>

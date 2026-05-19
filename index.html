@@ -198,6 +198,49 @@
   table.t tbody tr.clickable .row-go{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:var(--blue);opacity:.55;transition:opacity .12s;}
   table.t tbody tr.clickable:hover .row-go{opacity:1;}
 
+  /* 정산 달력 */
+  .cal-week{display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg-2);border-bottom:1px solid var(--line);}
+  .cal-wkhead{padding:10px;text-align:center;font-size:12px;font-weight:700;color:var(--ink-2);}
+  .cal-wkhead.sun{color:var(--red);}
+  .cal-wkhead.sat{color:var(--blue);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);}
+  .cal-cell{min-height:104px;background:#fff;padding:10px;transition:background .12s;display:flex;flex-direction:column;}
+  .cal-cell.has-data{cursor:pointer;}
+  .cal-cell.has-data:hover{background:#fafcff;}
+  .cal-cell.selected{background:#eaf3ff;outline:2px solid var(--blue);outline-offset:-2px;position:relative;z-index:1;}
+  .cal-cell.off{background:var(--bg-2);}
+  .cal-day{font-size:13px;font-weight:700;color:var(--ink-2);}
+  .cal-day.today{color:var(--blue);}
+  .cal-day.today::after{content:" · 오늘";font-size:10px;font-weight:600;color:var(--blue);}
+  .cal-amt{margin-top:6px;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.2;}
+  .cal-amt.done{color:var(--blue);}
+  .cal-amt.pending{color:#a25e00;}
+  .cal-tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;margin-top:4px;}
+  .cal-tag.done{background:var(--blue-50);color:var(--blue);}
+  .cal-tag.pending{background:#fff3d4;color:#a25e00;}
+  .cal-sub{font-size:10px;color:var(--ink-3);margin-top:4px;}
+  .cal-legend{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:4px;}
+  .cal-legend.done{background:var(--blue);}
+  .cal-legend.pending{background:var(--amber);}
+
+  /* 정산 상세 — 3 그룹 + sticky 합계 바 */
+  .stl-groups{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px;}
+  .stl-group{padding:16px 18px;background:var(--bg-2);border-radius:10px;}
+  .stl-g-title{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:10px;letter-spacing:-.01em;}
+  .stl-g-table{width:100%;font-size:13px;border-collapse:collapse;}
+  .stl-g-table td{padding:7px 0;color:var(--ink-2);vertical-align:top;}
+  .stl-g-table td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);}
+  .stl-g-table tr.stl-sum td{border-top:1px dashed var(--ink-4);padding-top:9px;color:var(--ink);font-weight:700;}
+  .stl-g-table tr.stl-final td{border-top:1px solid var(--ink);padding-top:9px;color:var(--ink);font-weight:800;font-size:14px;}
+  .stl-summary-bar{position:sticky;bottom:0;background:#fff;border:1px solid var(--blue-100);border-radius:12px;padding:16px 22px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px;box-shadow:0 -6px 18px rgba(0,0,0,.06);z-index:5;margin-top:14px;}
+  .stl-sb-item{display:flex;flex-direction:column;gap:4px;}
+  .stl-sb-label{font-size:12px;color:var(--ink-3);font-weight:600;}
+  .stl-sb-num{font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+  .stl-sb-num.primary{color:var(--blue);font-size:24px;}
+  .stl-cal-arr{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-3);cursor:pointer;border-radius:8px;font-size:16px;background:var(--bg-2);transition:all .12s;}
+  .stl-cal-arr:hover{background:var(--blue-50);color:var(--blue);}
+  .stl-cal-arr.disabled{background:transparent;color:var(--ink-4);cursor:not-allowed;opacity:.45;}
+
   /* 세부 검색(접기/펴기) — 토스 스타일 액션 카드 */
   .adv-search-panel{transition:border-color .15s, background .15s, box-shadow .15s;}
   .adv-search-panel:hover{border-color:var(--blue-100);background:#fafcff;box-shadow:0 4px 12px rgba(49,130,246,.06);}
@@ -576,11 +619,74 @@ const ORDERS = [
     ] },
 ];
 
+// === 정산 회차 (영업일 D+3 송금 · DAY 기반 동적 생성) ===
+// 정산 달력 · 정산내역 조회 공통 데이터 소스
+// 필드: id / approvalDate(영업일) / settleDate(정산일) / cnt / grossAmt
+//        / couponBizAmt(가맹점 발행) / couponTableAmt(테이블 발행)
+//        / feeBase + feeVat = feeTotal (입금 수수료)
+//        / couponSettle(쿠폰 정산금) / txSettle(거래금 정산) / totalSettle(총 정산)
+//        / status: 정산완료|정산대기 / usedCoupon
+const SETTLEMENTS = (function(){
+  const couponPattern = [true,false,true,false,false,true,false,false,true,false,true,false,false,true,true];
+  const today = new Date(2026, 4, 15);
+  const DOW_ARR = ['일','월','화','수','목','금','토'];
+  // 영업일 D+N 정산 (주말 스킵 — 한국 카드 정산 표준)
+  function addBizDays(base, n){
+    const d = new Date(base);
+    let added = 0;
+    while (added < n) {
+      d.setDate(d.getDate() + 1);
+      const w = d.getDay();
+      if (w !== 0 && w !== 6) added++;
+    }
+    return d;
+  }
+  return DAY.map((d, i) => {
+    const [m, dd] = d.d.split('/').map(Number);
+    const sDate = addBizDays(new Date(2026, m - 1, dd), 3);
+    const sM = sDate.getMonth() + 1;
+    const sD = sDate.getDate();
+    const sW = DOW_ARR[sDate.getDay()];
+    const gross = d.gross;
+    const usedCoupon = couponPattern[i];
+    const couponTable = usedCoupon ? Math.round(gross * 0.012) : 0;
+    const couponBiz   = usedCoupon ? Math.round(gross * 0.005) : 0;
+    const feeBase = Math.round(gross * 0.02);
+    const feeVat  = Math.round(feeBase * 0.1);
+    const feeTotal = feeBase + feeVat;
+    const couponSettle = couponTable;
+    const txSettle = gross - feeTotal - d.ref - couponBiz;
+    const totalSettle = txSettle + couponSettle;
+    const status = sDate <= today ? '정산완료' : '정산대기';
+    return {
+      id: `STL-2026${String(sM).padStart(2,'0')}${String(sD).padStart(2,'0')}01`,
+      approvalDate: `${m}/${dd}`,
+      approvalDow: d.w,
+      approvalISO: `2026-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`,
+      settleDate:  `${sM}/${sD}`,
+      settleDow:   sW,
+      settleISO:   `2026-${String(sM).padStart(2,'0')}-${String(sD).padStart(2,'0')}`,
+      cnt: d.ocnt,
+      grossAmt: gross,
+      refundAmt: d.ref,
+      couponBizAmt: couponBiz,
+      couponTableAmt: couponTable,
+      feeBase, feeVat, feeTotal,
+      couponSettle,
+      txSettle,
+      totalSettle,
+      status,
+      statusPill: status === '정산완료' ? 'done' : 'pending',
+      usedCoupon,
+    };
+  });
+})();
+
 /* ============================================================
    STATE
    ============================================================ */
 const state = {
-  section: 'overview',              // overview | detail | orders | cancels | stl-dash | stl-list | stl-detail | hold | fee | tax | bank
+  section: 'overview',              // overview | detail | orders | cancels | stl-calendar | stl-list | stl-detail | fee | tax | bank
   overviewPeriod: 'day',            // day | week | month | custom
   detailTab: 'period',              // period | hour | menu | category | method
   detailGroup: 'day',               // day | week | month | custom
@@ -604,6 +710,11 @@ const state = {
   exportDateRange: '',              // 조회 기간 안내 문구
   exportEmail: '',                  // 메일로 받기 시 발송 주소 (default STORE_EMAIL)
   exportEmailEditing: false,        // 이메일 변경 인풋 활성화 여부
+  calendarSelectedDate: '2026-05-15', // 정산 달력에서 선택된 정산일 (ISO)
+  stlListDateBasis: 'settle',       // 정산내역 조회 — 기간 기준 (settle:정산일 / approval:승인일)
+  stlListQuickRange: '1m',          // 1w | 1m | 3m
+  stlListStatus: 'all',             // all | 정산대기 | 정산완료
+  stlListCoupon: 'all',             // all | used | none
   customStart: '2026-05-01',        // 기간 선택 모달 — 시작일
   customEnd:   '2026-05-15',        // 기간 선택 모달 — 종료일
   customTarget: null,                // 'overview' | 'detail' | 'orders'
@@ -727,7 +838,7 @@ function renderApp(){
     'overview':    { fn:renderOverview,    url:'admin.qrorder.softment.co.kr/sales' },
     'detail':      { fn:renderDetail,      url:'admin.qrorder.softment.co.kr/sales/detail' },
     'orders':      { fn:renderOrders,      url:'admin.qrorder.softment.co.kr/orders' },
-    'stl-dash':    { fn:renderStlDash,     url:'admin.qrorder.softment.co.kr/settlements' },
+    'stl-calendar':{ fn:renderStlCalendar, url:'admin.qrorder.softment.co.kr/settlements/calendar' },
     'stl-list':    { fn:renderStlList,     url:'admin.qrorder.softment.co.kr/settlements/list' },
     'stl-detail':  { fn:renderStlDetail,   url:'admin.qrorder.softment.co.kr/settlements/STL-2026051901' },
     'fee':         { fn:renderFee,         url:'admin.qrorder.softment.co.kr/fees' },
@@ -749,8 +860,8 @@ function renderSidebar(){
     { type:'a', key:'overview',   ic:'📊', label:'매출 한눈에 보기' },
     { type:'a', key:'detail',     ic:'🔎', label:'매출 상세 보기' },
     { type:'grp', label:'정산관리' },
-    { type:'a', key:'stl-dash',   ic:'💰', label:'정산 대시보드' },
-    { type:'a', key:'stl-list',   ic:'📆', label:'정산 예정/완료', n:2 },
+    { type:'a', key:'stl-calendar', ic:'🗓️', label:'정산 달력' },
+    { type:'a', key:'stl-list',     ic:'🔎', label:'정산내역 조회', n:2 },
     { type:'a', key:'fee',        ic:'📑', label:'수수료·세금' },
     { type:'a', key:'tax',        ic:'🧾', label:'세금계산서' },
     { type:'a', key:'bank',       ic:'🏦', label:'정산계좌' },
@@ -1881,128 +1992,262 @@ function renderOrders(main){
 
 /* 취소·환불 페이지는 주문 내역에 통합돼서 제거됨. 상태 필터로 "취소·환불 전체" 선택. */
 
-/* ====================== 정산 대시보드 ====================== */
-function renderStlDash(main){
+/* ====================== 정산 달력 ====================== */
+function selectStlDate(iso){ state.calendarSelectedDate = iso; renderApp(); }
+
+function renderStlCalendar(main){
+  // 데이터 인덱스 (정산일 기준)
+  const byDate = {};
+  SETTLEMENTS.forEach(s => { byDate[s.settleISO] = s; });
+
+  // 달력 셀 계산 (2026년 5월)
+  const year = 2026, month = 5;
+  const firstWeekday = new Date(year, month-1, 1).getDay(); // 0=일
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const selected = state.calendarSelectedDate;
+  const sel = byDate[selected];
+
   main.innerHTML = `
-    <div class="crumb">정산관리 › 정산 대시보드</div>
-    <h2>정산 대시보드</h2>
-    <div class="page-sub">2026년 5월 15일(금) · 정산 계좌 신한은행 ****1234 · 정산 주기 <b>D+3 영업일</b></div>
-    <div style="height:18px;"></div>
-
-    <div class="grid-3-2">
+    <div class="crumb">정산관리 › 정산 달력</div>
+    <div class="toolbar">
       <div>
-        <div class="pc-card blue clickable" style="padding:26px;" onclick="setSection('stl-detail')">
-          <div class="label">다음 정산 ›</div>
-          <div style="font-size:14px;color:var(--ink-2);margin:6px 0;">5월 19일 화요일 오전 (영업일 5/14 → D+3)</div>
-          <div style="font-size:34px;font-weight:800;color:#1b64da;letter-spacing:-.02em;margin-top:6px;">1,098,200원</div>
-          <div class="row-flex" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--blue-100);font-size:12px;color:var(--ink-2);">
-            <span>회차 STL-2026051901</span>
-            <span style="color:var(--blue);font-weight:600;">자세히 보기 ›</span>
-          </div>
-        </div>
-        <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);margin-top:14px;">
-          <div class="pc-card"><div class="label">이번 달 누적 정산</div><div class="num" style="font-size:22px;">11,350,000원</div><div class="sub">5회 정산</div></div>
-          <div class="pc-card"><div class="label">회차 평균 송금액</div><div class="num" style="font-size:22px;">2,270,000원</div><div class="sub">최근 5회 평균</div></div>
-          <div class="pc-card clickable" onclick="setSection('fee')"><div class="label">이번 달 수수료 ›</div><div class="num" style="font-size:22px;">248,500원</div><div class="sub">청구서 ⬇</div></div>
-        </div>
+        <h2>정산 달력</h2>
+        <div class="page-sub">정산일을 한눈에 · 정산 계좌 <b>신한은행 ****1234</b> · 정산 주기 D+3 영업일</div>
       </div>
-
-      <div class="panel tight">
-        <h3>정산 일정 <span class="h-sub">최근 7회차 · D+3 영업일</span></h3>
-        <table class="t" style="font-size:12px;">
-          <thead><tr><th>송금일</th><th>영업일</th><th class="num">송금액</th><th>상태</th></tr></thead>
-          <tbody>
-            <tr class="clickable" onclick="alert('회차 STL-2026052001 상세')"><td><b>5/20 (수)</b></td><td>5/15</td><td class="num"><b style="color:var(--blue);">+1,200,500</b></td><td><span class="pill pending">집계중</span></td></tr>
-            <tr class="clickable" onclick="setSection('stl-detail')"><td><b>5/19 (화)</b></td><td>5/14</td><td class="num"><b style="color:var(--blue);">+1,098,200</b></td><td><span class="pill pending">정산예정</span></td></tr>
-            <tr><td><b>5/18 (월)</b></td><td>5/13</td><td class="num"><b style="color:var(--blue);">+982,400</b></td><td><span class="pill pending">송금중</span></td></tr>
-            <tr><td><b>5/15 (금)</b></td><td>5/12</td><td class="num">+1,098,000</td><td><span class="pill done">완료</span></td></tr>
-            <tr><td><b>5/14 (목)</b></td><td>5/11</td><td class="num">+872,000</td><td><span class="pill done">완료</span></td></tr>
-            <tr><td><b>5/13 (수)</b></td><td>5/10</td><td class="num">+1,420,000</td><td><span class="pill done">완료</span></td></tr>
-            <tr><td><b>5/12 (화)</b></td><td>5/9</td><td class="num">+1,495,000</td><td><span class="pill done">완료</span></td></tr>
-          </tbody>
-        </table>
+      <div class="left">
+        <button class="btn-ghost" onclick="setSection('stl-list')">🔎 정산내역 조회</button>
       </div>
     </div>
 
-    <div class="grid-2-eq" style="margin-top:14px;">
-      <div class="panel">
-        <h3>이번 달 정산 추이</h3>
-        <canvas id="ch-stl" height="80"></canvas>
-      </div>
-      <div class="panel">
-        <h3>알림</h3>
-        <div style="font-size:13px;color:var(--ink-2);line-height:1.8;">
-          📅 <b>5/19(화) 정산 예정</b> — 1,098,200원<br/>
-          ✅ 5월 15일 정산 완료 (1,098,000원)<br/>
-          ✅ 5월 14일 정산 완료 (872,000원)<br/>
-          📨 4월분 세금계산서 자동 발행 완료 (5/1)<br/>
-          🏦 정산계좌 신한 ****1234 · 본인 인증 완료
+    <div class="panel" style="padding:16px 20px;margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;gap:14px;align-items:center;">
+          <span class="stl-cal-arr disabled" title="이전 달 데이터는 데모에서 제공되지 않아요">◀</span>
+          <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;">${year}년 ${month}월</div>
+          <span class="stl-cal-arr disabled" title="아직 오지 않은 달은 볼 수 없어요">▶</span>
+        </div>
+        <div style="display:flex;gap:16px;align-items:center;font-size:12px;color:var(--ink-2);">
+          <span><span class="cal-legend done"></span> 입금 완료</span>
+          <span><span class="cal-legend pending"></span> 정산 중</span>
         </div>
       </div>
     </div>
+
+    <div class="panel" style="padding:0;margin-bottom:14px;overflow:hidden;">
+      <div class="cal-week">
+        ${['일','월','화','수','목','금','토'].map((w,i)=>`<div class="cal-wkhead ${i===0?'sun':i===6?'sat':''}">${w}</div>`).join('')}
+      </div>
+      <div class="cal-grid">
+        ${cells.map(d => {
+          if (d === null) return `<div class="cal-cell off"></div>`;
+          const iso = `2026-05-${String(d).padStart(2,'0')}`;
+          const stl = byDate[iso];
+          const isToday = iso === '2026-05-15';
+          const isSelected = iso === selected;
+          let inner = `<div class="cal-day ${isToday?'today':''}">${d}</div>`;
+          if (stl) {
+            inner += `<div class="cal-amt ${stl.statusPill}">${fmt(stl.totalSettle)}원</div>`;
+            inner += `<div><span class="cal-tag ${stl.statusPill}">${stl.status==='정산완료'?'입금 완료':'정산 중'}</span></div>`;
+            inner += `<div class="cal-sub">영업일 ${stl.approvalDate}(${stl.approvalDow})</div>`;
+          }
+          return `<div class="cal-cell ${isSelected?'selected':''} ${stl?'has-data':''}" ${stl?`onclick="selectStlDate('${iso}')"`:''}>${inner}</div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    ${sel ? `
+    <div class="panel">
+      <h3>
+        ${sel.settleDate}(${sel.settleDow}) ${sel.status==='정산완료'?'정산 완료':'정산 예정'}
+        <span class="pill ${sel.statusPill}" style="font-size:11px;margin-left:6px;vertical-align:middle;">${sel.status}</span>
+        <span style="font-weight:500;color:var(--ink-3);font-size:13px;margin-left:8px;">${sel.id} · 영업일 ${sel.approvalDate}(${sel.approvalDow})</span>
+      </h3>
+
+      <div class="stl-groups">
+        <div class="stl-group">
+          <div class="stl-g-title">① 기본 · 매출 정보</div>
+          <table class="stl-g-table">
+            <tr><td>승인일 (영업일)</td><td><b>${sel.approvalDate}(${sel.approvalDow})</b></td></tr>
+            <tr><td>정산${sel.status==='정산완료'?'일':' 예정일'}</td><td><b>${sel.settleDate}(${sel.settleDow})</b></td></tr>
+            <tr><td>건수</td><td><b>${fmt(sel.cnt)}건</b></td></tr>
+            <tr><td>거래 금액</td><td><b>${fmt(sel.grossAmt)}원</b></td></tr>
+            <tr><td>쿠폰 할인 <span style="font-size:11px;color:var(--ink-3);">(테이블 발행)</span></td><td>−${fmt(sel.couponTableAmt)}원</td></tr>
+            <tr><td>쿠폰 할인 <span style="font-size:11px;color:var(--ink-3);">(가맹점 발행)</span></td><td>−${fmt(sel.couponBizAmt)}원</td></tr>
+          </table>
+        </div>
+
+        <div class="stl-group">
+          <div class="stl-g-title">② 차감 정보 (수수료)</div>
+          <table class="stl-g-table">
+            <tr><td>입금 수수료 과세금액</td><td>−${fmt(sel.feeBase)}원</td></tr>
+            <tr><td>부가세 <span style="font-size:11px;color:var(--ink-3);">(과세금액의 10%)</span></td><td>−${fmt(sel.feeVat)}원</td></tr>
+            <tr class="stl-sum"><td>입금 수수료 계</td><td><b>−${fmt(sel.feeTotal)}원</b></td></tr>
+          </table>
+        </div>
+
+        <div class="stl-group">
+          <div class="stl-g-title">③ 정산 · 입금 정보</div>
+          <table class="stl-g-table">
+            <tr><td>쿠폰 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(테이블 발행분 보전)</span></td><td>+${fmt(sel.couponSettle)}원</td></tr>
+            <tr><td>거래금 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(거래 − 수수료 − 환불)</span></td><td>+${fmt(sel.txSettle)}원</td></tr>
+            <tr class="stl-final"><td>총 정산 금액</td><td><b style="color:${sel.status==='정산완료'?'var(--blue)':'#a25e00'};">${fmt(sel.totalSettle)}원</b></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div style="text-align:right;margin-top:14px;">
+        <button class="btn-ghost" onclick="setSection('stl-detail')">📋 거래 명세 보기 ›</button>
+      </div>
+    </div>
+
+    <div class="stl-summary-bar">
+      <div class="stl-sb-item">
+        <div class="stl-sb-label">총 건수</div>
+        <div class="stl-sb-num">${fmt(sel.cnt)}건</div>
+      </div>
+      <div class="stl-sb-item">
+        <div class="stl-sb-label">총 거래 금액</div>
+        <div class="stl-sb-num">${fmt(sel.grossAmt)}원</div>
+      </div>
+      <div class="stl-sb-item">
+        <div class="stl-sb-label">총 입금 수수료</div>
+        <div class="stl-sb-num">−${fmt(sel.feeTotal)}원</div>
+      </div>
+      <div class="stl-sb-item">
+        <div class="stl-sb-label">총 정산 금액</div>
+        <div class="stl-sb-num primary">${fmt(sel.totalSettle)}원</div>
+      </div>
+    </div>
+    ` : `
+    <div class="info-card" style="text-align:center;padding:30px;">
+      💡 달력의 일자를 누르면 그날 정산 세부 내역이 펼쳐져요.
+    </div>
+    `}
   `;
-
-  state.charts.stl = new Chart(document.getElementById('ch-stl'), {
-    type:'line',
-    data:{
-      labels:['5/3','5/5','5/7','5/9','5/11','5/13','5/15','5/18(예정)','5/19(예정)','5/20(예정)'],
-      datasets:[{label:'정산', data:[850000,920000,1080000,1520000,1450000,894000,1098000,982400,1098200,1200500], borderColor:'#3182f6', backgroundColor:'rgba(49,130,246,.1)', fill:true, tension:.35, borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#3182f6'}]
-    },
-    options:{
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmt(c.parsed.y)}원`}}},
-      scales:{y:{grid:{color:'#f2f4f6'},ticks:{font:{size:10},color:'#8b95a1',callback:v=>fmt(v/10000)+'만'}},x:{grid:{display:false},ticks:{font:{size:10},color:'#8b95a1'}}}
-    }
-  });
 }
 
-/* ====================== 정산 예정/완료 목록 ====================== */
+/* ====================== 정산내역 조회 ====================== */
+function setStlListQuick(k){ state.stlListQuickRange = k; renderApp(); }
+function setStlListBasis(k){ state.stlListDateBasis = k; renderApp(); }
+function setStlListStatus(k){ state.stlListStatus = k; renderApp(); }
+function setStlListCoupon(k){ state.stlListCoupon = k; renderApp(); }
+
 function renderStlList(main){
-  const list = [
-    { id:'STL-2026052001', day:'5/20 (수)', biz:'5/15', amt:1200500, status:'집계중',   pillCls:'pending' },
-    { id:'STL-2026051901', day:'5/19 (화)', biz:'5/14', amt:1098200, status:'정산예정', pillCls:'pending' },
-    { id:'STL-2026051801', day:'5/18 (월)', biz:'5/13', amt:982400,  status:'송금중',   pillCls:'pending' },
-    { id:'STL-2026051501', day:'5/15 (금)', biz:'5/12', amt:1098000, status:'완료',     pillCls:'done' },
-    { id:'STL-2026051401', day:'5/14 (목)', biz:'5/11', amt:872000,  status:'완료',     pillCls:'done' },
-    { id:'STL-2026051301', day:'5/13 (수)', biz:'5/10', amt:1420000, status:'완료',     pillCls:'done' },
-    { id:'STL-2026051201', day:'5/12 (화)', biz:'5/9',  amt:1495000, status:'완료',     pillCls:'done' },
-    { id:'STL-2026051101', day:'5/11 (월)', biz:'5/8',  amt:1152000, status:'완료',     pillCls:'done' },
-  ];
+  // 검색 조건 적용
+  const today = new Date(2026, 4, 15);
+  const rangeDays = { '1w':7, '1m':31, '3m':93 }[state.stlListQuickRange] || 31;
+  const from = new Date(today); from.setDate(today.getDate() - rangeDays + 1);
+  const basisKey = state.stlListDateBasis === 'approval' ? 'approvalISO' : 'settleISO';
+
+  let rows = SETTLEMENTS.filter(s => {
+    const d = new Date(s[basisKey]);
+    return d >= from && d <= today;
+  });
+  if (state.stlListStatus !== 'all') rows = rows.filter(s => s.status === state.stlListStatus);
+  if (state.stlListCoupon === 'used') rows = rows.filter(s => s.usedCoupon);
+  if (state.stlListCoupon === 'none') rows = rows.filter(s => !s.usedCoupon);
+
+  // 정렬: 정산일 최신순
+  rows = rows.slice().sort((a,b) => b.settleISO.localeCompare(a.settleISO));
+
+  // 집계
+  const cntAll = SETTLEMENTS.length;
+  const cntDone = SETTLEMENTS.filter(s=>s.status==='정산완료').length;
+  const cntPending = SETTLEMENTS.filter(s=>s.status==='정산대기').length;
+  const totSettle = rows.reduce((a,r)=>a+r.totalSettle, 0);
+
+  const rangeLabel = state.stlListQuickRange==='1w' ? '최근 1주일'
+                   : state.stlListQuickRange==='3m' ? '최근 3개월'
+                   :                                  '최근 1개월';
+
   main.innerHTML = `
-    <div class="crumb">정산관리 › 정산 예정/완료</div>
+    <div class="crumb">정산관리 › 정산내역 조회</div>
     <div class="toolbar">
-      <div><h2>정산 예정/완료</h2><div class="page-sub">D+3 영업일 송금 · ${list.length}개 회차</div></div>
-      <div class="left"><button class="btn-primary" onclick='openExport(${list.length}, "정산 회차 목록", "최근 ${list.length}개 회차")'>📤 내보내기</button></div>
-    </div>
-    <div class="panel" style="padding:12px 18px;margin-bottom:14px;">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <span style="font-size:12px;color:var(--ink-3);font-weight:700;">상태</span>
-        <span class="chip on">전체 (${list.length})</span>
-        <span class="chip">정산예정 (3)</span>
-        <span class="chip">완료 (${list.filter(l=>l.status==='완료').length})</span>
-        <span class="chip">송금실패 (0)</span>
+      <div>
+        <h2>정산내역 조회</h2>
+        <div class="page-sub">${rangeLabel} · ${state.stlListDateBasis==='approval'?'승인일':'정산일'} 기준 · <b style="color:var(--ink);">${rows.length}건 조회</b> · 합계 ${fmt(totSettle)}원</div>
+      </div>
+      <div class="left">
+        <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력</button>
+        <button class="btn-primary" onclick='openExport(${rows.length}, "정산내역", "${rangeLabel} · ${state.stlListDateBasis==='approval'?'승인일':'정산일'} 기준")'>📤 엑셀 다운로드</button>
       </div>
     </div>
+
+    <!-- 검색 조건 패널 -->
+    <div class="panel" style="padding:14px 18px;margin-bottom:14px;">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+        <span class="field-label">기간 기준</span>
+        <div class="seg sm">
+          <div class="b ${state.stlListDateBasis==='settle'?'on':''}" onclick="setStlListBasis('settle')">정산일</div>
+          <div class="b ${state.stlListDateBasis==='approval'?'on':''}" onclick="setStlListBasis('approval')">승인일</div>
+        </div>
+        <span style="color:var(--line);margin:0 4px;">|</span>
+        <span class="chip ${state.stlListQuickRange==='1w'?'on':''}" onclick="setStlListQuick('1w')">1주일</span>
+        <span class="chip ${state.stlListQuickRange==='1m'?'on':''}" onclick="setStlListQuick('1m')">1개월</span>
+        <span class="chip ${state.stlListQuickRange==='3m'?'on':''}" onclick="setStlListQuick('3m')">3개월</span>
+        <span class="chip" onclick="openDateRangePicker('stl-list')">📅 기간 직접 선택</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+        <span class="field-label">정산 상태</span>
+        <span class="chip ${state.stlListStatus==='all'?'on':''}" onclick="setStlListStatus('all')">전체 (${cntAll})</span>
+        <span class="chip ${state.stlListStatus==='정산대기'?'on':''}" onclick="setStlListStatus('정산대기')">정산 대기 (${cntPending})</span>
+        <span class="chip ${state.stlListStatus==='정산완료'?'on':''}" onclick="setStlListStatus('정산완료')">정산 완료 (${cntDone})</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span class="field-label">쿠폰 사용</span>
+        <span class="chip ${state.stlListCoupon==='all'?'on':''}" onclick="setStlListCoupon('all')">전체</span>
+        <span class="chip ${state.stlListCoupon==='used'?'on':''}" onclick="setStlListCoupon('used')">쿠폰 사용</span>
+        <span class="chip ${state.stlListCoupon==='none'?'on':''}" onclick="setStlListCoupon('none')">미사용</span>
+      </div>
+    </div>
+
+    <!-- 결과 그리드 -->
     <div class="panel tight">
-      <h3>회차 목록</h3>
+      <h3>조회 결과 <span class="h-sub">${rows.length}건 · 행 클릭 시 회차 상세</span></h3>
+      <div style="overflow-x:auto;">
       <table class="t">
-        <thead><tr><th>회차 ID</th><th>송금일</th><th>영업일</th><th class="num">송금액</th><th>상태</th><th>액션</th></tr></thead>
+        <thead>
+          <tr>
+            <th>회차 ID</th>
+            <th>승인일 (영업일)</th>
+            <th>정산일</th>
+            <th class="num">건수</th>
+            <th class="num">거래 금액</th>
+            <th class="num">쿠폰 할인</th>
+            <th class="num">입금 수수료</th>
+            <th class="num">총 정산 금액</th>
+            <th>상태</th>
+            <th></th>
+          </tr>
+        </thead>
         <tbody>
-          ${list.map(r=>`
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">조건에 맞는 정산 내역이 없어요.</td></tr>` : rows.map(r => `
             <tr class="clickable" onclick="setSection('stl-detail')">
               <td><b>${r.id}</b></td>
-              <td>${r.day}</td>
-              <td>${r.biz}</td>
-              <td class="num"><b>${fmt(r.amt)}원</b></td>
-              <td><span class="pill ${r.pillCls}">${r.status}</span></td>
+              <td>${r.approvalDate}(${r.approvalDow})</td>
+              <td><b>${r.settleDate}(${r.settleDow})</b></td>
+              <td class="num">${fmt(r.cnt)}</td>
+              <td class="num">${fmt(r.grossAmt)}</td>
+              <td class="num">${r.usedCoupon?`<b style="color:#a25e00;">−${fmt(r.couponTableAmt + r.couponBizAmt)}</b>`:'−'}</td>
+              <td class="num">−${fmt(r.feeTotal)}</td>
+              <td class="num"><b style="color:${r.status==='정산완료'?'var(--blue)':'#a25e00'};">${fmt(r.totalSettle)}원</b></td>
+              <td><span class="pill ${r.statusPill}">${r.status}</span></td>
               <td style="color:var(--blue);font-weight:600;">상세 ›</td>
             </tr>
           `).join('')}
         </tbody>
       </table>
+      </div>
       <div class="table-footer">
         <div class="rows-control">
           <span>표시 개수</span>${rowsSelect('orderRowsPerPage')}
-          <span class="cnt">총 <b>${list.length}</b>건 조회</span>
+          <span class="cnt">총 <b>${rows.length}</b>건 조회</span>
+          <span style="font-size:11px;color:var(--ink-3);margin-left:8px;">💡 화면에만 적용돼요 · 엑셀은 조회된 ${fmt(rows.length)}건 전체</span>
         </div>
         ${paginationStatic(1, 1)}
       </div>
@@ -2013,7 +2258,7 @@ function renderStlList(main){
 /* ====================== 정산 회차 상세 ====================== */
 function renderStlDetail(main){
   main.innerHTML = `
-    <div class="crumb"><span style="cursor:pointer;color:var(--blue);" onclick="setSection('stl-list')">정산관리 › 정산 예정/완료</span> › <b style="color:var(--ink);">STL-2026051901</b></div>
+    <div class="crumb"><span style="cursor:pointer;color:var(--blue);" onclick="setSection('stl-list')">정산관리 › 정산내역 조회</span> › <b style="color:var(--ink);">STL-2026051901</b></div>
     <div class="toolbar">
       <div>
         <h2>STL-2026051901 <span class="pill pending" style="font-size:12px;vertical-align:middle;margin-left:6px;">정산예정</span></h2>

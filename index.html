@@ -2583,49 +2583,17 @@ function renderBank(main){
   main.innerHTML = `
     <div class="crumb">정산관리 › 정산계좌</div>
     <div class="toolbar">
-      <div><h2>정산계좌 관리</h2><div class="page-sub">정산 송금을 받는 계좌예요. 변경 시 휴대폰 인증이 필요해요.</div></div>
+      <div><h2>정산계좌 관리</h2><div class="page-sub">정산 송금을 받는 계좌예요.</div></div>
     </div>
-    <div class="grid-3-2">
-      <div>
-        <div class="acct-box">
-          <div class="l">현재 정산 계좌</div>
-          <div style="font-size:14px;color:var(--ink-2);margin-bottom:4px;">신한은행</div>
-          <div class="num">****-**-***1234 <span style="font-size:14px;color:var(--ink-3);font-weight:500;margin-left:6px;cursor:pointer;" onclick="alert('전체 번호 표시 (보안 인증 필요)')">👁 표시</span></div>
-          <div class="holder">예금주 홍길동 · 사업자 대표명과 일치</div>
-          <span class="vtag">✓ 본인 인증 완료 · 2026-02-14</span>
-        </div>
-        <div style="margin-top:14px;">
-          <button class="btn-primary" style="width:100%;" onclick="alert('계좌 변경 4단계 흐름 시작 (1원 인증 + OTP)')">계좌 변경하기</button>
-        </div>
-        <div class="panel tight" style="margin-top:18px;">
-          <h3>변경 이력</h3>
-          <table class="t">
-            <thead><tr><th>변경일</th><th>은행</th><th>계좌번호</th><th>예금주</th><th>처리자</th><th>상태</th></tr></thead>
-            <tbody>
-              <tr><td>2026-02-14</td><td>신한은행</td><td>****-**-***1234</td><td>홍길동</td><td>홍길동</td><td><span class="pill done">사용중</span></td></tr>
-              <tr><td>2025-08-22</td><td>KB국민은행</td><td>****-**-***5678</td><td>홍길동</td><td>홍길동</td><td><span class="pill hold">종료</span></td></tr>
-              <tr><td>2024-11-03</td><td>우리은행</td><td>****-**-***9012</td><td>홍길동</td><td>홍길동</td><td><span class="pill hold">종료</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div>
-        <div class="panel">
-          <h3>계좌 변경 흐름</h3>
-          <div style="font-size:13px;line-height:1.9;color:var(--ink-2);">
-            ① 새 계좌 입력 (은행·번호·예금주)<br/>
-            ② <b>1원 인증</b> — 입금자명 4자리 확인<br/>
-            ③ 예금주 ↔ 사업자 대표명 일치 검증<br/>
-            ④ <b>휴대폰 OTP 2FA</b> 본인 확인<br/>
-            ⑤ 변경 완료 · 다음 정산부터 적용<br/>
-            ⑥ 감사 로그 영구 보관
-          </div>
-        </div>
-        <div class="info-card" style="margin-top:14px;">💡 <b>계좌를 바꾸면 다음 정산부터 새 계좌로 입금돼요.</b> 진행 중인 회차(STL-2026051901)는 기존 계좌로 송금돼요.</div>
-        <div style="margin-top:14px;padding:14px 16px;background:#fff5dd;border:1px solid #ffe0a3;border-radius:10px;font-size:12px;color:#7a4d00;line-height:1.5;">
-          🔒 <b>보안 안내</b> — 계좌 변경은 휴대폰 본인 인증 후에만 가능해요. 의심스러운 변경 시도가 있으면 SMS로 알려드려요.
-        </div>
-      </div>
+    <div class="acct-box" style="max-width:540px;">
+      <div class="l">현재 정산 계좌</div>
+      <div style="font-size:14px;color:var(--ink-2);margin-bottom:4px;">신한은행</div>
+      <div class="num">****-**-***1234 <span style="font-size:14px;color:var(--ink-3);font-weight:500;margin-left:6px;cursor:pointer;" onclick="alert('전체 번호 표시 (보안 인증 필요)')">👁 표시</span></div>
+      <div class="holder">예금주 홍길동 · 사업자 대표명과 일치</div>
+      <span class="vtag">✓ 본인 인증 완료 · 2026-02-14</span>
+    </div>
+    <div style="margin-top:14px;max-width:540px;">
+      <button class="btn-primary" style="width:100%;" onclick="alert('계좌 변경 진행')">계좌 변경하기</button>
     </div>
   `;
 }

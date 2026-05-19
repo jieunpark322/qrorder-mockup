@@ -250,6 +250,30 @@
   .stl-g-table td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;}
   .stl-g-table tr.stl-sum td{border-top:1px dashed var(--ink-4);padding-top:11px;color:var(--ink);font-weight:700;font-size:14.5px;}
   .stl-g-table tr.stl-final td{border-top:2px solid var(--ink);padding-top:11px;color:var(--ink);font-weight:800;font-size:15.5px;}
+
+  /* 정산 흐름 카드 — 거래 → 차감 → 정산 한눈에 */
+  .stl-flow{display:grid;grid-template-columns:1fr 28px 1fr 28px 1fr;gap:0;align-items:stretch;margin-top:20px;}
+  .stl-flow-arr{display:flex;align-items:center;justify-content:center;color:var(--ink-4);font-size:32px;font-weight:300;line-height:1;}
+  .stl-card{padding:22px 24px;background:#fff;border:1.5px solid var(--line);border-radius:14px;border-top-width:5px;display:flex;flex-direction:column;transition:box-shadow .12s,transform .12s;}
+  .stl-card:hover{box-shadow:0 6px 18px rgba(0,0,0,.06);transform:translateY(-1px);}
+  .stl-card.g1{border-top-color:var(--blue);}
+  .stl-card.g2{border-top-color:#f59e0b;}
+  .stl-card.g3{border-top-color:var(--green);}
+  .stl-card-label{font-size:13px;font-weight:800;letter-spacing:-.01em;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .stl-card.g1 .stl-card-label{color:var(--blue);}
+  .stl-card.g2 .stl-card-label{color:#c97a00;}
+  .stl-card.g3 .stl-card-label{color:var(--green);}
+  .stl-card-no{display:inline-flex;width:24px;height:24px;border-radius:50%;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;}
+  .stl-card.g1 .stl-card-no{background:var(--blue);}
+  .stl-card.g2 .stl-card-no{background:#f59e0b;}
+  .stl-card.g3 .stl-card-no{background:var(--green);}
+  .stl-card-amt{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums;color:var(--ink);}
+  .stl-card-amt.neg{color:#c97a00;}
+  .stl-card-amt.primary{color:var(--blue);}
+  .stl-card-sub{font-size:12px;color:var(--ink-3);margin-top:6px;}
+  .stl-card-detail{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);font-size:13px;}
+  .stl-d-row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;color:var(--ink-2);line-height:1.5;}
+  .stl-d-row b{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
   .stl-summary-bar{position:sticky;bottom:0;background:#fff;border:1px solid var(--blue-100);border-radius:12px;padding:16px 22px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px;box-shadow:0 -6px 18px rgba(0,0,0,.06);z-index:5;margin-top:14px;}
   .stl-sb-item{display:flex;flex-direction:column;gap:4px;}
   .stl-sb-label{font-size:12px;color:var(--ink-3);font-weight:600;}
@@ -2252,37 +2276,42 @@ function renderStlDetail(main){
       </div>
     </div>
 
-    <!-- 3 그룹 카드 (가맹점 친화 요약) -->
+    <!-- 흐름 카드 (거래 → 차감 → 정산) -->
     <div class="panel stl-detail-panel">
-      <div class="stl-groups">
-        <div class="stl-group g1">
-          <div class="stl-g-title"><span class="stl-g-no">1</span>기본 · 매출 정보</div>
-          <table class="stl-g-table">
-            <tr><td>승인일 (영업일)</td><td><b>${stl.approvalDate}(${stl.approvalDow})</b></td></tr>
-            <tr><td>정산${stl.status==='정산완료'?'일':' 예정일'}</td><td><b>${stl.settleDate}(${stl.settleDow})</b></td></tr>
-            <tr><td>건수</td><td><b>${fmt(stl.cnt)}건</b></td></tr>
-            <tr><td>거래 금액</td><td><b>${fmt(stl.grossAmt)}원</b></td></tr>
-            <tr><td>쿠폰 할인 <span style="font-size:11px;color:var(--ink-3);">(테이블 발행)</span></td><td>−${fmt(stl.couponTableAmt)}원</td></tr>
-            <tr><td>쿠폰 할인 <span style="font-size:11px;color:var(--ink-3);">(가맹점 발행)</span></td><td>−${fmt(stl.couponBizAmt)}원</td></tr>
-          </table>
+      <div class="stl-flow">
+        <div class="stl-card g1">
+          <div class="stl-card-label"><span class="stl-card-no">1</span>거래 매출</div>
+          <div class="stl-card-amt">${fmt(stl.grossAmt)}원</div>
+          <div class="stl-card-sub">${fmt(stl.cnt)}건 · 영업일 ${stl.approvalDate}(${stl.approvalDow})</div>
+          <div class="stl-card-detail">
+            <div class="stl-d-row"><span>거래 금액</span><b>${fmt(stl.grossAmt)}원</b></div>
+            <div class="stl-d-row"><span>쿠폰 할인 (테이블)</span><b style="color:#c97a00;">−${fmt(stl.couponTableAmt)}원</b></div>
+            <div class="stl-d-row"><span>쿠폰 할인 (가맹점)</span><b style="color:#c97a00;">−${fmt(stl.couponBizAmt)}원</b></div>
+          </div>
         </div>
 
-        <div class="stl-group g2">
-          <div class="stl-g-title"><span class="stl-g-no">2</span>차감 정보 (수수료)</div>
-          <table class="stl-g-table">
-            <tr><td>입금 수수료 과세금액</td><td>−${fmt(stl.feeBase)}원</td></tr>
-            <tr><td>부가세 <span style="font-size:11px;color:var(--ink-3);">(과세금액의 10%)</span></td><td>−${fmt(stl.feeVat)}원</td></tr>
-            <tr class="stl-sum"><td>입금 수수료 계</td><td><b>−${fmt(stl.feeTotal)}원</b></td></tr>
-          </table>
+        <div class="stl-flow-arr">→</div>
+
+        <div class="stl-card g2">
+          <div class="stl-card-label"><span class="stl-card-no">2</span>차감 (수수료)</div>
+          <div class="stl-card-amt neg">−${fmt(stl.feeTotal)}원</div>
+          <div class="stl-card-sub">입금 수수료 + 부가세</div>
+          <div class="stl-card-detail">
+            <div class="stl-d-row"><span>입금 수수료 과세금액</span><b>−${fmt(stl.feeBase)}원</b></div>
+            <div class="stl-d-row"><span>부가세 <span style="font-size:11px;color:var(--ink-3);">(10%)</span></span><b>−${fmt(stl.feeVat)}원</b></div>
+          </div>
         </div>
 
-        <div class="stl-group g3">
-          <div class="stl-g-title"><span class="stl-g-no">3</span>정산 · 입금 정보</div>
-          <table class="stl-g-table">
-            <tr><td>쿠폰 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(테이블 발행분 보전)</span></td><td>+${fmt(stl.couponSettle)}원</td></tr>
-            <tr><td>거래금 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(거래 − 수수료 − 환불)</span></td><td>+${fmt(stl.txSettle)}원</td></tr>
-            <tr class="stl-final"><td>총 정산 금액</td><td><b style="color:${settleColor};">${fmt(stl.totalSettle)}원</b></td></tr>
-          </table>
+        <div class="stl-flow-arr">→</div>
+
+        <div class="stl-card g3">
+          <div class="stl-card-label"><span class="stl-card-no">3</span>${stl.status==='정산완료'?'정산 완료':'정산 예정'}</div>
+          <div class="stl-card-amt primary">${fmt(stl.totalSettle)}원</div>
+          <div class="stl-card-sub">${stl.settleDate}(${stl.settleDow}) ${stl.status==='정산완료'?'입금 완료':'입금 예정'}</div>
+          <div class="stl-card-detail">
+            <div class="stl-d-row"><span>거래금 정산</span><b style="color:var(--blue);">+${fmt(stl.txSettle)}원</b></div>
+            <div class="stl-d-row"><span>쿠폰 정산 (보전)</span><b style="color:var(--blue);">+${fmt(stl.couponSettle)}원</b></div>
+          </div>
         </div>
       </div>
     </div>

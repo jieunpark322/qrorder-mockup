@@ -728,7 +728,8 @@ const state = {
   exportDateRange: '',              // 조회 기간 안내 문구
   exportEmail: '',                  // 메일로 받기 시 발송 주소 (default STORE_EMAIL)
   exportEmailEditing: false,        // 이메일 변경 인풋 활성화 여부
-  calendarSelectedDate: '2026-05-15', // 정산 달력에서 선택된 정산일 (ISO)
+  calendarSelectedDate: '2026-05-15', // 정산 달력에서 hover 미리보기용 (실제 클릭은 stl-detail로 이동)
+  stlDetailId: '',                    // 현재 보고 있는 정산 회차 ID (stl-detail 페이지)
   stlListDateBasis: 'settle',       // 정산내역 조회 — 기간 기준 (settle:정산일 / approval:승인일)
   stlListQuickRange: '1m',          // 1w | 1m | 3m
   stlListStatus: 'all',             // all | 정산대기 | 정산완료
@@ -2011,7 +2012,17 @@ function renderOrders(main){
 /* 취소·환불 페이지는 주문 내역에 통합돼서 제거됨. 상태 필터로 "취소·환불 전체" 선택. */
 
 /* ====================== 정산 달력 ====================== */
-function selectStlDate(iso){ state.calendarSelectedDate = iso; renderApp(); }
+// 회차 상세 페이지로 이동 (회차 ID 컨텍스트 함께 전달)
+function openStlDetail(stlId){
+  state.stlDetailId = stlId;
+  state.section = 'stl-detail';
+  renderApp();
+}
+// 달력 일자 클릭 → 해당 일자의 회차 상세 페이지로 이동
+function selectStlDate(iso){
+  const stl = SETTLEMENTS.find(s => s.settleISO === iso);
+  if (stl) openStlDetail(stl.id);
+}
 
 function renderStlCalendar(main){
   // 데이터 인덱스 (정산일 기준)
@@ -2078,74 +2089,9 @@ function renderStlCalendar(main){
       </div>
     </div>
 
-    ${sel ? `
-    <div class="panel stl-detail-panel">
-      <div class="stl-detail-head">
-        <div class="stl-detail-date">${sel.settleDate}(${sel.settleDow})</div>
-        <div class="stl-detail-status ${sel.statusPill}">${sel.status==='정산완료'?'정산 완료':'정산 예정'}</div>
-      </div>
-      <div class="stl-detail-meta">${sel.id} · 영업일 ${sel.approvalDate}(${sel.approvalDow})</div>
-
-      <div class="stl-groups">
-        <div class="stl-group g1">
-          <div class="stl-g-title"><span class="stl-g-no">1</span>기본 · 매출 정보</div>
-          <table class="stl-g-table">
-            <tr><td>승인일 (영업일)</td><td><b>${sel.approvalDate}(${sel.approvalDow})</b></td></tr>
-            <tr><td>정산${sel.status==='정산완료'?'일':' 예정일'}</td><td><b>${sel.settleDate}(${sel.settleDow})</b></td></tr>
-            <tr><td>건수</td><td><b>${fmt(sel.cnt)}건</b></td></tr>
-            <tr><td>거래 금액</td><td><b>${fmt(sel.grossAmt)}원</b></td></tr>
-            <tr><td>쿠폰 할인 <span style="font-size:11px;color:var(--ink-3);">(테이블 발행)</span></td><td>−${fmt(sel.couponTableAmt)}원</td></tr>
-            <tr><td>쿠폰 할인 <span style="font-size:11px;color:var(--ink-3);">(가맹점 발행)</span></td><td>−${fmt(sel.couponBizAmt)}원</td></tr>
-          </table>
-        </div>
-
-        <div class="stl-group g2">
-          <div class="stl-g-title"><span class="stl-g-no">2</span>차감 정보 (수수료)</div>
-          <table class="stl-g-table">
-            <tr><td>입금 수수료 과세금액</td><td>−${fmt(sel.feeBase)}원</td></tr>
-            <tr><td>부가세 <span style="font-size:11px;color:var(--ink-3);">(과세금액의 10%)</span></td><td>−${fmt(sel.feeVat)}원</td></tr>
-            <tr class="stl-sum"><td>입금 수수료 계</td><td><b>−${fmt(sel.feeTotal)}원</b></td></tr>
-          </table>
-        </div>
-
-        <div class="stl-group g3">
-          <div class="stl-g-title"><span class="stl-g-no">3</span>정산 · 입금 정보</div>
-          <table class="stl-g-table">
-            <tr><td>쿠폰 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(테이블 발행분 보전)</span></td><td>+${fmt(sel.couponSettle)}원</td></tr>
-            <tr><td>거래금 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(거래 − 수수료 − 환불)</span></td><td>+${fmt(sel.txSettle)}원</td></tr>
-            <tr class="stl-final"><td>총 정산 금액</td><td><b style="color:${sel.status==='정산완료'?'var(--blue)':'#c97a00'};">${fmt(sel.totalSettle)}원</b></td></tr>
-          </table>
-        </div>
-      </div>
-
-      <div style="text-align:right;margin-top:18px;">
-        <button class="btn-ghost" onclick="setSection('stl-detail')">📋 거래 명세 보기 ›</button>
-      </div>
+    <div class="info-card" style="text-align:center;padding:22px;">
+      💡 달력의 <b style="color:var(--ink);">정산 금액이 표시된 일자</b>를 누르면 그날의 상세 정산 내역 페이지로 이동해요.
     </div>
-
-    <div class="stl-summary-bar">
-      <div class="stl-sb-item">
-        <div class="stl-sb-label">총 건수</div>
-        <div class="stl-sb-num">${fmt(sel.cnt)}건</div>
-      </div>
-      <div class="stl-sb-item">
-        <div class="stl-sb-label">총 거래 금액</div>
-        <div class="stl-sb-num">${fmt(sel.grossAmt)}원</div>
-      </div>
-      <div class="stl-sb-item">
-        <div class="stl-sb-label">총 입금 수수료</div>
-        <div class="stl-sb-num">−${fmt(sel.feeTotal)}원</div>
-      </div>
-      <div class="stl-sb-item">
-        <div class="stl-sb-label">총 정산 금액</div>
-        <div class="stl-sb-num primary">${fmt(sel.totalSettle)}원</div>
-      </div>
-    </div>
-    ` : `
-    <div class="info-card" style="text-align:center;padding:30px;">
-      💡 달력의 일자를 누르면 그날 정산 세부 내역이 펼쳐져요.
-    </div>
-    `}
   `;
 }
 
@@ -2245,7 +2191,7 @@ function renderStlList(main){
         </thead>
         <tbody>
           ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">조건에 맞는 정산 내역이 없어요.</td></tr>` : rows.map(r => `
-            <tr class="clickable" onclick="setSection('stl-detail')">
+            <tr class="clickable" onclick="openStlDetail('${r.id}')">
               <td><b>${r.id}</b></td>
               <td>${r.approvalDate}(${r.approvalDow})</td>
               <td><b>${r.settleDate}(${r.settleDow})</b></td>
@@ -2275,79 +2221,117 @@ function renderStlList(main){
 
 /* ====================== 정산 회차 상세 ====================== */
 function renderStlDetail(main){
+  // 회차 컨텍스트 — state.stlDetailId 우선, 없으면 가장 최근 정산 대기 또는 마지막 회차
+  const stl = SETTLEMENTS.find(s => s.id === state.stlDetailId)
+           || SETTLEMENTS.slice().reverse().find(s => s.status === '정산대기')
+           || SETTLEMENTS[SETTLEMENTS.length - 1];
+
+  const pageCnt = Math.max(1, Math.ceil(stl.cnt / 50));
+  const statusLabel = stl.status === '정산완료' ? '정산 완료' : '정산 예정';
+  const settleColor = stl.status === '정산완료' ? 'var(--blue)' : '#c97a00';
+
   main.innerHTML = `
-    <div class="crumb"><span style="cursor:pointer;color:var(--blue);" onclick="setSection('stl-list')">정산관리 › 정산내역 조회</span> › <b style="color:var(--ink);">STL-2026051901</b></div>
+    <div class="crumb">
+      <span style="cursor:pointer;color:var(--blue);" onclick="setSection('stl-calendar')">정산관리 › 정산 달력</span>
+      <span style="color:var(--ink-4);margin:0 6px;">·</span>
+      <span style="cursor:pointer;color:var(--blue);" onclick="setSection('stl-list')">정산내역 조회</span>
+      › <b style="color:var(--ink);">${stl.id}</b>
+    </div>
+
     <div class="toolbar">
       <div>
-        <h2>STL-2026051901 <span class="pill pending" style="font-size:12px;vertical-align:middle;margin-left:6px;">정산예정</span></h2>
-        <div class="page-sub">대상 거래 <b style="color:var(--ink);">영업일 5/14 (5/14 03:00 ~ 5/15 02:59)</b> · 송금 예정 <b style="color:var(--ink);">5/19(화) — D+3</b> · 신한 ****1234</div>
+        <div class="stl-detail-head" style="margin-bottom:8px;">
+          <div class="stl-detail-date">${stl.settleDate}(${stl.settleDow})</div>
+          <div class="stl-detail-status ${stl.statusPill}">${statusLabel}</div>
+        </div>
+        <div class="stl-detail-meta">${stl.id} · 영업일 ${stl.approvalDate}(${stl.approvalDow}) (03:00 ~ 익일 02:59) · 신한 ****1234</div>
       </div>
       <div class="left">
-        <button class="btn-primary" onclick='openExport(312, "정산 회차 거래 명세", "영업일 5/14 (목) · 송금 예정 5/19 (화)")'>📤 내보내기</button>
+        <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력으로</button>
+        <button class="btn-primary" onclick='openExport(${stl.cnt}, "정산 회차 거래 명세", "영업일 ${stl.approvalDate}(${stl.approvalDow}) · 정산일 ${stl.settleDate}(${stl.settleDow})")'>📤 엑셀 다운로드</button>
       </div>
     </div>
 
-    <div class="grid-3-2">
-      <div class="panel">
-        <h3>차감 명세 <span class="h-act"><span class="unit-tag">단위 · 원</span></span></h3>
-        <table class="deduct">
-          <tr><td>총 매출 <span class="ttx">(결제 승인 합 · 312건)</span></td><td class="pos">+2,540,000</td></tr>
-          <tr><td>취소·환불 <span class="ttx">(정산 전 취소 분)</span></td><td class="neg">−180,000</td></tr>
-          <tr class="sum"><td>거래 순액 (A)</td><td>2,360,000</td></tr>
-          <tr><td>카드 수수료(국내) <span class="ttx">요율 2.0%</span></td><td class="neg">−47,200</td></tr>
-          <tr><td>카드 수수료(해외) <span class="ttx">요율 3.5%</span></td><td class="neg">−9,800</td></tr>
-          <tr><td>간편결제 수수료</td><td class="neg">−12,300</td></tr>
-          <tr><td>부가세 <span class="ttx">수수료의 10%</span></td><td class="neg">−6,930</td></tr>
-          <tr class="sum"><td>수수료·세금 합 (B)</td><td>−76,230</td></tr>
-          <tr><td>이전 회차 환불 차감 <span class="ttx">5/11분 환불 1건</span></td><td class="neg">−15,000</td></tr>
-          <tr class="final"><td>송금액</td><td style="color:var(--blue);">2,268,770원</td></tr>
-        </table>
-      </div>
-      <div>
-        <div class="pc-card blue" style="margin-bottom:14px;">
-          <div class="label">💸 송금 예정</div>
-          <div style="font-size:13px;color:var(--ink-2);">5월 19일 화요일 오전 (D+3)</div>
-          <div style="font-size:28px;font-weight:800;color:#1b64da;margin-top:8px;letter-spacing:-.02em;">2,268,770원</div>
-          <div style="font-size:12px;color:var(--ink-2);margin-top:10px;padding-top:10px;border-top:1px solid var(--blue-100);">
-            <b>신한은행 ****1234</b><br/>예금주: 홍길동
-          </div>
+    <!-- 3 그룹 카드 (가맹점 친화 요약) -->
+    <div class="panel stl-detail-panel">
+      <div class="stl-groups">
+        <div class="stl-group g1">
+          <div class="stl-g-title"><span class="stl-g-no">1</span>기본 · 매출 정보</div>
+          <table class="stl-g-table">
+            <tr><td>승인일 (영업일)</td><td><b>${stl.approvalDate}(${stl.approvalDow})</b></td></tr>
+            <tr><td>정산${stl.status==='정산완료'?'일':' 예정일'}</td><td><b>${stl.settleDate}(${stl.settleDow})</b></td></tr>
+            <tr><td>건수</td><td><b>${fmt(stl.cnt)}건</b></td></tr>
+            <tr><td>거래 금액</td><td><b>${fmt(stl.grossAmt)}원</b></td></tr>
+            <tr><td>쿠폰 할인 <span style="font-size:11px;color:var(--ink-3);">(테이블 발행)</span></td><td>−${fmt(stl.couponTableAmt)}원</td></tr>
+            <tr><td>쿠폰 할인 <span style="font-size:11px;color:var(--ink-3);">(가맹점 발행)</span></td><td>−${fmt(stl.couponBizAmt)}원</td></tr>
+          </table>
         </div>
-        <div class="panel">
-          <h3>회차 요약</h3>
-          <div style="font-size:13px;line-height:1.9;color:var(--ink-2);">
-            <div class="row-flex"><span>대상 거래</span><b style="color:var(--ink);">312건</b></div>
-            <div class="row-flex"><span>국내 카드</span><b style="color:var(--ink);">251건</b></div>
-            <div class="row-flex"><span>해외 카드</span><b style="color:var(--ink);">4건</b></div>
-            <div class="row-flex"><span>간편결제</span><b style="color:var(--ink);">52건</b></div>
-            <div class="row-flex"><span>현금성</span><b style="color:var(--ink);">5건</b></div>
-            <div class="row-flex"><span>취소 (정산 전)</span><b style="color:var(--red);">8건</b></div>
-          </div>
+
+        <div class="stl-group g2">
+          <div class="stl-g-title"><span class="stl-g-no">2</span>차감 정보 (수수료)</div>
+          <table class="stl-g-table">
+            <tr><td>입금 수수료 과세금액</td><td>−${fmt(stl.feeBase)}원</td></tr>
+            <tr><td>부가세 <span style="font-size:11px;color:var(--ink-3);">(과세금액의 10%)</span></td><td>−${fmt(stl.feeVat)}원</td></tr>
+            <tr class="stl-sum"><td>입금 수수료 계</td><td><b>−${fmt(stl.feeTotal)}원</b></td></tr>
+          </table>
         </div>
-        <div class="info-card">💡 5/14 영업일은 <b>5/14 03:00 ~ 5/15 02:59</b> 거래를 포함해요. (마감 03:00, 에이전트 설정)</div>
+
+        <div class="stl-group g3">
+          <div class="stl-g-title"><span class="stl-g-no">3</span>정산 · 입금 정보</div>
+          <table class="stl-g-table">
+            <tr><td>쿠폰 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(테이블 발행분 보전)</span></td><td>+${fmt(stl.couponSettle)}원</td></tr>
+            <tr><td>거래금 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(거래 − 수수료 − 환불)</span></td><td>+${fmt(stl.txSettle)}원</td></tr>
+            <tr class="stl-final"><td>총 정산 금액</td><td><b style="color:${settleColor};">${fmt(stl.totalSettle)}원</b></td></tr>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="panel tight">
-      <h3>거래 명세 <span class="h-sub">312건 · 1 / 7 페이지</span></h3>
+    <!-- 거래 명세 표 (데모 — 8건 샘플) -->
+    <div class="panel tight" style="margin-top:14px;">
+      <h3>거래 명세 <span class="h-sub">${fmt(stl.cnt)}건 · 1 / ${pageCnt} 페이지</span></h3>
+      <div style="overflow-x:auto;">
       <table class="t">
         <thead><tr><th>시각</th><th>결제번호</th><th>수단</th><th class="num">금액</th><th class="num">수수료</th><th class="num">VAT</th><th class="num">정산 반영</th><th>상태</th></tr></thead>
         <tbody>
-          <tr class="clickable"><td>5/14 09:18</td><td>tid_3f8a...01</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">26,400</td><td class="num">−528</td><td class="num">−53</td><td class="num">25,819</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>5/14 09:42</td><td>tid_3f8a...02</td><td>🟡 카카오페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">12,000</td><td class="num">−276</td><td class="num">−28</td><td class="num">11,696</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>5/14 10:12</td><td>tid_3f8a...03</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· KB</span></td><td class="num">8,000</td><td class="num">0</td><td class="num">0</td><td class="num">−</td><td><span class="pill cancel">취소(전)</span></td></tr>
-          <tr class="clickable"><td>5/14 10:24</td><td>tid_3f8a...04</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 해외 (VISA)</span></td><td class="num">27,420<br/><span style="font-size:11px;color:var(--ink-3);">($19.90)</span></td><td class="num">−959</td><td class="num">−96</td><td class="num">26,365</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>5/14 11:08</td><td>tid_3f8a...05</td><td>🟢 네이버페이 <span style="color:var(--ink-3);font-size:11px;">· 머니</span></td><td class="num">5,500</td><td class="num">−132</td><td class="num">−13</td><td class="num">5,355</td><td><span class="pill partial">부분취소</span></td></tr>
-          <tr class="clickable"><td>5/14 11:42</td><td>tid_3f8a...06</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 삼성</span></td><td class="num">14,500</td><td class="num">−290</td><td class="num">−29</td><td class="num">14,181</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>5/14 23:14</td><td>tid_3f8a...07</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">18,200</td><td class="num">−364</td><td class="num">−36</td><td class="num">17,800</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable" style="background:#fff5f0;"><td>5/15 01:42<br/><span style="font-size:11px;color:var(--amber);">새벽 거래</span></td><td>tid_3f8a...08</td><td>🔵 토스페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">9,500</td><td class="num">−219</td><td class="num">−22</td><td class="num">9,259</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${stl.approvalDate} 09:18</td><td>tid_3f8a...01</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">26,400</td><td class="num">−528</td><td class="num">−53</td><td class="num">25,819</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${stl.approvalDate} 09:42</td><td>tid_3f8a...02</td><td>🟡 카카오페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">12,000</td><td class="num">−276</td><td class="num">−28</td><td class="num">11,696</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${stl.approvalDate} 10:12</td><td>tid_3f8a...03</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· KB</span></td><td class="num">8,000</td><td class="num">0</td><td class="num">0</td><td class="num">−</td><td><span class="pill cancel">취소(전)</span></td></tr>
+          <tr class="clickable"><td>${stl.approvalDate} 10:24</td><td>tid_3f8a...04</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 해외 (VISA)</span></td><td class="num">27,420<br/><span style="font-size:11px;color:var(--ink-3);">($19.90)</span></td><td class="num">−959</td><td class="num">−96</td><td class="num">26,365</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${stl.approvalDate} 11:08</td><td>tid_3f8a...05</td><td>🟢 네이버페이 <span style="color:var(--ink-3);font-size:11px;">· 머니</span></td><td class="num">5,500</td><td class="num">−132</td><td class="num">−13</td><td class="num">5,355</td><td><span class="pill partial">부분취소</span></td></tr>
+          <tr class="clickable"><td>${stl.approvalDate} 11:42</td><td>tid_3f8a...06</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 삼성</span></td><td class="num">14,500</td><td class="num">−290</td><td class="num">−29</td><td class="num">14,181</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${stl.approvalDate} 23:14</td><td>tid_3f8a...07</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">18,200</td><td class="num">−364</td><td class="num">−36</td><td class="num">17,800</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable" style="background:#fff5f0;"><td>새벽 01:42<br/><span style="font-size:11px;color:var(--amber);">영업일 마감 전</span></td><td>tid_3f8a...08</td><td>🔵 토스페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">9,500</td><td class="num">−219</td><td class="num">−22</td><td class="num">9,259</td><td><span class="pill done">반영</span></td></tr>
         </tbody>
       </table>
+      </div>
       <div class="table-footer">
         <div class="rows-control">
           <span>표시 개수</span>${rowsSelect('orderRowsPerPage')}
-          <span class="cnt">총 <b>312</b>건 조회</span>
+          <span class="cnt">총 <b>${fmt(stl.cnt)}</b>건 조회</span>
+          <span style="font-size:11px;color:var(--ink-3);margin-left:8px;">💡 엑셀 다운로드는 ${fmt(stl.cnt)}건 전체</span>
         </div>
-        ${paginationStatic(1, 7)}
+        ${paginationStatic(1, pageCnt)}
+      </div>
+    </div>
+
+    <!-- Sticky 하단 합계 바 -->
+    <div class="stl-summary-bar">
+      <div class="stl-sb-item">
+        <div class="stl-sb-label">총 건수</div>
+        <div class="stl-sb-num">${fmt(stl.cnt)}건</div>
+      </div>
+      <div class="stl-sb-item">
+        <div class="stl-sb-label">총 거래 금액</div>
+        <div class="stl-sb-num">${fmt(stl.grossAmt)}원</div>
+      </div>
+      <div class="stl-sb-item">
+        <div class="stl-sb-label">총 입금 수수료</div>
+        <div class="stl-sb-num">−${fmt(stl.feeTotal)}원</div>
+      </div>
+      <div class="stl-sb-item">
+        <div class="stl-sb-label">총 정산 금액</div>
+        <div class="stl-sb-num primary">${fmt(stl.totalSettle)}원</div>
       </div>
     </div>
   `;

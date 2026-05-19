@@ -223,15 +223,33 @@
   .cal-legend.done{background:var(--blue);}
   .cal-legend.pending{background:var(--amber);}
 
-  /* 정산 상세 — 3 그룹 + sticky 합계 바 */
-  .stl-groups{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px;}
-  .stl-group{padding:16px 18px;background:var(--bg-2);border-radius:10px;}
-  .stl-g-title{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:10px;letter-spacing:-.01em;}
-  .stl-g-table{width:100%;font-size:13px;border-collapse:collapse;}
-  .stl-g-table td{padding:7px 0;color:var(--ink-2);vertical-align:top;}
-  .stl-g-table td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);}
-  .stl-g-table tr.stl-sum td{border-top:1px dashed var(--ink-4);padding-top:9px;color:var(--ink);font-weight:700;}
-  .stl-g-table tr.stl-final td{border-top:1px solid var(--ink);padding-top:9px;color:var(--ink);font-weight:800;font-size:14px;}
+  /* 정산 상세 — 큰 제목 + 3 그룹 카드 + sticky 합계 바 */
+  .stl-detail-panel{padding:26px 28px;}
+  .stl-detail-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px;}
+  .stl-detail-date{font-size:28px;font-weight:800;letter-spacing:-.02em;color:var(--ink);line-height:1.2;}
+  .stl-detail-status{font-size:18px;font-weight:800;letter-spacing:-.01em;}
+  .stl-detail-status.done{color:var(--blue);}
+  .stl-detail-status.pending{color:#c97a00;}
+  .stl-detail-meta{font-size:13px;color:var(--ink-3);margin-bottom:22px;}
+  .stl-groups{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px;}
+  .stl-group{padding:20px 22px;background:#fff;border:1.5px solid var(--line);border-radius:14px;border-top-width:4px;transition:border-color .12s,box-shadow .12s,transform .12s;}
+  .stl-group:hover{box-shadow:0 6px 18px rgba(0,0,0,.06);transform:translateY(-1px);}
+  .stl-group.g1{border-top-color:var(--blue);}
+  .stl-group.g2{border-top-color:#f59e0b;}
+  .stl-group.g3{border-top-color:var(--green);}
+  .stl-g-title{font-size:15px;font-weight:800;margin-bottom:14px;letter-spacing:-.01em;padding-bottom:10px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:8px;}
+  .stl-group.g1 .stl-g-title{color:var(--blue);}
+  .stl-group.g2 .stl-g-title{color:#c97a00;}
+  .stl-group.g3 .stl-g-title{color:var(--green);}
+  .stl-g-no{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;}
+  .stl-group.g1 .stl-g-no{background:var(--blue);}
+  .stl-group.g2 .stl-g-no{background:#f59e0b;}
+  .stl-group.g3 .stl-g-no{background:var(--green);}
+  .stl-g-table{width:100%;font-size:14px;border-collapse:collapse;}
+  .stl-g-table td{padding:9px 0;color:var(--ink-2);vertical-align:top;line-height:1.5;}
+  .stl-g-table td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;}
+  .stl-g-table tr.stl-sum td{border-top:1px dashed var(--ink-4);padding-top:11px;color:var(--ink);font-weight:700;font-size:14.5px;}
+  .stl-g-table tr.stl-final td{border-top:2px solid var(--ink);padding-top:11px;color:var(--ink);font-weight:800;font-size:15.5px;}
   .stl-summary-bar{position:sticky;bottom:0;background:#fff;border:1px solid var(--blue-100);border-radius:12px;padding:16px 22px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px;box-shadow:0 -6px 18px rgba(0,0,0,.06);z-index:5;margin-top:14px;}
   .stl-sb-item{display:flex;flex-direction:column;gap:4px;}
   .stl-sb-label{font-size:12px;color:var(--ink-3);font-weight:600;}
@@ -2061,16 +2079,16 @@ function renderStlCalendar(main){
     </div>
 
     ${sel ? `
-    <div class="panel">
-      <h3>
-        ${sel.settleDate}(${sel.settleDow}) ${sel.status==='정산완료'?'정산 완료':'정산 예정'}
-        <span class="pill ${sel.statusPill}" style="font-size:11px;margin-left:6px;vertical-align:middle;">${sel.status}</span>
-        <span style="font-weight:500;color:var(--ink-3);font-size:13px;margin-left:8px;">${sel.id} · 영업일 ${sel.approvalDate}(${sel.approvalDow})</span>
-      </h3>
+    <div class="panel stl-detail-panel">
+      <div class="stl-detail-head">
+        <div class="stl-detail-date">${sel.settleDate}(${sel.settleDow})</div>
+        <div class="stl-detail-status ${sel.statusPill}">${sel.status==='정산완료'?'정산 완료':'정산 예정'}</div>
+      </div>
+      <div class="stl-detail-meta">${sel.id} · 영업일 ${sel.approvalDate}(${sel.approvalDow})</div>
 
       <div class="stl-groups">
-        <div class="stl-group">
-          <div class="stl-g-title">① 기본 · 매출 정보</div>
+        <div class="stl-group g1">
+          <div class="stl-g-title"><span class="stl-g-no">1</span>기본 · 매출 정보</div>
           <table class="stl-g-table">
             <tr><td>승인일 (영업일)</td><td><b>${sel.approvalDate}(${sel.approvalDow})</b></td></tr>
             <tr><td>정산${sel.status==='정산완료'?'일':' 예정일'}</td><td><b>${sel.settleDate}(${sel.settleDow})</b></td></tr>
@@ -2081,8 +2099,8 @@ function renderStlCalendar(main){
           </table>
         </div>
 
-        <div class="stl-group">
-          <div class="stl-g-title">② 차감 정보 (수수료)</div>
+        <div class="stl-group g2">
+          <div class="stl-g-title"><span class="stl-g-no">2</span>차감 정보 (수수료)</div>
           <table class="stl-g-table">
             <tr><td>입금 수수료 과세금액</td><td>−${fmt(sel.feeBase)}원</td></tr>
             <tr><td>부가세 <span style="font-size:11px;color:var(--ink-3);">(과세금액의 10%)</span></td><td>−${fmt(sel.feeVat)}원</td></tr>
@@ -2090,17 +2108,17 @@ function renderStlCalendar(main){
           </table>
         </div>
 
-        <div class="stl-group">
-          <div class="stl-g-title">③ 정산 · 입금 정보</div>
+        <div class="stl-group g3">
+          <div class="stl-g-title"><span class="stl-g-no">3</span>정산 · 입금 정보</div>
           <table class="stl-g-table">
             <tr><td>쿠폰 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(테이블 발행분 보전)</span></td><td>+${fmt(sel.couponSettle)}원</td></tr>
             <tr><td>거래금 정산 금액 <span style="font-size:11px;color:var(--ink-3);">(거래 − 수수료 − 환불)</span></td><td>+${fmt(sel.txSettle)}원</td></tr>
-            <tr class="stl-final"><td>총 정산 금액</td><td><b style="color:${sel.status==='정산완료'?'var(--blue)':'#a25e00'};">${fmt(sel.totalSettle)}원</b></td></tr>
+            <tr class="stl-final"><td>총 정산 금액</td><td><b style="color:${sel.status==='정산완료'?'var(--blue)':'#c97a00'};">${fmt(sel.totalSettle)}원</b></td></tr>
           </table>
         </div>
       </div>
 
-      <div style="text-align:right;margin-top:14px;">
+      <div style="text-align:right;margin-top:18px;">
         <button class="btn-ghost" onclick="setSection('stl-detail')">📋 거래 명세 보기 ›</button>
       </div>
     </div>

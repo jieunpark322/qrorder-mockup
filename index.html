@@ -752,12 +752,20 @@ const state = {
   exportDateRange: '',              // 조회 기간 안내 문구
   exportEmail: '',                  // 메일로 받기 시 발송 주소 (default STORE_EMAIL)
   exportEmailEditing: false,        // 이메일 변경 인풋 활성화 여부
-  calendarSelectedDate: '2026-05-15', // 정산 달력에서 hover 미리보기용 (실제 클릭은 stl-detail로 이동)
+  calendarSelectedDate: '2026-05-15', // 정산 달력에서 강조용
   stlDetailId: '',                    // 현재 보고 있는 정산 회차 ID (stl-detail 페이지)
   stlListDateBasis: 'settle',       // 정산내역 조회 — 기간 기준 (settle:정산일 / approval:승인일)
-  stlListQuickRange: '1m',          // 1w | 1m | 3m
+  stlListQuickRange: '1m',          // 1w | 1m | 3m | specific
   stlListStatus: 'all',             // all | 정산대기 | 정산완료
   stlListCoupon: 'all',             // all | used | none
+  stlListSpecificDate: '',          // 특정 일자 직접 선택 (ISO) — 달력에서 진입 시 자동 설정
+  stlListIdSearch: '',              // 회차 ID 키워드 검색
+  stlListDow: 'all',                // 영업일 요일 (all | 일 | 월 | ... | 토)
+  stlListAmtMin: '',                // 거래 금액 최소
+  stlListAmtMax: '',                // 거래 금액 최대
+  stlListSettleMin: '',             // 정산 금액 최소
+  stlListSettleMax: '',             // 정산 금액 최대
+  stlListAdvancedOpen: false,       // 세부 검색 접기/펴기
   customStart: '2026-05-01',        // 기간 선택 모달 — 시작일
   customEnd:   '2026-05-15',        // 기간 선택 모달 — 종료일
   customTarget: null,                // 'overview' | 'detail' | 'orders'
@@ -2042,10 +2050,22 @@ function openStlDetail(stlId){
   state.section = 'stl-detail';
   renderApp();
 }
-// 달력 일자 클릭 → 해당 일자의 회차 상세 페이지로 이동
+// 달력 일자 클릭 → 정산내역 조회로 이동 + 해당 일자(정산일) 필터링
 function selectStlDate(iso){
-  const stl = SETTLEMENTS.find(s => s.settleISO === iso);
-  if (stl) openStlDetail(stl.id);
+  state.stlListSpecificDate = iso;
+  state.stlListDateBasis = 'settle';
+  state.stlListQuickRange = 'specific';
+  // 다른 필터는 초기화하여 깔끔한 결과 노출
+  state.stlListStatus = 'all';
+  state.stlListCoupon = 'all';
+  state.stlListIdSearch = '';
+  state.stlListDow = 'all';
+  state.stlListAmtMin = '';
+  state.stlListAmtMax = '';
+  state.stlListSettleMin = '';
+  state.stlListSettleMax = '';
+  state.section = 'stl-list';
+  renderApp();
 }
 
 function renderStlCalendar(main){
@@ -2120,25 +2140,63 @@ function renderStlCalendar(main){
 }
 
 /* ====================== 정산내역 조회 ====================== */
-function setStlListQuick(k){ state.stlListQuickRange = k; renderApp(); }
+function setStlListQuick(k){ state.stlListQuickRange = k; state.stlListSpecificDate=''; renderApp(); }
 function setStlListBasis(k){ state.stlListDateBasis = k; renderApp(); }
 function setStlListStatus(k){ state.stlListStatus = k; renderApp(); }
 function setStlListCoupon(k){ state.stlListCoupon = k; renderApp(); }
+function setStlListDow(k){ state.stlListDow = k; renderApp(); }
+function applyStlSpecificDate(){
+  const v = document.getElementById('stl-specific-date').value;
+  state.stlListSpecificDate = v;
+  state.stlListQuickRange = v ? 'specific' : '1m';
+  renderApp();
+}
+function toggleStlAdvanced(){ state.stlListAdvancedOpen = !state.stlListAdvancedOpen; renderApp(); }
+function resetStlListFilters(){
+  state.stlListDateBasis = 'settle';
+  state.stlListQuickRange = '1m';
+  state.stlListStatus = 'all';
+  state.stlListCoupon = 'all';
+  state.stlListSpecificDate = '';
+  state.stlListIdSearch = '';
+  state.stlListDow = 'all';
+  state.stlListAmtMin = '';
+  state.stlListAmtMax = '';
+  state.stlListSettleMin = '';
+  state.stlListSettleMax = '';
+  renderApp();
+}
 
 function renderStlList(main){
-  // 검색 조건 적용
+  // 필터 적용
   const today = new Date(2026, 4, 15);
-  const rangeDays = { '1w':7, '1m':31, '3m':93 }[state.stlListQuickRange] || 31;
-  const from = new Date(today); from.setDate(today.getDate() - rangeDays + 1);
   const basisKey = state.stlListDateBasis === 'approval' ? 'approvalISO' : 'settleISO';
+  let rows;
 
-  let rows = SETTLEMENTS.filter(s => {
-    const d = new Date(s[basisKey]);
-    return d >= from && d <= today;
-  });
+  if (state.stlListSpecificDate) {
+    // 특정 일자 우선 (달력에서 진입했거나 직접 선택)
+    rows = SETTLEMENTS.filter(s => s[basisKey] === state.stlListSpecificDate);
+  } else {
+    const rangeDays = { '1w':7, '1m':31, '3m':93 }[state.stlListQuickRange] || 31;
+    const from = new Date(today); from.setDate(today.getDate() - rangeDays + 1);
+    rows = SETTLEMENTS.filter(s => {
+      const d = new Date(s[basisKey]);
+      return d >= from && d <= today;
+    });
+  }
+
   if (state.stlListStatus !== 'all') rows = rows.filter(s => s.status === state.stlListStatus);
   if (state.stlListCoupon === 'used') rows = rows.filter(s => s.usedCoupon);
   if (state.stlListCoupon === 'none') rows = rows.filter(s => !s.usedCoupon);
+  if (state.stlListIdSearch) {
+    const q = state.stlListIdSearch.toLowerCase();
+    rows = rows.filter(s => s.id.toLowerCase().includes(q));
+  }
+  if (state.stlListDow !== 'all') rows = rows.filter(s => s.approvalDow === state.stlListDow);
+  if (state.stlListAmtMin) rows = rows.filter(s => s.grossAmt >= Number(state.stlListAmtMin));
+  if (state.stlListAmtMax) rows = rows.filter(s => s.grossAmt <= Number(state.stlListAmtMax));
+  if (state.stlListSettleMin) rows = rows.filter(s => s.totalSettle >= Number(state.stlListSettleMin));
+  if (state.stlListSettleMax) rows = rows.filter(s => s.totalSettle <= Number(state.stlListSettleMax));
 
   // 정렬: 정산일 최신순
   rows = rows.slice().sort((a,b) => b.settleISO.localeCompare(a.settleISO));
@@ -2149,16 +2207,31 @@ function renderStlList(main){
   const cntPending = SETTLEMENTS.filter(s=>s.status==='정산대기').length;
   const totSettle = rows.reduce((a,r)=>a+r.totalSettle, 0);
 
-  const rangeLabel = state.stlListQuickRange==='1w' ? '최근 1주일'
-                   : state.stlListQuickRange==='3m' ? '최근 3개월'
-                   :                                  '최근 1개월';
+  // 현재 활성 세부 필터 카운트 (안내용)
+  const advFilters = [
+    state.stlListIdSearch && '회차ID',
+    state.stlListDow !== 'all' && '요일',
+    (state.stlListAmtMin || state.stlListAmtMax) && '거래금액',
+    (state.stlListSettleMin || state.stlListSettleMax) && '정산금액',
+  ].filter(Boolean);
+  const hasAdv = advFilters.length > 0;
+
+  const rangeLabel = state.stlListSpecificDate
+    ? `${state.stlListSpecificDate.slice(5).replace('-','/')}(${SETTLEMENTS.find(s=>s[basisKey]===state.stlListSpecificDate)?.[state.stlListDateBasis==='approval'?'approvalDow':'settleDow'] || ''})`
+    : state.stlListQuickRange==='1w' ? '최근 1주일'
+    : state.stlListQuickRange==='3m' ? '최근 3개월'
+    :                                  '최근 1개월';
+
+  const subInfo = state.stlListSpecificDate
+    ? `<span style="color:var(--blue);font-weight:700;">📅 ${rangeLabel}</span> · ${state.stlListDateBasis==='approval'?'승인일':'정산일'} 기준 · <b style="color:var(--ink);">${rows.length}건 조회</b> · 합계 ${fmt(totSettle)}원`
+    : `${rangeLabel} · ${state.stlListDateBasis==='approval'?'승인일':'정산일'} 기준 · <b style="color:var(--ink);">${rows.length}건 조회</b> · 합계 ${fmt(totSettle)}원`;
 
   main.innerHTML = `
     <div class="crumb">정산관리 › 정산내역 조회</div>
     <div class="toolbar">
       <div>
         <h2>정산내역 조회</h2>
-        <div class="page-sub">${rangeLabel} · ${state.stlListDateBasis==='approval'?'승인일':'정산일'} 기준 · <b style="color:var(--ink);">${rows.length}건 조회</b> · 합계 ${fmt(totSettle)}원</div>
+        <div class="page-sub">${subInfo}</div>
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력</button>
@@ -2166,32 +2239,85 @@ function renderStlList(main){
       </div>
     </div>
 
-    <!-- 검색 조건 패널 -->
-    <div class="panel" style="padding:14px 18px;margin-bottom:14px;">
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+    <!-- 1차 필터: 기간 + 정산 상태 + 쿠폰 + 직접 일자 -->
+    <div class="search-wrap">
+      <div class="row">
         <span class="field-label">기간 기준</span>
         <div class="seg sm">
           <div class="b ${state.stlListDateBasis==='settle'?'on':''}" onclick="setStlListBasis('settle')">정산일</div>
           <div class="b ${state.stlListDateBasis==='approval'?'on':''}" onclick="setStlListBasis('approval')">승인일</div>
         </div>
         <span style="color:var(--line);margin:0 4px;">|</span>
-        <span class="chip ${state.stlListQuickRange==='1w'?'on':''}" onclick="setStlListQuick('1w')">1주일</span>
-        <span class="chip ${state.stlListQuickRange==='1m'?'on':''}" onclick="setStlListQuick('1m')">1개월</span>
-        <span class="chip ${state.stlListQuickRange==='3m'?'on':''}" onclick="setStlListQuick('3m')">3개월</span>
-        <span class="chip" onclick="openDateRangePicker('stl-list')">📅 기간 직접 선택</span>
+        <span class="chip ${state.stlListQuickRange==='1w' && !state.stlListSpecificDate?'on':''}" onclick="setStlListQuick('1w')">1주일</span>
+        <span class="chip ${state.stlListQuickRange==='1m' && !state.stlListSpecificDate?'on':''}" onclick="setStlListQuick('1m')">1개월</span>
+        <span class="chip ${state.stlListQuickRange==='3m' && !state.stlListSpecificDate?'on':''}" onclick="setStlListQuick('3m')">3개월</span>
+        <span style="color:var(--line);margin:0 4px;">|</span>
+        <span class="field-label">특정 일자</span>
+        <input class="input" type="date" id="stl-specific-date" value="${state.stlListSpecificDate}" max="${TODAY_DATE}" style="width:160px;" onchange="applyStlSpecificDate()" />
+        ${state.stlListSpecificDate?`<span class="chip" onclick="state.stlListSpecificDate='';state.stlListQuickRange='1m';renderApp()">✕ 일자 해제</span>`:''}
       </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+      <div class="row">
         <span class="field-label">정산 상태</span>
         <span class="chip ${state.stlListStatus==='all'?'on':''}" onclick="setStlListStatus('all')">전체 (${cntAll})</span>
         <span class="chip ${state.stlListStatus==='정산대기'?'on':''}" onclick="setStlListStatus('정산대기')">정산 대기 (${cntPending})</span>
         <span class="chip ${state.stlListStatus==='정산완료'?'on':''}" onclick="setStlListStatus('정산완료')">정산 완료 (${cntDone})</span>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span style="color:var(--line);margin:0 4px;">|</span>
         <span class="field-label">쿠폰 사용</span>
         <span class="chip ${state.stlListCoupon==='all'?'on':''}" onclick="setStlListCoupon('all')">전체</span>
-        <span class="chip ${state.stlListCoupon==='used'?'on':''}" onclick="setStlListCoupon('used')">쿠폰 사용</span>
+        <span class="chip ${state.stlListCoupon==='used'?'on':''}" onclick="setStlListCoupon('used')">사용</span>
         <span class="chip ${state.stlListCoupon==='none'?'on':''}" onclick="setStlListCoupon('none')">미사용</span>
+        <span style="color:var(--line);margin:0 4px;">|</span>
+        <button class="btn-ghost" onclick="resetStlListFilters()" style="padding:7px 14px;font-size:12px;">필터 초기화</button>
       </div>
+    </div>
+
+    <!-- 2차 필터: 세부 검색 (접기/펴기) -->
+    <div class="panel adv-search-panel ${state.stlListAdvancedOpen?'open':''}" style="padding:0;margin-bottom:14px;">
+      <div class="adv-head" onclick="toggleStlAdvanced()">
+        <div class="adv-head-left">
+          <div class="adv-title">
+            🔍 더 자세히 찾기
+            ${hasAdv ? `<span class="adv-active-badge">${advFilters.length}개 조건 적용 중</span>` : ''}
+          </div>
+          <div class="adv-desc">
+            ${hasAdv
+              ? `${advFilters.join(' · ')}(으)로 좁혀서 보고 있어요`
+              : '회차ID·영업일 요일·거래금액 범위·정산금액 범위로 더 정확하게 찾을 수 있어요'}
+          </div>
+        </div>
+        <span class="adv-toggle-btn">
+          ${state.stlListAdvancedOpen?'접기':'펼치기'}
+          <span class="adv-caret">⌄</span>
+        </span>
+      </div>
+      ${state.stlListAdvancedOpen ? `
+        <div style="padding:0 18px 18px;border-top:1px solid var(--line-2);">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;">
+            <span class="field-label">영업일 요일</span>
+            ${['all','월','화','수','목','금','토','일'].map(w=>`<span class="chip ${state.stlListDow===w?'on':''}" onclick="setStlListDow('${w}')">${w==='all'?'전체':w+'요일'}</span>`).join('')}
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+            <span class="field-label">거래 금액</span>
+            <input class="input" placeholder="최소" value="${state.stlListAmtMin}" oninput="state.stlListAmtMin=this.value" style="width:140px;" />
+            <span style="color:var(--ink-3);">~</span>
+            <input class="input" placeholder="최대" value="${state.stlListAmtMax}" oninput="state.stlListAmtMax=this.value" style="width:140px;" />
+            <span style="font-size:13px;color:var(--ink-3);">원</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+            <span class="field-label">정산 금액</span>
+            <input class="input" placeholder="최소" value="${state.stlListSettleMin}" oninput="state.stlListSettleMin=this.value" style="width:140px;" />
+            <span style="color:var(--ink-3);">~</span>
+            <input class="input" placeholder="최대" value="${state.stlListSettleMax}" oninput="state.stlListSettleMax=this.value" style="width:140px;" />
+            <span style="font-size:13px;color:var(--ink-3);">원</span>
+            <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+            <span class="field-label">회차 ID</span>
+            <input class="input" placeholder="🔍 회차 ID (예: STL-20260515)" value="${state.stlListIdSearch}" oninput="state.stlListIdSearch=this.value" style="flex:1;min-width:280px;" />
+            <button class="btn-primary" onclick="renderApp()">검색</button>
+          </div>
+        </div>
+      `:''}
     </div>
 
     <!-- 결과 그리드 -->
@@ -2214,7 +2340,7 @@ function renderStlList(main){
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">조건에 맞는 정산 내역이 없어요.</td></tr>` : rows.map(r => `
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">조건에 맞는 정산 내역이 없어요. <span style="color:var(--blue);cursor:pointer;font-weight:600;" onclick="resetStlListFilters()">필터 초기화</span></td></tr>` : rows.map(r => `
             <tr class="clickable" onclick="openStlDetail('${r.id}')">
               <td><b>${r.id}</b></td>
               <td>${r.approvalDate}(${r.approvalDow})</td>
@@ -2276,43 +2402,19 @@ function renderStlDetail(main){
       </div>
     </div>
 
-    <!-- 흐름 카드 (거래 → 차감 → 정산) -->
-    <div class="panel stl-detail-panel">
-      <div class="stl-flow">
-        <div class="stl-card g1">
-          <div class="stl-card-label"><span class="stl-card-no">1</span>거래 매출</div>
-          <div class="stl-card-amt">${fmt(stl.grossAmt)}원</div>
-          <div class="stl-card-sub">${fmt(stl.cnt)}건 · 영업일 ${stl.approvalDate}(${stl.approvalDow})</div>
-          <div class="stl-card-detail">
-            <div class="stl-d-row"><span>거래 금액</span><b>${fmt(stl.grossAmt)}원</b></div>
-            <div class="stl-d-row"><span>쿠폰 할인 (테이블)</span><b style="color:#c97a00;">−${fmt(stl.couponTableAmt)}원</b></div>
-            <div class="stl-d-row"><span>쿠폰 할인 (가맹점)</span><b style="color:#c97a00;">−${fmt(stl.couponBizAmt)}원</b></div>
-          </div>
+    <!-- 핵심 정산 카드 (단일) -->
+    <div class="panel" style="padding:24px 28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:13px;color:var(--ink-3);font-weight:700;margin-bottom:6px;">${stl.status==='정산완료'?'정산 완료 금액':'정산 예정 금액'}</div>
+        <div style="font-size:36px;font-weight:800;letter-spacing:-.02em;color:${settleColor};font-variant-numeric:tabular-nums;line-height:1.1;">${fmt(stl.totalSettle)}원</div>
+        <div style="font-size:13px;color:var(--ink-2);margin-top:8px;">
+          거래 ${fmt(stl.grossAmt)}원 − 입금 수수료 ${fmt(stl.feeTotal)}원${stl.usedCoupon?` + 쿠폰 정산 ${fmt(stl.couponSettle)}원`:''}
         </div>
-
-        <div class="stl-flow-arr">→</div>
-
-        <div class="stl-card g2">
-          <div class="stl-card-label"><span class="stl-card-no">2</span>차감 (수수료)</div>
-          <div class="stl-card-amt neg">−${fmt(stl.feeTotal)}원</div>
-          <div class="stl-card-sub">입금 수수료 + 부가세</div>
-          <div class="stl-card-detail">
-            <div class="stl-d-row"><span>입금 수수료 과세금액</span><b>−${fmt(stl.feeBase)}원</b></div>
-            <div class="stl-d-row"><span>부가세 <span style="font-size:11px;color:var(--ink-3);">(10%)</span></span><b>−${fmt(stl.feeVat)}원</b></div>
-          </div>
-        </div>
-
-        <div class="stl-flow-arr">→</div>
-
-        <div class="stl-card g3">
-          <div class="stl-card-label"><span class="stl-card-no">3</span>${stl.status==='정산완료'?'정산 완료':'정산 예정'}</div>
-          <div class="stl-card-amt primary">${fmt(stl.totalSettle)}원</div>
-          <div class="stl-card-sub">${stl.settleDate}(${stl.settleDow}) ${stl.status==='정산완료'?'입금 완료':'입금 예정'}</div>
-          <div class="stl-card-detail">
-            <div class="stl-d-row"><span>거래금 정산</span><b style="color:var(--blue);">+${fmt(stl.txSettle)}원</b></div>
-            <div class="stl-d-row"><span>쿠폰 정산 (보전)</span><b style="color:var(--blue);">+${fmt(stl.couponSettle)}원</b></div>
-          </div>
-        </div>
+      </div>
+      <div style="text-align:right;font-size:13px;color:var(--ink-2);line-height:1.7;">
+        <div>건수 <b style="color:var(--ink);">${fmt(stl.cnt)}건</b></div>
+        <div>입금 계좌 <b style="color:var(--ink);">신한 ****1234</b></div>
+        <div>쿠폰 사용 <b style="color:var(--ink);">${stl.usedCoupon?'적용 (테이블 발행 보전)':'없음'}</b></div>
       </div>
     </div>
 

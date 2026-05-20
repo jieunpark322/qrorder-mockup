@@ -1209,7 +1209,7 @@ function renderOverview(main){
     <div class="toolbar">
       <div>
         <h2>매출 한눈에 보기</h2>
-        <div class="page-sub">오늘 매장 매출 한눈에</div>
+        <div class="page-sub">어제까지 집계된 매출 · 오늘 매출은 <span style="color:var(--blue);font-weight:700;cursor:pointer;" onclick="setSection('orders')">주문 내역 ›</span> 에서 실시간으로 확인</div>
       </div>
       <div class="left">
         ${basisToggleInline()}
@@ -1378,7 +1378,7 @@ function renderDetail(main){
     <div class="toolbar">
       <div>
         <h2>매출 상세 보기</h2>
-        <div class="page-sub">${tabName} — 항목별로 깊게 분석하고, 표로 내려받으세요</div>
+        <div class="page-sub">${tabName} · 어제까지 집계 · 오늘 매출은 <span style="color:var(--blue);font-weight:700;cursor:pointer;" onclick="setSection('orders')">주문 내역 ›</span> 에서 실시간으로 확인</div>
       </div>
       <div class="left">
         ${basisToggleInline()}
@@ -2320,7 +2320,7 @@ function renderOrders(main){
     })()}
 
     <div class="toolbar">
-      <div><h2>주문 내역</h2><div class="page-sub">${rows.length}건 조회 · 결제완료 <b style="color:var(--ink);">${validCnt}건 · ${fmt(totalAmt)}원</b>${cancelAllCnt?` · 전체취소 ${cancelAllCnt}건`:''}</div></div>
+      <div><h2>주문 내역 <span style="font-size:11px;color:#1b64da;background:#e6f0ff;padding:3px 8px;border-radius:6px;font-weight:700;margin-left:6px;vertical-align:middle;">🟢 실시간</span></h2><div class="page-sub">${rows.length}건 조회 · 결제완료 <b style="color:var(--ink);">${validCnt}건 · ${fmt(totalAmt)}원</b>${cancelAllCnt?` · 전체취소 ${cancelAllCnt}건`:''}</div></div>
       <div class="left">
         <button class="btn-primary" onclick='openExport(${rows.length}, "주문 내역", ${JSON.stringify(
           state.orderDateFilter==='today'?'오늘 (2026년 5월 15일(금))':

@@ -991,14 +991,55 @@ function periodRange(){
   return '사용자가 지정한 기간';
 }
 
+// 영업시간 비율 (24시간 중 영업시간 분수). 토글 OFF면 1.
+// 자정 넘어가는 영업(예: 20:00~05:00)도 정확히 처리.
+function bhRatio(){
+  if (!state.useBusinessHours) return 1;
+  const [oh, om] = (state.businessHoursOpen||'09:00').split(':').map(Number);
+  const [ch, cm] = (state.businessHoursClose||'22:00').split(':').map(Number);
+  const openMin = oh*60+om, closeMin = ch*60+cm;
+  const minutes = (closeMin > openMin) ? (closeMin - openMin) : (24*60 - openMin + closeMin);
+  return Math.max(0, Math.min(1, minutes / (24*60)));
+}
+// 영업시간 범위에 시간 h(0~23)가 속하는지
+function inBusinessHours(h){
+  if (!state.useBusinessHours) return true;
+  const [oh] = (state.businessHoursOpen||'09:00').split(':').map(Number);
+  const [ch] = (state.businessHoursClose||'22:00').split(':').map(Number);
+  if (oh < ch) return h >= oh && h < ch;
+  return h >= oh || h < ch;  // 자정 넘김 (20시~05시 등)
+}
+// 매출 데이터 객체에서 amt/cnt 필드에 영업시간 비율 적용한 사본 반환
+function applyBhFields(arr, fields){
+  const r = bhRatio();
+  if (r === 1) return arr;
+  return arr.map(o => {
+    const copy = { ...o };
+    fields.forEach(k => { if (typeof copy[k] === 'number') copy[k] = Math.round(copy[k] * r); });
+    if (o.sub) copy.sub = o.sub.map(s => {
+      const sc = { ...s };
+      fields.forEach(k => { if (typeof sc[k] === 'number') sc[k] = Math.round(sc[k] * r); });
+      return sc;
+    });
+    return copy;
+  });
+}
 // 매출 흐름: 총매출 → (할인 + 포인트 + 환불) 차감 → 실매출 → (과세금액 + 부가세) → 순매출
+// 영업시간 토글 ON이면 비율만큼 안분 (시뮬레이션)
 function enrichDay(d){
-  const deduction = (d.disc||0) + (d.pt||0) + (d.ref||0);
-  const actual = d.gross - deduction;             // 실매출 (공급대가)
+  const r = bhRatio();
+  const gross = Math.round((d.gross||0) * r);
+  const disc  = Math.round((d.disc||0)  * r);
+  const pt    = Math.round((d.pt||0)    * r);
+  const ref   = Math.round((d.ref||0)   * r);
+  const ocnt  = Math.round((d.ocnt||0)  * r);
+  const rcnt  = Math.round((d.rcnt||0)  * r);
+  const deduction = disc + pt + ref;
+  const actual = gross - deduction;               // 실매출 (공급대가)
   const vat = Math.round(actual * 10 / 110);      // 부가세
   const taxable = actual - vat;                   // 과세금액 (공급가액)
-  const net = taxable;                            // 순매출 = 과세금액 (사장님이 가져가는 매출)
-  return { ...d, deduction, actual, vat, taxable, net };
+  const net = taxable;                            // 순매출
+  return { ...d, gross, disc, pt, ref, ocnt, rcnt, deduction, actual, vat, taxable, net };
 }
 
 /* ============================================================
@@ -1126,12 +1167,13 @@ function saveBusinessHours(){
 /* ====================== 매출 한눈에 보기 ====================== */
 function renderOverview(main){
   const days = periodDays();
-  const gross = sum(days, 'gross');
-  const disc = sum(days, 'disc');
-  const pt = sum(days, 'pt');
-  const ref = sum(days, 'ref');
-  const refCnt = sum(days, 'rcnt');
-  const ordCnt = sum(days, 'ocnt');
+  const r = bhRatio();
+  const gross = Math.round(sum(days, 'gross') * r);
+  const disc  = Math.round(sum(days, 'disc')  * r);
+  const pt    = Math.round(sum(days, 'pt')    * r);
+  const ref   = Math.round(sum(days, 'ref')   * r);
+  const refCnt = Math.round(sum(days, 'rcnt') * r);
+  const ordCnt = Math.round(sum(days, 'ocnt') * r);
   // enrichDay와 동일한 정의로 통일
   const actual = gross - disc - pt - ref;           // 실매출 (공급대가)
   const vat = Math.round(actual * 10 / 110);         // 부가세
@@ -1257,7 +1299,7 @@ function renderOverview(main){
         <div style="display:flex;align-items:center;gap:16px;">
           <div style="width:170px;height:170px;flex-shrink:0;"><canvas id="ch-donut-pay"></canvas></div>
           <div class="legend-list" style="flex:1;">
-            ${METHOD.filter(m=>m.amt>0).map(m=>`
+            ${applyBhFields(METHOD,['cnt','amt']).filter(m=>m.amt>0).map(m=>`
               <div class="lg-row">
                 <span><span class="swatch" style="background:${m.color}"></span>${m.name}</span>
                 <b>${fmt(m.amt)}원</b>
@@ -1279,15 +1321,15 @@ function renderOverview(main){
         <table class="t">
           <thead><tr><th style="width:36px;">#</th><th>메뉴</th><th class="num">수량</th><th class="num">매출</th><th class="num">비중</th></tr></thead>
           <tbody>
-            ${MENU.slice(0,5).map((m,i)=>`
+            ${(() => { const M = applyBhFields(MENU,['qty','amt','refund','refundCnt']); const sumA = sum(M,'amt') || 1; return M.slice(0,5).map((m,i)=>`
               <tr class="clickable" onclick="setDetailTab('menu')">
                 <td>${i+1}</td>
                 <td>${m.name} ${m.hot?'<span class="badge hot">🔥</span>':''}${m.isNew?'<span class="badge new">신규</span>':''}</td>
                 <td class="num">${fmt(m.qty)}${m.cat==='베이커리'?'개':'잔'}</td>
                 <td class="num">${fmt(m.amt)}</td>
-                <td class="num">${(m.amt/sum(MENU,'amt')*100).toFixed(1)}%</td>
+                <td class="num">${(m.amt/sumA*100).toFixed(1)}%</td>
               </tr>
-            `).join('')}
+            `).join(''); })()}
           </tbody>
         </table>
         <div style="text-align:right;margin-top:10px;"><span style="color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;" onclick="setDetailTab('menu')">메뉴별 상세 보기 ›</span></div>
@@ -1304,7 +1346,7 @@ function renderOverview(main){
         <div style="display:flex;align-items:center;gap:16px;">
           <div style="width:170px;height:170px;flex-shrink:0;"><canvas id="ch-donut-ch"></canvas></div>
           <div style="flex:1;">
-            ${CHANNEL.map(c=>`
+            ${applyBhFields(CHANNEL,['cnt','amt','avg']).map(c=>`
               <div style="padding:10px 0;border-bottom:1px solid var(--line-2);">
                 <div class="row-flex"><span style="font-size:13px;"><span class="swatch" style="background:${c.color}"></span><b>${c.name}</b></span><b style="font-size:14px;">${fmt(c.amt)}원</b></div>
                 <div style="font-size:11px;color:var(--ink-3);margin-top:3px;margin-left:15px;">${c.share}% · ${c.cnt}건 · 평균 ${fmt(c.avg)}원</div>
@@ -1318,8 +1360,10 @@ function renderOverview(main){
 
   // Charts
   drawHourChart('ch-hour');
-  drawDonut('ch-donut-pay', METHOD.filter(m=>m.amt>0).map(m=>m.amt), METHOD.filter(m=>m.amt>0).map(m=>m.color), METHOD.filter(m=>m.amt>0).map(m=>m.name));
-  drawDonut('ch-donut-ch', CHANNEL.map(c=>c.amt), CHANNEL.map(c=>c.color), CHANNEL.map(c=>c.name));
+  const _M = applyBhFields(METHOD,['cnt','amt']).filter(m=>m.amt>0);
+  drawDonut('ch-donut-pay', _M.map(m=>m.amt), _M.map(m=>m.color), _M.map(m=>m.name));
+  const _C = applyBhFields(CHANNEL,['cnt','amt','avg']);
+  drawDonut('ch-donut-ch', _C.map(c=>c.amt), _C.map(c=>c.color), _C.map(c=>c.name));
 }
 
 /* ====================== 매출 상세 보기 ====================== */
@@ -1681,6 +1725,14 @@ function renderDetailPeriod(body){
   });
 }
 
+// 영업시간 토글 ON이면 HOUR 데이터 자체를 영업시간 밖은 0으로 만든 사본 반환
+function effectiveHourData(){
+  if (!state.useBusinessHours) return { HOUR, HOUR_AVG };
+  return {
+    HOUR:     HOUR.map(h => ({ ...h, amt: inBusinessHours(h.h) ? h.amt : 0 })),
+    HOUR_AVG: HOUR_AVG.map(h => ({ ...h, amt: inBusinessHours(h.h) ? h.amt : 0 })),
+  };
+}
 // 시간대별
 function renderDetailHour(body){
   // 다른 탭과 동일한 기준(일간/주간/월간/기간 선택) — 시간대별은 24시간 분포가 본질이라
@@ -1746,8 +1798,8 @@ function renderDetailHour(body){
           </tr>
         </thead>
         <tbody>
-          ${applySort(HOUR.map((h,i)=>{
-            const avg = HOUR_AVG[i].amt;
+          ${(() => { const ed = effectiveHourData(); return applySort(ed.HOUR.map((h,i)=>{
+            const avg = ed.HOUR_AVG[i].amt;
             const cnt = Math.round(h.amt / 5500) || 0;
             const diff = avg ? Math.round((h.amt-avg)/avg*100) : 0;
             return { h:h.h, amt:h.amt, avg, cnt, diff, avgPrice: cnt?Math.round(h.amt/cnt):0 };
@@ -1777,12 +1829,12 @@ function renderDetailHour(body){
                 <td class="num">${r.cnt?fmt(r.avgPrice):'−'}</td>
               </tr>
             `;
-          }).join('')}
-          <tr class="total">
+          }).join(''); })()}
+          ${(() => { const ed = effectiveHourData(); return `<tr class="total">
             <td>합계</td>
-            <td class="num">${fmt(Math.round(sum(HOUR,'amt')/5500))}</td>
-            <td class="num">${fmt(sum(HOUR,'amt'))}</td>
-            <td class="num">${fmt(sum(HOUR_AVG,'amt'))}</td>
+            <td class="num">${fmt(Math.round(sum(ed.HOUR,'amt')/5500))}</td>
+            <td class="num">${fmt(sum(ed.HOUR,'amt'))}</td>
+            <td class="num">${fmt(sum(ed.HOUR_AVG,'amt'))}</td>`; })()}
             <td class="num">−</td>
             <td class="num">−</td>
           </tr>
@@ -1803,9 +1855,10 @@ function renderDetailHour(body){
 // 메뉴별
 function renderDetailMenu(body){
   const cats = ['전체','커피','베이커리','음료','차/논커피'];
+  const _MENU = applyBhFields(MENU, ['qty','amt','refund','refundCnt']);
   let filtered = state.detailCategoryFilter==='전체'
-    ? MENU
-    : MENU.filter(m=>m.cat===state.detailCategoryFilter);
+    ? _MENU
+    : _MENU.filter(m=>m.cat===state.detailCategoryFilter);
 
   // 상세 검색 필터
   if (state.detailMenuSearch) {
@@ -1934,8 +1987,9 @@ function renderDetailMenu(body){
 
 // 메뉴 카테고리별
 function renderDetailCategory(body){
+  const _CATEGORY = applyBhFields(CATEGORY, ['qty','amt']);
   // 매출 범위 필터 적용
-  let filteredCat = CATEGORY.slice();
+  let filteredCat = _CATEGORY.slice();
   if (state.detailCategoryMinAmt) filteredCat = filteredCat.filter(c => c.amt >= Number(state.detailCategoryMinAmt));
   if (state.detailCategoryMaxAmt) filteredCat = filteredCat.filter(c => c.amt <= Number(state.detailCategoryMaxAmt));
   const tot = filteredCat.reduce((a,c)=>{a.qty+=c.qty;a.amt+=c.amt;return a;},{qty:0,amt:0});
@@ -2037,11 +2091,12 @@ function renderDetailCategory(body){
 
 // 결제수단별
 function renderDetailMethod(body){
+  const _METHOD = applyBhFields(METHOD, ['cnt','amt']);
   // 결제수단 그룹 분류 (card / pay / etc)
   const groupOf = (m) => m.key === 'card' ? 'card'
     : (m.key === 'kakao' || m.key === 'naver' || m.key === 'toss') ? 'pay'
     : 'etc';
-  let filteredMethod = METHOD.filter(m => m.amt > 0);
+  let filteredMethod = _METHOD.filter(m => m.amt > 0);
   if (state.detailMethodGroup !== 'all') filteredMethod = filteredMethod.filter(m => groupOf(m) === state.detailMethodGroup);
   if (state.detailMethodMinAmt) filteredMethod = filteredMethod.filter(m => m.amt >= Number(state.detailMethodMinAmt));
   if (state.detailMethodMaxAmt) filteredMethod = filteredMethod.filter(m => m.amt <= Number(state.detailMethodMaxAmt));
@@ -3116,14 +3171,15 @@ function renderBank(main){
 function drawHourChart(id){
   const ctx = document.getElementById(id);
   if (!ctx) return;
-  const labels = HOUR.map(h=>`${String(h.h).padStart(2,'0')}시`);
+  const ed = effectiveHourData();
+  const labels = ed.HOUR.map(h=>`${String(h.h).padStart(2,'0')}시`);
   state.charts[id] = new Chart(ctx, {
     type:'line',
     data:{
       labels,
       datasets:[
-        { label:'오늘', data:HOUR.map(h=>h.amt), borderColor:'#3182f6', backgroundColor:'rgba(49,130,246,.1)', fill:true, tension:.35, borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#3182f6'},
-        { label:'4주 평균', data:HOUR_AVG.map(h=>h.amt), borderColor:'#cdd5df', borderDash:[5,5], borderWidth:1.5, tension:.35, pointRadius:0, fill:false},
+        { label:'오늘', data:ed.HOUR.map(h=>h.amt), borderColor:'#3182f6', backgroundColor:'rgba(49,130,246,.1)', fill:true, tension:.35, borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#3182f6'},
+        { label:'4주 평균', data:ed.HOUR_AVG.map(h=>h.amt), borderColor:'#cdd5df', borderDash:[5,5], borderWidth:1.5, tension:.35, pointRadius:0, fill:false},
       ]
     },
     options:{

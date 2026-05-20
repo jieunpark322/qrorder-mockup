@@ -1103,26 +1103,24 @@ function basisLabel(){
   if (!state.useBusinessHours) return '🕛 자정 기준';
   return `🕒 영업시간 기준 (${state.businessHoursOpen}~${state.businessHoursClose})`;
 }
-// 매출 보기 페이지 상단에 들어가는 토글 + 설정 아이콘
-function basisToggleBar(){
+// toolbar 우측에 컴팩트하게 들어가는 토글 (별도 패널 X)
+function basisToggleInline(){
   return `
-    <div class="panel" style="padding:12px 16px;margin-bottom:14px;${state.useBusinessHours?'background:#fffaf0;border-color:#ffe0a3;':''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-        <div style="display:flex;gap:10px;align-items:center;">
-          <span style="font-size:12px;color:var(--ink-3);font-weight:700;">매출 집계 기준</span>
-          <div class="seg sm">
-            <div class="b ${!state.useBusinessHours?'on':''}" onclick="state.useBusinessHours=false;renderApp()">🕛 자정 기준</div>
-            <div class="b ${state.useBusinessHours?'on':''}" onclick="state.useBusinessHours=true;renderApp()">🕒 영업시간 기준</div>
-          </div>
-          ${state.useBusinessHours?`<span style="font-size:12px;color:#a25e00;font-weight:600;">· ${state.businessHoursOpen} ~ ${state.businessHoursClose}</span>`:''}
-        </div>
-        <button class="btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="openBusinessHoursModal()">⚙️ 영업시간 설정</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="seg sm" title="매출 집계 기준">
+        <div class="b ${!state.useBusinessHours?'on':''}" onclick="state.useBusinessHours=false;renderApp()">🕛 자정</div>
+        <div class="b ${state.useBusinessHours?'on':''}" onclick="state.useBusinessHours=true;renderApp()">🕒 영업시간${state.useBusinessHours?` (${state.businessHoursOpen}~${state.businessHoursClose})`:''}</div>
       </div>
-      ${state.useBusinessHours?`
-        <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #ffd9a3;font-size:11px;color:#a25e00;line-height:1.5;">
-          💡 새벽 영업 매장(호프집·24시간 매장 등)에 추천해요. 자정을 넘기는 매장은 마감 시각을 새벽으로 설정하세요.
-        </div>
-      `:''}
+      <button class="btn-ghost" style="padding:6px 10px;font-size:12px;" onclick="openBusinessHoursModal()" title="영업시간 설정">⚙️</button>
+    </div>
+  `;
+}
+// ON 상태일 때 본문 위에 작은 호박색 안내 줄 (가독성 위해 진한 갈색 텍스트)
+function bhActiveNotice(){
+  if (!state.useBusinessHours) return '';
+  return `
+    <div style="margin-bottom:14px;padding:8px 14px;background:#fffaf0;border:1px solid #ffe0a3;border-radius:8px;font-size:12px;color:#7a4d00;line-height:1.5;">
+      🕒 <b>영업시간 기준 (${state.businessHoursOpen} ~ ${state.businessHoursClose})</b>으로 보고 있어요. 새벽 영업 매장에 추천해요.
     </div>
   `;
 }
@@ -1211,9 +1209,10 @@ function renderOverview(main){
     <div class="toolbar">
       <div>
         <h2>매출 한눈에 보기</h2>
-        <div class="page-sub">오늘 매장이 얼마 벌었는지 1분 안에 확인 · 마지막 동기화 1분 전</div>
+        <div class="page-sub">오늘 매장 매출 한눈에</div>
       </div>
       <div class="left">
+        ${basisToggleInline()}
         <button class="btn-ghost" onclick="alert('데이터를 새로고침했어요')">⟳ 새로고침</button>
         <button class="btn-primary" onclick='openExport(${days.length}, "매출 한눈에 보기", ${JSON.stringify(centerLabel)})'>📤 내보내기</button>
       </div>
@@ -1229,7 +1228,7 @@ function renderOverview(main){
       endTime: rangeEnd,
     })}
 
-    ${basisToggleBar()}
+    ${bhActiveNotice()}
 
     <!-- KPI 흐름 (총매출 → 차감 → 실매출) — 상세 항목은 매출 상세 보기에서 -->
     <div class="kpi-flow">
@@ -1383,11 +1382,12 @@ function renderDetail(main){
         <div class="page-sub">${tabName} — 항목별로 깊게 분석하고, 표로 내려받으세요</div>
       </div>
       <div class="left">
+        ${basisToggleInline()}
         <button class="btn-primary" onclick='openExport(15, "매출 상세 · " + ${JSON.stringify(tabName)}, "2026년 5월 1일(금) ~ 5월 15일(금)")'>📤 내보내기</button>
       </div>
     </div>
 
-    ${basisToggleBar()}
+    ${bhActiveNotice()}
 
     <div class="tabs">
       <div class="t ${state.detailTab==='period'?'on':''}"   onclick="setDetailTab('period')">📅 기간별</div>
@@ -2304,11 +2304,6 @@ function renderOrders(main){
   main.innerHTML = `
     <div class="crumb">주문관리 › 주문 내역</div>
 
-    <div class="basis-bar" style="background:#fffaf0;border-color:#ffe0a3;color:#7a4d00;">
-      <span class="ico" style="background:#fff3d4;color:#a25e00;">🔒</span>
-      <b>개인정보 보호 정책</b> — 결제일로부터 <b>1년 이내</b> 거래는 카드번호 <b>앞 6자리(BIN) + 끝 4자리</b>만 노출돼요. <b>1년 초과</b> 거래는 카드번호가 <b>전체 마스킹</b>되고, 카드번호로 검색해도 결과에 포함되지 않아요. 결제번호(tid)도 일부만 노출됩니다.
-    </div>
-
     ${(() => {
       let s, e;
       if (state.orderDateFilter==='today')         { s='5/15(금) 03:00'; e='5/16(토) 02:59'; }
@@ -2445,7 +2440,7 @@ function renderOrders(main){
     </div>
 
     <div class="panel tight">
-      <h3>주문 목록 <span class="h-sub">${rows.length}건 조회됨 · 카드번호는 앞 6 + 끝 4까지 노출 (1년 초과 시 전체 마스킹)</span></h3>
+      <h3>주문 목록 <span class="h-sub">${rows.length}건 조회됨 <span style="color:var(--ink-3);font-size:11px;font-weight:500;cursor:pointer;margin-left:6px;" onclick="alert('🔒 개인정보 보호 정책\\n\\n• 결제일로부터 1년 이내 거래: 카드번호 앞 6자리(BIN) + 끝 4자리만 노출\\n• 1년 초과 거래: 카드번호 전체 마스킹, 카드번호 검색 결과에도 포함되지 않음\\n• 결제번호(tid)도 일부만 노출됨')" title="개인정보 보호 정책">ⓘ 카드번호 표시 정책</span></span></h3>
       <table class="t">
         <thead>
           <tr>
@@ -2554,7 +2549,7 @@ function renderStlCalendar(main){
     <div class="toolbar">
       <div>
         <h2>정산 달력</h2>
-        <div class="page-sub">정산일을 한눈에 · 정산 계좌 <b>신한은행 ****1234</b> · 정산 주기 D+2 영업일</div>
+        <div class="page-sub">정산일을 한눈에 · 정산 주기 D+2 영업일</div>
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="setSection('stl-list')">🔎 정산 내역 보기</button>

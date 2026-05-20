@@ -987,13 +987,14 @@ function periodRange(){
   return '사용자가 지정한 기간';
 }
 
-// 매출 흐름: 총매출 → (할인 + 포인트 + 환불) 차감 → 실매출 → 부가세 차감 → 순매출
+// 매출 흐름: 총매출 → (할인 + 포인트 + 환불) 차감 → 실매출 → (과세금액 + 부가세) → 순매출
 function enrichDay(d){
   const deduction = (d.disc||0) + (d.pt||0) + (d.ref||0);
-  const actual = d.gross - deduction;             // 실매출 (실제 발생 매출)
-  const vat = Math.round(actual * 10 / 110);      // 부가세 (실매출의 10/110)
-  const net = actual - vat;                       // 순매출 (사장님 공급가액)
-  return { ...d, deduction, actual, vat, net };
+  const actual = d.gross - deduction;             // 실매출 (공급대가)
+  const vat = Math.round(actual * 10 / 110);      // 부가세
+  const taxable = actual - vat;                   // 과세금액 (공급가액)
+  const net = taxable;                            // 순매출 = 과세금액 (사장님이 가져가는 매출)
+  return { ...d, deduction, actual, vat, taxable, net };
 }
 
 /* ============================================================
@@ -1060,8 +1061,12 @@ function renderOverview(main){
   const ref = sum(days, 'ref');
   const refCnt = sum(days, 'rcnt');
   const ordCnt = sum(days, 'ocnt');
-  const net = gross - disc - ref;
-  const avgPrice = Math.round(net / ordCnt);
+  // enrichDay와 동일한 정의로 통일
+  const actual = gross - disc - pt - ref;           // 실매출 (공급대가)
+  const vat = Math.round(actual * 10 / 110);         // 부가세
+  const taxable = actual - vat;                      // 과세금액 (공급가액)
+  const net = taxable;                               // 순매출 = 과세금액
+  const avgPrice = ordCnt ? Math.round(actual / ordCnt) : 0;
 
   // 기간별 시간 범위 + 중앙 라벨 (요일 포함)
   let rangeStart, rangeEnd, centerLabel;
@@ -1107,24 +1112,36 @@ function renderOverview(main){
       endTime: rangeEnd,
     })}
 
-    <!-- KPI 흐름 (총매출 → 취소·환불 → 순매출) -->
+    <!-- KPI 흐름 (총매출 → 차감 → 실매출 → 부가세 → 순매출) -->
     <div class="kpi-flow">
       <div class="step gross">
         <div class="label">총매출</div>
         <div class="num">${fmt(gross)}원</div>
-        <div class="sub">결제건수 ${fmt(ordCnt)}건 · 할인 ${fmt(disc)}원 · 포인트 ${fmt(pt)}원</div>
+        <div class="sub">결제건수 ${fmt(ordCnt)}건</div>
       </div>
       <div class="arrow">→</div>
       <div class="step refund">
-        <div class="label">취소·환불</div>
-        <div class="num">−${fmt(ref)}원</div>
-        <div class="sub">${refCnt}건 · 취소율 ${(ref/gross*100).toFixed(1)}% <span class="tip"><span class="tip-i">i</span><span class="body">환불은 결제일 기준으로<br/>이 기간 매출에서 차감돼요.</span></span></div>
+        <div class="label">− 할인·포인트·환불</div>
+        <div class="num">−${fmt(disc + pt + ref)}원</div>
+        <div class="sub">할인 ${fmt(disc)} · 포인트 ${fmt(pt)} · 환불 ${fmt(ref)} (${refCnt}건) <span class="tip"><span class="tip-i">i</span><span class="body">환불은 결제일 기준으로<br/>이 기간 매출에서 차감돼요.</span></span></div>
       </div>
       <div class="arrow">→</div>
       <div class="step net">
-        <div class="label">순매출</div>
-        <div class="num">${fmt(net)}원</div>
-        <div class="sub">평균 객단가 ${fmt(avgPrice)}원 · <span class="delta-up">+12.4% ↑</span> 전일 대비</div>
+        <div class="label">실매출</div>
+        <div class="num">${fmt(actual)}원</div>
+        <div class="sub">건당 ${fmt(avgPrice)}원 · 과세 ${fmt(taxable)} + 부가세 ${fmt(vat)}</div>
+      </div>
+    </div>
+
+    <!-- 순매출 카드 (별도 강조) -->
+    <div class="panel" style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;margin-top:14px;background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border-color:#cfe1ff;">
+      <div>
+        <div style="font-size:12px;color:var(--ink-3);font-weight:700;">순매출 <span style="font-size:11px;color:var(--ink-3);font-weight:500;">실매출에서 부가세 뺀 사장님 공급가액</span></div>
+        <div style="font-size:28px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums;line-height:1.1;margin-top:4px;">${fmt(net)}원</div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:var(--ink-2);line-height:1.6;">
+        <div>실매출 ${fmt(actual)}원</div>
+        <div>− 부가세 ${fmt(vat)}원</div>
       </div>
     </div>
 
@@ -1325,7 +1342,7 @@ function renderDetailPeriod(body){
   if (state.detailPeriodMinAmt) rows = rows.filter(r => r.gross >= Number(state.detailPeriodMinAmt));
   if (state.detailPeriodMaxAmt) rows = rows.filter(r => r.gross <= Number(state.detailPeriodMaxAmt));
   const tot = rows.reduce((a,r)=>{
-    ['gross','disc','pt','ref','deduction','actual','vat','net','rcnt','ocnt'].forEach(k=>a[k]=(a[k]||0)+(r[k]||0));
+    ['gross','disc','pt','ref','deduction','actual','taxable','vat','net','rcnt','ocnt'].forEach(k=>a[k]=(a[k]||0)+(r[k]||0));
     return a;
   },{});
   const avgPrice = tot.ocnt ? Math.round(tot.actual / tot.ocnt) : 0;
@@ -1420,7 +1437,8 @@ function renderDetailPeriod(body){
             ${sortableHeader({key:'pt', label:'− 포인트', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'ref', label:'− 환불', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'actual', label:'= 실매출', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            ${sortableHeader({key:'vat', label:'− 부가세', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'taxable', label:'과세금액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'vat', label:'부가세', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'net', label:'= 순매출', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'ocnt', label:'결제건수', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'rcnt', label:'환불건수', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
@@ -1429,7 +1447,7 @@ function renderDetailPeriod(body){
         <tbody>
           ${applySort(rows, state.detailPeriodSort, {
             label: r=>r.label, gross:r=>r.gross, disc:r=>r.disc, pt:r=>r.pt, ref:r=>r.ref,
-            actual:r=>r.actual, vat:r=>r.vat, net:r=>r.net,
+            actual:r=>r.actual, taxable:r=>r.taxable, vat:r=>r.vat, net:r=>r.net,
             ocnt:r=>r.ocnt, rcnt:r=>r.rcnt
           }).map(r=>`
             <tr class="clickable" onclick='openPeriodDetail(${JSON.stringify(r.label)}, ${JSON.stringify(r.d || "")})' title="이 ${state.detailGroup==='day'?'날':'기간'}의 결제 내역을 볼 수 있어요">
@@ -1439,7 +1457,8 @@ function renderDetailPeriod(body){
               <td class="num">${r.pt?'−'+fmt(r.pt):'−'}</td>
               <td class="num neg">${r.ref?'−'+fmt(r.ref):'−'}</td>
               <td class="num"><b>${fmt(r.actual)}</b></td>
-              <td class="num">−${fmt(r.vat)}</td>
+              <td class="num">${fmt(r.taxable)}</td>
+              <td class="num">${fmt(r.vat)}</td>
               <td class="num pos"><b>${fmt(r.net)}</b></td>
               <td class="num">${fmt(r.ocnt)}</td>
               <td class="num">${r.rcnt}</td>
@@ -1452,7 +1471,8 @@ function renderDetailPeriod(body){
             <td class="num">${tot.pt?'−'+fmt(tot.pt):'−'}</td>
             <td class="num neg">${tot.ref?'−'+fmt(tot.ref):'−'}</td>
             <td class="num"><b>${fmt(tot.actual)}</b></td>
-            <td class="num">−${fmt(tot.vat)}</td>
+            <td class="num">${fmt(tot.taxable)}</td>
+            <td class="num">${fmt(tot.vat)}</td>
             <td class="num pos"><b>${fmt(tot.net)}</b></td>
             <td class="num">${fmt(tot.ocnt)}</td>
             <td class="num">${tot.rcnt}</td>

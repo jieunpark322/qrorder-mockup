@@ -3495,9 +3495,6 @@ function applyDateRange(){
 // 받는 방법(파일/메일) 선택 시 바로 다운로드/발송 (형식은 엑셀로 고정)
 function openExport(rowsCount, source, dateRange){
   state.exportDateRange = dateRange || '';
-  renderExportModal(rowsCount, source);
-}
-function renderExportModal(rowsCount, source){
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-head">
@@ -3516,103 +3513,16 @@ function renderExportModal(rowsCount, source){
       </div>
     ` : ''}
 
-    <div style="margin-bottom:12px;font-size:14px;font-weight:700;color:var(--ink);">어떻게 받을까요?</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-      <div class="opt-card" onclick='doExport("file",${rowsCount},${JSON.stringify(source)})'>
-        <div class="ico-lg">📂</div>
-        <div class="ttl">엑셀 파일로 받기</div>
-        <div style="font-size:11px;color:var(--ink-3);margin-top:4px;">.xlsx로 바로 다운로드</div>
-      </div>
-      <div class="opt-card" onclick='doExport("email",${rowsCount},${JSON.stringify(source)})'>
-        <div class="ico-lg">📧</div>
-        <div class="ttl">메일로 받기</div>
-        <div style="font-size:11px;color:var(--ink-3);margin-top:4px;">${STORE_EMAIL}</div>
-      </div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
+      <button class="btn-primary" style="flex:2;" onclick='confirmExport(${rowsCount},${JSON.stringify(source)})'>📂 엑셀 파일로 받기</button>
     </div>
-
-    <button class="btn-ghost" style="width:100%;" onclick="closeModal()">취소</button>
   `;
   document.getElementById('modal-bg').classList.add('on');
 }
-function doExport(method, cnt, src){
-  if (method === 'email') {
-    // 메일은 한 단계 더 — 등록된 이메일 확인 + 변경 가능
-    state.exportEmail = STORE_EMAIL;
-    state.exportEmailEditing = false;
-    renderEmailStep(cnt, src);
-    return;
-  }
-  // 파일은 즉시 다운로드
+function confirmExport(cnt, src){
   closeModal();
   alert(`✅ ${src} ${fmt(cnt)}건 엑셀로 다운로드 완료`);
-}
-
-function renderEmailStep(cnt, src){
-  const modal = document.getElementById('modal');
-  modal.innerHTML = `
-    <div class="modal-head">
-      <div>
-        <h3>📤 ${src}</h3>
-        <div class="modal-sub">조회 조건 기준 전체 <b style="color:var(--ink);">${fmt(cnt)}건</b> · 엑셀(.xlsx) 파일로 첨부</div>
-      </div>
-      <button class="close" onclick="closeModal()">✕</button>
-    </div>
-
-    <div class="selected-method" onclick='renderExportModal(${cnt},${JSON.stringify(src)})' style="margin-bottom:16px;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="check">✓</div>
-        <div style="font-size:22px;">📧</div>
-        <div>
-          <div style="font-size:14px;font-weight:800;">메일로 받기</div>
-        </div>
-      </div>
-      <span style="font-size:12px;color:var(--blue);font-weight:700;padding:6px 12px;border-radius:6px;background:#fff;">받는 방법 변경</span>
-    </div>
-
-    <div style="margin-bottom:10px;font-size:14px;font-weight:700;color:var(--ink);">이 메일 주소로 발송할까요?</div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      ${state.exportEmailEditing
-        ? `<input class="input" id="export-email-input" value="${state.exportEmail}" placeholder="example@email.com" style="flex:1;font-size:14px;font-variant-numeric:tabular-nums;" oninput="state.exportEmail=this.value" />
-           <button class="btn-primary" onclick='applyEmailEdit(${cnt},${JSON.stringify(src)})' style="padding:10px 18px;">완료</button>`
-        : `<div style="flex:1;padding:12px 16px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;">${state.exportEmail}</div>
-           <button class="btn-ghost" onclick='startEmailEdit(${cnt},${JSON.stringify(src)})' style="padding:10px 18px;font-weight:700;color:var(--blue);">✏️ 변경</button>`}
-    </div>
-    <div style="font-size:12px;color:var(--ink-3);margin-top:8px;line-height:1.55;">
-      💡 회원가입 시 등록한 이메일이에요. 다른 메일로 받고 싶으시면 <b style="color:var(--ink-2);">변경</b>을 눌러주세요.
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:20px;">
-      <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
-      <button class="btn-primary" style="flex:2;" onclick='confirmEmailSend(${cnt},${JSON.stringify(src)})'>📧 이 메일로 발송</button>
-    </div>
-  `;
-  document.getElementById('modal-bg').classList.add('on');
-  if (state.exportEmailEditing) {
-    setTimeout(()=>{
-      const el = document.getElementById('export-email-input');
-      if (el) { el.focus(); el.select(); }
-    }, 30);
-  }
-}
-
-function startEmailEdit(cnt, src){
-  state.exportEmailEditing = true;
-  renderEmailStep(cnt, src);
-}
-function applyEmailEdit(cnt, src){
-  const el = document.getElementById('export-email-input');
-  if (el) state.exportEmail = (el.value || '').trim() || STORE_EMAIL;
-  state.exportEmailEditing = false;
-  renderEmailStep(cnt, src);
-}
-function confirmEmailSend(cnt, src){
-  // 편집 중에 바로 발송 누른 경우 input 값을 우선 반영
-  if (state.exportEmailEditing) {
-    const el = document.getElementById('export-email-input');
-    if (el) state.exportEmail = (el.value || '').trim() || STORE_EMAIL;
-  }
-  closeModal();
-  alert(`✅ ${src} ${fmt(cnt)}건 엑셀로 ${state.exportEmail}에 발송 완료`);
 }
 
 function openOrderDetail(o){

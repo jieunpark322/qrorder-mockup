@@ -1185,18 +1185,16 @@ function renderOverview(main){
 
     ${basisToggleBar()}
 
-    <!-- KPI 흐름 (총매출 → 차감 → 실매출 → 부가세 → 순매출) -->
+    <!-- KPI 흐름 (총매출 → 차감 → 실매출) — 상세 항목은 매출 상세 보기에서 -->
     <div class="kpi-flow">
       <div class="step gross">
         <div class="label">총매출</div>
         <div class="num">${fmt(gross)}원</div>
-        <div class="sub">결제건수 ${fmt(ordCnt)}건</div>
       </div>
       <div class="arrow">→</div>
       <div class="step refund">
         <div class="label">− 할인·포인트·환불</div>
         <div class="num">−${fmt(disc + pt + ref)}원</div>
-        <div class="sub">할인 ${fmt(disc)} · 포인트 ${fmt(pt)} · 환불 ${fmt(ref)} (${refCnt}건) <span class="tip"><span class="tip-i">i</span><span class="body">환불은 결제일 기준으로<br/>이 기간 매출에서 차감돼요.</span></span></div>
       </div>
       <div class="arrow">→</div>
       <div class="step net">

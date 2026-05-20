@@ -484,9 +484,9 @@
 const STORE = { name:'소프트커피 합정점', owner:'홍길동' };
 
 // 15일치 일별 (5/1 ~ 5/15)
-// gross 총매출 / discount 할인 / point 포인트사용 / refund 환불액 / refundCnt 환불건수 / orderCnt 결제건수
-// 과세: 비과세는 모바일상품권/포인트 등으로 가정 → 총매출 × 0.06
-// 부가세 = (총매출 - 비과세 - 할인) × 10 / 110
+// gross 총매출 / disc 할인 / pt 포인트사용 / ref 환불액 / rcnt 환불건수 / ocnt 결제건수
+// 실매출 = 총매출 − 할인 − 포인트 − 환불
+// 부가세 = 실매출 × 10/110, 순매출 = 실매출 − 부가세
 const DAY = [
   // {date, day, gross, discount, point, refund, refundCnt, orderCnt}
   { d:'5/1',  w:'금', gross:1180000, disc:11000, pt:16000, ref:25000, rcnt:1, ocnt:44 },
@@ -529,8 +529,14 @@ const HOUR_AVG = [ // 4주 동요일 평균
 // 결제수단 — 1depth(메인) + 2depth(sub) 구조
 const METHOD = [
   { name:'카드',         key:'card',    cnt:400, amt:11045000, color:'#3182f6', sub:[
-    { name:'국내',  cnt:380, amt:10520000 },
-    { name:'해외',  cnt:20,  amt:525000, usd:381.55 },
+    { name:'신한카드',           cnt:128, amt:3548000, rate:'2.0%' },
+    { name:'KB국민카드',         cnt:96,  amt:2680000, rate:'2.0%' },
+    { name:'삼성카드',           cnt:74,  amt:2030000, rate:'2.0%' },
+    { name:'현대카드',           cnt:48,  amt:1310000, rate:'2.0%' },
+    { name:'BC카드',             cnt:22,  amt:612000,  rate:'2.0%' },
+    { name:'롯데카드',           cnt:12,  amt:340000,  rate:'2.0%' },
+    { name:'VISA (해외)',        cnt:14,  amt:368000, usd:267.44, rate:'3.5%' },
+    { name:'MASTER (해외)',      cnt:6,   amt:157000, usd:114.11, rate:'3.5%' },
   ]},
   { name:'카카오페이',   key:'kakao',   cnt:115, amt:2980000,  color:'#f5b347', sub:[
     { name:'머니', cnt:48, amt:1240000 },
@@ -612,12 +618,9 @@ const ORDERS = [
       {name:'크루아상',   qty:1, price:4420, options:[]},
       {name:'치즈케이크', qty:1, price:7800, options:[]},
     ] },
-  { id:'#20260515-0042', date:'2026-05-15', time:'09:42', channel:'테이블 1',   ch:'매장', menu:'카페라떼',               issuer:'네이버페이', paySub:'머니', amt:5500,  status:'부분취소', stl:'정산예정 5/20', cancelDate:'2026-05-15', cancelTime:'11:08', refundAmt:2500,
+  { id:'#20260515-0042', date:'2026-05-15', time:'09:42', channel:'테이블 1',   ch:'매장', menu:'카페라떼',               issuer:'네이버페이', paySub:'머니', amt:5500,  status:'완료',     stl:'정산예정 5/20',
     items:[
-      {name:'카페라떼', qty:1, price:5500, options:['ICE','시럽 추가 +500','샷 추가 +500']},
-    ],
-    refundItems:[
-      {name:'샷 추가 옵션', reason:'손님 요청으로 취소', amount:2500},
+      {name:'카페라떼', qty:1, price:5500, options:['ICE','시럽 추가 +500']},
     ] },
   { id:'#20260515-0041', date:'2026-05-15', time:'09:21', channel:'테이블 3',   ch:'매장', menu:'아메리카노 외 1건',   issuer:'삼성', amt:10000, status:'완료',     stl:'정산예정 5/20', card:'4523019012',
     items:[
@@ -984,13 +987,13 @@ function periodRange(){
   return '사용자가 지정한 기간';
 }
 
-// 일자별로 과세/부가세/비과세 계산
+// 매출 흐름: 총매출 → (할인 + 포인트 + 환불) 차감 → 실매출 → 부가세 차감 → 순매출
 function enrichDay(d){
-  const grossNet = d.gross - d.disc - d.ref;       // 순매출 (할인/환불 차감)
-  const taxFree = Math.round(d.gross * 0.06);       // 비과세 (모바일상품권/포인트 등)
-  const taxable = d.gross - taxFree - d.disc;       // 과세 매출
-  const vat = Math.round(taxable * 10 / 110);       // 부가세 (공급대가 기준)
-  return { ...d, net:grossNet, taxable, vat, taxFree };
+  const deduction = (d.disc||0) + (d.pt||0) + (d.ref||0);
+  const actual = d.gross - deduction;             // 실매출 (실제 발생 매출)
+  const vat = Math.round(actual * 10 / 110);      // 부가세 (실매출의 10/110)
+  const net = actual - vat;                       // 순매출 (사장님 공급가액)
+  return { ...d, deduction, actual, vat, net };
 }
 
 /* ============================================================
@@ -1322,10 +1325,10 @@ function renderDetailPeriod(body){
   if (state.detailPeriodMinAmt) rows = rows.filter(r => r.gross >= Number(state.detailPeriodMinAmt));
   if (state.detailPeriodMaxAmt) rows = rows.filter(r => r.gross <= Number(state.detailPeriodMaxAmt));
   const tot = rows.reduce((a,r)=>{
-    ['gross','disc','pt','net','taxable','vat','taxFree','ref','rcnt','ocnt'].forEach(k=>a[k]=(a[k]||0)+(r[k]||0));
+    ['gross','disc','pt','ref','deduction','actual','vat','net','rcnt','ocnt'].forEach(k=>a[k]=(a[k]||0)+(r[k]||0));
     return a;
   },{});
-  const avgPrice = tot.ocnt ? Math.round(tot.net / tot.ocnt) : 0;
+  const avgPrice = tot.ocnt ? Math.round(tot.actual / tot.ocnt) : 0;
 
   // custom 모드 라벨/범위 계산
   let cCenter='', cStart='', cEnd='';
@@ -1356,10 +1359,10 @@ function renderDetailPeriod(body){
 
     <div class="panel" style="padding:14px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
       <div style="font-size:12px;color:var(--ink-2);">
-        💡 <b style="color:var(--ink);">순매출액 = 총매출 − 할인 − 포인트 사용 − 환불액</b>
-        <span style="color:var(--ink-3);margin-left:6px;">(환불은 원래 결제한 날 매출에서 자동 차감돼요)</span>
+        💡 <b style="color:var(--ink);">총매출 − 할인 − 포인트 − 환불 = 실매출 → 부가세 빼면 순매출</b>
+        <span style="color:var(--ink-3);margin-left:6px;">환불은 결제한 날 매출에서 자동으로 빠져요</span>
       </div>
-      <span class="toggle-switch ${state.detailCompare?'on':''}" onclick="toggleDetailCompare()"><span class="sw"></span>전월 동일 시기 비교</span>
+      <span class="toggle-switch ${state.detailCompare?'on':''}" onclick="toggleDetailCompare()"><span class="sw"></span>전월 같은 시기와 비교</span>
     </div>
 
     ${(() => {
@@ -1391,9 +1394,9 @@ function renderDetailPeriod(body){
     })()}
 
     <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
-      <div class="pc-card"><div class="label">총매출 <span class="tip"><span class="tip-i">i</span><span class="body">결제 승인 합계 (공급가+부가세 포함)</span></span></div><div class="num">${fmt(tot.gross)}원</div><div class="sub">${fmt(tot.ocnt)}건 결제</div></div>
-      <div class="pc-card"><div class="label">순매출액 <span class="tip"><span class="tip-i">i</span><span class="body">총매출에서 할인·포인트 사용·환불액을<br/>모두 뺀 금액이에요</span></span></div><div class="num pos">${fmt(tot.net)}원</div><div class="sub">객단가 ${fmt(avgPrice)}원</div></div>
-      <div class="pc-card"><div class="label">환불액</div><div class="num neg">−${fmt(tot.ref)}원</div><div class="sub">${tot.rcnt}건 · 취소율 ${(tot.ref/tot.gross*100).toFixed(1)}%</div></div>
+      <div class="pc-card"><div class="label">총매출 <span class="tip"><span class="tip-i">i</span><span class="body">결제 승인 합계 (부가세 포함)</span></span></div><div class="num">${fmt(tot.gross)}원</div><div class="sub">${fmt(tot.ocnt)}건 결제</div></div>
+      <div class="pc-card"><div class="label">실매출 <span class="tip"><span class="tip-i">i</span><span class="body">총매출에서 할인·포인트·환불을<br/>뺀 실제 발생 매출이에요</span></span></div><div class="num">${fmt(tot.actual)}원</div><div class="sub">건당 ${fmt(avgPrice)}원</div></div>
+      <div class="pc-card"><div class="label">순매출 <span class="tip"><span class="tip-i">i</span><span class="body">실매출에서 부가세를 뺀<br/>사장님 공급가액이에요</span></span></div><div class="num pos">${fmt(tot.net)}원</div><div class="sub">부가세 ${fmt(tot.vat)}원</div></div>
     </div>
 
     <div class="panel">
@@ -1413,52 +1416,46 @@ function renderDetailPeriod(body){
           <tr>
             ${sortableHeader({key:'label', label:state.detailGroup==='day'?'날짜':state.detailGroup==='week'?'주':state.detailGroup==='month'?'월':'기간', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'gross', label:'총매출', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            ${sortableHeader({key:'disc', label:'할인', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            ${sortableHeader({key:'pt', label:'포인트 사용', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            ${sortableHeader({key:'ref', label:'환불액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            ${sortableHeader({key:'net', label:'순매출액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            ${sortableHeader({key:'taxable', label:'과세금액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            ${sortableHeader({key:'vat', label:'부가세', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            ${sortableHeader({key:'taxFree', label:'비과세금액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'disc', label:'− 할인', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'pt', label:'− 포인트', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'ref', label:'− 환불', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'actual', label:'= 실매출', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'vat', label:'− 부가세', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'net', label:'= 순매출', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'ocnt', label:'결제건수', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'rcnt', label:'환불건수', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            <th class="num">객단가</th>
           </tr>
         </thead>
         <tbody>
           ${applySort(rows, state.detailPeriodSort, {
             label: r=>r.label, gross:r=>r.gross, disc:r=>r.disc, pt:r=>r.pt, ref:r=>r.ref,
-            net:r=>r.net, taxable:r=>r.taxable, vat:r=>r.vat, taxFree:r=>r.taxFree,
+            actual:r=>r.actual, vat:r=>r.vat, net:r=>r.net,
             ocnt:r=>r.ocnt, rcnt:r=>r.rcnt
           }).map(r=>`
-            <tr class="clickable" onclick='openPeriodDetail(${JSON.stringify(r.label)}, ${JSON.stringify(r.d || "")})' title="클릭하면 이 ${state.detailGroup==='day'?'날':'기간'}의 주문 상세 내역을 볼 수 있어요">
-              <td><b>${r.label}</b> <span class="row-go">상세 ›</span></td>
+            <tr class="clickable" onclick='openPeriodDetail(${JSON.stringify(r.label)}, ${JSON.stringify(r.d || "")})' title="이 ${state.detailGroup==='day'?'날':'기간'}의 결제 내역을 볼 수 있어요">
+              <td><b>${r.label}</b> <span class="row-go">자세히 ›</span></td>
               <td class="num">${fmt(r.gross)}</td>
-              <td class="num">${fmt(r.disc)}</td>
-              <td class="num">${fmt(r.pt)}</td>
-              <td class="num neg">−${fmt(r.ref)}</td>
+              <td class="num">${r.disc?'−'+fmt(r.disc):'−'}</td>
+              <td class="num">${r.pt?'−'+fmt(r.pt):'−'}</td>
+              <td class="num neg">${r.ref?'−'+fmt(r.ref):'−'}</td>
+              <td class="num"><b>${fmt(r.actual)}</b></td>
+              <td class="num">−${fmt(r.vat)}</td>
               <td class="num pos"><b>${fmt(r.net)}</b></td>
-              <td class="num">${fmt(r.taxable)}</td>
-              <td class="num">${fmt(r.vat)}</td>
-              <td class="num">${fmt(r.taxFree)}</td>
               <td class="num">${fmt(r.ocnt)}</td>
               <td class="num">${r.rcnt}</td>
-              <td class="num">${fmt(Math.round(r.net/r.ocnt))}</td>
             </tr>
           `).join('')}
           <tr class="total">
             <td>합계</td>
             <td class="num">${fmt(tot.gross)}</td>
-            <td class="num">${fmt(tot.disc)}</td>
-            <td class="num">${fmt(tot.pt)}</td>
-            <td class="num neg">−${fmt(tot.ref)}</td>
-            <td class="num">${fmt(tot.net)}</td>
-            <td class="num">${fmt(tot.taxable)}</td>
-            <td class="num">${fmt(tot.vat)}</td>
-            <td class="num">${fmt(tot.taxFree)}</td>
+            <td class="num">${tot.disc?'−'+fmt(tot.disc):'−'}</td>
+            <td class="num">${tot.pt?'−'+fmt(tot.pt):'−'}</td>
+            <td class="num neg">${tot.ref?'−'+fmt(tot.ref):'−'}</td>
+            <td class="num"><b>${fmt(tot.actual)}</b></td>
+            <td class="num">−${fmt(tot.vat)}</td>
+            <td class="num pos"><b>${fmt(tot.net)}</b></td>
             <td class="num">${fmt(tot.ocnt)}</td>
             <td class="num">${tot.rcnt}</td>
-            <td class="num">${fmt(avgPrice)}</td>
           </tr>
         </tbody>
       </table>
@@ -2043,11 +2040,11 @@ function renderDetailMethod(body){
               </tr>
               ${m.sub?m.sub.map(s=>`
                 <tr style="background:#fafbfc;">
-                  <td style="padding-left:40px;color:var(--ink-2);font-size:12px;">▸ ${s.name}</td>
+                  <td style="padding-left:40px;color:var(--ink-2);font-size:12px;">▸ ${s.name}${s.rate?` <span style="font-size:10px;color:var(--ink-3);margin-left:4px;">(${s.rate})</span>`:''}${s.usd?`<div style="font-size:10px;color:var(--ink-3);margin-top:2px;">USD ${s.usd.toFixed(2)}</div>`:''}</td>
                   <td class="num">${fmt(s.cnt)}건</td>
                   <td class="num">${fmt(s.amt)}원</td>
                   <td class="num">${(s.amt/totAmt*100).toFixed(1)}%</td>
-                  <td class="num">−</td>
+                  <td class="num">${s.cnt?fmt(Math.round(s.amt/s.cnt))+'원':'−'}</td>
                   <td class="num">−</td>
                 </tr>
               `).join(''):''}
@@ -2103,7 +2100,7 @@ function renderOrders(main){
   // 'all' 인 경우 1년 초과 거래까지 모두 노출
 
   // 상태 필터
-  if (state.orderStatusFilter==='cancel-all') rows = rows.filter(o=>o.status==='전체취소' || o.status==='부분취소');
+  if (state.orderStatusFilter==='cancel-all') rows = rows.filter(o=>o.status==='전체취소');
   else if (state.orderStatusFilter!=='all')   rows = rows.filter(o=>o.status===state.orderStatusFilter);
 
   // 채널 필터 (매장/포장/배달)
@@ -2113,14 +2110,6 @@ function renderOrders(main){
   if (state.orderPayFilter!=='all') rows = rows.filter(o=>payMain(o)===state.orderPayFilter);
 
   // 정산상태 필터
-  if (state.orderStlFilter!=='all') {
-    rows = rows.filter(o=>{
-      if (state.orderStlFilter==='정산완료') return o.stl.includes('완료');
-      if (state.orderStlFilter==='정산예정') return o.stl.includes('예정');
-      if (state.orderStlFilter==='제외')     return o.stl==='제외' || o.stl==='−';
-      return true;
-    });
-  }
 
   // 메뉴 검색 — 요약 라벨(o.menu)뿐 아니라 상세 items.name까지 매칭
   if (state.orderMenuSearch){
@@ -2164,15 +2153,12 @@ function renderOrders(main){
     stl: o => o.stl,
   });
 
-  // 결제 집계 — 매출 상세 모달과 동일 규칙
-  // 전체취소: 합계/결제완료에서 제외 / 부분취소: 결제완료 포함, 환불액만 차감
+  // 결제 집계 — 전체취소만 존재 (부분취소 정책 없음)
   const cancelAllCnt = rows.filter(o=>o.status==='전체취소').length;
-  const partialCnt   = rows.filter(o=>o.status==='부분취소').length;
   const validCnt     = rows.length - cancelAllCnt;
-  const refundCnt    = cancelAllCnt + partialCnt;
+  const refundCnt    = cancelAllCnt;
   const totalAmt = rows.reduce((s,o)=>{
     if (o.status==='전체취소') return s;
-    if (o.status==='부분취소') return s + (o.amt - (o.refundAmt||0));
     return s + o.amt;
   }, 0);
 
@@ -2201,7 +2187,7 @@ function renderOrders(main){
     })()}
 
     <div class="toolbar">
-      <div><h2>주문 내역</h2><div class="page-sub">${rows.length}건 조회 · 결제완료 <b style="color:var(--ink);">${validCnt}건 · ${fmt(totalAmt)}원</b>${refundCnt?` · 취소·환불 ${refundCnt}건 (전체 ${cancelAllCnt}·부분 ${partialCnt})`:''}</div></div>
+      <div><h2>주문 내역</h2><div class="page-sub">${rows.length}건 조회 · 결제완료 <b style="color:var(--ink);">${validCnt}건 · ${fmt(totalAmt)}원</b>${cancelAllCnt?` · 전체취소 ${cancelAllCnt}건`:''}</div></div>
       <div class="left">
         <button class="btn-primary" onclick='openExport(${rows.length}, "주문 내역", ${JSON.stringify(
           state.orderDateFilter==='today'?'오늘 (2026년 5월 15일(금))':
@@ -2241,7 +2227,6 @@ function renderOrders(main){
         state.orderMenuSearch && '메뉴',
         state.orderChannelFilter!=='all' && '채널',
         state.orderPayFilter!=='all' && '결제수단',
-        state.orderStlFilter!=='all' && '정산상태',
         state.orderCardValue && '카드번호',
         (state.orderAmountMin || state.orderAmountMax) && '금액',
         state.orderSearch && '주문번호',
@@ -2295,13 +2280,6 @@ function renderOrders(main){
             </div>
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
-            <span class="field-label">정산상태</span>
-            <span class="chip ${state.orderStlFilter==='all'?'on':''}" onclick="state.orderStlFilter='all';renderApp()">전체</span>
-            <span class="chip ${state.orderStlFilter==='정산예정'?'on':''}" onclick="state.orderStlFilter='정산예정';renderApp()">정산예정</span>
-            <span class="chip ${state.orderStlFilter==='정산완료'?'on':''}" onclick="state.orderStlFilter='정산완료';renderApp()">정산완료</span>
-            <span class="chip ${state.orderStlFilter==='제외'?'on':''}" onclick="state.orderStlFilter='제외';renderApp()">제외</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
             <span class="field-label">카드번호</span>
             <div class="seg sm">
               <div class="b ${state.orderCardMode==='first6'?'on':''}" onclick="setCardMode('first6')">앞 6자리</div>
@@ -2339,30 +2317,22 @@ function renderOrders(main){
             ${sortableHeader({key:'pay', label:'결제수단', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'amt', label:'결제금액', align:'num', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'status', label:'상태', currentSort:state.orderSort, setter:'setOrderSort'})}
-            ${sortableHeader({key:'stl', label:'정산상태', currentSort:state.orderSort, setter:'setOrderSort'})}
             <th></th>
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="9">조건에 맞는 주문이 없어요.</td></tr>` : rows.slice(0,state.orderRowsPerPage).map(o=>{
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="8">조건에 맞는 주문이 없어요.</td></tr>` : rows.slice(0,state.orderRowsPerPage).map(o=>{
             const isCancelAll = o.status==='전체취소';
-            const isPartial   = o.status==='부분취소';
-            const rowAttr = isCancelAll ? ' style="background:#fff7f7;"' : (isPartial ? ' style="background:#fffaf0;"' : '');
+            const rowAttr = isCancelAll ? ' style="background:#fff7f7;"' : '';
             const idStyle = isCancelAll ? 'color:var(--red);font-weight:700;text-decoration:line-through;' : '';
             const dateLabel = o.date.slice(5).replace('-','/');
             const cancelDateLabel = o.cancelDate ? o.cancelDate.slice(5).replace('-','/') : dateLabel;
-            const cancelLine = (isCancelAll || isPartial) && o.cancelTime
-              ? `<div style="margin-top:4px;font-size:11px;font-weight:600;color:${isCancelAll?'var(--red)':'#a25e00'};white-space:nowrap;">↺ ${cancelDateLabel} ${o.cancelTime} ${isCancelAll?'전체취소':`부분취소 −${fmt(o.refundAmt||0)}원`}</div>`
+            const cancelLine = isCancelAll && o.cancelTime
+              ? `<div style="margin-top:4px;font-size:11px;font-weight:600;color:var(--red);white-space:nowrap;">↺ ${cancelDateLabel} ${o.cancelTime} 전체취소</div>`
               : '';
-            let amountCell;
-            if (isCancelAll) {
-              amountCell = `<b><s style="color:var(--ink-3);">${fmt(o.amt)}</s></b>`;
-            } else if (isPartial) {
-              const net = o.amt - (o.refundAmt||0);
-              amountCell = `<b>${fmt(net)}</b><div style="margin-top:2px;font-size:10px;color:var(--ink-3);font-weight:500;white-space:nowrap;">원 ${fmt(o.amt)} − 환불 ${fmt(o.refundAmt||0)}</div>`;
-            } else {
-              amountCell = `<b>${fmt(o.amt)}</b>${o.currency?`<div style="color:var(--ink-3);font-size:11px;">(${o.currency})</div>`:''}`;
-            }
+            const amountCell = isCancelAll
+              ? `<b><s style="color:var(--ink-3);">${fmt(o.amt)}</s></b>`
+              : `<b>${fmt(o.amt)}</b>${o.currency?`<div style="color:var(--ink-3);font-size:11px;">(${o.currency})</div>`:''}`;
             return `
             <tr class="clickable"${rowAttr} onclick='openOrderDetail(${JSON.stringify(o)})'>
               <td style="white-space:nowrap;">
@@ -2378,9 +2348,8 @@ function renderOrders(main){
               <td>${o.menu}</td>
               <td>${payLabel(o)}</td>
               <td class="num">${amountCell}</td>
-              <td><span class="pill ${o.status==='완료'?'done':isCancelAll?'cancel':'partial'}">${o.status}</span></td>
-              <td><span class="pill ${o.stl.includes('완료')?'done':o.stl==='제외'||o.stl==='−'?'hold':'pending'}">${o.stl}</span></td>
-              <td style="color:var(--blue);font-weight:600;">상세 ›</td>
+              <td><span class="pill ${o.status==='완료'?'done':'cancel'}">${o.status}</span></td>
+              <td style="color:var(--blue);font-weight:600;">자세히 ›</td>
             </tr>`;
           }).join('')}
         </tbody>
@@ -2858,7 +2827,7 @@ function renderStlDetail(main){
           <div class="stl-detail-date">${stl.settleDate}(${stl.settleDow})</div>
           <div class="stl-detail-status ${stl.statusPill}">${statusLabel}</div>
         </div>
-        <div class="stl-detail-meta">${stl.id} · 영업일 ${stl.approvalDate}(${stl.approvalDow}) (03:00 ~ 익일 02:59) · 신한 ****1234</div>
+        <div class="stl-detail-meta">${stl.id} · 결제일 ${stl.approvalDate}(${stl.approvalDow}) · 신한 ****1234</div>
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력으로</button>
@@ -2908,11 +2877,10 @@ function renderStlDetail(main){
           <tr class="clickable"><td>${lastApprovalLabel} 09:42</td><td>tid_3f8a...02</td><td>🟡 카카오페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">12,000</td><td class="num">−276</td><td class="num">−28</td><td class="num">11,696</td><td><span class="pill done">반영</span></td></tr>
           <tr class="clickable"><td>${lastApprovalLabel} 10:12</td><td>tid_3f8a...03</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· KB</span></td><td class="num">8,000</td><td class="num">0</td><td class="num">0</td><td class="num">−</td><td><span class="pill cancel">취소(전)</span></td></tr>
           <tr class="clickable"><td>${lastApprovalLabel} 10:24</td><td>tid_3f8a...04</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 해외 (VISA)</span></td><td class="num">27,420<br/><span style="font-size:11px;color:var(--ink-3);">($19.90)</span></td><td class="num">−959</td><td class="num">−96</td><td class="num">26,365</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>${lastApprovalLabel} 11:08</td><td>tid_3f8a...05</td><td>🟢 네이버페이 <span style="color:var(--ink-3);font-size:11px;">· 머니</span></td><td class="num">5,500</td><td class="num">−132</td><td class="num">−13</td><td class="num">5,355</td><td><span class="pill partial">부분취소</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 11:08</td><td>tid_3f8a...05</td><td>🟢 네이버페이 <span style="color:var(--ink-3);font-size:11px;">· 머니</span></td><td class="num">5,500</td><td class="num">−132</td><td class="num">−13</td><td class="num">5,355</td><td><span class="pill done">반영</span></td></tr>
           <tr class="clickable"><td>${lastApprovalLabel} 11:42</td><td>tid_3f8a...06</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 삼성</span></td><td class="num">14,500</td><td class="num">−290</td><td class="num">−29</td><td class="num">14,181</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>${lastApprovalLabel} 23:14</td><td>tid_3f8a...07</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">18,200</td><td class="num">−364</td><td class="num">−36</td><td class="num">17,800</td><td><span class="pill done">반영</span></td></tr>
-          <tr style="background:#fafbfc;border-top:1px dashed var(--line);"><td colspan="8" style="text-align:center;font-size:11px;color:#a25e00;font-weight:700;padding:8px;letter-spacing:.02em;">⏰ ─── 자정 이후 · ${lastApprovalLabel}(${lastApprovalDow}) 영업일 마감(${nextDayLabel} 03:00) 전까지 동일 회차에 포함 ─── </td></tr>
-          <tr class="clickable" style="background:#fff5f0;"><td>${nextDayLabel} 01:42<br/><span style="font-size:11px;color:var(--amber);">${lastApprovalLabel} 영업일</span></td><td>tid_3f8a...08</td><td>🔵 토스페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">9,500</td><td class="num">−219</td><td class="num">−22</td><td class="num">9,259</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 21:14</td><td>tid_3f8a...07</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">18,200</td><td class="num">−364</td><td class="num">−36</td><td class="num">17,800</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 22:32</td><td>tid_3f8a...08</td><td>🔵 토스페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">9,500</td><td class="num">−219</td><td class="num">−22</td><td class="num">9,259</td><td><span class="pill done">반영</span></td></tr>
         </tbody>
       </table>
       </div>
@@ -3056,8 +3024,8 @@ function renderBank(main){
       <div class="holder">예금주 홍길동 · 사업자 대표명과 일치</div>
       <span class="vtag">✓ 본인 인증 완료 · 2026-02-14</span>
     </div>
-    <div style="margin-top:14px;max-width:540px;">
-      <button class="btn-primary" style="width:100%;" onclick="alert('계좌 변경 진행')">계좌 변경하기</button>
+    <div class="info-card" style="max-width:540px;margin-top:14px;font-size:12px;">
+      💡 정산 계좌 변경은 곧 지원될 예정이에요. 지금은 계좌 정보 확인만 가능해요.
     </div>
   `;
 }
@@ -3531,18 +3499,13 @@ function openOrderDetail(o){
     : `<div class="r-line"><span>카드번호</span><div style="text-align:right;"><b style="font-variant-numeric:tabular-nums;">****-****-****-****</b><div style="font-size:11px;color:var(--amber);margin-top:2px;">🔒 1년 초과 마스킹</div></div></div>`) : '';
 
   const isCancelAll = o.status==='전체취소';
-  const isPartial   = o.status==='부분취소';
   const cancelDateLabel = o.cancelDate ? o.cancelDate.slice(5).replace('-','/') : (o.date.slice(5).replace('-','/'));
-  const statusPill = `<span class="pill ${isCancelAll?'cancel':isPartial?'partial':'done'}" style="margin-left:8px;font-size:11px;">${o.status}</span>`;
+  const statusPill = `<span class="pill ${isCancelAll?'cancel':'done'}" style="margin-left:8px;font-size:11px;">${o.status}</span>`;
 
   const amountBlock = isCancelAll ? `
       <div class="r-line"><span>결제금액 <span style="font-size:11px;color:var(--ink-3);">(원)</span></span><b style="font-size:14px;color:var(--ink-3);text-decoration:line-through;">${fmt(o.amt)}원</b></div>
       <div class="r-line" style="background:#fff7f7;margin:4px -8px;padding:8px;border-radius:8px;"><span style="color:var(--red);font-weight:600;">↺ 전체취소 처리</span><b style="color:var(--red);">${cancelDateLabel} ${o.cancelTime||'−'}</b></div>
-      <div class="r-line"><span><b>실 매출</b></span><b style="font-size:16px;color:var(--red);">0원</b></div>
-  ` : isPartial ? `
-      <div class="r-line"><span>결제금액 <span style="font-size:11px;color:var(--ink-3);">(원)</span></span><b style="font-size:14px;">${fmt(o.amt)}원</b></div>
-      <div class="r-line" style="background:#fffaf0;margin:4px -8px;padding:8px;border-radius:8px;"><span style="color:#a25e00;font-weight:600;">↺ 부분취소 환불</span><b style="color:#a25e00;">${cancelDateLabel} ${o.cancelTime||'−'} · −${fmt(o.refundAmt||0)}원</b></div>
-      <div class="r-line"><span><b>실 매출</b></span><b style="font-size:16px;color:var(--blue);">${fmt(o.amt - (o.refundAmt||0))}원</b></div>
+      <div class="r-line"><span><b>실매출</b></span><b style="font-size:16px;color:var(--red);">0원</b></div>
   ` : `
       <div class="r-line"><span><b>결제금액</b></span><b style="font-size:16px;color:var(--blue);">${fmt(o.amt)}원</b></div>
   `;
@@ -3564,7 +3527,7 @@ function openOrderDetail(o){
       <div class="r-line"><span>채널</span><b>${o.channel} (${o.ch})</b></div>
       <hr/>
       <div class="r-line"><span>주문일시</span><b>${o.date} ${o.time}</b></div>
-      ${(isCancelAll||isPartial) && o.cancelTime ? `<div class="r-line"><span>취소 처리</span><b style="color:${isCancelAll?'var(--red)':'#a25e00'};">${o.cancelDate||o.date} ${o.cancelTime}</b></div>`:''}
+      ${isCancelAll && o.cancelTime ? `<div class="r-line"><span>취소 처리</span><b style="color:var(--red);">${o.cancelDate||o.date} ${o.cancelTime}</b></div>`:''}
       <div style="margin:8px 0;padding:12px 14px;background:var(--bg-2);border-radius:10px;">
         <div style="font-size:11px;color:var(--ink-3);font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
           <span>🧾 주문 메뉴 상세</span>
@@ -3579,20 +3542,6 @@ function openOrderDetail(o){
             <div style="font-variant-numeric:tabular-nums;font-size:13px;color:var(--ink-2);white-space:nowrap;">${fmt(it.price * it.qty)}원</div>
           </div>
         `).join('')}
-        ${o.refundItems && o.refundItems.length ? `
-          <div style="margin-top:10px;padding:10px 12px;background:#fffaf0;border:1px dashed #ffd9a3;border-radius:8px;">
-            <div style="font-size:11px;font-weight:700;color:#a25e00;margin-bottom:6px;">↺ 부분취소 환불 내역</div>
-            ${o.refundItems.map(r=>`
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;gap:8px;">
-                <div style="flex:1;min-width:0;">
-                  <b style="color:var(--ink);">${r.name}</b>
-                  ${r.reason ? `<div style="color:var(--ink-3);font-size:11px;margin-top:2px;">— ${r.reason}</div>` : ''}
-                </div>
-                <b style="color:#a25e00;font-variant-numeric:tabular-nums;">−${fmt(r.amount)}원</b>
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
       </div>
       <hr/>
       ${amountBlock}
@@ -3612,14 +3561,13 @@ function openOrderDetail(o){
           <div class="r-line"><span>매입일 (예정)</span><b>${within?'영업일 D+1':'정산완료'}</b></div>
           <div class="r-line"><span>정산 회차</span><b style="color:var(--ink-3);">${within?'집계 중':'완료된 회차'}</b></div>`;
         return `
-          <div class="r-line"><span>매입일 (예정)</span><b>${stl.approvalDate}(${stl.approvalDow}) 영업일 마감 후</b></div>
+          <div class="r-line"><span>매입일 (예정)</span><b>${stl.approvalDate}(${stl.approvalDow}) 마감 후</b></div>
           <div class="r-line"><span>정산 회차</span><b style="color:var(--blue);cursor:pointer;" onclick="closeModal();openStlDetail('${stl.id}');">${stl.id} · ${stl.settleDate}(${stl.settleDow}) ${stl.status} ›</b></div>`;
       })()}
     </div>
     <div style="margin-top:14px;display:flex;gap:8px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeModal()">🖨️ 영수증 출력</button>
       ${within && o.status==='완료' ? `
-        <button class="btn-ghost" style="flex:1;" onclick="alert('부분 취소 시트 진입')">부분 취소</button>
         <button class="btn-danger" style="flex:1;" onclick="alert('전체 취소 확인 사항: 고객 카드로 환불 영업일 3~5일 소요')">전체 취소</button>
       ` : !within ? `
         <button class="btn-ghost" style="flex:1;opacity:.5;cursor:not-allowed;" disabled>🔒 취소 기간 만료</button>
@@ -3664,12 +3612,10 @@ function openPeriodDetail(label, dateStr){
   }
 
   const cancelAllCnt = list.filter(o=>o.status==='전체취소').length;
-  const partialCnt   = list.filter(o=>o.status==='부분취소').length;
-  const validCnt     = list.length - cancelAllCnt;   // 결제완료 (부분취소 포함)
-  const refundCnt    = cancelAllCnt + partialCnt;
+  const validCnt     = list.length - cancelAllCnt;
+  const refundCnt    = cancelAllCnt;
   const totalAmt     = list.reduce((s,o)=>{
     if (o.status==='전체취소') return s;
-    if (o.status==='부분취소') return s + (o.amt - (o.refundAmt||0));
     return s + o.amt;
   }, 0);
   const fmtCancelDate = d => d ? `${parseInt(d.slice(5,7),10)}/${parseInt(d.slice(8),10)}` : '';
@@ -3688,7 +3634,7 @@ function openPeriodDetail(label, dateStr){
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
       <span class="chip">결제완료 <b style="margin-left:4px;color:var(--ink);">${validCnt}건</b></span>
       <span class="chip on">합계 ${fmt(totalAmt)}원</span>
-      <span class="chip">취소·환불 <b style="margin-left:4px;color:var(--ink);">${refundCnt}건</b> <span style="color:var(--ink-3);font-size:11px;margin-left:4px;">(전체 ${cancelAllCnt}·부분 ${partialCnt})</span></span>
+      <span class="chip">전체취소 <b style="margin-left:4px;color:var(--ink);">${cancelAllCnt}건</b></span>
     </div>
 
     <div style="overflow-x:auto;border:1px solid var(--line);border-radius:10px;">
@@ -3710,21 +3656,17 @@ function openPeriodDetail(label, dateStr){
           const dateLabel = `${parseInt(o.date.slice(5,7),10)}/${parseInt(o.date.slice(8),10)}`;
           const pillCls = o.status==='완료'?'done':o.status==='전체취소'?'cancel':'partial';
           const isCancelAll = o.status==='전체취소';
-          const isPartial   = o.status==='부분취소';
-          const rowAttr = isCancelAll ? ' style="background:#fff7f7;"' : (isPartial ? ' style="background:#fffaf0;"' : '');
+          const rowAttr = isCancelAll ? ' style="background:#fff7f7;"' : '';
           const idStyle = isCancelAll
             ? 'color:var(--red);font-weight:700;font-size:12px;text-decoration:line-through;'
             : 'color:var(--ink-2);font-size:12px;';
           const approvalStyle = 'font-variant-numeric:tabular-nums;' + (isCancelAll ? 'color:var(--ink-3);' : '');
-          const cancelLabel = (isCancelAll || isPartial)
-            ? `<div style="margin-top:4px;font-size:11px;font-weight:600;color:${isCancelAll?'var(--red)':'#a25e00'};white-space:nowrap;">↺ ${fmtCancelDate(o.cancelDate)} ${o.cancelTime||'−'} ${isCancelAll?'전체취소 처리':`부분취소 −${fmt(o.refundAmt||0)}원`}</div>`
+          const cancelLabel = isCancelAll
+            ? `<div style="margin-top:4px;font-size:11px;font-weight:600;color:var(--red);white-space:nowrap;">↺ ${fmtCancelDate(o.cancelDate)} ${o.cancelTime||'−'} 전체취소 처리</div>`
             : '';
           let amountCell;
           if (isCancelAll) {
             amountCell = `<s style="color:var(--ink-3);">${fmt(o.amt)}</s>`;
-          } else if (isPartial) {
-            const net = o.amt - (o.refundAmt||0);
-            amountCell = `<b>${fmt(net)}</b><div style="margin-top:2px;font-size:10px;color:var(--ink-3);font-weight:500;white-space:nowrap;">원 ${fmt(o.amt)} − 환불 ${fmt(o.refundAmt||0)}</div>`;
           } else {
             amountCell = fmt(o.amt);
           }
@@ -3745,8 +3687,7 @@ function openPeriodDetail(label, dateStr){
     </div>
 
     <div style="margin-top:12px;padding:12px 14px;background:var(--bg-2);border-radius:10px;font-size:12px;color:var(--ink-2);line-height:1.65;">
-      💡 <b style="color:var(--red);">전체취소</b>는 결제 자체가 무효 처리돼서 <b style="color:var(--ink);">결제완료 집계와 매출 합계에서 빠져요</b>. 주문번호는 원주문 그대로 남고 빨간 취소선으로 표시돼요.<br/>
-      💡 <b style="color:#a25e00;">부분취소</b>는 메뉴 일부만 환불된 경우로 <b style="color:var(--ink);">결제완료 1건으로 집계</b>되고, 환불된 금액만 차감돼요.
+      💡 <b style="color:var(--red);">전체취소</b>는 결제 자체가 무효 처리돼서 <b style="color:var(--ink);">결제완료 집계와 매출 합계에서 빠져요</b>. 주문번호는 원주문 그대로 남고 빨간 취소선으로 표시돼요.
     </div>
 
     <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--ink-3);">

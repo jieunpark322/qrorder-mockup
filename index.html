@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>QR오더 점주 관리자 — 인터랙티브 프로토타입</title>
+<title>QR오더 사장님 관리자 — 인터랙티브 프로토타입</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -454,7 +454,7 @@
 <body>
 
 <div class="doc-head">
-  <h1>QR오더 점주 관리자 — 인터랙티브 프로토타입</h1>
+  <h1>QR오더 사장님 관리자 — 인터랙티브 프로토타입</h1>
   <p>토스 톤 PC 웹 · 사이드바·탭·필터·드롭다운·모달 모두 실제 동작 · 더미 데이터 기준일 2026-05-15(금)</p>
   <div class="hint">
     💡 <b>이렇게 써보세요</b> — 사이드바 메뉴, 탭, 일/주/월 토글, 표시 개수 드롭다운, 페이지 번호, 표 행, KPI 카드, 차트 막대를 모두 클릭/호버해보세요. 환불은 <b>결제일 기준</b>으로 고정 반영됩니다.
@@ -525,62 +525,66 @@ const HOUR_AVG = [ // 4주 동요일 평균
   { h:0,  amt: 4000   }, { h:1,  amt: 2000   }, { h:2,  amt: 1000   },
 ];
 
-// 결제수단 (이번 달)
+// 결제수단 (이번 달 1~15일 · DAY 합계 17,533,100원 기준)
 // 결제수단 — 1depth(메인) + 2depth(sub) 구조
 const METHOD = [
-  { name:'카드',         key:'card',    cnt:662, amt:17756800, color:'#3182f6', sub:[
-    { name:'국내',  cnt:628, amt:16840000 },
-    { name:'해외',  cnt:34,  amt:916800, usd:666.30 },
+  { name:'카드',         key:'card',    cnt:400, amt:11045000, color:'#3182f6', sub:[
+    { name:'국내',  cnt:380, amt:10520000 },
+    { name:'해외',  cnt:20,  amt:525000, usd:381.55 },
   ]},
-  { name:'카카오페이',   key:'kakao',   cnt:196, amt:5155200,  color:'#f5b347', sub:[
-    { name:'머니', cnt:80,  amt:2150000 },
-    { name:'페이', cnt:116, amt:3005200 },
+  { name:'카카오페이',   key:'kakao',   cnt:115, amt:2980000,  color:'#f5b347', sub:[
+    { name:'머니', cnt:48, amt:1240000 },
+    { name:'페이', cnt:67, amt:1740000 },
   ]},
-  { name:'네이버페이',   key:'naver',   cnt:116, amt:3150400,  color:'#1eb18d', sub:[
-    { name:'머니', cnt:42, amt:1140000 },
-    { name:'페이', cnt:74, amt:2010400 },
+  { name:'네이버페이',   key:'naver',   cnt:67,  amt:1755000,  color:'#1eb18d', sub:[
+    { name:'머니', cnt:24, amt:630000 },
+    { name:'페이', cnt:43, amt:1125000 },
   ]},
-  { name:'토스페이',     key:'toss',    cnt:23,  amt:615000,   color:'#0064FF', sub:[
-    { name:'페이', cnt:23, amt:615000 },
+  { name:'토스페이',     key:'toss',    cnt:14,  amt:350000,   color:'#0064FF', sub:[
+    { name:'페이', cnt:14, amt:350000 },
   ]},
-  { name:'현금',         key:'cash',    cnt:42,  amt:1150000,  color:'#9aa5b1' },
-  { name:'계좌이체',     key:'transfer',cnt:20,  amt:282000,   color:'#b0b8c1' },
-  { name:'자체 포인트',  key:'point',   cnt:24,  amt:720000,   color:'#8b5cf6' },
-  { name:'모바일 상품권',key:'voucher', cnt:12,  amt:425600,   color:'#f04452' },
+  { name:'현금',         key:'cash',    cnt:30,  amt:700000,   color:'#9aa5b1' },
+  { name:'계좌이체',     key:'transfer',cnt:8,   amt:175000,   color:'#b0b8c1' },
+  { name:'자체 포인트',  key:'point',   cnt:18,  amt:438000,   color:'#8b5cf6' },
+  { name:'모바일 상품권',key:'voucher', cnt:11,  amt:90100,    color:'#f04452' },
 ];
+// 합계: 663건 / 17,533,100원 (DAY 15일치와 일치)
 
-// 메뉴 (이번 달)
+// 메뉴 (이번 달 1~15일 · DAY 합계 기준 비례 축소)
 const MENU = [
-  { rank:1,  name:'아메리카노',   cat:'커피',     qty:1408, amt:5632000, price:4000, refund:48000, refundCnt:12, hot:true },
-  { rank:2,  name:'카페라떼',     cat:'커피',     qty:704,  amt:3168000, price:4500, refund:36000, refundCnt:8 },
-  { rank:3,  name:'크루아상',     cat:'베이커리', qty:416,  amt:2496000, price:6000, refund:18000, refundCnt:3 },
-  { rank:4,  name:'제주녹차',     cat:'차/논커피',qty:256,  amt:1792000, price:7000, refund:7000,  refundCnt:1, isNew:true },
-  { rank:5,  name:'자몽에이드',   cat:'음료',     qty:192,  amt:1536000, price:8000, refund:40000, refundCnt:5 },
-  { rank:6,  name:'치즈케이크',   cat:'베이커리', qty:168,  amt:1344000, price:8000, refund:16000, refundCnt:2 },
-  { rank:7,  name:'바닐라라떼',   cat:'커피',     qty:224,  amt:1232000, price:5500, refund:22000, refundCnt:4 },
-  { rank:8,  name:'카푸치노',     cat:'커피',     qty:200,  amt:1000000, price:5000, refund:10000, refundCnt:2 },
-  { rank:9,  name:'딸기라떼',     cat:'음료',     qty:144,  amt:936000,  price:6500, refund:6500,  refundCnt:1 },
-  { rank:10, name:'스콘 (블루베리)', cat:'베이커리', qty:128, amt:704000, price:5500, refund:0, refundCnt:0 },
-  { rank:11, name:'얼그레이',     cat:'차/논커피',qty:112,  amt:672000,  price:6000, refund:0, refundCnt:0 },
-  { rank:12, name:'마들렌',       cat:'베이커리', qty:96,   amt:576000,  price:6000, refund:0, refundCnt:0 },
-  { rank:13, name:'아이스티',     cat:'음료',     qty:80,   amt:480000,  price:6000, refund:0, refundCnt:0 },
-  { rank:14, name:'카라멜마끼아또',cat:'커피',     qty:88,   amt:528000,  price:6000, refund:6000, refundCnt:1 },
-  { rank:15, name:'호지차',       cat:'차/논커피',qty:64,   amt:448000,  price:7000, refund:0, refundCnt:0 },
+  { rank:1,  name:'아메리카노',   cat:'커피',     qty:1095, amt:4380000, price:4000, refund:48000, refundCnt:12, hot:true },
+  { rank:2,  name:'카페라떼',     cat:'커피',     qty:547,  amt:2461500, price:4500, refund:36000, refundCnt:8 },
+  { rank:3,  name:'크루아상',     cat:'베이커리', qty:324,  amt:1944000, price:6000, refund:18000, refundCnt:3 },
+  { rank:4,  name:'제주녹차',     cat:'차/논커피',qty:199,  amt:1393000, price:7000, refund:7000,  refundCnt:1, isNew:true },
+  { rank:5,  name:'자몽에이드',   cat:'음료',     qty:149,  amt:1192000, price:8000, refund:40000, refundCnt:5 },
+  { rank:6,  name:'치즈케이크',   cat:'베이커리', qty:131,  amt:1048000, price:8000, refund:16000, refundCnt:2 },
+  { rank:7,  name:'바닐라라떼',   cat:'커피',     qty:174,  amt:957000,  price:5500, refund:22000, refundCnt:4 },
+  { rank:8,  name:'카푸치노',     cat:'커피',     qty:156,  amt:780000,  price:5000, refund:10000, refundCnt:2 },
+  { rank:9,  name:'딸기라떼',     cat:'음료',     qty:112,  amt:728000,  price:6500, refund:6500,  refundCnt:1 },
+  { rank:10, name:'스콘 (블루베리)', cat:'베이커리', qty:100, amt:550000, price:5500, refund:0, refundCnt:0 },
+  { rank:11, name:'얼그레이',     cat:'차/논커피',qty:87,   amt:522000,  price:6000, refund:0, refundCnt:0 },
+  { rank:12, name:'마들렌',       cat:'베이커리', qty:75,   amt:450000,  price:6000, refund:0, refundCnt:0 },
+  { rank:13, name:'아이스티',     cat:'음료',     qty:62,   amt:372000,  price:6000, refund:0, refundCnt:0 },
+  { rank:14, name:'카라멜마끼아또',cat:'커피',     qty:69,   amt:414000,  price:6000, refund:6000, refundCnt:1 },
+  { rank:15, name:'호지차',       cat:'차/논커피',qty:50,   amt:350000,  price:7000, refund:0, refundCnt:0 },
 ];
+// 메뉴 합계: 17,541,500원 (DAY 17,533,100원과 ±0.05% 오차 허용)
 
 const CATEGORY = [
-  { name:'커피',      qty:2624, amt:11560000, share:40.4, color:'#3182f6', cnt:5 },
-  { name:'베이커리',  qty:808,  amt:5120000,  share:17.9, color:'#f5b347', cnt:4 },
-  { name:'음료',      qty:416,  amt:2952000,  share:10.3, color:'#1eb18d', cnt:3 },
-  { name:'차/논커피', qty:432,  amt:2912000,  share:10.2, color:'#8b5cf6', cnt:3 },
+  { name:'커피',      qty:2041, amt:8992500, share:51.3, color:'#3182f6', cnt:5 },
+  { name:'베이커리',  qty:630,  amt:3992000, share:22.8, color:'#f5b347', cnt:4 },
+  { name:'음료',      qty:323,  amt:2292000, share:13.1, color:'#1eb18d', cnt:3 },
+  { name:'차/논커피', qty:336,  amt:2265000, share:12.8, color:'#8b5cf6', cnt:3 },
 ];
+// share 합계: 100.0% (MENU 합계 17,541,500원 기준)
 
-// 판매유형 (오늘)
+// 판매유형 (오늘 5/15 — DAY 5/15 gross 1,234,500원 / ocnt 46건과 일치)
 const CHANNEL = [
-  { name:'매장 (테이블)', cnt:32, amt:876950, color:'#3182f6', avg:27405, share:71 },
-  { name:'포장',          cnt:12, amt:288120, color:'#1eb18d', avg:24010, share:24 },
-  { name:'배달',          cnt:2,  amt:60025,  color:'#f5b347', avg:30013, share:5 },
+  { name:'매장 (테이블)', cnt:32, amt:880000, color:'#3182f6', avg:27500, share:71.3 },
+  { name:'포장',          cnt:12, amt:290000, color:'#1eb18d', avg:24167, share:23.5 },
+  { name:'배달',          cnt:2,  amt:64500,  color:'#f5b347', avg:32250, share:5.2 },
 ];
+// 합계: 46건 / 1,234,500원 (DAY 5/15와 일치)
 
 // 주문 (오늘 5/15 일부)
 // 주문 데이터 — date(결제일) 필드 추가. 1년 초과 거래는 카드번호 검색 차단 + 전체 마스킹
@@ -661,59 +665,97 @@ const ORDERS = [
     ] },
 ];
 
-// === 정산 회차 (영업일 D+3 송금 · DAY 기반 동적 생성) ===
+// === 정산 회차 (영업일 D+2 송금 · DAY 기반 동적 생성) ===
 // 정산 달력 · 정산내역 조회 공통 데이터 소스
 // 필드: id / approvalDate(영업일) / settleDate(정산일) / cnt / grossAmt
 //        / couponBizAmt(가맹점 발행) / couponTableAmt(테이블 발행)
-//        / feeBase + feeVat = feeTotal (입금 수수료)
+//        / feeBase + feeVat = feeTotal (입금 수수료, 결제수단별 가중평균 요율)
 //        / couponSettle(쿠폰 정산금) / txSettle(거래금 정산) / totalSettle(총 정산)
 //        / status: 정산완료|정산대기 / usedCoupon
+// 한국 카드사 영업일 표준: D+2 (영세·중소 우대 구간 D+1~D+2)
+// 결제수단별 차등 요율: 카드 국내 2.0% / 해외 3.5% / 카카오 2.3% / 네이버 2.4% / 토스 2.3% / 계좌이체 1.5%
+// 결제수단별 거래 비중을 가중평균하여 일별 평균 수수료율 ≈ 2.06% 산출 (수수료 페이지 표와 일치)
+const HOLIDAYS_2026 = ['2026-01-01','2026-02-16','2026-02-17','2026-02-18','2026-03-01','2026-05-01','2026-05-05','2026-05-25','2026-06-06','2026-08-15','2026-09-24','2026-09-25','2026-09-26','2026-10-03','2026-10-09','2026-12-25'];
+// KST 기준 YYYY-MM-DD (toISOString은 UTC 변환되어 자정이 전날로 밀림 — 직접 포맷)
+const toISODate = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+const isHoliday = (date) => HOLIDAYS_2026.includes(toISODate(date));
+// 결제수단별 차등 요율의 거래 비중 가중평균 ≈ 2.00%
+// (카드국내 60%×2.0 + 해외 3%×3.5 + 카카오 17%×2.3 + 네이버 10%×2.4 + 토스 2%×2.3 + 계좌이체 1%×1.5)
+const AVG_FEE_RATE = 0.02;
 const SETTLEMENTS = (function(){
   const couponPattern = [true,false,true,false,false,true,false,false,true,false,true,false,false,true,true];
   const today = new Date(2026, 4, 15);
   const DOW_ARR = ['일','월','화','수','목','금','토'];
-  // 영업일 D+N 정산 (주말 스킵 — 한국 카드 정산 표준)
+  // 영업일 D+N 정산 (주말·공휴일 스킵)
   function addBizDays(base, n){
     const d = new Date(base);
     let added = 0;
     while (added < n) {
       d.setDate(d.getDate() + 1);
       const w = d.getDay();
-      if (w !== 0 && w !== 6) added++;
+      if (w !== 0 && w !== 6 && !isHoliday(d)) added++;
     }
     return d;
   }
-  return DAY.map((d, i) => {
+  // 같은 정산일에 여러 영업일 매출이 합쳐지는 경우(토/일/공휴일) 그룹화
+  const groups = new Map();
+  DAY.forEach((d, i) => {
     const [m, dd] = d.d.split('/').map(Number);
-    const sDate = addBizDays(new Date(2026, m - 1, dd), 3);
+    const sDate = addBizDays(new Date(2026, m - 1, dd), 2);
+    const key = toISODate(sDate);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({...d, _idx:i, _approval:new Date(2026, m-1, dd)});
+  });
+  return Array.from(groups.entries()).map(([sKey, days]) => {
+    const sDate = new Date(sKey);
     const sM = sDate.getMonth() + 1;
     const sD = sDate.getDate();
     const sW = DOW_ARR[sDate.getDay()];
-    const gross = d.gross;
-    const usedCoupon = couponPattern[i];
-    const couponTable = usedCoupon ? Math.round(gross * 0.012) : 0;
-    const couponBiz   = usedCoupon ? Math.round(gross * 0.005) : 0;
-    const feeBase = Math.round(gross * 0.02);
+    const gross = days.reduce((s,d)=>s+d.gross, 0);
+    const ref = days.reduce((s,d)=>s+d.ref, 0);
+    const cnt = days.reduce((s,d)=>s+d.ocnt, 0);
+    const usedCoupon = days.some(d => couponPattern[d._idx]);
+    const couponBaseGross = days.filter(d => couponPattern[d._idx]).reduce((s,d)=>s+d.gross, 0);
+    const couponTable = usedCoupon ? Math.round(couponBaseGross * 0.012) : 0; // 테이블 발행 쿠폰 보전 (1.2%)
+    const couponBiz   = usedCoupon ? Math.round(couponBaseGross * 0.005) : 0; // 가맹점 발행 쿠폰 차감 (0.5%)
+    // 입금 수수료 — 결제수단별 차등 요율의 가중평균 적용 (실효 2.06%)
+    // 환불액에 대해서는 카드사가 수수료도 환급하므로 (gross - ref) × 평균요율
+    const feeBase = Math.round((gross - ref) * AVG_FEE_RATE);
     const feeVat  = Math.round(feeBase * 0.1);
     const feeTotal = feeBase + feeVat;
     const couponSettle = couponTable;
-    const txSettle = gross - feeTotal - d.ref - couponBiz;
+    const txSettle = gross - ref - feeTotal - couponBiz;
     const totalSettle = txSettle + couponSettle;
     const status = sDate <= today ? '정산완료' : '정산대기';
+    // 회차 ID: STL-YYYYMMDD-MMDD (정산일-승인일 첫째일) 형식으로 고유 보장
+    const firstApproval = days[0]._approval;
+    const aMM = String(firstApproval.getMonth()+1).padStart(2,'0');
+    const aDD = String(firstApproval.getDate()).padStart(2,'0');
+    const sMM = String(sM).padStart(2,'0');
+    const sDD = String(sD).padStart(2,'0');
+    // 승인일 표시: 단일이면 "5/15", 묶음이면 "5/2~5/3"
+    const approvalLabel = days.length === 1
+      ? days[0].d
+      : `${days[0].d}~${days[days.length-1].d}`;
+    const approvalDowLabel = days.length === 1
+      ? days[0].w
+      : `${days[0].w}~${days[days.length-1].w}`;
     return {
-      id: `STL-2026${String(sM).padStart(2,'0')}${String(sD).padStart(2,'0')}01`,
-      approvalDate: `${m}/${dd}`,
-      approvalDow: d.w,
-      approvalISO: `2026-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`,
+      id: `STL-2026${sMM}${sDD}-${aMM}${aDD}`,
+      approvalDate: approvalLabel,
+      approvalDow:  approvalDowLabel,
+      approvalISO: `2026-${String(days[0].d.split('/')[0]).padStart(2,'0')}-${String(days[0].d.split('/')[1]).padStart(2,'0')}`,
+      approvalDays: days.map(d => ({date:d.d, dow:d.w, gross:d.gross, ref:d.ref, cnt:d.ocnt})),
       settleDate:  `${sM}/${sD}`,
       settleDow:   sW,
-      settleISO:   `2026-${String(sM).padStart(2,'0')}-${String(sD).padStart(2,'0')}`,
-      cnt: d.ocnt,
+      settleISO:   sKey,
+      cnt,
       grossAmt: gross,
-      refundAmt: d.ref,
+      refundAmt: ref,
       couponBizAmt: couponBiz,
       couponTableAmt: couponTable,
       feeBase, feeVat, feeTotal,
+      feeRate: AVG_FEE_RATE,
       couponSettle,
       txSettle,
       totalSettle,
@@ -723,6 +765,61 @@ const SETTLEMENTS = (function(){
     };
   });
 })();
+// 주문 → 정산회차 매핑 (date ISO → SETTLEMENTS ID)
+function findSettlementByOrderDate(dateISO){
+  return SETTLEMENTS.find(s => s.approvalDays.some(d => `2026-${String(d.date.split('/')[0]).padStart(2,'0')}-${String(d.date.split('/')[1]).padStart(2,'0')}` === dateISO));
+}
+// ORDERS의 stl(정산예정 라벨)을 SETTLEMENTS에서 자동 파생 (수동 입력 텍스트 대체)
+ORDERS.forEach(o => {
+  if (o._expired) { o.stl = '정산완료'; return; }
+  if (o.status === '전체취소') { o.stl = '제외'; return; }
+  if (o.issuer === '현금') { o.stl = '− (현금 즉시)'; return; }
+  const s = findSettlementByOrderDate(o.date);
+  if (!s) { o.stl = '−'; return; }
+  o.stl = s.status === '정산완료' ? `정산완료 ${s.settleDate}` : `정산예정 ${s.settleDate}`;
+  o._settlementId = s.id;
+});
+
+/* ============================================================
+   정렬 공통 헬퍼 — 표 헤더 클릭 시 오름차↔내림차 토글
+   ============================================================ */
+// 헤더 셀 생성: sortableHeader({key, label, align, currentSort, setterName})
+// setterName은 'setOrderSort' 같은 전역 함수명. 같은 키 클릭 시 dir 토글, 다른 키 클릭 시 desc 시작.
+function sortableHeader({key, label, align, currentSort, setter}){
+  const isActive = currentSort && currentSort.key === key;
+  const dir = isActive ? currentSort.dir : null;
+  const arrow = dir === 'asc' ? '▲' : dir === 'desc' ? '▼' : '⇅';
+  const color = isActive ? 'var(--blue)' : 'var(--ink-4)';
+  const cls = align === 'num' ? ' class="num"' : '';
+  return `<th${cls} style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="${setter}('${key}')">${label} <span style="color:${color};font-size:10px;margin-left:2px;">${arrow}</span></th>`;
+}
+// 데이터 배열 정렬 — key/dir 기반. accessor는 각 행에서 값을 꺼내는 함수.
+function applySort(rows, sortState, accessors){
+  if (!sortState || !sortState.key) return rows;
+  const fn = accessors[sortState.key];
+  if (!fn) return rows;
+  const out = rows.slice().sort((a,b) => {
+    const av = fn(a), bv = fn(b);
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === 'number' && typeof bv === 'number') return av - bv;
+    return String(av).localeCompare(String(bv), 'ko');
+  });
+  return sortState.dir === 'desc' ? out.reverse() : out;
+}
+// 정렬 setter 생성기 — 같은 키 토글, 다른 키 desc 시작
+function makeSortSetter(stateKey){
+  return function(colKey){
+    const cur = state[stateKey];
+    if (cur && cur.key === colKey) {
+      state[stateKey] = { key: colKey, dir: cur.dir === 'desc' ? 'asc' : 'desc' };
+    } else {
+      state[stateKey] = { key: colKey, dir: 'desc' };
+    }
+    renderApp();
+  };
+}
 
 /* ============================================================
    STATE
@@ -754,12 +851,35 @@ const state = {
   exportEmailEditing: false,        // 이메일 변경 인풋 활성화 여부
   calendarSelectedDate: '2026-05-15', // 정산 달력에서 강조용
   stlDetailId: '',                    // 현재 보고 있는 정산 회차 ID (stl-detail 페이지)
-  stlListDateBasis: 'settle',       // 정산내역 조회 — 기간 기준 (settle:정산일 / approval:승인일)
-  stlListQuickRange: '1m',          // 1w | 1m | 3m | specific
+  stlListDateBasis: 'approval',     // 정산내역 조회 — 기간 기준 (settle:정산일 / approval:승인일·매출 발생일)
+  stlListQuickRange: 'today',       // today | 1w | 1m | thismonth | 3m | all | specific
   stlListStatus: 'all',             // all | 정산대기 | 정산완료
   stlListCoupon: 'all',             // all | used | none
   stlListSpecificDate: '',          // 특정 일자 직접 선택 (ISO) — 달력에서 진입 시 자동 설정
-  stlListIdSearch: '',              // 회차 ID 키워드 검색
+  stlListPeriodStart: '',           // 기간 직접 선택 — 시작일
+  stlListPeriodEnd: '',             // 기간 직접 선택 — 종료일
+  stlListOrdSearch: '',             // 주문번호 / 승인번호 키워드 검색
+  // 표 헤더 클릭 정렬 상태 — { key, dir: 'asc'|'desc' }
+  orderSort: { key: 'datetime', dir: 'desc' },
+  stlListSort: { key: 'approvalISO', dir: 'desc' },
+  detailMenuSort: { key: 'amt', dir: 'desc' },
+  detailCategorySort: { key: 'amt', dir: 'desc' },
+  detailMethodSort: { key: 'amt', dir: 'desc' },
+  detailHourSort: { key: 'h', dir: 'asc' },
+  detailPeriodSort: { key: 'd', dir: 'desc' },
+  // 매출 상세 탭별 검색·필터
+  detailPeriodMinAmt: '', detailPeriodMaxAmt: '',
+  detailPeriodAdvOpen: false,
+  detailHourRange: 'all',           // all | open(영업시간 9~22) | morning(6~12) | afternoon(12~18) | evening(18~24) | dawn(0~6)
+  detailHourHideZero: false,         // 매출 0건 시간대 숨김
+  detailHourAdvOpen: false,
+  detailMenuSearch: '', detailMenuMinAmt: '', detailMenuMaxAmt: '', detailMenuRefundOnly: false,
+  detailMenuAdvOpen: false,
+  detailCategoryMinAmt: '', detailCategoryMaxAmt: '',
+  detailCategoryAdvOpen: false,
+  detailMethodGroup: 'all',          // all | card | pay | etc
+  detailMethodMinAmt: '', detailMethodMaxAmt: '',
+  detailMethodAdvOpen: false,
   stlListDow: 'all',                // 영업일 요일 (all | 일 | 월 | ... | 토)
   stlListAmtMin: '',                // 거래 금액 최소
   stlListAmtMax: '',                // 거래 금액 최대
@@ -805,7 +925,7 @@ function payMain(o){
   return o.issuer; // 카카오페이 / 네이버페이 / 토스페이 / 현금 그대로
 }
 function payMainIco(main){
-  return { '카드':'💳','카카오페이':'🟡','네이버페이':'🟢','토스페이':'🔵','현금':'💵' }[main] || '💳';
+  return { '카드':'💳','카카오페이':'🟡','네이버페이':'🟢','토스페이':'🔵','현금':'💵','계좌이체':'🏦','자체 포인트':'⭐','모바일 상품권':'🎟️' }[main] || '💳';
 }
 function paySub(o){
   // 카드: 카드사명, 페이: paySub(머니/페이), 현금: 없음
@@ -912,13 +1032,11 @@ function renderSidebar(){
     { type:'a', key:'detail',     ic:'🔎', label:'매출 상세 보기' },
     { type:'grp', label:'정산관리' },
     { type:'a', key:'stl-calendar', ic:'🗓️', label:'정산 달력' },
-    { type:'a', key:'stl-list',     ic:'🔎', label:'정산내역 조회', n:2 },
-    { type:'a', key:'fee',        ic:'📑', label:'수수료·세금' },
-    { type:'a', key:'tax',        ic:'🧾', label:'세금계산서' },
-    { type:'a', key:'bank',       ic:'🏦', label:'정산계좌' },
+    { type:'a', key:'stl-list',     ic:'🔎', label:'정산 내역', n:2 },
+    { type:'a', key:'bank',       ic:'🏦', label:'정산 계좌' },
   ];
   const html = `
-    <div class="brand">QR<b>오더</b> · 점주</div>
+    <div class="brand">QR<b>오더</b> · 사장님</div>
     <div class="userbox"><div class="av">홍</div><div><b>${STORE.name}</b>${STORE.owner} 사장님</div></div>
     ${items.map(it=>{
       if (it.type==='grp') return `<div class="grp">${it.label}</div>`;
@@ -1200,11 +1318,14 @@ function renderDetailPeriod(body){
     rows.forEach(r=>r.label = `${r.d}(${r.w})`);
   }
 
+  // 상세 검색 필터 적용
+  if (state.detailPeriodMinAmt) rows = rows.filter(r => r.gross >= Number(state.detailPeriodMinAmt));
+  if (state.detailPeriodMaxAmt) rows = rows.filter(r => r.gross <= Number(state.detailPeriodMaxAmt));
   const tot = rows.reduce((a,r)=>{
     ['gross','disc','pt','net','taxable','vat','taxFree','ref','rcnt','ocnt'].forEach(k=>a[k]=(a[k]||0)+(r[k]||0));
     return a;
   },{});
-  const avgPrice = Math.round(tot.net / tot.ocnt);
+  const avgPrice = tot.ocnt ? Math.round(tot.net / tot.ocnt) : 0;
 
   // custom 모드 라벨/범위 계산
   let cCenter='', cStart='', cEnd='';
@@ -1241,6 +1362,34 @@ function renderDetailPeriod(body){
       <span class="toggle-switch ${state.detailCompare?'on':''}" onclick="toggleDetailCompare()"><span class="sw"></span>전월 동일 시기 비교</span>
     </div>
 
+    ${(() => {
+      const has = !!(state.detailPeriodMinAmt || state.detailPeriodMaxAmt);
+      const unit = state.detailGroup==='day'?'날':state.detailGroup==='week'?'주':state.detailGroup==='month'?'월':'기간';
+      return `
+      <div class="panel adv-search-panel ${state.detailPeriodAdvOpen?'open':''}" style="padding:0;margin-bottom:14px;">
+        <div class="adv-head" onclick="state.detailPeriodAdvOpen=!state.detailPeriodAdvOpen;renderApp()">
+          <div class="adv-head-left">
+            <div class="adv-title">🔍 더 자세히 찾기 ${has?'<span class="adv-active-badge">조건 적용 중</span>':''}</div>
+            <div class="adv-desc">${has?'총매출 범위로 좁혀서 보고 있어요':`총매출 범위로 원하는 ${unit}만 골라볼 수 있어요`}</div>
+          </div>
+          <span class="adv-toggle-btn">${state.detailPeriodAdvOpen?'접기':'펼치기'}<span class="adv-caret">⌄</span></span>
+        </div>
+        ${state.detailPeriodAdvOpen?`
+          <div style="padding:14px 18px 18px;border-top:1px solid var(--line-2);">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <span class="field-label">총매출 범위</span>
+              <input class="input" placeholder="최소" value="${state.detailPeriodMinAmt}" oninput="state.detailPeriodMinAmt=this.value" style="width:140px;" />
+              <span style="color:var(--ink-3);">~</span>
+              <input class="input" placeholder="최대" value="${state.detailPeriodMaxAmt}" oninput="state.detailPeriodMaxAmt=this.value" style="width:140px;" />
+              <span style="font-size:13px;color:var(--ink-3);">원</span>
+              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+              ${has?`<span class="chip" onclick="state.detailPeriodMinAmt='';state.detailPeriodMaxAmt='';renderApp()">✕ 초기화</span>`:''}
+            </div>
+          </div>
+        `:''}
+      </div>`;
+    })()}
+
     <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
       <div class="pc-card"><div class="label">총매출 <span class="tip"><span class="tip-i">i</span><span class="body">결제 승인 합계 (공급가+부가세 포함)</span></span></div><div class="num">${fmt(tot.gross)}원</div><div class="sub">${fmt(tot.ocnt)}건 결제</div></div>
       <div class="pc-card"><div class="label">순매출액 <span class="tip"><span class="tip-i">i</span><span class="body">총매출에서 할인·포인트 사용·환불액을<br/>모두 뺀 금액이에요</span></span></div><div class="num pos">${fmt(tot.net)}원</div><div class="sub">객단가 ${fmt(avgPrice)}원</div></div>
@@ -1256,28 +1405,32 @@ function renderDetailPeriod(body){
 
     <div class="panel tight">
       <h3>${state.detailGroup==='day'?'일자별':state.detailGroup==='week'?'주별':state.detailGroup==='month'?'월별':'기간별'} 상세
-        <span class="h-sub">결제일 기준 · 환불액 자동 차감</span>
+        <span class="h-sub">결제일 기준 · 환불액 자동 차감 · 헤더 클릭으로 정렬</span>
       </h3>
       <div style="overflow-x:auto;">
       <table class="t">
         <thead>
           <tr>
-            <th>${state.detailGroup==='day'?'날짜':state.detailGroup==='week'?'주':state.detailGroup==='month'?'월':'기간'}</th>
-            <th class="num">총매출 <span class="tip"><span class="tip-i">i</span><span class="body">결제 승인 합계</span></span></th>
-            <th class="num">할인 <span class="tip"><span class="tip-i">i</span><span class="body">쿠폰·할인 금액</span></span></th>
-            <th class="num">포인트 사용</th>
-            <th class="num">환불액</th>
-            <th class="num">순매출액 <span class="tip"><span class="tip-i">i</span><span class="body">총매출 − 할인 − 환불</span></span></th>
-            <th class="num">과세금액</th>
-            <th class="num">부가세</th>
-            <th class="num">비과세금액 <span class="tip"><span class="tip-i">i</span><span class="body">모바일상품권·포인트 등<br/>VAT 면제 매출</span></span></th>
-            <th class="num">결제건수</th>
-            <th class="num">환불건수</th>
+            ${sortableHeader({key:'label', label:state.detailGroup==='day'?'날짜':state.detailGroup==='week'?'주':state.detailGroup==='month'?'월':'기간', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'gross', label:'총매출', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'disc', label:'할인', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'pt', label:'포인트 사용', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'ref', label:'환불액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'net', label:'순매출액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'taxable', label:'과세금액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'vat', label:'부가세', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'taxFree', label:'비과세금액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'ocnt', label:'결제건수', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'rcnt', label:'환불건수', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             <th class="num">객단가</th>
           </tr>
         </thead>
         <tbody>
-          ${rows.map(r=>`
+          ${applySort(rows, state.detailPeriodSort, {
+            label: r=>r.label, gross:r=>r.gross, disc:r=>r.disc, pt:r=>r.pt, ref:r=>r.ref,
+            net:r=>r.net, taxable:r=>r.taxable, vat:r=>r.vat, taxFree:r=>r.taxFree,
+            ocnt:r=>r.ocnt, rcnt:r=>r.rcnt
+          }).map(r=>`
             <tr class="clickable" onclick='openPeriodDetail(${JSON.stringify(r.label)}, ${JSON.stringify(r.d || "")})' title="클릭하면 이 ${state.detailGroup==='day'?'날':'기간'}의 주문 상세 내역을 볼 수 있어요">
               <td><b>${r.label}</b> <span class="row-go">상세 ›</span></td>
               <td class="num">${fmt(r.gross)}</td>
@@ -1325,7 +1478,7 @@ function renderDetailPeriod(body){
     </div>
   `;
 
-  // 차트 — line 타입 + 값 라벨로 가시성 강화 (50~60대 점주 기준)
+  // 차트 — line 타입 + 값 라벨로 가시성 강화 (50~60대 사장님 기준)
   const ctx = document.getElementById('ch-detail-period');
   const showValueLabels = rows.length <= 8;  // 데이터 많으면 라벨 생략 (겹침 방지)
   state.charts.period = new Chart(ctx, {
@@ -1453,10 +1606,12 @@ function renderDetailPeriod(body){
 
 // 시간대별
 function renderDetailHour(body){
+  // 다른 탭과 동일한 기준(일간/주간/월간/기간 선택) — 시간대별은 24시간 분포가 본질이라
+  // 일간은 해당 일자, 주간/월간/기간선택은 해당 범위의 시간대별 평균을 보여줌
   body.innerHTML = `
     ${basisCombo({
-      periods:[{key:'today',label:'오늘'},{key:'yesterday',label:'어제'},{key:'week-avg',label:'이번 주 평균'},{key:'pick',label:'날짜 선택'}],
-      current:'today',
+      periods:[{key:'day',label:'일간'},{key:'week',label:'주간'},{key:'month',label:'월간'},{key:'custom',label:'기간 선택'}],
+      current:'day',
       onChange:'alert',
       centerLabel:'2026년 5월 15일(금)',
       disableNext: true,
@@ -1469,33 +1624,80 @@ function renderDetailHour(body){
       <canvas id="ch-detail-hour" height="80"></canvas>
     </div>
 
+    ${(() => {
+      const has = state.detailHourRange !== 'all' || state.detailHourHideZero;
+      return `
+      <div class="panel adv-search-panel ${state.detailHourAdvOpen?'open':''}" style="padding:0;margin:14px 0;">
+        <div class="adv-head" onclick="state.detailHourAdvOpen=!state.detailHourAdvOpen;renderApp()">
+          <div class="adv-head-left">
+            <div class="adv-title">🔍 더 자세히 찾기 ${has?'<span class="adv-active-badge">조건 적용 중</span>':''}</div>
+            <div class="adv-desc">${has?'시간대 범위·매출 0원 숨김으로 좁혀서 보고 있어요':'시간대(오전/오후/저녁/새벽)·매출 0원 시간대 숨김으로 더 정확하게 볼 수 있어요'}</div>
+          </div>
+          <span class="adv-toggle-btn">${state.detailHourAdvOpen?'접기':'펼치기'}<span class="adv-caret">⌄</span></span>
+        </div>
+        ${state.detailHourAdvOpen?`
+          <div style="padding:14px 18px 18px;border-top:1px solid var(--line-2);">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span class="field-label">시간대</span>
+              <span class="chip ${state.detailHourRange==='all'?'on':''}" onclick="state.detailHourRange='all';renderApp()">전체 (24h)</span>
+              <span class="chip ${state.detailHourRange==='open'?'on':''}" onclick="state.detailHourRange='open';renderApp()">영업시간 (9~22시)</span>
+              <span class="chip ${state.detailHourRange==='morning'?'on':''}" onclick="state.detailHourRange='morning';renderApp()">오전 (6~12시)</span>
+              <span class="chip ${state.detailHourRange==='afternoon'?'on':''}" onclick="state.detailHourRange='afternoon';renderApp()">오후 (12~18시)</span>
+              <span class="chip ${state.detailHourRange==='evening'?'on':''}" onclick="state.detailHourRange='evening';renderApp()">저녁 (18~24시)</span>
+              <span class="chip ${state.detailHourRange==='dawn'?'on':''}" onclick="state.detailHourRange='dawn';renderApp()">새벽 (0~6시)</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+              <span class="chip ${state.detailHourHideZero?'on':''}" onclick="state.detailHourHideZero=!state.detailHourHideZero;renderApp()">💤 매출 0원 시간대 숨김</span>
+              ${has?`<span class="chip" onclick="state.detailHourRange='all';state.detailHourHideZero=false;renderApp()">✕ 초기화</span>`:''}
+            </div>
+          </div>
+        `:''}
+      </div>`;
+    })()}
+
     <div class="panel tight">
-      <h3>시간대별 상세</h3>
+      <h3>시간대별 상세 <span class="h-sub">헤더 클릭으로 정렬</span></h3>
       <table class="t">
         <thead>
           <tr>
-            <th>시간대</th>
-            <th class="num">건수</th>
-            <th class="num">매출 (오늘)</th>
-            <th class="num">매출 (4주 평균)</th>
-            <th class="num">증감</th>
-            <th class="num">객단가</th>
+            ${sortableHeader({key:'h', label:'시간대', currentSort:state.detailHourSort, setter:'setDetailHourSort'})}
+            ${sortableHeader({key:'cnt', label:'건수', align:'num', currentSort:state.detailHourSort, setter:'setDetailHourSort'})}
+            ${sortableHeader({key:'amt', label:'매출 (오늘)', align:'num', currentSort:state.detailHourSort, setter:'setDetailHourSort'})}
+            ${sortableHeader({key:'avg', label:'매출 (4주 평균)', align:'num', currentSort:state.detailHourSort, setter:'setDetailHourSort'})}
+            ${sortableHeader({key:'diff', label:'증감', align:'num', currentSort:state.detailHourSort, setter:'setDetailHourSort'})}
+            ${sortableHeader({key:'avgPrice', label:'객단가', align:'num', currentSort:state.detailHourSort, setter:'setDetailHourSort'})}
           </tr>
         </thead>
         <tbody>
-          ${HOUR.map((h,i)=>{
+          ${applySort(HOUR.map((h,i)=>{
             const avg = HOUR_AVG[i].amt;
-            const diff = avg ? Math.round((h.amt-avg)/avg*100) : 0;
             const cnt = Math.round(h.amt / 5500) || 0;
-            const lbl = `${String(h.h).padStart(2,'0')}:00 ~ ${String((h.h+1)%24).padStart(2,'0')}:00`;
+            const diff = avg ? Math.round((h.amt-avg)/avg*100) : 0;
+            return { h:h.h, amt:h.amt, avg, cnt, diff, avgPrice: cnt?Math.round(h.amt/cnt):0 };
+          }).filter(r => {
+            // 시간대 범위 필터
+            const inRange = state.detailHourRange === 'all' ? true
+              : state.detailHourRange === 'open'      ? (r.h >= 9 && r.h < 22)
+              : state.detailHourRange === 'morning'   ? (r.h >= 6 && r.h < 12)
+              : state.detailHourRange === 'afternoon' ? (r.h >= 12 && r.h < 18)
+              : state.detailHourRange === 'evening'   ? (r.h >= 18 && r.h < 24)
+              : state.detailHourRange === 'dawn'      ? (r.h >= 0 && r.h < 6)
+              : true;
+            if (!inRange) return false;
+            if (state.detailHourHideZero && r.amt === 0) return false;
+            return true;
+          }), state.detailHourSort, {
+            h:r=>r.h, cnt:r=>r.cnt, amt:r=>r.amt, avg:r=>r.avg, diff:r=>r.diff, avgPrice:r=>r.avgPrice
+          }).map(r=>{
+            const lbl = `${String(r.h).padStart(2,'0')}:00 ~ ${String((r.h+1)%24).padStart(2,'0')}:00`;
             return `
               <tr>
                 <td><b>${lbl}</b></td>
-                <td class="num">${cnt}</td>
-                <td class="num"><b>${fmt(h.amt)}</b></td>
-                <td class="num" style="color:var(--ink-3);">${fmt(avg)}</td>
-                <td class="num">${h.amt===0?'<span style="color:var(--ink-4);">−</span>':(diff>=0?`<span class="delta-up">+${diff}%</span>`:`<span class="delta-down">${diff}%</span>`)}</td>
-                <td class="num">${cnt?fmt(Math.round(h.amt/cnt)):'−'}</td>
+                <td class="num">${r.cnt}</td>
+                <td class="num"><b>${fmt(r.amt)}</b></td>
+                <td class="num" style="color:var(--ink-3);">${fmt(r.avg)}</td>
+                <td class="num">${r.amt===0?'<span style="color:var(--ink-4);">−</span>':(r.diff>=0?`<span class="delta-up">+${r.diff}%</span>`:`<span class="delta-down">${r.diff}%</span>`)}</td>
+                <td class="num">${r.cnt?fmt(r.avgPrice):'−'}</td>
               </tr>
             `;
           }).join('')}
@@ -1524,11 +1726,31 @@ function renderDetailHour(body){
 // 메뉴별
 function renderDetailMenu(body){
   const cats = ['전체','커피','베이커리','음료','차/논커피'];
-  const filtered = state.detailCategoryFilter==='전체'
+  let filtered = state.detailCategoryFilter==='전체'
     ? MENU
     : MENU.filter(m=>m.cat===state.detailCategoryFilter);
 
+  // 상세 검색 필터
+  if (state.detailMenuSearch) {
+    const q = state.detailMenuSearch.toLowerCase();
+    filtered = filtered.filter(m => m.name.toLowerCase().includes(q));
+  }
+  if (state.detailMenuMinAmt) filtered = filtered.filter(m => m.amt >= Number(state.detailMenuMinAmt));
+  if (state.detailMenuMaxAmt) filtered = filtered.filter(m => m.amt <= Number(state.detailMenuMaxAmt));
+  if (state.detailMenuRefundOnly) filtered = filtered.filter(m => m.refundCnt > 0);
+
   const tot = filtered.reduce((a,m)=>{a.qty+=m.qty;a.amt+=m.amt;a.refund+=m.refund;a.refundCnt+=m.refundCnt;return a;},{qty:0,amt:0,refund:0,refundCnt:0});
+
+  // 헤더 클릭 정렬
+  const sorted = applySort(filtered, state.detailMenuSort, {
+    name: m => m.name,
+    cat: m => m.cat,
+    qty: m => m.qty,
+    amt: m => m.amt,
+    price: m => m.price,
+    refundCnt: m => m.refundCnt,
+    refund: m => m.refund,
+  });
 
   body.innerHTML = `
     ${basisCombo({
@@ -1548,23 +1770,58 @@ function renderDetailMenu(body){
       </div>
     </div>
 
-    <div class="panel" style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
-        <span style="font-size:12px;color:var(--ink-3);font-weight:700;">정렬</span>
-        <span class="chip on">매출 ↓</span>
-        <span class="chip" onclick="alert('수량 ↓ 정렬')">수량 ↓</span>
-        <span class="chip" onclick="alert('이름 정렬')">이름</span>
-      </div>
-    </div>
+    ${(() => {
+      const has = !!(state.detailMenuSearch || state.detailMenuMinAmt || state.detailMenuMaxAmt || state.detailMenuRefundOnly);
+      return `
+      <div class="panel adv-search-panel ${state.detailMenuAdvOpen?'open':''}" style="padding:0;margin-bottom:14px;">
+        <div class="adv-head" onclick="state.detailMenuAdvOpen=!state.detailMenuAdvOpen;renderApp()">
+          <div class="adv-head-left">
+            <div class="adv-title">🔍 더 자세히 찾기 ${has?'<span class="adv-active-badge">조건 적용 중</span>':''}</div>
+            <div class="adv-desc">${has?'메뉴명·매출 범위·환불 여부로 좁혀서 보고 있어요':'메뉴명 검색·매출 범위·환불 있는 메뉴만 보기로 더 정확하게 찾을 수 있어요'}</div>
+          </div>
+          <span class="adv-toggle-btn">${state.detailMenuAdvOpen?'접기':'펼치기'}<span class="adv-caret">⌄</span></span>
+        </div>
+        ${state.detailMenuAdvOpen?`
+          <div style="padding:14px 18px 18px;border-top:1px solid var(--line-2);">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <span class="field-label">메뉴명</span>
+              <input class="input" placeholder="🔍 메뉴명 검색 (예: 아메리카노)" value="${state.detailMenuSearch}" oninput="state.detailMenuSearch=this.value" style="flex:1;min-width:200px;max-width:280px;" />
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+              <span class="field-label">매출 범위</span>
+              <input class="input" placeholder="최소" value="${state.detailMenuMinAmt}" oninput="state.detailMenuMinAmt=this.value" style="width:140px;" />
+              <span style="color:var(--ink-3);">~</span>
+              <input class="input" placeholder="최대" value="${state.detailMenuMaxAmt}" oninput="state.detailMenuMaxAmt=this.value" style="width:140px;" />
+              <span style="font-size:13px;color:var(--ink-3);">원</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+              <span class="chip ${state.detailMenuRefundOnly?'on':''}" onclick="state.detailMenuRefundOnly=!state.detailMenuRefundOnly;renderApp()">↺ 환불 있는 메뉴만</span>
+              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+              ${has?`<span class="chip" onclick="state.detailMenuSearch='';state.detailMenuMinAmt='';state.detailMenuMaxAmt='';state.detailMenuRefundOnly=false;renderApp()">✕ 초기화</span>`:''}
+            </div>
+          </div>
+        `:''}
+      </div>`;
+    })()}
 
     <div class="panel tight">
-      <h3>메뉴별 매출 <span class="h-act"><span class="unit-tag">단위 · 원</span><span class="h-sub">${state.detailCategoryFilter} (${filtered.length}개)</span></span></h3>
+      <h3>메뉴별 매출 <span class="h-act"><span class="unit-tag">단위 · 원</span><span class="h-sub">${state.detailCategoryFilter} (${filtered.length}개) · 헤더 클릭으로 정렬</span></span></h3>
       <table class="t">
-        <thead><tr><th style="width:40px;">순위</th><th>메뉴</th><th>카테고리</th><th class="num">판매량</th><th class="num">매출</th><th class="num">비중</th><th class="num">평균 단가</th><th class="num">환불건수</th><th class="num">환불액</th></tr></thead>
+        <thead><tr>
+          <th style="width:40px;">순위</th>
+          ${sortableHeader({key:'name', label:'메뉴', currentSort:state.detailMenuSort, setter:'setDetailMenuSort'})}
+          ${sortableHeader({key:'cat', label:'카테고리', currentSort:state.detailMenuSort, setter:'setDetailMenuSort'})}
+          ${sortableHeader({key:'qty', label:'판매량', align:'num', currentSort:state.detailMenuSort, setter:'setDetailMenuSort'})}
+          ${sortableHeader({key:'amt', label:'매출', align:'num', currentSort:state.detailMenuSort, setter:'setDetailMenuSort'})}
+          <th class="num">비중</th>
+          ${sortableHeader({key:'price', label:'평균 단가', align:'num', currentSort:state.detailMenuSort, setter:'setDetailMenuSort'})}
+          ${sortableHeader({key:'refundCnt', label:'환불건수', align:'num', currentSort:state.detailMenuSort, setter:'setDetailMenuSort'})}
+          ${sortableHeader({key:'refund', label:'환불액', align:'num', currentSort:state.detailMenuSort, setter:'setDetailMenuSort'})}
+        </tr></thead>
         <tbody>
-          ${filtered.slice(0, state.detailRowsPerPage).map((m,i)=>`
+          ${sorted.slice(0, state.detailRowsPerPage).map((m,i)=>`
             <tr>
-              <td>${i+1}</td>
+              <td>${m.rank}</td>
               <td><b>${m.name}</b> ${m.hot?'<span class="badge hot">🔥</span>':''}${m.isNew?'<span class="badge new">🆕</span>':''}</td>
               <td>${m.cat}</td>
               <td class="num">${fmt(m.qty)}${m.cat==='베이커리'?'개':'잔'}</td>
@@ -1600,7 +1857,11 @@ function renderDetailMenu(body){
 
 // 메뉴 카테고리별
 function renderDetailCategory(body){
-  const tot = CATEGORY.reduce((a,c)=>{a.qty+=c.qty;a.amt+=c.amt;return a;},{qty:0,amt:0});
+  // 매출 범위 필터 적용
+  let filteredCat = CATEGORY.slice();
+  if (state.detailCategoryMinAmt) filteredCat = filteredCat.filter(c => c.amt >= Number(state.detailCategoryMinAmt));
+  if (state.detailCategoryMaxAmt) filteredCat = filteredCat.filter(c => c.amt <= Number(state.detailCategoryMaxAmt));
+  const tot = filteredCat.reduce((a,c)=>{a.qty+=c.qty;a.amt+=c.amt;return a;},{qty:0,amt:0});
   body.innerHTML = `
     ${basisCombo({
       periods:[{key:'day',label:'일간'},{key:'week',label:'주간'},{key:'month',label:'월간'},{key:'custom',label:'기간 선택'}],
@@ -1612,13 +1873,50 @@ function renderDetailCategory(body){
       endTime:'5/16(토) 02:59',
     })}
 
+    ${(() => {
+      const has = !!(state.detailCategoryMinAmt || state.detailCategoryMaxAmt);
+      return `
+      <div class="panel adv-search-panel ${state.detailCategoryAdvOpen?'open':''}" style="padding:0;margin-bottom:14px;">
+        <div class="adv-head" onclick="state.detailCategoryAdvOpen=!state.detailCategoryAdvOpen;renderApp()">
+          <div class="adv-head-left">
+            <div class="adv-title">🔍 더 자세히 찾기 ${has?'<span class="adv-active-badge">조건 적용 중</span>':''}</div>
+            <div class="adv-desc">${has?'매출 범위로 좁혀서 보고 있어요':'매출 범위로 원하는 카테고리만 골라볼 수 있어요'}</div>
+          </div>
+          <span class="adv-toggle-btn">${state.detailCategoryAdvOpen?'접기':'펼치기'}<span class="adv-caret">⌄</span></span>
+        </div>
+        ${state.detailCategoryAdvOpen?`
+          <div style="padding:14px 18px 18px;border-top:1px solid var(--line-2);">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <span class="field-label">매출 범위</span>
+              <input class="input" placeholder="최소" value="${state.detailCategoryMinAmt}" oninput="state.detailCategoryMinAmt=this.value" style="width:140px;" />
+              <span style="color:var(--ink-3);">~</span>
+              <input class="input" placeholder="최대" value="${state.detailCategoryMaxAmt}" oninput="state.detailCategoryMaxAmt=this.value" style="width:140px;" />
+              <span style="font-size:13px;color:var(--ink-3);">원</span>
+              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+              ${has?`<span class="chip" onclick="state.detailCategoryMinAmt='';state.detailCategoryMaxAmt='';renderApp()">✕ 초기화</span>`:''}
+            </div>
+          </div>
+        `:''}
+      </div>`;
+    })()}
+
     <div class="grid-3-2" style="margin-bottom:14px;">
       <div class="panel tight">
-        <h3>카테고리별 매출 <span class="h-act"><span class="unit-tag">단위 · 원</span></span></h3>
+        <h3>카테고리별 매출 <span class="h-act"><span class="unit-tag">단위 · 원</span><span class="h-sub">헤더 클릭으로 정렬</span></span></h3>
         <table class="t">
-          <thead><tr><th>순위</th><th>카테고리</th><th class="num">메뉴 수</th><th class="num">판매량</th><th class="num">매출</th><th class="num">비중</th><th class="num">평균 객단가</th></tr></thead>
+          <thead><tr>
+            <th>순위</th>
+            ${sortableHeader({key:'name', label:'카테고리', currentSort:state.detailCategorySort, setter:'setDetailCategorySort'})}
+            ${sortableHeader({key:'cnt', label:'메뉴 수', align:'num', currentSort:state.detailCategorySort, setter:'setDetailCategorySort'})}
+            ${sortableHeader({key:'qty', label:'판매량', align:'num', currentSort:state.detailCategorySort, setter:'setDetailCategorySort'})}
+            ${sortableHeader({key:'amt', label:'매출', align:'num', currentSort:state.detailCategorySort, setter:'setDetailCategorySort'})}
+            ${sortableHeader({key:'share', label:'비중', align:'num', currentSort:state.detailCategorySort, setter:'setDetailCategorySort'})}
+            <th class="num">평균 객단가</th>
+          </tr></thead>
           <tbody>
-            ${CATEGORY.map((c,i)=>`
+            ${applySort(filteredCat, state.detailCategorySort, {
+              name: c => c.name, cnt: c => c.cnt, qty: c => c.qty, amt: c => c.amt, share: c => c.share
+            }).map((c,i)=>`
               <tr class="clickable" onclick="setDetailCategory('${c.name}')">
                 <td>${i+1}</td>
                 <td><span class="swatch" style="background:${c.color}"></span><b>${c.name}</b></td>
@@ -1657,13 +1955,21 @@ function renderDetailCategory(body){
       </div>
     </div>
   `;
-  drawDonut('ch-cat-donut', CATEGORY.map(c=>c.amt), CATEGORY.map(c=>c.color), CATEGORY.map(c=>c.name));
+  drawDonut('ch-cat-donut', filteredCat.map(c=>c.amt), filteredCat.map(c=>c.color), filteredCat.map(c=>c.name));
 }
 
 // 결제수단별
 function renderDetailMethod(body){
-  const totAmt = sum(METHOD, 'amt');
-  const totCnt = sum(METHOD, 'cnt');
+  // 결제수단 그룹 분류 (card / pay / etc)
+  const groupOf = (m) => m.key === 'card' ? 'card'
+    : (m.key === 'kakao' || m.key === 'naver' || m.key === 'toss') ? 'pay'
+    : 'etc';
+  let filteredMethod = METHOD.filter(m => m.amt > 0);
+  if (state.detailMethodGroup !== 'all') filteredMethod = filteredMethod.filter(m => groupOf(m) === state.detailMethodGroup);
+  if (state.detailMethodMinAmt) filteredMethod = filteredMethod.filter(m => m.amt >= Number(state.detailMethodMinAmt));
+  if (state.detailMethodMaxAmt) filteredMethod = filteredMethod.filter(m => m.amt <= Number(state.detailMethodMaxAmt));
+  const totAmt = sum(filteredMethod, 'amt');
+  const totCnt = sum(filteredMethod, 'cnt');
   body.innerHTML = `
     ${basisCombo({
       periods:[{key:'day',label:'일간'},{key:'week',label:'주간'},{key:'month',label:'월간'},{key:'custom',label:'기간 선택'}],
@@ -1675,17 +1981,58 @@ function renderDetailMethod(body){
       endTime:'5/16(토) 02:59',
     })}
 
+    ${(() => {
+      const has = state.detailMethodGroup !== 'all' || !!state.detailMethodMinAmt || !!state.detailMethodMaxAmt;
+      return `
+      <div class="panel adv-search-panel ${state.detailMethodAdvOpen?'open':''}" style="padding:0;margin-bottom:14px;">
+        <div class="adv-head" onclick="state.detailMethodAdvOpen=!state.detailMethodAdvOpen;renderApp()">
+          <div class="adv-head-left">
+            <div class="adv-title">🔍 더 자세히 찾기 ${has?'<span class="adv-active-badge">조건 적용 중</span>':''}</div>
+            <div class="adv-desc">${has?'결제수단 그룹·금액 범위로 좁혀서 보고 있어요':'결제수단 그룹(카드/간편결제/기타)·금액 범위로 더 정확하게 볼 수 있어요'}</div>
+          </div>
+          <span class="adv-toggle-btn">${state.detailMethodAdvOpen?'접기':'펼치기'}<span class="adv-caret">⌄</span></span>
+        </div>
+        ${state.detailMethodAdvOpen?`
+          <div style="padding:14px 18px 18px;border-top:1px solid var(--line-2);">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span class="field-label">결제수단 그룹</span>
+              <span class="chip ${state.detailMethodGroup==='all'?'on':''}" onclick="state.detailMethodGroup='all';renderApp()">전체</span>
+              <span class="chip ${state.detailMethodGroup==='card'?'on':''}" onclick="state.detailMethodGroup='card';renderApp()">💳 카드</span>
+              <span class="chip ${state.detailMethodGroup==='pay'?'on':''}" onclick="state.detailMethodGroup='pay';renderApp()">📱 간편결제 (카카오/네이버/토스)</span>
+              <span class="chip ${state.detailMethodGroup==='etc'?'on':''}" onclick="state.detailMethodGroup='etc';renderApp()">기타 (현금/이체/포인트/상품권)</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+              <span class="field-label">금액 범위</span>
+              <input class="input" placeholder="최소" value="${state.detailMethodMinAmt}" oninput="state.detailMethodMinAmt=this.value" style="width:140px;" />
+              <span style="color:var(--ink-3);">~</span>
+              <input class="input" placeholder="최대" value="${state.detailMethodMaxAmt}" oninput="state.detailMethodMaxAmt=this.value" style="width:140px;" />
+              <span style="font-size:13px;color:var(--ink-3);">원</span>
+              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+              ${has?`<span class="chip" onclick="state.detailMethodGroup='all';state.detailMethodMinAmt='';state.detailMethodMaxAmt='';renderApp()">✕ 초기화</span>`:''}
+            </div>
+          </div>
+        `:''}
+      </div>`;
+    })()}
+
     <div class="grid-3-2" style="margin-bottom:14px;">
       <div class="panel tight">
-        <h3>결제수단별 매출 <span class="h-act"><span class="unit-tag">단위 · 원</span></span></h3>
+        <h3>결제수단별 매출 <span class="h-act"><span class="unit-tag">단위 · 원</span><span class="h-sub">헤더 클릭으로 정렬</span></span></h3>
         <table class="t">
           <thead>
             <tr>
-              <th>결제수단</th><th class="num">건수</th><th class="num">금액</th><th class="num">비중</th><th class="num">평균 객단가</th><th class="num">취소율</th>
+              ${sortableHeader({key:'name', label:'결제수단', currentSort:state.detailMethodSort, setter:'setDetailMethodSort'})}
+              ${sortableHeader({key:'cnt', label:'건수', align:'num', currentSort:state.detailMethodSort, setter:'setDetailMethodSort'})}
+              ${sortableHeader({key:'amt', label:'금액', align:'num', currentSort:state.detailMethodSort, setter:'setDetailMethodSort'})}
+              ${sortableHeader({key:'share', label:'비중', align:'num', currentSort:state.detailMethodSort, setter:'setDetailMethodSort'})}
+              ${sortableHeader({key:'avg', label:'평균 객단가', align:'num', currentSort:state.detailMethodSort, setter:'setDetailMethodSort'})}
+              <th class="num">취소율</th>
             </tr>
           </thead>
           <tbody>
-            ${METHOD.filter(m=>m.amt>0).map(m=>`
+            ${applySort(filteredMethod, state.detailMethodSort, {
+              name: m=>m.name, cnt: m=>m.cnt, amt: m=>m.amt, share: m=>m.amt/totAmt, avg: m=>m.amt/m.cnt
+            }).map(m=>`
               <tr>
                 <td><span class="swatch" style="background:${m.color}"></span><b>${m.name}</b>${m.usd?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;">USD ${m.usd.toFixed(2)} · 환율 1,376원/USD</div>`:''}</td>
                 <td class="num">${fmt(m.cnt)}건</td>
@@ -1736,9 +2083,9 @@ function renderDetailMethod(body){
     </div>
   `;
   drawDonut('ch-method-donut',
-    METHOD.filter(m=>m.amt>0).map(m=>m.amt),
-    METHOD.filter(m=>m.amt>0).map(m=>m.color),
-    METHOD.filter(m=>m.amt>0).map(m=>m.name)
+    filteredMethod.map(m=>m.amt),
+    filteredMethod.map(m=>m.color),
+    filteredMethod.map(m=>m.name)
   );
 }
 
@@ -1804,6 +2151,18 @@ function renderOrders(main){
   // 금액 범위
   if (state.orderAmountMin) rows = rows.filter(o=>o.amt >= Number(state.orderAmountMin));
   if (state.orderAmountMax) rows = rows.filter(o=>o.amt <= Number(state.orderAmountMax));
+
+  // 헤더 클릭 정렬 적용
+  rows = applySort(rows, state.orderSort, {
+    datetime: o => `${o.date} ${o.time||''}`,
+    id: o => o.id,
+    channel: o => o.ch,
+    menu: o => o.menu,
+    pay: o => payMain(o),
+    amt: o => o.amt,
+    status: o => o.status,
+    stl: o => o.stl,
+  });
 
   // 결제 집계 — 매출 상세 모달과 동일 규칙
   // 전체취소: 합계/결제완료에서 제외 / 부분취소: 결제완료 포함, 환불액만 차감
@@ -1871,8 +2230,6 @@ function renderOrders(main){
         <span class="chip ${state.orderStatusFilter==='all'?'on':''}" onclick="state.orderStatusFilter='all';renderApp()">전체</span>
         <span class="chip ${state.orderStatusFilter==='완료'?'on':''}" onclick="state.orderStatusFilter='완료';renderApp()">완료</span>
         <span class="chip ${state.orderStatusFilter==='cancel-all'?'on':''}" onclick="state.orderStatusFilter='cancel-all';renderApp()">취소·환불 전체</span>
-        <span class="chip ${state.orderStatusFilter==='전체취소'?'on':''}" onclick="state.orderStatusFilter='전체취소';renderApp()">전체취소만</span>
-        <span class="chip ${state.orderStatusFilter==='부분취소'?'on':''}" onclick="state.orderStatusFilter='부분취소';renderApp()">부분취소만</span>
         <span style="color:var(--line);">|</span>
         <button class="btn-ghost" onclick="resetOrderFilters()" style="padding:7px 14px;font-size:12px;">필터 초기화</button>
       </div>
@@ -1975,14 +2332,14 @@ function renderOrders(main){
       <table class="t">
         <thead>
           <tr>
-            <th>주문일시</th>
-            <th>주문번호</th>
-            <th>채널</th>
-            <th>메뉴 요약</th>
-            <th>결제수단</th>
-            <th class="num">결제금액</th>
-            <th>상태</th>
-            <th>정산상태</th>
+            ${sortableHeader({key:'datetime', label:'주문일시', currentSort:state.orderSort, setter:'setOrderSort'})}
+            ${sortableHeader({key:'id', label:'주문번호', currentSort:state.orderSort, setter:'setOrderSort'})}
+            ${sortableHeader({key:'channel', label:'채널', currentSort:state.orderSort, setter:'setOrderSort'})}
+            ${sortableHeader({key:'menu', label:'메뉴 요약', currentSort:state.orderSort, setter:'setOrderSort'})}
+            ${sortableHeader({key:'pay', label:'결제수단', currentSort:state.orderSort, setter:'setOrderSort'})}
+            ${sortableHeader({key:'amt', label:'결제금액', align:'num', currentSort:state.orderSort, setter:'setOrderSort'})}
+            ${sortableHeader({key:'status', label:'상태', currentSort:state.orderSort, setter:'setOrderSort'})}
+            ${sortableHeader({key:'stl', label:'정산상태', currentSort:state.orderSort, setter:'setOrderSort'})}
             <th></th>
           </tr>
         </thead>
@@ -2050,22 +2407,21 @@ function openStlDetail(stlId){
   state.section = 'stl-detail';
   renderApp();
 }
-// 달력 일자 클릭 → 정산내역 조회로 이동 + 해당 일자(정산일) 필터링
+// 달력 일자 클릭 → 정산 회차 상세 페이지로 바로 이동 (중간 정산내역 조회 단계 생략)
+// 해당 일자에 정산 회차가 없으면(주말·공휴일) 가장 가까운 회차로 진입
 function selectStlDate(iso){
-  state.stlListSpecificDate = iso;
-  state.stlListDateBasis = 'settle';
-  state.stlListQuickRange = 'specific';
-  // 다른 필터는 초기화하여 깔끔한 결과 노출
-  state.stlListStatus = 'all';
-  state.stlListCoupon = 'all';
-  state.stlListIdSearch = '';
-  state.stlListDow = 'all';
-  state.stlListAmtMin = '';
-  state.stlListAmtMax = '';
-  state.stlListSettleMin = '';
-  state.stlListSettleMax = '';
-  state.section = 'stl-list';
-  renderApp();
+  state.calendarSelectedDate = iso;
+  const direct = SETTLEMENTS.find(s => s.settleISO === iso);
+  if (direct) { openStlDetail(direct.id); return; }
+  // fallback: 같은 일자 승인 회차 또는 가장 가까운 정산일 회차
+  const byApproval = SETTLEMENTS.find(s => s.approvalDays.some(d => {
+    const [m,dd] = d.date.split('/').map(Number);
+    return `2026-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}` === iso;
+  }));
+  if (byApproval) { openStlDetail(byApproval.id); return; }
+  const target = new Date(iso).getTime();
+  const nearest = SETTLEMENTS.slice().sort((a,b) => Math.abs(new Date(a.settleISO)-target) - Math.abs(new Date(b.settleISO)-target))[0];
+  if (nearest) openStlDetail(nearest.id);
 }
 
 function renderStlCalendar(main){
@@ -2093,7 +2449,7 @@ function renderStlCalendar(main){
         <div class="page-sub">정산일을 한눈에 · 정산 계좌 <b>신한은행 ****1234</b> · 정산 주기 D+3 영업일</div>
       </div>
       <div class="left">
-        <button class="btn-ghost" onclick="setSection('stl-list')">🔎 정산내역 조회</button>
+        <button class="btn-ghost" onclick="setSection('stl-list')">🔎 정산 내역 보기</button>
       </div>
     </div>
 
@@ -2106,7 +2462,7 @@ function renderStlCalendar(main){
         </div>
         <div style="display:flex;gap:16px;align-items:center;font-size:12px;color:var(--ink-2);">
           <span><span class="cal-legend done"></span> 입금 완료</span>
-          <span><span class="cal-legend pending"></span> 정산 중</span>
+          <span><span class="cal-legend pending"></span> 곧 들어와요</span>
         </div>
       </div>
     </div>
@@ -2125,8 +2481,8 @@ function renderStlCalendar(main){
           let inner = `<div class="cal-day ${isToday?'today':''}">${d}</div>`;
           if (stl) {
             inner += `<div class="cal-amt ${stl.statusPill}">${fmt(stl.totalSettle)}원</div>`;
-            inner += `<div><span class="cal-tag ${stl.statusPill}">${stl.status==='정산완료'?'입금 완료':'정산 중'}</span></div>`;
-            inner += `<div class="cal-sub">영업일 ${stl.approvalDate}(${stl.approvalDow})</div>`;
+            inner += `<div><span class="cal-tag ${stl.statusPill}">${stl.status==='정산완료'?'입금 완료':'곧 들어와요'}</span></div>`;
+            inner += `<div class="cal-sub">결제일 ${stl.approvalDate}(${stl.approvalDow})</div>`;
           }
           return `<div class="cal-cell ${isSelected?'selected':''} ${stl?'has-data':''}" ${stl?`onclick="selectStlDate('${iso}')"`:''}>${inner}</div>`;
         }).join('')}
@@ -2134,13 +2490,26 @@ function renderStlCalendar(main){
     </div>
 
     <div class="info-card" style="text-align:center;padding:22px;">
-      💡 달력의 <b style="color:var(--ink);">정산 금액이 표시된 일자</b>를 누르면 그날의 상세 정산 내역 페이지로 이동해요.
+      💡 금액이 적힌 날짜를 누르면, 그날 받은 정산을 자세히 볼 수 있어요.
     </div>
   `;
 }
 
 /* ====================== 정산내역 조회 ====================== */
-function setStlListQuick(k){ state.stlListQuickRange = k; state.stlListSpecificDate=''; renderApp(); }
+function setStlListQuick(k){
+  state.stlListQuickRange = k;
+  state.stlListSpecificDate = '';
+  if (k !== 'period') { state.stlListPeriodStart = ''; state.stlListPeriodEnd = ''; }
+  renderApp();
+}
+// 표 헤더 클릭 정렬 setter
+const setOrderSort = makeSortSetter('orderSort');
+const setStlListSort = makeSortSetter('stlListSort');
+const setDetailMenuSort = makeSortSetter('detailMenuSort');
+const setDetailCategorySort = makeSortSetter('detailCategorySort');
+const setDetailMethodSort = makeSortSetter('detailMethodSort');
+const setDetailHourSort = makeSortSetter('detailHourSort');
+const setDetailPeriodSort = makeSortSetter('detailPeriodSort');
 function setStlListBasis(k){ state.stlListDateBasis = k; renderApp(); }
 function setStlListStatus(k){ state.stlListStatus = k; renderApp(); }
 function setStlListCoupon(k){ state.stlListCoupon = k; renderApp(); }
@@ -2148,17 +2517,19 @@ function setStlListDow(k){ state.stlListDow = k; renderApp(); }
 function applyStlSpecificDate(){
   const v = document.getElementById('stl-specific-date').value;
   state.stlListSpecificDate = v;
-  state.stlListQuickRange = v ? 'specific' : '1m';
+  state.stlListQuickRange = v ? 'specific' : 'today';
   renderApp();
 }
 function toggleStlAdvanced(){ state.stlListAdvancedOpen = !state.stlListAdvancedOpen; renderApp(); }
 function resetStlListFilters(){
-  state.stlListDateBasis = 'settle';
-  state.stlListQuickRange = '1m';
+  state.stlListDateBasis = 'approval';
+  state.stlListQuickRange = 'today';
   state.stlListStatus = 'all';
   state.stlListCoupon = 'all';
   state.stlListSpecificDate = '';
-  state.stlListIdSearch = '';
+  state.stlListPeriodStart = '';
+  state.stlListPeriodEnd = '';
+  state.stlListOrdSearch = '';
   state.stlListDow = 'all';
   state.stlListAmtMin = '';
   state.stlListAmtMax = '';
@@ -2168,106 +2539,189 @@ function resetStlListFilters(){
 }
 
 function renderStlList(main){
-  // 필터 적용
+  // 데이터 소스: DAY(영업일별) 기반 — 정산 달력은 일자별 묶음, 여기선 일자별 평면 리스트
+  // 각 일자에 SETTLEMENTS에서 회차 정보를 매핑 (정산일/상태/회차ID 등)
+  const DOW_ARR = ['일','월','화','수','목','금','토'];
+  const dailyList = DAY.map(d => {
+    const [m, dd] = d.d.split('/').map(Number);
+    const iso = `2026-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    const stl = findSettlementByOrderDate(iso);
+    const usedCoupon = stl?.usedCoupon || false;
+    const couponTable = usedCoupon ? Math.round(d.gross * 0.012) : 0;
+    const couponBiz   = usedCoupon ? Math.round(d.gross * 0.005) : 0;
+    const feeBase = Math.round((d.gross - d.ref) * AVG_FEE_RATE);
+    const feeVat  = Math.round(feeBase * 0.1);
+    const feeTotal = feeBase + feeVat;
+    const txSettle = d.gross - d.ref - feeTotal - couponBiz;
+    const totalSettle = txSettle + couponTable;
+    return {
+      approvalDate: d.d,
+      approvalDow: d.w,
+      approvalISO: iso,
+      settleDate: stl?.settleDate || '−',
+      settleDow:  stl?.settleDow  || '',
+      settleISO:  stl?.settleISO  || '',
+      cnt: d.ocnt,
+      grossAmt: d.gross,
+      refundAmt: d.ref,
+      couponBizAmt: couponBiz,
+      couponTableAmt: couponTable,
+      couponDiscount: couponBiz + couponTable,
+      feeBase, feeVat, feeTotal,
+      txSettle,
+      totalSettle,
+      usedCoupon,
+      status: stl?.status || '정산대기',
+      statusPill: stl?.statusPill || 'pending',
+      settlementId: stl?.id || '',
+    };
+  });
+
   const today = new Date(2026, 4, 15);
   const basisKey = state.stlListDateBasis === 'approval' ? 'approvalISO' : 'settleISO';
   let rows;
 
-  if (state.stlListSpecificDate) {
-    // 특정 일자 우선 (달력에서 진입했거나 직접 선택)
-    rows = SETTLEMENTS.filter(s => s[basisKey] === state.stlListSpecificDate);
+  if (state.stlListOrdSearch) {
+    // 주문/승인번호 검색은 기간 필터를 우회
+    rows = dailyList.slice();
+  } else if (state.stlListQuickRange === 'period' && state.stlListPeriodStart && state.stlListPeriodEnd) {
+    rows = dailyList.filter(r => r[basisKey] >= state.stlListPeriodStart && r[basisKey] <= state.stlListPeriodEnd);
+  } else if (state.stlListSpecificDate) {
+    rows = dailyList.filter(r => r[basisKey] === state.stlListSpecificDate);
+  } else if (state.stlListQuickRange === 'all') {
+    rows = dailyList.slice();
+  } else if (state.stlListQuickRange === 'today') {
+    rows = dailyList.filter(r => r.approvalISO === TODAY_DATE);
+  } else if (state.stlListQuickRange === 'thismonth') {
+    rows = dailyList.filter(r => r.approvalISO.startsWith('2026-05'));
   } else {
     const rangeDays = { '1w':7, '1m':31, '3m':93 }[state.stlListQuickRange] || 31;
     const from = new Date(today); from.setDate(today.getDate() - rangeDays + 1);
-    rows = SETTLEMENTS.filter(s => {
-      const d = new Date(s[basisKey]);
+    rows = dailyList.filter(r => {
+      const d = new Date(r[basisKey] || r.approvalISO);
       return d >= from && d <= today;
     });
   }
 
-  if (state.stlListStatus !== 'all') rows = rows.filter(s => s.status === state.stlListStatus);
-  if (state.stlListCoupon === 'used') rows = rows.filter(s => s.usedCoupon);
-  if (state.stlListCoupon === 'none') rows = rows.filter(s => !s.usedCoupon);
-  if (state.stlListIdSearch) {
-    const q = state.stlListIdSearch.toLowerCase();
-    rows = rows.filter(s => s.id.toLowerCase().includes(q));
+  if (state.stlListStatus !== 'all') rows = rows.filter(r => r.status === state.stlListStatus);
+  if (state.stlListCoupon === 'used') rows = rows.filter(r => r.usedCoupon);
+  if (state.stlListCoupon === 'none') rows = rows.filter(r => !r.usedCoupon);
+  if (state.stlListOrdSearch) {
+    // 주문번호 또는 승인번호로 매칭되는 주문의 결제 일자만 남기기
+    const q = state.stlListOrdSearch.replace(/[#\s-]/g, '').toLowerCase();
+    const matchedDates = new Set();
+    ORDERS.forEach(o => {
+      if (!o.date) return;
+      const orderIdNorm = o.id.replace(/[#\s-]/g, '').toLowerCase();
+      const approvalNorm = makeApproval(o).replace(/[\s-]/g, '');
+      if (orderIdNorm.includes(q) || approvalNorm.includes(q)) matchedDates.add(o.date);
+    });
+    rows = rows.filter(r => matchedDates.has(r.approvalISO));
   }
-  if (state.stlListDow !== 'all') rows = rows.filter(s => s.approvalDow === state.stlListDow);
-  if (state.stlListAmtMin) rows = rows.filter(s => s.grossAmt >= Number(state.stlListAmtMin));
-  if (state.stlListAmtMax) rows = rows.filter(s => s.grossAmt <= Number(state.stlListAmtMax));
-  if (state.stlListSettleMin) rows = rows.filter(s => s.totalSettle >= Number(state.stlListSettleMin));
-  if (state.stlListSettleMax) rows = rows.filter(s => s.totalSettle <= Number(state.stlListSettleMax));
+  if (state.stlListDow !== 'all') rows = rows.filter(r => r.approvalDow === state.stlListDow);
+  if (state.stlListAmtMin) rows = rows.filter(r => r.grossAmt >= Number(state.stlListAmtMin));
+  if (state.stlListAmtMax) rows = rows.filter(r => r.grossAmt <= Number(state.stlListAmtMax));
+  if (state.stlListSettleMin) rows = rows.filter(r => r.totalSettle >= Number(state.stlListSettleMin));
+  if (state.stlListSettleMax) rows = rows.filter(r => r.totalSettle <= Number(state.stlListSettleMax));
 
-  // 정렬: 정산일 최신순
-  rows = rows.slice().sort((a,b) => b.settleISO.localeCompare(a.settleISO));
+  // 정렬
+  rows = applySort(rows, state.stlListSort, {
+    approvalISO: r => r.approvalISO,
+    settleISO: r => r.settleISO,
+    cnt: r => r.cnt,
+    grossAmt: r => r.grossAmt,
+    couponDiscount: r => r.couponDiscount,
+    feeTotal: r => r.feeTotal,
+    totalSettle: r => r.totalSettle,
+    status: r => r.status,
+  });
 
-  // 집계
-  const cntAll = SETTLEMENTS.length;
-  const cntDone = SETTLEMENTS.filter(s=>s.status==='정산완료').length;
-  const cntPending = SETTLEMENTS.filter(s=>s.status==='정산대기').length;
+  // 집계 (전체 dailyList 기준 카운트)
+  const cntAll = dailyList.length;
+  const cntDone = dailyList.filter(r=>r.status==='정산완료').length;
+  const cntPending = dailyList.filter(r=>r.status==='정산대기').length;
   const totSettle = rows.reduce((a,r)=>a+r.totalSettle, 0);
+  const totGross = rows.reduce((a,r)=>a+r.grossAmt, 0);
 
-  // 현재 활성 세부 필터 카운트 (안내용)
   const advFilters = [
-    state.stlListIdSearch && '회차ID',
+    state.stlListOrdSearch && '주문/승인번호',
     state.stlListDow !== 'all' && '요일',
     (state.stlListAmtMin || state.stlListAmtMax) && '거래금액',
     (state.stlListSettleMin || state.stlListSettleMax) && '정산금액',
   ].filter(Boolean);
   const hasAdv = advFilters.length > 0;
 
-  const rangeLabel = state.stlListSpecificDate
-    ? `${state.stlListSpecificDate.slice(5).replace('-','/')}(${SETTLEMENTS.find(s=>s[basisKey]===state.stlListSpecificDate)?.[state.stlListDateBasis==='approval'?'approvalDow':'settleDow'] || ''})`
-    : state.stlListQuickRange==='1w' ? '최근 1주일'
-    : state.stlListQuickRange==='3m' ? '최근 3개월'
-    :                                  '최근 1개월';
+  const rangeLabel = state.stlListQuickRange==='period' && state.stlListPeriodStart && state.stlListPeriodEnd
+    ? `${state.stlListPeriodStart.slice(5).replace('-','/')} ~ ${state.stlListPeriodEnd.slice(5).replace('-','/')}`
+    : state.stlListSpecificDate
+    ? `${state.stlListSpecificDate.slice(5).replace('-','/')}(${dailyList.find(r=>r[basisKey]===state.stlListSpecificDate)?.[state.stlListDateBasis==='approval'?'approvalDow':'settleDow'] || ''})`
+    : state.stlListQuickRange==='today'      ? `오늘 (${TODAY_DATE.slice(5).replace('-','/')})`
+    : state.stlListQuickRange==='1w'         ? '최근 1주일'
+    : state.stlListQuickRange==='1m'         ? '최근 1개월'
+    : state.stlListQuickRange==='thismonth'  ? '이번 달 (5월)'
+    : state.stlListQuickRange==='3m'         ? '최근 3개월'
+    :                                          '전체 기간';
 
   const subInfo = state.stlListSpecificDate
-    ? `<span style="color:var(--blue);font-weight:700;">📅 ${rangeLabel}</span> · ${state.stlListDateBasis==='approval'?'승인일':'정산일'} 기준 · <b style="color:var(--ink);">${rows.length}건 조회</b> · 합계 ${fmt(totSettle)}원`
-    : `${rangeLabel} · ${state.stlListDateBasis==='approval'?'승인일':'정산일'} 기준 · <b style="color:var(--ink);">${rows.length}건 조회</b> · 합계 ${fmt(totSettle)}원`;
+    ? `<span style="color:var(--blue);font-weight:700;">📅 ${rangeLabel}</span> · ${state.stlListDateBasis==='approval'?'결제일':'정산일'} 기준 · <b style="color:var(--ink);">${rows.length}일 분량</b> · 받으실 금액 ${fmt(totSettle)}원`
+    : `${rangeLabel} · ${state.stlListDateBasis==='approval'?'결제일':'정산일'} 기준 · <b style="color:var(--ink);">${rows.length}일 분량</b> · 결제 ${fmt(totGross)}원 · 받으실 금액 ${fmt(totSettle)}원`;
 
   main.innerHTML = `
-    <div class="crumb">정산관리 › 정산내역 조회</div>
+    <div class="crumb">정산관리 › 정산 내역</div>
     <div class="toolbar">
       <div>
-        <h2>정산내역 조회</h2>
+        <h2>정산 내역</h2>
         <div class="page-sub">${subInfo}</div>
       </div>
       <div class="left">
-        <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력</button>
-        <button class="btn-primary" onclick='openExport(${rows.length}, "정산내역", "${rangeLabel} · ${state.stlListDateBasis==='approval'?'승인일':'정산일'} 기준")'>📤 엑셀 다운로드</button>
+        <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력으로</button>
+        <button class="btn-primary" onclick='openExport(${rows.length}, "정산 내역", "${rangeLabel} · ${state.stlListDateBasis==='approval'?'결제일':'정산일'} 기준")'>📤 엑셀로 받기</button>
       </div>
     </div>
 
-    <!-- 1차 필터: 기간 + 정산 상태 + 쿠폰 + 직접 일자 -->
+    <!-- 1차 필터: 기간 + 정산 상태 + 쿠폰 + 직접 일자/기간 -->
     <div class="search-wrap">
       <div class="row">
-        <span class="field-label">기간 기준</span>
+        <span class="field-label">날짜 기준</span>
         <div class="seg sm">
           <div class="b ${state.stlListDateBasis==='settle'?'on':''}" onclick="setStlListBasis('settle')">정산일</div>
-          <div class="b ${state.stlListDateBasis==='approval'?'on':''}" onclick="setStlListBasis('approval')">승인일</div>
+          <div class="b ${state.stlListDateBasis==='approval'?'on':''}" onclick="setStlListBasis('approval')">결제일</div>
         </div>
-        <span style="color:var(--line);margin:0 4px;">|</span>
+        <span class="chip ${state.stlListQuickRange==='today' && !state.stlListSpecificDate?'on':''}" onclick="setStlListQuick('today')">오늘</span>
         <span class="chip ${state.stlListQuickRange==='1w' && !state.stlListSpecificDate?'on':''}" onclick="setStlListQuick('1w')">1주일</span>
         <span class="chip ${state.stlListQuickRange==='1m' && !state.stlListSpecificDate?'on':''}" onclick="setStlListQuick('1m')">1개월</span>
+        <span class="chip ${state.stlListQuickRange==='thismonth' && !state.stlListSpecificDate?'on':''}" onclick="setStlListQuick('thismonth')">이번 달</span>
         <span class="chip ${state.stlListQuickRange==='3m' && !state.stlListSpecificDate?'on':''}" onclick="setStlListQuick('3m')">3개월</span>
-        <span style="color:var(--line);margin:0 4px;">|</span>
-        <span class="field-label">특정 일자</span>
-        <input class="input" type="date" id="stl-specific-date" value="${state.stlListSpecificDate}" max="${TODAY_DATE}" style="width:160px;" onchange="applyStlSpecificDate()" />
-        ${state.stlListSpecificDate?`<span class="chip" onclick="state.stlListSpecificDate='';state.stlListQuickRange='1m';renderApp()">✕ 일자 해제</span>`:''}
+        <span class="chip ${state.stlListQuickRange==='all' && !state.stlListSpecificDate?'on':''}" onclick="setStlListQuick('all')">전체</span>
       </div>
       <div class="row">
-        <span class="field-label">정산 상태</span>
+        <span class="field-label" style="color:var(--ink-3);">직접 선택</span>
+        <span class="chip ${state.stlListQuickRange==='period'?'on':''}" onclick="state.stlListQuickRange='period';state.stlListSpecificDate='';if(!state.stlListPeriodStart){state.stlListPeriodStart='2026-05-01';state.stlListPeriodEnd='2026-05-15';}renderApp()">📅 기간으로</span>
+        ${state.stlListQuickRange==='period' ? `
+          <input class="input" type="date" value="${state.stlListPeriodStart}" max="${TODAY_DATE}" style="width:160px;" oninput="state.stlListPeriodStart=this.value;renderApp()" />
+          <span style="color:var(--ink-3);">~</span>
+          <input class="input" type="date" value="${state.stlListPeriodEnd}" max="${TODAY_DATE}" style="width:160px;" oninput="state.stlListPeriodEnd=this.value;renderApp()" />
+          <span class="chip" onclick="state.stlListQuickRange='today';state.stlListPeriodStart='';state.stlListPeriodEnd='';renderApp()">✕ 해제</span>
+        ` : ''}
+        <span style="color:var(--ink-4);font-size:12px;margin:0 2px;">또는</span>
+        <span class="chip ${state.stlListSpecificDate?'on':''}" onclick="if(!state.stlListSpecificDate){state.stlListSpecificDate=TODAY_DATE;state.stlListQuickRange='specific';}renderApp()">📅 하루로</span>
+        ${state.stlListSpecificDate?`
+          <input class="input" type="date" id="stl-specific-date" value="${state.stlListSpecificDate}" max="${TODAY_DATE}" style="width:160px;" onchange="applyStlSpecificDate()" />
+          <span class="chip" onclick="state.stlListSpecificDate='';state.stlListQuickRange='today';renderApp()">✕ 해제</span>
+        `:''}
+      </div>
+      <div class="row">
+        <span class="field-label">상태</span>
         <span class="chip ${state.stlListStatus==='all'?'on':''}" onclick="setStlListStatus('all')">전체 (${cntAll})</span>
-        <span class="chip ${state.stlListStatus==='정산대기'?'on':''}" onclick="setStlListStatus('정산대기')">정산 대기 (${cntPending})</span>
-        <span class="chip ${state.stlListStatus==='정산완료'?'on':''}" onclick="setStlListStatus('정산완료')">정산 완료 (${cntDone})</span>
+        <span class="chip ${state.stlListStatus==='정산대기'?'on':''}" onclick="setStlListStatus('정산대기')">곧 들어와요 (${cntPending})</span>
+        <span class="chip ${state.stlListStatus==='정산완료'?'on':''}" onclick="setStlListStatus('정산완료')">입금 완료 (${cntDone})</span>
         <span style="color:var(--line);margin:0 4px;">|</span>
-        <span class="field-label">쿠폰 사용</span>
+        <span class="field-label">쿠폰</span>
         <span class="chip ${state.stlListCoupon==='all'?'on':''}" onclick="setStlListCoupon('all')">전체</span>
-        <span class="chip ${state.stlListCoupon==='used'?'on':''}" onclick="setStlListCoupon('used')">사용</span>
-        <span class="chip ${state.stlListCoupon==='none'?'on':''}" onclick="setStlListCoupon('none')">미사용</span>
+        <span class="chip ${state.stlListCoupon==='used'?'on':''}" onclick="setStlListCoupon('used')">사용함</span>
+        <span class="chip ${state.stlListCoupon==='none'?'on':''}" onclick="setStlListCoupon('none')">안 썼어요</span>
         <span style="color:var(--line);margin:0 4px;">|</span>
-        <button class="btn-ghost" onclick="resetStlListFilters()" style="padding:7px 14px;font-size:12px;">필터 초기화</button>
+        <button class="btn-ghost" onclick="resetStlListFilters()" style="padding:7px 14px;font-size:12px;">처음으로 돌리기</button>
       </div>
     </div>
 
@@ -2282,7 +2736,7 @@ function renderStlList(main){
           <div class="adv-desc">
             ${hasAdv
               ? `${advFilters.join(' · ')}(으)로 좁혀서 보고 있어요`
-              : '회차ID·영업일 요일·거래금액 범위·정산금액 범위로 더 정확하게 찾을 수 있어요'}
+              : '주문/승인번호·영업일 요일·거래금액 범위·정산금액 범위로 더 정확하게 찾을 수 있어요'}
           </div>
         </div>
         <span class="adv-toggle-btn">
@@ -2312,8 +2766,8 @@ function renderStlList(main){
             <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
-            <span class="field-label">회차 ID</span>
-            <input class="input" placeholder="🔍 회차 ID (예: STL-20260515)" value="${state.stlListIdSearch}" oninput="state.stlListIdSearch=this.value" style="flex:1;min-width:280px;" />
+            <span class="field-label">주문/승인번호</span>
+            <input class="input" placeholder="🔍 주문번호(예: 20260515-0046) 또는 승인번호(예: 30150046)" value="${state.stlListOrdSearch}" oninput="state.stlListOrdSearch=this.value" style="flex:1;min-width:320px;" />
             <button class="btn-primary" onclick="renderApp()">검색</button>
           </div>
         </div>
@@ -2322,36 +2776,34 @@ function renderStlList(main){
 
     <!-- 결과 그리드 -->
     <div class="panel tight">
-      <h3>조회 결과 <span class="h-sub">${rows.length}건 · 행 클릭 시 회차 상세</span></h3>
+      <h3>여기 있어요 <span class="h-sub">${rows.length}일 분량 · 한 줄을 누르면 자세히 볼 수 있어요</span></h3>
       <div style="overflow-x:auto;">
       <table class="t">
         <thead>
           <tr>
-            <th>회차 ID</th>
-            <th>승인일 (영업일)</th>
-            <th>정산일</th>
-            <th class="num">건수</th>
-            <th class="num">거래 금액</th>
-            <th class="num">쿠폰 할인</th>
-            <th class="num">입금 수수료</th>
-            <th class="num">총 정산 금액</th>
-            <th>상태</th>
+            ${sortableHeader({key:'approvalISO', label:'결제일', currentSort:state.stlListSort, setter:'setStlListSort'})}
+            ${sortableHeader({key:'settleISO', label:'정산일', currentSort:state.stlListSort, setter:'setStlListSort'})}
+            ${sortableHeader({key:'cnt', label:'건수', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
+            ${sortableHeader({key:'grossAmt', label:'결제 금액', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
+            ${sortableHeader({key:'couponDiscount', label:'쿠폰 할인', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
+            ${sortableHeader({key:'feeTotal', label:'수수료', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
+            ${sortableHeader({key:'totalSettle', label:'받으실 금액', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
+            ${sortableHeader({key:'status', label:'상태', currentSort:state.stlListSort, setter:'setStlListSort'})}
             <th></th>
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">조건에 맞는 정산 내역이 없어요. <span style="color:var(--blue);cursor:pointer;font-weight:600;" onclick="resetStlListFilters()">필터 초기화</span></td></tr>` : rows.map(r => `
-            <tr class="clickable" onclick="openStlDetail('${r.id}')">
-              <td><b>${r.id}</b></td>
-              <td>${r.approvalDate}(${r.approvalDow})</td>
-              <td><b>${r.settleDate}(${r.settleDow})</b></td>
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="9">이 조건으로 정산받은 내역이 없어요. <span style="color:var(--blue);cursor:pointer;font-weight:600;" onclick="resetStlListFilters()">처음으로 돌리기</span></td></tr>` : rows.map(r => `
+            <tr class="clickable" ${r.settlementId?`onclick="openStlDetail('${r.settlementId}')"`:''}>
+              <td><b>${r.approvalDate}(${r.approvalDow})</b></td>
+              <td>${r.settleDate}${r.settleDow?`(${r.settleDow})`:''}</td>
               <td class="num">${fmt(r.cnt)}</td>
               <td class="num">${fmt(r.grossAmt)}</td>
-              <td class="num">${r.usedCoupon?`<b style="color:#a25e00;">−${fmt(r.couponTableAmt + r.couponBizAmt)}</b>`:'−'}</td>
+              <td class="num">${r.usedCoupon?`<b style="color:#a25e00;">−${fmt(r.couponDiscount)}</b>`:'−'}</td>
               <td class="num">−${fmt(r.feeTotal)}</td>
               <td class="num"><b style="color:${r.status==='정산완료'?'var(--blue)':'#a25e00'};">${fmt(r.totalSettle)}원</b></td>
-              <td><span class="pill ${r.statusPill}">${r.status}</span></td>
-              <td style="color:var(--blue);font-weight:600;">상세 ›</td>
+              <td><span class="pill ${r.statusPill}">${r.status==='정산대기'?'곧 들어와요':'입금 완료'}</span></td>
+              <td style="color:var(--blue);font-weight:600;">${r.settlementId?'자세히 ›':'−'}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -2377,14 +2829,26 @@ function renderStlDetail(main){
            || SETTLEMENTS[SETTLEMENTS.length - 1];
 
   const pageCnt = Math.max(1, Math.ceil(stl.cnt / 50));
-  const statusLabel = stl.status === '정산완료' ? '정산 완료' : '정산 예정';
+  const statusLabel = stl.status === '정산완료' ? '입금 완료' : '곧 들어와요';
   const settleColor = stl.status === '정산완료' ? 'var(--blue)' : '#c97a00';
+  // 자정 이후 새벽 결제 행을 위한 영업일 마지막 날 / 다음날 라벨
+  const lastApprovalDay = stl.approvalDays[stl.approvalDays.length - 1];
+  const lastApprovalLabel = lastApprovalDay.date;
+  const lastApprovalDow = lastApprovalDay.dow;
+  const _lastApprovalNext = (() => {
+    const [m, d] = lastApprovalDay.date.split('/').map(Number);
+    const dt = new Date(2026, m - 1, d + 1);
+    const DOW_ARR = ['일','월','화','수','목','금','토'];
+    return { label: `${dt.getMonth()+1}/${dt.getDate()}`, dow: DOW_ARR[dt.getDay()] };
+  })();
+  const nextDayLabel = _lastApprovalNext.label;
+  const nextDayDow = _lastApprovalNext.dow;
 
   main.innerHTML = `
     <div class="crumb">
       <span style="cursor:pointer;color:var(--blue);" onclick="setSection('stl-calendar')">정산관리 › 정산 달력</span>
       <span style="color:var(--ink-4);margin:0 6px;">·</span>
-      <span style="cursor:pointer;color:var(--blue);" onclick="setSection('stl-list')">정산내역 조회</span>
+      <span style="cursor:pointer;color:var(--blue);" onclick="setSection('stl-list')">정산 내역</span>
       › <b style="color:var(--ink);">${stl.id}</b>
     </div>
 
@@ -2398,41 +2862,57 @@ function renderStlDetail(main){
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력으로</button>
-        <button class="btn-primary" onclick='openExport(${stl.cnt}, "정산 회차 거래 명세", "영업일 ${stl.approvalDate}(${stl.approvalDow}) · 정산일 ${stl.settleDate}(${stl.settleDow})")'>📤 엑셀 다운로드</button>
+        <button class="btn-primary" onclick='openExport(${stl.cnt}, "결제 내역", "영업일 ${stl.approvalDate}(${stl.approvalDow}) · 정산일 ${stl.settleDate}(${stl.settleDow})")'>📤 엑셀로 받기</button>
       </div>
     </div>
 
     <!-- 핵심 정산 카드 (단일) -->
-    <div class="panel" style="padding:24px 28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;">
-      <div>
-        <div style="font-size:13px;color:var(--ink-3);font-weight:700;margin-bottom:6px;">${stl.status==='정산완료'?'정산 완료 금액':'정산 예정 금액'}</div>
-        <div style="font-size:36px;font-weight:800;letter-spacing:-.02em;color:${settleColor};font-variant-numeric:tabular-nums;line-height:1.1;">${fmt(stl.totalSettle)}원</div>
-        <div style="font-size:13px;color:var(--ink-2);margin-top:8px;">
-          거래 ${fmt(stl.grossAmt)}원 − 입금 수수료 ${fmt(stl.feeTotal)}원${stl.usedCoupon?` + 쿠폰 정산 ${fmt(stl.couponSettle)}원`:''}
+    <div class="panel" style="padding:24px 28px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:13px;color:var(--ink-3);font-weight:700;margin-bottom:6px;">${stl.status==='정산완료'?'입금된 금액':'받으실 금액'}</div>
+          <div style="font-size:36px;font-weight:800;letter-spacing:-.02em;color:${settleColor};font-variant-numeric:tabular-nums;line-height:1.1;">${fmt(stl.totalSettle)}원</div>
+          <div style="font-size:13px;color:var(--ink-2);margin-top:8px;">
+            결제 ${fmt(stl.grossAmt)}원에서 수수료 ${fmt(stl.feeTotal)}원 빼고${stl.usedCoupon?`, 쿠폰 정산 ${fmt(stl.couponSettle)}원 더해서 드려요`:' 드려요'}
+          </div>
+        </div>
+        <div style="text-align:right;font-size:13px;color:var(--ink-2);line-height:1.7;">
+          <div>받을 계좌 <b style="color:var(--ink);">신한 ****1234</b></div>
+          <div>쿠폰 사용 <b style="color:var(--ink);">${stl.usedCoupon?'적용됐어요':'없어요'}</b></div>
         </div>
       </div>
-      <div style="text-align:right;font-size:13px;color:var(--ink-2);line-height:1.7;">
-        <div>건수 <b style="color:var(--ink);">${fmt(stl.cnt)}건</b></div>
-        <div>입금 계좌 <b style="color:var(--ink);">신한 ****1234</b></div>
-        <div>쿠폰 사용 <b style="color:var(--ink);">${stl.usedCoupon?'적용 (테이블 발행 보전)':'없음'}</b></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line-2);">
+        <div>
+          <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">결제 금액</div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;">${fmt(stl.grossAmt)}원</div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">주문 건수</div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;">${fmt(stl.cnt)}건</div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">수수료 (부가세 포함)</div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink-2);font-variant-numeric:tabular-nums;">−${fmt(stl.feeTotal)}원</div>
+        </div>
       </div>
     </div>
 
-    <!-- 거래 명세 표 (데모 — 8건 샘플) -->
+    <!-- 결제 내역 표 (데모 — 8건 샘플) -->
     <div class="panel tight" style="margin-top:14px;">
-      <h3>거래 명세 <span class="h-sub">${fmt(stl.cnt)}건 · 1 / ${pageCnt} 페이지</span></h3>
+      <h3>결제 내역 <span class="h-sub">${fmt(stl.cnt)}건 · 1 / ${pageCnt} 페이지</span></h3>
       <div style="overflow-x:auto;">
       <table class="t">
-        <thead><tr><th>시각</th><th>결제번호</th><th>수단</th><th class="num">금액</th><th class="num">수수료</th><th class="num">VAT</th><th class="num">정산 반영</th><th>상태</th></tr></thead>
+        <thead><tr><th>시각</th><th>결제번호</th><th>수단</th><th class="num">금액</th><th class="num">수수료</th><th class="num">부가세</th><th class="num">정산 반영</th><th>상태</th></tr></thead>
         <tbody>
-          <tr class="clickable"><td>${stl.approvalDate} 09:18</td><td>tid_3f8a...01</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">26,400</td><td class="num">−528</td><td class="num">−53</td><td class="num">25,819</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>${stl.approvalDate} 09:42</td><td>tid_3f8a...02</td><td>🟡 카카오페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">12,000</td><td class="num">−276</td><td class="num">−28</td><td class="num">11,696</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>${stl.approvalDate} 10:12</td><td>tid_3f8a...03</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· KB</span></td><td class="num">8,000</td><td class="num">0</td><td class="num">0</td><td class="num">−</td><td><span class="pill cancel">취소(전)</span></td></tr>
-          <tr class="clickable"><td>${stl.approvalDate} 10:24</td><td>tid_3f8a...04</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 해외 (VISA)</span></td><td class="num">27,420<br/><span style="font-size:11px;color:var(--ink-3);">($19.90)</span></td><td class="num">−959</td><td class="num">−96</td><td class="num">26,365</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>${stl.approvalDate} 11:08</td><td>tid_3f8a...05</td><td>🟢 네이버페이 <span style="color:var(--ink-3);font-size:11px;">· 머니</span></td><td class="num">5,500</td><td class="num">−132</td><td class="num">−13</td><td class="num">5,355</td><td><span class="pill partial">부분취소</span></td></tr>
-          <tr class="clickable"><td>${stl.approvalDate} 11:42</td><td>tid_3f8a...06</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 삼성</span></td><td class="num">14,500</td><td class="num">−290</td><td class="num">−29</td><td class="num">14,181</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable"><td>${stl.approvalDate} 23:14</td><td>tid_3f8a...07</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">18,200</td><td class="num">−364</td><td class="num">−36</td><td class="num">17,800</td><td><span class="pill done">반영</span></td></tr>
-          <tr class="clickable" style="background:#fff5f0;"><td>새벽 01:42<br/><span style="font-size:11px;color:var(--amber);">영업일 마감 전</span></td><td>tid_3f8a...08</td><td>🔵 토스페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">9,500</td><td class="num">−219</td><td class="num">−22</td><td class="num">9,259</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 09:18</td><td>tid_3f8a...01</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">26,400</td><td class="num">−528</td><td class="num">−53</td><td class="num">25,819</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 09:42</td><td>tid_3f8a...02</td><td>🟡 카카오페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">12,000</td><td class="num">−276</td><td class="num">−28</td><td class="num">11,696</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 10:12</td><td>tid_3f8a...03</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· KB</span></td><td class="num">8,000</td><td class="num">0</td><td class="num">0</td><td class="num">−</td><td><span class="pill cancel">취소(전)</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 10:24</td><td>tid_3f8a...04</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 해외 (VISA)</span></td><td class="num">27,420<br/><span style="font-size:11px;color:var(--ink-3);">($19.90)</span></td><td class="num">−959</td><td class="num">−96</td><td class="num">26,365</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 11:08</td><td>tid_3f8a...05</td><td>🟢 네이버페이 <span style="color:var(--ink-3);font-size:11px;">· 머니</span></td><td class="num">5,500</td><td class="num">−132</td><td class="num">−13</td><td class="num">5,355</td><td><span class="pill partial">부분취소</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 11:42</td><td>tid_3f8a...06</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 삼성</span></td><td class="num">14,500</td><td class="num">−290</td><td class="num">−29</td><td class="num">14,181</td><td><span class="pill done">반영</span></td></tr>
+          <tr class="clickable"><td>${lastApprovalLabel} 23:14</td><td>tid_3f8a...07</td><td>💳 카드 <span style="color:var(--ink-3);font-size:11px;">· 신한</span></td><td class="num">18,200</td><td class="num">−364</td><td class="num">−36</td><td class="num">17,800</td><td><span class="pill done">반영</span></td></tr>
+          <tr style="background:#fafbfc;border-top:1px dashed var(--line);"><td colspan="8" style="text-align:center;font-size:11px;color:#a25e00;font-weight:700;padding:8px;letter-spacing:.02em;">⏰ ─── 자정 이후 · ${lastApprovalLabel}(${lastApprovalDow}) 영업일 마감(${nextDayLabel} 03:00) 전까지 동일 회차에 포함 ─── </td></tr>
+          <tr class="clickable" style="background:#fff5f0;"><td>${nextDayLabel} 01:42<br/><span style="font-size:11px;color:var(--amber);">${lastApprovalLabel} 영업일</span></td><td>tid_3f8a...08</td><td>🔵 토스페이 <span style="color:var(--ink-3);font-size:11px;">· 페이</span></td><td class="num">9,500</td><td class="num">−219</td><td class="num">−22</td><td class="num">9,259</td><td><span class="pill done">반영</span></td></tr>
         </tbody>
       </table>
       </div>
@@ -2440,29 +2920,9 @@ function renderStlDetail(main){
         <div class="rows-control">
           <span>표시 개수</span>${rowsSelect('orderRowsPerPage')}
           <span class="cnt">총 <b>${fmt(stl.cnt)}</b>건 조회</span>
-          <span style="font-size:11px;color:var(--ink-3);margin-left:8px;">💡 엑셀 다운로드는 ${fmt(stl.cnt)}건 전체</span>
+          <span style="font-size:11px;color:var(--ink-3);margin-left:8px;">💡 엑셀로 받으면 ${fmt(stl.cnt)}건 전부 들어가요</span>
         </div>
         ${paginationStatic(1, pageCnt)}
-      </div>
-    </div>
-
-    <!-- Sticky 하단 합계 바 -->
-    <div class="stl-summary-bar">
-      <div class="stl-sb-item">
-        <div class="stl-sb-label">총 건수</div>
-        <div class="stl-sb-num">${fmt(stl.cnt)}건</div>
-      </div>
-      <div class="stl-sb-item">
-        <div class="stl-sb-label">총 거래 금액</div>
-        <div class="stl-sb-num">${fmt(stl.grossAmt)}원</div>
-      </div>
-      <div class="stl-sb-item">
-        <div class="stl-sb-label">총 입금 수수료</div>
-        <div class="stl-sb-num">−${fmt(stl.feeTotal)}원</div>
-      </div>
-      <div class="stl-sb-item">
-        <div class="stl-sb-label">총 정산 금액</div>
-        <div class="stl-sb-num primary">${fmt(stl.totalSettle)}원</div>
       </div>
     </div>
   `;
@@ -2482,33 +2942,37 @@ function renderFee(main){
       ✨ <b>영세·중소 우대 요율 적용 중</b> — 최근 1년 매출 3억 원 이하 구간으로 결제 수수료가 우대 요율로 적용되고 있어요.
     </div>
     <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
-      <div class="pc-card"><div class="label">이번 달 수수료</div><div class="num">248,500원</div><div class="sub">부가세 포함 273,350원</div></div>
-      <div class="pc-card"><div class="label">평균 수수료율</div><div class="num">2.04%</div><div class="sub">전월 2.06% · <span class="delta-down">−0.02%p</span></div></div>
-      <div class="pc-card"><div class="label">이번 달 부가세</div><div class="num">24,850원</div><div class="sub">수수료의 10%</div></div>
+      <div class="pc-card"><div class="label">이번 달 수수료 (1~15일)</div><div class="num">350,110원</div><div class="sub">부가세 포함 385,121원</div></div>
+      <div class="pc-card"><div class="label">평균 수수료율</div><div class="num">2.00%</div><div class="sub">전월 2.04% · <span class="delta-down">−0.04%p</span></div></div>
+      <div class="pc-card"><div class="label">이번 달 부가세 (1~15일)</div><div class="num">35,011원</div><div class="sub">수수료의 10%</div></div>
     </div>
     <div class="panel tight">
-      <h3>결제수단별 적용 요율</h3>
+      <h3>결제수단별 적용 요율 <span class="h-sub">2026년 5월 1~15일 기준</span></h3>
       <table class="fee-table">
         <thead><tr><th>결제수단</th><th>적용 요율</th><th class="num">이번 달 거래액</th><th class="num">이번 달 수수료</th><th>효력 발생일</th></tr></thead>
         <tbody>
-          <tr><td>💳 카드 (국내)</td><td><b>2.0%</b></td><td class="num">16,840,000</td><td class="num">336,800</td><td>2026-01-01</td></tr>
-          <tr><td>💳 카드 (해외)</td><td><b>3.5%</b></td><td class="num">916,800</td><td class="num">32,088</td><td>2026-01-01</td></tr>
-          <tr><td>🟡 카카오페이</td><td><b>2.3%</b></td><td class="num">5,155,200</td><td class="num">118,570</td><td>2026-01-01</td></tr>
-          <tr><td>🟢 네이버페이</td><td><b>2.4%</b></td><td class="num">3,150,400</td><td class="num">75,610</td><td>2026-01-01</td></tr>
-          <tr><td>🔵 토스페이</td><td><b>2.3%</b></td><td class="num">615,000</td><td class="num">14,145</td><td>2026-01-01</td></tr>
-          <tr><td>🏦 계좌이체</td><td><b>1.5%</b></td><td class="num">282,000</td><td class="num">4,230</td><td>2026-01-01</td></tr>
-          <tr class="total"><td>합계</td><td>−</td><td class="num">26,344,400</td><td class="num"><b>567,298</b></td><td>−</td></tr>
+          <tr><td>💳 카드 (국내)</td><td><b>2.0%</b></td><td class="num">10,520,000</td><td class="num">210,400</td><td>2026-01-01</td></tr>
+          <tr><td>💳 카드 (해외)</td><td><b>3.5%</b></td><td class="num">525,000</td><td class="num">18,375</td><td>2026-01-01</td></tr>
+          <tr><td>🟡 카카오페이</td><td><b>2.3%</b></td><td class="num">2,980,000</td><td class="num">68,540</td><td>2026-01-01</td></tr>
+          <tr><td>🟢 네이버페이</td><td><b>2.4%</b></td><td class="num">1,755,000</td><td class="num">42,120</td><td>2026-01-01</td></tr>
+          <tr><td>🔵 토스페이</td><td><b>2.3%</b></td><td class="num">350,000</td><td class="num">8,050</td><td>2026-01-01</td></tr>
+          <tr><td>🏦 계좌이체</td><td><b>1.5%</b></td><td class="num">175,000</td><td class="num">2,625</td><td>2026-01-01</td></tr>
+          <tr><td style="color:var(--ink-3);">💵 현금 / 자체 포인트 / 상품권</td><td style="color:var(--ink-3);">수수료 없음</td><td class="num" style="color:var(--ink-3);">1,228,100</td><td class="num" style="color:var(--ink-3);">−</td><td style="color:var(--ink-3);">−</td></tr>
+          <tr class="total"><td>합계</td><td>−</td><td class="num">17,533,100</td><td class="num"><b>350,110</b></td><td>−</td></tr>
         </tbody>
       </table>
+      <div style="margin-top:10px;font-size:11px;color:var(--ink-3);line-height:1.6;">
+        💡 정산내역의 입금 수수료(385,121원 = 수수료 350,110원 + 부가세 35,011원 - 환불 비례 환급분)와 일치해요.
+      </div>
     </div>
     <div class="panel tight" style="margin-top:14px;">
       <h3>월간 수수료 명세서</h3>
       <table class="t">
         <thead><tr><th>기간</th><th class="num">총 거래액</th><th class="num">수수료</th><th class="num">부가세</th><th class="num">합계</th><th>세금계산서</th><th>액션</th></tr></thead>
         <tbody>
-          <tr><td>2026년 5월</td><td class="num">28,640,000</td><td class="num">248,500</td><td class="num">24,850</td><td class="num"><b>273,350</b></td><td><span class="pill pending">집계중</span></td><td style="color:var(--ink-3);">−</td></tr>
-          <tr class="clickable" onclick="alert('4월분 PDF 다운로드')"><td>2026년 4월</td><td class="num">26,480,000</td><td class="num">235,200</td><td class="num">23,520</td><td class="num"><b>258,720</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
-          <tr class="clickable" onclick="alert('3월분 PDF 다운로드')"><td>2026년 3월</td><td class="num">24,180,000</td><td class="num">214,800</td><td class="num">21,480</td><td class="num"><b>236,280</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
+          <tr><td>2026년 5월 (1~15일)</td><td class="num">17,533,100</td><td class="num">350,110</td><td class="num">35,011</td><td class="num"><b>385,121</b></td><td><span class="pill pending">집계중</span></td><td style="color:var(--ink-3);">−</td></tr>
+          <tr class="clickable" onclick="alert('4월분 PDF 다운로드')"><td>2026년 4월</td><td class="num">26,480,000</td><td class="num">529,600</td><td class="num">52,960</td><td class="num"><b>582,560</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
+          <tr class="clickable" onclick="alert('3월분 PDF 다운로드')"><td>2026년 3월</td><td class="num">24,180,000</td><td class="num">483,600</td><td class="num">48,360</td><td class="num"><b>531,960</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
         </tbody>
       </table>
     </div>
@@ -2535,11 +2999,11 @@ function renderTax(main){
         <table class="t">
           <thead><tr><th>발행일</th><th>공급시기</th><th>구분</th><th class="num">공급가액</th><th class="num">세액</th><th class="num">합계</th><th>상태</th><th>액션</th></tr></thead>
           <tbody>
-            <tr><td>예정 (6/1)</td><td>2026년 5월</td><td>일반</td><td class="num">248,500</td><td class="num">24,850</td><td class="num"><b>273,350</b></td><td><span class="pill pending">집계중</span></td><td style="color:var(--ink-3);">−</td></tr>
-            <tr class="clickable" onclick="alert('4월 PDF 다운로드')"><td>2026-05-01</td><td>2026년 4월</td><td>일반</td><td class="num">235,200</td><td class="num">23,520</td><td class="num"><b>258,720</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
-            <tr class="clickable" onclick="alert('3월 수정분 PDF')"><td>2026-04-03</td><td>2026년 3월</td><td>수정</td><td class="num neg">−12,000</td><td class="num neg">−1,200</td><td class="num"><b style="color:var(--red);">−13,200</b></td><td><span class="pill partial">수정</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
-            <tr class="clickable"><td>2026-04-01</td><td>2026년 3월</td><td>일반</td><td class="num">214,800</td><td class="num">21,480</td><td class="num"><b>236,280</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
-            <tr style="background:#fffaf0;"><td>2026-03-01</td><td>2026년 2월</td><td>일반</td><td class="num">190,800</td><td class="num">19,080</td><td class="num"><b>209,880</b></td><td><span class="pill cancel">반송</span></td><td style="color:var(--red);font-weight:600;cursor:pointer;" onclick="alert('재발송')">⚠️ 재발송 필요</td></tr>
+            <tr><td>예정 (6/1)</td><td>2026년 5월</td><td>일반</td><td class="num">350,110</td><td class="num">35,011</td><td class="num"><b>385,121</b></td><td><span class="pill pending">집계중</span></td><td style="color:var(--ink-3);">−</td></tr>
+            <tr class="clickable" onclick="alert('4월 PDF 다운로드')"><td>2026-05-01</td><td>2026년 4월</td><td>일반</td><td class="num">529,600</td><td class="num">52,960</td><td class="num"><b>582,560</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
+            <tr class="clickable" onclick="alert('3월 수정분 PDF')"><td>2026-04-03</td><td>2026년 3월</td><td>수정</td><td class="num neg">−24,000</td><td class="num neg">−2,400</td><td class="num"><b style="color:var(--red);">−26,400</b></td><td><span class="pill partial">수정</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
+            <tr class="clickable"><td>2026-04-01</td><td>2026년 3월</td><td>일반</td><td class="num">483,600</td><td class="num">48,360</td><td class="num"><b>531,960</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
+            <tr style="background:#fffaf0;"><td>2026-03-01</td><td>2026년 2월</td><td>일반</td><td class="num">381,600</td><td class="num">38,160</td><td class="num"><b>419,760</b></td><td><span class="pill cancel">반송</span></td><td style="color:var(--red);font-weight:600;cursor:pointer;" onclick="alert('재발송')">⚠️ 재발송 필요</td></tr>
           </tbody>
         </table>
         <div class="table-footer">
@@ -2564,11 +3028,11 @@ function renderTax(main){
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
               <span>공급시기</span><b style="text-align:right;">2026년 4월</b>
               <span>발행일</span><b style="text-align:right;">2026-05-01</b>
-              <span>공급가액</span><b style="text-align:right;">235,200원</b>
-              <span>세액 (10%)</span><b style="text-align:right;">23,520원</b>
+              <span>공급가액</span><b style="text-align:right;">529,600원</b>
+              <span>세액 (10%)</span><b style="text-align:right;">52,960원</b>
             </div>
             <div style="background:var(--bg-2);padding:10px;border-radius:6px;margin-top:10px;display:flex;justify-content:space-between;font-weight:800;color:var(--ink);">
-              <span>합계</span><span>258,720원</span>
+              <span>합계</span><span>582,560원</span>
             </div>
           </div>
           <button class="btn-primary" style="width:100%;margin-top:10px;" onclick="alert('PDF 다운로드')">⬇ PDF 다운로드</button>
@@ -2581,12 +3045,12 @@ function renderTax(main){
 /* ====================== 정산계좌 ====================== */
 function renderBank(main){
   main.innerHTML = `
-    <div class="crumb">정산관리 › 정산계좌</div>
+    <div class="crumb">정산관리 › 정산 계좌</div>
     <div class="toolbar">
-      <div><h2>정산계좌 관리</h2><div class="page-sub">정산 송금을 받는 계좌예요.</div></div>
+      <div><h2>정산 계좌</h2><div class="page-sub">정산금이 들어오는 계좌예요.</div></div>
     </div>
     <div class="acct-box" style="max-width:540px;">
-      <div class="l">현재 정산 계좌</div>
+      <div class="l">지금 쓰는 계좌</div>
       <div style="font-size:14px;color:var(--ink-2);margin-bottom:4px;">신한은행</div>
       <div class="num">****-**-***1234 <span style="font-size:14px;color:var(--ink-3);font-weight:500;margin-left:6px;cursor:pointer;" onclick="alert('전체 번호 표시 (보안 인증 필요)')">👁 표시</span></div>
       <div class="holder">예금주 홍길동 · 사업자 대표명과 일치</div>
@@ -3136,8 +3600,21 @@ function openOrderDetail(o){
       <hr/>
       <div class="r-line"><span>결제수단</span><b>${payLabelFull(o)}</b></div>
       ${cardLine}
-      <div class="r-line"><span>매입일 (예정)</span><b>${isCancelAll?'−':within?'5/16 (영업일)':'정산완료'}</b></div>
-      <div class="r-line"><span>정산 회차</span><b style="color:var(--blue);cursor:pointer;" onclick="closeModal();setSection('stl-detail');">${isCancelAll?'정산 제외':within?'STL-2026052001':'완료된 회차'} ›</b></div>
+      ${(() => {
+        if (isCancelAll) return `
+          <div class="r-line"><span>매입일 (예정)</span><b>−</b></div>
+          <div class="r-line"><span>정산 회차</span><b style="color:var(--ink-3);">정산 제외 (전체취소)</b></div>`;
+        if (o.issuer === '현금') return `
+          <div class="r-line"><span>매입일 (예정)</span><b style="color:var(--ink-3);">현금 결제 — 매입 없음</b></div>
+          <div class="r-line"><span>정산 회차</span><b style="color:var(--ink-3);">즉시 매장 보관</b></div>`;
+        const stl = o._settlementId ? SETTLEMENTS.find(s => s.id === o._settlementId) : null;
+        if (!stl) return `
+          <div class="r-line"><span>매입일 (예정)</span><b>${within?'영업일 D+1':'정산완료'}</b></div>
+          <div class="r-line"><span>정산 회차</span><b style="color:var(--ink-3);">${within?'집계 중':'완료된 회차'}</b></div>`;
+        return `
+          <div class="r-line"><span>매입일 (예정)</span><b>${stl.approvalDate}(${stl.approvalDow}) 영업일 마감 후</b></div>
+          <div class="r-line"><span>정산 회차</span><b style="color:var(--blue);cursor:pointer;" onclick="closeModal();openStlDetail('${stl.id}');">${stl.id} · ${stl.settleDate}(${stl.settleDow}) ${stl.status} ›</b></div>`;
+      })()}
     </div>
     <div style="margin-top:14px;display:flex;gap:8px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeModal()">🖨️ 영수증 출력</button>

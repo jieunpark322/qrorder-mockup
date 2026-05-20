@@ -883,6 +883,10 @@ const state = {
   detailMethodGroup: 'all',          // all | card | pay | etc
   detailMethodMinAmt: '', detailMethodMaxAmt: '',
   detailMethodAdvOpen: false,
+  // 영업시간 기준 토글 — 매출 보기 영역에서만 사용 (정산은 자정 고정)
+  useBusinessHours: false,
+  businessHoursOpen: '09:00',
+  businessHoursClose: '22:00',
   stlListDow: 'all',                // 영업일 요일 (all | 일 | 월 | ... | 토)
   stlListAmtMin: '',                // 거래 금액 최소
   stlListAmtMax: '',                // 거래 금액 최대
@@ -1052,6 +1056,73 @@ function renderSidebar(){
   document.getElementById('sidenav').innerHTML = html;
 }
 
+/* ====================== 영업시간 기준 토글 (매출 보기 전용) ====================== */
+// 현재 표시 기준 라벨 ("자정 기준" or "영업시간 기준 (HH:MM~HH:MM)")
+function basisLabel(){
+  if (!state.useBusinessHours) return '🕛 자정 기준';
+  return `🕒 영업시간 기준 (${state.businessHoursOpen}~${state.businessHoursClose})`;
+}
+// 매출 보기 페이지 상단에 들어가는 토글 + 설정 아이콘
+function basisToggleBar(){
+  return `
+    <div class="panel" style="padding:10px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;${state.useBusinessHours?'background:#fffaf0;border-color:#ffe0a3;':''}">
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:12px;color:var(--ink-3);font-weight:700;">매출 집계 기준</span>
+        <div class="seg sm">
+          <div class="b ${!state.useBusinessHours?'on':''}" onclick="state.useBusinessHours=false;renderApp()">🕛 자정 기준</div>
+          <div class="b ${state.useBusinessHours?'on':''}" onclick="state.useBusinessHours=true;renderApp()">🕒 영업시간 기준</div>
+        </div>
+        ${state.useBusinessHours?`<span style="font-size:12px;color:#a25e00;font-weight:600;">· ${state.businessHoursOpen} ~ ${state.businessHoursClose}</span>`:''}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        ${state.useBusinessHours?`<span style="font-size:11px;color:#a25e00;background:#fff3d4;padding:3px 8px;border-radius:6px;font-weight:600;">새벽 영업 매장에 추천해요</span>`:''}
+        <button class="btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="openBusinessHoursModal()">⚙️ 영업시간 설정</button>
+      </div>
+    </div>
+  `;
+}
+// 영업시간 설정 모달 — 사장님이 직접 변경
+function openBusinessHoursModal(){
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div>
+        <h3>영업시간 설정</h3>
+        <div class="modal-sub">매장 영업 시작·마감 시각을 입력하면, 매출을 그 기준으로도 볼 수 있어요</div>
+      </div>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+    <div style="padding:8px 0;">
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+        <label style="font-size:13px;color:var(--ink-2);font-weight:600;width:80px;">영업 시작</label>
+        <input class="input" id="bh-open" type="time" value="${state.businessHoursOpen}" style="flex:1;" />
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+        <label style="font-size:13px;color:var(--ink-2);font-weight:600;width:80px;">영업 마감</label>
+        <input class="input" id="bh-close" type="time" value="${state.businessHoursClose}" style="flex:1;" />
+      </div>
+      <div style="padding:12px 14px;background:var(--bg-2);border-radius:10px;font-size:12px;color:var(--ink-2);line-height:1.65;">
+        💡 호프집·24시간 매장처럼 자정을 넘기는 경우 마감 시각을 새벽(예: 04:00)으로 설정하세요.<br/>
+        💡 정산내역은 카드사 표준에 맞춰 항상 <b>자정 기준</b>으로 보여요.
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
+      <button class="btn-primary" style="flex:1;" onclick="saveBusinessHours()">저장</button>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function saveBusinessHours(){
+  const open = document.getElementById('bh-open').value;
+  const close = document.getElementById('bh-close').value;
+  if (open) state.businessHoursOpen = open;
+  if (close) state.businessHoursClose = close;
+  state.useBusinessHours = true; // 저장하면 자동으로 영업시간 기준 ON
+  closeModal();
+  renderApp();
+}
+
 /* ====================== 매출 한눈에 보기 ====================== */
 function renderOverview(main){
   const days = periodDays();
@@ -1111,6 +1182,8 @@ function renderOverview(main){
       startTime: rangeStart,
       endTime: rangeEnd,
     })}
+
+    ${basisToggleBar()}
 
     <!-- KPI 흐름 (총매출 → 차감 → 실매출 → 부가세 → 순매출) -->
     <div class="kpi-flow">
@@ -1267,6 +1340,8 @@ function renderDetail(main){
         <button class="btn-primary" onclick='openExport(15, "매출 상세 · " + ${JSON.stringify(tabName)}, "2026년 5월 1일(금) ~ 5월 15일(금)")'>📤 내보내기</button>
       </div>
     </div>
+
+    ${basisToggleBar()}
 
     <div class="tabs">
       <div class="t ${state.detailTab==='period'?'on':''}"   onclick="setDetailTab('period')">📅 기간별</div>

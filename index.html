@@ -855,7 +855,7 @@ const state = {
   calendarSelectedDate: '2026-05-15', // 정산 달력에서 강조용
   stlDetailId: '',                    // 현재 보고 있는 정산 회차 ID (stl-detail 페이지)
   stlListDateBasis: 'approval',     // 정산내역 조회 — 기간 기준 (settle:정산일 / approval:승인일·매출 발생일)
-  stlListQuickRange: 'today',       // today | 1w | 1m | thismonth | 3m | all | specific
+  stlListQuickRange: '1w',          // today | 1w | 1m | thismonth | 3m | all | specific
   stlListStatus: 'all',             // all | 정산대기 | 정산완료
   stlListCoupon: 'all',             // all | used | none
   stlListSpecificDate: '',          // 특정 일자 직접 선택 (ISO) — 달력에서 진입 시 자동 설정
@@ -2619,13 +2619,13 @@ function setStlListDow(k){ state.stlListDow = k; renderApp(); }
 function applyStlSpecificDate(){
   const v = document.getElementById('stl-specific-date').value;
   state.stlListSpecificDate = v;
-  state.stlListQuickRange = v ? 'specific' : 'today';
+  state.stlListQuickRange = v ? 'specific' : '1w';
   renderApp();
 }
 function toggleStlAdvanced(){ state.stlListAdvancedOpen = !state.stlListAdvancedOpen; renderApp(); }
 function resetStlListFilters(){
   state.stlListDateBasis = 'approval';
-  state.stlListQuickRange = 'today';
+  state.stlListQuickRange = '1w';
   state.stlListStatus = 'all';
   state.stlListCoupon = 'all';
   state.stlListSpecificDate = '';
@@ -2803,13 +2803,13 @@ function renderStlList(main){
           <input class="input" type="date" value="${state.stlListPeriodStart}" max="${TODAY_DATE}" style="width:160px;" oninput="state.stlListPeriodStart=this.value;renderApp()" />
           <span style="color:var(--ink-3);">~</span>
           <input class="input" type="date" value="${state.stlListPeriodEnd}" max="${TODAY_DATE}" style="width:160px;" oninput="state.stlListPeriodEnd=this.value;renderApp()" />
-          <span class="chip" onclick="state.stlListQuickRange='today';state.stlListPeriodStart='';state.stlListPeriodEnd='';renderApp()">✕ 해제</span>
+          <span class="chip" onclick="state.stlListQuickRange='1w';state.stlListPeriodStart='';state.stlListPeriodEnd='';renderApp()">✕ 해제</span>
         ` : ''}
         <span style="color:var(--ink-4);font-size:12px;margin:0 2px;">또는</span>
         <span class="chip ${state.stlListSpecificDate?'on':''}" onclick="if(!state.stlListSpecificDate){state.stlListSpecificDate=TODAY_DATE;state.stlListQuickRange='specific';}renderApp()">📅 하루로</span>
         ${state.stlListSpecificDate?`
           <input class="input" type="date" id="stl-specific-date" value="${state.stlListSpecificDate}" max="${TODAY_DATE}" style="width:160px;" onchange="applyStlSpecificDate()" />
-          <span class="chip" onclick="state.stlListSpecificDate='';state.stlListQuickRange='today';renderApp()">✕ 해제</span>
+          <span class="chip" onclick="state.stlListSpecificDate='';state.stlListQuickRange='1w';renderApp()">✕ 해제</span>
         `:''}
       </div>
       <div class="row">

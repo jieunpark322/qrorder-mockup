@@ -660,6 +660,30 @@
     .menu-layout{flex-direction:column;}
     .menu-preview-side{width:100%;position:static;}
   }
+  /* 오늘의 준비량 — 메뉴별 수량 카드 */
+  .stk-card{background:#fff;border:2px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;}
+  .stk-card.low{border-color:#fbbf24;background:#fffbeb;}
+  .stk-card.out{border-color:#ef4444;background:#fef2f2;}
+  .stk-info{}
+  .stk-name{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+  .stk-name .ico{font-size:18px;}
+  .stk-meta{font-size:12px;color:var(--ink-3);margin-bottom:6px;}
+  .stk-bar{height:6px;background:var(--bg-2);border-radius:3px;overflow:hidden;margin-bottom:4px;max-width:280px;}
+  .stk-bar .fill{height:100%;background:var(--blue);transition:width .3s;}
+  .stk-card.low .stk-bar .fill{background:#f59e0b;}
+  .stk-card.out .stk-bar .fill{background:#ef4444;}
+  .stk-yest{font-size:11px;color:var(--ink-4);}
+  .stk-control{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+  .stk-btn{width:48px;height:48px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:20px;font-weight:800;color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;}
+  .stk-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-50);}
+  .stk-num{display:flex;flex-direction:column;align-items:center;min-width:80px;}
+  .stk-num input{width:80px;font-size:22px;font-weight:800;color:var(--ink);text-align:center;border:none;background:transparent;font-variant-numeric:tabular-nums;font-family:inherit;}
+  .stk-num input:focus{outline:none;}
+  .stk-unit{font-size:11px;color:var(--ink-3);font-weight:600;margin-top:2px;}
+  .stk-badge{padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;}
+  .stk-badge.low{background:#fef3c7;color:#92400e;}
+  .stk-badge.out{background:#fee2e2;color:#b91c1c;}
+  .stk-badge.ok{background:#dcfce7;color:#15803d;}
   /* QR 메뉴판 — 모바일 미리보기 */
   .qrp-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 0;}
   .qrp-phone{width:300px;border:11px solid #1a1a1a;border-radius:36px;overflow:hidden;background:#1a1a1a;box-shadow:0 20px 50px rgba(0,0,0,.18),0 8px 20px rgba(0,0,0,.08);position:relative;}
@@ -1130,7 +1154,7 @@ function makeSortSetter(stateKey){
    STATE
    ============================================================ */
 const state = {
-  section: 'overview',              // overview | detail | orders | cancels | stl-calendar | stl-list | stl-detail | fee | tax | bank
+  section: 'orders',                // 첫 화면 — 당일 현황을 가장 잘 보여주는 주문 내역으로
   overviewPeriod: 'day',            // day | week | month | custom
   detailTab: 'period',              // period | hour | menu | category | method
   detailGroup: 'day',               // day | week | month | custom
@@ -1209,6 +1233,10 @@ const state = {
   // 메뉴판 구성 관리 — 우측 미리보기 스냅샷
   menuPreviewSnapshot: null,        // { menus:[...], origin:'...', takenAt:'...' }
   menuViewMode: 'card',             // 'card' | 'table' — 50대 친화 기본 카드 뷰
+  // FAQ 검색·필터·아코디언 상태
+  faqCat: '전체',
+  faqSearch: '',
+  faqOpen: new Set(),
   // charts holders
   charts: {},
 };
@@ -1395,6 +1423,7 @@ function renderApp(){
     'order-type':  { fn:renderOrderType,   url:'admin.qrorder.softment.co.kr/store/order-type' },
     'staff-call':  { fn:renderStaffCall,   url:'admin.qrorder.softment.co.kr/store/staff-call' },
     'origin':      { fn:renderOrigin,      url:'admin.qrorder.softment.co.kr/menu/origin' },
+    'stock':       { fn:renderStock,       url:'admin.qrorder.softment.co.kr/menu/stock' },
     'coupon':      { fn:renderCoupon,      url:'admin.qrorder.softment.co.kr/coupons' },
     'stamp':       { fn:renderStamp,       url:'admin.qrorder.softment.co.kr/stamp' },
     'membership':  { fn:renderMembership,  url:'admin.qrorder.softment.co.kr/membership' },
@@ -1438,6 +1467,7 @@ function renderSidebar(){
     ]},
     { label:'메뉴 관리',    items:[
       { key:'menu',      ic:'🍽️', label:'메뉴판 구성 관리' },
+      { key:'stock',     ic:'📦', label:'오늘의 준비량' },
       { key:'translate', ic:'🌐', label:'번역' },
     ]},
     { label:'매출 관리',    items:[
@@ -1456,8 +1486,8 @@ function renderSidebar(){
     ]},
     { label:'고객 지원',    items:[
       { key:'reviews', ic:'💬', label:'리뷰' },
-      { key:'cs',      ic:'📨', label:'CS 문의' },
-      { key:'faq',     ic:'❓', label:'FAQ' },
+      { key:'faq',     ic:'❓', label:'자주 묻는 질문' },
+      { key:'cs',      ic:'📨', label:'서비스 관련 문의' },
     ]},
   ];
 
@@ -4784,6 +4814,185 @@ function resetMenuAll(){
    메뉴 관리 페이지 내 탭 — 메뉴/옵션 그룹/카테고리/세트 메뉴 전환
    사이드바를 정리하고 페이지 안에서 이동
    ============================================================ */
+/* ============================================================
+   오늘의 준비량 — 분식·도시락처럼 한정 수량 메뉴 관리
+   ============================================================ */
+function renderStock(main){
+  const today = '2026-05-15(목)';
+  const items = MENU_STOCK.items.filter(it=>it.enabled);
+  const lowCnt = items.filter(it=>it.remaining>0 && it.remaining<=it.lowAlert).length;
+  const outCnt = items.filter(it=>it.remaining===0).length;
+  // 잠재 추가 대상 — 아직 수량 관리 안 하는 메뉴
+  const otherMenus = MENUS.filter(m=>!MENU_STOCK.items.some(it=>it.menuId===m.id));
+
+  main.innerHTML = `
+    <div class="crumb">메뉴 관리 › 오늘의 준비량</div>
+    <div class="toolbar">
+      <div>
+        <h2>오늘의 준비량</h2>
+        <div class="page-sub">한정 수량으로 파는 메뉴를 등록해요. 주문이 들어오면 자동으로 차감되고, 다 팔리면 손님 화면에 품절로 표시돼요.</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-ghost" onclick="copyYesterdayStock()" title="어제 준비한 양 그대로 가져와요">📋 어제와 같이</button>
+        <button class="btn-ghost" onclick="if(confirm('오늘 준비량을 모두 0으로 초기화할까요?'))resetTodayStock()">↺ 모두 비우기</button>
+      </div>
+    </div>
+
+    <!-- 영업일 정보 + 상태 요약 -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+      <div style="flex:1;min-width:180px;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;">
+        <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;">오늘 영업일</div>
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">${today}</div>
+      </div>
+      <div style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;">
+        <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;">수량 관리 메뉴</div>
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">${items.length}개</div>
+      </div>
+      <div style="flex:1;min-width:140px;padding:12px 16px;background:${lowCnt>0?'#fffbeb':'#fff'};border:1px solid ${lowCnt>0?'#fbbf24':'var(--line)'};border-radius:12px;">
+        <div style="font-size:11px;color:${lowCnt>0?'#92400e':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">곧 품절</div>
+        <div style="font-size:15px;font-weight:800;color:${lowCnt>0?'#92400e':'var(--ink)'};">${lowCnt}개</div>
+      </div>
+      <div style="flex:1;min-width:140px;padding:12px 16px;background:${outCnt>0?'#fef2f2':'#fff'};border:1px solid ${outCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
+        <div style="font-size:11px;color:${outCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 판매 완료</div>
+        <div style="font-size:15px;font-weight:800;color:${outCnt>0?'#b91c1c':'var(--ink)'};">${outCnt}개</div>
+      </div>
+    </div>
+
+    <!-- 메뉴별 준비량 카드 -->
+    <div class="panel">
+      <h3>수량 관리하는 메뉴 <span class="h-sub">${items.length}개</span>
+        <span class="h-act">
+          ${otherMenus.length>0?`<button class="btn-primary" style="padding:7px 14px;font-size:12px;" onclick="openAddStockModal()">+ 메뉴 추가 (${otherMenus.length}개 가능)</button>`:`<span style="font-size:11px;color:var(--ink-4);">등록된 메뉴 모두 관리 중</span>`}
+        </span>
+      </h3>
+
+      ${items.length===0 ? `
+        <div style="padding:48px 20px;text-align:center;background:var(--bg-2);border-radius:14px;">
+          <div style="font-size:42px;margin-bottom:14px;">📦</div>
+          <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">아직 수량 관리하는 메뉴가 없어요</div>
+          <div style="font-size:13px;color:var(--ink-3);line-height:1.6;">
+            한정 수량으로 파는 메뉴(예: 떡볶이 100인분, 도시락 30개)를 등록하면<br/>
+            주문이 들어올 때마다 자동 차감되고, 다 팔리면 손님 화면에 품절 표시돼요.
+          </div>
+        </div>
+      ` : items.map(it=>{
+        const m = MENUS.find(x=>x.id===it.menuId);
+        if(!m) return '';
+        const isOut = it.remaining===0;
+        const isLow = !isOut && it.remaining<=it.lowAlert;
+        const pct = it.prepared>0 ? Math.round((it.remaining/it.prepared)*100) : 0;
+        const cls = isOut?'out':isLow?'low':'';
+        const badge = isOut
+          ? `<span class="stk-badge out">🔴 오늘 판매 완료</span>`
+          : isLow
+            ? `<span class="stk-badge low">⚠️ 곧 품절 (${it.remaining}${it.unit} 남음)</span>`
+            : `<span class="stk-badge ok">✓ 판매 중</span>`;
+        return `
+          <div class="stk-card ${cls}">
+            <div class="stk-info">
+              <div class="stk-name">
+                <span class="ico">${m.img||'🍽️'}</span>
+                ${m.name}
+                ${badge}
+              </div>
+              <div class="stk-meta">${fmt(m.price)}원 · 단위: ${it.unit}</div>
+              <div class="stk-bar"><div class="fill" style="width:${pct}%;"></div></div>
+              <div class="stk-yest">어제 판매 ${it.yesterdaySold}/${it.yesterdayPrep}${it.unit}</div>
+            </div>
+            <div class="stk-control">
+              <button class="stk-btn" onclick="changeStock(${it.menuId},-10)" title="10개 빼기">−10</button>
+              <button class="stk-btn" onclick="changeStock(${it.menuId},-1)" title="1개 빼기">−</button>
+              <div class="stk-num">
+                <input type="number" value="${it.prepared}" min="0" onchange="setStock(${it.menuId}, Number(this.value)||0)" />
+                <span class="stk-unit">준비 / 잔여 ${it.remaining}</span>
+              </div>
+              <button class="stk-btn" onclick="changeStock(${it.menuId},1)" title="1개 더">+</button>
+              <button class="stk-btn" onclick="changeStock(${it.menuId},10)" title="10개 더">+10</button>
+              <button class="btn-ghost" style="padding:8px 10px;font-size:11px;color:var(--red);align-self:center;" onclick="removeStock(${it.menuId})" title="이 메뉴 수량 관리 해제">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- 안내 -->
+    <div style="margin-top:8px;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:16px;flex-shrink:0;">💡</span>
+        <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
+          <b>주문이 들어올 때마다 자동으로 1씩 차감</b>돼요. <b>0이 되면 즉시 손님 화면에 품절</b>로 바뀌고, 5개 이하로 떨어지면 알림을 보내 드려요. 추가로 만드시면 위의 <b>+ 버튼</b>이나 숫자를 직접 고쳐 주세요.
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 빠른 수량 조정
+function changeStock(menuId, delta){
+  const it = MENU_STOCK.items.find(x=>x.menuId===menuId);
+  if(!it) return;
+  it.prepared = Math.max(0, it.prepared + delta);
+  // 잔여는 준비량 변경 시 비례 조정 (mock)
+  const consumed = it.yesterdayPrep>0 ? Math.round((it.yesterdayPrep - it.yesterdaySold) / it.yesterdayPrep * (it.prepared - it.remaining)) : 0;
+  it.remaining = Math.min(it.prepared, Math.max(0, it.remaining + delta));
+  renderApp();
+}
+function setStock(menuId, qty){
+  const it = MENU_STOCK.items.find(x=>x.menuId===menuId);
+  if(!it) return;
+  const delta = qty - it.prepared;
+  it.prepared = Math.max(0, qty);
+  it.remaining = Math.min(it.prepared, Math.max(0, it.remaining + delta));
+  renderApp();
+}
+function removeStock(menuId){
+  const m = MENUS.find(x=>x.id===menuId);
+  if(!confirm(`${m?.name||'이 메뉴'}의 수량 관리를 해제할까요? 다시 등록하기 전까지는 잔여 수량이 표시되지 않아요.`)) return;
+  const idx = MENU_STOCK.items.findIndex(x=>x.menuId===menuId);
+  if(idx>=0) MENU_STOCK.items.splice(idx,1);
+  renderApp();
+}
+function copyYesterdayStock(){
+  MENU_STOCK.items.forEach(it=>{ it.prepared = it.yesterdayPrep; it.remaining = it.yesterdayPrep; });
+  alert('어제 준비량으로 모두 맞췄어요.');
+  renderApp();
+}
+function resetTodayStock(){
+  MENU_STOCK.items.forEach(it=>{ it.prepared = 0; it.remaining = 0; });
+  renderApp();
+}
+function openAddStockModal(){
+  const other = MENUS.filter(m=>!MENU_STOCK.items.some(it=>it.menuId===m.id));
+  if(other.length===0){ alert('모든 메뉴가 이미 수량 관리 중이에요.'); return; }
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:420px;">
+      <div class="modal-head"><b>수량 관리할 메뉴 추가</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:18px 20px;">
+        <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px;line-height:1.55;">한정 수량으로 파는 메뉴를 골라 주세요. 일반 메뉴는 굳이 등록 안 하셔도 돼요.</div>
+        <div style="display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;">
+          ${other.map(m=>`
+            <div onclick="addStockForMenu(${m.id})" style="padding:12px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .12s;" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--blue-50)';" onmouseout="this.style.borderColor='var(--line)';this.style.background='#fff';">
+              <span style="font-size:20px;">${m.img||'🍽️'}</span>
+              <div style="flex:1;">
+                <div style="font-size:14px;font-weight:700;color:var(--ink);">${m.name}</div>
+                <div style="font-size:11px;color:var(--ink-3);">${m.cat||'미분류'} · ${fmt(m.price)}원</div>
+              </div>
+              <span style="color:var(--blue);font-weight:700;font-size:13px;">+ 추가</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function addStockForMenu(menuId){
+  MENU_STOCK.items.push({ menuId, enabled:true, prepared:50, remaining:50, unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:0, yesterdaySold:0 });
+  closeModal();
+  renderApp();
+}
+
 // 메뉴 카드 그리드 — 사진·이름·가격 위주 시니어 친화 뷰
 function renderMenuCardGrid(rows){
   if(rows.length===0){
@@ -4818,9 +5027,9 @@ function renderMenuCardGrid(rows){
             <div class="menu-card-desc">${r.desc||''}</div>
             <div class="menu-card-price">${fmt(r.price)}원</div>
             <div class="menu-card-actions" onclick="event.stopPropagation()">
-              <button onclick="state.menuActionOpen=${r.id};alert('관리: 옵션·재고·시간·할인은 표 보기에서 변경할 수 있어요')">관리</button>
-              <button onclick="duplicateMenu(${r.id})">복사</button>
-              <button onclick="if(confirm('${r.name} 메뉴를 삭제할까요?'))deleteMenu(${r.id})" style="color:var(--red);">삭제</button>
+              <button onclick="quickToggleSoldOut(${r.id})" style="${r.manualSoldOut?'background:#fee2e2;color:#b91c1c;border-color:#fecaca;':''}">${r.manualSoldOut?'✓ 품절 중':'🚫 오늘 품절'}</button>
+              <button onclick="duplicateMenu(${r.id})">📋 복사</button>
+              <button onclick="if(confirm('${r.name} 메뉴를 삭제할까요?'))deleteMenu(${r.id})" style="color:var(--red);">✕ 삭제</button>
             </div>
           </div>
         `;
@@ -6370,6 +6579,14 @@ function bulkDeleteMenus(){
   state.menuSel.clear();
   renderApp();
 }
+// 메뉴 카드 빠른 품절 토글 (수동 품절 ON/OFF)
+function quickToggleSoldOut(id){
+  const m = MENUS.find(x=>x.id===id);
+  if(!m) return;
+  ensureMenuExtras(m);
+  m.manualSoldOut = !m.manualSoldOut;
+  renderApp();
+}
 function bulkToggleSoldOut(){
   const ids = [...state.menuSel];
   ids.forEach(id=>{
@@ -7070,19 +7287,47 @@ const REVIEWS = [
   { id:5, cust:'정**', date:'2026-05-11', rating:5, body:'사장님이 친절하세요!',                                reply:'감사합니다 :)',           photo:'' },
 ];
 
+// 서비스 관련 문의 — 사장님이 소프트먼트에 남긴 문의 (사장님 입장)
 const CS_INQUIRIES = [
-  { id:1, cust:'홍**', date:'2026-05-15', type:'환불 문의',   body:'어제 결제한 5천원 환불 요청 드려요.',                  status:'답변 대기', reply:'' },
-  { id:2, cust:'김**', date:'2026-05-14', type:'영수증 재발급', body:'전자 영수증을 다시 받을 수 있을까요?',                status:'답변 대기', reply:'' },
-  { id:3, cust:'이**', date:'2026-05-13', type:'메뉴 문의',   body:'디카페인 옵션이 있는 메뉴가 어떤 건가요?',              status:'답변 완료', reply:'아메리카노·카페라떼·바닐라라떼는 디카페인으로 변경 가능해요!' },
-  { id:4, cust:'박**', date:'2026-05-12', type:'영업시간',    body:'주말에도 9시에 여나요?',                                status:'답변 완료', reply:'네, 주말에도 동일하게 09:00~22:00 운영해요.' },
+  { id:1, date:'2026-05-15', type:'결제·정산',  title:'정산일이 변경됐어요',
+    body:'이번 주 정산일이 평소보다 하루 늦은 것 같은데, 무슨 일인가요?',
+    status:'답변 대기', reply:'', replyAt:'', by:'' },
+  { id:2, date:'2026-05-12', type:'기능 요청', title:'테이블별 매출을 보고 싶어요',
+    body:'어느 테이블에서 가장 매출이 좋은지 확인할 수 있는 기능이 있으면 좋겠어요.',
+    status:'답변 완료',
+    reply:'안녕하세요 사장님. 의견 감사드려요. 테이블별 매출 분석 기능은 다음 분기 업데이트에 반영 예정이에요. 추가 진행 사항이 생기면 알림으로 다시 알려 드릴게요.',
+    replyAt:'2026-05-13 14:22', by:'소프트먼트 운영팀' },
+  { id:3, date:'2026-05-08', type:'오류 신고', title:'QR이 인식이 안 돼요',
+    body:'어제부터 5번 테이블 QR이 휴대폰 카메라로 안 찍혀요. 확인 부탁드려요.',
+    status:'답변 완료',
+    reply:'담당자가 매장에 방문해 확인했고, QR 스티커 표면 손상이 원인이었어요. 새 QR을 무상으로 발송해 드렸어요. 사용 중 추가 문제가 있으시면 다시 문의 주세요.',
+    replyAt:'2026-05-09 10:15', by:'소프트먼트 CS팀' },
 ];
 
+// FAQ — 소프트먼트 운영팀이 작성한 서비스 사용 가이드 (사장님은 읽기 전용)
 const FAQS = [
-  { id:1, q:'영업시간이 어떻게 되나요?',           a:'평일·주말 모두 09:00~22:00 운영해요. 라스트오더는 21:30까지예요.', cat:'기본' },
-  { id:2, q:'주차장이 있나요?',                     a:'매장 앞 2시간 무료 주차 가능해요. (3만원 이상 결제 시)',         cat:'기본' },
-  { id:3, q:'디카페인 메뉴가 있나요?',             a:'아메리카노·카페라떼·바닐라라떼는 디카페인으로 변경 가능해요.',     cat:'메뉴' },
-  { id:4, q:'환불은 어떻게 하나요?',                a:'주문 후 5분 이내라면 즉시 환불 가능해요. 그 이후엔 사장님에게 문의해 주세요.', cat:'결제' },
-  { id:5, q:'단체석이 있나요?',                    a:'10인 이상 단체석은 사전 예약을 받아요. 전화 또는 카카오톡 문의 부탁드려요.', cat:'예약' },
+  { id:1,  cat:'시작하기',   q:'QR오더를 처음 시작하려면 무엇부터 해야 하나요?',
+    a:'매장 설정에서 매장 정보·영업시간을 입력하시고, 메뉴판 구성 관리에서 메뉴를 등록한 뒤 테이블별 QR 코드를 부착하시면 바로 사용하실 수 있어요. 자세한 절차는 사이드바 위에서 아래 순서대로 따라가시면 돼요.' },
+  { id:2,  cat:'시작하기',   q:'에이전트 프로그램은 꼭 설치해야 하나요?',
+    a:'네, 매장에 한 대 이상 설치하셔야 주문·호출 알림이 정상 동작해요. 설치 파일과 가이드는 가입 시 보내드린 메일에 포함되어 있어요.' },
+  { id:3,  cat:'결제·정산', q:'정산은 언제 받나요?',
+    a:'결제일 기준 +3 영업일에 등록하신 계좌로 입금돼요. 정확한 입금 예정일은 정산 달력에서 미리 확인하실 수 있어요.' },
+  { id:4,  cat:'결제·정산', q:'카드 수수료는 얼마인가요?',
+    a:'카드사·결제 수단에 따라 1.5%~2.5% 수준이에요. 회차별 상세 수수료는 정산 내역 → 회차 클릭 시 확인하실 수 있어요.' },
+  { id:5,  cat:'메뉴 관리', q:'옵션 선택지를 여러 메뉴에 동시에 적용할 수 있나요?',
+    a:'네! 옵션 선택지 탭에서 한 번 만들어 두시면 여러 메뉴에 동시에 연결하실 수 있어요. 사이즈·온도·샷 추가처럼 공통 옵션이 있다면 한 번에 관리하시는 걸 추천해요.' },
+  { id:6,  cat:'메뉴 관리', q:'오늘의 준비량은 어떤 매장에 필요한가요?',
+    a:'분식점·도시락·시즌 한정 메뉴처럼 정해진 수량만 파는 매장에 적합해요. 주문이 들어오면 자동으로 차감되고, 다 팔리면 손님 화면에 자동 품절로 표시돼요.' },
+  { id:7,  cat:'QR·테이블', q:'추가 QR 스티커는 어떻게 신청하나요?',
+    a:'QR 관리에서 원하는 색상과 수량(10장 단위)을 골라 신청하실 수 있어요. 영업일 기준 3~5일 안에 매장으로 발송돼요.' },
+  { id:8,  cat:'QR·테이블', q:'테이블 배치는 영업 중에도 바꿀 수 있나요?',
+    a:'안전을 위해 영업 마감 후에만 저장할 수 있어요. 영업 중에 드래그해서 바꾸시면 임시로만 적용되고, 마감 후 저장하셔야 손님 화면에 반영돼요.' },
+  { id:9,  cat:'직원호출', q:'직원 호출 알림은 어디서 받나요?',
+    a:'QR오더 에이전트 프로그램이 설치된 모든 기기에서 팝업 알림으로 동시에 받으실 수 있어요. 별도 설정은 필요하지 않아요.' },
+  { id:10, cat:'환불·취소', q:'환불은 어떻게 처리하나요?',
+    a:'주문 직후 5분 이내라면 에이전트 프로그램에서 바로 환불 가능해요. 그 이후에는 정산 관리에서 환불 처리하실 수 있어요.' },
+  { id:11, cat:'기타',     q:'원하는 답을 찾지 못했어요. 어디에 문의하나요?',
+    a:'고객 지원 → 서비스 관련 문의에 남겨 주시면 평균 24시간 안에 답변드려요. 긴급한 결제·정산 이슈는 가입 시 안내드린 CS 전화로 연락 주세요.' },
 ];
 
 const STORE_INFO = {
@@ -7159,6 +7404,20 @@ const STORE_ORIGIN = {
 쌀: 국내산
 배추김치: 국내산`,
   updatedAt: '2026-05-22',
+};
+
+/* ============================================================
+   판매 수량 관리 — 오늘의 준비량
+   ============================================================ */
+const MENU_STOCK = {
+  businessDate: '2026-05-15',
+  // menuId 별 오늘 준비량 / 잔여 / 단위 / 알림 임계값
+  // 분식·도시락 같은 한정 수량 운영용. 모든 메뉴가 다 등록될 필요는 없음
+  items: [
+    { menuId:7, enabled:true,  prepared:100, remaining:73, unit:'인분', lowAlert:5, soldOutAlert:true, yesterdayPrep:100, yesterdaySold:95 },
+    { menuId:8, enabled:true,  prepared:50,  remaining:38, unit:'줄',   lowAlert:5, soldOutAlert:true, yesterdayPrep:50,  yesterdaySold:42 },
+    { menuId:9, enabled:true,  prepared:80,  remaining:3,  unit:'인분', lowAlert:5, soldOutAlert:true, yesterdayPrep:80,  yesterdaySold:78 },
+  ],
 };
 
 /* ============================================================
@@ -8299,42 +8558,117 @@ function renderReviews(main){
    CS 문의
    ============================================================ */
 function renderCS(main){
-  const pending = CS_INQUIRIES.filter(c=>c.status==='답변 대기').length;
+  const waiting = CS_INQUIRIES.filter(c=>c.status==='답변 대기').length;
+  const done    = CS_INQUIRIES.filter(c=>c.status==='답변 완료').length;
   main.innerHTML = `
-    <div class="crumb">고객 지원 › CS 문의</div>
+    <div class="crumb">고객 지원 › 서비스 관련 문의</div>
     <div class="toolbar">
       <div>
-        <h2>CS 문의</h2>
-        <div class="page-sub">고객 문의를 확인하고 답변해요.</div>
+        <h2>서비스 관련 문의</h2>
+        <div class="page-sub">QR오더 사용 중 궁금한 점이나 문제가 있으면 남겨 주세요. 소프트먼트 운영팀이 확인 후 답변드려요.</div>
+      </div>
+      <button class="btn-primary" onclick="openNewInquiryModal()">+ 새 문의 남기기</button>
+    </div>
+
+    <!-- 안내 박스 -->
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
+      <span style="font-size:16px;flex-shrink:0;">📨</span>
+      <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
+        문의를 남겨 주시면 <b>평균 24시간 안에 답변</b>드려요. 결제·정산 같은 긴급 이슈는 가입 시 안내드린 <b>CS 전화</b>로 연락 주시면 더 빠르게 도와드릴 수 있어요.
       </div>
     </div>
 
-    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
-      <div class="pc-card blue"><div class="label">답변 대기</div><div class="num">${pending}<span style="font-size:13px;color:#1b64da;font-weight:600;margin-left:2px;">건</span></div></div>
-      <div class="pc-card"><div class="label">답변 완료</div><div class="num">${CS_INQUIRIES.filter(c=>c.status==='답변 완료').length}</div></div>
-      <div class="pc-card"><div class="label">평균 응답</div><div class="num">2.3<span style="font-size:14px;color:var(--ink-3);font-weight:600;">시간</span></div></div>
-      <div class="pc-card"><div class="label">이번 달 문의</div><div class="num">${CS_INQUIRIES.length}</div></div>
+    <!-- 상태 요약 -->
+    <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
+      <div class="pc-card ${waiting>0?'blue':''}"><div class="label">답변 대기</div><div class="num">${waiting}<span style="font-size:13px;color:${waiting>0?'#1b64da':'var(--ink-3)'};font-weight:600;margin-left:2px;">건</span></div></div>
+      <div class="pc-card"><div class="label">답변 완료</div><div class="num">${done}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div></div>
+      <div class="pc-card"><div class="label">평균 응답 시간</div><div class="num">12<span style="font-size:14px;color:var(--ink-3);font-weight:600;margin-left:2px;">시간</span></div></div>
     </div>
 
-    <div class="panel tight">
-      <h3>문의 목록 <span class="h-sub">${CS_INQUIRIES.length}건</span></h3>
-      <table class="t">
-        <thead><tr><th style="width:90px;">날짜</th><th style="width:80px;">고객</th><th style="width:130px;">문의 유형</th><th>내용</th><th style="width:100px;">상태</th><th style="width:80px;"></th></tr></thead>
-        <tbody>
+    <!-- 문의 이력 -->
+    <div class="panel">
+      <h3>내가 남긴 문의 <span class="h-sub">${CS_INQUIRIES.length}건</span></h3>
+      ${CS_INQUIRIES.length===0 ? `
+        <div style="padding:40px 20px;text-align:center;background:var(--bg-2);border-radius:12px;">
+          <div style="font-size:38px;margin-bottom:12px;">📨</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;">아직 남긴 문의가 없어요</div>
+          <div style="font-size:12px;color:var(--ink-3);">위의 <b style="color:var(--ink-2);">+ 새 문의 남기기</b>를 눌러 궁금한 점을 적어 주세요.</div>
+        </div>
+      ` : `
+        <div style="display:flex;flex-direction:column;gap:12px;">
           ${CS_INQUIRIES.map(c=>`
-            <tr>
-              <td>${c.date.slice(5).replace('-','/')}</td>
-              <td><b>${c.cust}</b></td>
-              <td><span style="font-size:12px;color:var(--ink-2);">${c.type}</span></td>
-              <td>${c.body}${c.reply?`<div style="background:var(--blue-50);padding:6px 10px;border-radius:6px;font-size:11px;color:var(--blue);margin-top:6px;">💬 ${c.reply}</div>`:''}</td>
-              <td><span class="pill ${c.status==='답변 완료'?'done':'pending'}">${c.status}</span></td>
-              <td>${c.status==='답변 대기' ? `<button class="btn-primary" style="padding:6px 10px;font-size:11px;" onclick="const t=prompt('답변을 입력해 주세요');if(t){const x=CS_INQUIRIES.find(y=>y.id===${c.id});x.reply=t;x.status='답변 완료';renderApp();}">답변</button>` : `<button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="alert('답변 수정 (와이어프레임)')">수정</button>`}</td>
-            </tr>
+            <div style="border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fff;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+                <span class="chip" style="font-size:11px;padding:3px 9px;cursor:default;background:var(--bg-2);color:var(--ink-2);">${c.type}</span>
+                <span class="pill ${c.status==='답변 완료'?'done':'pending'}" style="font-size:11px;">${c.status==='답변 완료'?'✓ 답변 완료':'⏳ 답변 대기'}</span>
+                <span style="font-size:11px;color:var(--ink-4);margin-left:auto;">${c.date.slice(5).replace('-','/')} 남김</span>
+              </div>
+              <div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px;">${c.title}</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;">${c.body}</div>
+              ${c.reply ? `
+                <div style="margin-top:12px;padding:12px 14px;background:var(--blue-50);border-radius:10px;border-left:3px solid var(--blue);">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                    <span style="font-size:14px;">💬</span>
+                    <span style="font-size:12px;font-weight:700;color:var(--blue);">${c.by||'소프트먼트'}</span>
+                    <span style="font-size:11px;color:var(--ink-4);margin-left:auto;">${c.replyAt||''}</span>
+                  </div>
+                  <div style="font-size:13px;color:var(--ink-2);line-height:1.65;white-space:pre-wrap;">${c.reply}</div>
+                </div>
+              ` : `
+                <div style="margin-top:12px;padding:10px 14px;background:#fff7ed;border:1px dashed #fed7aa;border-radius:8px;font-size:12px;color:#9a3412;">
+                  ⏳ 운영팀이 확인 중이에요. 답변이 도착하면 알림으로 알려 드릴게요.
+                </div>
+              `}
+            </div>
           `).join('')}
-        </tbody>
-      </table>
+        </div>
+      `}
     </div>
   `;
+}
+
+// 새 문의 작성 모달 (사장님 → 소프트먼트)
+function openNewInquiryModal(){
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:520px;">
+      <div class="modal-head"><b>새 문의 남기기</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:20px;">
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px;">문의 분류</label>
+        <select id="inq-type" class="input" style="width:100%;margin-bottom:14px;">
+          <option>결제·정산</option>
+          <option>메뉴 관리</option>
+          <option>QR·테이블</option>
+          <option>직원호출</option>
+          <option>기능 요청</option>
+          <option>오류 신고</option>
+          <option>기타</option>
+        </select>
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px;">제목</label>
+        <input id="inq-title" class="input" placeholder="한 줄 요약" style="width:100%;margin-bottom:14px;" />
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px;">자세한 내용</label>
+        <textarea id="inq-body" class="input" placeholder="언제·어떤 상황·어떤 도움이 필요한지 적어 주세요" style="width:100%;min-height:140px;font-family:inherit;resize:vertical;padding:12px 14px;line-height:1.6;"></textarea>
+        <div style="margin-top:8px;font-size:11px;color:var(--ink-4);">💡 스크린샷이 필요하면 답변 후 회신으로 보내실 수 있어요.</div>
+        <div style="margin-top:20px;display:flex;gap:8px;">
+          <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
+          <button class="btn-primary" style="flex:1;" onclick="submitInquiry()">문의 남기기</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function submitInquiry(){
+  const type  = document.getElementById('inq-type').value;
+  const title = document.getElementById('inq-title').value.trim();
+  const body  = document.getElementById('inq-body').value.trim();
+  if(!title){ alert('제목을 입력해 주세요.'); return; }
+  if(!body) { alert('자세한 내용을 입력해 주세요.'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  CS_INQUIRIES.unshift({ id:(CS_INQUIRIES.reduce((m,c)=>Math.max(m,c.id),0))+1, date:today, type, title, body, status:'답변 대기', reply:'', replyAt:'', by:'' });
+  closeModal();
+  alert('문의가 접수됐어요. 평균 24시간 안에 답변드릴게요.');
+  renderApp();
 }
 
 /* ============================================================
@@ -8766,43 +9100,85 @@ function confirmAddStaffMsg(){
    FAQ
    ============================================================ */
 function renderFAQ(main){
+  // 카테고리 자동 추출
+  const cats = ['전체', ...Array.from(new Set(FAQS.map(f=>f.cat)))];
+  if(!state.faqCat)    state.faqCat = '전체';
+  if(!state.faqSearch) state.faqSearch = '';
+  if(!state.faqOpen)   state.faqOpen = new Set();
+
+  let rows = FAQS;
+  if(state.faqCat !== '전체') rows = rows.filter(f=>f.cat===state.faqCat);
+  if(state.faqSearch){
+    const q = state.faqSearch.toLowerCase();
+    rows = rows.filter(f=>(f.q+' '+f.a).toLowerCase().includes(q));
+  }
+
   main.innerHTML = `
-    <div class="crumb">고객 지원 › FAQ</div>
+    <div class="crumb">고객 지원 › 자주 묻는 질문</div>
     <div class="toolbar">
       <div>
-        <h2>FAQ</h2>
-        <div class="page-sub">자주 묻는 질문을 관리해요. 고객 화면에 그대로 노출돼요.</div>
-      </div>
-      <div class="left">
-        <button class="btn-primary" onclick="const q=prompt('질문을 입력해 주세요');if(!q)return;const a=prompt('답변을 입력해 주세요');if(!a)return;FAQS.push({id:(FAQS.reduce((m,f)=>Math.max(m,f.id),0))+1,q,a,cat:'기본'});renderApp();">+ FAQ 추가</button>
+        <h2>자주 묻는 질문</h2>
+        <div class="page-sub">소프트먼트 운영팀이 정리한 사용 안내예요. 원하는 답을 찾지 못하시면 <b style="color:var(--ink-2);">서비스 관련 문의</b>로 남겨 주세요.</div>
       </div>
     </div>
 
-    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
-      <div class="pc-card"><div class="label">전체 FAQ</div><div class="num">${FAQS.length}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div></div>
-      ${['기본','메뉴','결제','예약'].map(c=>`
-        <div class="pc-card"><div class="label">${c}</div><div class="num">${FAQS.filter(f=>f.cat===c).length}</div></div>
-      `).join('')}
+    <!-- 검색 -->
+    <div style="margin-bottom:12px;">
+      <input class="input" style="width:100%;font-size:14px;padding:14px 16px;" placeholder="🔍 궁금한 키워드로 검색해 보세요 (예: 정산, 옵션, QR)" value="${state.faqSearch}" oninput="state.faqSearch=this.value;renderApp()" />
     </div>
 
+    <!-- 카테고리 칩 -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+      ${cats.map(c=>{
+        const cnt = c==='전체' ? FAQS.length : FAQS.filter(f=>f.cat===c).length;
+        return `<span class="chip ${state.faqCat===c?'on':''}" onclick="state.faqCat='${c}';renderApp()">${c} <span style="color:${state.faqCat===c?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${cnt}</span></span>`;
+      }).join('')}
+    </div>
+
+    <!-- 아코디언 목록 -->
     <div class="panel">
-      <h3>FAQ 목록 <span class="h-sub">${FAQS.length}개</span></h3>
-      <div>
-        ${FAQS.map(f=>`
-          <div style="padding:14px 0;border-bottom:1px solid var(--line-2);">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
-              <div style="flex:1;">
-                <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
-                  <span class="chip" style="font-size:11px;padding:3px 8px;cursor:default;">${f.cat}</span>
-                </div>
-                <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">Q. ${f.q}</div>
-                <div style="font-size:13px;color:var(--ink-2);line-height:1.6;">A. ${f.a}</div>
-              </div>
-              <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);flex-shrink:0;" onclick="if(confirm('이 FAQ를 삭제할까요?')){const i=FAQS.findIndex(x=>x.id===${f.id});FAQS.splice(i,1);renderApp();}">✕</button>
-            </div>
+      ${rows.length===0 ? `
+        <div style="padding:40px 20px;text-align:center;background:var(--bg-2);border-radius:12px;">
+          <div style="font-size:36px;margin-bottom:10px;">🔍</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;">조건에 맞는 답변이 없어요</div>
+          <div style="font-size:12px;color:var(--ink-3);line-height:1.6;">
+            다른 키워드로 검색해 보시거나, 아래 버튼을 눌러 직접 문의해 주세요.
           </div>
-        `).join('')}
+          <button class="btn-primary" style="margin-top:16px;" onclick="setSection('cs')">📨 서비스 관련 문의 남기기</button>
+        </div>
+      ` : `
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${rows.map(f=>{
+            const isOpen = state.faqOpen.has(f.id);
+            return `
+              <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;">
+                <div onclick="(()=>{if(state.faqOpen.has(${f.id}))state.faqOpen.delete(${f.id});else state.faqOpen.add(${f.id});renderApp();})()" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;${isOpen?'background:var(--bg-2);':''}">
+                  <span class="chip" style="font-size:10px;padding:3px 8px;cursor:default;background:var(--blue-50);color:var(--blue);border-color:var(--blue-100);font-weight:700;">${f.cat}</span>
+                  <span style="flex:1;font-size:14px;font-weight:700;color:var(--ink);">Q. ${f.q}</span>
+                  <span style="font-size:14px;color:var(--ink-3);transition:transform .2s;${isOpen?'transform:rotate(180deg);':''}">▾</span>
+                </div>
+                ${isOpen ? `
+                  <div style="padding:0 18px 16px 18px;background:var(--bg-2);">
+                    <div style="padding-top:12px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink-2);line-height:1.7;white-space:pre-wrap;">
+                      <b style="color:var(--blue);">A.</b> ${f.a}
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
+    </div>
+
+    <!-- 못 찾으셨나요 안내 -->
+    <div style="margin-top:14px;padding:18px 22px;background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border:1px solid var(--blue-100);border-radius:12px;display:flex;align-items:center;gap:16px;">
+      <span style="font-size:24px;flex-shrink:0;">💁</span>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:3px;">원하는 답을 못 찾으셨나요?</div>
+        <div style="font-size:12px;color:var(--ink-2);line-height:1.55;">소프트먼트 운영팀이 평균 24시간 안에 답변드려요.</div>
       </div>
+      <button class="btn-primary" onclick="setSection('cs')">📨 직접 문의 남기기</button>
     </div>
   `;
 }

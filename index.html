@@ -8329,7 +8329,7 @@ function renderStore(main){
 
       <div class="panel">
         <div style="font-size:12px;color:var(--blue);background:var(--blue-50);border-radius:8px;padding:8px 12px;margin-bottom:16px;">
-          📱 아래 로고와 매장 사진은 고객의 QR오더 주문 화면에 표시돼요.
+          📱 아래 로고와 매장 대표 사진(커버 이미지)은 고객의 QR오더 주문 화면에 표시돼요.
         </div>
 
         <!-- ① 매장 로고 (1장, 작은 정사각형) -->
@@ -8344,7 +8344,7 @@ function renderStore(main){
         </div>
 
         <!-- ② 매장 배경 사진 (최대 3장) -->
-        <h3 style="margin-bottom:10px;">매장 사진 <span class="h-sub">최대 3장</span></h3>
+        <h3 style="margin-bottom:10px;">매장 대표 사진 <span class="h-sub">커버 이미지 · 최대 3장</span></h3>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
           ${Array.from({length:s.extraImages},(_, idx)=>`
             <div style="position:relative;flex-shrink:0;">

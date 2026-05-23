@@ -1837,7 +1837,7 @@ function renderOverview(main){
 
 /* ====================== 매출 상세 보기 ====================== */
 function renderDetail(main){
-  const tabName = { period:'기간별', hour:'시간대별', menu:'메뉴별', category:'메뉴 카테고리별', method:'결제수단별' }[state.detailTab];
+  const tabName = { period:'날짜별', hour:'시간대별', menu:'메뉴별', category:'메뉴 카테고리별', method:'결제수단별' }[state.detailTab];
 
   main.innerHTML = `
     <div class="crumb">매출 관리 › 매출 상세 보기 › ${tabName}</div>
@@ -1856,7 +1856,7 @@ function renderDetail(main){
     ${bhActiveNotice()}
 
     <div class="tabs">
-      <div class="t ${state.detailTab==='period'?'on':''}"   onclick="setDetailTab('period')">📅 기간별</div>
+      <div class="t ${state.detailTab==='period'?'on':''}"   onclick="setDetailTab('period')">📅 날짜별</div>
       <div class="t ${state.detailTab==='hour'?'on':''}"     onclick="setDetailTab('hour')">⏰ 시간대별</div>
       <div class="t ${state.detailTab==='menu'?'on':''}"     onclick="setDetailTab('menu')">🥐 메뉴별</div>
       <div class="t ${state.detailTab==='category'?'on':''}" onclick="setDetailTab('category')">🗂️ 메뉴 카테고리별</div>
@@ -2242,7 +2242,7 @@ function renderDetailHour(body){
     })}
 
     <div class="banner-info" style="margin-bottom:14px;">
-      💡 <b>오늘(5/15) 기준</b>으로 보여드려요. 다른 날짜·다른 기간 단위로 보려면 <span style="color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="setDetailTab('period')">[기간별] 탭</span>에서 변경해 주세요.
+      💡 <b>오늘(5/15) 기준</b>으로 보여드려요. 다른 날짜·다른 기간 단위로 보려면 <span style="color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="setDetailTab('period')">[날짜별] 탭</span>에서 변경해 주세요.
     </div>
 
     <div class="panel">
@@ -2395,7 +2395,7 @@ function renderDetailMenu(body){
     })}
 
     <div class="banner-info" style="margin-bottom:14px;">
-      💡 <b>이번 달(5/1~5/15) 기준</b>으로 보여드려요. 기간을 바꾸려면 <span style="color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="setDetailTab('period')">[기간별] 탭</span>에서 변경해 주세요.
+      💡 <b>이번 달(5/1~5/15) 기준</b>으로 보여드려요. 기간을 바꾸려면 <span style="color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="setDetailTab('period')">[날짜별] 탭</span>에서 변경해 주세요.
     </div>
 
     <div class="panel" style="padding:12px 18px;margin-bottom:14px;">
@@ -2512,7 +2512,7 @@ function renderDetailCategory(body){
     })}
 
     <div class="banner-info" style="margin-bottom:14px;">
-      💡 <b>이번 달(5/1~5/15) 기준</b>으로 보여드려요. 기간을 바꾸려면 <span style="color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="setDetailTab('period')">[기간별] 탭</span>에서 변경해 주세요.
+      💡 <b>이번 달(5/1~5/15) 기준</b>으로 보여드려요. 기간을 바꾸려면 <span style="color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="setDetailTab('period')">[날짜별] 탭</span>에서 변경해 주세요.
     </div>
 
     ${(() => {
@@ -2627,7 +2627,7 @@ function renderDetailMethod(body){
     })}
 
     <div class="banner-info" style="margin-bottom:14px;">
-      💡 <b>이번 달(5/1~5/15) 기준</b>으로 보여드려요. 기간을 바꾸려면 <span style="color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="setDetailTab('period')">[기간별] 탭</span>에서 변경해 주세요.
+      💡 <b>이번 달(5/1~5/15) 기준</b>으로 보여드려요. 기간을 바꾸려면 <span style="color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="setDetailTab('period')">[날짜별] 탭</span>에서 변경해 주세요.
     </div>
 
     ${(() => {
@@ -3946,7 +3946,7 @@ function basisCombo(opts){
         ${nextEl}
       </div>
       <div class="bc-row">
-        <div class="seg ${segDis?'disabled':''}" ${segDis?'title="[기간별] 탭에서 기간을 변경해 주세요"':''}>
+        <div class="seg ${segDis?'disabled':''}" ${segDis?'title="[날짜별] 탭에서 기간을 변경해 주세요"':''}>
           ${opts.periods.map(p=>`<div class="b ${opts.current===p.key?'on':''}" onclick="${click}('${p.key}')">${p.label}</div>`).join('')}
         </div>
       </div>
@@ -3955,7 +3955,7 @@ function basisCombo(opts){
 }
 // 비활성 탭의 토글 클릭 시 안내 — 기간별 탭으로 이동을 권유
 function showDetailGroupHint(){
-  if (confirm('이 탭은 이번 달 기준으로만 보여드려요.\n기간을 바꾸려면 [기간별] 탭으로 이동할까요?')){
+  if (confirm('이 탭은 이번 달 기준으로만 보여드려요.\n기간을 바꾸려면 [날짜별] 탭으로 이동할까요?')){
     state.detailTab = 'period';
     renderApp();
   }

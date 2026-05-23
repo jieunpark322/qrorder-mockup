@@ -1154,7 +1154,7 @@ function makeSortSetter(stateKey){
    STATE
    ============================================================ */
 const state = {
-  section: 'orders',                // 첫 화면 — 당일 현황을 가장 잘 보여주는 주문 내역으로
+  section: 'home',                  // 첫 화면 — 어제 대비·처리 일감·오늘 변수를 한눈에 보는 대시보드
   overviewPeriod: 'day',            // day | week | month | custom
   detailTab: 'period',              // period | hour | menu | category | method
   detailGroup: 'day',               // day | week | month | custom
@@ -1404,6 +1404,7 @@ function renderApp(){
   const urlBar = document.getElementById('url-bar');
 
   const sectionMap = {
+    'home':        { fn:renderHome,        url:'admin.qrorder.softment.co.kr/' },
     'overview':    { fn:renderOverview,    url:'admin.qrorder.softment.co.kr/sales' },
     'detail':      { fn:renderDetail,      url:'admin.qrorder.softment.co.kr/sales/detail' },
     'orders':      { fn:renderOrders,      url:'admin.qrorder.softment.co.kr/orders' },
@@ -1456,7 +1457,10 @@ function renderSidebar(){
 
   // 그룹 단위로 접기/펼치기 — 50~60대 인지 친화
   const groups = [
-    { label:'_solo',        items:[{ key:'notify', ic:'🔔', label:'알림 센터', n:notifyCnt || undefined }] },
+    { label:'_solo',        items:[
+      { key:'home',   ic:'🏠', label:'홈' },
+      { key:'notify', ic:'🔔', label:'알림 센터', n:notifyCnt || undefined },
+    ] },
     { label:'주문 관리',    items:[
       { key:'orders', ic:'📋', label:'주문 내역' },
     ]},
@@ -1634,6 +1638,165 @@ function saveBusinessHours(){
 }
 
 /* ====================== 매출 한눈에 보기 ====================== */
+/* ============================================================
+   홈 대시보드 — 어제 매출 대비 + 처리 일감 + 오늘 운영 변수
+   PRD §6 P0: 사장님이 하루 5분 안에 매장 상태를 파악할 수 있는 단일 진입점
+   ============================================================ */
+function renderHome(main){
+  // 어제 / 그저께 매출 (DAY 배열 기준 — 5/14, 5/13)
+  const yesterday = DAY[13] || { gross:0, ocnt:0 };
+  const dayBefore = DAY[12] || { gross:1, ocnt:1 };
+  const grossDiff = yesterday.gross - dayBefore.gross;
+  const grossDiffPct = dayBefore.gross>0 ? Math.round(grossDiff / dayBefore.gross * 100) : 0;
+  const cntDiff = yesterday.ocnt - dayBefore.ocnt;
+
+  // 처리 필요 일감
+  const reviewWait = REVIEWS.filter(r=>!r.reply).length;
+  const inquiryWait = CS_INQUIRIES.filter(c=>c.status==='답변 대기').length;
+  const notifyUnread = (typeof NOTIFICATIONS!=='undefined' ? NOTIFICATIONS.filter(n=>!n.read).length : 4);
+
+  // 오늘 운영 변수
+  const today = '2026-05-15(목)';
+  const todayHours = STORE_INFO.hours.find(h=>h.dow==='목');
+  const hoursLabel = todayHours && !todayHours.off ? `${todayHours.open}~${todayHours.close}` : '휴무';
+  const stockItems = MENU_STOCK.items.filter(it=>it.enabled);
+  const stockLow   = stockItems.filter(it=>it.remaining>0 && it.remaining<=it.lowAlert).length;
+  const stockOut   = stockItems.filter(it=>it.remaining===0).length;
+  const manualSoldOut = MENUS.filter(m=>{ ensureMenuExtras(m); return m.manualSoldOut; }).length;
+  const channelsOn = Object.entries(ORDER_CHANNELS).filter(([,v])=>v.enabled).length;
+
+  main.innerHTML = `
+    <div class="crumb">홈</div>
+    <div class="toolbar">
+      <div>
+        <h2>안녕하세요, ${STORE_INFO.owner} 사장님 👋</h2>
+        <div class="page-sub">오늘은 ${today}이에요. 어제 매장 운영 결과와 오늘 챙겨야 할 일감을 한눈에 모았어요.</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:2px;">${STORE_INFO.name}</div>
+        <div style="font-size:13px;color:var(--ink-2);font-weight:700;">📍 ${STORE_INFO.addr}</div>
+      </div>
+    </div>
+
+    <!-- ① 어제 매출 대비 -->
+    <div class="panel" style="cursor:pointer;" onclick="setSection('overview')" title="매출 한눈에 보기로 이동">
+      <h3>📊 어제 매장 운영 결과 <span class="h-sub">5/14(수) · 그저께(5/13 화)와 비교</span>
+        <span class="h-act"><span style="font-size:12px;color:var(--blue);font-weight:700;">매출 한눈에 보기 ›</span></span>
+      </h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+        <div style="padding:18px 20px;background:var(--bg-2);border-radius:12px;">
+          <div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:6px;">어제 총 매출</div>
+          <div style="font-size:24px;font-weight:800;color:var(--ink);margin-bottom:4px;">${fmt(yesterday.gross)}<span style="font-size:14px;color:var(--ink-3);font-weight:600;margin-left:2px;">원</span></div>
+          <div style="font-size:12px;font-weight:700;color:${grossDiff>=0?'var(--blue)':'var(--red)'};">
+            ${grossDiff>=0?'▲':'▼'} ${fmt(Math.abs(grossDiff))}원 (${grossDiff>=0?'+':''}${grossDiffPct}%)
+          </div>
+        </div>
+        <div style="padding:18px 20px;background:var(--bg-2);border-radius:12px;">
+          <div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:6px;">어제 주문 수</div>
+          <div style="font-size:24px;font-weight:800;color:var(--ink);margin-bottom:4px;">${fmt(yesterday.ocnt)}<span style="font-size:14px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div>
+          <div style="font-size:12px;font-weight:700;color:${cntDiff>=0?'var(--blue)':'var(--red)'};">
+            ${cntDiff>=0?'▲':'▼'} ${fmt(Math.abs(cntDiff))}건
+          </div>
+        </div>
+        <div style="padding:18px 20px;background:var(--bg-2);border-radius:12px;">
+          <div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:6px;">평균 객단가</div>
+          <div style="font-size:24px;font-weight:800;color:var(--ink);margin-bottom:4px;">${yesterday.ocnt>0?fmt(Math.round(yesterday.gross/yesterday.ocnt)):0}<span style="font-size:14px;color:var(--ink-3);font-weight:600;margin-left:2px;">원</span></div>
+          <div style="font-size:12px;color:var(--ink-3);">한 주문당 평균</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② 처리 필요 일감 -->
+    <div class="panel">
+      <h3>📌 사장님이 챙겨야 할 일 <span class="h-sub">${reviewWait+inquiryWait+notifyUnread}건</span></h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+        <div onclick="setSection('reviews');state.reviewFilter='wait';renderApp()" style="padding:18px 20px;background:#fff;border:2px solid ${reviewWait>0?'#fbbf24':'var(--line)'};border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:18px;">💬</span>
+            <span style="font-size:13px;font-weight:700;color:var(--ink-2);">답변 안 한 리뷰</span>
+          </div>
+          <div style="font-size:26px;font-weight:800;color:${reviewWait>0?'#d97706':'var(--ink-3)'};">${reviewWait}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div>
+          <div style="font-size:11px;color:var(--ink-4);margin-top:4px;">${reviewWait>0?'클릭해서 답변하기 →':'모든 리뷰에 답변하셨어요'}</div>
+        </div>
+        <div onclick="setSection('cs')" style="padding:18px 20px;background:#fff;border:2px solid ${inquiryWait>0?'var(--blue-100)':'var(--line)'};border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:18px;">📨</span>
+            <span style="font-size:13px;font-weight:700;color:var(--ink-2);">답변 받을 문의</span>
+          </div>
+          <div style="font-size:26px;font-weight:800;color:${inquiryWait>0?'var(--blue)':'var(--ink-3)'};">${inquiryWait}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div>
+          <div style="font-size:11px;color:var(--ink-4);margin-top:4px;">${inquiryWait>0?'운영팀 답변 대기 중':'문의 모두 답변 받음'}</div>
+        </div>
+        <div onclick="setSection('notify')" style="padding:18px 20px;background:#fff;border:2px solid ${notifyUnread>0?'#fca5a5':'var(--line)'};border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:18px;">🔔</span>
+            <span style="font-size:13px;font-weight:700;color:var(--ink-2);">확인 안 한 알림</span>
+          </div>
+          <div style="font-size:26px;font-weight:800;color:${notifyUnread>0?'var(--red)':'var(--ink-3)'};">${notifyUnread}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div>
+          <div style="font-size:11px;color:var(--ink-4);margin-top:4px;">${notifyUnread>0?'클릭해서 확인하기 →':'모든 알림을 확인하셨어요'}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ 오늘 운영 변수 -->
+    <div class="panel">
+      <h3>🍽️ 오늘 운영 상태 <span class="h-sub">영업·메뉴·주문 채널 점검</span></h3>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+        <div onclick="setSection('store')" style="padding:18px 20px;background:#fff;border:2px solid var(--line);border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:18px;">🕘</span>
+            <span style="font-size:13px;font-weight:700;color:var(--ink-2);">오늘 영업시간</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--blue);font-weight:700;">매장 설정 ›</span>
+          </div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink);">${hoursLabel}</div>
+          ${todayHours && todayHours.breakS ? `<div style="font-size:11px;color:var(--ink-3);margin-top:4px;">브레이크 ${todayHours.breakS}~${todayHours.breakE}</div>`:''}
+        </div>
+        <div onclick="setSection('order-type')" style="padding:18px 20px;background:#fff;border:2px solid var(--line);border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:18px;">🛒</span>
+            <span style="font-size:13px;font-weight:700;color:var(--ink-2);">받는 주문 방식</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--blue);font-weight:700;">주문 방식 ›</span>
+          </div>
+          <div style="font-size:20px;font-weight:800;color:${channelsOn>0?'var(--ink)':'var(--red)'};">${channelsOn}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">가지 켜짐</span></div>
+          <div style="font-size:11px;color:${channelsOn===0?'var(--red)':'var(--ink-3)'};margin-top:4px;">${channelsOn===0?'⚠️ 손님이 주문할 수 없어요':'테이블·포장·픽업 등'}</div>
+        </div>
+        <div onclick="setSection('stock')" style="padding:18px 20px;background:#fff;border:2px solid ${stockLow+stockOut>0?'#fbbf24':'var(--line)'};border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:18px;">📦</span>
+            <span style="font-size:13px;font-weight:700;color:var(--ink-2);">오늘의 준비량</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--blue);font-weight:700;">준비량 관리 ›</span>
+          </div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink);">
+            ${stockItems.length}<span style="font-size:13px;color:var(--ink-3);font-weight:600;">개 관리 중</span>
+            ${stockLow>0?`<span style="font-size:12px;color:#d97706;font-weight:700;margin-left:8px;">⚠️ 곧 품절 ${stockLow}</span>`:''}
+            ${stockOut>0?`<span style="font-size:12px;color:var(--red);font-weight:700;margin-left:8px;">🔴 완료 ${stockOut}</span>`:''}
+          </div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:4px;">${stockLow+stockOut===0?'한정 수량 메뉴 정상 운영 중':'클릭해서 점검하기 →'}</div>
+        </div>
+        <div onclick="setSection('menu')" style="padding:18px 20px;background:#fff;border:2px solid ${manualSoldOut>0?'#fca5a5':'var(--line)'};border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:18px;">🚫</span>
+            <span style="font-size:13px;font-weight:700;color:var(--ink-2);">오늘 품절 메뉴</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--blue);font-weight:700;">메뉴판 구성 ›</span>
+          </div>
+          <div style="font-size:20px;font-weight:800;color:${manualSoldOut>0?'var(--red)':'var(--ink)'};">${manualSoldOut}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">개</span></div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:4px;">${manualSoldOut>0?'손님 화면에 품절로 표시 중':'모든 메뉴 정상 판매 중'}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ 빠른 진입 -->
+    <div class="panel">
+      <h3>🚀 자주 쓰는 메뉴</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-ghost" style="padding:12px 20px;font-size:13px;font-weight:700;" onclick="setSection('orders')">📋 주문 내역</button>
+        <button class="btn-ghost" style="padding:12px 20px;font-size:13px;font-weight:700;" onclick="setSection('overview')">📊 매출 한눈에 보기</button>
+        <button class="btn-ghost" style="padding:12px 20px;font-size:13px;font-weight:700;" onclick="setSection('menu')">🍽️ 메뉴판 구성 관리</button>
+        <button class="btn-ghost" style="padding:12px 20px;font-size:13px;font-weight:700;" onclick="setSection('stl-list')">💰 정산 내역</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderOverview(main){
   const days = periodDays();
   const r = bhRatio();

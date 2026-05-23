@@ -1237,6 +1237,8 @@ const state = {
   faqCat: '전체',
   faqSearch: '',
   faqOpen: new Set(),
+  // 리뷰 관리 필터
+  reviewFilter: 'all',              // all | wait | done | star5 | low (3점 이하)
   // charts holders
   charts: {},
 };
@@ -1485,7 +1487,7 @@ function renderSidebar(){
       { key:'membership', ic:'👑', label:'멤버십' },
     ]},
     { label:'고객 지원',    items:[
-      { key:'reviews', ic:'💬', label:'리뷰' },
+      { key:'reviews', ic:'💬', label:'리뷰 관리' },
       { key:'faq',     ic:'❓', label:'자주 묻는 질문' },
       { key:'cs',      ic:'📨', label:'서비스 관련 문의' },
     ]},
@@ -8506,27 +8508,74 @@ function renderMembership(main){
    ============================================================ */
 function renderReviews(main){
   const avg = REVIEWS.length ? (REVIEWS.reduce((s,r)=>s+r.rating,0)/REVIEWS.length).toFixed(1) : 0;
-  const noReply = REVIEWS.filter(r=>!r.reply).length;
+  const totalCnt = REVIEWS.length;
+  const waitCnt  = REVIEWS.filter(r=>!r.reply).length;
+  const doneCnt  = REVIEWS.filter(r=>r.reply).length;
+  const star5Cnt = REVIEWS.filter(r=>r.rating===5).length;
+  const lowCnt   = REVIEWS.filter(r=>r.rating<=3).length;
+
+  // 필터 적용
+  const f = state.reviewFilter || 'all';
+  let rows = REVIEWS;
+  if(f==='wait')  rows = rows.filter(r=>!r.reply);
+  if(f==='done')  rows = rows.filter(r=>r.reply);
+  if(f==='star5') rows = rows.filter(r=>r.rating===5);
+  if(f==='low')   rows = rows.filter(r=>r.rating<=3);
+
+  const filterLabel = {all:'전체',wait:'답변 대기',done:'답변 완료',star5:'⭐ 5점',low:'⚠️ 3점 이하'}[f];
+
   main.innerHTML = `
-    <div class="crumb">고객 지원 › 리뷰</div>
+    <div class="crumb">고객 지원 › 리뷰 관리</div>
     <div class="toolbar">
       <div>
-        <h2>리뷰</h2>
-        <div class="page-sub">고객 리뷰를 보고 답변을 등록해요.</div>
+        <h2>리뷰 관리</h2>
+        <div class="page-sub">손님이 남긴 리뷰를 확인하고 답변을 등록해요. 아래 카드를 클릭하면 상태별로 골라 볼 수 있어요.</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:2px;">평균 별점</div>
+        <div style="font-size:22px;font-weight:800;color:#f59e0b;line-height:1;">⭐ ${avg}</div>
       </div>
     </div>
 
-    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
-      <div class="pc-card blue"><div class="label">평균 별점</div><div class="num">⭐ ${avg}</div></div>
-      <div class="pc-card"><div class="label">전체 리뷰</div><div class="num">${REVIEWS.length}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div></div>
-      <div class="pc-card"><div class="label">답변 대기</div><div class="num" style="color:var(--amber);">${noReply}</div></div>
-      <div class="pc-card"><div class="label">5점 비율</div><div class="num">${REVIEWS.length?Math.round(REVIEWS.filter(r=>r.rating===5).length/REVIEWS.length*100):0}<span style="font-size:14px;color:var(--ink-3);font-weight:600;">%</span></div></div>
+    <!-- 클릭형 KPI 카드 필터 -->
+    <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
+      <div class="pc-card clickable${f==='all'?' on':''}" style="${f==='all'?'border-color:var(--ink);box-shadow:0 0 0 2px rgba(0,0,0,.06);':''}" onclick="state.reviewFilter='all';renderApp()">
+        <div class="label">전체</div>
+        <div class="num">${totalCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div>
+      </div>
+      <div class="pc-card clickable${f==='wait'?' on':''}" style="${f==='wait'?'border-color:#f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.18);':''}" onclick="state.reviewFilter='wait';renderApp()">
+        <div class="label">답변 대기</div>
+        <div class="num" style="color:${waitCnt>0?'#d97706':'var(--ink-3)'};">${waitCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div>
+      </div>
+      <div class="pc-card clickable${f==='done'?' on':''}" style="${f==='done'?'border-color:var(--blue);box-shadow:0 0 0 2px rgba(49,130,246,.18);':''}" onclick="state.reviewFilter='done';renderApp()">
+        <div class="label">답변 완료</div>
+        <div class="num" style="color:var(--blue);">${doneCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div>
+      </div>
+      <div class="pc-card clickable${f==='star5'?' on':''}" style="${f==='star5'?'border-color:#f59e0b;box-shadow:0 0 0 2px rgba(245,158,11,.18);':''}" onclick="state.reviewFilter='star5';renderApp()">
+        <div class="label">⭐ 5점</div>
+        <div class="num" style="color:#f59e0b;">${star5Cnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div>
+      </div>
+      <div class="pc-card clickable${f==='low'?' on':''}" style="${f==='low'?'border-color:var(--red);box-shadow:0 0 0 2px rgba(228,68,68,.18);':''}" onclick="state.reviewFilter='low';renderApp()">
+        <div class="label">3점 이하</div>
+        <div class="num" style="color:${lowCnt>0?'var(--red)':'var(--ink-3)'};">${lowCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">건</span></div>
+      </div>
     </div>
 
     <div class="panel">
-      <h3>리뷰 목록 <span class="h-sub">${REVIEWS.length}건</span></h3>
+      <h3>리뷰 목록 <span class="h-sub">${filterLabel} · ${rows.length}건${rows.length!==totalCnt?` · 전체 ${totalCnt}건 중`:''}</span>
+        ${f!=='all'?`<span class="h-act"><button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="state.reviewFilter='all';renderApp()">필터 해제</button></span>`:''}
+      </h3>
+      ${rows.length===0 ? `
+        <div style="padding:40px 20px;text-align:center;background:var(--bg-2);border-radius:12px;">
+          <div style="font-size:36px;margin-bottom:10px;">${f==='wait'?'✅':f==='low'?'😊':'💬'}</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;">
+            ${f==='wait'?'답변 대기 중인 리뷰가 없어요':f==='low'?'3점 이하 리뷰가 없어요':'해당 조건의 리뷰가 없어요'}
+          </div>
+          <div style="font-size:12px;color:var(--ink-3);">${f==='wait'?'모든 리뷰에 답변을 남기셨어요. 수고하셨어요!':f==='low'?'손님 만족도가 좋아요!':'다른 필터를 눌러 보세요.'}</div>
+        </div>
+      ` : `
       <div>
-        ${REVIEWS.map(r=>`
+        ${rows.map(r=>`
           <div style="padding:16px 0;border-bottom:1px solid var(--line-2);">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;">
               <div style="display:flex;gap:10px;align-items:center;">
@@ -8550,6 +8599,7 @@ function renderReviews(main){
           </div>
         `).join('')}
       </div>
+      `}
     </div>
   `;
 }

@@ -1438,7 +1438,7 @@ function renderApp(){
     'stl-detail':  { fn:renderStlDetail,   url:'admin.qrorder.softment.co.kr/settlements/STL-2026051901' },
     'fee':         { fn:renderFee,         url:'admin.qrorder.softment.co.kr/fees' },
     'tax':         { fn:renderTax,         url:'admin.qrorder.softment.co.kr/tax-invoices' },
-    'bank':        { fn:renderBank,        url:'admin.qrorder.softment.co.kr/bank-account' },
+    // 'bank' 라우트는 내 정보 페이지로 통합됨 — renderBank는 호환용으로만 남김
     'menu':        { fn:renderMenu,        url:'admin.qrorder.softment.co.kr/menu' },
     'option':      { fn:renderOption,      url:'admin.qrorder.softment.co.kr/menu/options' },
     'category':    { fn:renderCategory,    url:'admin.qrorder.softment.co.kr/menu/categories' },
@@ -1783,7 +1783,7 @@ function renderHome(main){
             <span style="margin-left:auto;font-size:11px;color:var(--blue);font-weight:700;">주문 방식 ›</span>
           </div>
           <div style="font-size:20px;font-weight:800;color:${channelsOn>0?'var(--ink)':'var(--red)'};">${channelsOn}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">가지 켜짐</span></div>
-          <div style="font-size:11px;color:${channelsOn===0?'var(--red)':'var(--ink-3)'};margin-top:4px;">${channelsOn===0?'⚠️ 손님이 주문할 수 없어요':'테이블·포장·픽업 등'}</div>
+          <div style="font-size:11px;color:${channelsOn===0?'var(--red)':'var(--ink-3)'};margin-top:4px;">${channelsOn===0?'⚠️ 주문 채널이 모두 닫혀 있어요':'테이블·포장·픽업 등'}</div>
         </div>
         <div onclick="setSection('stock')" style="padding:18px 20px;background:#fff;border:2px solid ${stockLow+stockOut>0?'#fbbf24':'var(--line)'};border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -3895,8 +3895,9 @@ function renderMypage(main){
         <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">매장 연락처</div><div style="font-size:14px;color:var(--ink-2);">${s.phone}</div></div>
         <div style="grid-column:1/-1;"><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">주소</div><div style="font-size:14px;color:var(--ink-2);">${s.addr}</div></div>
       </div>
-      <div style="margin-top:12px;padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;">
-        💡 매장 정보를 변경해야 하면 <b style="color:var(--ink-2);">서비스 관련 문의</b>로 알려 주세요. 본사에서 확인 후 처리해 드려요.
+      <div style="margin-top:12px;padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <span>💡 매장 정보 변경은 본사 확인이 필요해요. 변경할 항목과 사유를 적어 주시면 안내해 드려요.</span>
+        <button class="btn-ghost" style="padding:6px 12px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="openNewInquiryWithType('기타','매장 정보 변경 요청')">📨 변경 신청하기</button>
       </div>
     </div>
 
@@ -3947,9 +3948,11 @@ function renderMypage(main){
         <div class="holder">예금주 ${s.owner} · 사업자 대표명과 일치</div>
         <span class="vtag">✓ 본인 인증 완료 · 2026-02-14</span>
       </div>
-      <div class="info-card" style="max-width:540px;margin-top:14px;font-size:12px;">
-        💡 계좌 변경은 고객센터에서 도와드려요. 📞 <b style="color:var(--ink);">1833-8540</b>
+      <div class="info-card" style="max-width:540px;margin-top:14px;font-size:12px;display:flex;align-items:center;gap:10px;justify-content:space-between;">
+        <span>🔒 계좌 변경은 보안을 위해 본인 인증과 대기 기간이 필요해요. 운영팀에서 안내해 드려요.</span>
+        <button class="btn-ghost" style="padding:6px 12px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="openNewInquiryWithType('결제·정산','정산 계좌 변경 요청')">📨 계좌 변경 신청</button>
       </div>
+      <div style="max-width:540px;margin-top:8px;font-size:11px;color:var(--ink-4);">긴급 시 📞 <b style="color:var(--ink-2);">1833-8540</b> (영업일 09:00~18:00)</div>
     </div>
 
     <!-- ⑤ 로그아웃 -->
@@ -7890,7 +7893,7 @@ const CS_INQUIRIES = [
     status:'답변 완료',
     reply:'안녕하세요 사장님. 의견 감사드려요. 테이블별 매출 분석 기능은 다음 분기 업데이트에 반영 예정이에요. 추가 진행 사항이 생기면 알림으로 다시 알려 드릴게요.',
     replyAt:'2026-05-13 14:22', by:'소프트먼트 운영팀' },
-  { id:3, date:'2026-05-08', type:'오류 신고', title:'QR이 인식이 안 돼요',
+  { id:3, date:'2026-05-08', type:'작동 문제 신고', title:'QR이 인식이 안 돼요',
     body:'어제부터 5번 테이블 QR이 휴대폰 카메라로 안 찍혀요. 확인 부탁드려요.',
     status:'답변 완료',
     reply:'담당자가 매장에 방문해 확인했고, QR 스티커 표면 손상이 원인이었어요. 새 QR을 무상으로 발송해 드렸어요. 사용 중 추가 문제가 있으시면 다시 문의 주세요.',
@@ -9288,6 +9291,19 @@ function renderCS(main){
   `;
 }
 
+// 다른 페이지에서 CS 문의 모달을 미리 분류·제목 채워서 열기
+function openNewInquiryWithType(type, title){
+  state.section = 'cs';
+  renderApp();
+  setTimeout(()=>{
+    openNewInquiryModal();
+    const t = document.getElementById('inq-type'); if(t) t.value = type;
+    const ti = document.getElementById('inq-title'); if(ti) ti.value = title;
+    const body = document.getElementById('inq-body');
+    if(body && !body.value) body.value = '아래에 변경할 내용·사유를 자세히 적어 주세요.\n\n';
+  }, 50);
+}
+
 // 새 문의 작성 모달 (사장님 → 소프트먼트)
 function openNewInquiryModal(){
   const modal = document.getElementById('modal');
@@ -9302,14 +9318,19 @@ function openNewInquiryModal(){
           <option>QR·테이블</option>
           <option>직원호출</option>
           <option>기능 요청</option>
-          <option>오류 신고</option>
+          <option>작동 문제 신고</option>
           <option>기타</option>
         </select>
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px;">제목</label>
         <input id="inq-title" class="input" placeholder="한 줄 요약" style="width:100%;margin-bottom:14px;" />
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px;">자세한 내용</label>
         <textarea id="inq-body" class="input" placeholder="언제·어떤 상황·어떤 도움이 필요한지 적어 주세요" style="width:100%;min-height:140px;font-family:inherit;resize:vertical;padding:12px 14px;line-height:1.6;"></textarea>
-        <div style="margin-top:8px;font-size:11px;color:var(--ink-4);">💡 스크린샷이 필요하면 답변 후 회신으로 보내실 수 있어요.</div>
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-top:14px;margin-bottom:8px;">스크린샷 첨부 <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">선택 · 최대 3장</span></label>
+        <div onclick="alert('파일 첨부 (와이어프레임)')" style="display:flex;align-items:center;gap:10px;padding:14px 16px;border:2px dashed var(--line);border-radius:10px;cursor:pointer;color:var(--ink-3);font-size:12px;transition:all .15s;" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--ink-3)'">
+          <span style="font-size:18px;">📎</span>
+          <span>여기를 클릭하거나 파일을 끌어다 놓아 주세요 (JPG·PNG, 5MB 이하)</span>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--ink-4);">💡 화면을 첨부해 주시면 더 빠르게 도와드릴 수 있어요.</div>
         <div style="margin-top:20px;display:flex;gap:8px;">
           <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
           <button class="btn-primary" style="flex:1;" onclick="submitInquiry()">문의 남기기</button>
@@ -9836,7 +9857,7 @@ function renderFAQ(main){
     <div style="margin-top:14px;padding:18px 22px;background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border:1px solid var(--blue-100);border-radius:12px;display:flex;align-items:center;gap:16px;">
       <span style="font-size:24px;flex-shrink:0;">💁</span>
       <div style="flex:1;">
-        <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:3px;">원하는 답을 못 찾으셨나요?</div>
+        <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:3px;">더 궁금한 점이 있으신가요?</div>
         <div style="font-size:12px;color:var(--ink-2);line-height:1.55;">소프트먼트 운영팀이 평균 24시간 안에 답변드려요.</div>
       </div>
       <button class="btn-primary" onclick="setSection('cs')">📨 직접 문의 남기기</button>

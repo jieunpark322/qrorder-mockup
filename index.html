@@ -660,6 +660,21 @@
     .menu-layout{flex-direction:column;}
     .menu-preview-side{width:100%;position:static;}
   }
+  /* 직원 계정 관리 */
+  .staff-group-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;}
+  .staff-group-pill.g1{background:#fef3c7;color:#92400e;}
+  .staff-group-pill.g2{background:#dbeafe;color:#1e40af;}
+  .staff-group-pill.g3{background:#d1fae5;color:#065f46;}
+  .staff-group-pill.g4{background:#e5e7eb;color:#374151;}
+  .perm-matrix{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;}
+  .perm-matrix table{width:100%;border-collapse:collapse;font-size:12px;}
+  .perm-matrix th{background:var(--bg-2);font-size:11px;color:var(--ink-3);font-weight:700;padding:10px 12px;text-align:center;border-bottom:1px solid var(--line);}
+  .perm-matrix th:first-child{text-align:left;}
+  .perm-matrix td{padding:10px 12px;text-align:center;border-bottom:1px solid var(--line-2);}
+  .perm-matrix td:first-child{text-align:left;font-weight:700;color:var(--ink-2);}
+  .perm-matrix tr:last-child td{border-bottom:none;}
+  .perm-yes{color:var(--blue);font-weight:800;}
+  .perm-no{color:var(--ink-4);}
   /* 오늘의 준비량 — 메뉴별 수량 카드 */
   .stk-card{background:#fff;border:2px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;}
   .stk-card.low{border-color:#fbbf24;background:#fffbeb;}
@@ -1239,6 +1254,11 @@ const state = {
   faqOpen: new Set(),
   // 리뷰 관리 필터
   reviewFilter: 'all',              // all | wait | done | star5 | low (3점 이하)
+  // 직원 계정 관리 검색·필터
+  staffSearch: '',
+  staffGroupFilter: 'all',          // all | groupId
+  staffUseFilter: 'all',            // all | Y | N
+  staffPermsOpen: false,            // 권한 매트릭스 펼침/접힘
   // charts holders
   charts: {},
 };
@@ -1427,6 +1447,7 @@ function renderApp(){
     'staff-call':  { fn:renderStaffCall,   url:'admin.qrorder.softment.co.kr/store/staff-call' },
     'origin':      { fn:renderOrigin,      url:'admin.qrorder.softment.co.kr/menu/origin' },
     'stock':       { fn:renderStock,       url:'admin.qrorder.softment.co.kr/menu/stock' },
+    'staff':       { fn:renderStaff,       url:'admin.qrorder.softment.co.kr/staff' },
     'coupon':      { fn:renderCoupon,      url:'admin.qrorder.softment.co.kr/coupons' },
     'stamp':       { fn:renderStamp,       url:'admin.qrorder.softment.co.kr/stamp' },
     'membership':  { fn:renderMembership,  url:'admin.qrorder.softment.co.kr/membership' },
@@ -1470,6 +1491,7 @@ function renderSidebar(){
       { key:'staff-call', ic:'🛎️',  label:'직원호출' },
       { key:'table',      ic:'🪑',  label:'테이블 관리' },
       { key:'qr',         ic:'📱',  label:'QR 관리' },
+      { key:'staff',      ic:'👥',  label:'직원 계정 관리' },
     ]},
     { label:'메뉴 관리',    items:[
       { key:'menu',      ic:'🍽️', label:'메뉴판 구성 관리' },
@@ -4980,6 +5002,299 @@ function resetMenuAll(){
    사이드바를 정리하고 페이지 안에서 이동
    ============================================================ */
 /* ============================================================
+   직원 계정 관리 페이지
+   매장은 본사가 생성, 직원만 사장님이 추가해서 권한 차등
+   ============================================================ */
+function renderStaff(main){
+  const f = state.staffSearch.toLowerCase();
+  let rows = STAFF_LIST.slice();
+  if(state.staffGroupFilter!=='all') rows = rows.filter(s=>s.groupId===Number(state.staffGroupFilter));
+  if(state.staffUseFilter!=='all')   rows = rows.filter(s=>s.enabled===state.staffUseFilter);
+  if(f) rows = rows.filter(s=>(s.name+' '+s.loginId+' '+s.phone).toLowerCase().includes(f));
+
+  const totalCnt  = STAFF_LIST.length;
+  const activeCnt = STAFF_LIST.filter(s=>s.enabled==='Y').length;
+  const offCnt    = STAFF_LIST.filter(s=>s.enabled==='N').length;
+  const ownerCnt  = STAFF_LIST.filter(s=>s.groupId===1).length;
+
+  main.innerHTML = `
+    <div class="crumb">매장 운영 › 직원 계정 관리</div>
+    <div class="toolbar">
+      <div>
+        <h2>직원 계정 관리</h2>
+        <div class="page-sub">매장에서 일할 직원에게 권한을 나눠 주세요. 직원마다 볼 수 있는 화면이 달라요.</div>
+      </div>
+      <button class="btn-primary" onclick="openStaffAddModal()">+ 직원 등록</button>
+    </div>
+
+    <!-- 안내 박스 -->
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
+      <span style="font-size:16px;flex-shrink:0;">💡</span>
+      <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
+        <b>매장 계정</b>은 가입 시 소프트먼트(본사)에서 만들어 드려요. 사장님은 매장 안에서 일할 <b>직원 계정만 추가</b>하시면 돼요.
+        직원에게 그룹(매니저·직원·알바)을 정해 주시면 해당 그룹의 권한대로 화면이 보여요.
+      </div>
+    </div>
+
+    <!-- 상태 요약 -->
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
+      <div class="pc-card"><div class="label">전체 직원</div><div class="num">${totalCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">명</span></div></div>
+      <div class="pc-card"><div class="label">사용 중</div><div class="num" style="color:var(--blue);">${activeCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">명</span></div></div>
+      <div class="pc-card"><div class="label">사용 안 함</div><div class="num" style="color:${offCnt>0?'var(--ink-3)':'var(--ink-4)'};">${offCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">명</span></div></div>
+      <div class="pc-card"><div class="label">사장 계정</div><div class="num">${ownerCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">명</span></div></div>
+    </div>
+
+    <!-- 검색·필터 -->
+    <div class="search-wrap">
+      <div class="row">
+        <span class="field-label">그룹</span>
+        <span class="chip ${state.staffGroupFilter==='all'?'on':''}" onclick="state.staffGroupFilter='all';renderApp()">전체</span>
+        ${STAFF_GROUPS.map(g=>`<span class="chip ${state.staffGroupFilter==String(g.id)?'on':''}" onclick="state.staffGroupFilter='${g.id}';renderApp()">${g.name} <span style="color:${state.staffGroupFilter==String(g.id)?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${STAFF_LIST.filter(s=>s.groupId===g.id).length}</span></span>`).join('')}
+      </div>
+      <div class="row">
+        <span class="field-label">사용 여부</span>
+        <span class="chip ${state.staffUseFilter==='all'?'on':''}" onclick="state.staffUseFilter='all';renderApp()">전체</span>
+        <span class="chip ${state.staffUseFilter==='Y'?'on':''}" onclick="state.staffUseFilter='Y';renderApp()">사용 중</span>
+        <span class="chip ${state.staffUseFilter==='N'?'on':''}" onclick="state.staffUseFilter='N';renderApp()">사용 안 함</span>
+      </div>
+      <div class="row">
+        <span class="field-label">검색</span>
+        <input class="input" style="flex:1;max-width:340px;" placeholder="직원명·로그인 ID·휴대폰" value="${state.staffSearch}" oninput="state.staffSearch=this.value" onchange="renderApp()" />
+      </div>
+    </div>
+
+    <!-- 직원 목록 표 -->
+    <div class="panel tight">
+      <h3>직원 목록 <span class="h-sub">${rows.length}명${rows.length!==totalCnt?` · 전체 ${totalCnt}명 중`:''}</span></h3>
+      <table class="t">
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th style="width:90px;">직원명</th>
+            <th style="width:140px;">로그인 ID</th>
+            <th style="width:130px;">휴대폰</th>
+            <th style="width:100px;">그룹</th>
+            <th>이메일</th>
+            <th style="width:120px;">사용 기간</th>
+            <th style="width:90px;">사용 여부</th>
+            <th style="width:100px;">등록일</th>
+            <th style="width:90px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">조건에 맞는 직원이 없어요. 위에서 + 직원 등록을 눌러 추가해 주세요.</td></tr>` : rows.map((s,i)=>{
+            const g = STAFF_GROUPS.find(x=>x.id===s.groupId);
+            const usePeriod = !s.useFrom && !s.useTo ? '<span style="color:var(--ink-4);">기간 없음</span>' : `${s.useFrom||'~'} ~ ${s.useTo||'~'}`;
+            return `
+              <tr>
+                <td style="color:var(--ink-3);">${i+1}</td>
+                <td><b>${s.name}</b>${s.isMe?' <span style="font-size:10px;color:var(--blue);font-weight:700;background:var(--blue-50);padding:2px 6px;border-radius:8px;margin-left:4px;">나</span>':''}</td>
+                <td style="font-family:ui-monospace,monospace;color:var(--ink-2);font-size:12px;">${s.loginId}</td>
+                <td style="color:var(--ink-2);font-size:12px;">${s.phone}</td>
+                <td><span class="staff-group-pill g${s.groupId}">${g?.name||'-'}</span></td>
+                <td style="color:var(--ink-3);font-size:12px;">${s.email||'<span style="color:var(--ink-4);">—</span>'}</td>
+                <td style="font-size:12px;color:var(--ink-2);">${usePeriod}</td>
+                <td><span class="pill ${s.enabled==='Y'?'done':'cancel'}" style="font-size:11px;">${s.enabled==='Y'?'사용 중':'사용 안 함'}</span></td>
+                <td style="color:var(--ink-3);font-size:12px;">${s.regDate.slice(5).replace('-','/')}</td>
+                <td>
+                  ${s.isMe ? `<span style="font-size:11px;color:var(--ink-4);">본인</span>` : `
+                    <button class="btn-ghost" style="padding:5px 9px;font-size:11px;" onclick="openStaffEditModal(${s.id})">수정</button>
+                    <button class="btn-ghost" style="padding:5px 9px;font-size:11px;color:var(--red);" onclick="deleteStaff(${s.id})">삭제</button>
+                  `}
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 권한 매트릭스 (접힘) -->
+    <div class="panel" style="margin-top:14px;">
+      <h3 style="cursor:pointer;" onclick="state.staffPermsOpen=!state.staffPermsOpen;renderApp()">
+        🔐 그룹별 권한 살펴보기
+        <span class="h-act">
+          <span style="font-size:12px;color:var(--ink-3);">${state.staffPermsOpen?'접기 ▴':'펼치기 ▾'}</span>
+        </span>
+      </h3>
+      ${state.staffPermsOpen ? `
+        <div class="perm-matrix" style="margin-top:8px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:120px;">기능 / 그룹</th>
+                ${STAFF_GROUPS.map(g=>`<th><span class="staff-group-pill g${g.id}">${g.name}</span></th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${[
+                ['orders','📋 주문 처리·조회'],
+                ['refund','↺ 환불 처리'],
+                ['sales','📊 매출·분석 조회'],
+                ['settle','💰 정산 조회·계좌 변경'],
+                ['menu','🍽️ 메뉴·가격 변경'],
+                ['store','🏪 매장 설정·영업시간'],
+                ['staff','👥 직원 계정 추가·삭제'],
+              ].map(([key,label])=>`
+                <tr>
+                  <td>${label}</td>
+                  ${STAFF_GROUPS.map(g=>`<td>${g.perms[key]?'<span class="perm-yes">●</span>':'<span class="perm-no">−</span>'}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--ink-3);line-height:1.6;">
+          💡 그룹은 4가지로 정해져 있어요. 직원에게 권한을 더 세밀하게 나누고 싶다면 <b style="color:var(--ink-2);">서비스 관련 문의</b>로 알려 주세요. 다음 업데이트 때 검토해 드릴게요.
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+// 직원 등록 모달
+function openStaffAddModal(){
+  state._staffEdit = null;
+  state._staffForm = { name:'', loginId:'', phone:'', email:'', groupId:3, useFrom:'', useTo:'', enabled:'Y', password:'' };
+  renderStaffModal('등록');
+}
+// 직원 수정 모달
+function openStaffEditModal(id){
+  const s = STAFF_LIST.find(x=>x.id===id);
+  if(!s) return;
+  state._staffEdit = id;
+  state._staffForm = { ...s, password:'' };
+  renderStaffModal('수정');
+}
+function renderStaffModal(mode){
+  const f = state._staffForm;
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:560px;">
+      <div class="modal-head"><b>직원 ${mode}</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:20px;max-height:70vh;overflow-y:auto;">
+
+        <div style="font-size:11px;color:var(--ink-4);font-weight:700;margin-bottom:6px;text-transform:uppercase;">기본 정보</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">직원 이름 <span style="color:var(--red);">*</span></label>
+            <input id="sf-name" class="input" placeholder="한글·영문 2~10자" value="${f.name||''}" maxlength="10" style="width:100%;" />
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">휴대폰 <span style="color:var(--red);">*</span></label>
+            <input id="sf-phone" class="input" placeholder="010-1234-5678" value="${f.phone||''}" style="width:100%;" />
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--ink-4);font-weight:700;margin-bottom:6px;text-transform:uppercase;">로그인 정보</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">로그인 ID <span style="color:var(--red);">*</span></label>
+            <input id="sf-loginId" class="input" placeholder="영문·숫자 5~20자" value="${f.loginId||''}" ${mode==='수정'?'readonly':''} style="width:100%;${mode==='수정'?'background:var(--bg-2);color:var(--ink-3);':''}" />
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">${mode==='수정'?'한 번 정한 ID는 바꿀 수 없어요':'직원이 로그인할 때 쓸 ID예요'}</div>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">${mode==='등록'?'임시 비밀번호 ':'비밀번호 재설정'}${mode==='등록'?'<span style="color:var(--red);">*</span>':''}</label>
+            <input id="sf-pw" class="input" type="text" placeholder="영문·숫자·특수문자 8~20자" value="" style="width:100%;" />
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">${mode==='등록'?'직원이 처음 로그인 시 본인이 변경하게 안내해 주세요':'비워 두면 변경되지 않아요'}</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--ink-4);font-weight:700;margin-bottom:6px;text-transform:uppercase;">권한 그룹</div>
+        <div style="margin-bottom:18px;">
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">그룹 <span style="color:var(--red);">*</span></label>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${STAFF_GROUPS.filter(g=>g.id!==1).map(g=>`
+              <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:2px solid ${f.groupId===g.id?'var(--blue)':'var(--line)'};border-radius:10px;cursor:pointer;background:${f.groupId===g.id?'var(--blue-50)':'#fff'};">
+                <input type="radio" name="sf-group" value="${g.id}" ${f.groupId===g.id?'checked':''} onchange="state._staffForm.groupId=${g.id};renderStaffModal('${mode}')" style="margin-top:2px;" />
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:800;color:${f.groupId===g.id?'var(--blue)':'var(--ink)'};margin-bottom:2px;">${g.name}</div>
+                  <div style="font-size:11px;color:var(--ink-3);line-height:1.5;">${g.desc}</div>
+                </div>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--ink-4);font-weight:700;margin-bottom:6px;text-transform:uppercase;">선택 입력</div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">이메일</label>
+          <input id="sf-email" class="input" placeholder="hong@example.com" value="${f.email||''}" style="width:100%;" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">사용 시작일</label>
+            <input id="sf-from" class="input" type="date" value="${f.useFrom||''}" style="width:100%;" />
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">사용 종료일</label>
+            <input id="sf-to" class="input" type="date" value="${f.useTo||''}" style="width:100%;" />
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">종료일 이후엔 자동으로 사용 안 함이 돼요</div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg-2);border-radius:10px;margin-bottom:18px;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink-2);">계정 사용 여부</div>
+            <div style="font-size:11px;color:var(--ink-4);margin-top:2px;">사용 안 함으로 두면 로그인이 막혀요</div>
+          </div>
+          <label class="toggle-switch ${f.enabled==='Y'?'on':''}" onclick="state._staffForm.enabled=state._staffForm.enabled==='Y'?'N':'Y';renderStaffModal('${mode}')">
+            <span class="sw"></span>
+            <span style="font-size:12px;font-weight:700;">${f.enabled==='Y'?'사용 중':'사용 안 함'}</span>
+          </label>
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
+          <button class="btn-primary" style="flex:2;" onclick="saveStaff('${mode}')">${mode==='등록'?'직원 등록하기':'변경 사항 저장'}</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function saveStaff(mode){
+  const name    = document.getElementById('sf-name').value.trim();
+  const phone   = document.getElementById('sf-phone').value.trim();
+  const loginId = document.getElementById('sf-loginId').value.trim();
+  const pw      = document.getElementById('sf-pw').value.trim();
+  const email   = document.getElementById('sf-email').value.trim();
+  const useFrom = document.getElementById('sf-from').value;
+  const useTo   = document.getElementById('sf-to').value;
+  const groupId = state._staffForm.groupId;
+  const enabled = state._staffForm.enabled;
+  if(!name)    { alert('직원 이름을 입력해 주세요.'); return; }
+  if(!phone)   { alert('휴대폰을 입력해 주세요.'); return; }
+  if(!loginId) { alert('로그인 ID를 입력해 주세요.'); return; }
+  if(mode==='등록' && !pw){ alert('임시 비밀번호를 입력해 주세요.'); return; }
+  // 중복 ID 확인
+  if(mode==='등록' && STAFF_LIST.some(s=>s.loginId===loginId)){
+    alert(`이미 사용 중인 로그인 ID예요. 다른 ID로 입력해 주세요.`); return;
+  }
+  if(mode==='등록'){
+    const newId = (STAFF_LIST.reduce((m,s)=>Math.max(m,s.id),0))+1;
+    STAFF_LIST.push({ id:newId, name, loginId, phone, email, groupId, useFrom, useTo, enabled, regDate: new Date().toISOString().slice(0,10) });
+    alert(`${name} 직원 계정을 등록했어요. 로그인 ID와 임시 비밀번호를 직원에게 안내해 주세요.`);
+  } else {
+    const s = STAFF_LIST.find(x=>x.id===state._staffEdit);
+    if(!s) return;
+    Object.assign(s, { name, phone, email, groupId, useFrom, useTo, enabled });
+    alert(`${name} 직원 정보를 수정했어요.`);
+  }
+  closeModal();
+  renderApp();
+}
+function deleteStaff(id){
+  const s = STAFF_LIST.find(x=>x.id===id);
+  if(!s || s.isMe) return;
+  if(!confirm(`${s.name} 직원 계정을 삭제할까요? 이 계정으로는 더 이상 로그인할 수 없게 돼요.`)) return;
+  const idx = STAFF_LIST.findIndex(x=>x.id===id);
+  STAFF_LIST.splice(idx,1);
+  alert(`${s.name} 직원 계정을 삭제했어요.`);
+  renderApp();
+}
+
+/* ============================================================
    오늘의 준비량 — 분식·도시락처럼 한정 수량 메뉴 관리
    ============================================================ */
 function renderStock(main){
@@ -7570,6 +7885,24 @@ const STORE_ORIGIN = {
 배추김치: 국내산`,
   updatedAt: '2026-05-22',
 };
+
+/* ============================================================
+   직원 계정 관리 — 사장님이 직원에게 권한을 나누어 주는 구조
+   매장 자체는 본사(소프트먼트)에서 생성, 직원만 사장님이 추가
+   ============================================================ */
+const STAFF_GROUPS = [
+  { id:1, name:'사장',   desc:'모든 기능을 쓸 수 있어요',                     readOnly:true,  perms:{ orders:true, sales:true, settle:true, menu:true, store:true, staff:true, refund:true } },
+  { id:2, name:'매니저', desc:'주문·매출·메뉴 관리까지 가능 (직원 추가는 못 해요)', readOnly:false, perms:{ orders:true, sales:true, settle:true, menu:true, store:false, staff:false, refund:true } },
+  { id:3, name:'직원',   desc:'주문 처리에 집중 — 매출·환불은 못 봐요',         readOnly:false, perms:{ orders:true, sales:false, settle:false, menu:false, store:false, staff:false, refund:false } },
+  { id:4, name:'알바',   desc:'주문 조회만 가능 — 환불·취소 못 해요',           readOnly:false, perms:{ orders:true, sales:false, settle:false, menu:false, store:false, staff:false, refund:false } },
+];
+const STAFF_LIST = [
+  { id:1, loginId:'softcoffee_owner', name:'홍길동', phone:'010-1234-5678', email:'hong@softcoffee.com',   groupId:1, useFrom:'', useTo:'', enabled:'Y', regDate:'2024-08-15', isMe:true },
+  { id:2, loginId:'manager_kim',      name:'김매니',  phone:'010-2345-6789', email:'kim@softcoffee.com',    groupId:2, useFrom:'', useTo:'', enabled:'Y', regDate:'2025-03-02' },
+  { id:3, loginId:'staff_lee',        name:'이주말',  phone:'010-3456-7890', email:'',                       groupId:3, useFrom:'', useTo:'2026-12-31', enabled:'Y', regDate:'2026-01-10' },
+  { id:4, loginId:'partime_park',     name:'박알바',  phone:'010-4567-8901', email:'',                       groupId:4, useFrom:'2026-05-01', useTo:'2026-08-31', enabled:'Y', regDate:'2026-04-28' },
+  { id:5, loginId:'staff_choi',       name:'최저녁',  phone:'010-5678-9012', email:'',                       groupId:3, useFrom:'', useTo:'', enabled:'N', regDate:'2025-11-22' },
+];
 
 /* ============================================================
    판매 수량 관리 — 오늘의 준비량

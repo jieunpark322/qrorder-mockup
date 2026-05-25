@@ -40,7 +40,11 @@
   .sidenav{width:244px;background:#fff;border-right:1px solid var(--line);padding:20px 14px;flex-shrink:0;}
   .brand{font-size:18px;font-weight:800;padding:6px 10px 14px;letter-spacing:-.01em;}
   .brand b{color:var(--blue);}
-  .userbox{margin:0 0 14px;padding:12px;background:var(--bg-2);border-radius:10px;font-size:13px;color:var(--ink-2);display:flex;gap:10px;align-items:center;}
+  .userbox{margin:0 0 14px;padding:12px;background:var(--bg-2);border-radius:10px;font-size:13px;color:var(--ink-2);display:flex;gap:10px;align-items:center;cursor:pointer;transition:background .12s,box-shadow .15s;position:relative;}
+  .userbox:hover{background:#eaf2ff;box-shadow:0 4px 12px rgba(49,130,246,.10);}
+  .userbox.on{background:#dbeafe;}
+  .userbox::after{content:'›';position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--ink-4);font-weight:800;}
+  .userbox:hover::after{color:var(--blue);}
   .userbox .av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#a8c8f5,#3182f6);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
   .userbox b{display:block;color:var(--ink);font-size:14px;margin-bottom:2px;}
   /* 그룹 헤더 — 클릭으로 접기/펼치기 */
@@ -1425,6 +1429,7 @@ function renderApp(){
 
   const sectionMap = {
     'home':        { fn:renderHome,        url:'admin.qrorder.softment.co.kr/' },
+    'mypage':      { fn:renderMypage,      url:'admin.qrorder.softment.co.kr/account' },
     'overview':    { fn:renderOverview,    url:'admin.qrorder.softment.co.kr/sales' },
     'detail':      { fn:renderDetail,      url:'admin.qrorder.softment.co.kr/sales/detail' },
     'orders':      { fn:renderOrders,      url:'admin.qrorder.softment.co.kr/orders' },
@@ -1505,7 +1510,6 @@ function renderSidebar(){
     { label:'정산 관리',    items:[
       { key:'stl-calendar', ic:'🗓️', label:'정산 달력' },
       { key:'stl-list',     ic:'🔎', label:'정산 내역', n:2 },
-      { key:'bank',         ic:'🏦', label:'정산 계좌' },
     ]},
     { label:'마케팅 · CRM', items:[
       { key:'coupon',     ic:'🎟️', label:'쿠폰' },
@@ -1545,7 +1549,7 @@ function renderSidebar(){
 
   let html = `
     <div class="brand">QR<b>오더</b> · 사장님</div>
-    <div class="userbox"><div class="av">홍</div><div><b>${STORE.name}</b>${STORE.owner} 사장님</div></div>
+    <div class="userbox ${state.section==='mypage'?'on':''}" onclick="setSection('mypage')" title="내 정보·비밀번호·정산 계좌"><div class="av">홍</div><div><b>${STORE.name}</b>${STORE.owner} 사장님</div></div>
   `;
 
   groups.forEach(g => {
@@ -3863,6 +3867,108 @@ function renderTax(main){
 }
 
 /* ====================== 정산계좌 ====================== */
+/* ============================================================
+   내 정보 (사장 계정 정보·비밀번호 변경·정산 계좌)
+   사이드바 사용자 박스 클릭 시 진입
+   ============================================================ */
+function renderMypage(main){
+  const me = STAFF_LIST.find(s=>s.isMe) || { name:'홍길동', loginId:'softcoffee_owner', phone:'010-1234-5678', email:'hong@softcoffee.com' };
+  const s = STORE_INFO;
+  main.innerHTML = `
+    <div class="crumb">내 정보</div>
+    <div class="toolbar">
+      <div>
+        <h2>내 정보</h2>
+        <div class="page-sub">사장님 본인 계정 정보와 비밀번호, 정산 계좌를 한곳에서 관리해요.</div>
+      </div>
+    </div>
+
+    <!-- ① 매장 정보 (본사 생성 — 읽기 전용) -->
+    <div class="panel">
+      <h3>🏪 매장 정보 <span class="h-sub">소프트먼트가 등록한 정보예요</span>
+        <span class="h-act"><span style="font-size:11px;color:var(--ink-4);">읽기 전용</span></span>
+      </h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:6px 0;">
+        <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">매장명</div><div style="font-size:14px;font-weight:700;color:var(--ink);">${s.name}</div></div>
+        <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">사업자등록번호</div><div style="font-size:14px;color:var(--ink-2);font-family:ui-monospace,monospace;">${s.bizNo}</div></div>
+        <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">대표자</div><div style="font-size:14px;color:var(--ink-2);">${s.owner}</div></div>
+        <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">매장 연락처</div><div style="font-size:14px;color:var(--ink-2);">${s.phone}</div></div>
+        <div style="grid-column:1/-1;"><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">주소</div><div style="font-size:14px;color:var(--ink-2);">${s.addr}</div></div>
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;">
+        💡 매장 정보를 변경해야 하면 <b style="color:var(--ink-2);">서비스 관련 문의</b>로 알려 주세요. 본사에서 확인 후 처리해 드려요.
+      </div>
+    </div>
+
+    <!-- ② 사장님 계정 정보 (편집 가능) -->
+    <div class="panel">
+      <h3>👤 사장님 계정 정보</h3>
+      <div class="form-grid">
+        <div class="form-row"><label>이름</label><input class="input" value="${me.name}" /></div>
+        <div class="form-row"><label>휴대폰</label><input class="input" value="${me.phone}" /></div>
+        <div class="form-row"><label>로그인 ID</label><input class="input" value="${me.loginId}" readonly style="background:var(--bg-2);color:var(--ink-3);" /></div>
+        <div class="form-row"><label>이메일</label><input class="input" value="${me.email}" /></div>
+      </div>
+      <div style="margin-top:14px;text-align:right;">
+        <button class="btn-primary" onclick="alert('계정 정보를 저장했어요.')">변경 사항 저장</button>
+      </div>
+    </div>
+
+    <!-- ③ 비밀번호 변경 -->
+    <div class="panel">
+      <h3>🔒 비밀번호 변경</h3>
+      <div style="max-width:520px;display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">현재 비밀번호</label>
+          <input id="mp-pw-now" class="input" type="password" placeholder="현재 비밀번호" style="width:100%;" />
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">새 비밀번호</label>
+          <input id="mp-pw-new" class="input" type="password" placeholder="영문·숫자·특수문자 8~20자" style="width:100%;" />
+          <div style="font-size:10px;color:var(--ink-4);margin-top:4px;">영문(대/소문자), 숫자, 특수문자를 포함해 8~20자로 입력해 주세요. ($ @ ! % * # ? & - _)</div>
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">새 비밀번호 확인</label>
+          <input id="mp-pw-new2" class="input" type="password" placeholder="새 비밀번호 다시 입력" style="width:100%;" />
+        </div>
+      </div>
+      <div style="margin-top:14px;text-align:right;">
+        <button class="btn-primary" onclick="changeMypagePw()">비밀번호 변경</button>
+      </div>
+    </div>
+
+    <!-- ④ 정산 계좌 (이전 정산 관리에서 이동) -->
+    <div class="panel">
+      <h3>🏦 정산 계좌 <span class="h-sub">정산금이 들어오는 계좌예요</span></h3>
+      <div class="acct-box" style="max-width:540px;">
+        <div class="l">지금 쓰는 계좌</div>
+        <div style="font-size:14px;color:var(--ink-2);margin-bottom:4px;">신한은행</div>
+        <div class="num">****-**-***1234 <span style="font-size:14px;color:var(--ink-3);font-weight:500;margin-left:6px;cursor:pointer;" onclick="alert('전체 번호 표시 (보안 인증 필요)')">👁 표시</span></div>
+        <div class="holder">예금주 ${s.owner} · 사업자 대표명과 일치</div>
+        <span class="vtag">✓ 본인 인증 완료 · 2026-02-14</span>
+      </div>
+      <div class="info-card" style="max-width:540px;margin-top:14px;font-size:12px;">
+        💡 계좌 변경은 고객센터에서 도와드려요. 📞 <b style="color:var(--ink);">1833-8540</b>
+      </div>
+    </div>
+
+    <!-- ⑤ 로그아웃 -->
+    <div style="margin-top:6px;text-align:right;">
+      <button class="btn-ghost" style="color:var(--red);" onclick="if(confirm('로그아웃할까요?'))alert('로그아웃 처리 (와이어프레임)')">로그아웃</button>
+    </div>
+  `;
+}
+function changeMypagePw(){
+  const now = document.getElementById('mp-pw-now').value;
+  const n1  = document.getElementById('mp-pw-new').value;
+  const n2  = document.getElementById('mp-pw-new2').value;
+  if(!now){ alert('현재 비밀번호를 입력해 주세요.'); return; }
+  if(!n1) { alert('새 비밀번호를 입력해 주세요.'); return; }
+  if(n1!==n2){ alert('새 비밀번호가 일치하지 않아요. 다시 확인해 주세요.'); return; }
+  if(n1.length<8){ alert('새 비밀번호는 최소 8자 이상이어야 해요.'); return; }
+  alert('비밀번호가 변경됐어요. 다음 로그인부터 새 비밀번호로 들어오세요.');
+}
+
 function renderBank(main){
   main.innerHTML = `
     <div class="crumb">정산 관리 › 정산 계좌</div>
@@ -5006,50 +5112,48 @@ function resetMenuAll(){
    매장은 본사가 생성, 직원만 사장님이 추가해서 권한 차등
    ============================================================ */
 function renderStaff(main){
+  // 직원 계정 관리 페이지에선 '사장' 본인을 표시하지 않음 (본인은 사이드바 사용자 박스 → 내 정보에서 관리)
   const f = state.staffSearch.toLowerCase();
-  let rows = STAFF_LIST.slice();
-  if(state.staffGroupFilter!=='all') rows = rows.filter(s=>s.groupId===Number(state.staffGroupFilter));
-  if(state.staffUseFilter!=='all')   rows = rows.filter(s=>s.enabled===state.staffUseFilter);
+  let rows = STAFF_LIST.filter(s=>s.groupId!==1);  // 사장 제외
+  if(state.staffUseFilter!=='all') rows = rows.filter(s=>s.enabled===state.staffUseFilter);
   if(f) rows = rows.filter(s=>(s.name+' '+s.loginId+' '+s.phone).toLowerCase().includes(f));
 
-  const totalCnt  = STAFF_LIST.length;
-  const activeCnt = STAFF_LIST.filter(s=>s.enabled==='Y').length;
-  const offCnt    = STAFF_LIST.filter(s=>s.enabled==='N').length;
-  const ownerCnt  = STAFF_LIST.filter(s=>s.groupId===1).length;
+  const all       = STAFF_LIST.filter(s=>s.groupId!==1);
+  const totalCnt  = all.length;
+  const activeCnt = all.filter(s=>s.enabled==='Y').length;
+  const offCnt    = all.filter(s=>s.enabled==='N').length;
 
   main.innerHTML = `
     <div class="crumb">매장 운영 › 직원 계정 관리</div>
     <div class="toolbar">
       <div>
         <h2>직원 계정 관리</h2>
-        <div class="page-sub">매장에서 일할 직원에게 권한을 나눠 주세요. 직원마다 볼 수 있는 화면이 달라요.</div>
+        <div class="page-sub">매장에서 일할 직원 계정을 만들고 관리해요. 사장님 본인 계정은 사이드바 위 사용자 박스에서 관리할 수 있어요.</div>
       </div>
-      <button class="btn-primary" onclick="openStaffAddModal()">+ 직원 등록</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-ghost" style="padding:8px 14px;font-size:12px;" onclick="openStaffPermsModal()" title="직원 권한이 어디까지 가능한지 확인">ℹ️ 권한 설명</button>
+        <button class="btn-primary" onclick="openStaffAddModal()">+ 직원 등록</button>
+      </div>
     </div>
 
     <!-- 안내 박스 -->
     <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
       <span style="font-size:16px;flex-shrink:0;">💡</span>
       <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
-        <b>매장 계정</b>은 가입 시 소프트먼트(본사)에서 만들어 드려요. 사장님은 매장 안에서 일할 <b>직원 계정만 추가</b>하시면 돼요.
-        직원 계정에는 자동으로 <b>'직원' 권한</b>이 부여돼요 — 주문 처리만 가능하고 매출·환불·정산은 볼 수 없어요.
+        <b>매장 계정</b>은 가입 시 소프트먼트(본사)에서 만들어 드려요. 사장님은 매장에서 일할 <b>직원 계정만 추가</b>하시면 돼요.
+        직원에게는 자동으로 <b>'직원' 권한</b>이 부여돼요. 자세한 권한 범위는 우상단 <b>ℹ️ 권한 설명</b> 버튼에서 확인할 수 있어요.
       </div>
     </div>
 
     <!-- 상태 요약 -->
     <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
-      <div class="pc-card"><div class="label">전체 계정</div><div class="num">${totalCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">명</span></div></div>
+      <div class="pc-card"><div class="label">전체 직원 계정</div><div class="num">${totalCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">명</span></div></div>
       <div class="pc-card"><div class="label">사용 중</div><div class="num" style="color:var(--blue);">${activeCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">명</span></div></div>
       <div class="pc-card"><div class="label">사용 안 함</div><div class="num" style="color:${offCnt>0?'var(--ink-3)':'var(--ink-4)'};">${offCnt}<span style="font-size:13px;color:var(--ink-3);font-weight:600;margin-left:2px;">명</span></div></div>
     </div>
 
-    <!-- 검색·필터 -->
+    <!-- 검색·필터 (그룹 필터 제거 — 모두 직원 단일 권한) -->
     <div class="search-wrap">
-      <div class="row">
-        <span class="field-label">그룹</span>
-        <span class="chip ${state.staffGroupFilter==='all'?'on':''}" onclick="state.staffGroupFilter='all';renderApp()">전체</span>
-        ${STAFF_GROUPS.map(g=>`<span class="chip ${state.staffGroupFilter==String(g.id)?'on':''}" onclick="state.staffGroupFilter='${g.id}';renderApp()">${g.name} <span style="color:${state.staffGroupFilter==String(g.id)?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${STAFF_LIST.filter(s=>s.groupId===g.id).length}</span></span>`).join('')}
-      </div>
       <div class="row">
         <span class="field-label">사용 여부</span>
         <span class="chip ${state.staffUseFilter==='all'?'on':''}" onclick="state.staffUseFilter='all';renderApp()">전체</span>
@@ -5069,37 +5173,32 @@ function renderStaff(main){
         <thead>
           <tr>
             <th style="width:40px;">#</th>
-            <th style="width:90px;">직원명</th>
-            <th style="width:140px;">로그인 ID</th>
-            <th style="width:130px;">휴대폰</th>
-            <th style="width:100px;">그룹</th>
+            <th style="width:100px;">직원명</th>
+            <th style="width:160px;">로그인 ID</th>
+            <th style="width:140px;">휴대폰</th>
             <th>이메일</th>
-            <th style="width:120px;">사용 기간</th>
-            <th style="width:90px;">사용 여부</th>
+            <th style="width:170px;">사용 기간</th>
+            <th style="width:100px;">사용 여부</th>
             <th style="width:100px;">등록일</th>
-            <th style="width:90px;"></th>
+            <th style="width:100px;"></th>
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">조건에 맞는 직원이 없어요. 위에서 + 직원 등록을 눌러 추가해 주세요.</td></tr>` : rows.map((s,i)=>{
-            const g = STAFF_GROUPS.find(x=>x.id===s.groupId);
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="9">${totalCnt===0?'아직 등록한 직원 계정이 없어요. 위 + 직원 등록을 눌러 추가해 주세요.':'조건에 맞는 직원이 없어요. 검색·필터를 다시 살펴봐 주세요.'}</td></tr>` : rows.map((s,i)=>{
             const usePeriod = !s.useFrom && !s.useTo ? '<span style="color:var(--ink-4);">기간 없음</span>' : `${s.useFrom||'~'} ~ ${s.useTo||'~'}`;
             return `
               <tr>
                 <td style="color:var(--ink-3);">${i+1}</td>
-                <td><b>${s.name}</b>${s.isMe?' <span style="font-size:10px;color:var(--blue);font-weight:700;background:var(--blue-50);padding:2px 6px;border-radius:8px;margin-left:4px;">나</span>':''}</td>
+                <td><b>${s.name}</b></td>
                 <td style="font-family:ui-monospace,monospace;color:var(--ink-2);font-size:12px;">${s.loginId}</td>
                 <td style="color:var(--ink-2);font-size:12px;">${s.phone}</td>
-                <td><span class="staff-group-pill g${s.groupId}">${g?.name||'-'}</span></td>
                 <td style="color:var(--ink-3);font-size:12px;">${s.email||'<span style="color:var(--ink-4);">—</span>'}</td>
                 <td style="font-size:12px;color:var(--ink-2);">${usePeriod}</td>
                 <td><span class="pill ${s.enabled==='Y'?'done':'cancel'}" style="font-size:11px;">${s.enabled==='Y'?'사용 중':'사용 안 함'}</span></td>
                 <td style="color:var(--ink-3);font-size:12px;">${s.regDate.slice(5).replace('-','/')}</td>
                 <td>
-                  ${s.isMe ? `<span style="font-size:11px;color:var(--ink-4);">본인</span>` : `
-                    <button class="btn-ghost" style="padding:5px 9px;font-size:11px;" onclick="openStaffEditModal(${s.id})">수정</button>
-                    <button class="btn-ghost" style="padding:5px 9px;font-size:11px;color:var(--red);" onclick="deleteStaff(${s.id})">삭제</button>
-                  `}
+                  <button class="btn-ghost" style="padding:5px 9px;font-size:11px;" onclick="openStaffEditModal(${s.id})">수정</button>
+                  <button class="btn-ghost" style="padding:5px 9px;font-size:11px;color:var(--red);" onclick="deleteStaff(${s.id})">삭제</button>
                 </td>
               </tr>
             `;
@@ -5107,48 +5206,65 @@ function renderStaff(main){
         </tbody>
       </table>
     </div>
+  `;
+}
 
-    <!-- 권한 매트릭스 (접힘) -->
-    <div class="panel" style="margin-top:14px;">
-      <h3 style="cursor:pointer;" onclick="state.staffPermsOpen=!state.staffPermsOpen;renderApp()">
-        🔐 그룹별 권한 살펴보기
-        <span class="h-act">
-          <span style="font-size:12px;color:var(--ink-3);">${state.staffPermsOpen?'접기 ▴':'펼치기 ▾'}</span>
-        </span>
-      </h3>
-      ${state.staffPermsOpen ? `
-        <div class="perm-matrix" style="margin-top:8px;">
-          <table>
+// 직원 권한 안내 모달
+function openStaffPermsModal(){
+  const modal = document.getElementById('modal');
+  const items = [
+    { ico:'📋', label:'주문 내역',         owner:'전체 기간', staff:'당일만 가능',          note:'직원은 오늘 들어온 주문만 볼 수 있어요. 과거 주문은 사장님만 조회할 수 있어요.' },
+    { ico:'↺', label:'환불·취소 처리',     owner:'가능',     staff:'불가',                  note:'잘못된 환불·취소를 막기 위해 사장님만 처리할 수 있어요.' },
+    { ico:'🏪', label:'매장 운영 카테고리',  owner:'전체 가능', staff:'전체 가능 (단, 직원 계정 관리 제외)', note:'매장 설정·주문 방식·직원호출·테이블·QR 관리 모두 가능해요.' },
+    { ico:'🍽️', label:'메뉴 관리 카테고리',  owner:'전체 가능', staff:'전체 가능',             note:'메뉴판 구성·옵션·카테고리·세트·원산지·오늘의 준비량·번역 모두 가능해요.' },
+    { ico:'📊', label:'매출 관리',          owner:'가능',     staff:'화면 자체가 안 보여요', note:'매출은 사장님 영업 정보라 직원에게는 노출되지 않아요.' },
+    { ico:'💰', label:'정산 관리',          owner:'가능',     staff:'화면 자체가 안 보여요', note:'정산·계좌·세금 같은 재무 정보는 사장님만 확인할 수 있어요.' },
+    { ico:'🎟️', label:'마케팅·CRM',         owner:'가능',     staff:'화면 자체가 안 보여요', note:'쿠폰·스탬프·멤버십 같은 마케팅 영역은 사장님 영역이에요.' },
+    { ico:'👥', label:'직원 계정 관리',      owner:'가능',     staff:'화면 자체가 안 보여요', note:'직원이 다른 직원을 추가·삭제할 수 없도록 사장님만 접근할 수 있어요.' },
+  ];
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:680px;">
+      <div class="modal-head"><b>🔐 직원 권한 안내</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:20px;max-height:74vh;overflow-y:auto;">
+        <div style="font-size:13px;color:var(--ink-2);line-height:1.65;margin-bottom:16px;">
+          직원 계정은 <b>주문 처리에 필요한 운영 기능만 사용</b>할 수 있어요. 매출·정산 같은 사장님 전용 영역은 직원 화면에 아예 나타나지 않아요.
+        </div>
+        <div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
             <thead>
-              <tr>
-                <th style="width:120px;">기능 / 그룹</th>
-                ${STAFF_GROUPS.map(g=>`<th><span class="staff-group-pill g${g.id}">${g.name}</span></th>`).join('')}
+              <tr style="background:var(--bg-2);">
+                <th style="padding:11px 12px;text-align:left;font-size:11px;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);width:180px;">기능</th>
+                <th style="padding:11px 12px;text-align:center;font-size:11px;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);width:140px;"><span class="staff-group-pill g1">사장</span></th>
+                <th style="padding:11px 12px;text-align:center;font-size:11px;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);width:140px;"><span class="staff-group-pill g2">직원</span></th>
+                <th style="padding:11px 12px;text-align:left;font-size:11px;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);">설명</th>
               </tr>
             </thead>
             <tbody>
-              ${[
-                ['orders','📋 주문 처리·조회'],
-                ['refund','↺ 환불 처리'],
-                ['sales','📊 매출·분석 조회'],
-                ['settle','💰 정산 조회·계좌 변경'],
-                ['menu','🍽️ 메뉴·가격 변경'],
-                ['store','🏪 매장 설정·영업시간'],
-                ['staff','👥 직원 계정 추가·삭제'],
-              ].map(([key,label])=>`
-                <tr>
-                  <td>${label}</td>
-                  ${STAFF_GROUPS.map(g=>`<td>${g.perms[key]?'<span class="perm-yes">●</span>':'<span class="perm-no">−</span>'}</td>`).join('')}
-                </tr>
-              `).join('')}
+              ${items.map(it=>{
+                const staffOk = (it.staff==='가능' || it.staff.includes('가능'));
+                const staffPartial = it.staff.includes('당일만') || (it.staff.includes('가능') && it.staff.includes('제외'));
+                return `
+                  <tr style="border-bottom:1px solid var(--line-2);">
+                    <td style="padding:12px;font-weight:700;color:var(--ink-2);">${it.ico} ${it.label}</td>
+                    <td style="padding:12px;text-align:center;color:var(--blue);font-weight:700;">${it.owner}</td>
+                    <td style="padding:12px;text-align:center;font-weight:700;color:${staffOk?(staffPartial?'#d97706':'var(--blue)'):'var(--ink-4)'};">${it.staff}</td>
+                    <td style="padding:12px;font-size:11px;color:var(--ink-3);line-height:1.5;">${it.note}</td>
+                  </tr>
+                `;
+              }).join('')}
             </tbody>
           </table>
         </div>
-        <div style="margin-top:10px;font-size:12px;color:var(--ink-3);line-height:1.6;">
-          💡 직원 계정에는 자동으로 '직원' 권한이 적용돼요. 권한을 더 세밀하게 나누고 싶다면 <b style="color:var(--ink-2);">서비스 관련 문의</b>로 알려 주세요. 다음 업데이트 때 검토해 드릴게요.
+        <div style="margin-top:14px;padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;font-size:12px;color:#9a3412;line-height:1.6;">
+          ⚠️ 권한 범위를 더 세밀하게 나누고 싶다면 <b style="color:var(--ink-2);">고객 지원 → 서비스 관련 문의</b>로 알려 주세요. 다음 업데이트 때 검토해 드릴게요.
         </div>
-      ` : ''}
+        <div style="margin-top:14px;display:flex;justify-content:flex-end;">
+          <button class="btn-primary" onclick="closeModal()">확인했어요</button>
+        </div>
+      </div>
     </div>
   `;
+  document.getElementById('modal-bg').classList.add('on');
 }
 
 // 직원 등록 모달
@@ -7888,8 +8004,12 @@ const STORE_ORIGIN = {
    매장 자체는 본사(소프트먼트)에서 생성, 직원만 사장님이 추가
    ============================================================ */
 const STAFF_GROUPS = [
-  { id:1, name:'사장', desc:'모든 기능을 쓸 수 있어요',                                                  readOnly:true,  perms:{ orders:true, sales:true, settle:true, menu:true, store:true, staff:true, refund:true } },
-  { id:2, name:'직원', desc:'주문 처리만 가능해요 · 매출·환불·정산은 볼 수 없어요',                       readOnly:false, perms:{ orders:true, sales:false, settle:false, menu:false, store:false, staff:false, refund:false } },
+  { id:1, name:'사장', desc:'모든 기능을 쓸 수 있어요',
+    readOnly:true,
+    perms:{ orders:true,    sales:true,  settle:true,  menu:true, store:true, staff:true,  refund:true } },
+  { id:2, name:'직원', desc:'주문(당일만)·매장 운영·메뉴 관리만 가능해요. 매출·정산·마케팅은 볼 수 없어요',
+    readOnly:false,
+    perms:{ orders:'today', sales:false, settle:false, menu:true, store:true, staff:false, refund:false } },
 ];
 const STAFF_LIST = [
   { id:1, loginId:'softcoffee_owner', name:'홍길동', phone:'010-1234-5678', email:'hong@softcoffee.com', groupId:1, useFrom:'', useTo:'',           enabled:'Y', regDate:'2024-08-15', isMe:true },

@@ -800,6 +800,22 @@
   .ot-strip{background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;color:#1e40af;}
   .ot-strip .now{display:flex;align-items:center;gap:8px;font-size:13px;}
   .ot-strip .now b{font-weight:800;}
+  /* 결제 한눈에 보기 — 채널별 결제 방식 요약 */
+  .ot-pay-summary{background:linear-gradient(135deg,#eff6ff 0%,#f5f3ff 100%);border:1px solid var(--blue-100);border-radius:14px;margin-bottom:18px;overflow:hidden;box-shadow:0 2px 10px rgba(49,130,246,.06);}
+  .ot-pay-summary .sum-head{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:rgba(255,255,255,.55);border-bottom:1px solid var(--blue-100);font-size:12px;color:#1e40af;font-weight:800;letter-spacing:.01em;}
+  .ot-pay-summary .sum-grid{display:grid;grid-template-columns:1fr;}
+  .ot-pay-summary .sum-grid.two{grid-template-columns:1fr 1fr;}
+  .ot-pay-summary .ch{padding:16px 22px;display:flex;flex-direction:column;gap:6px;}
+  .ot-pay-summary .ch + .ch{border-left:1px solid var(--blue-100);}
+  .ot-pay-summary .ch-head{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink-3);}
+  .ot-pay-summary .ch-policy{display:inline-flex;align-items:center;gap:8px;font-size:22px;font-weight:900;color:var(--ink);letter-spacing:-.02em;line-height:1.15;}
+  .ot-pay-summary .ch-policy.prepay{color:#1e40af;}
+  .ot-pay-summary .ch-policy.postpay{color:#9a3412;}
+  .ot-pay-summary .ch-policy .ic{font-size:22px;}
+  .ot-pay-summary .ch-scope{font-size:12px;color:var(--ink-3);line-height:1.5;}
+  /* 포장 결제 시점 — 컬러 배지 */
+  .ot-pay-fixed{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--blue-50);border:1.5px solid var(--blue-100);border-radius:10px;font-size:14px;font-weight:800;color:var(--blue);}
+  .ot-pay-fixed .ic{font-size:16px;}
   /* 주문 방식 — 채널 4종 카드 (단일 선택) */
   .ot-modes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
   .ot-mode{border:2px solid var(--line);border-radius:12px;padding:18px 14px;text-align:center;cursor:pointer;background:#fff;transition:all .12s;}
@@ -10101,16 +10117,36 @@ function renderOrderType(main){
       </div>
     </div>
 
-    <!-- 상단 — 현재 적용 중인 정책 -->
-    ${!menuOnly ? `
-      <div class="ot-strip">
-        <div class="now">
-          <span style="font-size:16px;">🕘</span>
-          <span>현재 ${hhmm} — <b>${cp.label} 적용 중</b> · ${cp.scope}</span>
+    <!-- 상단 — 채널별 결제 방식 한눈에 보기 -->
+    ${!menuOnly ? (() => {
+      const polIcon = (lbl) => lbl==='선결제' ? '💳' : '🧾';
+      const polCls  = (lbl) => lbl==='선결제' ? 'prepay' : 'postpay';
+      const dineInBlock = dineIn ? `
+        <div class="ch">
+          <div class="ch-head">🪑 매장 주문</div>
+          <div class="ch-policy ${polCls(cp.label)}"><span class="ic">${polIcon(cp.label)}</span>${cp.label}</div>
+          <div class="ch-scope">${cp.scope}${ch.payment==='scheduled'?' · 시간대별 자동':''}</div>
         </div>
-        ${dineIn && ch.payment==='scheduled' ? `<button class="btn-ghost" style="padding:6px 12px;font-size:12px;font-weight:700;background:#fff;" onclick="openOrderOverrideModal()">🔄 지금 강제 변경</button>` : ''}
-      </div>
-    ` : ''}
+      ` : '';
+      const takeoutBlock = takeout ? `
+        <div class="ch">
+          <div class="ch-head">🛍️ 포장 주문</div>
+          <div class="ch-policy prepay"><span class="ic">💳</span>선결제</div>
+          <div class="ch-scope">포장은 항상 선결제 · 고정</div>
+        </div>
+      ` : '';
+      return `
+        <div class="ot-pay-summary">
+          <div class="sum-head">
+            <span>💳 지금 받는 결제 방식 · ${hhmm} 기준</span>
+            ${dineIn && ch.payment==='scheduled' ? `<button class="btn-ghost" style="padding:5px 12px;font-size:11px;font-weight:700;background:#fff;" onclick="openOrderOverrideModal()">🔄 지금 강제 변경</button>` : ''}
+          </div>
+          <div class="sum-grid ${dineIn && takeout ? 'two' : ''}">
+            ${dineInBlock}${takeoutBlock}
+          </div>
+        </div>
+      `;
+    })() : ''}
 
     <!-- ① 주문 채널 4종 (단일 선택) -->
     <div class="panel">
@@ -10169,7 +10205,7 @@ function renderOrderType(main){
       <h3>포장 주문 설정 <span class="h-sub">포장 활성 시</span></h3>
       <div class="ot-row">
         <span class="lbl">결제 시점</span>
-        <span style="font-size:13px;font-weight:700;color:var(--ink);">선결제</span>
+        <span class="ot-pay-fixed"><span class="ic">💳</span>선결제 (고정)</span>
         <span style="font-size:11px;color:var(--ink-4);">포장은 항상 선결제로 진행돼요</span>
       </div>
       <div class="ot-row">

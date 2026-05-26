@@ -653,10 +653,10 @@
   .menu-card-actions button{padding:6px 10px;font-size:11px;font-weight:700;border:1px solid var(--line);background:#fff;border-radius:7px;cursor:pointer;color:var(--ink-2);transition:all .12s;white-space:nowrap;}
   .menu-card-actions button:hover{background:var(--bg-2);border-color:var(--blue-100);color:var(--blue);}
   /* 메뉴판 구성 — 좌측 작업 + 우측 폰 미리보기 레이아웃 */
-  .menu-layout{display:flex;gap:20px;align-items:flex-start;}
-  .menu-main{flex:1;min-width:0;overflow:hidden;}
+  .menu-layout{display:flex;gap:20px;align-items:flex-start;width:100%;max-width:100%;}
+  .menu-main{flex:1 1 0;min-width:0;max-width:100%;overflow:hidden;}
   /* 메뉴 표는 컬럼이 많아 좌측 폭을 넘으면 표 자체만 가로 스크롤 */
-  .menu-table-scroll{overflow-x:scroll;overflow-y:visible;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px;background:#fff;position:relative;}
+  .menu-table-scroll{width:100%;max-width:100%;box-sizing:border-box;overflow-x:scroll;overflow-y:visible;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px;background:#fff;position:relative;}
   .menu-table-scroll > table.t{min-width:1300px;margin:0;border:none;border-radius:0;}
   .menu-table-scroll::-webkit-scrollbar{height:12px;}
   .menu-table-scroll::-webkit-scrollbar-track{background:var(--bg-2);border-radius:6px;margin:0 4px;}

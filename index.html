@@ -4992,6 +4992,11 @@ function ensureMenuExtras(m){
 }
 // 포장가 표시용 — null이면 매장가와 동일
 function getTakeoutPrice(m){ return (m.takeoutPrice != null && m.takeoutPrice >= 0) ? m.takeoutPrice : m.price; }
+// 오늘의 준비량 — 메뉴 ID로 찾기 (메뉴판 관리 표·카드에서 잔여 수량 즉시 반영용)
+function getMenuStock(menuId){
+  if(typeof MENU_STOCK==='undefined' || !MENU_STOCK.items) return null;
+  return MENU_STOCK.items.find(it=>it.menuId===menuId && it.enabled) || null;
+}
 function ensureSetExtras(s){
   if (!s.schedule) s.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!s.discount) s.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
@@ -5671,7 +5676,15 @@ function renderMenuCardGrid(rows){
             <span onclick="event.stopPropagation();toggleSel('menuSel',${r.id})" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;border:2px solid ${isSel?'var(--blue)':'var(--ink-4)'};background:${isSel?'var(--blue)':'#fff'};color:#fff;font-weight:800;font-size:10px;cursor:pointer;flex-shrink:0;">${isSel?'✓':''}</span>
             <div class="menu-card-img">${r.img||'🍽️'}</div>
             <div class="menu-card-main">
-              <div class="menu-card-name">${r.name}</div>
+              <div class="menu-card-name">${r.name}${(()=>{
+                const st = getMenuStock(r.id);
+                if(!st) return '';
+                const isOut = st.remaining===0;
+                const isLow = !isOut && st.remaining<=st.lowAlert;
+                const color = isOut?'#b91c1c':isLow?'#d97706':'#15803d';
+                const bg    = isOut?'#fee2e2':isLow?'#fef3c7':'#dcfce7';
+                return ` <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:${bg};color:${color};margin-left:6px;vertical-align:middle;">📦 ${st.remaining}/${st.prepared}${st.unit}${isOut?' · 완료':isLow?' · 곧 품절':''}</span>`;
+              })()}</div>
               <div class="menu-card-desc">${r.desc||'<span style="color:var(--ink-4);">설명 없음</span>'}</div>
             </div>
             <div class="menu-card-meta">
@@ -5952,7 +5965,7 @@ function renderMenu(main){
             <th style="width:74px;">카테고리</th>
             <th class="num" style="width:106px;">매장 판매가</th>
             <th class="num" style="width:106px;">포장가 <span style="color:var(--ink-4);font-weight:400;font-size:10px;">(없으면 매장가)</span></th>
-            <th style="width:108px;">재고</th>
+            <th style="width:130px;">오늘 준비량 <span style="color:var(--ink-4);font-weight:400;font-size:10px;">남은/준비</span></th>
             <th style="width:120px;">판매 시간</th>
             <th>연결된 옵션</th>
             <th style="width:78px;">상태</th>
@@ -5993,7 +6006,22 @@ function renderMenu(main){
                 <td class="num">${r.takeoutPrice!=null&&r.takeoutPrice>=0
                   ? `<b style="color:#15803d;">${fmt(r.takeoutPrice)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>${r.takeoutPrice<r.price?`<div style="font-size:10px;color:#15803d;font-weight:700;margin-top:2px;">−${fmt(r.price-r.takeoutPrice)}원</div>`:''}`
                   : `<span style="color:var(--ink-4);font-size:12px;">매장가 동일</span>`}</td>
-                <td><span style="font-size:12px;color:${stockColor};font-weight:${r.stock!=null?700:400};">${stockTxt}</span></td>
+                <td>${(()=>{
+                  const st = getMenuStock(r.id);
+                  if(st){
+                    const isOut = st.remaining===0;
+                    const isLow = !isOut && st.remaining<=st.lowAlert;
+                    const color = isOut?'var(--red)':isLow?'#d97706':'var(--ink-2)';
+                    const bg = isOut?'#fef2f2':isLow?'#fffbeb':'transparent';
+                    const ratio = st.prepared>0?Math.round(st.remaining/st.prepared*100):0;
+                    return `<div style="display:flex;flex-direction:column;gap:3px;padding:4px 8px;border-radius:6px;background:${bg};">
+                      <div style="font-size:12px;font-weight:800;color:${color};">${st.remaining}<span style="font-weight:500;color:var(--ink-3);"> / ${st.prepared}${st.unit}</span></div>
+                      <div style="height:3px;background:#e5e7eb;border-radius:2px;overflow:hidden;"><div style="height:100%;background:${color};width:${ratio}%;"></div></div>
+                      ${isOut?'<div style="font-size:9px;color:var(--red);font-weight:700;">🔴 오늘 완료</div>':isLow?`<div style="font-size:9px;color:#d97706;font-weight:700;">⚠️ 곧 품절</div>`:''}
+                    </div>`;
+                  }
+                  return `<span style="font-size:12px;color:${stockColor};font-weight:${r.stock!=null?700:400};">${stockTxt}</span>`;
+                })()}</td>
                 <td><span style="font-size:11px;color:${r.schedule&&r.schedule.enabled?'var(--blue)':'var(--ink-3)'};font-weight:${r.schedule&&r.schedule.enabled?700:400};">${r.schedule&&r.schedule.enabled?'🕒 ':''}${schTxt}</span></td>
                 <td>${optsHtml}</td>
                 <td>${statusPill}</td>
@@ -7311,9 +7339,25 @@ function renderMenuEditModal(){
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">설명 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
         <textarea id="me-desc" class="input" placeholder="메뉴를 설명해 주세요. 손님 화면에 작은 글씨로 표시돼요." style="width:100%;min-height:80px;font-family:inherit;resize:vertical;padding:12px 14px;line-height:1.55;margin-bottom:14px;">${(f.desc||'').replace(/</g,'&lt;')}</textarea>
 
+        ${(()=>{
+          const st = getMenuStock(f.id);
+          if(!st) return `<div style="padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <span>📦 이 메뉴는 오늘의 준비량 관리를 안 하고 있어요.</span>
+            <button class="btn-ghost" style="padding:5px 10px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="closeModal();setSection('stock');">수량 관리 →</button>
+          </div>`;
+          const isOut = st.remaining===0;
+          const isLow = !isOut && st.remaining<=st.lowAlert;
+          const color = isOut?'#b91c1c':isLow?'#d97706':'#15803d';
+          const bg    = isOut?'#fef2f2':isLow?'#fffbeb':'#f0fdf4';
+          return `<div style="padding:12px 14px;background:${bg};border-radius:10px;font-size:12px;color:var(--ink-2);line-height:1.55;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <span>📦 <b style="color:${color};">오늘 ${st.remaining}/${st.prepared}${st.unit}</b> 남았어요${isOut?' · 오늘 판매 완료':isLow?' · 곧 품절':''}</span>
+            <button class="btn-ghost" style="padding:5px 10px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="closeModal();setSection('stock');">준비량 변경 →</button>
+          </div>`;
+        })()}
+
         <!-- 안내 -->
         <div style="padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;margin-bottom:18px;">
-          💡 옵션 그룹·재고·판매 시간·해피아워 같은 부가 설정은 표 우측 <b style="color:var(--ink-2);">관리 ▼</b> 버튼에서 변경할 수 있어요.
+          💡 옵션 그룹·판매 시간·해피아워 같은 부가 설정은 표 우측 <b style="color:var(--ink-2);">관리 ▼</b> 버튼에서 변경할 수 있어요.
         </div>
 
         <div style="display:flex;gap:8px;">
@@ -8199,9 +8243,10 @@ const MENU_STOCK = {
   // menuId 별 오늘 준비량 / 잔여 / 단위 / 알림 임계값
   // 분식·도시락 같은 한정 수량 운영용. 모든 메뉴가 다 등록될 필요는 없음
   items: [
-    { menuId:7, enabled:true,  prepared:100, remaining:73, unit:'인분', lowAlert:5, soldOutAlert:true, yesterdayPrep:100, yesterdaySold:95 },
-    { menuId:8, enabled:true,  prepared:50,  remaining:38, unit:'줄',   lowAlert:5, soldOutAlert:true, yesterdayPrep:50,  yesterdaySold:42 },
-    { menuId:9, enabled:true,  prepared:80,  remaining:3,  unit:'인분', lowAlert:5, soldOutAlert:true, yesterdayPrep:80,  yesterdaySold:78 },
+    // 매장 메뉴(MENUS id 7: 크로아상, 8: 치즈케이크, 9: 마들렌)에 맞춰 더미 데이터 매핑
+    { menuId:7, enabled:true,  prepared:30, remaining:18, unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:30, yesterdaySold:27 },
+    { menuId:8, enabled:true,  prepared:20, remaining:3,  unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:20, yesterdaySold:18 },
+    { menuId:9, enabled:true,  prepared:15, remaining:0,  unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:15, yesterdaySold:15 },
   ],
 };
 

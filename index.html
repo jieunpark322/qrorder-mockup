@@ -10174,30 +10174,7 @@ function renderOrderType(main){
     </div>
     ` : ''}
 
-    ${!menuOnly ? `
-    <!-- ⑤ 시뮬레이션 — 고객 경험 5단계 -->
-    <div class="panel">
-      <h3>지금 설정대로면 손님 경험은? <span class="h-sub">시뮬레이션 · 실시간 반영</span></h3>
-      <div class="ot-flow">
-        ${(()=>{
-          const qrLabel = dineIn ? (ch.service==='server'?'테이블별 QR':'공용 QR') : '포장 QR';
-          const menuLabel = ch.mode==='both'?'매장+포장':(ch.mode==='dine_in'?'매장 전용':'포장 전용');
-          const acceptLabel = (takeout && ch.reservation) ? '수락 필요' : '자동 접수';
-          let receipt;
-          if(ch.mode==='takeout') receipt = '픽업 호출';
-          else if(ch.service==='server') receipt = '직원 서빙';
-          else receipt = ch.notifications.length>0 ? ch.notifications.map(n=>ORDER_LABELS.notify[n]).join('+') : '미설정';
-          return [
-            ['📱','1. 스캔', qrLabel],
-            ['📋','2. 메뉴', menuLabel],
-            ['💳','3. 결제', cp.label],
-            ['🍳','4. 접수', acceptLabel],
-            ['🔔','5. 호출/수령', receipt],
-          ].map(([ic,l,v])=>`<div class="ot-step"><span class="ic">${ic}</span><span class="l">${l}</span><span class="v">${v}</span></div>`).join('');
-        })()}
-      </div>
-    </div>
-    ` : `<div class="panel"><h3>💡 메뉴판만 모드 안내</h3><div style="font-size:13px;color:var(--ink-2);line-height:1.65;">손님이 QR로 매장 메뉴만 볼 수 있어요. 결제·접수·호출은 모두 운영되지 않아요.</div></div>`}
+    ${menuOnly ? `<div class="panel"><h3>💡 메뉴판만 모드 안내</h3><div style="font-size:13px;color:var(--ink-2);line-height:1.65;">손님이 QR로 매장 메뉴만 볼 수 있어요. 결제·접수·호출은 모두 운영되지 않아요.</div></div>` : ''}
 
     <!-- 저장 바 -->
     <div class="ot-savebar">

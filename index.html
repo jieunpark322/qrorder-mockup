@@ -9486,6 +9486,20 @@ function updateOriginPreview(){
 /* ============================================================
    주문 방식 설정 페이지
    ============================================================ */
+// 테이블 주문 두 채널(직원 서빙 ↔ 손님 직접 수령)은 상호 배타적
+// 운영 방식이 정반대라 동시 운영 불가
+function toggleTableMode(which){
+  if(which==='serve'){
+    const v = !ORDER_CHANNELS.tableServe.enabled;
+    ORDER_CHANNELS.tableServe.enabled = v;
+    if(v && ORDER_CHANNELS.tableSelf.enabled){ ORDER_CHANNELS.tableSelf.enabled = false; }
+  } else {
+    const v = !ORDER_CHANNELS.tableSelf.enabled;
+    ORDER_CHANNELS.tableSelf.enabled = v;
+    if(v && ORDER_CHANNELS.tableServe.enabled){ ORDER_CHANNELS.tableServe.enabled = false; }
+  }
+  renderApp();
+}
 function renderOrderType(main){
   const ch = ORDER_CHANNELS;
   const anyOn = ch.tableServe.enabled || ch.tableSelf.enabled || ch.takeout.enabled || ch.pickup.enabled;
@@ -9508,6 +9522,12 @@ function renderOrderType(main){
       </div>
     ` : ''}
 
+    <!-- 테이블 주문 그룹 안내 -->
+    <div style="display:flex;gap:10px;align-items:center;padding:10px 16px;background:#f0f9ff;border:1px dashed #93c5fd;border-radius:10px;margin-bottom:8px;font-size:12px;color:#1e40af;font-weight:600;">
+      <span>💡</span>
+      <span>테이블 주문은 운영 방식이 정반대라 <b>① 직원 서빙</b>과 <b>② 손님 직접 수령</b> 중 <b>한 가지만 선택</b>할 수 있어요. 한쪽을 켜면 다른 쪽은 자동으로 꺼져요.</span>
+    </div>
+
     <!-- ① 테이블 주문 — 직원이 서빙 -->
     <div class="oc-card ${ch.tableServe.enabled?'on':''}">
       <div class="oc-head">
@@ -9516,7 +9536,7 @@ function renderOrderType(main){
           <div class="oc-title">테이블 주문 <span style="color:var(--ink-3);font-weight:500;font-size:12px;margin-left:4px;">직원이 서빙</span></div>
           <div class="oc-desc">손님이 QR로 주문하면 직원이 자리로 가져다 줘요</div>
         </div>
-        <label class="toggle-switch ${ch.tableServe.enabled?'on':''}" onclick="ORDER_CHANNELS.tableServe.enabled=!ORDER_CHANNELS.tableServe.enabled;renderApp()">
+        <label class="toggle-switch ${ch.tableServe.enabled?'on':''}" onclick="toggleTableMode('serve')">
           <span class="sw"></span>
         </label>
       </div>
@@ -9558,7 +9578,7 @@ function renderOrderType(main){
           <div class="oc-title">테이블 주문 <span style="color:var(--ink-3);font-weight:500;font-size:12px;margin-left:4px;">손님이 직접 수령</span></div>
           <div class="oc-desc">조리 완료 알림을 받으면 손님이 카운터로 가지러 와요</div>
         </div>
-        <label class="toggle-switch ${ch.tableSelf.enabled?'on':''}" onclick="ORDER_CHANNELS.tableSelf.enabled=!ORDER_CHANNELS.tableSelf.enabled;renderApp()">
+        <label class="toggle-switch ${ch.tableSelf.enabled?'on':''}" onclick="toggleTableMode('self')">
           <span class="sw"></span>
         </label>
       </div>

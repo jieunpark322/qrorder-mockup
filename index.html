@@ -188,6 +188,13 @@
   .pc-card.blue{background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border-color:var(--blue-100);}
   .pc-card.blue .label,.pc-card.blue .num{color:#1b64da;}
 
+  /* 하루 KPI 카드 — 매출 상세 보기 단일 일자 모드 */
+  .day-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:4px 0 12px;}
+  .day-kpi{padding:12px 14px;background:var(--bg-2);border:1px solid var(--line-2);border-radius:10px;}
+  .day-kpi .lbl{font-size:11px;color:var(--ink-3);font-weight:700;margin-bottom:6px;}
+  .day-kpi .val{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.01em;font-variant-numeric:tabular-nums;}
+  .day-kpi .sub{margin-top:3px;font-size:11px;color:var(--ink-3);}
+
   .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px;}
   .grid-3-2{display:grid;grid-template-columns:3fr 2fr;gap:14px;}
   .grid-2-eq{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -395,6 +402,13 @@
   .search-wrap .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
   .search-wrap .row + .row{margin-top:10px;}
   .search-wrap .field-label{font-size:12px;color:var(--ink-3);font-weight:700;width:72px;flex-shrink:0;}
+
+  /* 패널 내부 필터 (등록된 메뉴 안) */
+  .menu-panel-filters{padding:14px 16px;margin:6px 0 14px;background:var(--bg-2);border-radius:10px;border:1px solid var(--line-2);}
+  .menu-panel-filters .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .menu-panel-filters .row + .row{margin-top:10px;}
+  .menu-panel-filters .field-label{font-size:12px;color:var(--ink-3);font-weight:700;width:72px;flex-shrink:0;}
+  .menu-panel-filters .input{background:#fff;}
 
   /* Pagination + rows control */
   .table-footer{padding:12px 18px;border-top:1px solid var(--line-2);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-3);flex-wrap:wrap;gap:10px;}
@@ -2247,6 +2261,25 @@ function renderDetailPeriod(body){
   },{});
   const avgPrice = tot.ocnt ? Math.round(tot.actual / tot.ocnt) : 0;
 
+  // 단일 일자 모드 — 일간 또는 custom에서 시작일=종료일일 때
+  const isSingleDay =
+    state.detailGroup==='day' ||
+    (state.detailGroup==='custom' && state.customStart === state.customEnd) ||
+    rows.length === 1 && state.detailGroup!=='week' && state.detailGroup!=='month';
+
+  // 하루 시간대 분포 — 4주 평균을 그날 총매출에 비례 스케일링
+  let singleDayHourly = null, singleDayKpi = null;
+  if (isSingleDay && rows.length === 1){
+    const totAvg = HOUR_AVG.reduce((a,b)=>a+b.amt, 0);
+    const scale = totAvg ? (rows[0].gross / totAvg) : 1;
+    singleDayHourly = HOUR_AVG.map(h => ({ h:h.h, amt: Math.round(h.amt * scale) }));
+    const active = singleDayHourly.filter(h=>h.amt>0);
+    const peak  = active.length ? active.reduce((m,h)=> h.amt>m.amt?h:m, active[0]) : {h:'-',amt:0};
+    const quiet = active.length ? active.reduce((m,h)=> h.amt<m.amt?h:m, active[0]) : {h:'-',amt:0};
+    const avgPerHour = active.length ? Math.round(rows[0].gross / active.length) : 0;
+    singleDayKpi = { peak, quiet, avgPerHour, activeHours: active.length };
+  }
+
   // custom 모드 라벨/범위 계산
   let cCenter='', cStart='', cEnd='';
   if (state.detailGroup==='custom'){
@@ -2332,12 +2365,27 @@ function renderDetailPeriod(body){
       <div class="pc-card"><div class="label">순매출 <span class="tip"><span class="tip-i">i</span><span class="body">실매출에서 부가세를 뺀<br/>사장님 공급가액이에요</span></span></div><div class="num pos">${fmt(tot.net)}원</div><div class="sub">부가세 ${fmt(tot.vat)}원</div></div>
     </div>
 
-    <div class="panel">
-      <h3>${state.detailGroup==='day'?'일자별':state.detailGroup==='week'?'주별':state.detailGroup==='month'?'월별':'기간'} 매출 추이
-        <span class="h-act"><span class="unit-tag">단위 · 만 원</span></span>
-      </h3>
-      <div style="height:240px;"><canvas id="ch-detail-period"></canvas></div>
-    </div>
+    ${isSingleDay && singleDayKpi ? `
+      <div class="panel">
+        <h3>하루 흐름 한눈에 보기 <span class="h-sub">${rows[0].label} · 시간대별 매출 분포</span>
+          <span class="h-act"><span class="unit-tag">단위 · 만 원</span></span>
+        </h3>
+        <div class="day-kpi-grid">
+          <div class="day-kpi"><div class="lbl">⏰ 피크 시간</div><div class="val">${singleDayKpi.peak.h}시</div><div class="sub">${fmt(singleDayKpi.peak.amt)}원</div></div>
+          <div class="day-kpi"><div class="lbl">🌙 한산한 시간</div><div class="val">${singleDayKpi.quiet.h}시</div><div class="sub">${fmt(singleDayKpi.quiet.amt)}원</div></div>
+          <div class="day-kpi"><div class="lbl">📊 시간당 평균</div><div class="val">${fmt(singleDayKpi.avgPerHour)}원</div><div class="sub">${singleDayKpi.activeHours}시간 영업</div></div>
+          <div class="day-kpi"><div class="lbl">🧾 결제 건수</div><div class="val">${fmt(rows[0].ocnt)}건</div><div class="sub">건당 ${fmt(rows[0].ocnt?Math.round(rows[0].actual/rows[0].ocnt):0)}원</div></div>
+        </div>
+        <div style="height:200px;margin-top:6px;"><canvas id="ch-detail-period"></canvas></div>
+      </div>
+    ` : `
+      <div class="panel">
+        <h3>${state.detailGroup==='week'?'주별':state.detailGroup==='month'?'월별':'일자별'} 매출 추이
+          <span class="h-act"><span class="unit-tag">단위 · 만 원</span></span>
+        </h3>
+        <div style="height:240px;"><canvas id="ch-detail-period"></canvas></div>
+      </div>
+    `}
 
     <div class="panel tight">
       <h3>${state.detailGroup==='day'?'일자별':state.detailGroup==='week'?'주별':state.detailGroup==='month'?'월별':'기간별'} 상세
@@ -2414,7 +2462,57 @@ function renderDetailPeriod(body){
   `;
 
   // 차트 — line 타입 + 값 라벨로 가시성 강화 (50~60대 사장님 기준)
+  // 단일 일자 모드일 땐 시간대 분포 bar 차트로 교체
   const ctx = document.getElementById('ch-detail-period');
+  if (isSingleDay && singleDayHourly){
+    state.charts.period = new Chart(ctx, {
+      type:'bar',
+      data:{
+        labels: singleDayHourly.map(h => `${h.h}시`),
+        datasets:[{
+          label:'시간대별 매출',
+          data: singleDayHourly.map(h => h.amt),
+          backgroundColor: singleDayHourly.map(h => h.h===singleDayKpi.peak.h ? '#3182f6' : 'rgba(49,130,246,.35)'),
+          borderRadius:6,
+          borderSkipped:false,
+          maxBarThickness:22,
+        }]
+      },
+      options:{
+        maintainAspectRatio:false,
+        layout:{padding:{top:18, right:10, bottom:4, left:4}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            backgroundColor:'#191f28',
+            titleFont:{size:13,weight:'700'},
+            bodyFont:{size:13},
+            padding:12,
+            cornerRadius:8,
+            callbacks:{ title:c=>`${c[0].label}`, label:c=>` ${fmt(c.parsed.y)}원` }
+          }
+        },
+        scales:{
+          y:{
+            beginAtZero:true,
+            grid:{color:'#eceff2',lineWidth:1,drawTicks:false},
+            border:{display:false},
+            ticks:{
+              font:{size:12,weight:'600',family:'Pretendard'},
+              color:'#4e5968', padding:10, maxTicksLimit:5,
+              callback:v=>fmt(Math.round(v/10000))+'만'
+            }
+          },
+          x:{
+            grid:{display:false},
+            border:{color:'#e5e8eb',width:1},
+            ticks:{ font:{size:11,weight:'600',family:'Pretendard'}, color:'#4e5968', padding:6, autoSkip:false }
+          }
+        }
+      }
+    });
+    return; // 단일 일자는 여기서 종료
+  }
   const showValueLabels = rows.length <= 8;  // 데이터 많으면 라벨 생략 (겹침 방지)
   state.charts.period = new Chart(ctx, {
     type:'line',
@@ -5276,7 +5374,7 @@ function effectiveStatus(m){
 }
 function stockLeftLabel(m){
   ensureMenuExtras(m);
-  if (m.stock == null) return '∞ 무제한';
+  if (m.stock == null) return '제한 없음';
   const left = Math.max(0, m.stock - m.sold);
   if (left === 0) return '0개 (자동 품절)';
   if (left <= 3)  return `잔여 ${left}개`;
@@ -6050,7 +6148,6 @@ function renderMenu(main){
       <td>
         <select class="input" onchange="state.menuBulkRows[${idx}].status=this.value">
           <option ${(row.status||'판매중')==='판매중'?'selected':''}>판매중</option>
-          <option ${row.status==='품절'?'selected':''}>품절</option>
           <option ${row.status==='숨김'?'selected':''}>숨김</option>
         </select>
       </td>
@@ -6117,46 +6214,39 @@ function renderMenu(main){
       </div>
     </div>
 
-    <div class="search-wrap">
-      <div class="row">
-        <span class="field-label">카테고리</span>
-        <span class="chip ${state.menuCatFilter==='all'?'on':''}" onclick="state.menuCatFilter='all';renderApp()">전체</span>
-        ${CAT_MENU.map(c=>`<span class="chip ${state.menuCatFilter===c.name?'on':''}" onclick="state.menuCatFilter='${c.name}';renderApp()">${c.name} <span style="color:${state.menuCatFilter===c.name?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${MENUS.filter(m=>m.cat===c.name).length}</span></span>`).join('')}
-      </div>
-      <div class="row">
-        <span class="field-label">판매 상태</span>
-        <span class="chip ${state.menuStatusFilter==='all'?'on':''}" onclick="state.menuStatusFilter='all';renderApp()">전체</span>
-        <span class="chip ${state.menuStatusFilter==='판매중'?'on':''}" onclick="state.menuStatusFilter='판매중';renderApp()">판매중</span>
-        <span class="chip ${state.menuStatusFilter==='품절'?'on':''}" onclick="state.menuStatusFilter='품절';renderApp()">품절</span>
-        <span class="chip ${state.menuStatusFilter==='숨김'?'on':''}" onclick="state.menuStatusFilter='숨김';renderApp()">숨김</span>
-      </div>
-      <div class="row">
-        <span class="field-label">검색</span>
-        <input class="input" style="flex:1;max-width:320px;" placeholder="메뉴명·상품코드로 찾기" value="${state.menuSearch}" oninput="state.menuSearch=this.value" onchange="renderApp()" />
-      </div>
-    </div>
-
     <div class="panel tight menu-saved-panel">
       <h3>등록된 메뉴 <span class="h-sub">${rows.length}개${rows.length!==MENUS.length?` · 전체 ${MENUS.length}개 중`:''} · 행을 클릭하면 정보·가격을 수정할 수 있어요</span>
         <span class="h-act">
           ${state.menuSel.size>0 ? `
             <span style="font-size:12px;color:var(--blue);font-weight:700;">${state.menuSel.size}개 선택</span>
-            <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="duplicateSelectedMenus()">📋 복사</button>
+            <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="duplicateSelectedMenus()">📋 복제</button>
             <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="openBulkPriceModal()">💰 가격 조정</button>
             <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="openBulkCatModal()">🗂️ 카테고리 이동</button>
-            <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="bulkToggleSoldOut()">⛔ 품절 토글</button>
             <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);" onclick="bulkDeleteMenus()">✕ 삭제</button>
             <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="state.menuSel.clear();renderApp()">선택 해제</button>
-          ` : `
-            <div class="menu-view-toggle">
-              <div class="opt ${state.menuViewMode==='card'?'on':''}" onclick="state.menuViewMode='card';renderApp()" title="사진 위주 카드 보기">🖼️ 카드</div>
-              <div class="opt ${state.menuViewMode==='table'?'on':''}" onclick="state.menuViewMode='table';renderApp()" title="자세한 정보 표 보기">📋 표</div>
-            </div>
-          `}
+          ` : ''}
         </span>
       </h3>
-      ${state.menuViewMode==='card' ? renderMenuCardGrid(rows) : ''}
-      ${state.menuViewMode==='table' ? `
+
+      <div class="menu-panel-filters">
+        <div class="row">
+          <span class="field-label">카테고리</span>
+          <span class="chip ${state.menuCatFilter==='all'?'on':''}" onclick="state.menuCatFilter='all';renderApp()">전체</span>
+          ${CAT_MENU.map(c=>`<span class="chip ${state.menuCatFilter===c.name?'on':''}" onclick="state.menuCatFilter='${c.name}';renderApp()">${c.name} <span style="color:${state.menuCatFilter===c.name?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${MENUS.filter(m=>m.cat===c.name).length}</span></span>`).join('')}
+        </div>
+        <div class="row">
+          <span class="field-label">판매 상태</span>
+          <span class="chip ${state.menuStatusFilter==='all'?'on':''}" onclick="state.menuStatusFilter='all';renderApp()">전체</span>
+          <span class="chip ${state.menuStatusFilter==='판매중'?'on':''}" onclick="state.menuStatusFilter='판매중';renderApp()">판매중</span>
+          <span class="chip ${state.menuStatusFilter==='품절'?'on':''}" onclick="state.menuStatusFilter='품절';renderApp()">품절</span>
+          <span class="chip ${state.menuStatusFilter==='숨김'?'on':''}" onclick="state.menuStatusFilter='숨김';renderApp()">숨김</span>
+        </div>
+        <div class="row">
+          <span class="field-label">검색</span>
+          <input class="input" style="flex:1;max-width:320px;" placeholder="메뉴명·상품코드로 찾기" value="${state.menuSearch}" oninput="state.menuSearch=this.value" onchange="renderApp()" />
+        </div>
+      </div>
+
       <div class="menu-scroll-hint">↔️ 좌우로 스크롤해서 모든 정보를 확인할 수 있어요</div>
       <div class="menu-table-topscroll" id="menu-table-topscroll" onscroll="(function(t){var b=document.getElementById('menu-table-scroll');if(b&&b.scrollLeft!==t.scrollLeft)b.scrollLeft=t.scrollLeft;})(this)"><div style="height:1px;min-width:1300px;width:1300px;"></div></div>
       <div class="menu-table-scroll" id="menu-table-scroll" onscroll="(function(b){var t=document.getElementById('menu-table-topscroll');if(t&&t.scrollLeft!==b.scrollLeft)t.scrollLeft=b.scrollLeft;})(this)">
@@ -6230,7 +6320,6 @@ function renderMenu(main){
                 <td>${statusPill}</td>
                 <td onclick="event.stopPropagation()">
                   <div class="row-actions-wrap">
-                    <button class="btn-primary" style="padding:6px 10px;font-size:11px;font-weight:700;margin-right:4px;" onclick="openMenuEditModal(${r.id})">✏️ 수정</button>
                     <button class="btn-ghost" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="state.menuActionOpen=state.menuActionOpen===${r.id}?null:${r.id};renderApp()">⋯ ${state.menuActionOpen===r.id?'▲':'▼'}</button>
                     ${state.menuActionOpen===r.id ? `
                       <div class="row-actions-pop">
@@ -6238,7 +6327,7 @@ function renderMenu(main){
                         <button onclick="state.menuActionOpen=null;openOptLinkModal(${r.id})"><span class="ic-em">🧩</span>옵션 그룹 연결</button>
                         <button onclick="state.menuActionOpen=null;openScheduleModal('menu',${r.id})"><span class="ic-em">🕒</span>판매 시간</button>
                         <button onclick="state.menuActionOpen=null;openDiscountModal('menu',${r.id})"><span class="ic-em">🔥</span>해피아워 할인</button>
-                        <button onclick="state.menuActionOpen=null;duplicateMenu(${r.id})"><span class="ic-em">📋</span>복사하기</button>
+                        <button onclick="state.menuActionOpen=null;duplicateMenu(${r.id})"><span class="ic-em">📋</span>복제하기</button>
                         <button class="danger" onclick="state.menuActionOpen=null;deleteMenu(${r.id})"><span class="ic-em">✕</span>삭제</button>
                       </div>
                     ` : ''}
@@ -6250,7 +6339,6 @@ function renderMenu(main){
         </tbody>
       </table>
       </div>
-      ` : ''}
     </div>
 
     <div class="banner-info" style="margin-top:14px;">
@@ -7349,7 +7437,7 @@ function duplicateMenu(id){
   const src = MENUS.find(x=>x.id===id); if (!src) return;
   const nextId = (MENUS.reduce((m,r)=>Math.max(m,r.id),0))+1;
   const copy = JSON.parse(JSON.stringify(src));
-  copy.id = nextId; copy.code = genCode('M'); copy.name = src.name + ' (복사본)'; copy.sold = 0;
+  copy.id = nextId; copy.code = genCode('M'); copy.name = src.name + ' (복제본)'; copy.sold = 0;
   const idx = MENUS.indexOf(src);
   MENUS.splice(idx+1, 0, copy);
   renderApp();
@@ -7435,9 +7523,9 @@ function renderMenuEditModal(){
             <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">판매 상태</label>
             <select id="me-status" class="input" style="width:100%;">
               <option ${f.status==='판매중'?'selected':''}>판매중</option>
-              <option ${f.status==='품절'?'selected':''}>품절</option>
               <option ${f.status==='숨김'?'selected':''}>숨김</option>
             </select>
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;line-height:1.5;">품절은 <b style="color:var(--ink-3);cursor:pointer;" onclick="closeModal();setSection('stock');">오늘의 준비량</b>에서 설정할 수 있어요.</div>
           </div>
         </div>
 

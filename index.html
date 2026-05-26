@@ -5630,7 +5630,8 @@ function renderStock(main){
           ${otherMenus.length>0?`
             <button class="btn-ghost" style="padding:7px 14px;font-size:12px;" onclick="loadAllMenus()" title="아직 등록 안 한 메뉴를 한 번에 불러와요">📥 전체 메뉴 불러오기 (${otherMenus.length}개)</button>
             <button class="btn-primary" style="padding:7px 14px;font-size:12px;" onclick="openAddStockModal()">+ 메뉴 추가</button>
-          `:`<span style="font-size:11px;color:var(--ink-4);">등록된 메뉴 모두 관리 중</span>`}
+          `:''}
+          ${items.length>0?`<button class="btn-ghost" style="padding:7px 14px;font-size:12px;color:var(--red);" onclick="deleteAllStock()" title="등록된 메뉴 수량 관리를 모두 해제해요">✕ 전체 삭제</button>`:''}
         </span>
       </h3>
 
@@ -5733,6 +5734,14 @@ function loadAllMenus(){
   other.forEach(m => {
     MENU_STOCK.items.push({ menuId:m.id, enabled:true, prepared:0, remaining:0, unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:0, yesterdaySold:0 });
   });
+  renderApp();
+}
+// 등록된 모든 메뉴의 수량 관리를 한 번에 해제
+function deleteAllStock(){
+  const n = MENU_STOCK.items.length;
+  if(n===0){ alert('등록된 메뉴가 없어요.'); return; }
+  if(!confirm(`등록된 메뉴 ${n}개의 수량 관리를 모두 해제할까요?\n다시 불러오기 전까지 잔여 수량은 표시되지 않아요.`)) return;
+  MENU_STOCK.items.length = 0;
   renderApp();
 }
 function resetTodayStock(){

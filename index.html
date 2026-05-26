@@ -5951,7 +5951,7 @@ function renderMenuCardGrid(rows){
               <span class="menu-card-status ${statusCls}">${statusLbl}</span>
               <div class="menu-card-actions" onclick="event.stopPropagation()">
                 <button onclick="openMenuEditModal(${r.id})" style="background:var(--blue-50);color:var(--blue);border-color:var(--blue-100);" title="정보·가격 수정">✏️ 수정</button>
-                <button onclick="quickToggleSoldOut(${r.id})" style="${r.manualSoldOut?'background:#fee2e2;color:#b91c1c;border-color:#fecaca;':''}" title="${r.manualSoldOut?'품절 해제':'오늘 품절'}">${r.manualSoldOut?'✓ 품절 중':'🚫 품절'}</button>
+                <button onclick="quickToggleSoldOut(${r.id})" style="${r.manualSoldOut?'background:#fee2e2;color:#b91c1c;border-color:#fecaca;':''}" title="${r.manualSoldOut?'품절 해제':'오늘 품절'}">${r.manualSoldOut?'품절 해제':'품절'}</button>
                 <button onclick="if(confirm('${r.name} 메뉴를 삭제할까요?'))deleteMenu(${r.id})" style="color:var(--red);" title="삭제">✕</button>
               </div>
             </div>

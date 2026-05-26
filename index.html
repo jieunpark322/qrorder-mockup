@@ -825,7 +825,7 @@
   .ot-subsection-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
   .ot-subsection-title .sub{font-size:11px;font-weight:500;color:var(--ink-3);}
   /* 주문 방식 — 채널 4종 카드 (단일 선택) */
-  .ot-modes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .ot-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
   .ot-mode{border:2px solid var(--line);border-radius:12px;padding:18px 14px;text-align:center;cursor:pointer;background:#fff;transition:all .12s;}
   .ot-mode:hover{border-color:var(--blue-100);background:#f7faff;}
   .ot-mode.sel{border-color:var(--blue);background:var(--blue-50);box-shadow:0 4px 12px rgba(49,130,246,.18);}
@@ -865,8 +865,6 @@
   .ot-savebar .info{font-size:12px;color:var(--ink-4);}
   .ot-savebar .info.dirty{color:#d97706;font-weight:700;}
   .ot-savebar .actions{display:flex;gap:8px;}
-  /* 메뉴판만 모드 안내 */
-  .ot-menu-only{padding:24px;text-align:center;color:var(--ink-2);font-size:13px;background:var(--bg-2);border-radius:10px;margin-top:12px;line-height:1.65;}
   /* 주문 방식 — 세그먼트 (선불/후불) — 기존 잔존 */
   .oc-seg{display:inline-flex;background:var(--bg-2);padding:3px;border-radius:10px;gap:0;flex-shrink:0;}
   .oc-seg .opt{padding:8px 16px;font-size:13px;font-weight:700;color:var(--ink-3);border-radius:8px;cursor:pointer;transition:all .12s;}
@@ -1805,7 +1803,6 @@ function renderHome(main){
   const manualSoldOut = MENUS.filter(m=>{ ensureMenuExtras(m); return m.manualSoldOut; }).length;
   // 주문 방식 단일 선택 구조 — 현재 채널 모드 표시
   const modeKey = ORDER_CHANNELS.mode;
-  const channelsOn = modeKey === 'menu_only' ? 0 : 1;
   const modeLabel = (ORDER_LABELS && ORDER_LABELS.mode[modeKey]) || modeKey;
 
   main.innerHTML = `
@@ -1899,8 +1896,8 @@ function renderHome(main){
             <span style="font-size:13px;font-weight:700;color:var(--ink-2);">받는 주문 방식</span>
             <span style="margin-left:auto;font-size:11px;color:var(--blue);font-weight:700;">주문 방식 ›</span>
           </div>
-          <div style="font-size:18px;font-weight:800;color:${channelsOn>0?'var(--ink)':'var(--red)'};">${modeLabel}</div>
-          <div style="font-size:11px;color:${channelsOn===0?'var(--red)':'var(--ink-3)'};margin-top:4px;">${channelsOn===0?'⚠️ 손님은 메뉴만 볼 수 있어요':'클릭해서 채널·결제 정책 확인'}</div>
+          <div style="font-size:18px;font-weight:800;color:var(--ink);">${modeLabel}</div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:4px;">클릭해서 채널·결제 정책 확인</div>
         </div>
         <div onclick="setSection('stock')" style="padding:18px 20px;background:#fff;border:2px solid ${stockLow+stockOut>0?'#fbbf24':'var(--line)'};border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -8349,7 +8346,7 @@ const STORE_INFO = {
    ============================================================ */
 // 주문 방식 — 채널 단일 선택 + 시간대별 결제 정책 구조
 const ORDER_CHANNELS = {
-  mode: 'both',                    // menu_only | both | dine_in | takeout
+  mode: 'both',                    // both | dine_in | takeout (메뉴판만은 QR 관리의 '메뉴판 QR'로 분리)
   service: 'self',                 // server | self — 직원 서빙 vs 손님 셀프 수령 (시스템 자동 결정)
   notifications: ['kakao'],        // multi: call_name | kakao | display
   // 포장 설정
@@ -8365,8 +8362,8 @@ const ORDER_CHANNELS = {
   defaultPolicy: 'prepay',         // 미정 시간대 기본값
 };
 const ORDER_LABELS = {
-  mode: { menu_only:'메뉴판만', both:'매장 + 포장', dine_in:'매장 주문만', takeout:'포장 주문만' },
-  modeDesc: { menu_only:'전자 메뉴판 · 주문 없음', both:'매장 식사와 픽업 둘 다', dine_in:'테이블 취식 전용', takeout:'픽업 전용' },
+  mode: { both:'매장 + 포장', dine_in:'매장 주문만', takeout:'포장 주문만' },
+  modeDesc: { both:'매장 식사와 픽업 둘 다', dine_in:'테이블 취식 전용', takeout:'픽업 전용' },
   notify: { call_name:'호명', kakao:'알림톡', display:'전광판' },
 };
 
@@ -10078,7 +10075,6 @@ function ot_currentPolicy(){
   const ch = ORDER_CHANNELS;
   const dineIn = ch.mode==='both' || ch.mode==='dine_in';
   const takeout = ch.mode==='both' || ch.mode==='takeout';
-  if(ch.mode==='menu_only') return { label:'주문 없음', scope:'메뉴판 전용' };
   if(!dineIn && takeout) return { label:'선결제', scope:'포장 전용' };
   const now = new Date();
   const hhmm = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
@@ -10132,13 +10128,12 @@ function renderOrderType(main){
   const ch = ORDER_CHANNELS;
   const dineIn  = ch.mode==='both' || ch.mode==='dine_in';
   const takeout = ch.mode==='both' || ch.mode==='takeout';
-  const menuOnly = ch.mode==='menu_only';
   const cp = ot_currentPolicy();
   const now = new Date();
   const hhmm = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   const dirty = ot_isDirty();
-  const channelIcons = { menu_only:'📖', both:'🍽️🛍️', dine_in:'🪑', takeout:'🛍️' };
-  const channelDescs = { menu_only:'전자 메뉴판 · 주문 없음', both:'매장 식사와 픽업 둘 다', dine_in:'테이블 취식 전용', takeout:'픽업 전용' };
+  const channelIcons = { both:'🍽️🛍️', dine_in:'🪑', takeout:'🛍️' };
+  const channelDescs = { both:'매장 식사와 픽업 둘 다', dine_in:'테이블 취식 전용', takeout:'픽업 전용' };
   main.innerHTML = `
     <div class="crumb">주문 관리 › 주문 방식</div>
     <div class="toolbar">
@@ -10149,7 +10144,7 @@ function renderOrderType(main){
     </div>
 
     <!-- 상단 — 채널별 결제 방식 한눈에 보기 -->
-    ${!menuOnly ? (() => {
+    ${(() => {
       const polIcon = (lbl) => lbl==='선결제' ? '💳' : '🧾';
       const polCls  = (lbl) => lbl==='선결제' ? 'prepay' : 'postpay';
       const dineInBlock = dineIn ? `
@@ -10176,9 +10171,9 @@ function renderOrderType(main){
           </div>
         </div>
       `;
-    })() : ''}
+    })()}
 
-    <!-- ① 주문 채널 4종 (단일 선택) -->
+    <!-- ① 주문 채널 3종 (단일 선택) -->
     <div class="panel">
       <h3>주문 채널 <span class="h-sub">매장이 받을 주문 종류를 한 가지만 골라 주세요</span></h3>
       <div class="ot-modes">
@@ -10190,11 +10185,10 @@ function renderOrderType(main){
           </div>
         `).join('')}
       </div>
-      ${menuOnly ? `
-        <div class="ot-menu-only">
-          ℹ️ <b>메뉴판만</b> 모드에서는 손님이 메뉴를 볼 수만 있고 주문은 받지 않아요. 결제·주문 관련 설정은 자동으로 꺼져요.
-        </div>
-      ` : ''}
+      <div style="margin-top:12px;padding:10px 14px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;font-size:11px;color:#5b21b6;line-height:1.55;display:flex;gap:8px;align-items:flex-start;">
+        <span style="flex-shrink:0;">📖</span>
+        <span>주문 없이 메뉴만 보여주고 싶다면 <b style="cursor:pointer;text-decoration:underline;" onclick="setSection('qr')">QR 관리 → 메뉴판 QR</b>을 활용해 주세요.</span>
+      </div>
     </div>
 
     <!-- 매장 + 포장 설정 — 둘 다 활성이면 좌우 2단, 한쪽만 활성이면 1단 -->
@@ -10303,8 +10297,6 @@ function renderOrderType(main){
       ` : ''}
     </div>
     ` : ''}
-
-    ${menuOnly ? `<div class="panel"><h3>💡 메뉴판만 모드 안내</h3><div style="font-size:13px;color:var(--ink-2);line-height:1.65;">손님이 QR로 매장 메뉴만 볼 수 있어요. 결제·접수·호출은 모두 운영되지 않아요.</div></div>` : ''}
 
     <!-- 저장 바 -->
     <div class="ot-savebar">

@@ -490,6 +490,13 @@
   .mnav{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px;}
   /* QR 관리 — 4개 섹션 퀵 점프 탭 (페이지 내 스크롤) */
   .qr-quick-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+  /* 행 순서 드래그 — '≡' 손잡이 + 드래그 중 시각 피드백 */
+  .drag-handle{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;cursor:grab;color:var(--ink-3);border-radius:6px;font-size:18px;line-height:1;transition:background .12s,color .12s;user-select:none;font-weight:700;}
+  .drag-handle:hover{background:var(--bg-2);color:var(--ink-2);}
+  .drag-handle:active{cursor:grabbing;}
+  tr.drag-source{opacity:.4;}
+  tr.drag-over-top{box-shadow:inset 0 3px 0 0 var(--blue);}
+  tr.drag-over-bottom{box-shadow:inset 0 -3px 0 0 var(--blue);}
   .mnav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 12px;background:#fff;border:2px solid var(--line);border-radius:14px;cursor:pointer;transition:border-color .15s,background .15s,transform .12s,box-shadow .15s;text-align:center;position:relative;user-select:none;}
   .mnav-tab:hover{border-color:var(--blue-100);background:#f7faff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.04);}
   .mnav-tab.on{background:var(--blue);border-color:var(--blue);box-shadow:0 6px 18px rgba(49,130,246,.28);transform:translateY(-1px);}
@@ -5166,12 +5173,6 @@ function ensureCatExtras(c){
   if (typeof c.displayMode === 'undefined') c.displayMode = 'grid'; // 'grid' | 'list'
   if (typeof c.paused === 'undefined')     c.paused = false;
 }
-// 정렬 헬퍼 — 배열 안에서 idx의 항목을 dir(-1 위/+1 아래)로 이동
-function moveItem(arr, idx, dir){
-  const ni = idx + dir;
-  if (ni < 0 || ni >= arr.length) return;
-  const t = arr[idx]; arr[idx] = arr[ni]; arr[ni] = t;
-}
 // 일괄 선택 도구 — 체크박스 td 생성
 function selCheckTd(sel, id){
   const on = sel.has(id);
@@ -5189,12 +5190,70 @@ function toggleSelAll(selKey, ids){
   else ids.forEach(id=>s.add(id));
   renderApp();
 }
-// ▲▼ 정렬 버튼 td
-function sortButtonsTd(arr, idx){
-  return `<td style="width:50px;white-space:nowrap;">
-    <button class="btn-ghost" style="padding:4px 6px;font-size:11px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(${arr === MENUS ? 'MENUS' : arr === OPT_GROUPS ? 'OPT_GROUPS' : arr === SETS ? 'SETS' : 'CAT_MENU'}, ${idx}, -1);renderApp()" title="위로">▲</button>
-    <button class="btn-ghost" style="padding:4px 6px;font-size:11px;${idx===arr.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(${arr === MENUS ? 'MENUS' : arr === OPT_GROUPS ? 'OPT_GROUPS' : arr === SETS ? 'SETS' : 'CAT_MENU'}, ${idx}, 1);renderApp()" title="아래로">▼</button>
-  </td>`;
+// 행 순서 드래그 — '≡' 손잡이 + HTML5 drag-and-drop
+let _dragSrc = null; // { arrName, idx }
+function dragHandleTd(arrName, idx, num){
+  const numHtml = num != null ? `<b style="margin-right:6px;color:var(--ink-3);font-variant-numeric:tabular-nums;">${num}</b>` : '';
+  return `<td style="white-space:nowrap;">${numHtml}<span class="drag-handle" title="끌어서 순서 바꾸기">≡</span></td>`;
+}
+function dragRowAttrs(arrName, idx){
+  return `draggable="true"
+    ondragstart="dragRowStart(event,'${arrName}',${idx})"
+    ondragover="dragRowOver(event,'${arrName}',${idx})"
+    ondragleave="dragRowLeave(event)"
+    ondrop="dragRowDrop(event,'${arrName}',${idx})"
+    ondragend="dragRowEnd()"`;
+}
+function _getArrByName(name){
+  return ({ MENUS, OPT_GROUPS, SETS, CAT_MENU })[name];
+}
+function dragRowStart(ev, arrName, idx){
+  _dragSrc = { arrName, idx };
+  ev.dataTransfer.effectAllowed = 'move';
+  try { ev.dataTransfer.setData('text/plain', arrName+':'+idx); } catch(e){}
+  ev.currentTarget.classList.add('drag-source');
+}
+function dragRowOver(ev, arrName, idx){
+  if(!_dragSrc || _dragSrc.arrName !== arrName) return;
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'move';
+  const tr = ev.currentTarget;
+  const rect = tr.getBoundingClientRect();
+  const above = ev.clientY < rect.top + rect.height/2;
+  document.querySelectorAll('tr.drag-over-top, tr.drag-over-bottom').forEach(r=>r.classList.remove('drag-over-top','drag-over-bottom'));
+  tr.classList.add(above ? 'drag-over-top' : 'drag-over-bottom');
+}
+function dragRowLeave(ev){
+  // 행에서 완전히 벗어났을 때만 인디케이터 제거
+  if(ev.currentTarget.contains(ev.relatedTarget)) return;
+  ev.currentTarget.classList.remove('drag-over-top','drag-over-bottom');
+}
+function dragRowDrop(ev, arrName, idx){
+  if(!_dragSrc || _dragSrc.arrName !== arrName){ dragRowEnd(); return; }
+  ev.preventDefault();
+  const arr = _getArrByName(arrName);
+  if(!arr){ dragRowEnd(); return; }
+  const srcIdx = _dragSrc.idx;
+  let dstIdx = idx;
+  const tr = ev.currentTarget;
+  const rect = tr.getBoundingClientRect();
+  const above = ev.clientY < rect.top + rect.height/2;
+  if(!above) dstIdx = dstIdx + 1;
+  if(srcIdx === dstIdx || srcIdx === dstIdx - 1 && !above && false){
+    // 자기 자신 위치 — 무동작
+  }
+  if(srcIdx !== dstIdx){
+    const [moved] = arr.splice(srcIdx, 1);
+    if(srcIdx < dstIdx) dstIdx--;
+    arr.splice(dstIdx, 0, moved);
+  }
+  _dragSrc = null;
+  document.querySelectorAll('tr.drag-source, tr.drag-over-top, tr.drag-over-bottom').forEach(r=>r.classList.remove('drag-source','drag-over-top','drag-over-bottom'));
+  renderApp();
+}
+function dragRowEnd(){
+  document.querySelectorAll('tr.drag-source, tr.drag-over-top, tr.drag-over-bottom').forEach(r=>r.classList.remove('drag-source','drag-over-top','drag-over-bottom'));
+  _dragSrc = null;
 }
 function effectiveStatus(m){
   ensureMenuExtras(m);
@@ -6205,12 +6264,9 @@ function renderMenu(main){
               : `<b>${fmt(r.price)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>`;
             const isSel = state.menuSel.has(r.id);
             return `
-              <tr style="${isSel?'background:var(--blue-50);':''}cursor:pointer;" onclick="openMenuEditModal(${r.id})" title="행을 클릭하면 정보를 수정할 수 있어요">
+              <tr ${dragRowAttrs('MENUS', idx)} style="${isSel?'background:var(--blue-50);':''}cursor:pointer;" onclick="openMenuEditModal(${r.id})" title="행을 클릭하면 정보를 수정할 수 있어요">
                 <td onclick="event.stopPropagation()">${selCheckTd(state.menuSel, r.id).replace(/^<td[^>]*>/,'').replace(/<\/td>$/,'')}</td>
-                <td style="white-space:nowrap;" onclick="event.stopPropagation()">
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(MENUS, ${idx}, -1);renderApp()" title="위로">▲</button>
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===MENUS.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(MENUS, ${idx}, 1);renderApp()" title="아래로">▼</button>
-                </td>
+                ${dragHandleTd('MENUS', idx)}
                 <td><div style="width:36px;height:36px;border-radius:8px;background:var(--bg-2);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;">${r.img?menuImgHtml(r.img,36,8):'<span style="font-size:11px;color:var(--ink-4);">없음</span>'}</div></td>
                 <td style="font-family:ui-monospace,'SF Mono',monospace;color:var(--ink-2);font-size:11px;">${r.code}</td>
                 <td><b>${r.name}</b>${r.maxQty?`<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:1px 6px;border-radius:8px;vertical-align:middle;" title="1회 주문 최대 ${r.maxQty}개">최대 ${r.maxQty}개</span>`:''}${r.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${r.desc}</div>`:''}</td>
@@ -6461,12 +6517,9 @@ function renderOption(main){
             }).join('');
             const isSel = state.optSel.has(g.id);
             return `
-              <tr${isSel?` style="background:var(--blue-50);"`:''}>
+              <tr ${dragRowAttrs('OPT_GROUPS', idx)}${isSel?` style="background:var(--blue-50);"`:''}>
                 ${selCheckTd(state.optSel, g.id)}
-                <td style="white-space:nowrap;">
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(OPT_GROUPS, ${idx}, -1);renderApp()" title="위로">▲</button>
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===OPT_GROUPS.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(OPT_GROUPS, ${idx}, 1);renderApp()" title="아래로">▼</button>
-                </td>
+                ${dragHandleTd('OPT_GROUPS', idx)}
                 <td style="font-family:ui-monospace,'SF Mono',monospace;color:var(--ink-2);font-size:12px;">${g.code}</td>
                 <td><b>${g.name}</b></td>
                 <td>
@@ -6607,12 +6660,8 @@ function renderCategory(main){
             const chips = itemsInCat.map(x=>`<span class="chip" style="font-size:11px;padding:3px 8px;cursor:default;margin:1px;">${x.name}</span>`).join('');
             const schTxt = scheduleLabel(c.schedule);
             return `
-              <tr${c.paused?` style="background:#fff7f7;opacity:.7;"`:''}>
-                <td style="white-space:nowrap;">
-                  <b style="margin-right:4px;">${idx+1}</b>
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(CAT_MENU, ${idx}, -1);renderApp()" title="위로">▲</button>
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===CAT_MENU.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(CAT_MENU, ${idx}, 1);renderApp()" title="아래로">▼</button>
-                </td>
+              <tr ${dragRowAttrs('CAT_MENU', idx)}${c.paused?` style="background:#fff7f7;opacity:.7;"`:''}>
+                ${dragHandleTd('CAT_MENU', idx, idx+1)}
                 <td><b>${c.name}</b></td>
                 <td>
                   <div style="display:inline-flex;background:var(--bg-2);border-radius:8px;padding:2px;">
@@ -6820,12 +6869,9 @@ function renderSet(main){
             const dcTxt = discountLabel(s.discount);
             const isSel = state.setSel.has(s.id);
             return `
-              <tr${isSel?` style="background:var(--blue-50);"`:''}>
+              <tr ${dragRowAttrs('SETS', idx)}${isSel?` style="background:var(--blue-50);"`:''}>
                 ${selCheckTd(state.setSel, s.id)}
-                <td style="white-space:nowrap;">
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(SETS, ${idx}, -1);renderApp()" title="위로">▲</button>
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===SETS.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(SETS, ${idx}, 1);renderApp()" title="아래로">▼</button>
-                </td>
+                ${dragHandleTd('SETS', idx)}
                 <td style="font-family:ui-monospace,'SF Mono',monospace;color:var(--ink-2);font-size:12px;">${s.code}</td>
                 <td><b>${s.name}</b>${s.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${s.desc}</div>`:''}${dcTxt?`<div style="font-size:10px;color:var(--blue);font-weight:700;margin-top:3px;">🔥 ${dcTxt}</div>`:''}</td>
                 <td>${slotList||'<span style="color:var(--ink-4);font-size:11px;">자리 없음</span>'}</td>

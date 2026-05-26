@@ -655,7 +655,9 @@
   /* 메뉴판 구성 — 좌측 작업 + 우측 폰 미리보기 레이아웃 */
   .menu-layout{display:flex;gap:20px;align-items:flex-start;}
   .menu-main{flex:1;min-width:0;}
-  .menu-preview-side{width:360px;flex-shrink:0;position:sticky;top:20px;display:flex;flex-direction:column;gap:12px;}
+  .menu-preview-side{width:360px;flex-shrink:0;position:sticky;top:20px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .menu-preview-side > *{width:100%;}
+  .menu-preview-side .qrp-phone{width:300px;align-self:center;}
   .menu-preview-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px;}
   .menu-preview-head .ttl{font-size:14px;font-weight:800;color:var(--ink);}
   .menu-preview-head .sub{font-size:11px;color:var(--ink-4);margin-top:2px;font-weight:500;}

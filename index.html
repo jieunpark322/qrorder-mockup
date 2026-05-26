@@ -770,6 +770,25 @@
   .stk-badge.low{background:#fef3c7;color:#92400e;}
   .stk-badge.out{background:#fee2e2;color:#b91c1c;}
   .stk-badge.ok{background:#dcfce7;color:#15803d;}
+
+  /* 오늘 품절 처리 — 수량 관리 없는 메뉴 빠른 토글 카드 */
+  .qso-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:6px;}
+  .qso-card{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s;user-select:none;}
+  .qso-card:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(49,130,246,.08);}
+  .qso-card.on{background:#fef2f2;border-color:#fca5a5;}
+  .qso-card.on:hover{border-color:var(--red);box-shadow:0 2px 8px rgba(239,68,68,.10);}
+  .qso-icon{width:32px;height:32px;border-radius:8px;background:var(--bg-2);display:inline-flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;}
+  .qso-card.on .qso-icon{opacity:.55;filter:grayscale(.4);}
+  .qso-info{flex:1;min-width:0;}
+  .qso-name{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .qso-card.on .qso-name{color:#7f1d1d;}
+  .qso-status{font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .qso-card.on .qso-status{color:#b91c1c;font-weight:600;}
+  .qso-sw{width:38px;height:22px;background:#d1d5db;border-radius:11px;position:relative;transition:background .15s;flex-shrink:0;}
+  .qso-sw::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.18);}
+  .qso-sw.on{background:var(--red);}
+  .qso-sw.on::after{transform:translateX(16px);}
+
   /* QR 메뉴판 — 모바일 미리보기 */
   .qrp-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 0;}
   .qrp-phone{width:300px;border:11px solid #1a1a1a;border-radius:36px;overflow:hidden;background:#1a1a1a;box-shadow:0 20px 50px rgba(0,0,0,.18),0 8px 20px rgba(0,0,0,.08);position:relative;}
@@ -5091,7 +5110,7 @@ state.setSel     = new Set();
 state.menuBulkOpen = false;
 state.optBulkOpen  = false;
 
-// 메뉴 표 행별 액션 메뉴 펼침 (관리 ▼)
+// 메뉴 표 행별 액션 메뉴 펼침 (추가 설정 ▼)
 state.menuActionOpen = null; // menu id
 // 영역 도구 더보기 펼침
 state.mmMoreOpen = false;
@@ -5804,17 +5823,16 @@ function renderStock(main){
   const outCnt = items.filter(it=>it.remaining===0).length;
   // 잠재 추가 대상 — 아직 수량 관리 안 하는 메뉴
   const otherMenus = MENUS.filter(m=>!MENU_STOCK.items.some(it=>it.menuId===m.id));
+  // 수량 관리 없는 메뉴 중 '오늘만 품절' 토글로 막아둔 메뉴
+  otherMenus.forEach(m=>ensureMenuExtras(m));
+  const manualOutCnt = otherMenus.filter(m=>m.manualSoldOut).length;
 
   main.innerHTML = `
     <div class="crumb">메뉴 관리 › 오늘의 준비량</div>
     <div class="toolbar">
       <div>
         <h2>오늘의 준비량</h2>
-        <div class="page-sub">한정 수량으로 파는 메뉴를 등록해요. 주문이 들어오면 자동으로 차감되고, 다 팔리면 손님 화면에 품절로 표시돼요.</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn-ghost" onclick="copyYesterdayStock()" title="어제 준비한 양 그대로 가져와요">📋 어제와 같이</button>
-        <button class="btn-ghost" onclick="if(confirm('오늘 준비량을 모두 0으로 초기화할까요?'))resetTodayStock()">↺ 모두 비우기</button>
+        <div class="page-sub">한정 수량은 <b style="color:var(--ink-2);">수량 관리</b>로 자동 차감하고, 잠시 안 팔 메뉴는 <b style="color:var(--ink-2);">오늘 품절 처리</b>로 빠르게 막을 수 있어요.</div>
       </div>
     </div>
 
@@ -5835,6 +5853,10 @@ function renderStock(main){
       <div style="flex:1;min-width:140px;padding:12px 16px;background:${outCnt>0?'#fef2f2':'#fff'};border:1px solid ${outCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
         <div style="font-size:11px;color:${outCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 판매 완료</div>
         <div style="font-size:15px;font-weight:800;color:${outCnt>0?'#b91c1c':'var(--ink)'};">${outCnt}개</div>
+      </div>
+      <div style="flex:1;min-width:140px;padding:12px 16px;background:${manualOutCnt>0?'#fef2f2':'#fff'};border:1px solid ${manualOutCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
+        <div style="font-size:11px;color:${manualOutCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 품절 처리</div>
+        <div style="font-size:15px;font-weight:800;color:${manualOutCnt>0?'#b91c1c':'var(--ink)'};">${manualOutCnt}개</div>
       </div>
     </div>
 
@@ -5899,12 +5921,34 @@ function renderStock(main){
       }).join('')}
     </div>
 
+    <!-- 오늘 품절 처리 — 수량 관리 안 하는 메뉴를 오늘만 잠시 막기 -->
+    ${otherMenus.length>0 ? `
+      <div class="panel" style="margin-top:14px;">
+        <h3>오늘 품절 처리
+          <span class="h-sub">수량 관리는 안 하지만 오늘만 잠깐 안 팔 메뉴를 표시할 수 있어요${manualOutCnt>0?` · 현재 <b style="color:var(--red);">${manualOutCnt}개</b> 품절 중`:''}</span>
+          ${manualOutCnt>0?`<span class="h-act"><button class="btn-ghost" style="padding:6px 12px;font-size:11px;color:var(--red);" onclick="clearAllManualSoldOut()">↺ 품절 모두 해제</button></span>`:''}
+        </h3>
+        <div class="qso-grid">
+          ${otherMenus.map(m=>`
+            <div class="qso-card ${m.manualSoldOut?'on':''}" onclick="quickToggleSoldOut(${m.id})" title="${m.manualSoldOut?'품절 해제하기':'오늘만 품절 처리하기'}">
+              <span class="qso-icon">${m.img?menuImgHtml(m.img, 32, 8):'🍽️'}</span>
+              <div class="qso-info">
+                <div class="qso-name">${m.name}</div>
+                <div class="qso-status">${m.manualSoldOut?'🔴 오늘 품절 중':'✓ 판매 중'} · ${m.cat||'미분류'}</div>
+              </div>
+              <span class="qso-sw ${m.manualSoldOut?'on':''}"></span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+
     <!-- 안내 -->
     <div style="margin-top:8px;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;">
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <span style="font-size:16px;flex-shrink:0;">💡</span>
         <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
-          <b>주문이 들어올 때마다 자동으로 1씩 차감</b>돼요. <b>0이 되면 즉시 손님 화면에 품절</b>로 바뀌고, 5개 이하로 떨어지면 알림을 보내 드려요. 추가로 만드시면 위의 <b>+ 버튼</b>이나 숫자를 직접 고쳐 주세요.
+          <b>수량 관리</b>는 주문이 들어올 때마다 자동으로 1씩 차감되고, 0이 되면 손님 화면에 품절로 바뀌어요. <b>오늘 품절 처리</b>는 수량 관리 없이 메뉴 하나를 오늘만 잠시 숨기고 싶을 때 쓰세요. 둘 다 영업 종료 후 자동으로 초기화돼요.
         </div>
       </div>
     </div>
@@ -5934,6 +5978,13 @@ function removeStock(menuId){
   if(!confirm(`${m?.name||'이 메뉴'}의 수량 관리를 해제할까요? 다시 등록하기 전까지는 잔여 수량이 표시되지 않아요.`)) return;
   const idx = MENU_STOCK.items.findIndex(x=>x.menuId===menuId);
   if(idx>=0) MENU_STOCK.items.splice(idx,1);
+  renderApp();
+}
+function clearAllManualSoldOut(){
+  const targets = MENUS.filter(m=>{ ensureMenuExtras(m); return m.manualSoldOut; });
+  if(targets.length===0){ alert('오늘 품절 처리된 메뉴가 없어요.'); return; }
+  if(!confirm(`품절 처리된 메뉴 ${targets.length}개를 모두 판매 중으로 되돌릴까요?`)) return;
+  targets.forEach(m=>{ m.manualSoldOut = false; });
   renderApp();
 }
 function copyYesterdayStock(){
@@ -6320,7 +6371,7 @@ function renderMenu(main){
                 <td>${statusPill}</td>
                 <td onclick="event.stopPropagation()">
                   <div class="row-actions-wrap">
-                    <button class="btn-ghost" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="state.menuActionOpen=state.menuActionOpen===${r.id}?null:${r.id};renderApp()">⋯ ${state.menuActionOpen===r.id?'▲':'▼'}</button>
+                    <button class="btn-ghost" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="state.menuActionOpen=state.menuActionOpen===${r.id}?null:${r.id};renderApp()">추가 설정 ${state.menuActionOpen===r.id?'▲':'▼'}</button>
                     ${state.menuActionOpen===r.id ? `
                       <div class="row-actions-pop">
                         <button onclick="state.menuActionOpen=null;openMenuEditModal(${r.id})"><span class="ic-em">✏️</span>메뉴 정보·가격 수정</button>
@@ -7560,7 +7611,7 @@ function renderMenuEditModal(){
 
         <!-- 안내 -->
         <div style="padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;margin-bottom:18px;">
-          💡 옵션 그룹·판매 시간·해피아워 같은 부가 설정은 표 우측 <b style="color:var(--ink-2);">관리 ▼</b> 버튼에서 변경할 수 있어요.
+          💡 옵션 그룹·판매 시간·해피아워 같은 부가 설정은 표 우측 <b style="color:var(--ink-2);">추가 설정 ▼</b> 버튼에서 변경할 수 있어요.
         </div>
 
         <div style="display:flex;gap:8px;">

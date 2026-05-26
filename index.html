@@ -381,6 +381,14 @@
   .btn-ghost:hover{border-color:var(--ink-4);color:var(--ink);}
   .btn-danger{padding:10px 22px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;}
   .btn-danger:hover{background:#d83849;}
+  /* 저장 강조 CTA — 페이지 단위 저장 버튼이 한눈에 띄도록 초록 + 그림자, 미저장 변경 시 펄스 */
+  .btn-save-cta{padding:10px 22px;background:#10b981;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;transition:background .15s,box-shadow .15s,transform .12s;box-shadow:0 4px 12px rgba(16,185,129,.32);}
+  .btn-save-cta:hover{background:#059669;box-shadow:0 6px 18px rgba(16,185,129,.45);transform:translateY(-1px);}
+  .btn-save-cta.pulse{animation:save-pulse 1.6s ease-in-out infinite;}
+  @keyframes save-pulse{
+    0%,100%{box-shadow:0 4px 12px rgba(16,185,129,.32);}
+    50%{box-shadow:0 6px 22px rgba(16,185,129,.6);}
+  }
 
   /* Search wrap */
   .search-wrap{padding:18px 20px;background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:14px;}
@@ -6179,7 +6187,7 @@ function renderMenu(main){
           <div class="right">
             <span class="bulk-info">${state.menuBulkRows.length}개 행</span>
             <button class="btn-ghost" onclick="state.menuBulkRows=[];renderApp()">행 비우기</button>
-            <button class="btn-primary" onclick="saveMenuBulk()">💾 입력한 메뉴 한 번에 저장</button>
+            <button class="btn-save-cta" onclick="saveMenuBulk()">💾 입력한 메뉴 한 번에 저장</button>
           </div>
         </div>
         <div class="hint" style="margin-top:10px;font-size:12px;color:var(--ink-3);line-height:1.55;">
@@ -6478,7 +6486,7 @@ function renderOption(main){
           <div class="right">
             <span class="bulk-info">${state.optBulkCards.length}개 그룹 · 항목 ${state.optBulkCards.reduce((s,c)=>s+c.items.length,0)}개</span>
             <button class="btn-ghost" onclick="state.optBulkCards=[];renderApp()">비우기</button>
-            <button class="btn-primary" onclick="saveOptBulk()">💾 여러 개 한 번에 저장</button>
+            <button class="btn-save-cta" onclick="saveOptBulk()">💾 여러 개 한 번에 저장</button>
           </div>
         </div>
         <div class="hint" style="margin-top:10px;font-size:12px;color:var(--ink-3);line-height:1.55;">
@@ -6830,7 +6838,7 @@ function renderSet(main){
       <div class="bulk-actions" style="margin-top:14px;">
         <button class="btn-ghost" onclick="clearSetForm()">입력 초기화</button>
         <div class="right">
-          <button class="btn-primary" onclick="saveSet()">💾 세트 등록</button>
+          <button class="btn-save-cta" onclick="saveSet()">💾 세트 등록</button>
         </div>
       </div>
 
@@ -7569,7 +7577,7 @@ function renderMenuEditModal(){
 
         <div style="display:flex;gap:8px;">
           <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
-          <button class="btn-primary" style="flex:2;" onclick="saveMenuEdit()">💾 저장</button>
+          <button class="btn-save-cta" style="flex:2;" onclick="saveMenuEdit()">💾 저장</button>
         </div>
       </div>
     </div>
@@ -8777,8 +8785,8 @@ function renderTable(main){
           ${isOpen ? '영업 중' : '영업 마감'}
         </button>
         <button class="btn-ghost" onclick="addTable()">+ 테이블 추가</button>
-        <button id="table-save-btn" class="${pendingCnt>0?'btn-primary':'btn-ghost'}" onclick="saveTableLayout()">
-          ${pendingCnt>0 ? `저장 (${pendingCnt}건 변경)` : '저장'}
+        <button id="table-save-btn" class="${pendingCnt>0?'btn-save-cta pulse':'btn-ghost'}" onclick="saveTableLayout()">
+          ${pendingCnt>0 ? `💾 저장 (${pendingCnt}건 변경)` : '저장'}
         </button>
       </div>
     </div>
@@ -9329,7 +9337,7 @@ function renderStore(main){
         <div class="page-sub">매장 정보·영업시간·휴무일을 관리해요.</div>
       </div>
       <div class="left">
-        <button class="btn-primary" onclick="alert('변경사항이 저장됐어요 (와이어프레임)');">저장</button>
+        <button class="btn-save-cta" onclick="alert('변경사항이 저장됐어요 (와이어프레임)');">💾 저장</button>
       </div>
     </div>
 
@@ -10345,7 +10353,7 @@ function renderOrderType(main){
       <span class="info ${dirty?'dirty':''}">${dirty?'⚠️ 저장하지 않은 변경 사항이 있어요':'변경된 내용 없음'}</span>
       <div class="actions">
         <button class="btn-ghost" onclick="resetOrderType()">↺ 초기화</button>
-        <button class="btn-primary" onclick="saveOrderType()">💾 변경 사항 저장</button>
+        <button class="${dirty?'btn-save-cta pulse':'btn-ghost'}" onclick="saveOrderType()">💾 변경 사항 저장</button>
       </div>
     </div>
 

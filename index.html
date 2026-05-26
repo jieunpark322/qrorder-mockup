@@ -514,22 +514,6 @@
   .preview-fab{position:fixed;bottom:24px;right:24px;z-index:50;padding:14px 22px;border-radius:32px;background:var(--ink);color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.22);display:flex;align-items:center;gap:8px;transition:transform .12s,box-shadow .15s,background .15s;}
   .preview-fab:hover{background:var(--blue);box-shadow:0 12px 32px rgba(49,130,246,.42);transform:translateY(-2px);}
   .preview-fab .ic{font-size:18px;line-height:1;}
-  /* 옵션 빠른 연결 — 메뉴판 우측 사이드 패널 */
-  .opt-quick-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px;width:100%;box-shadow:0 1px 3px rgba(0,0,0,.04);}
-  .oqp-head{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline;gap:6px;flex-wrap:wrap;}
-  .oqp-head .oqp-hint{font-size:11px;font-weight:500;color:var(--ink-4);}
-  .oqp-sub{font-size:11px;color:var(--ink-3);margin-bottom:10px;line-height:1.5;}
-  .oqp-chips{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;max-height:280px;overflow-y:auto;}
-  .oqp-chip{padding:9px 12px;background:var(--blue-50);border:1.5px solid var(--blue-100);border-radius:8px;cursor:grab;user-select:none;transition:transform .12s,box-shadow .12s,background .12s;}
-  .oqp-chip:hover{background:#dbeafe;transform:translateY(-1px);box-shadow:0 4px 12px rgba(49,130,246,.18);}
-  .oqp-chip:active{cursor:grabbing;}
-  .oqp-chip-name{display:block;font-size:13px;font-weight:700;color:var(--blue);}
-  .oqp-chip-meta{display:block;font-size:11px;color:var(--ink-3);margin-top:2px;}
-  .oqp-foot{padding-top:8px;border-top:1px dashed var(--line);}
-  .oqp-foot button{width:100%;}
-  .oqp-empty{padding:18px;text-align:center;font-size:12px;color:var(--ink-3);line-height:1.6;}
-  .oqp-empty .lnk{color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;}
-  tr.drag-over-option{box-shadow:inset 0 0 0 2px var(--blue)!important;background:var(--blue-50)!important;}
   .mnav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 12px;background:#fff;border:2px solid var(--line);border-radius:14px;cursor:pointer;transition:border-color .15s,background .15s,transform .12s,box-shadow .15s;text-align:center;position:relative;user-select:none;}
   .mnav-tab:hover{border-color:var(--blue-100);background:#f7faff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.04);}
   .mnav-tab.on{background:var(--blue);border-color:var(--blue);box-shadow:0 6px 18px rgba(49,130,246,.28);transform:translateY(-1px);}
@@ -717,8 +701,6 @@
   .menu-card-actions button{padding:6px 10px;font-size:11px;font-weight:700;border:1px solid var(--line);background:#fff;border-radius:7px;cursor:pointer;color:var(--ink-2);transition:all .12s;white-space:nowrap;}
   .menu-card-actions button:hover{background:var(--bg-2);border-color:var(--blue-100);color:var(--blue);}
   /* 메뉴판 구성 — 좌측 작업 + 우측 폰 미리보기 레이아웃 */
-  .menu-layout{display:flex;gap:20px;align-items:flex-start;width:100%;max-width:100%;}
-  .menu-main{flex:1 1 0;min-width:0;max-width:100%;overflow:hidden;}
   /* 메뉴 표는 컬럼이 많아 좌측 폭을 넘으면 표 자체만 가로 스크롤 */
   .menu-table-scroll{width:100%;max-width:100%;box-sizing:border-box;overflow-x:scroll;overflow-y:visible;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px;background:#fff;position:relative;}
   .menu-table-scroll > table.t{min-width:1300px;margin:0;border:none;border-radius:0;}
@@ -735,12 +717,6 @@
   .menu-table-topscroll::-webkit-scrollbar-thumb:hover{background:var(--blue);}
   .menu-table-topscroll + .menu-table-scroll{border-top-left-radius:0;border-top-right-radius:0;}
   .menu-scroll-hint{font-size:11px;color:var(--ink-4);padding:6px 4px;display:flex;align-items:center;gap:6px;}
-  .menu-preview-side{width:360px;flex-shrink:0;position:sticky;top:20px;display:flex;flex-direction:column;align-items:center;gap:12px;}
-  .menu-preview-side > *{width:100%;}
-  @media (max-width:1280px){
-    .menu-layout{flex-direction:column;}
-    .menu-preview-side{width:100%;position:static;}
-  }
   /* 직원 계정 관리 */
   .staff-group-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;}
   .staff-group-pill.g1{background:#fef3c7;color:#92400e;}
@@ -5249,16 +5225,7 @@ function dragRowStart(ev, arrName, idx){
   ev.currentTarget.classList.add('drag-source');
 }
 function dragRowOver(ev, arrName, idx){
-  if(!_dragSrc) return;
-  // 옵션 칩을 메뉴 행에 끌어 놓을 때 — 연결 미리보기 (파란 배경)
-  if(_dragSrc.type === 'option' && arrName === 'MENUS'){
-    ev.preventDefault();
-    ev.dataTransfer.dropEffect = 'copy';
-    document.querySelectorAll('tr.drag-over-option').forEach(r=>r.classList.remove('drag-over-option'));
-    ev.currentTarget.classList.add('drag-over-option');
-    return;
-  }
-  if(_dragSrc.arrName !== arrName) return;
+  if(!_dragSrc || _dragSrc.arrName !== arrName) return;
   ev.preventDefault();
   ev.dataTransfer.dropEffect = 'move';
   const tr = ev.currentTarget;
@@ -5273,24 +5240,6 @@ function dragRowLeave(ev){
   ev.currentTarget.classList.remove('drag-over-top','drag-over-bottom');
 }
 function dragRowDrop(ev, arrName, idx){
-  // 옵션 칩 → 메뉴 행: 옵션 그룹을 메뉴에 연결
-  if(_dragSrc && _dragSrc.type === 'option' && arrName === 'MENUS'){
-    ev.preventDefault();
-    const menu = MENUS[idx];
-    const optGroup = OPT_GROUPS.find(g => g.id === _dragSrc.id);
-    if(menu && optGroup){
-      if(!menu.opt) menu.opt = [];
-      if(!menu.opt.includes(optGroup.id)){
-        menu.opt.push(optGroup.id);
-        if(!optGroup.links) optGroup.links = [];
-        if(!optGroup.links.includes(menu.id)) optGroup.links.push(menu.id);
-      }
-    }
-    _dragSrc = null;
-    document.querySelectorAll('tr.drag-over-option').forEach(r=>r.classList.remove('drag-over-option'));
-    renderApp();
-    return;
-  }
   if(!_dragSrc || _dragSrc.arrName !== arrName){ dragRowEnd(); return; }
   ev.preventDefault();
   const arr = _getArrByName(arrName);
@@ -5314,44 +5263,8 @@ function dragRowDrop(ev, arrName, idx){
   renderApp();
 }
 function dragRowEnd(){
-  document.querySelectorAll('tr.drag-source, tr.drag-over-top, tr.drag-over-bottom, tr.drag-over-option').forEach(r=>r.classList.remove('drag-source','drag-over-top','drag-over-bottom','drag-over-option'));
+  document.querySelectorAll('tr.drag-source, tr.drag-over-top, tr.drag-over-bottom').forEach(r=>r.classList.remove('drag-source','drag-over-top','drag-over-bottom'));
   _dragSrc = null;
-}
-// 옵션 칩 드래그 시작 — 메뉴 행에 끌어 놓으면 즉시 연결
-function optChipDragStart(ev, optId){
-  _dragSrc = { type:'option', id: optId };
-  ev.dataTransfer.effectAllowed = 'copy';
-  try { ev.dataTransfer.setData('text/plain', 'option:'+optId); } catch(e){}
-}
-function renderOptionQuickPanel(){
-  if(OPT_GROUPS.length === 0){
-    return `
-      <div class="opt-quick-panel">
-        <div class="oqp-head">🧩 옵션 빠른 연결</div>
-        <div class="oqp-empty">
-          아직 옵션 그룹이 없어요.<br/>
-          <span class="lnk" onclick="setSection('option')">옵션 선택지 페이지로 이동 →</span>
-        </div>
-      </div>
-    `;
-  }
-  return `
-    <div class="opt-quick-panel">
-      <div class="oqp-head">🧩 옵션 빠른 연결 <span class="oqp-hint">메뉴 행으로 끌어 놓기</span></div>
-      <div class="oqp-sub">옵션 그룹 칩을 끌어 메뉴 행에 놓으면 즉시 연결돼요. 옵션 자체는 옵션 선택지 페이지에서 만들고 편집해요.</div>
-      <div class="oqp-chips">
-        ${OPT_GROUPS.map(g => `
-          <div class="oqp-chip" draggable="true" ondragstart="optChipDragStart(event,${g.id})" ondragend="dragRowEnd()" title="끌어서 메뉴에 연결">
-            <span class="oqp-chip-name">${g.name}</span>
-            <span class="oqp-chip-meta">${g.items.length}개 항목 · ${g.links?.length||0}개 메뉴 연결됨</span>
-          </div>
-        `).join('')}
-      </div>
-      <div class="oqp-foot">
-        <button class="btn-ghost" onclick="setSection('option')">⚙️ 옵션 선택지에서 편집</button>
-      </div>
-    </div>
-  `;
 }
 function effectiveStatus(m){
   ensureMenuExtras(m);
@@ -6158,9 +6071,6 @@ function renderMenu(main){
       ${h.tools}
     </div>
 
-    <div class="menu-layout">
-      <div class="menu-main">
-
     <div class="bulk-collapse">
       <div class="bulk-collapse-head" onclick="state.menuBulkOpen=!state.menuBulkOpen;renderApp()">
         <div class="bc-left">
@@ -6347,12 +6257,6 @@ function renderMenu(main){
       💡 <b>매장 판매가</b>와 <b>포장가</b>를 따로 정할 수 있어요. 포장가가 비어 있으면 매장가와 같은 가격으로 손님에게 노출돼요. 포장 할인 사용 여부는 <b style="color:var(--ink-2);cursor:pointer;" onclick="setSection('order-type')">주문 방식</b>에서 결정해요.
     </div>
 
-      </div><!-- /.menu-main -->
-
-      <aside class="menu-preview-side">
-        ${renderOptionQuickPanel()}
-      </aside>
-    </div><!-- /.menu-layout -->
   `;
 }
 

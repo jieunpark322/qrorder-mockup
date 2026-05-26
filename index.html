@@ -1629,6 +1629,10 @@ function renderApp(){
     requestAnimationFrame(() => { main.scrollTop = prevScroll; });
   }
   state._lastNavKey = navKey;
+  // 고객 화면 미리보기 FAB은 메뉴판 관리 화면(메뉴/옵션/카테고리/세트/원산지)에서만 노출
+  const MENU_MGMT_KEYS = ['menu','option','category','set','origin'];
+  const fab = document.querySelector('.preview-fab');
+  if (fab) fab.style.display = MENU_MGMT_KEYS.includes(state.section) ? 'flex' : 'none';
 }
 
 function renderSidebar(){

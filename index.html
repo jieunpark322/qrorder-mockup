@@ -7820,101 +7820,90 @@ function renderCustomerPreview(){
     .map(l=>`<span class="chip ${lang===l.c?'on':''}" onclick="state._cpLang='${l.c}';renderCustomerPreview()" style="font-size:11px;">${l.f} ${l.n}</span>`).join('');
 
   const catChips = `
-    <span class="chip ${cat==='all'?'on':''}" onclick="state._cpCat='all';renderCustomerPreview()">전체</span>
-    ${activeCats.map(c=>`<span class="chip ${cat===c.name?'on':''}" onclick="state._cpCat='${c.name}';renderCustomerPreview()">${c.name} <span style="color:${cat===c.name?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${visibleMenus.filter(m=>m.cat===c.name).length}</span></span>`).join('')}
+    <span class="chip ${cat==='all'?'on':''}" onclick="state._cpCat='all';renderCustomerPreview()" style="font-size:11px;">전체</span>
+    ${activeCats.map(c=>`<span class="chip ${cat===c.name?'on':''}" onclick="state._cpCat='${c.name}';renderCustomerPreview()" style="font-size:11px;">${c.name}</span>`).join('')}
   `;
 
-  // 카테고리별 그룹화하여 표시 (현재 카테고리의 노출 모드에 따라 그리드/리스트)
+  // 카테고리별 그룹화
   let grouped = {};
   filtered.forEach(m=>{
     if (!grouped[m.cat]) grouped[m.cat] = [];
     grouped[m.cat].push(m);
   });
 
-  const renderCard = (m) => {
+  // 휴대폰 화면 내부 카드 (.qrp-card 스타일 활용)
+  const renderPhoneCard = (m) => {
     const eff = effectiveStatus(m);
     const isOut = eff.kind==='manual-out' || eff.kind==='auto-out' || eff.kind==='out';
     const dc = m.discount && m.discount.enabled;
     const dcPrice = dc ? Math.round(m.price * (1 - m.discount.rate/100)) : m.price;
+    const desc = trDesc(m);
     return `
-      <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;position:relative;${isOut?'opacity:.55;':''}">
-        ${isOut?`<div style="position:absolute;top:8px;right:8px;padding:3px 8px;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:6px;">품절</div>`:''}
-        ${dc?`<div style="position:absolute;top:8px;left:8px;padding:3px 8px;background:var(--blue);color:#fff;font-size:10px;font-weight:800;border-radius:6px;">${m.discount.rate}%↓</div>`:''}
-        <div style="width:100%;aspect-ratio:1.4;background:var(--bg-2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:8px;">${m.img||'🍽️'}</div>
-        <div style="font-size:13px;font-weight:700;color:var(--ink);line-height:1.3;">${trName(m)}</div>
-        ${trDesc(m)?`<div style="font-size:11px;color:var(--ink-3);margin-top:3px;line-height:1.4;">${trDesc(m)}</div>`:''}
-        <div style="margin-top:6px;">${dc?`<b style="color:var(--blue);font-size:13px;">${fmt(dcPrice)}원</b> <span style="color:var(--ink-4);text-decoration:line-through;font-size:11px;">${fmt(m.price)}원</span>`:`<b style="font-size:13px;">${fmt(m.price)}원</b>`}</div>
-      </div>
-    `;
-  };
-  const renderListItem = (m) => {
-    const eff = effectiveStatus(m);
-    const isOut = eff.kind==='manual-out' || eff.kind==='auto-out' || eff.kind==='out';
-    const dc = m.discount && m.discount.enabled;
-    const dcPrice = dc ? Math.round(m.price * (1 - m.discount.rate/100)) : m.price;
-    return `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line-2);${isOut?'opacity:.55;':''}">
-        <div style="display:flex;gap:10px;align-items:center;flex:1;min-width:0;">
-          <span style="font-size:24px;flex-shrink:0;">${m.img||'🍽️'}</span>
-          <div style="min-width:0;">
-            <div style="font-size:13px;font-weight:700;color:var(--ink);">${trName(m)} ${isOut?`<span style="font-size:10px;background:var(--red);color:#fff;padding:1px 5px;border-radius:4px;margin-left:4px;">품절</span>`:''}</div>
-            ${trDesc(m)?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${trDesc(m)}</div>`:''}
-          </div>
-        </div>
-        <div style="text-align:right;flex-shrink:0;">
-          ${dc?`<div style="font-size:10px;color:var(--blue);font-weight:700;">${m.discount.rate}%↓</div><b style="color:var(--blue);">${fmt(dcPrice)}원</b>`:`<b>${fmt(m.price)}원</b>`}
+      <div class="qrp-card" style="${isOut?'opacity:.55;':''}position:relative;">
+        ${dc?`<span style="position:absolute;top:6px;right:8px;font-size:9px;font-weight:800;color:var(--blue);background:var(--blue-50);padding:2px 6px;border-radius:6px;">${m.discount.rate}%↓</span>`:''}
+        <div class="qrp-mimg">${m.img?menuImgHtml(m.img,48,8):'🍽️'}</div>
+        <div class="qrp-minfo" style="flex:1;min-width:0;">
+          <div class="qrp-mname">${trName(m)} ${isOut?'<span style="color:var(--red);font-size:9px;font-weight:700;background:#fef2f2;padding:1px 5px;border-radius:4px;margin-left:2px;">품절</span>':''}</div>
+          ${desc?`<div class="qrp-mdesc">${desc}</div>`:''}
+          <div class="qrp-mprice">${dc?`<span style="color:var(--blue);">${fmt(dcPrice)}원</span> <span style="color:var(--ink-4);text-decoration:line-through;font-size:10px;font-weight:500;">${fmt(m.price)}원</span>`:`${fmt(m.price)}원`}</div>
         </div>
       </div>
     `;
   };
 
-  const groupedHtml = Object.keys(grouped).map(catName=>{
-    const c = CAT_MENU.find(x=>x.name===catName);
-    const mode = c && c.displayMode ? c.displayMode : 'grid';
+  const phoneListHtml = Object.keys(grouped).map(catName=>{
     const items = grouped[catName];
     return `
-      <div style="margin-bottom:24px;">
-        <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--ink);display:flex;justify-content:space-between;align-items:center;">
-          <span>${catName}</span>
-          <span style="font-size:10px;color:var(--ink-3);font-weight:600;">${mode==='grid'?'📷 그리드':'📋 리스트'} · ${items.length}개</span>
-        </div>
-        ${mode==='grid'
-          ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">${items.map(renderCard).join('')}</div>`
-          : `<div>${items.map(renderListItem).join('')}</div>`}
+      <div style="padding:10px 12px 4px;font-size:12px;font-weight:800;color:var(--ink);background:#fafafa;letter-spacing:-.01em;">
+        ${catName} <span style="font-size:10px;color:var(--ink-3);font-weight:500;margin-left:4px;">${items.length}개</span>
       </div>
+      ${items.map(renderPhoneCard).join('')}
     `;
   }).join('');
 
   const modal = document.getElementById('modal');
-  modal.style.width = '780px';
+  modal.style.width = '420px';
   modal.innerHTML = `
     <div class="modal-head">
       <div>
         <h3>👁️ 고객 화면 미리보기</h3>
-        <div class="modal-sub">${STORE.name} · 고객이 보는 메뉴 화면을 그대로 보여드려요</div>
+        <div class="modal-sub">${STORE.name} · 손님 휴대폰 화면 그대로</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
 
-    <div style="margin-bottom:14px;padding:12px 14px;background:var(--bg-2);border-radius:10px;">
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-        <span style="font-size:11px;color:var(--ink-3);font-weight:700;padding:6px 8px 6px 0;">언어</span>
+    <div style="margin-bottom:14px;padding:10px 12px;background:var(--bg-2);border-radius:10px;">
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;align-items:center;">
+        <span style="font-size:11px;color:var(--ink-3);font-weight:700;margin-right:4px;">언어</span>
         ${langTabs}
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <span style="font-size:11px;color:var(--ink-3);font-weight:700;padding:6px 8px 6px 0;">카테고리</span>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:11px;color:var(--ink-3);font-weight:700;margin-right:4px;">카테고리</span>
         ${catChips}
       </div>
     </div>
 
-    <div style="max-height:60vh;overflow-y:auto;padding-right:6px;">
-      ${Object.keys(grouped).length===0
-        ? `<div style="padding:60px 20px;text-align:center;color:var(--ink-3);font-size:13px;">노출할 메뉴를 등록해 주세요.<br/><span style="color:var(--ink-4);font-size:11px;">숨김·품절·운영 중지된 카테고리·판매 시간 외 메뉴는 자동으로 빠져요.</span></div>`
-        : groupedHtml}
+    <!-- 휴대폰 프레임 안에 손님 화면 그대로 -->
+    <div style="display:flex;justify-content:center;padding:6px 0 4px;">
+      <div class="qrp-phone">
+        <div class="qrp-notch"></div>
+        <div class="qrp-screen">
+          <div class="qrp-header">
+            <div class="qrp-store">${STORE.name}</div>
+            <div class="qrp-tag">맛있는 한 잔, QR로 빠르게</div>
+            <div class="qrp-table-chip">T03 테이블</div>
+          </div>
+          <div class="qrp-list" style="padding:0;gap:0;">
+            ${Object.keys(grouped).length===0
+              ? `<div class="qrp-empty" style="padding:60px 14px;">노출할 메뉴가 없어요.</div>`
+              : phoneListHtml}
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="banner-info" style="margin-top:14px;font-size:11px;">
-      💡 자동 품절·수동 품절·판매 시간 외·운영 중지된 카테고리는 회색 또는 비노출 처리돼요. 언어 탭을 바꿔서 다국어 노출도 미리 확인할 수 있어요.
+      💡 자동 품절·수동 품절·운영 중지된 카테고리·판매 시간 외 메뉴는 자동으로 빠지거나 회색 처리돼요. 언어를 바꿔 다국어 노출도 바로 확인할 수 있어요.
     </div>
 
     <div style="display:flex;gap:8px;margin-top:14px;">

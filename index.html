@@ -6171,7 +6171,6 @@ function renderMenu(main){
                       <div class="row-actions-pop">
                         <button onclick="state.menuActionOpen=null;openMenuEditModal(${r.id})"><span class="ic-em">✏️</span>메뉴 정보·가격 수정</button>
                         <button onclick="state.menuActionOpen=null;openOptLinkModal(${r.id})"><span class="ic-em">🧩</span>옵션 그룹 연결</button>
-                        <button onclick="state.menuActionOpen=null;openStockModal(${r.id})"><span class="ic-em">📦</span>재고 설정</button>
                         <button onclick="state.menuActionOpen=null;openScheduleModal('menu',${r.id})"><span class="ic-em">🕒</span>판매 시간</button>
                         <button onclick="state.menuActionOpen=null;openDiscountModal('menu',${r.id})"><span class="ic-em">🔥</span>해피아워 할인</button>
                         <button onclick="state.menuActionOpen=null;duplicateMenu(${r.id})"><span class="ic-em">📋</span>복사하기</button>
@@ -7161,78 +7160,6 @@ function confirmOptLink(){
     if (has && !inLinks) g.links.push(m.id);
     if (!has && inLinks) g.links = g.links.filter(x=>x!==m.id);
   });
-  closeModal();
-  renderApp();
-}
-
-/* ============================================================
-   재고 관리 모달 — 한도 / 판매 카운트 / 자동·수동 품절
-   ============================================================ */
-function openStockModal(menuId){
-  const m = MENUS.find(x=>x.id===menuId); if (!m) return;
-  ensureMenuExtras(m);
-  state._stockTarget = menuId;
-  const modal = document.getElementById('modal');
-  const left = m.stock != null ? Math.max(0, m.stock - m.sold) : null;
-  modal.innerHTML = `
-    <div class="modal-head">
-      <div>
-        <h3>재고 관리 — ${m.name}</h3>
-        <div class="modal-sub">${m.code} · 오늘 판매 수량 ${m.sold}개</div>
-      </div>
-      <button class="close" onclick="closeModal()">✕</button>
-    </div>
-
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;">
-      <div class="opt-card ${m.stock==null?'on':''}" onclick="state._tempStock=null;document.getElementById('stk-limit').disabled=true;document.getElementById('stk-limit').value='';this.parentNode.querySelectorAll('.opt-card').forEach(c=>c.classList.remove('on'));this.classList.add('on');">
-        <div class="ico-lg">♾️</div>
-        <div class="ttl">무제한</div>
-        <div class="sub-ttl">재고를 따지지 않음</div>
-      </div>
-      <div class="opt-card ${m.stock!=null&&left>0?'on':''}" onclick="if(!document.getElementById('stk-limit').value)document.getElementById('stk-limit').value=20;document.getElementById('stk-limit').disabled=false;document.getElementById('stk-limit').focus();this.parentNode.querySelectorAll('.opt-card').forEach(c=>c.classList.remove('on'));this.classList.add('on');">
-        <div class="ico-lg">📦</div>
-        <div class="ttl">한도 설정</div>
-        <div class="sub-ttl">한도 도달 시 자동 품절</div>
-      </div>
-      <div class="opt-card ${m.manualSoldOut?'on':''}" onclick="state._tempManual=true;this.parentNode.querySelectorAll('.opt-card').forEach(c=>c.classList.remove('on'));this.classList.add('on');">
-        <div class="ico-lg">⛔</div>
-        <div class="ttl">수동 품절</div>
-        <div class="sub-ttl">재고와 무관하게 차단</div>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-      <div>
-        <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:6px;">오늘 재고 한도</label>
-        <input class="input" id="stk-limit" type="number" min="0" placeholder="예) 20" value="${m.stock!=null?m.stock:''}" ${m.stock==null?'disabled':''} style="width:100%;" />
-      </div>
-      <div>
-        <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:6px;">오늘 판매 수량</label>
-        <input class="input" id="stk-sold" type="number" min="0" value="${m.sold}" style="width:100%;" />
-      </div>
-    </div>
-
-    <div class="info-card">
-      💡 <b>자동 품절</b>: 판매 수량이 한도에 도달하면 자동으로 품절 처리돼요.<br/>
-      💡 <b>잔여 3개 이하</b>가 되면 알림 센터에 자동으로 알림이 떠요.<br/>
-      💡 <b>매일 자정에 판매 수량은 0으로 초기화</b>돼요. (한도는 유지)
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:18px;">
-      <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
-      <button class="btn-primary" style="flex:1;" onclick="saveStock()">저장</button>
-    </div>
-  `;
-  document.getElementById('modal-bg').classList.add('on');
-}
-function saveStock(){
-  const m = MENUS.find(x=>x.id===state._stockTarget); if (!m){ closeModal(); return; }
-  ensureMenuExtras(m);
-  const limitV = document.getElementById('stk-limit').value;
-  const soldV  = document.getElementById('stk-sold').value;
-  m.stock = (limitV===''||limitV==null) ? null : Math.max(0, Number(limitV));
-  m.sold  = Math.max(0, Number(soldV)||0);
-  // 수동 품절 카드가 선택된 경우 (단순 추정)
   closeModal();
   renderApp();
 }

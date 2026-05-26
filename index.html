@@ -8170,6 +8170,12 @@ const QR_COLOR_OPTIONS = [
 // QR 이미지 추가 신청 — 정책: 10개 단위 + 단일 색상
 const QR_PRICE_PER_UNIT = 2000;  // 1장당 단가 (원)
 const QR_BATCH_SIZE     = 10;    // 최소 신청 단위
+// 포장 주문 QR — 매장에서 직접 관리 (카운터·입구·주차장 등)
+// 테이블 QR과 똑같이 자동 생성. 신청 스티커가 도착하기 전엔 즉시 임시 출력 가능.
+const TAKEOUT_QRS = [
+  { id:1, name:'카운터', code:'takeout-counter-01', primary:true },
+  { id:2, name:'매장 입구', code:'takeout-entry-01' },
+];
 const QR_REQUESTS = [
   { id:1, qty:10, colorName:'검정', hex:'#191f28', memo:'옥상 테라스 신규 테이블용', reqDate:'2026-05-10', status:'신청중', totalPrice:20000 },
 ];
@@ -8922,13 +8928,24 @@ function renderQR(main){
     <div class="toolbar">
       <div>
         <h2>QR 관리</h2>
-        <div class="page-sub">운영 중인 테이블의 QR과 주문 링크를 확인하고, 추가 QR 이미지를 신청할 수 있어요.</div>
+        <div class="page-sub">테이블·포장 QR을 즉시 임시 출력해서 쓰고, 정식 스티커는 따로 신청할 수 있어요.</div>
+      </div>
+    </div>
+
+    <!-- 안내 — 임시 출력 vs 정식 스티커 -->
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
+      <span style="font-size:16px;flex-shrink:0;">💡</span>
+      <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
+        테이블·포장 코드를 만들면 <b>QR이 즉시 자동 생성</b>돼요. 정식 스티커가 도착하기 전이라도 <b>🖨️ 임시 출력</b> 버튼으로 종이에 출력해 바로 영업할 수 있어요.
+        디자인이 들어간 정식 QR 스티커는 아래 <b>추가 QR 신청</b>에서 따로 신청해 주세요.
       </div>
     </div>
 
     <!-- ① 테이블별 QR 및 주문 링크 -->
     <div class="panel">
-      <h3>테이블별 QR 및 주문 링크</h3>
+      <h3>🪑 테이블 QR <span class="h-sub">테이블 관리에서 만든 테이블마다 자동 생성돼요</span>
+        <span class="h-act"><span style="font-size:12px;color:var(--blue);font-weight:700;cursor:pointer;" onclick="setSection('table')">테이블 관리 →</span></span>
+      </h3>
       ${zoneGroups.map(({zone, tables})=> tables.length===0 ? '' : `
         <div style="margin-bottom:24px;">
           <div style="font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line-2);">
@@ -8947,7 +8964,7 @@ function renderQR(main){
                   </div>
                 </div>
                 <div style="display:flex;gap:8px;flex-shrink:0;">
-                  <button class="btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="alert('${t.name} QR 다운로드 (와이어프레임)')">📥 다운로드</button>
+                  <button class="btn-primary" style="font-size:12px;padding:6px 12px;font-weight:700;" onclick="openTempPrintQRModal('table',${t.id})">🖨️ 임시 출력</button>
                   <button class="btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="navigator.clipboard?.writeText('order.qrorder.co.kr/${storeCode}/${t.name}').then(()=>alert('링크가 복사됐어요'))">🔗 링크 복사</button>
                 </div>
               </div>
@@ -8957,9 +8974,43 @@ function renderQR(main){
       `).join('')}
     </div>
 
-    <!-- ② QR 이미지 추가 신청 -->
+    <!-- ② 포장 주문 QR -->
     <div class="panel">
-      <h3>QR 이미지 추가 신청</h3>
+      <h3>🛍️ 포장 주문 QR <span class="h-sub">카운터·입구 등 매장 안 곳곳에 붙일 수 있어요</span>
+        <span class="h-act"><button class="btn-primary" style="padding:6px 12px;font-size:12px;font-weight:700;" onclick="addTakeoutQR()">+ 포장 QR 추가</button></span>
+      </h3>
+      ${TAKEOUT_QRS.length===0 ? `
+        <div style="padding:32px 18px;text-align:center;background:var(--bg-2);border-radius:12px;color:var(--ink-3);font-size:13px;line-height:1.65;">
+          🛍️ 아직 포장 QR이 없어요.<br/>위 <b style="color:var(--ink-2);">+ 포장 QR 추가</b>를 눌러 만들어 주세요.<br/>
+          <span style="font-size:11px;">예: 카운터 / 매장 입구 / 외부 테이크아웃 창구</span>
+        </div>
+      ` : `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          ${TAKEOUT_QRS.map((tq,idx)=>`
+            <div style="display:flex;align-items:center;gap:16px;padding:14px 16px;background:var(--bg-2);border-radius:12px;border:1px solid var(--line-2);">
+              <div style="font-size:13px;font-weight:700;color:var(--ink-3);width:24px;text-align:right;flex-shrink:0;">${idx+1}</div>
+              ${qrMock(1000+tq.id)}
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:800;margin-bottom:4px;">${tq.name}${tq.primary?' <span style="font-size:10px;color:var(--blue);font-weight:700;background:var(--blue-50);padding:2px 7px;border-radius:8px;margin-left:4px;">기본</span>':''}</div>
+                <div style="font-size:12px;color:var(--ink-3);font-family:ui-monospace,monospace;background:#fff;border:1px solid var(--line-2);border-radius:6px;padding:4px 8px;display:inline-block;cursor:pointer;"
+                  onclick="navigator.clipboard?.writeText('order.qrorder.co.kr/${storeCode}/takeout/${tq.code}').then(()=>alert('링크가 복사됐어요'))">
+                  order.qrorder.co.kr/${storeCode}/takeout/${tq.code}
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;flex-shrink:0;">
+                <button class="btn-primary" style="font-size:12px;padding:6px 12px;font-weight:700;" onclick="openTempPrintQRModal('takeout',${tq.id})">🖨️ 임시 출력</button>
+                <button class="btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="renameTakeoutQR(${tq.id})">✏️ 이름</button>
+                ${tq.primary?'':`<button class="btn-ghost" style="font-size:12px;padding:6px 10px;color:var(--red);" onclick="removeTakeoutQR(${tq.id})" title="삭제">✕</button>`}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `}
+    </div>
+
+    <!-- ③ QR 이미지 추가 신청 -->
+    <div class="panel">
+      <h3>📦 정식 QR 스티커 신청</h3>
       <div class="page-sub" style="margin-bottom:14px;">추가 QR이 필요할 땐 <b style="color:var(--ink-2);">${QR_BATCH_SIZE}장 단위</b>로 한 번에 신청해 주세요. 한 번 신청 시 <b style="color:var(--ink-2);">색상 1가지</b>만 선택할 수 있어요.</div>
 
       <!-- 정책 안내 박스 -->
@@ -9047,6 +9098,72 @@ function renderQR(main){
       </table>` : ''}
     </div>
   `;
+}
+
+// 포장 QR 추가/삭제/이름 변경
+function addTakeoutQR(){
+  const name = prompt('새 포장 QR 이름을 적어 주세요. (예: 입구, 카운터, 외부 창구)');
+  if(!name || !name.trim()) return;
+  const id = (TAKEOUT_QRS.reduce((m,q)=>Math.max(m,q.id),0))+1;
+  const code = 'takeout-' + Date.now().toString().slice(-6);
+  TAKEOUT_QRS.push({ id, name:name.trim(), code });
+  alert(`'${name.trim()}' 포장 QR을 만들었어요. 🖨️ 임시 출력으로 바로 사용해 보세요.`);
+  renderApp();
+}
+function renameTakeoutQR(id){
+  const q = TAKEOUT_QRS.find(x=>x.id===id);
+  if(!q) return;
+  const newName = prompt('새 이름을 적어 주세요.', q.name);
+  if(newName && newName.trim()){ q.name = newName.trim(); renderApp(); }
+}
+function removeTakeoutQR(id){
+  const q = TAKEOUT_QRS.find(x=>x.id===id);
+  if(!q) return;
+  if(!confirm(`'${q.name}' 포장 QR을 삭제할까요? 출력된 QR이 있다면 더 이상 작동하지 않아요.`)) return;
+  const i = TAKEOUT_QRS.findIndex(x=>x.id===id);
+  TAKEOUT_QRS.splice(i,1);
+  renderApp();
+}
+// 임시 출력 모달 — 정식 스티커 도착 전 종이로 출력해 임시 사용
+function openTempPrintQRModal(type, id){
+  let title, code, link, qrId;
+  if(type==='table'){
+    const t = TABLES.find(x=>x.id===id);
+    if(!t) return;
+    title = `${t.name} 테이블`;
+    code = t.name;
+    link = `order.qrorder.co.kr/softcoffee-hapjeong/${t.name}`;
+    qrId = t.id;
+  } else {
+    const q = TAKEOUT_QRS.find(x=>x.id===id);
+    if(!q) return;
+    title = `${q.name} (포장)`;
+    code = q.code;
+    link = `order.qrorder.co.kr/softcoffee-hapjeong/takeout/${q.code}`;
+    qrId = 1000 + q.id;
+  }
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:480px;">
+      <div class="modal-head"><b>🖨️ 임시 출력 미리보기</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:24px;">
+        <div style="text-align:center;padding:24px;background:#fff;border:2px dashed var(--line);border-radius:14px;margin-bottom:18px;">
+          <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:6px;">${title}</div>
+          <div style="font-size:11px;color:var(--ink-3);margin-bottom:14px;">스마트폰 카메라로 찍어 주세요</div>
+          <div style="display:flex;justify-content:center;margin-bottom:14px;transform:scale(2.2);transform-origin:center;height:130px;align-items:center;">${qrMock(qrId)}</div>
+          <div style="font-size:11px;color:var(--ink-3);font-family:ui-monospace,monospace;background:var(--bg-2);padding:6px 10px;border-radius:6px;display:inline-block;">${link}</div>
+        </div>
+        <div style="padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;font-size:11px;color:#9a3412;line-height:1.6;margin-bottom:14px;">
+          ⚠️ 이건 <b>임시 출력용</b>이에요. 흑백 프린터로 종이에 출력해 코팅하거나 부착해서 바로 영업에 쓰실 수 있어요. 디자인이 들어간 <b>정식 QR 스티커</b>는 따로 신청해 주세요.
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost" style="flex:1;" onclick="closeModal()">닫기</button>
+          <button class="btn-primary" style="flex:2;" onclick="window.print();">🖨️ 지금 출력하기</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
 }
 
 function submitQRRequest(){

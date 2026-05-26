@@ -4196,8 +4196,33 @@ function paginationStatic(cur, total){
 /* ============================================================
    EVENT HANDLERS
    ============================================================ */
+// 현재 페이지에 저장 안 한 변경 사항이 있는지 — 있으면 페이지 라벨 반환
+function getUnsavedChangesInfo(){
+  if(state.section === 'order-type' && typeof ot_isDirty === 'function' && ot_isDirty()){
+    return { label:'주문 방식', discard: () => {
+      const saved = JSON.parse(ORDER_SAVED);
+      for(const k in saved) ORDER_CHANNELS[k] = saved[k];
+    }};
+  }
+  if(state.section === 'table' && typeof _pendingTablePos !== 'undefined' && Object.keys(_pendingTablePos).length > 0){
+    return { label:'테이블 관리', discard: () => { _pendingTablePos = {}; }};
+  }
+  return null;
+}
+
 function setSection(s){
   // 'faq'·'cs'는 통합된 '고객 지원' 페이지의 탭으로 리다이렉트
+  const targetSection = (s === 'faq' || s === 'cs') ? 'support' : s;
+  // 다른 페이지로 이동할 때 미저장 변경 사항이 있으면 확인
+  if(targetSection !== state.section){
+    const unsaved = getUnsavedChangesInfo();
+    if(unsaved){
+      if(!confirm(`${unsaved.label} 페이지에 저장하지 않은 변경 사항이 있어요.\n저장하지 않고 이동할까요?\n\n[확인] 변경 사항을 버리고 이동\n[취소] 현재 페이지에 머무르기`)){
+        return;
+      }
+      unsaved.discard();
+    }
+  }
   if (s === 'faq') { state.section = 'support'; state.supportTab = 'faq'; }
   else if (s === 'cs') { state.section = 'support'; state.supportTab = 'cs'; }
   else state.section = s;

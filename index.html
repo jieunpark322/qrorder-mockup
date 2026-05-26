@@ -1298,7 +1298,7 @@ const state = {
   qrReqMemo:  '',                    // 메모 (선택)
   // 메뉴 관리 — 더보기 드롭다운
   mmMoreOpen: false,
-  // 메뉴판 구성 관리 — 우측 미리보기 스냅샷
+  // 메뉴판 관리 — 우측 미리보기 스냅샷
   menuPreviewSnapshot: null,        // { menus:[...], origin:'...', takenAt:'...' }
   menuViewMode: 'table',            // 'card' | 'table' — 정보 밀도 우선 기본 표 뷰
   // FAQ 검색·필터·아코디언 상태
@@ -1548,7 +1548,7 @@ function renderSidebar(){
       { key:'staff',      ic:'👥',  label:'직원 계정 관리' },
     ]},
     { label:'메뉴 관리',    items:[
-      { key:'menu',      ic:'🍽️', label:'메뉴판 구성 관리' },
+      { key:'menu',      ic:'🍽️', label:'메뉴판 관리' },
       { key:'stock',     ic:'📦', label:'오늘의 준비량' },
       { key:'translate', ic:'🌐', label:'번역' },
     ]},
@@ -1865,7 +1865,7 @@ function renderHome(main){
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn-ghost" style="padding:12px 20px;font-size:13px;font-weight:700;" onclick="setSection('orders')">📋 주문 내역</button>
         <button class="btn-ghost" style="padding:12px 20px;font-size:13px;font-weight:700;" onclick="setSection('overview')">📊 매출 한눈에 보기</button>
-        <button class="btn-ghost" style="padding:12px 20px;font-size:13px;font-weight:700;" onclick="setSection('menu')">🍽️ 메뉴판 구성 관리</button>
+        <button class="btn-ghost" style="padding:12px 20px;font-size:13px;font-weight:700;" onclick="setSection('menu')">🍽️ 메뉴판 관리</button>
         <button class="btn-ghost" style="padding:12px 20px;font-size:13px;font-weight:700;" onclick="setSection('stl-list')">💰 정산 내역</button>
       </div>
     </div>
@@ -4761,15 +4761,15 @@ document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeModal(); })
    상품코드: M=메뉴 / O=옵션 / S=세트 (6자리)
    ============================================================ */
 const MENUS = [
-  { id:1, code:'M00101', name:'아메리카노',         cat:'커피',    price:4500, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%' },
-  { id:2, code:'M00102', name:'카페라떼',           cat:'커피',    price:5000, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%' },
-  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피',    price:5500, status:'판매중', img:'🥤', opt:[1,2,3], desc:'' },
-  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피',    price:4500, status:'판매중', img:'🧊', opt:[1,2,3], desc:'' },
-  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료',    price:4800, status:'판매중', img:'🍑', opt:[2,3],   desc:'' },
-  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료',    price:5200, status:'판매중', img:'🍋', opt:[2,3],   desc:'' },
-  { id:7, code:'M00301', name:'크로아상',           cat:'디저트',  price:3800, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요' },
-  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트',  price:5500, status:'품절',   img:'🍰', opt:[],      desc:'' },
-  { id:9, code:'M00303', name:'마들렌',             cat:'디저트',  price:2800, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴' },
+  { id:1, code:'M00101', name:'아메리카노',         cat:'커피',    price:4500, takeoutPrice:4000, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%' },
+  { id:2, code:'M00102', name:'카페라떼',           cat:'커피',    price:5000, takeoutPrice:4500, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%' },
+  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피',    price:5500, takeoutPrice:5000, status:'판매중', img:'🥤', opt:[1,2,3], desc:'' },
+  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피',    price:4500, takeoutPrice:4000, status:'판매중', img:'🧊', opt:[1,2,3], desc:'' },
+  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료',    price:4800, takeoutPrice:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'' },
+  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료',    price:5200, takeoutPrice:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'' },
+  { id:7, code:'M00301', name:'크로아상',           cat:'디저트',  price:3800, takeoutPrice:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요' },
+  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트',  price:5500, takeoutPrice:null, status:'품절',   img:'🍰', opt:[],      desc:'' },
+  { id:9, code:'M00303', name:'마들렌',             cat:'디저트',  price:2800, takeoutPrice:null, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴' },
 ];
 
 const OPT_GROUPS = [
@@ -4983,9 +4983,12 @@ function ensureMenuExtras(m){
   if (typeof m.stock === 'undefined')  m.stock  = null;   // null = 무제한
   if (typeof m.sold === 'undefined')   m.sold   = 0;
   if (typeof m.manualSoldOut === 'undefined') m.manualSoldOut = false;
+  if (typeof m.takeoutPrice === 'undefined') m.takeoutPrice = null;  // null = 매장가 동일 적용
   if (!m.schedule) m.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!m.discount) m.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
 }
+// 포장가 표시용 — null이면 매장가와 동일
+function getTakeoutPrice(m){ return (m.takeoutPrice != null && m.takeoutPrice >= 0) ? m.takeoutPrice : m.price; }
 function ensureSetExtras(s){
   if (!s.schedule) s.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!s.discount) s.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
@@ -5669,7 +5672,12 @@ function renderMenuCardGrid(rows){
             </div>
             <div class="menu-card-meta">
               ${r.cat?`<span class="menu-card-cat">${r.cat}</span>`:''}
-              <div class="menu-card-price">${fmt(r.price)}<span style="font-size:11px;color:var(--ink-3);font-weight:500;margin-left:1px;">원</span></div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:90px;">
+                <div class="menu-card-price">${fmt(r.price)}<span style="font-size:11px;color:var(--ink-3);font-weight:500;margin-left:1px;">원</span></div>
+                ${r.takeoutPrice!=null&&r.takeoutPrice>=0
+                  ? `<div style="font-size:10px;color:#15803d;font-weight:700;">🛍️ ${fmt(r.takeoutPrice)}원</div>`
+                  : ''}
+              </div>
               <span class="menu-card-status ${statusCls}">${statusLbl}</span>
               <div class="menu-card-actions" onclick="event.stopPropagation()">
                 <button onclick="quickToggleSoldOut(${r.id})" style="${r.manualSoldOut?'background:#fee2e2;color:#b91c1c;border-color:#fecaca;':''}" title="${r.manualSoldOut?'품절 해제':'오늘 품절'}">${r.manualSoldOut?'✓ 품절 중':'🚫 품절'}</button>
@@ -5757,7 +5765,7 @@ function renderMenuPhonePreview(){
 
 function menuNavTabs(){
   const tabs = [
-    { key:'menu',     ic:'🍽️', label:'메뉴',        cnt: MENUS.length },
+    { key:'menu',     ic:'🍽️', label:'메뉴판',       cnt: MENUS.length },
     { key:'option',   ic:'🧩', label:'옵션 선택지',  cnt: OPT_GROUPS.length },
     { key:'category', ic:'🗂️', label:'카테고리',     cnt: CAT_MENU.length + CAT_OPT.length },
     { key:'set',      ic:'🎁', label:'세트',         cnt: SETS.length },
@@ -5802,6 +5810,7 @@ function renderMenu(main){
       </td>
       <td><input class="input" placeholder="예) 아메리카노" value="${row.name||''}" oninput="state.menuBulkRows[${idx}].name=this.value" /></td>
       <td><input class="input" type="number" placeholder="0" value="${row.price||''}" oninput="state.menuBulkRows[${idx}].price=Number(this.value)||0" style="text-align:right;" /></td>
+      <td><input class="input" type="number" placeholder="비워 두면 매장가" value="${row.takeoutPrice||''}" oninput="state.menuBulkRows[${idx}].takeoutPrice=this.value===''?null:(Number(this.value)||0)" style="text-align:right;color:#15803d;" /></td>
       <td>
         <select class="input" onchange="state.menuBulkRows[${idx}].cat=this.value">
           <option value="">미지정</option>
@@ -5827,13 +5836,13 @@ function renderMenu(main){
   const stale = isMenuPreviewStale();
   const snap  = state.menuPreviewSnapshot;
   main.innerHTML = `
-    <div class="crumb">메뉴 관리 › 메뉴판 구성 관리</div>
+    <div class="crumb">메뉴 관리 › 메뉴판 관리</div>
 
     ${menuNavTabs()}
 
     <div class="toolbar">
       <div>
-        <h2>메뉴판 구성 관리</h2>
+        <h2>메뉴판 관리</h2>
         <div class="page-sub">단품을 등록하고, 옵션 그룹을 연결해요. 여러 개를 한 번에 올릴 수 있어요.</div>
       </div>
       ${h.tools}
@@ -5856,19 +5865,20 @@ function renderMenu(main){
             <thead>
               <tr>
                 <th style="width:36px;text-align:center;">#</th>
-                <th style="width:130px;" title="시스템이 자동으로 만들어 줘요. 직접 정하셔도 돼요.">상품코드 <span style="font-size:9px;color:var(--ink-4);font-weight:400;">자동</span></th>
-                <th style="min-width:160px;" class="req">메뉴 이름</th>
-                <th style="width:120px;" class="req">판매 가격</th>
-                <th style="width:120px;">카테고리</th>
-                <th style="min-width:180px;">설명</th>
-                <th style="width:70px;text-align:center;">사진</th>
-                <th style="width:110px;">상태</th>
+                <th style="width:110px;" title="시스템이 자동으로 만들어 줘요. 직접 정하셔도 돼요.">상품코드 <span style="font-size:9px;color:var(--ink-4);font-weight:400;">자동</span></th>
+                <th style="min-width:140px;" class="req">메뉴 이름</th>
+                <th style="width:108px;" class="req">매장 판매가</th>
+                <th style="width:108px;" title="비워 두면 매장가와 동일하게 적용돼요">포장가 <span style="font-size:9px;color:var(--ink-4);font-weight:400;">선택</span></th>
+                <th style="width:108px;">카테고리</th>
+                <th style="min-width:160px;">설명</th>
+                <th style="width:64px;text-align:center;">사진</th>
+                <th style="width:96px;">상태</th>
                 <th style="width:36px;"></th>
               </tr>
             </thead>
             <tbody>
               ${state.menuBulkRows.length===0
-                ? `<tr><td colspan="9" style="padding:32px 16px;text-align:center;color:var(--ink-3);font-size:13px;">아래 <b>+ 메뉴 행 추가</b>를 눌러 첫 메뉴를 입력해 주세요.</td></tr>`
+                ? `<tr><td colspan="10" style="padding:32px 16px;text-align:center;color:var(--ink-3);font-size:13px;">아래 <b>+ 메뉴 행 추가</b>를 눌러 첫 메뉴를 입력해 주세요.</td></tr>`
                 : bulkRowsHtml}
             </tbody>
           </table>
@@ -5936,7 +5946,8 @@ function renderMenu(main){
             <th style="width:84px;">상품코드</th>
             <th>메뉴명</th>
             <th style="width:74px;">카테고리</th>
-            <th class="num" style="width:118px;">판매가</th>
+            <th class="num" style="width:106px;">매장 판매가</th>
+            <th class="num" style="width:106px;">포장가 <span style="color:var(--ink-4);font-weight:400;font-size:10px;">(없으면 매장가)</span></th>
             <th style="width:108px;">재고</th>
             <th style="width:120px;">판매 시간</th>
             <th>연결된 옵션</th>
@@ -5945,7 +5956,7 @@ function renderMenu(main){
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="12">${MENUS.length===0?'위 + 새 메뉴 추가를 눌러 첫 메뉴를 등록해 주세요. 또는 ⚙️ 고급 설정 → ☕ 샘플 메뉴 불러오기로 빠르게 시작할 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : rows.map(r=>{
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="13">${MENUS.length===0?'위 + 새 메뉴 추가를 눌러 첫 메뉴를 등록해 주세요. 또는 ⚙️ 고급 설정 → ☕ 샘플 메뉴 불러오기로 빠르게 시작할 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : rows.map(r=>{
             ensureMenuExtras(r);
             const idx = MENUS.indexOf(r); // 전체 배열 기준 인덱스
             const opts = r.opt.map(oid=>{
@@ -5975,6 +5986,9 @@ function renderMenu(main){
                 <td><b>${r.name}</b>${r.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${r.desc}</div>`:''}</td>
                 <td><span style="font-size:12px;color:var(--ink-2);">${r.cat}</span></td>
                 <td class="num">${priceCell}</td>
+                <td class="num">${r.takeoutPrice!=null&&r.takeoutPrice>=0
+                  ? `<b style="color:#15803d;">${fmt(r.takeoutPrice)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>${r.takeoutPrice<r.price?`<div style="font-size:10px;color:#15803d;font-weight:700;margin-top:2px;">−${fmt(r.price-r.takeoutPrice)}원</div>`:''}`
+                  : `<span style="color:var(--ink-4);font-size:12px;">매장가 동일</span>`}</td>
                 <td><span style="font-size:12px;color:${stockColor};font-weight:${r.stock!=null?700:400};">${stockTxt}</span></td>
                 <td><span style="font-size:11px;color:${r.schedule&&r.schedule.enabled?'var(--blue)':'var(--ink-3)'};font-weight:${r.schedule&&r.schedule.enabled?700:400};">${r.schedule&&r.schedule.enabled?'🕒 ':''}${schTxt}</span></td>
                 <td>${optsHtml}</td>
@@ -6003,7 +6017,7 @@ function renderMenu(main){
     </div>
 
     <div class="banner-info" style="margin-top:14px;">
-      💡 카드 보기는 사진과 가격 위주로 한눈에 볼 수 있고, 표 보기는 상품코드·옵션 같은 자세한 정보까지 같이 볼 수 있어요.
+      💡 <b>매장 판매가</b>와 <b>포장가</b>를 따로 정할 수 있어요. 포장가가 비어 있으면 매장가와 같은 가격으로 손님에게 노출돼요. 포장 할인 사용 여부는 <b style="color:var(--ink-2);cursor:pointer;" onclick="setSection('order-type')">주문 방식</b>에서 결정해요.
     </div>
 
       </div><!-- /.menu-main -->
@@ -6037,7 +6051,7 @@ function cycleSampleImg(idx){
   renderApp();
 }
 function addMenuBulkRow(){
-  state.menuBulkRows.push({ code:'', name:'', price:0, cat:'', desc:'', img:'', status:'판매중' });
+  state.menuBulkRows.push({ code:'', name:'', price:0, takeoutPrice:null, cat:'', desc:'', img:'', status:'판매중' });
   renderApp();
 }
 function removeMenuBulkRow(idx){
@@ -6051,7 +6065,7 @@ function saveMenuBulk(){
     MENUS.push({
       id: nextId++, code: r.code || genCode('M'),
       name: r.name, cat: r.cat || (CAT_MENU[0]?.name || '미분류'),
-      price: r.price, status: r.status||'판매중',
+      price: r.price, takeoutPrice: r.takeoutPrice, status: r.status||'판매중',
       img: r.img || '🍽️', opt: [], desc: r.desc || '',
     });
   });
@@ -7953,7 +7967,7 @@ const CS_INQUIRIES = [
 // FAQ — 소프트먼트 운영팀이 작성한 서비스 사용 가이드 (사장님은 읽기 전용)
 const FAQS = [
   { id:1,  cat:'시작하기',   q:'QR오더를 처음 시작하려면 무엇부터 해야 하나요?',
-    a:'매장 설정에서 매장 정보·영업시간을 입력하시고, 메뉴판 구성 관리에서 메뉴를 등록한 뒤 테이블별 QR 코드를 부착하시면 바로 사용하실 수 있어요. 자세한 절차는 사이드바 위에서 아래 순서대로 따라가시면 돼요.' },
+    a:'매장 설정에서 매장 정보·영업시간을 입력하시고, 메뉴판 관리에서 메뉴를 등록한 뒤 테이블별 QR 코드를 부착하시면 바로 사용하실 수 있어요. 자세한 절차는 사이드바 위에서 아래 순서대로 따라가시면 돼요.' },
   { id:2,  cat:'시작하기',   q:'에이전트 프로그램은 꼭 설치해야 하나요?',
     a:'네, 매장에 한 대 이상 설치하셔야 주문·호출 알림이 정상 동작해요. 설치 파일과 가이드는 가입 시 보내드린 메일에 포함되어 있어요.' },
   { id:3,  cat:'결제·정산', q:'정산은 언제 받나요?',

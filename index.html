@@ -1579,7 +1579,7 @@ function renderApp(){
   // 스크롤 위치 보존 — 같은 페이지·같은 탭 내 재렌더(필터/조회)일 땐 위치 유지,
   // 페이지·탭 자체가 바뀌었을 때만 최상단으로 이동
   // 차트·테이블 렌더가 끝난 다음 프레임에 scrollTop 설정 (innerHTML 직후엔 무시될 수 있음)
-  const navKey = state.section + ':' + (state.detailTab||'') + ':' + (state.catTab||'') + ':' + (state.trTarget||'') + ':' + (state.trLang||'') + ':' + (state.supportTab||'');
+  const navKey = state.section + ':' + (state.detailTab||'') + ':' + (state.trTarget||'') + ':' + (state.trLang||'') + ':' + (state.supportTab||'');
   const prevScroll = main.scrollTop;
   main.innerHTML = '';
   cur.fn(main);
@@ -4888,16 +4888,16 @@ const MENUS = [
 ];
 
 const OPT_GROUPS = [
-  { id:1, code:'O00101', name:'샷 추가',    mode:'중복 선택',     required:false, cat:'음료 옵션', items:[
+  { id:1, code:'O00101', name:'샷 추가',    mode:'중복 선택',     required:false, items:[
     { name:'샷 1번 추가',   price:600 },
     { name:'샷 2번 추가',   price:1200 },
     { name:'디카페인 변경', price:500 },
   ], links:[1,2,3,4] },
-  { id:2, code:'O00102', name:'사이즈',     mode:'1개 선택', required:true,  cat:'음료 옵션', items:[
+  { id:2, code:'O00102', name:'사이즈',     mode:'1개 선택', required:true,  items:[
     { name:'Regular', price:0 },
     { name:'Large',   price:800 },
   ], links:[1,2,3,4,5,6] },
-  { id:3, code:'O00103', name:'얼음·온도',  mode:'1개 선택', required:true,  cat:'음료 옵션', items:[
+  { id:3, code:'O00103', name:'얼음·온도',  mode:'1개 선택', required:true,  items:[
     { name:'얼음 보통', price:0 },
     { name:'얼음 적게', price:0 },
     { name:'따뜻하게',  price:0 },
@@ -4908,9 +4908,6 @@ const CAT_MENU = [
   { id:1, name:'커피',   order:1 },
   { id:2, name:'음료',   order:2 },
   { id:3, name:'디저트', order:3 },
-];
-const CAT_OPT = [
-  { id:1, name:'음료 옵션', order:1 },
 ];
 
 // 세트 메뉴 — 자리(slot) + 후보 메뉴 + 추가 금액 모델
@@ -4960,7 +4957,6 @@ function setPriceRange(s){
 state.menuCatFilter   = 'all';
 state.menuStatusFilter= 'all';
 state.menuSearch      = '';
-state.catTab          = 'menu';   // 'menu' | 'option'
 state.trLang          = 'en';     // 번역 현재 언어 탭
 state.trTarget        = 'menu';   // 'menu' | 'option' | 'set'
 state.trSearch        = '';
@@ -5048,8 +5044,7 @@ state.menuBulkRows = [];           // [{code, name, price, desc, img, status, ca
 state.optBulkCards = [];           // [{name, mode, required, cat, items:[{name, price}]}]
 state.catForm = {                  // 카테고리 입력 폼
   name:'', order:1,
-  pickedMenus:[],                  // 메뉴 카테고리에 담을 메뉴 id
-  pickedOpts:[],                   // 옵션 카테고리에 담을 옵션 그룹 id
+  pickedMenus:[],                  // 카테고리에 담을 메뉴 id
 };
 state.setForm = {                  // 세트 입력 폼 — 자리(slot) + 후보 메뉴 모델
   name:'', basePrice:0, desc:'',
@@ -5100,7 +5095,7 @@ function mmHeaderHTML(activeKey){
     <div class="mm-stats">
       <div class="mm-stat${activeKey==='menu'?' on':''}" onclick="setSection('menu')"><span class="ic">🍽️</span><span class="lbl">메뉴</span><b>${MENUS.length}</b></div>
       <div class="mm-stat${activeKey==='option'?' on':''}" onclick="setSection('option')"><span class="ic">🧩</span><span class="lbl">옵션</span><b>${OPT_GROUPS.length}</b></div>
-      <div class="mm-stat${activeKey==='category'?' on':''}" onclick="setSection('category')"><span class="ic">🗂️</span><span class="lbl">카테고리</span><b>${CAT_MENU.length+CAT_OPT.length}</b></div>
+      <div class="mm-stat${activeKey==='category'?' on':''}" onclick="setSection('category')"><span class="ic">🗂️</span><span class="lbl">카테고리</span><b>${CAT_MENU.length}</b></div>
       <div class="mm-stat${activeKey==='set'?' on':''}" onclick="setSection('set')"><span class="ic">🎁</span><span class="lbl">세트</span><b>${SETS.length}</b></div>
     </div>
   `;
@@ -5195,8 +5190,8 @@ function toggleSelAll(selKey, ids){
 // ▲▼ 정렬 버튼 td
 function sortButtonsTd(arr, idx){
   return `<td style="width:50px;white-space:nowrap;">
-    <button class="btn-ghost" style="padding:4px 6px;font-size:11px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(${arr === MENUS ? 'MENUS' : arr === OPT_GROUPS ? 'OPT_GROUPS' : arr === SETS ? 'SETS' : arr === CAT_MENU ? 'CAT_MENU' : 'CAT_OPT'}, ${idx}, -1);renderApp()" title="위로">▲</button>
-    <button class="btn-ghost" style="padding:4px 6px;font-size:11px;${idx===arr.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(${arr === MENUS ? 'MENUS' : arr === OPT_GROUPS ? 'OPT_GROUPS' : arr === SETS ? 'SETS' : arr === CAT_MENU ? 'CAT_MENU' : 'CAT_OPT'}, ${idx}, 1);renderApp()" title="아래로">▼</button>
+    <button class="btn-ghost" style="padding:4px 6px;font-size:11px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(${arr === MENUS ? 'MENUS' : arr === OPT_GROUPS ? 'OPT_GROUPS' : arr === SETS ? 'SETS' : 'CAT_MENU'}, ${idx}, -1);renderApp()" title="위로">▲</button>
+    <button class="btn-ghost" style="padding:4px 6px;font-size:11px;${idx===arr.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(${arr === MENUS ? 'MENUS' : arr === OPT_GROUPS ? 'OPT_GROUPS' : arr === SETS ? 'SETS' : 'CAT_MENU'}, ${idx}, 1);renderApp()" title="아래로">▼</button>
   </td>`;
 }
 function effectiveStatus(m){
@@ -5231,13 +5226,12 @@ function loadMenuSample(){
     if (!confirm('지금 등록된 메뉴·옵션·세트가 있어요.\n샘플로 덮어쓸까요?')) return;
   }
   MENUS.length = 0; OPT_GROUPS.length = 0; SETS.length = 0;
-  CAT_MENU.length = 0; CAT_OPT.length = 0;
+  CAT_MENU.length = 0;
   CAT_MENU.push(
     { id:1, name:'커피',   order:1 },
     { id:2, name:'음료',   order:2 },
     { id:3, name:'디저트', order:3 },
   );
-  CAT_OPT.push({ id:1, name:'음료 옵션', order:1 });
   MENUS.push(
     { id:1, code:'M00101', name:'아메리카노',         cat:'커피',    price:4500, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%' },
     { id:2, code:'M00102', name:'카페라떼',           cat:'커피',    price:5000, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%' },
@@ -5250,16 +5244,16 @@ function loadMenuSample(){
     { id:9, code:'M00303', name:'마들렌',             cat:'디저트',  price:2800, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴' },
   );
   OPT_GROUPS.push(
-    { id:1, code:'O00101', name:'샷 추가',    mode:'중복 선택',     required:false, cat:'음료 옵션', items:[
+    { id:1, code:'O00101', name:'샷 추가',    mode:'중복 선택',     required:false, items:[
       { name:'샷 1번 추가',   price:600 },
       { name:'샷 2번 추가',   price:1200 },
       { name:'디카페인 변경', price:500 },
     ], links:[1,2,3,4] },
-    { id:2, code:'O00102', name:'사이즈',     mode:'1개 선택', required:true,  cat:'음료 옵션', items:[
+    { id:2, code:'O00102', name:'사이즈',     mode:'1개 선택', required:true,  items:[
       { name:'Regular', price:0 },
       { name:'Large',   price:800 },
     ], links:[1,2,3,4,5,6] },
-    { id:3, code:'O00103', name:'얼음·온도',  mode:'1개 선택', required:true,  cat:'음료 옵션', items:[
+    { id:3, code:'O00103', name:'얼음·온도',  mode:'1개 선택', required:true,  items:[
       { name:'얼음 보통', price:0 },
       { name:'얼음 적게', price:0 },
       { name:'따뜻하게',  price:0 },
@@ -5290,7 +5284,7 @@ function loadMenuSample(){
 }
 
 function exportMenuJSON(){
-  const payload = { menus:MENUS, optGroups:OPT_GROUPS, catMenu:CAT_MENU, catOpt:CAT_OPT, sets:SETS, exportedAt:new Date().toISOString() };
+  const payload = { menus:MENUS, optGroups:OPT_GROUPS, catMenu:CAT_MENU, sets:SETS, exportedAt:new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -5309,7 +5303,6 @@ function importMenuJSON(ev){
       MENUS.length = 0;       (p.menus||[]).forEach(x=>MENUS.push(x));
       OPT_GROUPS.length = 0;  (p.optGroups||[]).forEach(x=>OPT_GROUPS.push(x));
       CAT_MENU.length = 0;    (p.catMenu||[]).forEach(x=>CAT_MENU.push(x));
-      CAT_OPT.length = 0;     (p.catOpt||[]).forEach(x=>CAT_OPT.push(x));
       SETS.length = 0;        (p.sets||[]).forEach(x=>SETS.push(x));
       renderApp();
     }catch(err){ alert('파일 형식을 확인해 주세요.'); }
@@ -5320,9 +5313,9 @@ function importMenuJSON(ev){
 
 function resetMenuAll(){
   if (!confirm('메뉴·옵션·카테고리·세트를 모두 비울까요?\n되돌릴 수 없어요.')) return;
-  MENUS.length = 0; OPT_GROUPS.length = 0; CAT_MENU.length = 0; CAT_OPT.length = 0; SETS.length = 0;
+  MENUS.length = 0; OPT_GROUPS.length = 0; CAT_MENU.length = 0; SETS.length = 0;
   state.menuBulkRows = []; state.optBulkCards = [];
-  state.catForm = { name:'', order:1, pickedMenus:[], pickedOpts:[] };
+  state.catForm = { name:'', order:1, pickedMenus:[] };
   state.setForm = { name:'', basePrice:0, desc:'', slots:[] };
   renderApp();
 }
@@ -5970,7 +5963,7 @@ function menuNavTabs(){
   const tabs = [
     { key:'menu',     ic:'🍽️', label:'메뉴판',       cnt: MENUS.length },
     { key:'option',   ic:'🧩', label:'옵션 선택지',  cnt: OPT_GROUPS.length },
-    { key:'category', ic:'🗂️', label:'카테고리',     cnt: CAT_MENU.length + CAT_OPT.length },
+    { key:'category', ic:'🗂️', label:'카테고리',     cnt: CAT_MENU.length },
     { key:'set',      ic:'🎁', label:'세트',         cnt: SETS.length },
     { key:'origin',   ic:'🌿', label:'원산지',       cnt: STORE_ORIGIN.text.split('\n').filter(l=>l.trim()).length },
   ];
@@ -6444,7 +6437,7 @@ function renderOption(main){
                   <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===OPT_GROUPS.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(OPT_GROUPS, ${idx}, 1);renderApp()" title="아래로">▼</button>
                 </td>
                 <td style="font-family:ui-monospace,'SF Mono',monospace;color:var(--ink-2);font-size:12px;">${g.code}</td>
-                <td><b>${g.name}</b><div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${g.cat}</div></td>
+                <td><b>${g.name}</b></td>
                 <td>
                   <span class="pill ${g.required?'pending':'hold'}">${g.required?'필수':'선택'}</span>
                   <div style="font-size:11px;color:var(--ink-3);margin-top:4px;">${g.mode}</div>
@@ -6473,7 +6466,6 @@ function saveOptBulk(){
     OPT_GROUPS.push({
       id: nextId++, code: c.code || genCode('O'),
       name: c.name, mode: c.mode||'1개 선택', required: !!c.required,
-      cat: CAT_OPT[0]?.name || '미분류',
       items: c.items.filter(it=>it.name).map(it=>({name:it.name, price:it.price||0})),
       links: [],
     });
@@ -6494,20 +6486,15 @@ function deleteOpt(id){
    ============================================================ */
 function renderCategory(main){
   const h = mmHeaderHTML('category');
-  const isMenu = state.catTab === 'menu';
-  const list = isMenu ? CAT_MENU : CAT_OPT;
   const form = state.catForm;
-  const picked = isMenu ? form.pickedMenus : form.pickedOpts;
-  const pool = isMenu ? MENUS : OPT_GROUPS;
+  const picked = form.pickedMenus;
 
-  const pickerItems = pool.map(p => {
+  const pickerItems = MENUS.map(p => {
     const isPicked = picked.includes(p.id);
-    const meta = isMenu
-      ? `${p.cat||'미분류'} · ${fmt(p.price)}원`
-      : `${p.items.length}개 항목`;
+    const meta = `${p.cat||'미분류'} · ${fmt(p.price)}원`;
     return `
       <div class="picker-item ${isPicked?'picked':''}" onclick="toggleCatPick(${p.id})">
-        <span class="pi-ic">${isMenu ? (p.img||'🍽️') : '🧩'}</span>
+        <span class="pi-ic">${p.img||'🍽️'}</span>
         <div class="pi-body">
           <div class="pi-name">${p.name}</div>
           <div class="pi-meta">${meta}</div>
@@ -6524,7 +6511,7 @@ function renderCategory(main){
     <div class="toolbar">
       <div>
         <h2>카테고리</h2>
-        <div class="page-sub">메뉴 카테고리와 옵션 카테고리를 따로 관리해요.</div>
+        <div class="page-sub">메뉴를 묶는 카테고리예요. 손님 주문 화면에 그대로 보여요.</div>
       </div>
       ${h.tools}
     </div>
@@ -6532,33 +6519,28 @@ function renderCategory(main){
     <div class="panel">
       <h3>
         <span>카테고리 등록</span>
-        <span class="h-sub">메뉴 카테고리는 고객 화면에 그대로 노출돼요</span>
+        <span class="h-sub">정렬 순서가 작을수록 위에 표시돼요</span>
       </h3>
-
-      <div class="tabs" style="margin-bottom:16px;">
-        <div class="t ${isMenu?'on':''}" onclick="switchCatTab('menu')">📋 메뉴 카테고리 <span style="color:var(--ink-4);font-weight:500;margin-left:4px;">${CAT_MENU.length}</span></div>
-        <div class="t ${!isMenu?'on':''}" onclick="switchCatTab('option')">🧩 옵션 카테고리 <span style="color:var(--ink-4);font-weight:500;margin-left:4px;">${CAT_OPT.length}</span></div>
-      </div>
 
       <div class="form-grid" style="margin-bottom:14px;">
         <div class="form-row">
-          <label>${isMenu?'메뉴':'옵션'} 카테고리명 *</label>
-          <input class="input" placeholder="${isMenu?'예) 커피, 디저트':'예) 음료 옵션, 토핑 옵션'}" value="${form.name||''}" oninput="state.catForm.name=this.value" />
+          <label>카테고리명 *</label>
+          <input class="input" placeholder="예) 커피, 디저트" value="${form.name||''}" oninput="state.catForm.name=this.value" />
         </div>
         <div class="form-row">
           <label>정렬 순서</label>
-          <input class="input" type="number" placeholder="1" value="${form.order||list.length+1}" oninput="state.catForm.order=Number(this.value)||1" />
+          <input class="input" type="number" placeholder="1" value="${form.order||CAT_MENU.length+1}" oninput="state.catForm.order=Number(this.value)||1" />
         </div>
       </div>
 
       <div class="picker-wrap" style="margin-bottom:14px;">
         <div class="picker-title">
-          <span>${isMenu?'📋 메뉴 불러오기':'🧩 옵션 그룹 불러오기'} — 클릭해서 카테고리에 담아요</span>
+          <span>📋 메뉴 불러오기 — 클릭해서 카테고리에 담아요</span>
           <span style="color:var(--blue);font-weight:700;">선택 ${picked.length}개</span>
         </div>
         <div class="picker-grid">
-          ${pool.length===0
-            ? `<div class="picker-empty" style="grid-column:1/-1;">먼저 ${isMenu?'메뉴를':'옵션 그룹을'} 등록해 주세요.</div>`
+          ${MENUS.length===0
+            ? `<div class="picker-empty" style="grid-column:1/-1;">먼저 메뉴를 등록해 주세요.</div>`
             : pickerItems}
         </div>
       </div>
@@ -6566,68 +6548,58 @@ function renderCategory(main){
       <div class="bulk-actions">
         <button class="btn-ghost" onclick="clearCatForm()">입력 초기화</button>
         <div class="right">
-          <button class="btn-primary" onclick="saveCategory()">${isMenu?'메뉴':'옵션'} 카테고리 추가</button>
+          <button class="btn-primary" onclick="saveCategory()">카테고리 추가</button>
         </div>
-      </div>
-
-      <div class="hint" style="margin-top:10px;font-size:12px;color:var(--ink-3);line-height:1.55;">
-        💡 ${isMenu
-          ? '메뉴 카테고리는 고객 주문 화면에 노출돼요. 정렬 순서가 작을수록 위에 표시돼요.'
-          : '옵션 카테고리는 사장님이 옵션 그룹을 정리하는 폴더로만 쓰여요. 고객에게는 보이지 않아요.'}
       </div>
     </div>
 
     <div class="panel tight">
-      <h3>등록된 ${isMenu?'메뉴':'옵션'} 카테고리 <span class="h-sub">${list.length}개</span></h3>
+      <h3>등록된 카테고리 <span class="h-sub">${CAT_MENU.length}개</span></h3>
       <table class="t">
         <thead>
           <tr>
             <th style="width:50px;">순서</th>
             <th style="width:200px;">카테고리명</th>
-            ${isMenu ? `<th style="width:130px;">노출 모드</th><th style="width:110px;">운영 상태</th>` : ''}
-            <th>포함 ${isMenu?'메뉴':'옵션 그룹'}</th>
+            <th style="width:130px;">노출 모드</th>
+            <th style="width:110px;">운영 상태</th>
+            <th>포함 메뉴</th>
             <th style="width:60px;" class="num">개수</th>
-            ${isMenu ? `<th style="width:130px;">판매 시간</th>` : ''}
+            <th style="width:130px;">판매 시간</th>
             <th style="width:140px;"></th>
           </tr>
         </thead>
         <tbody>
-          ${list.length===0 ? `<tr class="empty-row"><td colspan="${isMenu?8:5}">위에서 첫 카테고리를 추가해 주세요.</td></tr>` : list.map((c, idx)=>{
-            if (isMenu) ensureCatExtras(c);
-            if (isMenu && !c.schedule) c.schedule = { enabled:false, days:[0,1,2,3,4,5,6], start:'09:00', end:'22:00' };
-            const itemsInCat = isMenu
-              ? MENUS.filter(m=>m.cat===c.name)
-              : OPT_GROUPS.filter(o=>o.cat===c.name);
+          ${CAT_MENU.length===0 ? `<tr class="empty-row"><td colspan="8">위에서 첫 카테고리를 추가해 주세요.</td></tr>` : CAT_MENU.map((c, idx)=>{
+            ensureCatExtras(c);
+            if (!c.schedule) c.schedule = { enabled:false, days:[0,1,2,3,4,5,6], start:'09:00', end:'22:00' };
+            const itemsInCat = MENUS.filter(m=>m.cat===c.name);
             const chips = itemsInCat.map(x=>`<span class="chip" style="font-size:11px;padding:3px 8px;cursor:default;margin:1px;">${x.name}</span>`).join('');
-            const arrName = isMenu?'CAT_MENU':'CAT_OPT';
-            const schTxt = isMenu ? scheduleLabel(c.schedule) : '';
+            const schTxt = scheduleLabel(c.schedule);
             return `
-              <tr${isMenu&&c.paused?` style="background:#fff7f7;opacity:.7;"`:''}>
+              <tr${c.paused?` style="background:#fff7f7;opacity:.7;"`:''}>
                 <td style="white-space:nowrap;">
                   <b style="margin-right:4px;">${idx+1}</b>
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(${arrName}, ${idx}, -1);renderApp()" title="위로">▲</button>
-                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===list.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(${arrName}, ${idx}, 1);renderApp()" title="아래로">▼</button>
+                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(CAT_MENU, ${idx}, -1);renderApp()" title="위로">▲</button>
+                  <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===CAT_MENU.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(CAT_MENU, ${idx}, 1);renderApp()" title="아래로">▼</button>
                 </td>
                 <td><b>${c.name}</b></td>
-                ${isMenu ? `
-                  <td>
-                    <div style="display:inline-flex;background:var(--bg-2);border-radius:8px;padding:2px;">
-                      <span onclick="toggleCatDisplayMode(${c.id},'grid')" style="padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;background:${c.displayMode==='grid'?'#fff':'transparent'};color:${c.displayMode==='grid'?'var(--ink)':'var(--ink-3)'};box-shadow:${c.displayMode==='grid'?'0 1px 2px rgba(0,0,0,.06)':'none'};">📷 그리드</span>
-                      <span onclick="toggleCatDisplayMode(${c.id},'list')" style="padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;background:${c.displayMode==='list'?'#fff':'transparent'};color:${c.displayMode==='list'?'var(--ink)':'var(--ink-3)'};box-shadow:${c.displayMode==='list'?'0 1px 2px rgba(0,0,0,.06)':'none'};">📋 리스트</span>
-                    </div>
-                  </td>
-                  <td>
-                    <label class="toggle-switch ${!c.paused?'on':''}" onclick="toggleCatPaused(${c.id})">
-                      <div class="sw"></div>
-                      <span style="font-size:11px;">${c.paused?'중지':'운영'}</span>
-                    </label>
-                  </td>
-                ` : ''}
-                <td><div style="display:flex;flex-wrap:wrap;gap:2px;">${chips || `<span style="color:var(--ink-4);font-size:12px;">${isMenu?'메뉴':'옵션 그룹'}을 연결해 주세요</span>`}</div></td>
-                <td class="num"><b>${itemsInCat.length}</b></td>
-                ${isMenu ? `<td><span style="font-size:11px;color:${c.schedule&&c.schedule.enabled?'var(--blue)':'var(--ink-3)'};font-weight:${c.schedule&&c.schedule.enabled?700:400};">${c.schedule&&c.schedule.enabled?'🕒 ':''}${schTxt}</span></td>` : ''}
                 <td>
-                  ${isMenu ? `<button class="btn-ghost" style="padding:6px 7px;font-size:11px;" onclick="openCategoryScheduleModal(${c.id})" title="판매 시간">🕒</button>` : ''}
+                  <div style="display:inline-flex;background:var(--bg-2);border-radius:8px;padding:2px;">
+                    <span onclick="toggleCatDisplayMode(${c.id},'grid')" style="padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;background:${c.displayMode==='grid'?'#fff':'transparent'};color:${c.displayMode==='grid'?'var(--ink)':'var(--ink-3)'};box-shadow:${c.displayMode==='grid'?'0 1px 2px rgba(0,0,0,.06)':'none'};">📷 그리드</span>
+                    <span onclick="toggleCatDisplayMode(${c.id},'list')" style="padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;background:${c.displayMode==='list'?'#fff':'transparent'};color:${c.displayMode==='list'?'var(--ink)':'var(--ink-3)'};box-shadow:${c.displayMode==='list'?'0 1px 2px rgba(0,0,0,.06)':'none'};">📋 리스트</span>
+                  </div>
+                </td>
+                <td>
+                  <label class="toggle-switch ${!c.paused?'on':''}" onclick="toggleCatPaused(${c.id})">
+                    <div class="sw"></div>
+                    <span style="font-size:11px;">${c.paused?'중지':'운영'}</span>
+                  </label>
+                </td>
+                <td><div style="display:flex;flex-wrap:wrap;gap:2px;">${chips || `<span style="color:var(--ink-4);font-size:12px;">메뉴를 연결해 주세요</span>`}</div></td>
+                <td class="num"><b>${itemsInCat.length}</b></td>
+                <td><span style="font-size:11px;color:${c.schedule&&c.schedule.enabled?'var(--blue)':'var(--ink-3)'};font-weight:${c.schedule&&c.schedule.enabled?700:400};">${c.schedule&&c.schedule.enabled?'🕒 ':''}${schTxt}</span></td>
+                <td>
+                  <button class="btn-ghost" style="padding:6px 7px;font-size:11px;" onclick="openCategoryScheduleModal(${c.id})" title="판매 시간">🕒</button>
                   <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);" onclick="deleteCategory(${c.id})">✕</button>
                 </td>
               </tr>
@@ -6639,48 +6611,32 @@ function renderCategory(main){
   `;
 }
 
-function switchCatTab(tab){
-  state.catTab = tab;
-  state.catForm = { name:'', order:(tab==='menu'?CAT_MENU.length:CAT_OPT.length)+1, pickedMenus:[], pickedOpts:[] };
-  renderApp();
-}
 function toggleCatPick(id){
-  const f = state.catForm;
-  const arr = state.catTab==='menu' ? f.pickedMenus : f.pickedOpts;
+  const arr = state.catForm.pickedMenus;
   const i = arr.indexOf(id);
   if (i>=0) arr.splice(i,1); else arr.push(id);
   renderApp();
 }
 function clearCatForm(){
-  state.catForm = { name:'', order:1, pickedMenus:[], pickedOpts:[] };
+  state.catForm = { name:'', order:1, pickedMenus:[] };
   renderApp();
 }
 function saveCategory(){
   const f = state.catForm;
   if (!f.name){ alert('카테고리명을 입력해 주세요.'); return; }
-  const isMenu = state.catTab === 'menu';
-  const list = isMenu ? CAT_MENU : CAT_OPT;
-  const nextId = (list.reduce((m,c)=>Math.max(m,c.id),0))+1;
-  list.push({ id:nextId, name:f.name, order:f.order||list.length+1 });
-  // 선택한 메뉴·옵션 그룹의 cat을 새 카테고리로 이동
-  if (isMenu){
-    MENUS.forEach(m => { if (f.pickedMenus.includes(m.id)) m.cat = f.name; });
-  } else {
-    OPT_GROUPS.forEach(o => { if (f.pickedOpts.includes(o.id)) o.cat = f.name; });
-  }
+  const nextId = (CAT_MENU.reduce((m,c)=>Math.max(m,c.id),0))+1;
+  CAT_MENU.push({ id:nextId, name:f.name, order:f.order||CAT_MENU.length+1 });
+  MENUS.forEach(m => { if (f.pickedMenus.includes(m.id)) m.cat = f.name; });
   clearCatForm();
 }
 function deleteCategory(id){
-  const isMenu = state.catTab === 'menu';
-  const list = isMenu ? CAT_MENU : CAT_OPT;
-  const i = list.findIndex(c=>c.id===id);
+  const i = CAT_MENU.findIndex(c=>c.id===id);
   if (i<0) return;
-  const target = list[i];
-  const inUse = isMenu ? MENUS.filter(m=>m.cat===target.name).length : OPT_GROUPS.filter(o=>o.cat===target.name).length;
-  if (inUse>0 && !confirm(`소속 ${isMenu?'메뉴':'옵션 그룹'} ${inUse}개가 있어요. 삭제하면 '미분류'로 옮겨져요.\n그래도 삭제할까요?`)) return;
-  if (isMenu) MENUS.forEach(m=>{ if (m.cat===target.name) m.cat='미분류'; });
-  else        OPT_GROUPS.forEach(o=>{ if (o.cat===target.name) o.cat='미분류'; });
-  list.splice(i,1);
+  const target = CAT_MENU[i];
+  const inUse = MENUS.filter(m=>m.cat===target.name).length;
+  if (inUse>0 && !confirm(`소속 메뉴 ${inUse}개가 있어요. 삭제하면 '미분류'로 옮겨져요.\n그래도 삭제할까요?`)) return;
+  MENUS.forEach(m=>{ if (m.cat===target.name) m.cat='미분류'; });
+  CAT_MENU.splice(i,1);
   renderApp();
 }
 
@@ -8000,12 +7956,6 @@ function openOptionFormModal(id){
         <input class="input" style="width:100%;font-family:ui-monospace,monospace;" placeholder="자동 생성" value="${g?g.code:''}" ${g?'readonly':''} />
       </div>
       <div>
-        <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:6px;">옵션 카테고리</label>
-        <select class="input" style="width:100%;">
-          ${CAT_OPT.map(c=>`<option ${g&&g.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
-        </select>
-      </div>
-      <div style="grid-column:span 2;">
         <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:6px;">옵션 그룹명 *</label>
         <input class="input" style="width:100%;" placeholder="예) 샷 추가" value="${g?g.name:''}" />
       </div>
@@ -8048,32 +7998,28 @@ function openOptionFormModal(id){
 }
 
 function openCategoryFormModal(id){
-  const isMenu = state.catTab === 'menu';
-  const list = isMenu ? CAT_MENU : CAT_OPT;
-  const c = id ? list.find(x=>x.id===id) : null;
+  const c = id ? CAT_MENU.find(x=>x.id===id) : null;
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-head">
       <div>
-        <h3>${c?'카테고리 관리':isMenu?'메뉴 카테고리 추가':'옵션 카테고리 추가'}</h3>
-        <div class="modal-sub">${c?c.name:isMenu?'예) 커피, 디저트':'예) 음료 옵션, 토핑 옵션'}</div>
+        <h3>${c?'카테고리 관리':'카테고리 추가'}</h3>
+        <div class="modal-sub">${c?c.name:'예) 커피, 디저트'}</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;">
       <div>
         <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:6px;">카테고리명 *</label>
-        <input class="input" style="width:100%;" placeholder="${isMenu?'예) 커피':'예) 음료 옵션'}" value="${c?c.name:''}" />
+        <input class="input" style="width:100%;" placeholder="예) 커피" value="${c?c.name:''}" />
       </div>
       <div>
         <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:6px;">정렬 순서</label>
-        <input class="input" style="width:100%;" type="number" placeholder="1" value="${c?c.order:list.length+1}" />
+        <input class="input" style="width:100%;" type="number" placeholder="1" value="${c?c.order:CAT_MENU.length+1}" />
       </div>
     </div>
     <div class="info-card" style="margin-top:14px;">
-      💡 ${isMenu
-        ? '메뉴 카테고리는 <b>고객 주문 화면</b>에 그대로 노출돼요. 정렬 순서가 작을수록 위에 표시돼요.'
-        : '옵션 카테고리는 사장님이 옵션 그룹을 정리하는 용도로만 쓰여요. 고객에게는 보이지 않아요.'}
+      💡 카테고리는 <b>고객 주문 화면</b>에 그대로 노출돼요. 정렬 순서가 작을수록 위에 표시돼요.
     </div>
     <div style="display:flex;gap:8px;margin-top:18px;">
       ${c?`<button class="btn-ghost" style="color:var(--red);border-color:#ffd0d4;" onclick="closeModal()">삭제</button>`:''}

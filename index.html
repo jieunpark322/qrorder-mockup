@@ -488,6 +488,8 @@
   /* 컴팩트 워크플로 — 점 + 라벨 */
   /* 메뉴관리 탭 — 카드 블록형 네비게이션 */
   .mnav{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px;}
+  /* QR 관리 — 4개 섹션 퀵 점프 탭 (페이지 내 스크롤) */
+  .qr-quick-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
   .mnav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 12px;background:#fff;border:2px solid var(--line);border-radius:14px;cursor:pointer;transition:border-color .15s,background .15s,transform .12s,box-shadow .15s;text-align:center;position:relative;user-select:none;}
   .mnav-tab:hover{border-color:var(--blue-100);background:#f7faff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.04);}
   .mnav-tab.on{background:var(--blue);border-color:var(--blue);box-shadow:0 6px 18px rgba(49,130,246,.28);transform:translateY(-1px);}
@@ -5959,6 +5961,35 @@ function renderMenuPhonePreview(){
   `;
 }
 
+// QR 관리 — 페이지 내 4개 섹션으로 점프하는 퀵 탭
+function qrQuickTabs(){
+  const takeoutActive = isTakeoutQRActive();
+  const tabs = [
+    { key:'table',   ic:'🪑', label:'테이블 QR',       cnt: TABLES.length },
+    { key:'takeout', ic:'🛍️', label:'포장 주문 QR',   cnt: takeoutActive ? 1 : 0 },
+    { key:'menu',    ic:'📖', label:'메뉴판 QR',       cnt: 1 },
+    { key:'sticker', ic:'📦', label:'QR 스티커 신청', cnt: QR_REQUESTS.length },
+  ];
+  return `
+    <div class="qr-quick-tabs">
+      ${tabs.map(t=>`
+        <div class="mnav-tab" onclick="scrollToQRSection('${t.key}')">
+          <span class="mnav-ic">${t.ic}</span>
+          <span class="mnav-lbl">${t.label}</span>
+          <span class="mnav-cnt">${t.cnt}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+function scrollToQRSection(key){
+  const el = document.getElementById('qr-section-' + key);
+  if(!el) return;
+  // .pc 부모가 overflow:hidden이라 scrollIntoView가 window로 전파되지 않으므로 직접 스크롤
+  const top = el.getBoundingClientRect().top + window.scrollY - 16;
+  window.scrollTo(0, top);
+}
+
 function menuNavTabs(){
   const tabs = [
     { key:'menu',     ic:'🍽️', label:'메뉴판',       cnt: MENUS.length },
@@ -8961,6 +8992,8 @@ function renderQR(main){
       </div>
     </div>
 
+    ${qrQuickTabs()}
+
     <!-- 안내 — 임시 출력 vs 정식 스티커 -->
     <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
       <span style="font-size:16px;flex-shrink:0;">💡</span>
@@ -8971,7 +9004,7 @@ function renderQR(main){
     </div>
 
     <!-- ① 테이블별 QR 및 주문 링크 -->
-    <div class="panel">
+    <div class="panel" id="qr-section-table">
       <h3>🪑 테이블 QR <span class="h-sub">테이블 관리에서 만든 테이블마다 자동 생성돼요</span>
         <span class="h-act"><span style="font-size:12px;color:var(--blue);font-weight:700;cursor:pointer;" onclick="setSection('table')">테이블 관리 →</span></span>
       </h3>
@@ -9004,7 +9037,7 @@ function renderQR(main){
     </div>
 
     <!-- ② 포장 주문 QR — ORDER_CHANNELS.mode 기반 자동 -->
-    <div class="panel">
+    <div class="panel" id="qr-section-takeout">
       <h3>🛍️ 포장 주문 QR <span class="h-sub">${isTakeoutQRActive()?'주문 방식에서 포장이 켜져 있어 자동 생성돼요':'포장 주문이 꺼져 있어요'}</span>
         <span class="h-act"><span style="font-size:12px;color:var(--blue);font-weight:700;cursor:pointer;" onclick="setSection('order-type')">주문 방식 →</span></span>
       </h3>
@@ -9033,7 +9066,7 @@ function renderQR(main){
     </div>
 
     <!-- ③ 메뉴판 QR — 매장당 항상 1개 자동 -->
-    <div class="panel">
+    <div class="panel" id="qr-section-menu">
       <h3>📖 메뉴판 QR <span class="h-sub">매장 운영 모드와 무관하게 자동 생성돼요 · 외부 진열·SNS 공유용</span></h3>
 
       <!-- 주문 불가 안내 -->
@@ -9061,7 +9094,7 @@ function renderQR(main){
     </div>
 
     <!-- ④ QR 이미지 추가 신청 -->
-    <div class="panel">
+    <div class="panel" id="qr-section-sticker">
       <h3>📦 정식 QR 스티커 신청</h3>
       <div class="page-sub" style="margin-bottom:14px;">추가 QR이 필요할 땐 <b style="color:var(--ink-2);">${QR_BATCH_SIZE}장 단위</b>로 한 번에 신청해 주세요. 한 번 신청 시 <b style="color:var(--ink-2);">색상 1가지</b>만 선택할 수 있어요.</div>
 

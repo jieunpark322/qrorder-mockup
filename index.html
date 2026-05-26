@@ -756,7 +756,54 @@
   .oc-opt-label{font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:3px;}
   .oc-opt-desc{font-size:11px;color:var(--ink-4);line-height:1.5;}
   .oc-opt-text{flex:1;min-width:0;}
-  /* 주문 방식 — 세그먼트 (선불/후불) */
+  /* 주문 방식 — 상단 현재 정책 스트립 */
+  .ot-strip{background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;color:#1e40af;}
+  .ot-strip .now{display:flex;align-items:center;gap:8px;font-size:13px;}
+  .ot-strip .now b{font-weight:800;}
+  /* 주문 방식 — 채널 4종 카드 (단일 선택) */
+  .ot-modes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .ot-mode{border:2px solid var(--line);border-radius:12px;padding:18px 14px;text-align:center;cursor:pointer;background:#fff;transition:all .12s;}
+  .ot-mode:hover{border-color:var(--blue-100);background:#f7faff;}
+  .ot-mode.sel{border-color:var(--blue);background:var(--blue-50);box-shadow:0 4px 12px rgba(49,130,246,.18);}
+  .ot-mode .ic{font-size:28px;display:block;margin-bottom:8px;}
+  .ot-mode .nm{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:3px;}
+  .ot-mode.sel .nm{color:var(--blue);}
+  .ot-mode .dc{font-size:11px;color:var(--ink-3);line-height:1.4;}
+  /* 행 패턴 */
+  .ot-row{display:flex;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap;}
+  .ot-row + .ot-row{border-top:1px dashed var(--line);}
+  .ot-row .lbl{font-size:13px;font-weight:700;color:var(--ink-2);min-width:120px;}
+  .ot-row .lbl small{display:block;font-size:10px;color:var(--ink-4);font-weight:400;margin-top:2px;}
+  /* 읽기 전용 표시 (서빙 방식 잠금) */
+  .ot-locked{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg-2);border:1px dashed var(--line);border-radius:10px;font-size:13px;color:var(--ink-2);font-weight:600;}
+  .ot-locked .lock{color:var(--ink-4);}
+  /* 옵션 칩 (호출 방식·결제 정책) */
+  .ot-opt{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;cursor:pointer;background:#fff;user-select:none;transition:all .12s;color:var(--ink-2);font-weight:600;}
+  .ot-opt:hover{border-color:var(--blue-100);background:#f7faff;}
+  .ot-opt.sel{border-color:var(--blue);background:var(--blue-50);color:var(--blue);font-weight:800;}
+  .ot-opt.dis{opacity:.45;cursor:not-allowed;}
+  .ot-opt.dis:hover{background:#fff;border-color:var(--line);}
+  /* 시간대 슬롯 */
+  .ot-slot{display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px;margin-bottom:6px;flex-wrap:wrap;background:#fff;}
+  .ot-slot .nm{font-size:11px;color:var(--ink-3);min-width:42px;font-weight:700;}
+  .ot-slot .pmt{padding:5px 12px;border-radius:6px;background:var(--blue-50);color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;}
+  .ot-slot .pmt:hover{background:#cfe4ff;}
+  .ot-slot .x{color:var(--ink-4);cursor:pointer;font-size:18px;padding:0 4px;}
+  .ot-slot .x:hover{color:var(--red);}
+  /* 5단계 시뮬레이션 */
+  .ot-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .ot-step{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 10px;text-align:center;font-size:11px;}
+  .ot-step .ic{font-size:22px;display:block;margin-bottom:6px;}
+  .ot-step .l{display:block;color:var(--ink-4);font-size:11px;margin-bottom:3px;font-weight:600;}
+  .ot-step .v{display:block;font-weight:800;font-size:12px;color:var(--ink);}
+  /* sticky 저장 바 */
+  .ot-savebar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 4px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;z-index:10;}
+  .ot-savebar .info{font-size:12px;color:var(--ink-4);}
+  .ot-savebar .info.dirty{color:#d97706;font-weight:700;}
+  .ot-savebar .actions{display:flex;gap:8px;}
+  /* 메뉴판만 모드 안내 */
+  .ot-menu-only{padding:24px;text-align:center;color:var(--ink-2);font-size:13px;background:var(--bg-2);border-radius:10px;margin-top:12px;line-height:1.65;}
+  /* 주문 방식 — 세그먼트 (선불/후불) — 기존 잔존 */
   .oc-seg{display:inline-flex;background:var(--bg-2);padding:3px;border-radius:10px;gap:0;flex-shrink:0;}
   .oc-seg .opt{padding:8px 16px;font-size:13px;font-weight:700;color:var(--ink-3);border-radius:8px;cursor:pointer;transition:all .12s;}
   .oc-seg .opt:hover{color:var(--ink-2);}
@@ -7952,32 +7999,28 @@ const STORE_INFO = {
 /* ============================================================
    주문 방식 설정 데이터
    ============================================================ */
+// 주문 방식 — 채널 단일 선택 + 시간대별 결제 정책 구조
 const ORDER_CHANNELS = {
-  // ① 테이블 주문 — 직원이 서빙
-  tableServe: {
-    enabled: true,
-    payTiming: 'prepay',          // prepay(선불) | postpay(후불)
-    printAt: ['kitchen','counter'], // multi: kitchen(주방용) / counter(카운터용)
-  },
-  // ② 테이블 주문 — 손님이 직접 수령
-  tableSelf: {
-    enabled: false,
-    notifyMethods: ['kakao'],      // multi: kakao(알림톡) / display(전광판)
-    collectTableNo: true,          // false면 공용 QR (테이블 번호 안 받음)
-  },
-  // ③ 매장에서 포장 주문
-  takeout: {
-    enabled: true,
-    useTakeoutMenu: false,         // 포장 전용 메뉴판 연동
-    prepTime: 15,                  // 예상 대기 시간 (분)
-  },
-  // ④ 매장 도착 전 미리 주문 (픽업 예약)
-  pickup: {
-    enabled: false,
-    timeSlot: 10,                  // 수령 시간 단위 (분)
-    minLeadTime: 30,               // 최소 조리 여유 시간 (분) — 주문 후 N분 이후부터 예약 가능
-    prepayRequired: true,          // 노쇼 대비 — 선결제 강제 (변경 불가)
-  },
+  mode: 'both',                    // menu_only | both | dine_in | takeout
+  service: 'self',                 // server | self — 직원 서빙 vs 손님 셀프 수령 (시스템 자동 결정)
+  notifications: ['kakao'],        // multi: call_name | kakao | display
+  // 포장 설정
+  takeoutDiscount: true,           // 포장 할인가 사용
+  waitMinutes: 20,                 // 포장 대기 시간 안내 (분)
+  reservation: false,              // 포장 예약 — ON 시 사장님 수락 필요
+  // 결제 정책 (매장 주문 활성 시)
+  payment: 'scheduled',            // prepay | postpay | scheduled (시간대별)
+  schedule: [
+    { name:'점심', start:'11:00', end:'14:30', policy:'prepay' },
+    { name:'저녁', start:'17:00', end:'21:00', policy:'postpay' },
+  ],
+  defaultPolicy: 'prepay',         // 미정 시간대 기본값
+  override: null,                  // { policy, until:timestamp } — 일시 강제 변경
+};
+const ORDER_LABELS = {
+  mode: { menu_only:'메뉴판만', both:'매장 + 포장', dine_in:'매장 주문만', takeout:'포장 주문만' },
+  modeDesc: { menu_only:'전자 메뉴판 · 주문 없음', both:'매장 식사와 픽업 둘 다', dine_in:'테이블 취식 전용', takeout:'픽업 전용' },
+  notify: { call_name:'호명', kakao:'알림톡', display:'전광판' },
 };
 
 /* ============================================================
@@ -9486,220 +9529,293 @@ function updateOriginPreview(){
 /* ============================================================
    주문 방식 설정 페이지
    ============================================================ */
-// 테이블 주문 두 채널(직원 서빙 ↔ 손님 직접 수령)은 상호 배타적
-// 운영 방식이 정반대라 동시 운영 불가
-function toggleTableMode(which){
-  if(which==='serve'){
-    const v = !ORDER_CHANNELS.tableServe.enabled;
-    ORDER_CHANNELS.tableServe.enabled = v;
-    if(v && ORDER_CHANNELS.tableSelf.enabled){ ORDER_CHANNELS.tableSelf.enabled = false; }
-  } else {
-    const v = !ORDER_CHANNELS.tableSelf.enabled;
-    ORDER_CHANNELS.tableSelf.enabled = v;
-    if(v && ORDER_CHANNELS.tableServe.enabled){ ORDER_CHANNELS.tableServe.enabled = false; }
+// 주문 방식 — 저장 상태 추적
+let ORDER_SAVED = JSON.stringify(ORDER_CHANNELS);
+function ot_isDirty(){ return JSON.stringify(ORDER_CHANNELS) !== ORDER_SAVED; }
+function ot_currentPolicy(){
+  const ch = ORDER_CHANNELS;
+  const dineIn = ch.mode==='both' || ch.mode==='dine_in';
+  const takeout = ch.mode==='both' || ch.mode==='takeout';
+  if(ch.mode==='menu_only') return { label:'주문 없음', scope:'메뉴판 전용' };
+  if(ch.override && ch.override.until>Date.now()){
+    const mins = Math.ceil((ch.override.until-Date.now())/60000);
+    return { label: ch.override.policy==='prepay'?'선결제':'후결제', scope:`수동 강제 — ${mins}분 남음` };
   }
+  if(!dineIn && takeout) return { label:'선결제', scope:'포장 전용' };
+  const now = new Date();
+  const hhmm = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  if(ch.payment==='prepay')  return { label:'선결제', scope:'고정 정책' };
+  if(ch.payment==='postpay') return { label:'후결제', scope:'고정 정책' };
+  const cur = ch.schedule.find(s=>hhmm>=s.start && hhmm<=s.end);
+  if(cur) return { label: cur.policy==='prepay'?'선결제':'후결제', scope:`${cur.name} 시간대` };
+  return { label: ch.defaultPolicy==='prepay'?'선결제':'후결제', scope:'미정 시간대 기본값' };
+}
+// 액션 핸들러
+function setOrderMode(m){ ORDER_CHANNELS.mode = m; renderApp(); }
+function toggleOrderNotif(k){
+  const a = ORDER_CHANNELS.notifications;
+  const i = a.indexOf(k);
+  if(i>=0) a.splice(i,1); else a.push(k);
+  renderApp();
+}
+function setOrderPayment(p){ ORDER_CHANNELS.payment = p; renderApp(); }
+function setOrderDefaultPolicy(p){ ORDER_CHANNELS.defaultPolicy = p; renderApp(); }
+function addOrderSlot(){ ORDER_CHANNELS.schedule.push({ name:'추가', start:'14:30', end:'17:00', policy:'prepay' }); renderApp(); }
+function removeOrderSlot(i){ ORDER_CHANNELS.schedule.splice(i,1); renderApp(); }
+function updateOrderSlot(i,k,v){ ORDER_CHANNELS.schedule[i][k]=v; renderApp(); }
+function toggleOrderSlotPolicy(i){ ORDER_CHANNELS.schedule[i].policy = ORDER_CHANNELS.schedule[i].policy==='prepay'?'postpay':'prepay'; renderApp(); }
+function toggleOrderField(field){ ORDER_CHANNELS[field] = !ORDER_CHANNELS[field]; renderApp(); }
+function updateOrderWait(v){ ORDER_CHANNELS.waitMinutes = Number(v); renderApp(); }
+function saveOrderType(){
+  const dineIn = ORDER_CHANNELS.mode==='both'||ORDER_CHANNELS.mode==='dine_in';
+  if(dineIn && ORDER_CHANNELS.service==='self' && ORDER_CHANNELS.notifications.length===0){
+    alert('호출 방식을 최소 1개 선택해 주세요.'); return;
+  }
+  for(const s of ORDER_CHANNELS.schedule){
+    if(s.start >= s.end){ alert(`${s.name} 시간대의 시작 시각이 종료보다 빨라야 해요.`); return; }
+  }
+  ORDER_SAVED = JSON.stringify(ORDER_CHANNELS);
+  alert('주문 방식 설정을 저장했어요.');
+  renderApp();
+}
+function resetOrderType(){
+  if(!ot_isDirty()){ alert('변경된 내용이 없어요.'); return; }
+  if(!confirm('변경 사항을 모두 취소하고 마지막 저장 상태로 되돌릴까요?')) return;
+  Object.assign(ORDER_CHANNELS, JSON.parse(ORDER_SAVED));
+  // schedule 등 중첩 배열은 깊은 복사 필요 → 객체 자체 교체
+  const saved = JSON.parse(ORDER_SAVED);
+  for(const k in saved) ORDER_CHANNELS[k] = saved[k];
+  renderApp();
+}
+function openOrderOverrideModal(){
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:420px;">
+      <div class="modal-head"><b>결제 방식 강제 변경</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:14px;">현재 정책을 일시적으로 바꿔요. 시간이 지나면 시간대별 정책으로 자동 돌아가요.</div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">결제 방식</label>
+        <select id="ov-policy" class="input" style="width:100%;margin-bottom:14px;">
+          <option value="prepay">선결제</option>
+          <option value="postpay" selected>후결제</option>
+        </select>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">적용 시간</label>
+        <select id="ov-duration" class="input" style="width:100%;">
+          <option value="5">5분</option>
+          <option value="10">10분</option>
+          <option value="30" selected>30분</option>
+          <option value="60">1시간</option>
+          <option value="end">오늘 영업 종료까지</option>
+        </select>
+        <div style="margin-top:20px;display:flex;gap:8px;">
+          <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
+          <button class="btn-primary" style="flex:1;" onclick="applyOrderOverride()">적용</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function alertDisplayNotConnected(){
+  alert('전광판은 아직 매장에 연결되지 않았어요. 본사 문의로 신청해 주세요.');
+}
+function applyOrderOverride(){
+  const policy = document.getElementById('ov-policy').value;
+  const dur = document.getElementById('ov-duration').value;
+  const minutes = dur==='end' ? 600 : parseInt(dur);
+  ORDER_CHANNELS.override = { policy, until: Date.now() + minutes*60000 };
+  closeModal();
+  alert(`${policy==='prepay'?'선결제':'후결제'}를 ${dur==='end'?'오늘 영업 종료까지':dur+'분간'} 적용해요.`);
   renderApp();
 }
 function renderOrderType(main){
   const ch = ORDER_CHANNELS;
-  const anyOn = ch.tableServe.enabled || ch.tableSelf.enabled || ch.takeout.enabled || ch.pickup.enabled;
+  const dineIn  = ch.mode==='both' || ch.mode==='dine_in';
+  const takeout = ch.mode==='both' || ch.mode==='takeout';
+  const menuOnly = ch.mode==='menu_only';
+  const cp = ot_currentPolicy();
+  const now = new Date();
+  const hhmm = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const dirty = ot_isDirty();
+  const channelIcons = { menu_only:'📖', both:'🍽️🛍️', dine_in:'🪑', takeout:'🛍️' };
+  const channelDescs = { menu_only:'전자 메뉴판 · 주문 없음', both:'매장 식사와 픽업 둘 다', dine_in:'테이블 취식 전용', takeout:'픽업 전용' };
   main.innerHTML = `
     <div class="crumb">매장 운영 › 주문 방식</div>
     <div class="toolbar">
       <div>
         <h2>주문 방식</h2>
-        <div class="page-sub">매장 운영 방식에 맞춰 받을 주문 종류를 골라 주세요. 각 방식마다 결제 시점·알림·시간 같은 세부 설정을 정할 수 있어요.</div>
+        <div class="page-sub">매장 운영 방식에 맞춰 주문 채널·결제 정책·고객 안내 방식을 한곳에서 관리해요.</div>
       </div>
     </div>
 
-    ${!anyOn ? `
-      <div style="margin-bottom:14px;padding:14px 18px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;display:flex;gap:10px;align-items:flex-start;">
-        <span style="font-size:18px;flex-shrink:0;">⚠️</span>
-        <div>
-          <div style="font-weight:700;color:#c2410c;font-size:14px;margin-bottom:4px;">모든 주문 방식이 꺼져 있어요</div>
-          <div style="font-size:13px;color:#9a3412;">손님이 주문할 수 있도록 최소 1개는 켜 주세요.</div>
+    <!-- 상단 — 현재 적용 중인 정책 -->
+    ${!menuOnly ? `
+      <div class="ot-strip">
+        <div class="now">
+          <span style="font-size:16px;">🕘</span>
+          <span>현재 ${hhmm} — <b>${cp.label} 적용 중</b> · ${cp.scope}</span>
         </div>
+        ${dineIn && ch.payment==='scheduled' ? `<button class="btn-ghost" style="padding:6px 12px;font-size:12px;font-weight:700;background:#fff;" onclick="openOrderOverrideModal()">🔄 지금 강제 변경</button>` : ''}
       </div>
     ` : ''}
 
-    <!-- 테이블 주문 그룹 안내 -->
-    <div style="display:flex;gap:10px;align-items:center;padding:10px 16px;background:#f0f9ff;border:1px dashed #93c5fd;border-radius:10px;margin-bottom:8px;font-size:12px;color:#1e40af;font-weight:600;">
-      <span>💡</span>
-      <span>테이블 주문은 운영 방식이 정반대라 <b>① 직원 서빙</b>과 <b>② 손님 직접 수령</b> 중 <b>한 가지만 선택</b>할 수 있어요. 한쪽을 켜면 다른 쪽은 자동으로 꺼져요.</span>
-    </div>
-
-    <!-- ① 테이블 주문 — 직원이 서빙 -->
-    <div class="oc-card ${ch.tableServe.enabled?'on':''}">
-      <div class="oc-head">
-        <div class="oc-ic">🍽️</div>
-        <div class="oc-info">
-          <div class="oc-title">테이블 주문 <span style="color:var(--ink-3);font-weight:500;font-size:12px;margin-left:4px;">직원이 서빙</span></div>
-          <div class="oc-desc">손님이 QR로 주문하면 직원이 자리로 가져다 줘요</div>
-        </div>
-        <label class="toggle-switch ${ch.tableServe.enabled?'on':''}" onclick="toggleTableMode('serve')">
-          <span class="sw"></span>
-        </label>
+    <!-- ① 주문 채널 4종 (단일 선택) -->
+    <div class="panel">
+      <h3>주문 채널 <span class="h-sub">매장이 받을 주문 종류를 한 가지만 골라 주세요</span></h3>
+      <div class="ot-modes">
+        ${Object.keys(ORDER_LABELS.mode).map(k=>`
+          <div class="ot-mode ${ch.mode===k?'sel':''}" onclick="setOrderMode('${k}')">
+            <span class="ic">${channelIcons[k]}</span>
+            <div class="nm">${ORDER_LABELS.mode[k]}</div>
+            <div class="dc">${channelDescs[k]}</div>
+          </div>
+        `).join('')}
       </div>
-      ${ch.tableServe.enabled ? `
-        <div class="oc-body">
-          <div class="oc-opt-row">
-            <div class="oc-opt-text">
-              <div class="oc-opt-label">결제 시점</div>
-              <div class="oc-opt-desc">손님이 언제 결제할지 정해 주세요</div>
-            </div>
-            <div class="oc-seg">
-              <div class="opt ${ch.tableServe.payTiming==='prepay'?'on':''}" onclick="ORDER_CHANNELS.tableServe.payTiming='prepay';renderApp()">선불 (주문과 동시에)</div>
-              <div class="opt ${ch.tableServe.payTiming==='postpay'?'on':''}" onclick="ORDER_CHANNELS.tableServe.payTiming='postpay';renderApp()">후불 (나갈 때)</div>
-            </div>
-          </div>
-          <div class="oc-opt-row vert">
-            <div class="oc-opt-text">
-              <div class="oc-opt-label">주문서 출력 위치</div>
-              <div class="oc-opt-desc">주문이 들어오면 어디로 인쇄할지 골라 주세요 (둘 다 선택 가능)</div>
-            </div>
-            <div class="oc-chk-group">
-              ${[['kitchen','🍳 주방 (조리용)'],['counter','🧾 카운터 (빌지용)']].map(([k,l])=>{
-                const on = ch.tableServe.printAt.includes(k);
-                return `<div class="oc-chk ${on?'on':''}" onclick="(()=>{const a=ORDER_CHANNELS.tableServe.printAt;const i=a.indexOf('${k}');if(i>=0)a.splice(i,1);else a.push('${k}');renderApp();})()">
-                  <span class="box">${on?'✓':''}</span>${l}
-                </div>`;
-              }).join('')}
-            </div>
-          </div>
+      ${menuOnly ? `
+        <div class="ot-menu-only">
+          ℹ️ <b>메뉴판만</b> 모드에서는 손님이 메뉴를 볼 수만 있고 주문은 받지 않아요. 결제·주문 관련 설정은 자동으로 꺼져요.
         </div>
       ` : ''}
     </div>
 
-    <!-- ② 테이블 주문 — 손님이 직접 수령 -->
-    <div class="oc-card ${ch.tableSelf.enabled?'on':''}">
-      <div class="oc-head">
-        <div class="oc-ic">🥡</div>
-        <div class="oc-info">
-          <div class="oc-title">테이블 주문 <span style="color:var(--ink-3);font-weight:500;font-size:12px;margin-left:4px;">손님이 직접 수령</span></div>
-          <div class="oc-desc">조리 완료 알림을 받으면 손님이 카운터로 가지러 와요</div>
+    ${dineIn ? `
+    <!-- ② 매장 주문 설정 -->
+    <div class="panel">
+      <h3>매장 주문 설정 <span class="h-sub">매장 활성 시</span></h3>
+      <div class="ot-row">
+        <span class="lbl">서빙 방식<small>본사 설정 항목</small></span>
+        <div class="ot-locked">
+          <span class="lock">🔒</span>
+          <span>${ch.service==='server'?'🍳 직원이 서빙':'🚶 손님 셀프 수령'}</span>
         </div>
-        <label class="toggle-switch ${ch.tableSelf.enabled?'on':''}" onclick="toggleTableMode('self')">
+        <span style="font-size:11px;color:var(--ink-4);margin-left:4px;">${ch.service==='server'?'테이블별 QR · 직원이 자리로 가져다 줘요':'공용 QR · 음식이 나오면 손님이 직접 가져가요'}</span>
+      </div>
+      ${ch.service==='self' ? `
+        <div class="ot-row">
+          <span class="lbl">호출 방식<small>복수 선택 · 최소 1</small></span>
+          ${['call_name','kakao','display'].map(k=>{
+            const on = ch.notifications.includes(k);
+            const dis = k==='display';
+            return `<div class="ot-opt ${on&&!dis?'sel':''} ${dis?'dis':''}" onclick="${dis?'alertDisplayNotConnected()':`toggleOrderNotif('${k}')`}">
+              <span>${k==='call_name'?'🎙️':k==='kakao'?'💬':'📺'}</span>${ORDER_LABELS.notify[k]}${dis?' · 미연결':''}
+            </div>`;
+          }).join('')}
+        </div>
+        ${ch.notifications.length===0 ? `
+          <div style="margin-left:120px;padding:9px 12px;background:#fef2f2;border-radius:8px;font-size:11px;color:#b91c1c;display:flex;align-items:center;gap:6px;">
+            ⚠️ 호출 방식을 최소 1개 선택해 주세요.
+          </div>
+        ` : `<div style="margin-left:120px;font-size:11px;color:var(--ink-4);">고객 식별자: 휴대폰 끝 4자리</div>`}
+      ` : ''}
+    </div>
+    ` : ''}
+
+    ${takeout ? `
+    <!-- ③ 포장 주문 설정 -->
+    <div class="panel">
+      <h3>포장 주문 설정 <span class="h-sub">포장 활성 시</span></h3>
+      <div class="ot-row">
+        <span class="lbl">결제 시점</span>
+        <span style="font-size:13px;font-weight:700;color:var(--ink);">선결제</span>
+        <span style="font-size:11px;color:var(--ink-4);">포장은 항상 선결제로 진행돼요</span>
+      </div>
+      <div class="ot-row">
+        <span class="lbl">포장 할인가</span>
+        <label class="toggle-switch ${ch.takeoutDiscount?'on':''}" onclick="toggleOrderField('takeoutDiscount')">
           <span class="sw"></span>
         </label>
+        <span style="font-size:12px;color:var(--ink-2);">${ch.takeoutDiscount?'메뉴별 포장가를 따로 받아요':'매장가와 동일하게 적용돼요'}</span>
+        ${ch.takeoutDiscount ? `<span style="font-size:12px;color:var(--blue);font-weight:700;cursor:pointer;margin-left:auto;" onclick="setSection('menu')">메뉴 관리에서 포장가 입력 →</span>` : ''}
       </div>
-      ${ch.tableSelf.enabled ? `
-        <div class="oc-body">
-          <div class="oc-opt-row vert">
-            <div class="oc-opt-text">
-              <div class="oc-opt-label">손님 호출 방식</div>
-              <div class="oc-opt-desc">조리가 끝났을 때 손님에게 어떻게 알릴지 골라 주세요 (둘 다 선택 가능)</div>
-            </div>
-            <div class="oc-chk-group">
-              ${[['kakao','💬 카카오톡 알림톡 발송'],['display','📺 매장 전광판에 주문번호 표시']].map(([k,l])=>{
-                const on = ch.tableSelf.notifyMethods.includes(k);
-                return `<div class="oc-chk ${on?'on':''}" onclick="(()=>{const a=ORDER_CHANNELS.tableSelf.notifyMethods;const i=a.indexOf('${k}');if(i>=0)a.splice(i,1);else a.push('${k}');renderApp();})()">
-                  <span class="box">${on?'✓':''}</span>${l}
-                </div>`;
-              }).join('')}
-            </div>
+      <div class="ot-row">
+        <span class="lbl">대기 시간 안내</span>
+        <input type="range" min="5" max="70" step="5" value="${ch.waitMinutes}" oninput="updateOrderWait(this.value)" style="flex:1;max-width:300px;" />
+        <span style="font-size:14px;font-weight:800;min-width:50px;">${ch.waitMinutes}분</span>
+      </div>
+      <div class="ot-row">
+        <span class="lbl">포장 예약</span>
+        <label class="toggle-switch ${ch.reservation?'on':''}" onclick="toggleOrderField('reservation')">
+          <span class="sw"></span>
+        </label>
+        <span style="font-size:12px;color:var(--ink-2);">${ch.reservation?'예약 ON — 사장님 수락 후 접수':'예약 OFF — 즉시 접수'}</span>
+      </div>
+      ${ch.reservation ? `
+        <div style="margin-left:120px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:11px;color:#9a3412;line-height:1.55;margin-top:4px;">
+          ℹ️ 고객이 픽업 시간을 선택하면 매장에 즉시 들어가지 않아요. <b>사장님이 [수락]을 눌러야</b> 주문이 확정돼요. 슬롯당 최대 5건 · 영업 종료 30분 전 슬롯 자동 차단.
+        </div>
+      ` : ''}
+    </div>
+    ` : ''}
+
+    ${dineIn ? `
+    <!-- ④ 결제 정책 -->
+    <div class="panel">
+      <h3>결제 정책 <span class="h-sub">매장 주문 활성 시 · 손님이 언제 결제할지</span></h3>
+      <div class="ot-row" style="border:none;padding-top:4px;">
+        ${[['prepay','💳','선결제 고정'],['postpay','🧾','후결제 고정'],['scheduled','⏰','시간대별 자동']].map(([k,ic,l])=>`
+          <div class="ot-opt ${ch.payment===k?'sel':''}" onclick="setOrderPayment('${k}')">
+            <span>${ic}</span>${l}
           </div>
-          <div class="oc-opt-row">
-            <div class="oc-opt-text">
-              <div class="oc-opt-label">테이블 번호 수집</div>
-              <div class="oc-opt-desc">${ch.tableSelf.collectTableNo
-                ? '손님이 어디 앉았는지 입력하게 해요. 자리 안내가 필요할 때 켜 주세요.'
-                : '공용 QR 스티커 하나로 운영하는 매장이라면 끄세요. 손님이 테이블 번호를 안 골라요.'}</div>
+        `).join('')}
+      </div>
+      ${ch.payment==='scheduled' ? `
+        <div style="margin-top:12px;">
+          <div style="font-size:11px;color:var(--ink-3);font-weight:700;margin-bottom:8px;">시간대 슬롯</div>
+          ${ch.schedule.map((s,i)=>`
+            <div class="ot-slot">
+              <input class="input" style="width:70px;" value="${s.name}" oninput="updateOrderSlot(${i},'name',this.value)" />
+              <input class="input" type="time" value="${s.start}" style="width:108px;" onchange="updateOrderSlot(${i},'start',this.value)" />
+              <span style="color:var(--ink-4);">~</span>
+              <input class="input" type="time" value="${s.end}" style="width:108px;" onchange="updateOrderSlot(${i},'end',this.value)" />
+              <span class="pmt" style="margin-left:auto;" onclick="toggleOrderSlotPolicy(${i})">${s.policy==='prepay'?'선결제':'후결제'}</span>
+              <span class="x" onclick="removeOrderSlot(${i})">×</span>
             </div>
-            <label class="toggle-switch ${ch.tableSelf.collectTableNo?'on':''}" onclick="ORDER_CHANNELS.tableSelf.collectTableNo=!ORDER_CHANNELS.tableSelf.collectTableNo;renderApp()">
-              <span class="sw"></span>
-            </label>
+          `).join('')}
+          <button class="btn-ghost" style="width:100%;justify-content:center;margin-top:4px;padding:8px;" onclick="addOrderSlot()">+ 시간대 추가</button>
+          <div class="ot-row" style="margin-top:10px;">
+            <span class="lbl">미정 시간대 기본값</span>
+            <div class="ot-opt ${ch.defaultPolicy==='prepay'?'sel':''}" onclick="setOrderDefaultPolicy('prepay')">선결제</div>
+            <div class="ot-opt ${ch.defaultPolicy==='postpay'?'sel':''}" onclick="setOrderDefaultPolicy('postpay')">후결제</div>
           </div>
         </div>
       ` : ''}
     </div>
+    ` : ''}
 
-    <!-- ③ 매장에서 포장 주문 -->
-    <div class="oc-card ${ch.takeout.enabled?'on':''}">
-      <div class="oc-head">
-        <div class="oc-ic">🛍️</div>
-        <div class="oc-info">
-          <div class="oc-title">매장에서 포장 주문</div>
-          <div class="oc-desc">매장 안에서 QR로 포장 주문을 받아요</div>
-        </div>
-        <label class="toggle-switch ${ch.takeout.enabled?'on':''}" onclick="ORDER_CHANNELS.takeout.enabled=!ORDER_CHANNELS.takeout.enabled;renderApp()">
-          <span class="sw"></span>
-        </label>
+    ${!menuOnly ? `
+    <!-- ⑤ 시뮬레이션 — 고객 경험 5단계 -->
+    <div class="panel">
+      <h3>지금 설정대로면 손님 경험은? <span class="h-sub">시뮬레이션 · 실시간 반영</span></h3>
+      <div class="ot-flow">
+        ${(()=>{
+          const qrLabel = dineIn ? (ch.service==='server'?'테이블별 QR':'공용 QR') : '포장 QR';
+          const menuLabel = ch.mode==='both'?'매장+포장':(ch.mode==='dine_in'?'매장 전용':'포장 전용');
+          const acceptLabel = (takeout && ch.reservation) ? '수락 필요' : '자동 접수';
+          let receipt;
+          if(ch.mode==='takeout') receipt = '픽업 호출';
+          else if(ch.service==='server') receipt = '직원 서빙';
+          else receipt = ch.notifications.length>0 ? ch.notifications.map(n=>ORDER_LABELS.notify[n]).join('+') : '미설정';
+          return [
+            ['📱','1. 스캔', qrLabel],
+            ['📋','2. 메뉴', menuLabel],
+            ['💳','3. 결제', cp.label],
+            ['🍳','4. 접수', acceptLabel],
+            ['🔔','5. 호출/수령', receipt],
+          ].map(([ic,l,v])=>`<div class="ot-step"><span class="ic">${ic}</span><span class="l">${l}</span><span class="v">${v}</span></div>`).join('');
+        })()}
       </div>
-      ${ch.takeout.enabled ? `
-        <div class="oc-body">
-          <div class="oc-opt-row">
-            <div class="oc-opt-text">
-              <div class="oc-opt-label">포장 전용 메뉴판</div>
-              <div class="oc-opt-desc">${ch.takeout.useTakeoutMenu
-                ? '포장 주문 시 별도 메뉴판을 보여줘요. 메뉴 페이지에서 매핑할 수 있어요.'
-                : '매장 식사와 같은 메뉴판을 써요. 포장 할인이나 메뉴가 다르면 켜 주세요.'}</div>
-            </div>
-            <label class="toggle-switch ${ch.takeout.useTakeoutMenu?'on':''}" onclick="ORDER_CHANNELS.takeout.useTakeoutMenu=!ORDER_CHANNELS.takeout.useTakeoutMenu;renderApp()">
-              <span class="sw"></span>
-            </label>
-          </div>
-          <div class="oc-opt-row">
-            <div class="oc-opt-text">
-              <div class="oc-opt-label">예상 대기 시간 안내</div>
-              <div class="oc-opt-desc">손님 화면에 "약 ${ch.takeout.prepTime}분 소요됩니다"로 표시돼요</div>
-            </div>
-            <select class="input" style="width:110px;" onchange="ORDER_CHANNELS.takeout.prepTime=Number(this.value);renderApp()">
-              ${[5,10,15,20,30,40,60].map(v=>`<option value="${v}" ${ch.takeout.prepTime===v?'selected':''}>약 ${v}분</option>`).join('')}
-            </select>
-          </div>
-        </div>
-      ` : ''}
     </div>
+    ` : `<div class="panel"><h3>💡 메뉴판만 모드 안내</h3><div style="font-size:13px;color:var(--ink-2);line-height:1.65;">손님이 QR로 매장 메뉴만 볼 수 있어요. 결제·접수·호출은 모두 운영되지 않아요.</div></div>`}
 
-    <!-- ④ 매장 도착 전 미리 주문 (픽업 예약) -->
-    <div class="oc-card ${ch.pickup.enabled?'on':''}">
-      <div class="oc-head">
-        <div class="oc-ic">📦</div>
-        <div class="oc-info">
-          <div class="oc-title">매장 도착 전 미리 주문 <span style="color:var(--ink-3);font-weight:500;font-size:12px;margin-left:4px;">픽업 예약</span></div>
-          <div class="oc-desc">손님이 외부에서 미리 주문하고 정한 시간에 가지러 와요</div>
-        </div>
-        <label class="toggle-switch ${ch.pickup.enabled?'on':''}" onclick="ORDER_CHANNELS.pickup.enabled=!ORDER_CHANNELS.pickup.enabled;renderApp()">
-          <span class="sw"></span>
-        </label>
+    <!-- 저장 바 -->
+    <div class="ot-savebar">
+      <span class="info ${dirty?'dirty':''}">${dirty?'⚠️ 저장하지 않은 변경 사항이 있어요':'변경된 내용 없음'}</span>
+      <div class="actions">
+        <button class="btn-ghost" onclick="resetOrderType()">↺ 초기화</button>
+        <button class="btn-primary" onclick="saveOrderType()">💾 변경 사항 저장</button>
       </div>
-      ${ch.pickup.enabled ? `
-        <div class="oc-body">
-          <div class="oc-opt-row">
-            <div class="oc-opt-text">
-              <div class="oc-opt-label">수령 희망 시간 단위</div>
-              <div class="oc-opt-desc">손님이 픽업 시각을 ${ch.pickup.timeSlot}분 간격으로 고를 수 있어요</div>
-            </div>
-            <select class="input" style="width:110px;" onchange="ORDER_CHANNELS.pickup.timeSlot=Number(this.value);renderApp()">
-              ${[5,10,15,30].map(v=>`<option value="${v}" ${ch.pickup.timeSlot===v?'selected':''}>${v}분 단위</option>`).join('')}
-            </select>
-          </div>
-          <div class="oc-opt-row">
-            <div class="oc-opt-text">
-              <div class="oc-opt-label">최소 조리 여유 시간</div>
-              <div class="oc-opt-desc">주문 시점으로부터 ${ch.pickup.minLeadTime}분 이후 시간만 예약할 수 있어요. 즉시 픽업으로 인한 조리 부담을 막아 줘요.</div>
-            </div>
-            <select class="input" style="width:130px;" onchange="ORDER_CHANNELS.pickup.minLeadTime=Number(this.value);renderApp()">
-              ${[[15,'15분 뒤부터'],[30,'30분 뒤부터'],[60,'1시간 뒤부터'],[120,'2시간 뒤부터']].map(([v,l])=>`<option value="${v}" ${ch.pickup.minLeadTime===v?'selected':''}>${l}</option>`).join('')}
-            </select>
-          </div>
-          <div class="oc-opt-row vert">
-            <div class="oc-opt-text">
-              <div class="oc-opt-label">노쇼 대비 결제</div>
-              <div class="oc-opt-desc">예약 주문은 손님이 안 올 위험이 있어, 항상 선결제로 받아요</div>
-            </div>
-            <div class="oc-locked">
-              <span class="ico">🔒</span>
-              <span><b>선결제 필수</b> · 노쇼 손실을 줄이려고 픽업 예약은 결제까지 마쳐야 예약이 확정돼요. 이 설정은 끌 수 없어요.</span>
-            </div>
-          </div>
-        </div>
-      ` : ''}
     </div>
 
-    <div style="margin-top:6px;padding:12px 16px;background:var(--bg-2);border-radius:10px;font-size:12px;color:var(--ink-3);line-height:1.6;">
-      💡 설정이 바뀌면 <b style="color:var(--ink-2);">30초 안에 손님 화면에 반영</b>돼요. 두 가지 이상 켜면 손님이 QR 진입 시 어떤 방식으로 받을지 골라요.
-    </div>
   `;
 }
 

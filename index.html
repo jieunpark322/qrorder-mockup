@@ -5081,6 +5081,7 @@ function ensureMenuExtras(m){
   if (typeof m.sold === 'undefined')   m.sold   = 0;
   if (typeof m.manualSoldOut === 'undefined') m.manualSoldOut = false;
   if (typeof m.takeoutPrice === 'undefined') m.takeoutPrice = null;  // null = 매장가 동일 적용
+  if (typeof m.maxQty === 'undefined') m.maxQty = null;  // null = 제한 없음 (1회 주문 최대 수량)
   if (!m.schedule) m.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!m.discount) m.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
 }
@@ -6137,7 +6138,7 @@ function renderMenu(main){
                 </td>
                 <td><div style="width:36px;height:36px;border-radius:8px;background:var(--bg-2);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;">${r.img?menuImgHtml(r.img,36,8):'<span style="font-size:11px;color:var(--ink-4);">없음</span>'}</div></td>
                 <td style="font-family:ui-monospace,'SF Mono',monospace;color:var(--ink-2);font-size:11px;">${r.code}</td>
-                <td><b>${r.name}</b>${r.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${r.desc}</div>`:''}</td>
+                <td><b>${r.name}</b>${r.maxQty?`<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:1px 6px;border-radius:8px;vertical-align:middle;" title="1회 주문 최대 ${r.maxQty}개">최대 ${r.maxQty}개</span>`:''}${r.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${r.desc}</div>`:''}</td>
                 <td><span style="font-size:12px;color:var(--ink-2);">${r.cat}</span></td>
                 <td class="num">${priceCell}</td>
                 <td class="num">${r.takeoutPrice!=null&&r.takeoutPrice>=0
@@ -7453,7 +7454,7 @@ function openMenuEditModal(id){
   const m = MENUS.find(x=>x.id===id);
   if(!m) return;
   ensureMenuExtras(m);
-  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, cat:m.cat, desc:m.desc||'', img:m.img||'🍽️', status:m.status };
+  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, cat:m.cat, desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty };
   renderMenuEditModal();
 }
 function renderMenuEditModal(){
@@ -7520,6 +7521,15 @@ function renderMenuEditModal(){
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">설명 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
         <textarea id="me-desc" class="input" placeholder="메뉴를 설명해 주세요. 손님 화면에 작은 글씨로 표시돼요." style="width:100%;min-height:80px;font-family:inherit;resize:vertical;padding:12px 14px;line-height:1.55;margin-bottom:14px;">${(f.desc||'').replace(/</g,'&lt;')}</textarea>
 
+        <!-- 1회 주문 최대 수량 -->
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">1회 주문 최대 수량 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+          <input id="me-maxqty" class="input" type="number" min="1" value="${f.maxQty!=null?f.maxQty:''}" placeholder="제한 없음" style="flex:1;" />
+          <span style="font-size:13px;font-weight:700;color:var(--ink-2);">개</span>
+          ${f.maxQty!=null?`<button class="btn-ghost" style="padding:8px 12px;font-size:11px;color:var(--red);" onclick="document.getElementById('me-maxqty').value='';">✕ 제한 해제</button>`:''}
+        </div>
+        <div style="font-size:10px;color:var(--ink-4);margin-bottom:14px;line-height:1.5;">손님이 한 번에 담을 수 있는 최대 수량이에요. 비워 두면 제한 없이 주문할 수 있어요. (예: 인기 메뉴·이벤트 메뉴는 5개로 제한)</div>
+
         ${(()=>{
           const st = getMenuStock(f.id);
           if(!st) return `<div style="padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
@@ -7571,6 +7581,8 @@ function saveMenuEdit(){
   m.status = document.getElementById('me-status').value;
   m.desc = document.getElementById('me-desc').value;
   m.img = f.img;
+  const mqVal = document.getElementById('me-maxqty').value;
+  m.maxQty = (mqVal==='' || Number(mqVal)<=0) ? null : Math.floor(Number(mqVal));
   closeModal();
   renderApp();
 }

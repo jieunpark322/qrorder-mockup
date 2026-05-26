@@ -510,6 +510,22 @@
   tr.drag-source{opacity:.4;}
   tr.drag-over-top{box-shadow:inset 0 3px 0 0 var(--blue);}
   tr.drag-over-bottom{box-shadow:inset 0 -3px 0 0 var(--blue);}
+  /* 옵션 빠른 연결 — 메뉴판 우측 사이드 패널 */
+  .opt-quick-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px;width:100%;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .oqp-head{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline;gap:6px;flex-wrap:wrap;}
+  .oqp-head .oqp-hint{font-size:11px;font-weight:500;color:var(--ink-4);}
+  .oqp-sub{font-size:11px;color:var(--ink-3);margin-bottom:10px;line-height:1.5;}
+  .oqp-chips{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;max-height:280px;overflow-y:auto;}
+  .oqp-chip{padding:9px 12px;background:var(--blue-50);border:1.5px solid var(--blue-100);border-radius:8px;cursor:grab;user-select:none;transition:transform .12s,box-shadow .12s,background .12s;}
+  .oqp-chip:hover{background:#dbeafe;transform:translateY(-1px);box-shadow:0 4px 12px rgba(49,130,246,.18);}
+  .oqp-chip:active{cursor:grabbing;}
+  .oqp-chip-name{display:block;font-size:13px;font-weight:700;color:var(--blue);}
+  .oqp-chip-meta{display:block;font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .oqp-foot{padding-top:8px;border-top:1px dashed var(--line);}
+  .oqp-foot button{width:100%;}
+  .oqp-empty{padding:18px;text-align:center;font-size:12px;color:var(--ink-3);line-height:1.6;}
+  .oqp-empty .lnk{color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;}
+  tr.drag-over-option{box-shadow:inset 0 0 0 2px var(--blue)!important;background:var(--blue-50)!important;}
   .mnav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 12px;background:#fff;border:2px solid var(--line);border-radius:14px;cursor:pointer;transition:border-color .15s,background .15s,transform .12s,box-shadow .15s;text-align:center;position:relative;user-select:none;}
   .mnav-tab:hover{border-color:var(--blue-100);background:#f7faff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.04);}
   .mnav-tab.on{background:var(--blue);border-color:var(--blue);box-shadow:0 6px 18px rgba(49,130,246,.28);transform:translateY(-1px);}
@@ -5227,7 +5243,16 @@ function dragRowStart(ev, arrName, idx){
   ev.currentTarget.classList.add('drag-source');
 }
 function dragRowOver(ev, arrName, idx){
-  if(!_dragSrc || _dragSrc.arrName !== arrName) return;
+  if(!_dragSrc) return;
+  // 옵션 칩을 메뉴 행에 끌어 놓을 때 — 연결 미리보기 (파란 배경)
+  if(_dragSrc.type === 'option' && arrName === 'MENUS'){
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'copy';
+    document.querySelectorAll('tr.drag-over-option').forEach(r=>r.classList.remove('drag-over-option'));
+    ev.currentTarget.classList.add('drag-over-option');
+    return;
+  }
+  if(_dragSrc.arrName !== arrName) return;
   ev.preventDefault();
   ev.dataTransfer.dropEffect = 'move';
   const tr = ev.currentTarget;
@@ -5242,6 +5267,24 @@ function dragRowLeave(ev){
   ev.currentTarget.classList.remove('drag-over-top','drag-over-bottom');
 }
 function dragRowDrop(ev, arrName, idx){
+  // 옵션 칩 → 메뉴 행: 옵션 그룹을 메뉴에 연결
+  if(_dragSrc && _dragSrc.type === 'option' && arrName === 'MENUS'){
+    ev.preventDefault();
+    const menu = MENUS[idx];
+    const optGroup = OPT_GROUPS.find(g => g.id === _dragSrc.id);
+    if(menu && optGroup){
+      if(!menu.opt) menu.opt = [];
+      if(!menu.opt.includes(optGroup.id)){
+        menu.opt.push(optGroup.id);
+        if(!optGroup.links) optGroup.links = [];
+        if(!optGroup.links.includes(menu.id)) optGroup.links.push(menu.id);
+      }
+    }
+    _dragSrc = null;
+    document.querySelectorAll('tr.drag-over-option').forEach(r=>r.classList.remove('drag-over-option'));
+    renderApp();
+    return;
+  }
   if(!_dragSrc || _dragSrc.arrName !== arrName){ dragRowEnd(); return; }
   ev.preventDefault();
   const arr = _getArrByName(arrName);
@@ -5265,8 +5308,44 @@ function dragRowDrop(ev, arrName, idx){
   renderApp();
 }
 function dragRowEnd(){
-  document.querySelectorAll('tr.drag-source, tr.drag-over-top, tr.drag-over-bottom').forEach(r=>r.classList.remove('drag-source','drag-over-top','drag-over-bottom'));
+  document.querySelectorAll('tr.drag-source, tr.drag-over-top, tr.drag-over-bottom, tr.drag-over-option').forEach(r=>r.classList.remove('drag-source','drag-over-top','drag-over-bottom','drag-over-option'));
   _dragSrc = null;
+}
+// 옵션 칩 드래그 시작 — 메뉴 행에 끌어 놓으면 즉시 연결
+function optChipDragStart(ev, optId){
+  _dragSrc = { type:'option', id: optId };
+  ev.dataTransfer.effectAllowed = 'copy';
+  try { ev.dataTransfer.setData('text/plain', 'option:'+optId); } catch(e){}
+}
+function renderOptionQuickPanel(){
+  if(OPT_GROUPS.length === 0){
+    return `
+      <div class="opt-quick-panel">
+        <div class="oqp-head">🧩 옵션 빠른 연결</div>
+        <div class="oqp-empty">
+          아직 옵션 그룹이 없어요.<br/>
+          <span class="lnk" onclick="setSection('option')">옵션 선택지 페이지로 이동 →</span>
+        </div>
+      </div>
+    `;
+  }
+  return `
+    <div class="opt-quick-panel">
+      <div class="oqp-head">🧩 옵션 빠른 연결 <span class="oqp-hint">메뉴 행으로 끌어 놓기</span></div>
+      <div class="oqp-sub">옵션 그룹 칩을 끌어 메뉴 행에 놓으면 즉시 연결돼요. 옵션 자체는 옵션 선택지 페이지에서 만들고 편집해요.</div>
+      <div class="oqp-chips">
+        ${OPT_GROUPS.map(g => `
+          <div class="oqp-chip" draggable="true" ondragstart="optChipDragStart(event,${g.id})" ondragend="dragRowEnd()" title="끌어서 메뉴에 연결">
+            <span class="oqp-chip-name">${g.name}</span>
+            <span class="oqp-chip-meta">${g.items.length}개 항목 · ${g.links?.length||0}개 메뉴 연결됨</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="oqp-foot">
+        <button class="btn-ghost" onclick="setSection('option')">⚙️ 옵션 선택지에서 편집</button>
+      </div>
+    </div>
+  `;
 }
 function effectiveStatus(m){
   ensureMenuExtras(m);
@@ -6339,6 +6418,7 @@ function renderMenu(main){
       </div><!-- /.menu-main -->
 
       <aside class="menu-preview-side">
+        ${renderOptionQuickPanel()}
         <div class="menu-preview-head" style="text-align:center;">
           <div style="width:100%;">
             <div class="ttl">📱 적용한 메뉴판</div>

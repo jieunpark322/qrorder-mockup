@@ -5667,7 +5667,8 @@ function renderMenuCardGrid(rows){
         const statusCls = isHidden?'hidden':isSoldOut?'off':'on';
         const statusLbl = isHidden?'숨김':isSoldOut?'품절':'판매 중';
         return `
-          <div class="menu-card ${isSel?'sel':''} ${isSoldOut?'sold-out':''}" onclick="toggleSel('menuSel',${r.id})">
+          <div class="menu-card ${isSel?'sel':''} ${isSoldOut?'sold-out':''}" onclick="openMenuEditModal(${r.id})" title="카드를 클릭하면 정보를 수정할 수 있어요">
+            <span onclick="event.stopPropagation();toggleSel('menuSel',${r.id})" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;border:2px solid ${isSel?'var(--blue)':'var(--ink-4)'};background:${isSel?'var(--blue)':'#fff'};color:#fff;font-weight:800;font-size:10px;cursor:pointer;flex-shrink:0;">${isSel?'✓':''}</span>
             <div class="menu-card-img">${r.img||'🍽️'}</div>
             <div class="menu-card-main">
               <div class="menu-card-name">${r.name}</div>
@@ -5683,8 +5684,8 @@ function renderMenuCardGrid(rows){
               </div>
               <span class="menu-card-status ${statusCls}">${statusLbl}</span>
               <div class="menu-card-actions" onclick="event.stopPropagation()">
+                <button onclick="openMenuEditModal(${r.id})" style="background:var(--blue-50);color:var(--blue);border-color:var(--blue-100);" title="정보·가격 수정">✏️ 수정</button>
                 <button onclick="quickToggleSoldOut(${r.id})" style="${r.manualSoldOut?'background:#fee2e2;color:#b91c1c;border-color:#fecaca;':''}" title="${r.manualSoldOut?'품절 해제':'오늘 품절'}">${r.manualSoldOut?'✓ 품절 중':'🚫 품절'}</button>
-                <button onclick="duplicateMenu(${r.id})" title="복사">📋</button>
                 <button onclick="if(confirm('${r.name} 메뉴를 삭제할까요?'))deleteMenu(${r.id})" style="color:var(--red);" title="삭제">✕</button>
               </div>
             </div>
@@ -5920,7 +5921,7 @@ function renderMenu(main){
     </div>
 
     <div class="panel tight">
-      <h3>등록된 메뉴 <span class="h-sub">${rows.length}개${rows.length!==MENUS.length?` · 전체 ${MENUS.length}개 중`:''}</span>
+      <h3>등록된 메뉴 <span class="h-sub">${rows.length}개${rows.length!==MENUS.length?` · 전체 ${MENUS.length}개 중`:''} · 행을 클릭하면 정보·가격을 수정할 수 있어요</span>
         <span class="h-act">
           ${state.menuSel.size>0 ? `
             <span style="font-size:12px;color:var(--blue);font-weight:700;">${state.menuSel.size}개 선택</span>
@@ -5978,9 +5979,9 @@ function renderMenu(main){
               : `<b>${fmt(r.price)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>`;
             const isSel = state.menuSel.has(r.id);
             return `
-              <tr${isSel?` style="background:var(--blue-50);"`:''}>
-                ${selCheckTd(state.menuSel, r.id)}
-                <td style="white-space:nowrap;">
+              <tr style="${isSel?'background:var(--blue-50);':''}cursor:pointer;" onclick="openMenuEditModal(${r.id})" title="행을 클릭하면 정보를 수정할 수 있어요">
+                <td onclick="event.stopPropagation()">${selCheckTd(state.menuSel, r.id).replace(/^<td[^>]*>/,'').replace(/<\/td>$/,'')}</td>
+                <td style="white-space:nowrap;" onclick="event.stopPropagation()">
                   <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===0?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(MENUS, ${idx}, -1);renderApp()" title="위로">▲</button>
                   <button class="btn-ghost" style="padding:3px 5px;font-size:10px;${idx===MENUS.length-1?'opacity:.35;pointer-events:none;':''}" onclick="moveItem(MENUS, ${idx}, 1);renderApp()" title="아래로">▼</button>
                 </td>
@@ -5996,11 +5997,13 @@ function renderMenu(main){
                 <td><span style="font-size:11px;color:${r.schedule&&r.schedule.enabled?'var(--blue)':'var(--ink-3)'};font-weight:${r.schedule&&r.schedule.enabled?700:400};">${r.schedule&&r.schedule.enabled?'🕒 ':''}${schTxt}</span></td>
                 <td>${optsHtml}</td>
                 <td>${statusPill}</td>
-                <td>
+                <td onclick="event.stopPropagation()">
                   <div class="row-actions-wrap">
-                    <button class="btn-ghost" style="padding:7px 12px;font-size:12px;font-weight:700;" onclick="state.menuActionOpen=state.menuActionOpen===${r.id}?null:${r.id};renderApp()">관리 ${state.menuActionOpen===r.id?'▲':'▼'}</button>
+                    <button class="btn-primary" style="padding:6px 10px;font-size:11px;font-weight:700;margin-right:4px;" onclick="openMenuEditModal(${r.id})">✏️ 수정</button>
+                    <button class="btn-ghost" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="state.menuActionOpen=state.menuActionOpen===${r.id}?null:${r.id};renderApp()">⋯ ${state.menuActionOpen===r.id?'▲':'▼'}</button>
                     ${state.menuActionOpen===r.id ? `
                       <div class="row-actions-pop">
+                        <button onclick="state.menuActionOpen=null;openMenuEditModal(${r.id})"><span class="ic-em">✏️</span>메뉴 정보·가격 수정</button>
                         <button onclick="state.menuActionOpen=null;openOptLinkModal(${r.id})"><span class="ic-em">🧩</span>옵션 그룹 연결</button>
                         <button onclick="state.menuActionOpen=null;openStockModal(${r.id})"><span class="ic-em">📦</span>재고 설정</button>
                         <button onclick="state.menuActionOpen=null;openScheduleModal('menu',${r.id})"><span class="ic-em">🕒</span>판매 시간</button>
@@ -7243,6 +7246,109 @@ function bulkDeleteMenus(){
   renderApp();
 }
 // 메뉴 카드 빠른 품절 토글 (수동 품절 ON/OFF)
+// 메뉴 정보·가격 편집 모달 — 행/카드 클릭으로 진입
+function openMenuEditModal(id){
+  const m = MENUS.find(x=>x.id===id);
+  if(!m) return;
+  ensureMenuExtras(m);
+  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, cat:m.cat, desc:m.desc||'', img:m.img||'🍽️', status:m.status };
+  renderMenuEditModal();
+}
+function renderMenuEditModal(){
+  const f = state._menuEdit;
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:560px;">
+      <div class="modal-head"><b>메뉴 정보 수정</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:20px;max-height:74vh;overflow-y:auto;">
+
+        <!-- 사진 -->
+        <div style="display:flex;gap:14px;align-items:center;margin-bottom:18px;">
+          <div onclick="cycleMenuEditImg()" style="width:72px;height:72px;border-radius:14px;background:var(--bg-2);display:flex;align-items:center;justify-content:center;font-size:40px;cursor:pointer;border:2px dashed var(--line);transition:border-color .12s;" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--line)'">${f.img}</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:3px;">사진</div>
+            <div style="font-size:11px;color:var(--ink-4);line-height:1.5;">사진 자리를 클릭하면 이모지가 바뀌어요.<br/>실제 사진은 추후 추가 예정이에요.</div>
+          </div>
+        </div>
+
+        <!-- 메뉴 이름 -->
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">메뉴 이름 <span style="color:var(--red);">*</span></label>
+        <input id="me-name" class="input" value="${f.name.replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:16px;" />
+
+        <!-- 가격 — 매장가 / 포장가 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">매장 판매가 <span style="color:var(--red);">*</span></label>
+            <input id="me-price" class="input" type="number" value="${f.price}" style="width:100%;" />
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">매장에서 드시는 손님이 보는 가격</div>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">포장가 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
+            <input id="me-takeout" class="input" type="number" value="${f.takeoutPrice!=null?f.takeoutPrice:''}" placeholder="비워 두면 매장가" style="width:100%;color:#15803d;" />
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">포장 주문 시 적용할 가격</div>
+          </div>
+        </div>
+
+        <!-- 카테고리 + 상태 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">카테고리</label>
+            <select id="me-cat" class="input" style="width:100%;">
+              ${CAT_MENU.map(c=>`<option ${f.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">판매 상태</label>
+            <select id="me-status" class="input" style="width:100%;">
+              <option ${f.status==='판매중'?'selected':''}>판매중</option>
+              <option ${f.status==='품절'?'selected':''}>품절</option>
+              <option ${f.status==='숨김'?'selected':''}>숨김</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 설명 -->
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">설명 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
+        <textarea id="me-desc" class="input" placeholder="메뉴를 설명해 주세요. 손님 화면에 작은 글씨로 표시돼요." style="width:100%;min-height:80px;font-family:inherit;resize:vertical;padding:12px 14px;line-height:1.55;margin-bottom:14px;">${(f.desc||'').replace(/</g,'&lt;')}</textarea>
+
+        <!-- 안내 -->
+        <div style="padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;margin-bottom:18px;">
+          💡 옵션 그룹·재고·판매 시간·해피아워 같은 부가 설정은 표 우측 <b style="color:var(--ink-2);">관리 ▼</b> 버튼에서 변경할 수 있어요.
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
+          <button class="btn-primary" style="flex:2;" onclick="saveMenuEdit()">💾 저장</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function cycleMenuEditImg(){
+  const i = SAMPLE_ICONS.indexOf(state._menuEdit.img);
+  state._menuEdit.img = SAMPLE_ICONS[(i+1) % SAMPLE_ICONS.length] || SAMPLE_ICONS[0];
+  renderMenuEditModal();
+}
+function saveMenuEdit(){
+  const f = state._menuEdit;
+  const m = MENUS.find(x=>x.id===f.id);
+  if(!m) return;
+  const name = document.getElementById('me-name').value.trim();
+  const price = Number(document.getElementById('me-price').value);
+  if(!name){ alert('메뉴 이름을 입력해 주세요.'); return; }
+  if(!(price>0)){ alert('매장 판매가는 0보다 커야 해요.'); return; }
+  const tpVal = document.getElementById('me-takeout').value;
+  m.name = name;
+  m.price = price;
+  m.takeoutPrice = tpVal==='' ? null : Math.max(0, Number(tpVal)||0);
+  m.cat = document.getElementById('me-cat').value;
+  m.status = document.getElementById('me-status').value;
+  m.desc = document.getElementById('me-desc').value;
+  m.img = f.img;
+  closeModal();
+  renderApp();
+}
 function quickToggleSoldOut(id){
   const m = MENUS.find(x=>x.id===id);
   if(!m) return;

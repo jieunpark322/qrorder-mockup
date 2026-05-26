@@ -490,6 +490,11 @@
   .mnav{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px;}
   /* QR 관리 — 4개 섹션 퀵 점프 탭 (페이지 내 스크롤) */
   .qr-quick-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+  /* 테이블 모양 선택 — 사각/원형 토글 */
+  .shape-toggle{display:inline-flex;background:var(--bg-2);border-radius:8px;padding:2px;gap:0;}
+  .shape-toggle .opt{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;color:var(--ink-3);user-select:none;transition:all .12s;}
+  .shape-toggle .opt:hover{color:var(--ink-2);}
+  .shape-toggle .opt.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06);}
   /* 행 순서 드래그 — '≡' 손잡이 + 드래그 중 시각 피드백 */
   .drag-handle{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;cursor:grab;color:var(--ink-3);border-radius:6px;font-size:18px;line-height:1;transition:background .12s,color .12s;user-select:none;font-weight:700;}
   .drag-handle:hover{background:var(--bg-2);color:var(--ink-2);}
@@ -8804,7 +8809,7 @@ function renderTable(main){
     </div>
 
     <div class="panel">
-      <h3>${curZone.name} 평면도 <span class="h-sub">드래그로 위치 이동</span></h3>
+      <h3>${curZone.name} 평면도 <span class="h-sub">드래그로 위치 이동 · 모양은 아래 표에서 ▢ 사각 / ◯ 원형으로 바꿀 수 있어요</span></h3>
       <div id="floorplan" style="position:relative;width:100%;height:400px;
         background:repeating-linear-gradient(0deg,var(--bg-2) 0,var(--bg-2) 1px,#fff 1px,#fff 40px),
                    repeating-linear-gradient(90deg,var(--bg-2) 0,var(--bg-2) 1px,#fff 1px,#fff 40px);
@@ -8846,12 +8851,17 @@ function renderTable(main){
       <h3>${curZone.name} 테이블 목록 <span class="h-sub">${zoneTables.length}개</span></h3>
       ${zoneTables.length===0 ? `<div style="padding:20px;text-align:center;color:var(--ink-3);font-size:13px;">이 구역에 테이블이 없어요.</div>` : `
       <table class="t">
-        <thead><tr><th>이름</th><th style="width:100px;">모양</th><th style="width:150px;"></th></tr></thead>
+        <thead><tr><th>이름</th><th style="width:160px;">모양</th><th style="width:150px;"></th></tr></thead>
         <tbody>
           ${zoneTables.map(t=>`
             <tr>
               <td><b>${t.name}</b>${_pendingTablePos[t.id]?'<span style="font-size:10px;color:var(--amber);margin-left:6px;">●미저장</span>':''}</td>
-              <td><span style="font-size:12px;color:var(--ink-2);">${t.shape==='circle'?'원형':'사각형'}</span></td>
+              <td>
+                <div class="shape-toggle">
+                  <span class="opt ${t.shape==='square'?'on':''}" onclick="setTableShape(${t.id},'square')">▢ 사각</span>
+                  <span class="opt ${t.shape==='circle'?'on':''}" onclick="setTableShape(${t.id},'circle')">◯ 원형</span>
+                </div>
+              </td>
               <td style="white-space:nowrap;">
                 <button class="btn-ghost" style="padding:6px 10px;font-size:11px;margin-right:4px;" onclick="renameTable(${t.id})">✏️ 이름</button>
                 <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);"
@@ -8872,6 +8882,13 @@ function addTable(){
   const row    = Math.floor(TABLES.filter(t=>t.zone===zone).length / 4);
   TABLES.push({ id:nextId, name:'T'+String(nextId).padStart(2,'0'), zone,
     shape:'square', x:20+col*100, y:20+row*110, status:'비어있음', orderCnt:0 });
+  renderApp();
+}
+// 테이블 모양 변경 — 사각/원형 토글
+function setTableShape(id, shape){
+  const t = TABLES.find(x=>x.id===id);
+  if(!t || t.shape === shape) return;
+  t.shape = shape;
   renderApp();
 }
 // 테이블 이름 변경 — 중복·공백 검증 후 반영

@@ -8802,14 +8802,17 @@ function renderTable(main){
       <h3>${curZone.name} 테이블 목록 <span class="h-sub">${zoneTables.length}개</span></h3>
       ${zoneTables.length===0 ? `<div style="padding:20px;text-align:center;color:var(--ink-3);font-size:13px;">이 구역에 테이블이 없어요.</div>` : `
       <table class="t">
-        <thead><tr><th>이름</th><th style="width:100px;">모양</th><th style="width:80px;"></th></tr></thead>
+        <thead><tr><th>이름</th><th style="width:100px;">모양</th><th style="width:150px;"></th></tr></thead>
         <tbody>
           ${zoneTables.map(t=>`
             <tr>
               <td><b>${t.name}</b>${_pendingTablePos[t.id]?'<span style="font-size:10px;color:var(--amber);margin-left:6px;">●미저장</span>':''}</td>
               <td><span style="font-size:12px;color:var(--ink-2);">${t.shape==='circle'?'원형':'사각형'}</span></td>
-              <td><button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);"
-                onclick="if(confirm('${t.name}을 삭제할까요?')){const i=TABLES.findIndex(x=>x.id===${t.id});TABLES.splice(i,1);delete _pendingTablePos[${t.id}];renderApp();}">삭제</button></td>
+              <td style="white-space:nowrap;">
+                <button class="btn-ghost" style="padding:6px 10px;font-size:11px;margin-right:4px;" onclick="renameTable(${t.id})">✏️ 이름</button>
+                <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);"
+                onclick="if(confirm('${t.name}을 삭제할까요?')){const i=TABLES.findIndex(x=>x.id===${t.id});TABLES.splice(i,1);delete _pendingTablePos[${t.id}];renderApp();}">삭제</button>
+              </td>
             </tr>
           `).join('')}
         </tbody>
@@ -8825,6 +8828,22 @@ function addTable(){
   const row    = Math.floor(TABLES.filter(t=>t.zone===zone).length / 4);
   TABLES.push({ id:nextId, name:'T'+String(nextId).padStart(2,'0'), zone,
     shape:'square', x:20+col*100, y:20+row*110, status:'비어있음', orderCnt:0 });
+  renderApp();
+}
+// 테이블 이름 변경 — 중복·공백 검증 후 반영
+function renameTable(id){
+  const t = TABLES.find(x=>x.id===id);
+  if(!t) return;
+  const raw = prompt('새 테이블 이름을 적어 주세요. (예: A-1, 창가1, T07)', t.name);
+  if(raw === null) return;
+  const newName = raw.trim();
+  if(!newName){ alert('테이블 이름은 비워 둘 수 없어요.'); return; }
+  if(newName === t.name) return;
+  if(TABLES.some(x => x.id !== id && x.name === newName)){
+    alert(`'${newName}'은(는) 이미 사용 중인 테이블 이름이에요.`);
+    return;
+  }
+  t.name = newName;
   renderApp();
 }
 
@@ -9580,7 +9599,7 @@ function renderMembership(main){
       <table class="t">
         <thead><tr><th style="width:130px;">등급</th><th style="width:160px;">승급 기준</th><th>혜택</th><th class="num" style="width:100px;">회원수</th><th class="num" style="width:100px;">비율</th><th style="width:64px;"></th></tr></thead>
         <tbody>
-          ${m.tiers.map(t=>{
+          ${m.tiers.map((t,idx)=>{
             const ratio = totalMembers?Math.round(t.members/totalMembers*100):0;
             return `
               <tr>
@@ -9589,7 +9608,7 @@ function renderMembership(main){
                 <td><b>${t.benefit}</b></td>
                 <td class="num"><b>${t.members}</b>명</td>
                 <td class="num">${ratio}%</td>
-                <td><button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="alert('${t.name} 등급 수정 (와이어프레임)')">수정</button></td>
+                <td><button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="renameMembershipTier(${idx})">✏️ 이름</button></td>
               </tr>
             `;
           }).join('')}
@@ -9601,6 +9620,22 @@ function renderMembership(main){
       💡 등급은 매월 1일 누적 결제 금액 기준으로 자동 산정돼요. 일정 기간 거래가 없으면 한 단계 떨어질 수 있어요.
     </div>
   `;
+}
+// 멤버십 등급명 변경 — 중복·공백 검증 후 반영
+function renameMembershipTier(idx){
+  const t = MEMBERSHIP.tiers[idx];
+  if(!t) return;
+  const raw = prompt('새 등급 이름을 적어 주세요. (예: VIP, 다이아몬드, 단골)', t.name);
+  if(raw === null) return;
+  const newName = raw.trim();
+  if(!newName){ alert('등급 이름은 비워 둘 수 없어요.'); return; }
+  if(newName === t.name) return;
+  if(MEMBERSHIP.tiers.some((x,i) => i !== idx && x.name === newName)){
+    alert(`'${newName}'은(는) 이미 사용 중인 등급 이름이에요.`);
+    return;
+  }
+  t.name = newName;
+  renderApp();
 }
 
 /* ============================================================

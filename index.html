@@ -2430,7 +2430,7 @@ function renderDetailPeriod(body){
               <span style="color:var(--ink-3);">~</span>
               <input class="input" placeholder="최대" value="${state.detailPeriodMaxAmt}" oninput="state.detailPeriodMaxAmt=this.value" style="width:140px;" />
               <span style="font-size:13px;color:var(--ink-3);">원</span>
-              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">🔍 검색</button>
               ${has?`<span class="chip" onclick="state.detailPeriodMinAmt='';state.detailPeriodMaxAmt='';renderApp()">✕ 초기화</span>`:''}
             </div>
           </div>
@@ -2931,7 +2931,7 @@ function renderDetailMenu(body){
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
               <span class="chip ${state.detailMenuRefundOnly?'on':''}" onclick="state.detailMenuRefundOnly=!state.detailMenuRefundOnly;renderApp()">↺ 환불 있는 메뉴만</span>
-              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">🔍 검색</button>
               ${has?`<span class="chip" onclick="state.detailMenuSearch='';state.detailMenuMinAmt='';state.detailMenuMaxAmt='';state.detailMenuRefundOnly=false;renderApp()">✕ 초기화</span>`:''}
             </div>
           </div>
@@ -3034,7 +3034,7 @@ function renderDetailCategory(body){
               <span style="color:var(--ink-3);">~</span>
               <input class="input" placeholder="최대" value="${state.detailCategoryMaxAmt}" oninput="state.detailCategoryMaxAmt=this.value" style="width:140px;" />
               <span style="font-size:13px;color:var(--ink-3);">원</span>
-              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">🔍 검색</button>
               ${has?`<span class="chip" onclick="state.detailCategoryMinAmt='';state.detailCategoryMaxAmt='';renderApp()">✕ 초기화</span>`:''}
             </div>
           </div>
@@ -3156,7 +3156,7 @@ function renderDetailMethod(body){
               <span style="color:var(--ink-3);">~</span>
               <input class="input" placeholder="최대" value="${state.detailMethodMaxAmt}" oninput="state.detailMethodMaxAmt=this.value" style="width:140px;" />
               <span style="font-size:13px;color:var(--ink-3);">원</span>
-              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+              <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">🔍 검색</button>
               ${has?`<span class="chip" onclick="state.detailMethodGroup='all';state.detailMethodMinAmt='';state.detailMethodMaxAmt='';renderApp()">✕ 초기화</span>`:''}
             </div>
           </div>
@@ -3403,7 +3403,7 @@ function renderOrders(main){
         return `
         <div style="padding:0 18px 18px;border-top:1px solid var(--line-2);">
           <div class="info-card" style="margin:14px 0 12px;background:#f4f8ff;border-color:#cfe0fa;color:#1b64da;font-size:12px;">
-            💡 여러 조건을 함께 골라 두고 아래 <b>이 조건으로 찾기</b> 버튼을 눌러야 적용돼요.
+            💡 여러 조건을 함께 골라 두고 아래 <b>검색</b> 버튼을 눌러야 적용돼요.
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px;">
             <span class="field-label">기간</span>
@@ -3465,7 +3465,7 @@ function renderOrders(main){
           </div>
           <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px dashed var(--line-2);">
             <button class="btn-ghost" onclick="clearOrderFilterDraft()" style="padding:9px 16px;font-size:13px;">조건 비우기</button>
-            <button class="btn-primary" onclick="applyOrderFilters()" style="padding:10px 22px;font-size:14px;font-weight:700;">🔍 이 조건으로 찾기</button>
+            <button class="btn-primary" onclick="applyOrderFilters()" style="padding:10px 22px;font-size:14px;font-weight:700;">🔍 검색</button>
           </div>
         </div>
       `;})() :''}
@@ -3917,7 +3917,7 @@ function renderStlList(main){
             <span style="color:var(--ink-3);">~</span>
             <input class="input" placeholder="최대" value="${state.stlListSettleMax}" oninput="state.stlListSettleMax=this.value" style="width:140px;" />
             <span style="font-size:13px;color:var(--ink-3);">원</span>
-            <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">적용</button>
+            <button class="btn-primary" onclick="renderApp()" style="padding:8px 16px;">🔍 검색</button>
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
             <span class="field-label">주문/승인번호</span>
@@ -5178,6 +5178,8 @@ state.menuStatusFilter= 'all';
 state.menuL2Filter    = 'all';   // 대분류(catL2) 드롭다운 필터
 state.menuL3Filter    = 'all';   // 중분류(catL3) 드롭다운 필터
 state.menuTag3Filter  = 'all';   // 소분류(tag3)  드롭다운 필터
+// 검색·필터 draft — [검색] 버튼 클릭 시 live state로 commit
+state.menuFilterDraft = { cat:'all', status:'all', L2:'all', L3:'all', tag3:'all', search:'' };
 state.menuSearch      = '';
 // 오늘의 준비량 — 분류 필터 (두 탭 공용)
 state.stockCatFilter  = 'all';
@@ -6883,37 +6885,34 @@ function renderMenu(main){
       <div class="menu-panel-filters">
         <div class="row">
           <span class="field-label">카테고리</span>
-          <span class="chip ${state.menuCatFilter==='all'?'on':''}" onclick="state.menuCatFilter='all';renderApp()">전체</span>
-          ${CAT_MENU.map(c=>`<span class="chip ${state.menuCatFilter===c.name?'on':''}" onclick="state.menuCatFilter='${c.name}';renderApp()">${c.name} <span style="color:${state.menuCatFilter===c.name?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${MENUS.filter(m=>m.cat===c.name).length}</span></span>`).join('')}
+          <span class="chip ${state.menuFilterDraft.cat==='all'?'on':''}" onclick="state.menuFilterDraft.cat='all';renderApp()">전체</span>
+          ${CAT_MENU.map(c=>`<span class="chip ${state.menuFilterDraft.cat===c.name?'on':''}" onclick="state.menuFilterDraft.cat='${c.name}';renderApp()">${c.name} <span style="color:${state.menuFilterDraft.cat===c.name?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${MENUS.filter(m=>m.cat===c.name).length}</span></span>`).join('')}
         </div>
         <div class="row">
           <span class="field-label">판매 상태</span>
-          <span class="chip ${state.menuStatusFilter==='all'?'on':''}" onclick="state.menuStatusFilter='all';renderApp()">전체</span>
-          <span class="chip ${state.menuStatusFilter==='판매중'?'on':''}" onclick="state.menuStatusFilter='판매중';renderApp()">판매중</span>
-          <span class="chip ${state.menuStatusFilter==='품절'?'on':''}" onclick="state.menuStatusFilter='품절';renderApp()">품절</span>
-          <span class="chip ${state.menuStatusFilter==='숨김'?'on':''}" onclick="state.menuStatusFilter='숨김';renderApp()">숨김</span>
+          ${[['all','전체'],['판매중','판매중'],['품절','품절'],['숨김','숨김']].map(([v,l])=>`<span class="chip ${state.menuFilterDraft.status===v?'on':''}" onclick="state.menuFilterDraft.status='${v}';renderApp()">${l}</span>`).join('')}
         </div>
-        ${(allL2Tags.length>0||allL3Tags.length>0||allTag3s.length>0)?`
         <div class="row">
           <span class="field-label" title="메뉴를 만들 때 입력한 대/중/소분류로 좁혀 볼 수 있어요. 손님 화면에는 안 보여요.">분류 태그</span>
-          ${allL2Tags.length>0?`<select class="filter-select${state.menuL2Filter!=='all'?' active':''}" onchange="state.menuL2Filter=this.value;renderApp()">
+          <select class="filter-select${state.menuFilterDraft.L2!=='all'?' active':''}" onchange="state.menuFilterDraft.L2=this.value">
             <option value="all">대분류 전체</option>
-            ${allL2Tags.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"${state.menuL2Filter===t?' selected':''}>${t}</option>`).join('')}
-          </select>`:''}
-          ${allL3Tags.length>0?`<select class="filter-select${state.menuL3Filter!=='all'?' active':''}" onchange="state.menuL3Filter=this.value;renderApp()">
+            ${allL2Tags.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"${state.menuFilterDraft.L2===t?' selected':''}>${t}</option>`).join('')}
+          </select>
+          <select class="filter-select${state.menuFilterDraft.L3!=='all'?' active':''}" onchange="state.menuFilterDraft.L3=this.value">
             <option value="all">중분류 전체</option>
-            ${allL3Tags.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"${state.menuL3Filter===t?' selected':''}>${t}</option>`).join('')}
-          </select>`:''}
-          ${allTag3s.length>0?`<select class="filter-select${state.menuTag3Filter!=='all'?' active':''}" onchange="state.menuTag3Filter=this.value;renderApp()">
+            ${allL3Tags.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"${state.menuFilterDraft.L3===t?' selected':''}>${t}</option>`).join('')}
+          </select>
+          <select class="filter-select${state.menuFilterDraft.tag3!=='all'?' active':''}" onchange="state.menuFilterDraft.tag3=this.value">
             <option value="all">소분류 전체</option>
-            ${allTag3s.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"${state.menuTag3Filter===t?' selected':''}>${t}</option>`).join('')}
-          </select>`:''}
-          ${state.menuL2Filter!=='all'||state.menuL3Filter!=='all'||state.menuTag3Filter!=='all'?`<span onclick="state.menuL2Filter='all';state.menuL3Filter='all';state.menuTag3Filter='all';renderApp()" style="font-size:12px;color:var(--blue);cursor:pointer;font-weight:700;">✕ 초기화</span>`:''}
+            ${allTag3s.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"${state.menuFilterDraft.tag3===t?' selected':''}>${t}</option>`).join('')}
+          </select>
+          ${allL2Tags.length===0&&allL3Tags.length===0&&allTag3s.length===0?`<span style="font-size:11px;color:var(--ink-4);">메뉴에 분류 태그를 입력하면 여기로 골라 볼 수 있어요.</span>`:''}
         </div>
-        `:''}
         <div class="row">
-          <span class="field-label">검색</span>
-          <input class="input" style="flex:1;max-width:320px;" placeholder="메뉴명·상품코드·분류 태그로 찾기" value="${state.menuSearch}" oninput="state.menuSearch=this.value" onchange="renderApp()" />
+          <span class="field-label">검색어</span>
+          <input class="input" style="flex:1;max-width:320px;" placeholder="메뉴명·상품코드·분류 태그로 찾기" value="${state.menuFilterDraft.search}" oninput="state.menuFilterDraft.search=this.value" onkeydown="if(event.key==='Enter')applyMenuFilters()" />
+          <button class="btn-primary" style="padding:9px 22px;font-size:13px;font-weight:800;" onclick="applyMenuFilters()">🔍 검색</button>
+          <button class="btn-ghost" style="padding:9px 14px;font-size:12px;" onclick="resetMenuFilters()">초기화</button>
         </div>
       </div>
 
@@ -8206,6 +8205,22 @@ function bulkDeleteMenus(){
   if(allWarnings.length>0){ alert(`삭제했어요. 다음 세트 자리가 비었으니 새 후보를 추가해 주세요:\n• ${[...new Set(allWarnings)].join('\n• ')}`); }
   renderApp();
   showToast(`<span class="ic">🗑️</span> 메뉴 ${removedCount}개를 삭제했어요`, 'ok');
+}
+// 메뉴 검색·필터 — draft → live state로 일괄 적용
+function applyMenuFilters(){
+  const d = state.menuFilterDraft || {};
+  state.menuCatFilter    = d.cat||'all';
+  state.menuStatusFilter = d.status||'all';
+  state.menuL2Filter     = d.L2||'all';
+  state.menuL3Filter     = d.L3||'all';
+  state.menuTag3Filter   = d.tag3||'all';
+  state.menuSearch       = d.search||'';
+  state.menuPage = 1;
+  renderApp();
+}
+function resetMenuFilters(){
+  state.menuFilterDraft = { cat:'all', status:'all', L2:'all', L3:'all', tag3:'all', search:'' };
+  applyMenuFilters();
 }
 // 메뉴 표 정렬 — 같은 키 클릭 시 asc↔desc 토글, 다른 키면 새 키 asc부터
 function sortMenu(key){

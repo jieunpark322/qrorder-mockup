@@ -1866,6 +1866,7 @@ function saveBusinessHours(){
   state.useBusinessHours = true; // 저장하면 자동으로 영업시간 기준 ON
   closeModal();
   renderApp();
+  showToast(`<span class="ic">🕘</span> 영업시간을 저장했어요`, 'ok');
 }
 
 /* ====================== 매출 한눈에 보기 ====================== */
@@ -4805,7 +4806,7 @@ function openExport(rowsCount, source, dateRange){
 }
 function confirmExport(cnt, src){
   closeModal();
-  alert(`✅ ${src} ${fmt(cnt)}건 엑셀로 다운로드 완료`);
+  showToast(`<span class="ic">📥</span> ${src} ${fmt(cnt)}건을 엑셀로 내려받았어요`, 'ok');
 }
 
 function openOrderDetail(o){
@@ -5545,6 +5546,7 @@ function exportMenuJSON(){
   a.href = url; a.download = `qrorder-menu-${new Date().toISOString().slice(0,10)}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  showToast(`<span class="ic">📥</span> 메뉴 데이터를 내려받았어요`, 'ok');
 }
 
 function importMenuJSON(ev){
@@ -5559,6 +5561,7 @@ function importMenuJSON(ev){
       CAT_MENU.length = 0;    (p.catMenu||[]).forEach(x=>CAT_MENU.push(x));
       SETS.length = 0;        (p.sets||[]).forEach(x=>SETS.push(x));
       renderApp();
+      showToast(`<span class="ic">📤</span> 메뉴 데이터를 불러왔어요`, 'ok');
     }catch(err){ alert('파일 형식을 확인해 주세요.'); }
   };
   r.readAsText(file);
@@ -5858,15 +5861,14 @@ function saveStaff(mode){
   if(mode==='등록'){
     const newId = (STAFF_LIST.reduce((m,s)=>Math.max(m,s.id),0))+1;
     STAFF_LIST.push({ id:newId, name, loginId, phone, email, groupId, useFrom, useTo, enabled, regDate: new Date().toISOString().slice(0,10) });
-    alert(`${name} 직원 계정을 등록했어요. 로그인 ID와 비밀번호를 직원에게 안내해 주세요.`);
   } else {
     const s = STAFF_LIST.find(x=>x.id===state._staffEdit);
     if(!s) return;
     Object.assign(s, { name, phone, email, useFrom, useTo, enabled });
-    alert(`${name} 직원 정보를 수정했어요.`);
   }
   closeModal();
   renderApp();
+  showToast(`<span class="ic">✅</span> ${name} 직원 계정을 ${mode==='등록'?'등록했어요':'수정했어요'}`, 'ok');
 }
 function deleteStaff(id){
   const s = STAFF_LIST.find(x=>x.id===id);
@@ -5874,8 +5876,8 @@ function deleteStaff(id){
   if(!confirm(`${s.name} 직원 계정을 삭제할까요? 이 계정으로는 더 이상 로그인할 수 없게 돼요.`)) return;
   const idx = STAFF_LIST.findIndex(x=>x.id===id);
   STAFF_LIST.splice(idx,1);
-  alert(`${s.name} 직원 계정을 삭제했어요.`);
   renderApp();
+  showToast(`<span class="ic">🗑️</span> ${s.name} 직원 계정을 삭제했어요`, 'ok');
 }
 
 /* ============================================================
@@ -6044,28 +6046,33 @@ function removeStock(menuId){
   const idx = MENU_STOCK.items.findIndex(x=>x.menuId===menuId);
   if(idx>=0) MENU_STOCK.items.splice(idx,1);
   renderApp();
+  showToast(`<span class="ic">🗑️</span> '${m?.name||'메뉴'}'의 수량 관리를 해제했어요`, 'ok');
 }
 function clearAllManualSoldOut(){
   const targets = MENUS.filter(m=>{ ensureMenuExtras(m); return m.manualSoldOut; });
   if(targets.length===0){ alert('오늘 품절 처리된 메뉴가 없어요.'); return; }
   if(!confirm(`품절 처리된 메뉴 ${targets.length}개를 모두 판매 중으로 되돌릴까요?`)) return;
+  const cnt = targets.length;
   targets.forEach(m=>{ m.manualSoldOut = false; });
   renderApp();
+  showToast(`<span class="ic">✅</span> 메뉴 ${cnt}개를 판매 중으로 되돌렸어요`, 'ok');
 }
 function copyYesterdayStock(){
   MENU_STOCK.items.forEach(it=>{ it.prepared = it.yesterdayPrep; it.remaining = it.yesterdayPrep; });
-  alert('어제 준비량으로 모두 맞췄어요.');
   renderApp();
+  showToast(`<span class="ic">✅</span> 어제 준비량으로 모두 맞췄어요`, 'ok');
 }
 // 아직 등록 안 한 메뉴를 한 번에 불러오기 — 준비량은 0으로 시작
 function loadAllMenus(){
   const other = MENUS.filter(m=>!MENU_STOCK.items.some(it=>it.menuId===m.id));
   if(other.length===0){ alert('모든 메뉴가 이미 등록돼 있어요.'); return; }
   if(!confirm(`수량 관리 안 하는 메뉴 ${other.length}개를 모두 불러올까요?\n준비량은 0으로 시작하니, 추가 후 메뉴마다 직접 수량을 입력해 주세요.`)) return;
+  const cnt = other.length;
   other.forEach(m => {
     MENU_STOCK.items.push({ menuId:m.id, enabled:true, prepared:0, remaining:0, unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:0, yesterdaySold:0 });
   });
   renderApp();
+  showToast(`<span class="ic">✅</span> 메뉴 ${cnt}개를 수량 관리에 추가했어요`, 'ok');
 }
 // 등록된 모든 메뉴의 수량 관리를 한 번에 해제
 function deleteAllStock(){
@@ -6074,6 +6081,7 @@ function deleteAllStock(){
   if(!confirm(`등록된 메뉴 ${n}개의 수량 관리를 모두 해제할까요?\n다시 불러오기 전까지 잔여 수량은 표시되지 않아요.`)) return;
   MENU_STOCK.items.length = 0;
   renderApp();
+  showToast(`<span class="ic">🗑️</span> 메뉴 ${n}개의 수량 관리를 모두 해제했어요`, 'ok');
 }
 function resetTodayStock(){
   MENU_STOCK.items.forEach(it=>{ it.prepared = 0; it.remaining = 0; });
@@ -6107,8 +6115,10 @@ function openAddStockModal(){
 }
 function addStockForMenu(menuId){
   MENU_STOCK.items.push({ menuId, enabled:true, prepared:50, remaining:50, unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:0, yesterdaySold:0 });
+  const m = MENUS.find(x=>x.id===menuId);
   closeModal();
   renderApp();
+  showToast(`<span class="ic">✅</span> '${m?.name||'메뉴'}'을(를) 수량 관리에 추가했어요`, 'ok');
 }
 
 // 메뉴 카드 그리드 — 사진·이름·가격 위주 시니어 친화 뷰
@@ -6494,8 +6504,10 @@ function saveMenuBulk(){
       img: r.img || '🍽️', opt: [], desc: r.desc || '',
     });
   });
+  const addedCount = rows.length;
   state.menuBulkRows = [];
   renderApp();
+  showToast(`<span class="ic">✅</span> 새 메뉴 ${addedCount}개를 저장했어요`, 'ok');
 }
 // 메뉴 삭제 시 연결 데이터 일괄 정리 — 오늘의 준비량·세트 후보·옵션 연결
 function cleanupAfterMenuDelete(id, code){
@@ -6529,6 +6541,7 @@ function deleteMenu(id){
   if (i>=0) MENUS.splice(i,1);
   if(warnings.length>0){ alert(`삭제했어요. 다음 세트의 자리가 비었으니 새 후보를 추가해 주세요:\n• ${warnings.join('\n• ')}`); }
   renderApp();
+  showToast(`<span class="ic">🗑️</span> '${m.name}' 메뉴를 삭제했어요`, 'ok');
 }
 
 /* ============================================================
@@ -6700,15 +6713,19 @@ function saveOptBulk(){
       links: [],
     });
   });
+  const addedCount = cards.length;
   state.optBulkCards = [];
   renderApp();
+  showToast(`<span class="ic">✅</span> 옵션 그룹 ${addedCount}개를 저장했어요`, 'ok');
 }
 function deleteOpt(id){
+  const g = OPT_GROUPS.find(x=>x.id===id);
   if (!confirm('이 옵션 그룹을 삭제할까요? 연결된 메뉴에서도 빠져요.')) return;
   const i = OPT_GROUPS.findIndex(g=>g.id===id);
   if (i>=0) OPT_GROUPS.splice(i,1);
   MENUS.forEach(m=>{ m.opt = m.opt.filter(x=>x!==id); });
   renderApp();
+  showToast(`<span class="ic">🗑️</span> '${g?.name||'옵션 그룹'}'을(를) 삭제했어요`, 'ok');
 }
 
 /* ============================================================
@@ -6853,7 +6870,9 @@ function saveCategory(){
   const nextId = (CAT_MENU.reduce((m,c)=>Math.max(m,c.id),0))+1;
   CAT_MENU.push({ id:nextId, name:f.name, order:f.order||CAT_MENU.length+1 });
   MENUS.forEach(m => { if (f.pickedMenus.includes(m.id)) m.cat = f.name; });
+  const savedName = f.name;
   clearCatForm();
+  showToast(`<span class="ic">✅</span> '${savedName}' 카테고리를 추가했어요`, 'ok');
 }
 function deleteCategory(id){
   const i = CAT_MENU.findIndex(c=>c.id===id);
@@ -6864,6 +6883,7 @@ function deleteCategory(id){
   MENUS.forEach(m=>{ if (m.cat===target.name) m.cat='미분류'; });
   CAT_MENU.splice(i,1);
   renderApp();
+  showToast(`<span class="ic">🗑️</span> '${target.name}' 카테고리를 삭제했어요`, 'ok');
 }
 
 /* ============================================================
@@ -7125,14 +7145,17 @@ function saveSet(){
       candidates: sl.candidates.map(c=>({ code:c.code, name:c.name, extraPrice:Number(c.extraPrice)||0, isDefault:!!c.isDefault })),
     })),
   });
-  alert(`'${f.name}' 세트를 등록했어요.`);
+  const savedName = f.name;
   clearSetForm();
+  showToast(`<span class="ic">✅</span> '${savedName}' 세트를 등록했어요`, 'ok');
 }
 function deleteSet(id){
+  const s = SETS.find(x=>x.id===id);
   if (!confirm('이 세트를 삭제할까요?')) return;
   const i = SETS.findIndex(s=>s.id===id);
   if (i>=0) SETS.splice(i,1);
   renderApp();
+  showToast(`<span class="ic">🗑️</span> '${s?.name||'세트'}'를 삭제했어요`, 'ok');
 }
 
 /* ============================================================
@@ -7391,7 +7414,10 @@ function confirmOptLink(){
     if (!has && inLinks) g.links = g.links.filter(x=>x!==m.id);
   });
   closeModal();
+  state._flashMenuId = m.id;
   renderApp();
+  flashSavedMenu(m.id);
+  showToast(`<span class="ic">✅</span> '${m.name}' 옵션 연결을 저장했어요`, 'ok');
 }
 
 /* ============================================================
@@ -7483,7 +7509,10 @@ function saveSchedule(){
   const item = list.find(x=>x.id===tgt.id);
   item.schedule = JSON.parse(JSON.stringify(state._schDraft));
   closeModal();
+  if(tgt.kind==='menu') state._flashMenuId = item.id;
   renderApp();
+  if(tgt.kind==='menu') flashSavedMenu(item.id);
+  showToast(`<span class="ic">🕒</span> '${item.name}' 판매 시간을 저장했어요`, 'ok');
 }
 
 /* ============================================================
@@ -7572,7 +7601,10 @@ function saveDiscount(){
   const item = list.find(x=>x.id===tgt.id);
   item.discount = JSON.parse(JSON.stringify(state._dcDraft));
   closeModal();
+  if(tgt.kind==='menu') state._flashMenuId = item.id;
   renderApp();
+  if(tgt.kind==='menu') flashSavedMenu(item.id);
+  showToast(`<span class="ic">🔥</span> '${item.name}' 해피아워 할인을 저장했어요`, 'ok');
 }
 
 /* ============================================================
@@ -7604,9 +7636,11 @@ function bulkDeleteMenus(){
     const i = MENUS.findIndex(x=>x.id===id);
     if (i>=0) MENUS.splice(i,1);
   });
+  const removedCount = ids.length;
   state.menuSel.clear();
   if(allWarnings.length>0){ alert(`삭제했어요. 다음 세트 자리가 비었으니 새 후보를 추가해 주세요:\n• ${[...new Set(allWarnings)].join('\n• ')}`); }
   renderApp();
+  showToast(`<span class="ic">🗑️</span> 메뉴 ${removedCount}개를 삭제했어요`, 'ok');
 }
 // 메뉴 카드 빠른 품절 토글 (수동 품절 ON/OFF)
 // 메뉴 정보·가격 편집 모달 — 행/카드 클릭으로 진입
@@ -7821,7 +7855,10 @@ function quickToggleSoldOut(id){
   if(!m) return;
   ensureMenuExtras(m);
   m.manualSoldOut = !m.manualSoldOut;
+  state._flashMenuId = m.id;
   renderApp();
+  flashSavedMenu(m.id);
+  showToast(`<span class="ic">${m.manualSoldOut?'⛔':'✅'}</span> '${m.name}'을(를) ${m.manualSoldOut?'품절로 바꿨어요':'판매 중으로 되돌렸어요'}`, 'ok');
 }
 function bulkToggleSoldOut(){
   const ids = [...state.menuSel];
@@ -7830,7 +7867,9 @@ function bulkToggleSoldOut(){
     ensureMenuExtras(m);
     m.manualSoldOut = !m.manualSoldOut;
   });
+  const cnt = ids.length;
   renderApp();
+  showToast(`<span class="ic">🔁</span> 메뉴 ${cnt}개의 품절 상태를 바꿨어요`, 'ok');
 }
 function openBulkPriceModal(){
   const ids = [...state.menuSel];
@@ -7910,8 +7949,11 @@ function applyBulkPrice(){
     else if (mode==='fixed') m.price = Math.max(0, m.price + Number(v));
     else                     m.price = Math.max(0, Number(v));
   });
+  const cnt = ids.length;
   state.menuSel.clear();
   closeModal();
+  renderApp();
+  showToast(`<span class="ic">💲</span> 메뉴 ${cnt}개의 가격을 조정했어요`, 'ok');
 }
 function openBulkCatModal(){
   const ids = [...state.menuSel];
@@ -7948,9 +7990,11 @@ function applyBulkCat(catName){
     const m = MENUS.find(x=>x.id===id); if (!m) return;
     m.cat = catName;
   });
+  const cnt = ids.length;
   state.menuSel.clear();
   closeModal();
   renderApp();
+  showToast(`<span class="ic">📂</span> 메뉴 ${cnt}개를 '${catName}'(으)로 옮겼어요`, 'ok');
 }
 function bulkDeleteOpts(){
   const ids = [...state.optSel];
@@ -7961,8 +8005,10 @@ function bulkDeleteOpts(){
     if (i>=0) OPT_GROUPS.splice(i,1);
     MENUS.forEach(m=>{ m.opt = m.opt.filter(x=>x!==id); });
   });
+  const cnt = ids.length;
   state.optSel.clear();
   renderApp();
+  showToast(`<span class="ic">🗑️</span> 옵션 그룹 ${cnt}개를 삭제했어요`, 'ok');
 }
 function bulkDeleteSets(){
   const ids = [...state.setSel];
@@ -7972,8 +8018,10 @@ function bulkDeleteSets(){
     const i = SETS.findIndex(s=>s.id===id);
     if (i>=0) SETS.splice(i,1);
   });
+  const cnt = ids.length;
   state.setSel.clear();
   renderApp();
+  showToast(`<span class="ic">🗑️</span> 세트 ${cnt}개를 삭제했어요`, 'ok');
 }
 
 /* ============================================================
@@ -7990,6 +8038,7 @@ function toggleCatPaused(id){
   ensureCatExtras(c);
   c.paused = !c.paused;
   renderApp();
+  showToast(`<span class="ic">${c.paused?'⏸️':'▶️'}</span> '${c.name}' 카테고리를 ${c.paused?'운영 중지했어요':'다시 운영해요'}`, 'ok');
 }
 function openCategoryScheduleModal(id){
   // 카테고리 스케줄도 메뉴/세트와 같은 모달 사용
@@ -9098,9 +9147,11 @@ function addTable(){
   const zone   = state.currentZone || ZONE_LIST[0].id;
   const col    = TABLES.filter(t=>t.zone===zone).length % 4;
   const row    = Math.floor(TABLES.filter(t=>t.zone===zone).length / 4);
-  TABLES.push({ id:nextId, name:'T'+String(nextId).padStart(2,'0'), zone,
+  const newName = 'T'+String(nextId).padStart(2,'0');
+  TABLES.push({ id:nextId, name:newName, zone,
     shape:'square', x:20+col*100, y:20+row*110, status:'비어있음', orderCnt:0 });
   renderApp();
+  showToast(`<span class="ic">✅</span> '${newName}' 테이블을 추가했어요`, 'ok');
 }
 // 테이블 모양 변경 — 사각/원형 토글
 function setTableShape(id, shape){
@@ -9155,6 +9206,7 @@ function confirmAddZone(){
   state.currentZone = newId;
   closeModal();
   renderApp();
+  showToast(`<span class="ic">✅</span> '${name}' 구역을 추가했어요`, 'ok');
 }
 function deleteZone(id){
   if(ZONE_LIST.length<=1){ alert('구역이 1개일 때는 삭제할 수 없어요.'); return; }
@@ -9177,6 +9229,7 @@ function deleteZone(id){
   document.getElementById('modal-bg').classList.add('on');
 }
 function confirmDeleteZone(id){
+  const zoneName = ZONE_LIST.find(x=>x.id===id)?.name || '구역';
   const idx = ZONE_LIST.findIndex(x=>x.id===id);
   ZONE_LIST.splice(idx,1);
   for(let i=TABLES.length-1;i>=0;i--){ if(TABLES[i].zone===id) TABLES.splice(i,1); }
@@ -9184,6 +9237,7 @@ function confirmDeleteZone(id){
   state.currentZone = ZONE_LIST[0].id;
   closeModal();
   renderApp();
+  showToast(`<span class="ic">🗑️</span> '${zoneName}' 구역을 삭제했어요`, 'ok');
 }
 
 function saveTableLayout(){
@@ -9226,6 +9280,7 @@ function saveTableLayout(){
 }
 
 function applyTableLayout(){
+  const cnt = Object.keys(_pendingTablePos).length;
   Object.entries(_pendingTablePos).forEach(([id, pos])=>{
     const t = TABLES.find(x=>x.id===parseInt(id));
     if(t){ t.x = pos.x; t.y = pos.y; }
@@ -9233,6 +9288,7 @@ function applyTableLayout(){
   _pendingTablePos = {};
   closeModal();
   renderApp();
+  showToast(`<span class="ic">📐</span> 테이블 ${cnt}개의 배치를 저장했어요`, 'ok');
 }
 
 /* ============================================================
@@ -9530,8 +9586,8 @@ function submitQRRequest(){
   state.qrReqColor = null;
   state.qrReqQty = null;
   state.qrReqMemo = '';
-  alert(`${color} 색상 QR ${qty}장 신청이 접수됐어요. 결제 금액: ${total.toLocaleString()}원`);
   renderApp();
+  showToast(`<span class="ic">✅</span> ${color} QR ${qty}장 신청이 접수됐어요`, 'ok');
 }
 
 /* ============================================================
@@ -9726,6 +9782,7 @@ function addHolidayFromModal(){
   STORE_INFO.holidays.push(entry);
   closeModal();
   renderApp();
+  showToast(`<span class="ic">📅</span> 휴무일을 추가했어요`, 'ok');
 }
 
 function addStoreImage(){
@@ -10196,8 +10253,8 @@ function submitInquiry(){
   const today = new Date().toISOString().slice(0,10);
   CS_INQUIRIES.unshift({ id:(CS_INQUIRIES.reduce((m,c)=>Math.max(m,c.id),0))+1, date:today, type, title, body, status:'답변 대기', reply:'', replyAt:'', by:'' });
   closeModal();
-  alert('문의가 접수됐어요. 평균 24시간 안에 답변드릴게요.');
   renderApp();
+  showToast(`<span class="ic">✅</span> 문의가 접수됐어요. 평균 24시간 안에 답변드릴게요`, 'ok');
 }
 
 /* ============================================================
@@ -10414,8 +10471,8 @@ function saveOrderType(){
     if(s.start >= s.end){ alert(`${s.name} 시간대의 시작 시각이 종료보다 빨라야 해요.`); return; }
   }
   ORDER_SAVED = JSON.stringify(ORDER_CHANNELS);
-  alert('주문 방식 설정을 저장했어요.');
   renderApp();
+  showToast(`<span class="ic">✅</span> 주문 방식 설정을 저장했어요`, 'ok');
 }
 function resetOrderType(){
   if(!ot_isDirty()){ alert('변경된 내용이 없어요.'); return; }
@@ -10820,6 +10877,7 @@ function confirmAddStaffMsg(){
   const newId=Math.max(0,...STAFF_CALLS.messages.map(m=>m.id))+1;
   STAFF_CALLS.messages.push({ id:newId, body, enabled:true, sort:STAFF_CALLS.messages.length+1 });
   closeModal(); renderApp();
+  showToast(`<span class="ic">✅</span> 직원 호출 메시지를 추가했어요`, 'ok');
 }
 
 /* ============================================================

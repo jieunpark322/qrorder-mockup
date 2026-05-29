@@ -930,6 +930,26 @@
   .sc-drag{font-size:16px;color:var(--ink-4);cursor:grab;flex-shrink:0;}
   .sc-num{font-size:12px;color:var(--ink-4);width:18px;text-align:center;flex-shrink:0;}
   .sc-body{flex:1;font-size:14px;font-weight:600;color:var(--ink);}
+  /* 직원호출 최근 내역 행 */
+  .sc-hist-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line-2);}
+  .sc-hist-row.pending{background:#fff7ed;margin:0 -20px;padding:14px 20px;border-bottom:1px solid #fed7aa;}
+  .sc-hist-no{font-size:12px;font-weight:700;color:var(--ink-3);font-variant-numeric:tabular-nums;width:40px;text-align:right;flex-shrink:0;}
+  .sc-hist-row.pending .sc-hist-no{color:#c2410c;}
+  .sc-hist-time{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;width:64px;flex-shrink:0;}
+  .sc-hist-table-cell{width:70px;flex-shrink:0;display:flex;justify-content:center;}
+  .sc-hist-table{font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-50);border:1px solid var(--blue-100);border-radius:8px;padding:4px 10px;min-width:54px;text-align:center;}
+  .sc-hist-msg{flex:1;font-size:14px;font-weight:600;color:var(--ink);min-width:0;}
+  .sc-hist-status{display:flex;align-items:center;justify-content:flex-end;gap:8px;width:240px;flex-shrink:0;}
+  .sc-hist-elapsed{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;flex-shrink:0;}
+  .sc-hist-elapsed.live{color:#c2410c;font-weight:700;}
+  .sc-hist-elapsed .lab{margin-right:4px;}
+  /* 직원호출 헤더 행 */
+  .sc-hist-head{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:2px solid var(--line);font-size:12px;font-weight:700;color:var(--ink-3);}
+  .sc-hist-head .col{cursor:pointer;user-select:none;white-space:nowrap;}
+  .sc-hist-head .col:hover{color:var(--ink);}
+  .sc-hist-head .col.active{color:var(--blue);}
+  .sc-hist-head .col .arrow{font-size:10px;color:var(--ink-4);margin-left:3px;}
+  .sc-hist-head .col.active .arrow{color:var(--blue);}
   /* 원산지 행 */
   .origin-row{padding:12px 0;border-bottom:1px solid var(--line-2);display:flex;flex-direction:column;gap:8px;}
   .origin-row.on{background:var(--blue-50);margin:0 -20px;padding:12px 20px;border-bottom:1px solid var(--blue-100);}
@@ -1419,6 +1439,10 @@ const state = {
   faqOpen: new Set(),
   // 고객 지원 탭 — 자주 묻는 질문 / 서비스 관련 문의
   supportTab: 'faq',                // faq | cs
+  // 직원 호출 탭 — 최근 호출 내역 / 호출 메시지
+  staffCallTab: 'history',          // history | messages
+  // 직원 호출 내역 정렬 — 헤더 클릭 토글
+  staffCallHistSort: { key:'no', dir:'desc' },
   // 우리 매장 리뷰 필터
   reviewFilter: 'all',              // all | wait | done | star5 | low (3점 이하)
   // 직원 계정 관리 검색·필터
@@ -1659,7 +1683,7 @@ function renderSidebar(){
     ]},
     { label:'매장 운영',    items:[
       { key:'store',      ic:'🏪',  label:'매장 설정' },
-      { key:'staff-call', ic:'🛎️',  label:'직원호출' },
+      { key:'staff-call', ic:'🛎️',  label:'직원 호출' },
       { key:'table',      ic:'🪑',  label:'테이블 관리' },
       { key:'qr',         ic:'📱',  label:'QR 관리' },
       { key:'staff',      ic:'👥',  label:'직원 계정 관리' },
@@ -3603,6 +3627,7 @@ const setDetailCategorySort = makeSortSetter('detailCategorySort');
 const setDetailMethodSort = makeSortSetter('detailMethodSort');
 const setDetailHourSort = makeSortSetter('detailHourSort');
 const setDetailPeriodSort = makeSortSetter('detailPeriodSort');
+const setStaffCallHistSort = makeSortSetter('staffCallHistSort');
 function setStlListBasis(k){ state.stlListDateBasis = k; renderApp(); }
 function setStlListStatus(k){ state.stlListStatus = k; renderApp(); }
 function setStlListCoupon(k){ state.stlListCoupon = k; renderApp(); }
@@ -5621,7 +5646,7 @@ function openStaffPermsModal(){
   const items = [
     { ico:'📋', label:'주문 내역',         owner:'전체 기간', staff:'당일만 가능',          note:'직원은 오늘 들어온 주문만 볼 수 있어요. 과거 주문은 사장님만 조회할 수 있어요.' },
     { ico:'↺', label:'환불·취소 처리',     owner:'가능',     staff:'불가',                  note:'잘못된 환불·취소를 막기 위해 사장님만 처리할 수 있어요.' },
-    { ico:'🏪', label:'매장 운영 카테고리',  owner:'전체 가능', staff:'전체 가능 (단, 직원 계정 관리 제외)', note:'매장 설정·직원호출·테이블·QR 관리 모두 가능해요.' },
+    { ico:'🏪', label:'매장 운영 카테고리',  owner:'전체 가능', staff:'전체 가능 (단, 직원 계정 관리 제외)', note:'매장 설정·직원 호출·테이블·QR 관리 모두 가능해요.' },
     { ico:'🍽️', label:'메뉴 관리 카테고리',  owner:'전체 가능', staff:'전체 가능',             note:'메뉴판 구성·옵션·카테고리·세트·원산지·오늘의 준비량·번역 모두 가능해요.' },
     { ico:'📊', label:'매출 관리',          owner:'가능',     staff:'화면 자체가 안 보여요', note:'매출은 사장님 영업 정보라 직원에게는 노출되지 않아요.' },
     { ico:'💰', label:'정산 관리',          owner:'가능',     staff:'화면 자체가 안 보여요', note:'정산·계좌·세금 같은 재무 정보는 사장님만 확인할 수 있어요.' },
@@ -6083,7 +6108,7 @@ function renderMenuCardGrid(rows){
                 const isLow = !isOut && st.remaining<=st.lowAlert;
                 const color = isOut?'#b91c1c':isLow?'#d97706':'#15803d';
                 const bg    = isOut?'#fee2e2':isLow?'#fef3c7':'#dcfce7';
-                return ` <span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:${bg};color:${color};margin-left:6px;vertical-align:middle;">📦 ${st.remaining}/${st.prepared}${st.unit}${isOut?' · 완료':isLow?' · 곧 품절':''}</span>`;
+                return ` <span onclick="event.stopPropagation();setSection('stock')" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:${bg};color:${color};margin-left:6px;vertical-align:middle;cursor:pointer;" title="오늘의 준비량 페이지로 이동">📦 ${st.remaining}/${st.prepared}${st.unit}${isOut?' · 완료':isLow?' · 곧 품절':''}</span>`;
               })()}</div>
               <div class="menu-card-desc">${r.desc||'<span style="color:var(--ink-4);">설명 없음</span>'}</div>
             </div>
@@ -6358,7 +6383,7 @@ function renderMenu(main){
                     const color = isOut?'var(--red)':isLow?'#d97706':'var(--ink-2)';
                     const bg = isOut?'#fef2f2':isLow?'#fffbeb':'transparent';
                     const ratio = st.prepared>0?Math.round(st.remaining/st.prepared*100):0;
-                    return `<div style="display:flex;flex-direction:column;gap:3px;padding:4px 8px;border-radius:6px;background:${bg};">
+                    return `<div onclick="event.stopPropagation();setSection('stock')" style="display:flex;flex-direction:column;gap:3px;padding:4px 8px;border-radius:6px;background:${bg};cursor:pointer;" title="오늘의 준비량 페이지로 이동">
                       <div style="font-size:12px;font-weight:800;color:${color};">${st.remaining}<span style="font-weight:500;color:var(--ink-3);"> / ${st.prepared}${st.unit}</span></div>
                       <div style="height:3px;background:#e5e7eb;border-radius:2px;overflow:hidden;"><div style="height:100%;background:${color};width:${ratio}%;"></div></div>
                       ${isOut?'<div style="font-size:9px;color:var(--red);font-weight:700;">🔴 오늘 완료</div>':isLow?`<div style="font-size:9px;color:#d97706;font-weight:700;">⚠️ 곧 품절</div>`:''}
@@ -6429,11 +6454,37 @@ function saveMenuBulk(){
   state.menuBulkRows = [];
   renderApp();
 }
+// 메뉴 삭제 시 연결 데이터 일괄 정리 — 오늘의 준비량·세트 후보·옵션 연결
+function cleanupAfterMenuDelete(id, code){
+  // 옵션 그룹 연결 제거
+  OPT_GROUPS.forEach(g=>{ if(g.links) g.links = g.links.filter(x=>x!==id); });
+  // 오늘의 준비량에서 제거
+  if(typeof MENU_STOCK!=='undefined' && MENU_STOCK.items){
+    MENU_STOCK.items = MENU_STOCK.items.filter(it=>it.menuId!==id);
+  }
+  // 세트 메뉴의 자리 후보에서 제거 — 후보가 0이 되면 안내
+  let setWarnings = [];
+  SETS.forEach(s=>{
+    (s.slots||[]).forEach(sl=>{
+      const before = sl.candidates.length;
+      const wasDefault = sl.candidates.find(c=>c.code===code)?.isDefault;
+      sl.candidates = sl.candidates.filter(c=>c.code!==code);
+      if(wasDefault && sl.candidates.length>0){ sl.candidates[0].isDefault = true; }
+      if(before > sl.candidates.length && sl.candidates.length===0){
+        setWarnings.push(`${s.name} - ${sl.name}`);
+      }
+    });
+  });
+  return setWarnings;
+}
 function deleteMenu(id){
-  if (!confirm('이 메뉴를 삭제할까요? 옵션·세트의 연결도 함께 끊겨요.')) return;
-  const i = MENUS.findIndex(m=>m.id===id);
+  const m = MENUS.find(x=>x.id===id);
+  if(!m) return;
+  if (!confirm(`'${m.name}' 메뉴를 삭제할까요?\n오늘의 준비량·세트 후보·옵션 연결도 함께 정리돼요.`)) return;
+  const warnings = cleanupAfterMenuDelete(m.id, m.code);
+  const i = MENUS.findIndex(x=>x.id===id);
   if (i>=0) MENUS.splice(i,1);
-  OPT_GROUPS.forEach(g=>{ g.links = g.links.filter(x=>x!==id); });
+  if(warnings.length>0){ alert(`삭제했어요. 다음 세트의 자리가 비었으니 새 후보를 추가해 주세요:\n• ${warnings.join('\n• ')}`); }
   renderApp();
 }
 
@@ -7502,13 +7553,16 @@ function duplicateSelectedMenus(){
 function bulkDeleteMenus(){
   const ids = [...state.menuSel];
   if (ids.length===0) return;
-  if (!confirm(`선택한 ${ids.length}개 메뉴를 삭제할까요? 옵션·세트 연결도 함께 끊겨요.`)) return;
+  if (!confirm(`선택한 ${ids.length}개 메뉴를 삭제할까요?\n오늘의 준비량·세트 후보·옵션 연결도 함께 정리돼요.`)) return;
+  let allWarnings = [];
   ids.forEach(id=>{
-    const i = MENUS.findIndex(m=>m.id===id);
+    const m = MENUS.find(x=>x.id===id);
+    if(m){ allWarnings = allWarnings.concat(cleanupAfterMenuDelete(m.id, m.code)); }
+    const i = MENUS.findIndex(x=>x.id===id);
     if (i>=0) MENUS.splice(i,1);
-    OPT_GROUPS.forEach(g=>{ g.links = g.links.filter(x=>x!==id); });
   });
   state.menuSel.clear();
+  if(allWarnings.length>0){ alert(`삭제했어요. 다음 세트 자리가 비었으니 새 후보를 추가해 주세요:\n• ${[...new Set(allWarnings)].join('\n• ')}`); }
   renderApp();
 }
 // 메뉴 카드 빠른 품절 토글 (수동 품절 ON/OFF)
@@ -7561,6 +7615,12 @@ function renderMenuEditModal(){
             <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">포장 주문 시 적용할 가격</div>
           </div>
         </div>
+        ${(typeof ORDER_CHANNELS!=='undefined' && ORDER_CHANNELS.takeoutDiscount===false) ? `
+          <div style="margin-top:-6px;margin-bottom:16px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:11px;color:#9a3412;line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <span>⚠️ 현재 주문 방식에서 <b>포장 할인이 꺼져 있어</b>, 입력하신 포장가는 손님 화면에 적용되지 않아요.</span>
+            <button class="btn-ghost" style="padding:5px 10px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="closeModal();setSection('order-type');">설정 →</button>
+          </div>
+        ` : ''}
 
         <!-- 카테고리 + 상태 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
@@ -7635,11 +7695,20 @@ function saveMenuEdit(){
   const name = document.getElementById('me-name').value.trim();
   const price = Number(document.getElementById('me-price').value);
   if(!name){ alert('메뉴 이름을 입력해 주세요.'); return; }
-  if(!(price>0)){ alert('매장 판매가는 0보다 커야 해요.'); return; }
+  if(!(price>0)){ alert('매장 판매가는 0보다 커야 해요. 음수·0은 입력할 수 없어요.'); return; }
+  // 같은 이름 메뉴 중복 체크 (자기 자신 제외)
+  if(MENUS.some(x=>x.id!==m.id && x.name.trim()===name)){
+    if(!confirm(`같은 이름의 메뉴('${name}')가 이미 있어요. 그래도 저장할까요?`)) return;
+  }
   const tpVal = document.getElementById('me-takeout').value;
+  const takeoutPrice = tpVal==='' ? null : Math.max(0, Number(tpVal)||0);
+  // 포장가 > 매장가 안내 (사장님 의도 존중, 차단 X)
+  if(takeoutPrice!=null && takeoutPrice > price){
+    if(!confirm(`포장가(${fmt(takeoutPrice)}원)가 매장 판매가(${fmt(price)}원)보다 비싸요.\n보통은 포장이 더 저렴해요. 그래도 저장할까요?`)) return;
+  }
   m.name = name;
   m.price = price;
-  m.takeoutPrice = tpVal==='' ? null : Math.max(0, Number(tpVal)||0);
+  m.takeoutPrice = takeoutPrice;
   m.cat = document.getElementById('me-cat').value;
   m.status = document.getElementById('me-status').value;
   m.desc = document.getElementById('me-desc').value;
@@ -8377,7 +8446,7 @@ const FAQS = [
     a:'QR 관리에서 원하는 색상과 수량(10장 단위)을 골라 신청하실 수 있어요. 영업일 기준 3~5일 안에 매장으로 발송돼요.' },
   { id:8,  cat:'QR·테이블', q:'테이블 배치는 영업 중에도 바꿀 수 있나요?',
     a:'안전을 위해 영업 마감 후에만 저장할 수 있어요. 영업 중에 드래그해서 바꾸시면 임시로만 적용되고, 마감 후 저장하셔야 손님 화면에 반영돼요.' },
-  { id:9,  cat:'직원호출', q:'직원 호출 알림은 어디서 받나요?',
+  { id:9,  cat:'직원 호출', q:'직원 호출 알림은 어디서 받나요?',
     a:'QR오더 에이전트 프로그램이 설치된 모든 기기에서 팝업 알림으로 동시에 받으실 수 있어요. 별도 설정은 필요하지 않아요.' },
   { id:10, cat:'환불·취소', q:'환불은 어떻게 처리하나요?',
     a:'주문 직후 5분 이내라면 에이전트 프로그램에서 바로 환불 가능해요. 그 이후에는 정산 관리에서 환불 처리하실 수 있어요.' },
@@ -8432,18 +8501,33 @@ const ORDER_LABELS = {
 };
 
 /* ============================================================
-   직원호출 데이터
+   직원 호출 데이터
    ============================================================ */
 const STAFF_CALLS = {
   enabled: true,
   messages: [
-    { id:1, body:'물',       enabled:true,  sort:1, usage:42 },
-    { id:2, body:'수저',     enabled:true,  sort:2, usage:18 },
-    { id:3, body:'계산',     enabled:true,  sort:3, usage:35 },
-    { id:4, body:'메뉴 추천', enabled:true,  sort:4, usage:7  },
-    { id:5, body:'도움',     enabled:false, sort:5, usage:3  },
+    { id:1, body:'물',       enabled:true,  sort:1 },
+    { id:2, body:'수저',     enabled:true,  sort:2 },
+    { id:3, body:'계산',     enabled:true,  sort:3 },
+    { id:4, body:'메뉴 추천', enabled:true,  sort:4 },
+    { id:5, body:'도움',     enabled:false, sort:5 },
   ],
 };
+
+/* 직원 호출 최근 내역 — 더미 기준시각: 오늘 14:55:00 */
+const STAFF_CALL_NOW = '14:55:00';
+const STAFF_CALL_HISTORY = [
+  // 진행 중 (completedAt = null) — 카운트가 살아 있어요
+  { id:201, table:'T05',  body:'물',       calledAt:'14:54:25', completedAt:null      },
+  { id:202, table:'T03',  body:'계산',     calledAt:'14:53:10', completedAt:null      },
+  // 처리 완료
+  { id:203, table:'T01',  body:'수저',     calledAt:'14:50:02', completedAt:'14:50:48' },
+  { id:204, table:'바01', body:'물',       calledAt:'14:43:11', completedAt:'14:44:50' },
+  { id:205, table:'T04',  body:'메뉴 추천', calledAt:'14:31:30', completedAt:'14:34:55' },
+  { id:206, table:'T02',  body:'계산',     calledAt:'14:18:08', completedAt:'14:18:42' },
+  { id:207, table:'T06',  body:'물',       calledAt:'14:02:55', completedAt:'14:04:33' },
+  { id:208, table:'바02', body:'수저',     calledAt:'13:48:20', completedAt:'13:49:10' },
+];
 
 /* ============================================================
    원산지 표시 데이터 — 사장님 자유 입력
@@ -9981,7 +10065,7 @@ function openNewInquiryModal(){
           <option>결제·정산</option>
           <option>메뉴 관리</option>
           <option>QR·테이블</option>
-          <option>직원호출</option>
+          <option>직원 호출</option>
           <option>기능 요청</option>
           <option>작동 문제 신고</option>
           <option>기타</option>
@@ -10166,6 +10250,49 @@ function ot_currentPolicy(){
 }
 // 액션 핸들러
 function setOrderMode(m){ ORDER_CHANNELS.mode = m; renderApp(); }
+// 주문 채널 변경 — 영향 범위가 커서 변경 전 안내 팝업으로 한 번 더 확인
+function confirmOrderModeChange(m){
+  if(ORDER_CHANNELS.mode === m) return; // 같은 채널이면 변경 없음
+  const labels = ORDER_LABELS.mode;
+  const fromLabel = labels[ORDER_CHANNELS.mode] || ORDER_CHANNELS.mode;
+  const toLabel = labels[m] || m;
+  const willDineOff  = (ORDER_CHANNELS.mode==='both'||ORDER_CHANNELS.mode==='dine_in') && m==='takeout';
+  const willTakeOff  = (ORDER_CHANNELS.mode==='both'||ORDER_CHANNELS.mode==='takeout') && m==='dine_in';
+  const impacts = [];
+  if(willDineOff) impacts.push('테이블 QR 주문이 손님 화면에서 사라져요.');
+  if(willTakeOff) impacts.push('포장 주문 QR이 손님 화면에서 사라져요.');
+  if(m==='both')  impacts.push('매장 주문과 포장 주문을 모두 받게 돼요.');
+  impacts.push('손님 메뉴판에 보이는 주문 방식이 바로 바뀌어요.');
+  impacts.push('이미 들어온 주문은 그대로 유지돼요.');
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:460px;">
+      <div class="modal-head"><b>주문 채널을 바꿀까요?</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:20px;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:14px;background:var(--bg-2);border-radius:12px;margin-bottom:16px;">
+          <span style="font-size:14px;font-weight:700;color:var(--ink-3);">${fromLabel}</span>
+          <span style="font-size:18px;color:var(--blue);font-weight:800;">→</span>
+          <span style="font-size:15px;font-weight:800;color:var(--ink);">${toLabel}</span>
+        </div>
+        <div style="font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:12px;">주문 채널은 매장 운영의 기준이 되는 설정이에요. 바꾸기 전에 아래 내용을 확인해 주세요.</div>
+        <ul style="margin:0 0 16px;padding-left:18px;font-size:13px;color:var(--ink-2);line-height:1.7;">
+          ${impacts.map(t=>`<li>${t}</li>`).join('')}
+        </ul>
+        <div style="padding:10px 14px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:8px;font-size:12px;color:#1b64da;line-height:1.55;margin-bottom:18px;">💡 여기서 바꿔도 아래 <b>저장</b> 버튼을 눌러야 최종 반영돼요. 저장 전엔 손님 화면이 바뀌지 않아요.</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost" style="flex:1;" onclick="closeModal()">그대로 둘게요</button>
+          <button class="btn-save-cta" style="flex:1.4;" onclick="applyOrderModeChange('${m}')">네, 바꿀게요</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function applyOrderModeChange(m){
+  ORDER_CHANNELS.mode = m;
+  closeModal();
+  renderApp();
+}
 function toggleOrderNotif(k){
   const a = ORDER_CHANNELS.notifications;
   const i = a.indexOf(k);
@@ -10258,7 +10385,7 @@ function renderOrderType(main){
       <h3>주문 채널 <span class="h-sub">매장이 받을 주문 종류를 한 가지만 골라 주세요</span></h3>
       <div class="ot-modes">
         ${Object.keys(ORDER_LABELS.mode).map(k=>`
-          <div class="ot-mode ${ch.mode===k?'sel':''}" onclick="setOrderMode('${k}')">
+          <div class="ot-mode ${ch.mode===k?'sel':''}" onclick="confirmOrderModeChange('${k}')">
             <span class="ic">${channelIcons[k]}</span>
             <div class="nm">${ORDER_LABELS.mode[k]}</div>
             <div class="dc">${channelDescs[k]}</div>
@@ -10393,14 +10520,36 @@ function renderOrderType(main){
 /* ============================================================
    직원호출 설정 페이지
    ============================================================ */
+function scHmsToSec(s){ const [h,m,sec]=s.split(':').map(Number); return h*3600+m*60+(sec||0); }
+function scHmToShort(s){ // '14:54:25' -> '14:54'
+  const [h,m] = s.split(':');
+  return `${h}:${m}`;
+}
+function scCompleteCall(id){
+  const row = STAFF_CALL_HISTORY.find(r=>r.id===id);
+  if (!row || row.completedAt) return;
+  row.completedAt = STAFF_CALL_NOW;
+  renderApp();
+}
+function scUndoComplete(id){
+  const row = STAFF_CALL_HISTORY.find(r=>r.id===id);
+  if (!row || !row.completedAt) return;
+  row.completedAt = null;
+  renderApp();
+}
+
 function renderStaffCall(main){
   const sc = STAFF_CALLS;
   const enabledCnt = sc.messages.filter(m=>m.enabled).length;
+  const tab = state.staffCallTab || 'history';
+  const MAX_MSG = 15;
+  const pendingCnt = STAFF_CALL_HISTORY.filter(r=>!r.completedAt).length;
+
   main.innerHTML = `
-    <div class="crumb">매장 운영 › 직원호출</div>
+    <div class="crumb">매장 운영 › 직원 호출</div>
     <div class="toolbar">
       <div>
-        <h2>직원호출</h2>
+        <h2>직원 호출</h2>
         <div class="page-sub">고객이 테이블에서 직원을 부를 수 있는 기능이에요. 매장 식사 채널에서만 작동해요.</div>
       </div>
       <label class="toggle-switch ${sc.enabled?'on':''}" style="font-size:13px;" onclick="STAFF_CALLS.enabled=!STAFF_CALLS.enabled;renderApp()">
@@ -10409,56 +10558,143 @@ function renderStaffCall(main){
       </label>
     </div>
 
-    ${sc.enabled ? `
-      <div class="panel" style="background:var(--blue-50);border:1px solid var(--blue-100);padding:14px 18px;">
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <span style="font-size:16px;flex-shrink:0;">💡</span>
-          <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
-            직원 호출이 들어오면 <b>QR오더 에이전트 프로그램이 설치된 기기에서 팝업창</b>으로 안내해요. 별도 설정 없이 매장에 설치된 모든 에이전트 기기에서 동시에 알림이 떠요.
-          </div>
-        </div>
-      </div>
+    <div class="tabs">
+      <div class="t ${tab==='history'?'on':''}" onclick="state.staffCallTab='history';renderApp()">🛎️ 최근 호출 내역${pendingCnt?` <span style="display:inline-block;margin-left:4px;font-size:11px;font-weight:800;color:#fff;background:#c2410c;border-radius:10px;padding:1px 7px;vertical-align:middle;">${pendingCnt}</span>`:''}</div>
+      <div class="t ${tab==='messages'?'on':''}" onclick="state.staffCallTab='messages';renderApp()">💬 호출 메시지</div>
+    </div>
 
+    <div id="staff-call-body"></div>
+  `;
+
+  const body = document.getElementById('staff-call-body');
+
+  if (tab === 'history') {
+    // 호출 인입 순서(오래된 순)로 번호 부여 → 가장 먼저 들어온 호출이 #1
+    const withNo = STAFF_CALL_HISTORY.slice()
+      .sort((a,b)=>scHmsToSec(a.calledAt)-scHmsToSec(b.calledAt))
+      .map((r,i)=>Object.assign({}, r, { _no:i+1 }));
+
+    const sortState = state.staffCallHistSort || { key:'no', dir:'desc' };
+    const accessors = {
+      no:       r => r._no,
+      calledAt: r => scHmsToSec(r.calledAt),
+      table:    r => r.table,
+      body:     r => r.body,
+      status:   r => r.completedAt ? 1 : 0,  // 0=대기 · 1=완료
+    };
+    const rows = applySort(withNo, sortState, accessors);
+
+    const arrowFor = (k) => sortState.key===k ? (sortState.dir==='asc'?'▲':'▼') : '⇅';
+    const headCol = (k, label, style) => `
+      <span class="col ${sortState.key===k?'active':''}" style="${style}" onclick="setStaffCallHistSort('${k}')">
+        ${label}<span class="arrow">${arrowFor(k)}</span>
+      </span>
+    `;
+
+    body.innerHTML = `
       <div class="panel">
-        <h3>호출 메시지 <span class="h-sub">${enabledCnt}개 활성 · 단어로 짧게 적어 주세요</span>
-          <span class="h-act">
-            ${sc.messages.length<10?`<button class="btn-primary" style="padding:7px 14px;font-size:12px;" onclick="openAddStaffMsgModal()">+ 메시지 추가 (${sc.messages.length}/10)</button>`:`<span style="font-size:12px;color:var(--ink-3);">최대 10개</span>`}
-          </span>
+        <h3>오늘 들어온 호출
+          <span class="h-sub">총 ${rows.length}건${pendingCnt?` · 처리 대기 ${pendingCnt}건`:''} · 당일 데이터만 보관해요</span>
         </h3>
-
-        ${enabledCnt===0 ? `
-          <div style="padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#c2410c;margin-bottom:12px;">
-            ⚠️ 모든 메시지가 꺼져 있어요. 고객 화면에 직원호출 버튼이 나타나지 않아요.
+        ${rows.length === 0 ? `
+          <div style="padding:40px 20px;text-align:center;color:var(--ink-3);font-size:13px;">
+            오늘 아직 들어온 호출이 없어요.
           </div>
-        ` : ''}
-
-        <div>
-          ${sc.messages.map((m,i)=>`
-            <div class="sc-msg-row ${m.enabled?'':'off'}">
-              <span class="sc-drag">⠿</span>
-              <span class="sc-num">${i+1}</span>
-              <span class="sc-body">${m.body}</span>
-              <span style="font-size:11px;color:var(--ink-4);margin-right:4px;">${m.usage}회</span>
-              <label class="toggle-switch ${m.enabled?'on':''}" onclick="STAFF_CALLS.messages[${i}].enabled=!STAFF_CALLS.messages[${i}].enabled;renderApp()">
-                <span class="sw"></span>
-              </label>
-              <button class="btn-ghost" style="padding:4px 8px;font-size:11px;color:var(--red);flex-shrink:0;" onclick="if(STAFF_CALLS.messages.length>1){STAFF_CALLS.messages.splice(${i},1);renderApp();}else{alert('최소 1개의 메시지가 필요해요.');}">✕</button>
-            </div>
-          `).join('')}
-        </div>
-        <div style="margin-top:10px;font-size:12px;color:var(--ink-4);">⠿ 아이콘을 드래그해서 순서를 바꿀 수 있어요</div>
+        ` : `
+          <div class="sc-hist-head">
+            ${headCol('no',       '#',         'width:40px;text-align:right;')}
+            ${headCol('calledAt', '호출 시각',  'width:64px;')}
+            ${headCol('table',    '테이블',     'width:70px;text-align:center;')}
+            ${headCol('body',     '호출 내용',  'flex:1;')}
+            ${headCol('status',   '상태',       'width:240px;text-align:right;')}
+          </div>
+          <div>
+            ${rows.map(r=>{
+              const isPending = !r.completedAt;
+              return `
+                <div class="sc-hist-row ${isPending?'pending':''}">
+                  <span class="sc-hist-no">#${r._no}</span>
+                  <span class="sc-hist-time">${scHmToShort(r.calledAt)}</span>
+                  <span class="sc-hist-table-cell"><span class="sc-hist-table">${r.table}</span></span>
+                  <span class="sc-hist-msg">${r.body}</span>
+                  <div class="sc-hist-status">
+                    ${isPending
+                      ? `
+                        <span class="sc-hist-elapsed live"><span class="lab">⏱</span>대기 중</span>
+                        <button class="btn-primary" style="padding:6px 14px;font-size:12px;" onclick="scCompleteCall(${r.id})">처리 완료</button>
+                      `
+                      : `
+                        <span style="font-size:12px;color:var(--ink-4);">✓ 처리 완료 <span style="color:var(--ink-3);font-variant-numeric:tabular-nums;margin-left:4px;">· ${scHmToShort(r.completedAt)}</span></span>
+                        <button class="btn-ghost" style="padding:4px 9px;font-size:11px;color:var(--ink-3);" onclick="scUndoComplete(${r.id})" title="실수로 눌렀다면 되돌릴 수 있어요">↺ 되돌리기</button>
+                      `}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:var(--ink-4);">
+            💡 컬럼 제목을 클릭하면 정렬 방향이 바뀌어요. 호출 내역은 오늘 들어온 항목만 보여 드리고, 자정 이후엔 자동으로 비워져요.
+          </div>
+        `}
       </div>
-    ` : `
+    `;
+    return;
+  }
+
+  // tab === 'messages'
+  if (!sc.enabled) {
+    body.innerHTML = `
       <div class="panel" style="text-align:center;padding:48px 20px;">
         <div style="font-size:36px;margin-bottom:14px;">🛎️</div>
-        <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px;">직원호출이 꺼져 있어요</div>
+        <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px;">직원 호출이 꺼져 있어요</div>
         <div style="font-size:13px;color:var(--ink-3);">위 토글을 켜면 고객이 테이블에서 직원을 부를 수 있어요.</div>
       </div>
-    `}
+    `;
+    return;
+  }
+
+  body.innerHTML = `
+    <div class="panel" style="background:var(--blue-50);border:1px solid var(--blue-100);padding:14px 18px;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:16px;flex-shrink:0;">💡</span>
+        <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
+          직원 호출이 들어오면 <b>QR오더 에이전트 프로그램이 설치된 기기에서 팝업창</b>으로 안내해요. 별도 설정 없이 매장에 설치된 모든 에이전트 기기에서 동시에 알림이 떠요.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>호출 메시지 <span class="h-sub">${enabledCnt}개 활성 · 단어로 짧게 적어 주세요</span>
+        <span class="h-act">
+          ${sc.messages.length<MAX_MSG?`<button class="btn-primary" style="padding:7px 14px;font-size:12px;" onclick="openAddStaffMsgModal()">+ 메시지 추가 (${sc.messages.length}/${MAX_MSG})</button>`:`<span style="font-size:12px;color:var(--ink-3);">최대 ${MAX_MSG}개</span>`}
+        </span>
+      </h3>
+
+      ${enabledCnt===0 ? `
+        <div style="padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#c2410c;margin-bottom:12px;">
+          ⚠️ 모든 메시지가 꺼져 있어요. 고객 화면에 직원 호출 버튼이 나타나지 않아요.
+        </div>
+      ` : ''}
+
+      <div>
+        ${sc.messages.map((m,i)=>`
+          <div class="sc-msg-row ${m.enabled?'':'off'}">
+            <span class="sc-drag">⠿</span>
+            <span class="sc-num">${i+1}</span>
+            <span class="sc-body">${m.body}</span>
+            <label class="toggle-switch ${m.enabled?'on':''}" onclick="STAFF_CALLS.messages[${i}].enabled=!STAFF_CALLS.messages[${i}].enabled;renderApp()">
+              <span class="sw"></span>
+            </label>
+            <button class="btn-ghost" style="padding:4px 8px;font-size:11px;color:var(--red);flex-shrink:0;" onclick="if(STAFF_CALLS.messages.length>1){STAFF_CALLS.messages.splice(${i},1);renderApp();}else{alert('최소 1개의 메시지가 필요해요.');}">✕</button>
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--ink-4);">⠿ 아이콘을 드래그해서 순서를 바꿀 수 있어요</div>
+    </div>
   `;
 }
 function openAddStaffMsgModal(){
-  if(STAFF_CALLS.messages.length>=10){ alert('메시지는 최대 10개까지 추가할 수 있어요.'); return; }
+  if(STAFF_CALLS.messages.length>=15){ alert('메시지는 최대 15개까지 추가할 수 있어요.'); return; }
   const modal=document.getElementById('modal');
   modal.innerHTML=`
     <div class="modal-box" style="max-width:360px;">
@@ -10484,7 +10720,7 @@ function confirmAddStaffMsg(){
   const body=document.getElementById('sc-msg-input')?.value.trim();
   if(!body){ alert('내용을 입력해 주세요.'); return; }
   const newId=Math.max(0,...STAFF_CALLS.messages.map(m=>m.id))+1;
-  STAFF_CALLS.messages.push({ id:newId, body, enabled:true, sort:STAFF_CALLS.messages.length+1, usage:0 });
+  STAFF_CALLS.messages.push({ id:newId, body, enabled:true, sort:STAFF_CALLS.messages.length+1 });
   closeModal(); renderApp();
 }
 

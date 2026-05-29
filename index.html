@@ -6815,10 +6815,11 @@ function renderMenu(main){
     <div class="bulk-collapse">
       <div class="bulk-collapse-head" onclick="state.menuBulkOpen=!state.menuBulkOpen;renderApp()">
         <div class="bc-left">
-          <span class="ttl">✏️ 새 메뉴 입력</span>
-          <span class="sub">${state.menuBulkRows.length>0?`작성 중 · ${state.menuBulkRows.length}개 행 · 저장 전엔 손님 화면에 안 보여요`:'클릭해서 펼친 뒤 행을 추가하거나, 엑셀로 한 번에 올릴 수 있어요. · 저장 전엔 손님 화면에 안 보여요'}</span>
+          <span class="ttl">⚡ 간편 등록 <span style="font-size:11px;font-weight:500;color:var(--ink-3);margin-left:4px;">여러 메뉴를 행으로 빠르게</span></span>
+          <span class="sub">${state.menuBulkRows.length>0?`작성 중 · ${state.menuBulkRows.length}개 행 · 저장 전엔 손님 화면에 안 보여요`:'클릭해서 펼친 뒤 행을 추가하면 이름·가격만 빠르게 입력할 수 있어요. 자세한 정보(사진·분류 태그·옵션)는 상세 등록을 써 주세요.'}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <button class="btn-ghost" style="padding:8px 14px;font-size:12px;font-weight:800;border:1.5px solid var(--blue-100);color:var(--blue);" onclick="event.stopPropagation();openMenuDetailNewModal()" title="메뉴 한 개의 모든 정보(사진·분류·옵션·포장가 등)를 자세히 입력해요">📝 상세 등록</button>
           <button class="btn-primary" style="padding:8px 14px;font-size:12px;font-weight:800;" onclick="event.stopPropagation();openMenuExcelModal()" title="엑셀 양식을 받아 메뉴 여러 개를 한 번에 등록할 수 있어요">📊 엑셀로 한 번에 등록</button>
           <span class="arr">${state.menuBulkOpen?'▼':'▶'}</span>
         </div>
@@ -8223,6 +8224,18 @@ function sortIcon(key){
 }
 // 메뉴 카드 빠른 품절 토글 (수동 품절 ON/OFF)
 // 메뉴 정보·가격 편집 모달 — 행/카드 클릭으로 진입
+// 상세 등록 — 빈 메뉴 편집 모달로 신규 진입
+function openMenuDetailNewModal(){
+  state._menuEdit = {
+    id: null,                                // null = 신규
+    isNew: true,
+    name:'', price:0, takeoutPrice:null,
+    cat: (CAT_MENU[0]?.name)||'미분류',
+    catL2:'', catL3:'', tag3:'',
+    desc:'', img:'', status:'판매중', maxQty:null,
+  };
+  renderMenuEditModal();
+}
 function openMenuEditModal(id){
   const m = MENUS.find(x=>x.id===id);
   if(!m) return;
@@ -8235,7 +8248,7 @@ function renderMenuEditModal(){
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-box" style="max-width:560px;">
-      <div class="modal-head"><b>메뉴 정보 수정</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-head"><b>${f.isNew?'📝 메뉴 상세 등록':'메뉴 정보 수정'}</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
       <div class="modal-body" style="padding:20px;max-height:74vh;overflow-y:auto;">
 
         <!-- 사진 첨부 -->
@@ -8395,8 +8408,14 @@ function cycleMenuEditImg(){
 }
 function saveMenuEdit(){
   const f = state._menuEdit;
-  const m = MENUS.find(x=>x.id===f.id);
-  if(!m) return;
+  // 신규 등록 분기 — id가 null이면 새 메뉴 push
+  let m;
+  if(f.isNew){
+    m = { id: (MENUS.reduce((mx,r)=>Math.max(mx,r.id),0))+1, code: genCode('M'), opt:[] };
+  } else {
+    m = MENUS.find(x=>x.id===f.id);
+    if(!m) return;
+  }
   const name = document.getElementById('me-name').value.trim();
   const price = Number(document.getElementById('me-price').value);
   if(!name){ alert('메뉴 이름을 입력해 주세요.'); return; }
@@ -8423,11 +8442,13 @@ function saveMenuEdit(){
   m.img = f.img;
   const mqVal = document.getElementById('me-maxqty').value;
   m.maxQty = (mqVal==='' || Number(mqVal)<=0) ? null : Math.floor(Number(mqVal));
+  // 신규 등록이면 MENUS에 push
+  if(f.isNew){ MENUS.push(m); }
   closeModal();
-  state._flashMenuId = m.id;        // 목록에서 바뀐 메뉴를 잠깐 강조
+  state._flashMenuId = m.id;
   renderApp();
-  flashSavedMenu(m.id);             // 해당 메뉴로 스크롤
-  showToast(`<span class="ic">✅</span> '${name}' 저장됐어요`, 'ok');
+  flashSavedMenu(m.id);
+  showToast(`<span class="ic">✅</span> '${name}' ${f.isNew?'등록됐어요':'저장됐어요'}`, 'ok');
 }
 function quickToggleSoldOut(id){
   const m = MENUS.find(x=>x.id===id);

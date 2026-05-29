@@ -1464,6 +1464,10 @@ const state = {
   mmMoreOpen: false,
   // 메뉴판 관리 — 우측 미리보기 스냅샷
   menuViewMode: 'table',            // 'card' | 'table' — 정보 밀도 우선 기본 표 뷰
+  // 메뉴 표 — 페이지네이션·정렬
+  menuRowsPerPage: 20,
+  menuPage: 1,
+  menuSort: { key:'order', dir:'asc' }, // order(등록순) | name | cat | price | takeoutPrice | stock | status
   // FAQ 검색·필터·아코디언 상태
   faqCat: '전체',
   faqSearch: '',
@@ -6723,6 +6727,33 @@ function renderMenu(main){
     rows = rows.filter(r=>{ ensureMenuExtras(r); return (r.name+' '+r.code+' '+(r.catL2||'')+' '+(r.catL3||'')+' '+(r.tag3||'')).toLowerCase().includes(q); });
   }
 
+  // 정렬
+  const sort = state.menuSort || { key:'order', dir:'asc' };
+  const cmp = (a,b)=>{
+    let av, bv;
+    switch(sort.key){
+      case 'order':   av=MENUS.indexOf(a); bv=MENUS.indexOf(b); break;
+      case 'name':    av=a.name||''; bv=b.name||''; break;
+      case 'cat':     av=a.cat||''; bv=b.cat||''; break;
+      case 'price':   av=a.price||0; bv=b.price||0; break;
+      case 'takeoutPrice': av=a.takeoutPrice!=null?a.takeoutPrice:a.price; bv=b.takeoutPrice!=null?b.takeoutPrice:b.price; break;
+      case 'stock':   { const sa=getMenuStock(a.id), sb=getMenuStock(b.id); av=sa?sa.remaining:Infinity; bv=sb?sb.remaining:Infinity; break; }
+      case 'status':  av=a.status||''; bv=b.status||''; break;
+      default: av=0; bv=0;
+    }
+    if(typeof av==='string'){ return av.localeCompare(bv,'ko') * (sort.dir==='asc'?1:-1); }
+    return (av-bv) * (sort.dir==='asc'?1:-1);
+  };
+  rows = rows.slice().sort(cmp);
+
+  // 페이지네이션
+  const totalCnt = rows.length;
+  const perPage  = state.menuRowsPerPage || 20;
+  const totalPages = Math.max(1, Math.ceil(totalCnt/perPage));
+  if(state.menuPage > totalPages) state.menuPage = 1;
+  const curPage = state.menuPage || 1;
+  const pagedRows = rows.slice((curPage-1)*perPage, curPage*perPage);
+
   const h = mmHeaderHTML('menu');
 
   // 일괄 입력 표 행 HTML
@@ -6821,7 +6852,7 @@ function renderMenu(main){
     </div>
 
     <div class="panel tight menu-saved-panel">
-      <h3>등록된 메뉴 <span class="h-sub">${rows.length}개${rows.length!==MENUS.length?` · 전체 ${MENUS.length}개 중`:''} · 행을 클릭하면 정보·가격을 수정할 수 있어요</span>
+      <h3>등록된 메뉴 <span class="h-sub">${totalCnt}개${totalCnt!==MENUS.length?` · 전체 ${MENUS.length}개 중`:''} · 행을 클릭하면 정보·가격을 수정할 수 있어요</span>
         <span class="h-act">
           ${state.menuSel.size>0 ? `
             <span style="font-size:12px;color:var(--blue);font-weight:700;">${state.menuSel.size}개 선택</span>
@@ -6881,23 +6912,23 @@ function renderMenu(main){
       <table class="t">
         <thead>
           <tr>
-            <th style="width:36px;text-align:center;"><span onclick="toggleSelAll('menuSel', ${JSON.stringify(rows.map(r=>r.id))})" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;border:2px solid ${rows.length>0&&rows.every(r=>state.menuSel.has(r.id))?'var(--blue)':'var(--ink-4)'};background:${rows.length>0&&rows.every(r=>state.menuSel.has(r.id))?'var(--blue)':'#fff'};color:#fff;font-weight:800;font-size:10px;cursor:pointer;">${rows.length>0&&rows.every(r=>state.menuSel.has(r.id))?'✓':''}</span></th>
-            <th style="width:62px;">순서 <span onclick="showOrderHelp()" title="순서 바꾸는 방법 보기" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--ink-4);color:#fff;font-size:10px;font-weight:800;font-style:normal;cursor:pointer;vertical-align:middle;">i</span></th>
+            <th style="width:36px;text-align:center;"><span onclick="toggleSelAll('menuSel', ${JSON.stringify(pagedRows.map(r=>r.id))})" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;border:2px solid ${pagedRows.length>0&&pagedRows.every(r=>state.menuSel.has(r.id))?'var(--blue)':'var(--ink-4)'};background:${pagedRows.length>0&&pagedRows.every(r=>state.menuSel.has(r.id))?'var(--blue)':'#fff'};color:#fff;font-weight:800;font-size:10px;cursor:pointer;">${pagedRows.length>0&&pagedRows.every(r=>state.menuSel.has(r.id))?'✓':''}</span></th>
+            <th style="width:62px;cursor:pointer;" onclick="sortMenu('order')">순서${sortIcon('order')} <span onclick="event.stopPropagation();showOrderHelp()" title="순서 바꾸는 방법 보기" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--ink-4);color:#fff;font-size:10px;font-weight:800;font-style:normal;cursor:pointer;vertical-align:middle;">i</span></th>
             <th style="width:42px;">사진</th>
             <th style="width:84px;">상품코드</th>
-            <th>메뉴명</th>
-            <th style="width:74px;">카테고리</th>
-            <th class="num" style="width:106px;">매장 판매가</th>
-            <th class="num" style="width:106px;">포장가 <span style="color:var(--ink-4);font-weight:400;font-size:10px;">(없으면 매장가)</span></th>
-            <th style="width:130px;">오늘 준비량 <span style="color:var(--ink-4);font-weight:400;font-size:10px;">남은/준비</span></th>
+            <th style="cursor:pointer;" onclick="sortMenu('name')">메뉴명${sortIcon('name')}</th>
+            <th style="width:74px;cursor:pointer;" onclick="sortMenu('cat')">카테고리${sortIcon('cat')}</th>
+            <th class="num" style="width:106px;cursor:pointer;" onclick="sortMenu('price')">매장 판매가${sortIcon('price')}</th>
+            <th class="num" style="width:106px;cursor:pointer;" onclick="sortMenu('takeoutPrice')">포장가${sortIcon('takeoutPrice')} <span style="color:var(--ink-4);font-weight:400;font-size:10px;">(없으면 매장가)</span></th>
+            <th style="width:130px;cursor:pointer;" onclick="sortMenu('stock')">오늘 준비량${sortIcon('stock')} <span style="color:var(--ink-4);font-weight:400;font-size:10px;">남은/준비</span></th>
             <th style="width:120px;">판매 시간</th>
             <th>연결된 옵션</th>
-            <th style="width:78px;">상태</th>
+            <th style="width:78px;cursor:pointer;" onclick="sortMenu('status')">상태${sortIcon('status')}</th>
             <th style="width:90px;"></th>
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="13">${MENUS.length===0?'위 <b>✏️ 새 메뉴 입력</b>을 펼쳐 첫 메뉴를 등록해 주세요. 또는 <b>📤 엑셀로 한 번에 올리기</b>로 여러 개를 한 번에 올릴 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : rows.map(r=>{
+          ${pagedRows.length===0 ? `<tr class="empty-row"><td colspan="13">${MENUS.length===0?'위 <b>✏️ 새 메뉴 입력</b>을 펼쳐 첫 메뉴를 등록해 주세요. 또는 <b>📤 엑셀로 한 번에 올리기</b>로 여러 개를 한 번에 올릴 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : pagedRows.map(r=>{
             ensureMenuExtras(r);
             const idx = MENUS.indexOf(r); // 전체 배열 기준 인덱스
             const opts = r.opt.map(oid=>{
@@ -6968,6 +6999,28 @@ function renderMenu(main){
           }).join('')}
         </tbody>
       </table>
+      </div>
+      <!-- 페이지네이션 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 4px 4px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);">
+          <span>한 페이지에</span>
+          <select class="input" style="width:auto;padding:5px 8px;font-size:12px;" onchange="state.menuRowsPerPage=Number(this.value);state.menuPage=1;renderApp()">
+            ${[10,20,50,100].map(n=>`<option value="${n}" ${perPage===n?'selected':''}>${n}개</option>`).join('')}
+          </select>
+          <span>· 총 ${totalCnt}개 · ${curPage}/${totalPages} 페이지</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <button class="btn-ghost" style="padding:6px 10px;font-size:11px;${curPage<=1?'opacity:.4;pointer-events:none;':''}" onclick="state.menuPage=1;renderApp()" title="첫 페이지">«</button>
+          <button class="btn-ghost" style="padding:6px 10px;font-size:11px;${curPage<=1?'opacity:.4;pointer-events:none;':''}" onclick="state.menuPage=Math.max(1,${curPage}-1);renderApp()" title="이전">‹</button>
+          ${(()=>{
+            const pages=[]; let start=Math.max(1,curPage-2); let end=Math.min(totalPages,start+4);
+            if(end-start<4) start=Math.max(1,end-4);
+            for(let p=start;p<=end;p++) pages.push(p);
+            return pages.map(p=>`<button class="btn-ghost" style="padding:6px 11px;font-size:11px;font-weight:${p===curPage?'800':'500'};${p===curPage?'background:var(--blue);color:#fff;':''}" onclick="state.menuPage=${p};renderApp()">${p}</button>`).join('');
+          })()}
+          <button class="btn-ghost" style="padding:6px 10px;font-size:11px;${curPage>=totalPages?'opacity:.4;pointer-events:none;':''}" onclick="state.menuPage=Math.min(${totalPages},${curPage}+1);renderApp()" title="다음">›</button>
+          <button class="btn-ghost" style="padding:6px 10px;font-size:11px;${curPage>=totalPages?'opacity:.4;pointer-events:none;':''}" onclick="state.menuPage=${totalPages};renderApp()" title="마지막 페이지">»</button>
+        </div>
       </div>
     </div>
 
@@ -8143,6 +8196,21 @@ function bulkDeleteMenus(){
   renderApp();
   showToast(`<span class="ic">🗑️</span> 메뉴 ${removedCount}개를 삭제했어요`, 'ok');
 }
+// 메뉴 표 정렬 — 같은 키 클릭 시 asc↔desc 토글, 다른 키면 새 키 asc부터
+function sortMenu(key){
+  const cur = state.menuSort || { key:'order', dir:'asc' };
+  if(cur.key===key){ state.menuSort = { key, dir: cur.dir==='asc'?'desc':'asc' }; }
+  else { state.menuSort = { key, dir:'asc' }; }
+  state.menuPage = 1;
+  renderApp();
+}
+function sortIcon(key){
+  const cur = state.menuSort || { key:'order', dir:'asc' };
+  if(cur.key!==key) return '<span style="color:var(--ink-4);font-size:9px;margin-left:3px;opacity:.5;">⇅</span>';
+  return cur.dir==='asc'
+    ? '<span style="color:var(--blue);font-size:10px;margin-left:3px;font-weight:700;">▲</span>'
+    : '<span style="color:var(--blue);font-size:10px;margin-left:3px;font-weight:700;">▼</span>';
+}
 // 메뉴 카드 빠른 품절 토글 (수동 품절 ON/OFF)
 // 메뉴 정보·가격 편집 모달 — 행/카드 클릭으로 진입
 function openMenuEditModal(id){
@@ -8218,17 +8286,17 @@ function renderMenuEditModal(){
             <div>
               <input id="me-catL2" class="input" list="me-catL2-list" placeholder="예: 에스프레소" value="${(f.catL2||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
               <datalist id="me-catL2-list">${[...new Set(MENUS.map(m=>m.catL2).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
-              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;">분류 ①</div>
+              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;font-weight:700;">대분류</div>
             </div>
             <div>
               <input id="me-catL3" class="input" list="me-catL3-list" placeholder="예: 시그니처" value="${(f.catL3||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
               <datalist id="me-catL3-list">${[...new Set(MENUS.map(m=>m.catL3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
-              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;">분류 ②</div>
+              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;font-weight:700;">중분류</div>
             </div>
             <div>
               <input id="me-tag3" class="input" list="me-tag3-list" placeholder="예: 추천" value="${(f.tag3||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
               <datalist id="me-tag3-list">${[...new Set(MENUS.map(m=>m.tag3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
-              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;">분류 ③</div>
+              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;font-weight:700;">소분류</div>
             </div>
           </div>
         </div>

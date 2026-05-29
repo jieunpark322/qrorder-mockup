@@ -5038,15 +5038,15 @@ document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeModal(); })
    상품코드: M=메뉴 / O=옵션 / S=세트 (6자리)
    ============================================================ */
 const MENUS = [
-  { id:1, code:'M00101', name:'아메리카노',         cat:'커피',    price:4500, takeoutPrice:4000, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%' },
-  { id:2, code:'M00102', name:'카페라떼',           cat:'커피',    price:5000, takeoutPrice:4500, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%' },
-  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피',    price:5500, takeoutPrice:5000, status:'판매중', img:'🥤', opt:[1,2,3], desc:'' },
-  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피',    price:4500, takeoutPrice:4000, status:'판매중', img:'🧊', opt:[1,2,3], desc:'' },
-  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료',    price:4800, takeoutPrice:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'' },
-  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료',    price:5200, takeoutPrice:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'' },
-  { id:7, code:'M00301', name:'크로아상',           cat:'디저트',  price:3800, takeoutPrice:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요' },
-  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트',  price:5500, takeoutPrice:null, status:'품절',   img:'🍰', opt:[],      desc:'' },
-  { id:9, code:'M00303', name:'마들렌',             cat:'디저트',  price:2800, takeoutPrice:null, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴' },
+  { id:1, code:'M00101', name:'아메리카노',         cat:'커피', catL2:'에스프레소', catL3:'',       price:4500, takeoutPrice:4000, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%' },
+  { id:2, code:'M00102', name:'카페라떼',           cat:'커피', catL2:'밀크',       catL3:'',       price:5000, takeoutPrice:4500, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%' },
+  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피', catL2:'밀크',       catL3:'시그니처', price:5500, takeoutPrice:5000, status:'판매중', img:'🥤', opt:[1,2,3], desc:'' },
+  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피', catL2:'에스프레소', catL3:'아이스',   price:4500, takeoutPrice:4000, status:'판매중', img:'🧊', opt:[1,2,3], desc:'' },
+  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료', catL2:'티',         catL3:'',       price:4800, takeoutPrice:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'' },
+  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료', catL2:'에이드',     catL3:'',       price:5200, takeoutPrice:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'' },
+  { id:7, code:'M00301', name:'크로아상',           cat:'디저트', catL2:'빵',       catL3:'',       price:3800, takeoutPrice:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요' },
+  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트', catL2:'케이크',   catL3:'',       price:5500, takeoutPrice:null, status:'품절',   img:'🍰', opt:[],      desc:'' },
+  { id:9, code:'M00303', name:'마들렌',             cat:'디저트', catL2:'쿠키',     catL3:'',       price:2800, takeoutPrice:null, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴' },
 ];
 
 const OPT_GROUPS = [
@@ -5289,6 +5289,8 @@ function ensureMenuExtras(m){
   if (typeof m.sold === 'undefined')   m.sold   = 0;
   if (typeof m.manualSoldOut === 'undefined') m.manualSoldOut = false;
   if (typeof m.takeoutPrice === 'undefined') m.takeoutPrice = null;  // null = 매장가 동일 적용
+  if (typeof m.catL2 === 'undefined') m.catL2 = '';  // 중분류 (선택)
+  if (typeof m.catL3 === 'undefined') m.catL3 = '';  // 소분류 (선택)
   if (typeof m.maxQty === 'undefined') m.maxQty = null;  // null = 제한 없음 (1회 주문 최대 수량)
   if (!m.schedule) m.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!m.discount) m.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
@@ -6113,7 +6115,7 @@ function renderMenuCardGrid(rows){
               <div class="menu-card-desc">${r.desc||'<span style="color:var(--ink-4);">설명 없음</span>'}</div>
             </div>
             <div class="menu-card-meta">
-              ${r.cat?`<span class="menu-card-cat">${r.cat}</span>`:''}
+              ${r.cat?`<span class="menu-card-cat" title="${[r.cat,r.catL2,r.catL3].filter(x=>x).join(' › ')}">${r.cat}${r.catL2?` › ${r.catL2}${r.catL3?` › ${r.catL3}`:''}`:''}</span>`:''}
               <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:90px;">
                 <div class="menu-card-price">${fmt(r.price)}<span style="font-size:11px;color:var(--ink-3);font-weight:500;margin-left:1px;">원</span></div>
                 ${r.takeoutPrice!=null&&r.takeoutPrice>=0
@@ -6370,7 +6372,7 @@ function renderMenu(main){
                 <td><div style="width:36px;height:36px;border-radius:8px;background:var(--bg-2);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;">${r.img?menuImgHtml(r.img,36,8):'<span style="font-size:11px;color:var(--ink-4);">없음</span>'}</div></td>
                 <td style="font-family:ui-monospace,'SF Mono',monospace;color:var(--ink-2);font-size:11px;">${r.code}</td>
                 <td><b>${r.name}</b>${r.maxQty?`<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:1px 6px;border-radius:8px;vertical-align:middle;" title="1회 주문 최대 ${r.maxQty}개">최대 ${r.maxQty}개</span>`:''}${r.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${r.desc}</div>`:''}</td>
-                <td><span style="font-size:12px;color:var(--ink-2);">${r.cat}</span></td>
+                <td><span style="font-size:12px;color:var(--ink-2);">${r.cat}${r.catL2?`<div style="font-size:10px;color:var(--ink-3);margin-top:2px;">› ${r.catL2}${r.catL3?` › ${r.catL3}`:''}</div>`:''}</span></td>
                 <td class="num">${priceCell}</td>
                 <td class="num">${r.takeoutPrice!=null&&r.takeoutPrice>=0
                   ? `<b style="color:#15803d;">${fmt(r.takeoutPrice)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>${r.takeoutPrice<r.price?`<div style="font-size:10px;color:#15803d;font-weight:700;margin-top:2px;">−${fmt(r.price-r.takeoutPrice)}원</div>`:''}`
@@ -6440,8 +6442,8 @@ function removeMenuBulkRow(idx){
   state.menuBulkRows.splice(idx,1); renderApp();
 }
 function saveMenuBulk(){
-  const rows = state.menuBulkRows.filter(r => r.name && r.price>0);
-  if (rows.length===0){ alert('메뉴명과 판매가를 입력해 주세요.'); return; }
+  const rows = state.menuBulkRows.filter(r => r.name && r.price>=0);
+  if (rows.length===0){ alert('메뉴 이름을 입력해 주세요. (가격은 0원도 가능해요)'); return; }
   let nextId = (MENUS.reduce((m,r)=>Math.max(m,r.id),0))+1;
   rows.forEach(r=>{
     MENUS.push({
@@ -7571,7 +7573,7 @@ function openMenuEditModal(id){
   const m = MENUS.find(x=>x.id===id);
   if(!m) return;
   ensureMenuExtras(m);
-  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, cat:m.cat, desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty };
+  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, cat:m.cat, catL2:m.catL2||'', catL3:m.catL3||'', desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty };
   renderMenuEditModal();
 }
 function renderMenuEditModal(){
@@ -7622,23 +7624,35 @@ function renderMenuEditModal(){
           </div>
         ` : ''}
 
-        <!-- 카테고리 + 상태 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <!-- 메뉴 분류 — 대 / 중 / 소 -->
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">메뉴 분류 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">대분류 필수 · 중·소분류는 선택</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px;">
           <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">카테고리</label>
             <select id="me-cat" class="input" style="width:100%;">
               ${CAT_MENU.map(c=>`<option ${f.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
             </select>
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;text-align:center;font-weight:600;">대분류</div>
           </div>
           <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">판매 상태</label>
-            <select id="me-status" class="input" style="width:100%;">
-              <option ${f.status==='판매중'?'selected':''}>판매중</option>
-              <option ${f.status==='숨김'?'selected':''}>숨김</option>
-            </select>
-            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;line-height:1.5;">품절은 <b style="color:var(--ink-3);cursor:pointer;" onclick="closeModal();setSection('stock');">오늘의 준비량</b>에서 설정할 수 있어요.</div>
+            <input id="me-catL2" class="input" list="me-catL2-list" placeholder="예: 에스프레소" value="${(f.catL2||'').replace(/"/g,'&quot;')}" style="width:100%;" />
+            <datalist id="me-catL2-list">${[...new Set(MENUS.map(m=>m.catL2).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;text-align:center;">중분류 (선택)</div>
+          </div>
+          <div>
+            <input id="me-catL3" class="input" list="me-catL3-list" placeholder="예: 아이스" value="${(f.catL3||'').replace(/"/g,'&quot;')}" style="width:100%;" />
+            <datalist id="me-catL3-list">${[...new Set(MENUS.map(m=>m.catL3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;text-align:center;">소분류 (선택)</div>
           </div>
         </div>
+        <div style="font-size:10px;color:var(--ink-4);margin-bottom:16px;line-height:1.55;">💡 중·소분류는 자유 입력이에요. 다른 메뉴와 같은 이름을 쓰면 자동으로 묶여요. (예: 커피 › 에스프레소 › 아이스)</div>
+
+        <!-- 판매 상태 -->
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">판매 상태</label>
+        <select id="me-status" class="input" style="width:100%;margin-bottom:6px;">
+          <option ${f.status==='판매중'?'selected':''}>판매중</option>
+          <option ${f.status==='숨김'?'selected':''}>숨김</option>
+        </select>
+        <div style="font-size:10px;color:var(--ink-4);margin-bottom:16px;line-height:1.5;">품절은 <b style="color:var(--ink-3);cursor:pointer;" onclick="closeModal();setSection('stock');">오늘의 준비량</b>에서 설정할 수 있어요.</div>
 
         <!-- 설명 -->
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">설명 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
@@ -7695,7 +7709,7 @@ function saveMenuEdit(){
   const name = document.getElementById('me-name').value.trim();
   const price = Number(document.getElementById('me-price').value);
   if(!name){ alert('메뉴 이름을 입력해 주세요.'); return; }
-  if(!(price>0)){ alert('매장 판매가는 0보다 커야 해요. 음수·0은 입력할 수 없어요.'); return; }
+  if(price<0 || isNaN(price)){ alert('매장 판매가는 0원 이상이어야 해요. (음수 입력 불가)'); return; }
   // 같은 이름 메뉴 중복 체크 (자기 자신 제외)
   if(MENUS.some(x=>x.id!==m.id && x.name.trim()===name)){
     if(!confirm(`같은 이름의 메뉴('${name}')가 이미 있어요. 그래도 저장할까요?`)) return;
@@ -7710,6 +7724,8 @@ function saveMenuEdit(){
   m.price = price;
   m.takeoutPrice = takeoutPrice;
   m.cat = document.getElementById('me-cat').value;
+  m.catL2 = (document.getElementById('me-catL2').value||'').trim();
+  m.catL3 = (document.getElementById('me-catL3').value||'').trim();
   m.status = document.getElementById('me-status').value;
   m.desc = document.getElementById('me-desc').value;
   m.img = f.img;

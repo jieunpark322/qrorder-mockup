@@ -5288,8 +5288,10 @@ function ensureMenuExtras(m){
   if (typeof m.sold === 'undefined')   m.sold   = 0;
   if (typeof m.manualSoldOut === 'undefined') m.manualSoldOut = false;
   if (typeof m.takeoutPrice === 'undefined') m.takeoutPrice = null;  // null = 매장가 동일 적용
-  if (typeof m.catL2 === 'undefined') m.catL2 = '';  // 중분류 (선택)
-  if (typeof m.catL3 === 'undefined') m.catL3 = '';  // 소분류 (선택)
+  // 분류 태그 — 사장님 내부 검색·구분용 자유 키워드 (손님 화면에는 안 노출)
+  if (typeof m.catL2 === 'undefined') m.catL2 = '';
+  if (typeof m.catL3 === 'undefined') m.catL3 = '';
+  if (typeof m.tag3  === 'undefined') m.tag3  = '';
   if (typeof m.maxQty === 'undefined') m.maxQty = null;  // null = 제한 없음 (1회 주문 최대 수량)
   if (!m.schedule) m.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!m.discount) m.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
@@ -6114,7 +6116,7 @@ function renderMenuCardGrid(rows){
               <div class="menu-card-desc">${r.desc||'<span style="color:var(--ink-4);">설명 없음</span>'}</div>
             </div>
             <div class="menu-card-meta">
-              ${r.cat?`<span class="menu-card-cat" title="${[r.cat,r.catL2,r.catL3].filter(x=>x).join(' › ')}">${r.cat}${r.catL2?` › ${r.catL2}${r.catL3?` › ${r.catL3}`:''}`:''}</span>`:''}
+              ${r.cat?`<span class="menu-card-cat" title="${[r.catL2,r.catL3,r.tag3].filter(x=>x).map(x=>'🏷️ '+x).join(', ')||'분류 태그 없음'}">${r.cat}</span>`:''}
               <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:90px;">
                 <div class="menu-card-price">${fmt(r.price)}<span style="font-size:11px;color:var(--ink-3);font-weight:500;margin-left:1px;">원</span></div>
                 ${r.takeoutPrice!=null&&r.takeoutPrice>=0
@@ -6371,7 +6373,10 @@ function renderMenu(main){
                 <td><div style="width:36px;height:36px;border-radius:8px;background:var(--bg-2);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;">${r.img?menuImgHtml(r.img,36,8):'<span style="font-size:11px;color:var(--ink-4);">없음</span>'}</div></td>
                 <td style="font-family:ui-monospace,'SF Mono',monospace;color:var(--ink-2);font-size:11px;">${r.code}</td>
                 <td><b>${r.name}</b>${r.maxQty?`<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:1px 6px;border-radius:8px;vertical-align:middle;" title="1회 주문 최대 ${r.maxQty}개">최대 ${r.maxQty}개</span>`:''}${r.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${r.desc}</div>`:''}</td>
-                <td><span style="font-size:12px;color:var(--ink-2);">${r.cat}${r.catL2?`<div style="font-size:10px;color:var(--ink-3);margin-top:2px;">› ${r.catL2}${r.catL3?` › ${r.catL3}`:''}</div>`:''}</span></td>
+                <td>
+                  <div style="font-size:12px;color:var(--ink-2);font-weight:700;">${r.cat}</div>
+                  ${[r.catL2,r.catL3,r.tag3].filter(x=>x).length>0?`<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px;">${[r.catL2,r.catL3,r.tag3].filter(x=>x).map(t=>`<span style="font-size:9px;background:#fef9e7;color:#854d0e;padding:1px 6px;border-radius:6px;font-weight:600;border:1px solid #fde047;">🏷️${t}</span>`).join('')}</div>`:''}
+                </td>
                 <td class="num">${priceCell}</td>
                 <td class="num">${r.takeoutPrice!=null&&r.takeoutPrice>=0
                   ? `<b>${fmt(r.takeoutPrice)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>`
@@ -7572,7 +7577,7 @@ function openMenuEditModal(id){
   const m = MENUS.find(x=>x.id===id);
   if(!m) return;
   ensureMenuExtras(m);
-  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, cat:m.cat, catL2:m.catL2||'', catL3:m.catL3||'', desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty };
+  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, cat:m.cat, catL2:m.catL2||'', catL3:m.catL3||'', tag3:m.tag3||'', desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty };
   renderMenuEditModal();
 }
 function renderMenuEditModal(){
@@ -7623,30 +7628,38 @@ function renderMenuEditModal(){
           </div>
         ` : ''}
 
-        <!-- 메뉴 분류 — 대 / 중 / 소 -->
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">메뉴 분류 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">대분류 필수 · 중·소분류는 선택</span></label>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px;">
-          <div>
-            <div style="display:flex;gap:4px;">
-              <select id="me-cat" class="input" style="flex:1;min-width:0;">
-                ${CAT_MENU.map(c=>`<option ${f.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
-              </select>
-              <button class="btn-ghost" style="padding:0 10px;font-size:13px;font-weight:800;flex-shrink:0;" onclick="addNewCatL1()" title="새 대분류 추가">+</button>
+        <!-- 카테고리 (손님 메뉴판 노출용) -->
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">카테고리 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">손님 메뉴판에 보이는 분류 · 필수</span></label>
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <select id="me-cat" class="input" style="flex:1;min-width:0;">
+            ${CAT_MENU.map(c=>`<option ${f.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
+          </select>
+          <button class="btn-ghost" style="padding:0 14px;font-size:13px;font-weight:800;flex-shrink:0;" onclick="addNewCatL1()" title="새 카테고리 추가">+ 새 카테고리</button>
+        </div>
+        <div style="font-size:10px;color:var(--ink-4);margin-bottom:18px;">💡 카테고리 자체 관리(이름 변경·순서·노출 여부)는 <b style="color:var(--ink-3);cursor:pointer;" onclick="closeModal();setSection('category');">메뉴 관리 → 카테고리</b>에서 따로 할 수 있어요.</div>
+
+        <!-- 메뉴 분류 태그 (사장님 내부용 검색·구분) -->
+        <div style="padding:14px 16px;background:#fef9e7;border:1px dashed #fde047;border-radius:10px;margin-bottom:16px;">
+          <label style="display:block;font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px;">🏷️ 메뉴 분류 태그 <span style="color:#a16207;font-weight:400;font-size:11px;">선택 · 카테고리와 별개</span></label>
+          <div style="font-size:11px;color:#a16207;line-height:1.55;margin-bottom:10px;">사장님이 메뉴를 <b>내부에서 검색·구분</b>하실 때 쓰는 자유 키워드예요. 손님 화면에는 안 보여요. (예: '시그니처', '신메뉴', '추천', '비건')</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div>
+              <input id="me-catL2" class="input" list="me-catL2-list" placeholder="예: 에스프레소" value="${(f.catL2||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
+              <datalist id="me-catL2-list">${[...new Set(MENUS.map(m=>m.catL2).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
+              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;">분류 ①</div>
             </div>
-            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;text-align:center;font-weight:600;">대분류</div>
-          </div>
-          <div>
-            <input id="me-catL2" class="input" list="me-catL2-list" placeholder="예: 에스프레소" value="${(f.catL2||'').replace(/"/g,'&quot;')}" style="width:100%;" />
-            <datalist id="me-catL2-list">${[...new Set(MENUS.map(m=>m.catL2).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
-            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;text-align:center;">중분류 (선택)</div>
-          </div>
-          <div>
-            <input id="me-catL3" class="input" list="me-catL3-list" placeholder="예: 아이스" value="${(f.catL3||'').replace(/"/g,'&quot;')}" style="width:100%;" />
-            <datalist id="me-catL3-list">${[...new Set(MENUS.map(m=>m.catL3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
-            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;text-align:center;">소분류 (선택)</div>
+            <div>
+              <input id="me-catL3" class="input" list="me-catL3-list" placeholder="예: 시그니처" value="${(f.catL3||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
+              <datalist id="me-catL3-list">${[...new Set(MENUS.map(m=>m.catL3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
+              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;">분류 ②</div>
+            </div>
+            <div>
+              <input id="me-tag3" class="input" list="me-tag3-list" placeholder="예: 추천" value="${(f.tag3||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
+              <datalist id="me-tag3-list">${[...new Set(MENUS.map(m=>m.tag3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
+              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;">분류 ③</div>
+            </div>
           </div>
         </div>
-        <div style="font-size:10px;color:var(--ink-4);margin-bottom:16px;line-height:1.55;">💡 중·소분류는 자유 입력이에요. 다른 메뉴와 같은 이름을 쓰면 자동으로 묶여요. (예: 커피 › 에스프레소 › 아이스)</div>
 
         <!-- 판매 상태 -->
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">판매 상태</label>
@@ -7753,6 +7766,7 @@ function saveMenuEdit(){
   m.cat = document.getElementById('me-cat').value;
   m.catL2 = (document.getElementById('me-catL2').value||'').trim();
   m.catL3 = (document.getElementById('me-catL3').value||'').trim();
+  m.tag3  = (document.getElementById('me-tag3')?.value||'').trim();
   m.status = document.getElementById('me-status').value;
   m.desc = document.getElementById('me-desc').value;
   m.img = f.img;

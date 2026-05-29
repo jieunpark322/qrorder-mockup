@@ -5241,9 +5241,8 @@ function mmHeaderHTML(activeKey){
         ${state.mmMoreOpen ? `
           <div class="mm-more">
             <div class="mm-more-section">데이터 관리</div>
-            <button onclick="state.mmMoreOpen=false;loadMenuSample()"><span class="ic-em">☕</span>샘플 메뉴 불러오기</button>
-            <button onclick="state.mmMoreOpen=false;exportMenuJSON()"><span class="ic-em">📤</span>메뉴 백업 받기</button>
-            <button onclick="state.mmMoreOpen=false;document.getElementById('mm-json-file').click()"><span class="ic-em">📥</span>백업에서 복원</button>
+            <button onclick="state.mmMoreOpen=false;exportMenuJSON()"><span class="ic-em">📊</span>엑셀 다운로드</button>
+            <button onclick="state.mmMoreOpen=false;document.getElementById('mm-json-file').click()"><span class="ic-em">📤</span>엑셀 업로드</button>
             <div class="mm-more-section danger-section">⚠️ 위험한 작업</div>
             <button class="danger" onclick="state.mmMoreOpen=false;resetMenuAll()"><span class="ic-em">🗑️</span>등록된 메뉴 모두 지우기</button>
           </div>
@@ -6082,7 +6081,7 @@ function renderMenuCardGrid(rows){
         <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">${MENUS.length===0?'아직 등록된 메뉴가 없어요':'조건에 맞는 메뉴가 없어요'}</div>
         <div style="font-size:13px;color:var(--ink-3);line-height:1.6;">
           ${MENUS.length===0
-            ? '위 <b style="color:var(--ink-2);">+ 새 메뉴 추가</b>를 눌러서 첫 메뉴를 등록해 주세요.<br/>또는 ⚙️ 고급 설정 → ☕ 샘플 메뉴 불러오기로 빠르게 시작할 수 있어요.'
+            ? '위 <b style="color:var(--ink-2);">+ 새 메뉴 추가</b>를 눌러서 첫 메뉴를 등록해 주세요.<br/>또는 ⚙️ 고급 설정 → 📤 엑셀 업로드로 한 번에 올릴 수 있어요.'
             : '카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}
         </div>
       </div>
@@ -6347,7 +6346,7 @@ function renderMenu(main){
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="13">${MENUS.length===0?'위 + 새 메뉴 추가를 눌러 첫 메뉴를 등록해 주세요. 또는 ⚙️ 고급 설정 → ☕ 샘플 메뉴 불러오기로 빠르게 시작할 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : rows.map(r=>{
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="13">${MENUS.length===0?'위 + 새 메뉴 추가를 눌러 첫 메뉴를 등록해 주세요. 또는 ⚙️ 고급 설정 → 📤 엑셀 업로드로 한 번에 올릴 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : rows.map(r=>{
             ensureMenuExtras(r);
             const idx = MENUS.indexOf(r); // 전체 배열 기준 인덱스
             const opts = r.opt.map(oid=>{
@@ -6375,7 +6374,7 @@ function renderMenu(main){
                 <td><span style="font-size:12px;color:var(--ink-2);">${r.cat}${r.catL2?`<div style="font-size:10px;color:var(--ink-3);margin-top:2px;">› ${r.catL2}${r.catL3?` › ${r.catL3}`:''}</div>`:''}</span></td>
                 <td class="num">${priceCell}</td>
                 <td class="num">${r.takeoutPrice!=null&&r.takeoutPrice>=0
-                  ? `<b style="color:#15803d;">${fmt(r.takeoutPrice)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>${r.takeoutPrice<r.price?`<div style="font-size:10px;color:#15803d;font-weight:700;margin-top:2px;">−${fmt(r.price-r.takeoutPrice)}원</div>`:''}`
+                  ? `<b>${fmt(r.takeoutPrice)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>`
                   : `<span style="color:var(--ink-4);font-size:12px;">매장가 동일</span>`}</td>
                 <td>${(()=>{
                   const st = getMenuStock(r.id);
@@ -7628,9 +7627,12 @@ function renderMenuEditModal(){
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">메뉴 분류 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">대분류 필수 · 중·소분류는 선택</span></label>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px;">
           <div>
-            <select id="me-cat" class="input" style="width:100%;">
-              ${CAT_MENU.map(c=>`<option ${f.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
-            </select>
+            <div style="display:flex;gap:4px;">
+              <select id="me-cat" class="input" style="flex:1;min-width:0;">
+                ${CAT_MENU.map(c=>`<option ${f.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
+              </select>
+              <button class="btn-ghost" style="padding:0 10px;font-size:13px;font-weight:800;flex-shrink:0;" onclick="addNewCatL1()" title="새 대분류 추가">+</button>
+            </div>
             <div style="font-size:10px;color:var(--ink-4);margin-top:3px;text-align:center;font-weight:600;">대분류</div>
           </div>
           <div>
@@ -7696,6 +7698,31 @@ function renderMenuEditModal(){
     </div>
   `;
   document.getElementById('modal-bg').classList.add('on');
+}
+// 편집 모달 안에서 대분류를 즉시 추가 (별도 카테고리 페이지로 가지 않게)
+function addNewCatL1(){
+  // 현재 입력 상태 보존
+  const cur = state._menuEdit;
+  cur.name    = (document.getElementById('me-name')?.value||cur.name).trim();
+  cur.price   = Number(document.getElementById('me-price')?.value)||cur.price;
+  const tpV   = document.getElementById('me-takeout')?.value;
+  cur.takeoutPrice = tpV==='' ? null : (Number(tpV) ?? cur.takeoutPrice);
+  cur.catL2   = (document.getElementById('me-catL2')?.value||cur.catL2||'').trim();
+  cur.catL3   = (document.getElementById('me-catL3')?.value||cur.catL3||'').trim();
+  cur.desc    = document.getElementById('me-desc')?.value||cur.desc;
+  cur.status  = document.getElementById('me-status')?.value||cur.status;
+  const name  = prompt('새 대분류 이름을 적어 주세요. (예: 베이커리, 사이드)');
+  if(!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if(CAT_MENU.some(c=>c.name===trimmed)){
+    alert(`'${trimmed}' 분류는 이미 있어요.`);
+    cur.cat = trimmed;
+  } else {
+    const nextId = (CAT_MENU.reduce((m,c)=>Math.max(m,c.id||0),0))+1;
+    CAT_MENU.push({ id:nextId, name:trimmed });
+    cur.cat = trimmed;
+  }
+  renderMenuEditModal();
 }
 function cycleMenuEditImg(){
   const i = SAMPLE_ICONS.indexOf(state._menuEdit.img);

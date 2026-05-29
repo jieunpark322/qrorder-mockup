@@ -6810,7 +6810,6 @@ function renderMenu(main){
         <h2>메뉴판 관리</h2>
         <div class="page-sub">단품을 등록하고, 옵션 그룹을 연결해요. 여러 개를 한 번에 올릴 수 있어요.</div>
       </div>
-      <button class="btn-primary" style="padding:10px 16px;font-size:13px;font-weight:800;" onclick="openMenuExcelModal()">📊 엑셀로 한 번에 등록</button>
     </div>
 
     <div class="bulk-collapse">
@@ -6820,8 +6819,7 @@ function renderMenu(main){
           <span class="sub">${state.menuBulkRows.length>0?`작성 중 · ${state.menuBulkRows.length}개 행 · 저장 전엔 손님 화면에 안 보여요`:'클릭해서 펼친 뒤 행을 추가하거나, 엑셀로 한 번에 올릴 수 있어요. · 저장 전엔 손님 화면에 안 보여요'}</span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-          <button class="btn-ghost" style="padding:8px 14px;font-size:12px;font-weight:700;" onclick="event.stopPropagation();document.getElementById('mm-json-file').click()" title="엑셀(JSON) 파일로 여러 메뉴를 한 번에 등록할 수 있어요">📤 엑셀로 한 번에 올리기</button>
-          <input type="file" id="mm-json-file" accept=".json" style="display:none" onchange="importMenuJSON(event)" />
+          <button class="btn-primary" style="padding:8px 14px;font-size:12px;font-weight:800;" onclick="event.stopPropagation();openMenuExcelModal()" title="엑셀 양식을 받아 메뉴 여러 개를 한 번에 등록할 수 있어요">📊 엑셀로 한 번에 등록</button>
           <span class="arr">${state.menuBulkOpen?'▼':'▶'}</span>
         </div>
       </div>

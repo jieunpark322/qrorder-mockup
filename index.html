@@ -425,6 +425,9 @@
   .menu-panel-filters .row + .row{margin-top:10px;}
   .menu-panel-filters .field-label{font-size:12px;color:var(--ink-3);font-weight:700;width:72px;flex-shrink:0;}
   .menu-panel-filters .input{background:#fff;}
+  .filter-select{height:34px;padding:0 28px 0 10px;border:1px solid var(--line);border-radius:8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 10px center;-webkit-appearance:none;appearance:none;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;transition:border-color .12s;}
+  .filter-select:focus{outline:none;border-color:var(--blue);}
+  .filter-select.active{border-color:var(--blue);background-color:#eef4ff;color:var(--blue);}
 
   /* Pagination + rows control */
   .table-footer{padding:12px 18px;border-top:1px solid var(--line-2);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-3);flex-wrap:wrap;gap:10px;}
@@ -5167,8 +5170,15 @@ function setPriceRange(s){
 // 메뉴관리 페이지 공통 상태
 state.menuCatFilter   = 'all';
 state.menuStatusFilter= 'all';
-state.menuTagFilter   = 'all';   // 분류 태그(catL2/catL3/tag3) 값별 상세 필터
+state.menuL2Filter    = 'all';   // 대분류(catL2) 드롭다운 필터
+state.menuL3Filter    = 'all';   // 중분류(catL3) 드롭다운 필터
+state.menuTag3Filter  = 'all';   // 소분류(tag3)  드롭다운 필터
 state.menuSearch      = '';
+// 오늘의 준비량 — 분류 필터 (두 탭 공용)
+state.stockCatFilter  = 'all';
+state.stockL2Filter   = 'all';
+state.stockL3Filter   = 'all';
+state.stockTag3Filter = 'all';
 state.trLang          = 'en';     // 번역 현재 언어 탭
 state.trTarget        = 'menu';   // 'menu' | 'option' | 'set'
 state.trSearch        = '';
@@ -5929,13 +5939,79 @@ function renderStock(main){
   const items = MENU_STOCK.items.filter(it=>it.enabled);
   const lowCnt = items.filter(it=>it.remaining>0 && it.remaining<=it.lowAlert).length;
   const outCnt = items.filter(it=>it.remaining===0).length;
-  // 잠재 추가 대상 — 아직 수량 관리 안 하는 메뉴
-  const otherMenus = MENUS.filter(m=>!MENU_STOCK.items.some(it=>it.menuId===m.id));
-  // 수량 관리 없는 메뉴 중 '오늘만 품절' 토글로 막아둔 메뉴
+  // 품절 처리 대상 — 수량 관리 밖 메뉴에서 숨김 처리된 메뉴 제외
+  const otherMenus = MENUS.filter(m=>!MENU_STOCK.items.some(it=>it.menuId===m.id) && m.status!=='숨김');
   otherMenus.forEach(m=>ensureMenuExtras(m));
   const manualOutCnt = otherMenus.filter(m=>m.manualSoldOut).length;
   const fullOutCnt = otherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='full').length;
   const tempOutCnt = otherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='temp').length;
+
+  // 분류 필터 선택 목록 (전체 메뉴 기준)
+  const stockAllCats  = [...new Set(MENUS.map(m=>m.cat).filter(x=>x&&x.trim()))];
+  const stockAllL2    = [...new Set(MENUS.map(m=>{ ensureMenuExtras(m); return m.catL2; }).filter(x=>x&&x.trim()))];
+  const stockAllL3    = [...new Set(MENUS.map(m=>{ ensureMenuExtras(m); return m.catL3; }).filter(x=>x&&x.trim()))];
+  const stockAllTag3  = [...new Set(MENUS.map(m=>{ ensureMenuExtras(m); return m.tag3;  }).filter(x=>x&&x.trim()))];
+  const hasStockTags  = stockAllL2.length>0 || stockAllL3.length>0 || stockAllTag3.length>0;
+  const stockFilterActive = state.stockCatFilter!=='all' || state.stockL2Filter!=='all' || state.stockL3Filter!=='all' || state.stockTag3Filter!=='all';
+
+  // 필터 적용
+  let displayItems = items;
+  let displayOtherMenus = otherMenus;
+  if (state.stockCatFilter!=='all') {
+    displayItems = displayItems.filter(it=>{ const m=MENUS.find(x=>x.id===it.menuId); return m&&m.cat===state.stockCatFilter; });
+    displayOtherMenus = displayOtherMenus.filter(m=>m.cat===state.stockCatFilter);
+  }
+  if (state.stockL2Filter!=='all') {
+    displayItems = displayItems.filter(it=>{ const m=MENUS.find(x=>x.id===it.menuId); return m&&(m.catL2||'')=== state.stockL2Filter; });
+    displayOtherMenus = displayOtherMenus.filter(m=>(m.catL2||'')===state.stockL2Filter);
+  }
+  if (state.stockL3Filter!=='all') {
+    displayItems = displayItems.filter(it=>{ const m=MENUS.find(x=>x.id===it.menuId); return m&&(m.catL3||'')=== state.stockL3Filter; });
+    displayOtherMenus = displayOtherMenus.filter(m=>(m.catL3||'')===state.stockL3Filter);
+  }
+  if (state.stockTag3Filter!=='all') {
+    displayItems = displayItems.filter(it=>{ const m=MENUS.find(x=>x.id===it.menuId); return m&&(m.tag3||'')=== state.stockTag3Filter; });
+    displayOtherMenus = displayOtherMenus.filter(m=>(m.tag3||'')===state.stockTag3Filter);
+  }
+  const displayLowCnt = displayItems.filter(it=>it.remaining>0 && it.remaining<=it.lowAlert).length;
+  const displayOutCnt = displayItems.filter(it=>it.remaining===0).length;
+  const displayManualOutCnt = displayOtherMenus.filter(m=>m.manualSoldOut).length;
+  const displayFullOutCnt   = displayOtherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='full').length;
+  const displayTempOutCnt   = displayOtherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='temp').length;
+
+  // 필터 바 HTML (string 조합 — 중첩 방지)
+  let _sfb = '';
+  if (stockAllCats.length>0 || hasStockTags) {
+    _sfb += '<div class="menu-panel-filters" style="margin-bottom:14px;">';
+    if (stockAllCats.length>0) {
+      _sfb += '<div class="row"><span class="field-label">카테고리</span>';
+      _sfb += `<span class="chip ${state.stockCatFilter==='all'?'on':''}" onclick="state.stockCatFilter='all';renderApp()">전체</span>`;
+      stockAllCats.forEach(c => { _sfb += `<span class="chip ${state.stockCatFilter===c?'on':''}" onclick="state.stockCatFilter='${c.replace(/'/g,"\\'")}';renderApp()">${c}</span>`; });
+      _sfb += '</div>';
+    }
+    if (hasStockTags) {
+      _sfb += '<div class="row"><span class="field-label">분류 태그</span>';
+      if (stockAllL2.length>0) {
+        _sfb += `<select class="filter-select${state.stockL2Filter!=='all'?' active':''}" onchange="state.stockL2Filter=this.value;renderApp()"><option value="all">대분류 전체</option>`;
+        stockAllL2.forEach(t => { _sfb += `<option value="${t.replace(/"/g,'&quot;')}"${state.stockL2Filter===t?' selected':''}>${t}</option>`; });
+        _sfb += '</select>';
+      }
+      if (stockAllL3.length>0) {
+        _sfb += `<select class="filter-select${state.stockL3Filter!=='all'?' active':''}" onchange="state.stockL3Filter=this.value;renderApp()"><option value="all">중분류 전체</option>`;
+        stockAllL3.forEach(t => { _sfb += `<option value="${t.replace(/"/g,'&quot;')}"${state.stockL3Filter===t?' selected':''}>${t}</option>`; });
+        _sfb += '</select>';
+      }
+      if (stockAllTag3.length>0) {
+        _sfb += `<select class="filter-select${state.stockTag3Filter!=='all'?' active':''}" onchange="state.stockTag3Filter=this.value;renderApp()"><option value="all">소분류 전체</option>`;
+        stockAllTag3.forEach(t => { _sfb += `<option value="${t.replace(/"/g,'&quot;')}"${state.stockTag3Filter===t?' selected':''}>${t}</option>`; });
+        _sfb += '</select>';
+      }
+      if (stockFilterActive) _sfb += `<span onclick="state.stockCatFilter='all';state.stockL2Filter='all';state.stockL3Filter='all';state.stockTag3Filter='all';renderApp()" style="font-size:12px;color:var(--blue);cursor:pointer;font-weight:700;">✕ 초기화</span>`;
+      _sfb += '</div>';
+    }
+    _sfb += '</div>';
+  }
+  const stockFilterBarHtml = _sfb;
 
   main.innerHTML = `
     <div class="crumb">메뉴 관리 › 오늘의 준비량</div>
@@ -5962,26 +6038,29 @@ function renderStock(main){
       </div>
     </div>
 
+    <!-- 분류 필터 (두 탭 공용) -->
+    ${stockFilterBarHtml}
+
     <!-- 탭1: 오늘 판매 수량 관리 -->
     <div style="${state.stockTab==='qty'?'':'display:none;'}">
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
       <div style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;">
-        <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;">수량 관리 메뉴</div>
-        <div style="font-size:15px;font-weight:800;color:var(--ink);">${items.length}개</div>
+        <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;">수량 관리 메뉴${stockFilterActive?` <span style="color:var(--blue);">· 필터 적용 중</span>`:''}</div>
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">${displayItems.length}개${stockFilterActive&&displayItems.length!==items.length?`<span style="font-size:11px;font-weight:600;color:var(--ink-3);"> / 전체 ${items.length}개</span>`:''}</div>
       </div>
-      <div style="flex:1;min-width:140px;padding:12px 16px;background:${lowCnt>0?'#fffbeb':'#fff'};border:1px solid ${lowCnt>0?'#fbbf24':'var(--line)'};border-radius:12px;">
-        <div style="font-size:11px;color:${lowCnt>0?'#92400e':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">곧 품절</div>
-        <div style="font-size:15px;font-weight:800;color:${lowCnt>0?'#92400e':'var(--ink)'};">${lowCnt}개</div>
+      <div style="flex:1;min-width:140px;padding:12px 16px;background:${displayLowCnt>0?'#fffbeb':'#fff'};border:1px solid ${displayLowCnt>0?'#fbbf24':'var(--line)'};border-radius:12px;">
+        <div style="font-size:11px;color:${displayLowCnt>0?'#92400e':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">곧 품절</div>
+        <div style="font-size:15px;font-weight:800;color:${displayLowCnt>0?'#92400e':'var(--ink)'};">${displayLowCnt}개</div>
       </div>
-      <div style="flex:1;min-width:140px;padding:12px 16px;background:${outCnt>0?'#fef2f2':'#fff'};border:1px solid ${outCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
-        <div style="font-size:11px;color:${outCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 판매 완료</div>
-        <div style="font-size:15px;font-weight:800;color:${outCnt>0?'#b91c1c':'var(--ink)'};">${outCnt}개</div>
+      <div style="flex:1;min-width:140px;padding:12px 16px;background:${displayOutCnt>0?'#fef2f2':'#fff'};border:1px solid ${displayOutCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
+        <div style="font-size:11px;color:${displayOutCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 판매 완료</div>
+        <div style="font-size:15px;font-weight:800;color:${displayOutCnt>0?'#b91c1c':'var(--ink)'};">${displayOutCnt}개</div>
       </div>
     </div>
 
     <!-- 메뉴별 준비량 카드 -->
     <div class="panel">
-      <h3>수량 관리하는 메뉴 <span class="h-sub">${items.length}개</span>
+      <h3>수량 관리하는 메뉴 <span class="h-sub">${displayItems.length}개${stockFilterActive&&displayItems.length!==items.length?` · 필터 적용 (전체 ${items.length}개)`:''}</span>
         <span class="h-act">
           ${otherMenus.length>0?`
             <button class="btn-ghost" style="padding:7px 14px;font-size:12px;" onclick="loadAllMenus()" title="아직 등록 안 한 메뉴를 한 번에 불러와요">📥 전체 메뉴 불러오기 (${otherMenus.length}개)</button>
@@ -6000,7 +6079,13 @@ function renderStock(main){
             주문이 들어올 때마다 자동 차감되고, 다 팔리면 손님 화면에 품절 표시돼요.
           </div>
         </div>
-      ` : items.map(it=>{
+      ` : displayItems.length===0 ? `
+        <div style="padding:40px 20px;text-align:center;background:var(--bg-2);border-radius:14px;">
+          <div style="font-size:36px;margin-bottom:12px;">🔍</div>
+          <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">필터 조건에 맞는 메뉴가 없어요</div>
+          <div style="font-size:13px;color:var(--ink-3);">다른 분류를 선택하거나 필터를 초기화해 보세요.</div>
+        </div>
+      ` : displayItems.map(it=>{
         const m = MENUS.find(x=>x.id===it.menuId);
         if(!m) return '';
         const isOut = it.remaining===0;
@@ -6045,14 +6130,18 @@ function renderStock(main){
     <!-- 탭2: 오늘 품절 처리 -->
     <div style="${state.stockTab==='soldout'?'':'display:none;'}">
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-      <div style="flex:1;min-width:140px;padding:12px 16px;background:${manualOutCnt>0?'#fef2f2':'#fff'};border:1px solid ${manualOutCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
-        <div style="font-size:11px;color:${manualOutCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 품절 처리</div>
-        <div style="font-size:15px;font-weight:800;color:${manualOutCnt>0?'#b91c1c':'var(--ink)'};">${manualOutCnt}개${manualOutCnt>0?` <span style="font-size:11px;font-weight:600;color:var(--ink-3);">· 🔴 완전 ${fullOutCnt} · 🟡 일시 ${tempOutCnt}</span>`:''}</div>
+      <div style="flex:1;min-width:140px;padding:12px 16px;background:${displayManualOutCnt>0?'#fef2f2':'#fff'};border:1px solid ${displayManualOutCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
+        <div style="font-size:11px;color:${displayManualOutCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 품절 처리${stockFilterActive?` <span style="color:var(--blue);">· 필터 적용 중</span>`:''}</div>
+        <div style="font-size:15px;font-weight:800;color:${displayManualOutCnt>0?'#b91c1c':'var(--ink)'};">${displayManualOutCnt}개${displayManualOutCnt>0?` <span style="font-size:11px;font-weight:600;color:var(--ink-3);">· 🔴 완전 ${displayFullOutCnt} · 🟡 일시 ${displayTempOutCnt}</span>`:''}</div>
       </div>
       <div style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;">
         <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;">품절 처리 가능한 메뉴</div>
-        <div style="font-size:15px;font-weight:800;color:var(--ink);">${otherMenus.length}개</div>
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">${displayOtherMenus.length}개${stockFilterActive&&displayOtherMenus.length!==otherMenus.length?`<span style="font-size:11px;font-weight:600;color:var(--ink-3);"> / 전체 ${otherMenus.length}개</span>`:''}</div>
       </div>
+    </div>
+
+    <div style="margin-bottom:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;font-size:12px;color:#166534;line-height:1.55;">
+      ℹ️ 메뉴판 관리에서 <b>숨김 처리한 메뉴</b>는 여기에 표시되지 않아요. <b>판매 가능한 상태의 메뉴</b>만 품절 설정을 할 수 있어요.
     </div>
 
     <div class="panel">
@@ -6069,9 +6158,15 @@ function renderStock(main){
               수량 관리 없이 잠깐만 막아둘 메뉴가 생기면 여기에 표시돼요.
             </div>
           </div>
+        ` : displayOtherMenus.length===0 ? `
+          <div style="padding:40px 20px;text-align:center;background:var(--bg-2);border-radius:14px;">
+            <div style="font-size:36px;margin-bottom:12px;">🔍</div>
+            <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">필터 조건에 맞는 메뉴가 없어요</div>
+            <div style="font-size:13px;color:var(--ink-3);">다른 분류를 선택하거나 필터를 초기화해 보세요.</div>
+          </div>
         `:''}
         <div class="qso-grid">
-          ${otherMenus.map(m=>{
+          ${displayOtherMenus.map(m=>{
             ensureMenuExtras(m);
             const stateCls = m.manualSoldOut ? (m.soldOutKind==='full'?'out-full':'out-temp') : '';
             const statusTxt = m.manualSoldOut
@@ -6326,11 +6421,15 @@ function menuNavTabs(){
    ============================================================ */
 function renderMenu(main){
   let rows = MENUS;
-  // 분류 태그 모음 — 사장님이 catL2/catL3/tag3에 입력한 자유 키워드 (중복 제거)
-  const allMenuTags = [...new Set(MENUS.flatMap(m=>{ ensureMenuExtras(m); return [m.catL2,m.catL3,m.tag3]; }).filter(x=>x&&x.trim()))];
+  // 분류 태그 드롭다운 목록 — 대/중/소분류 각각
+  const allL2Tags   = [...new Set(MENUS.map(m=>{ ensureMenuExtras(m); return m.catL2; }).filter(x=>x&&x.trim()))];
+  const allL3Tags   = [...new Set(MENUS.map(m=>{ ensureMenuExtras(m); return m.catL3; }).filter(x=>x&&x.trim()))];
+  const allTag3s    = [...new Set(MENUS.map(m=>{ ensureMenuExtras(m); return m.tag3;  }).filter(x=>x&&x.trim()))];
   if (state.menuCatFilter !== 'all')    rows = rows.filter(r=>r.cat===state.menuCatFilter);
   if (state.menuStatusFilter !== 'all') rows = rows.filter(r=>r.status===state.menuStatusFilter);
-  if (state.menuTagFilter !== 'all')    rows = rows.filter(r=>{ ensureMenuExtras(r); return [r.catL2,r.catL3,r.tag3].includes(state.menuTagFilter); });
+  if (state.menuL2Filter !== 'all')     rows = rows.filter(r=>{ ensureMenuExtras(r); return r.catL2===state.menuL2Filter; });
+  if (state.menuL3Filter !== 'all')     rows = rows.filter(r=>{ ensureMenuExtras(r); return r.catL3===state.menuL3Filter; });
+  if (state.menuTag3Filter !== 'all')   rows = rows.filter(r=>{ ensureMenuExtras(r); return r.tag3 ===state.menuTag3Filter; });
   if (state.menuSearch){
     const q = state.menuSearch.toLowerCase();
     rows = rows.filter(r=>{ ensureMenuExtras(r); return (r.name+' '+r.code+' '+(r.catL2||'')+' '+(r.catL3||'')+' '+(r.tag3||'')).toLowerCase().includes(q); });
@@ -6464,11 +6563,22 @@ function renderMenu(main){
           <span class="chip ${state.menuStatusFilter==='품절'?'on':''}" onclick="state.menuStatusFilter='품절';renderApp()">품절</span>
           <span class="chip ${state.menuStatusFilter==='숨김'?'on':''}" onclick="state.menuStatusFilter='숨김';renderApp()">숨김</span>
         </div>
-        ${allMenuTags.length>0?`
+        ${(allL2Tags.length>0||allL3Tags.length>0||allTag3s.length>0)?`
         <div class="row">
-          <span class="field-label" title="메뉴를 만들 때 입력한 분류 태그(중분류·소분류·키워드)로 좁혀 볼 수 있어요. 손님 화면에는 안 보여요.">분류 태그</span>
-          <span class="chip ${state.menuTagFilter==='all'?'on':''}" onclick="state.menuTagFilter='all';renderApp()">전체</span>
-          ${allMenuTags.map(t=>`<span class="chip ${state.menuTagFilter===t?'on':''}" onclick="state.menuTagFilter='${t.replace(/'/g,"\\'")}';renderApp()">🏷️ ${t} <span style="color:${state.menuTagFilter===t?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${MENUS.filter(m=>[m.catL2,m.catL3,m.tag3].includes(t)).length}</span></span>`).join('')}
+          <span class="field-label" title="메뉴를 만들 때 입력한 대/중/소분류로 좁혀 볼 수 있어요. 손님 화면에는 안 보여요.">분류 태그</span>
+          ${allL2Tags.length>0?`<select class="filter-select${state.menuL2Filter!=='all'?' active':''}" onchange="state.menuL2Filter=this.value;renderApp()">
+            <option value="all">대분류 전체</option>
+            ${allL2Tags.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"${state.menuL2Filter===t?' selected':''}>${t}</option>`).join('')}
+          </select>`:''}
+          ${allL3Tags.length>0?`<select class="filter-select${state.menuL3Filter!=='all'?' active':''}" onchange="state.menuL3Filter=this.value;renderApp()">
+            <option value="all">중분류 전체</option>
+            ${allL3Tags.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"${state.menuL3Filter===t?' selected':''}>${t}</option>`).join('')}
+          </select>`:''}
+          ${allTag3s.length>0?`<select class="filter-select${state.menuTag3Filter!=='all'?' active':''}" onchange="state.menuTag3Filter=this.value;renderApp()">
+            <option value="all">소분류 전체</option>
+            ${allTag3s.map(t=>`<option value="${t.replace(/"/g,'&quot;')}"${state.menuTag3Filter===t?' selected':''}>${t}</option>`).join('')}
+          </select>`:''}
+          ${state.menuL2Filter!=='all'||state.menuL3Filter!=='all'||state.menuTag3Filter!=='all'?`<span onclick="state.menuL2Filter='all';state.menuL3Filter='all';state.menuTag3Filter='all';renderApp()" style="font-size:12px;color:var(--blue);cursor:pointer;font-weight:700;">✕ 초기화</span>`:''}
         </div>
         `:''}
         <div class="row">

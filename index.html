@@ -5979,6 +5979,20 @@ function renderStock(main){
   const displayFullOutCnt   = displayOtherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='full').length;
   const displayTempOutCnt   = displayOtherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='temp').length;
 
+  // 옵션 데이터 — 옵션도 수량 관리·품절 처리 가능
+  const allOptItems = OPT_GROUPS.flatMap(g => g.items.map((it, idx) => {
+    ensureOptExtras(it);
+    return { gid:g.id, idx, item:it, groupName:g.name, groupCode:g.code, groupMode:g.mode };
+  }));
+  const optStockItems = OPT_STOCK.items.filter(it=>it.enabled);
+  const optStockSet = new Set(optStockItems.map(x=>`${x.groupId}:${x.itemIdx}`));
+  const otherOptItems = allOptItems.filter(o => !optStockSet.has(`${o.gid}:${o.idx}`));
+  const optLowCnt = optStockItems.filter(it=>it.remaining>0 && it.remaining<=it.lowAlert).length;
+  const optOutCnt = optStockItems.filter(it=>it.remaining===0).length;
+  const optManualOutCnt = otherOptItems.filter(o=>o.item.manualSoldOut).length;
+  const optFullOutCnt   = otherOptItems.filter(o=>o.item.manualSoldOut && o.item.soldOutKind==='full').length;
+  const optTempOutCnt   = otherOptItems.filter(o=>o.item.manualSoldOut && o.item.soldOutKind==='temp').length;
+
   // 필터 바 HTML (string 조합 — 중첩 방지)
   let _sfb = '';
   if (stockAllCats.length>0 || hasStockTags) {
@@ -6031,10 +6045,10 @@ function renderStock(main){
     <!-- 두 개 버튼 탭 -->
     <div class="stk-tabs">
       <div class="stk-tab ${state.stockTab==='qty'?'on':''}" onclick="state.stockTab='qty';renderApp()">
-        <span class="ic">📦</span> 오늘 판매 수량 관리 <span class="cnt">${items.length}</span>
+        <span class="ic">📦</span> 오늘 판매 수량 관리 <span class="cnt">${items.length + optStockItems.length}</span>
       </div>
       <div class="stk-tab ${state.stockTab==='soldout'?'on':''}" onclick="state.stockTab='soldout';renderApp()">
-        <span class="ic">🚫</span> 오늘 품절 처리 <span class="cnt">${manualOutCnt}</span>
+        <span class="ic">🚫</span> 오늘 품절 처리 <span class="cnt">${manualOutCnt + optManualOutCnt}</span>
       </div>
     </div>
 
@@ -6124,6 +6138,57 @@ function renderStock(main){
         `;
       }).join('')}
     </div>
+
+    <!-- 옵션 수량 관리 -->
+    <div class="panel" style="margin-top:14px;">
+      <h3>수량 관리하는 옵션 <span class="h-sub">${optStockItems.length}개 · 옵션도 한정 수량으로 관리할 수 있어요</span></h3>
+      ${optStockItems.length===0 ? `
+        <div style="padding:40px 20px;text-align:center;background:var(--bg-2);border-radius:14px;">
+          <div style="font-size:36px;margin-bottom:12px;">⚙️</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">수량 관리 옵션이 아직 없어요</div>
+          <div style="font-size:12px;color:var(--ink-3);line-height:1.55;">디카페인 원두, 한정 시럽 같이 옵션 단위 한정 수량을 운영할 수 있어요.</div>
+        </div>
+      ` : optStockItems.map(it=>{
+        const g = OPT_GROUPS.find(x=>x.id===it.groupId);
+        if(!g) return '';
+        const opt = g.items[it.itemIdx];
+        if(!opt) return '';
+        const isOut = it.remaining===0;
+        const isLow = !isOut && it.remaining<=it.lowAlert;
+        const pct = it.prepared>0 ? Math.round((it.remaining/it.prepared)*100) : 0;
+        const cls = isOut?'out':isLow?'low':'';
+        const badge = isOut
+          ? `<span class="stk-badge out">🔴 오늘 사용 완료</span>`
+          : isLow
+            ? `<span class="stk-badge low">⚠️ 곧 품절 (${it.remaining}${it.unit} 남음)</span>`
+            : `<span class="stk-badge ok">✓ 사용 가능</span>`;
+        return `
+          <div class="stk-card ${cls}">
+            <div class="stk-info">
+              <div class="stk-name">
+                <span class="ico">⚙️</span>
+                <span style="font-size:11px;color:var(--ink-3);font-weight:600;margin-right:4px;">${g.name} ›</span>${opt.name}
+                ${badge}
+              </div>
+              <div class="stk-meta">+${fmt(opt.price)}원 · ${g.mode} · 단위: ${it.unit}</div>
+              <div class="stk-bar"><div class="fill" style="width:${pct}%;"></div></div>
+              <div class="stk-yest">어제 사용 ${it.yesterdaySold}/${it.yesterdayPrep}${it.unit}</div>
+            </div>
+            <div class="stk-control">
+              <button class="stk-btn" onclick="changeOptStock(${it.groupId},${it.itemIdx},-10)" title="10개 빼기">−10</button>
+              <button class="stk-btn" onclick="changeOptStock(${it.groupId},${it.itemIdx},-1)" title="1개 빼기">−</button>
+              <div class="stk-num">
+                <input type="number" value="${it.prepared}" min="0" onchange="setOptStockQty(${it.groupId},${it.itemIdx}, Number(this.value)||0)" />
+                <span class="stk-unit">준비 / 잔여 ${it.remaining}</span>
+              </div>
+              <button class="stk-btn" onclick="changeOptStock(${it.groupId},${it.itemIdx},1)" title="1개 더">+</button>
+              <button class="stk-btn" onclick="changeOptStock(${it.groupId},${it.itemIdx},10)" title="10개 더">+10</button>
+              <button class="btn-ghost" style="padding:8px 10px;font-size:11px;color:var(--red);align-self:center;" onclick="removeOptStock(${it.groupId},${it.itemIdx})" title="이 옵션 수량 관리 해제">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
     </div>
     <!-- /탭1 -->
 
@@ -6189,6 +6254,44 @@ function renderStock(main){
           }).join('')}
         </div>
       </div>
+
+    <!-- 옵션 품절 처리 -->
+    <div class="panel" style="margin-top:14px;">
+      <h3>옵션 품절 처리
+        <span class="h-sub">옵션도 메뉴와 똑같이 일시·완전 품절 처리할 수 있어요.${optManualOutCnt>0?` · 현재 <b style="color:var(--red);">${optManualOutCnt}개</b> 품절 중`:''}</span>
+        ${optManualOutCnt>0?`<span class="h-act"><button class="btn-ghost" style="padding:6px 12px;font-size:11px;color:var(--red);" onclick="clearAllOptSoldOut()">↺ 옵션 품절 모두 해제</button></span>`:''}
+      </h3>
+      ${otherOptItems.length===0 ? `
+        <div style="padding:40px 20px;text-align:center;background:var(--bg-2);border-radius:14px;">
+          <div style="font-size:36px;margin-bottom:12px;">⚙️</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">품절 처리할 옵션이 없어요</div>
+          <div style="font-size:12px;color:var(--ink-3);line-height:1.55;">옵션 그룹을 먼저 등록해 주세요.</div>
+        </div>
+      ` : `
+        <div class="qso-grid">
+          ${otherOptItems.map(o=>{
+            const stateCls = o.item.manualSoldOut ? (o.item.soldOutKind==='full'?'out-full':'out-temp') : '';
+            const statusTxt = o.item.manualSoldOut
+              ? (o.item.soldOutKind==='full' ? '🔴 완전 품절 · 오늘 사용 불가' : '🟡 일시 품절 · 준비 후 재제공 예정')
+              : '✓ 사용 가능';
+            return `
+            <div class="qso-card ${stateCls}">
+              <span class="qso-icon">⚙️</span>
+              <div class="qso-info">
+                <div class="qso-name"><span style="font-size:11px;color:var(--ink-3);font-weight:600;margin-right:4px;">${o.groupName} ›</span>${o.item.name}</div>
+                <div class="qso-status">${statusTxt} · +${fmt(o.item.price)}원 · ${o.groupMode}</div>
+              </div>
+              <div class="qso-actions">
+                ${o.item.manualSoldOut
+                  ? `<button class="qso-resume" onclick="setOptSoldOut(${o.gid},${o.idx},'on')" title="다시 사용 가능으로 되돌려요">↺ 사용 재개</button>`
+                  : `<button class="qso-temp" onclick="setOptSoldOut(${o.gid},${o.idx},'temp')" title="준비되면 다시 제공해요 (준비 후 재제공)">일시 품절</button>
+                     <button class="qso-full" onclick="setOptSoldOut(${o.gid},${o.idx},'full')" title="오늘은 더 이상 제공하지 않아요 (사용 불가)">완전 품절</button>`}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      `}
+    </div>
     </div>
     <!-- /탭2 -->
 
@@ -6197,7 +6300,7 @@ function renderStock(main){
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <span style="font-size:16px;flex-shrink:0;">💡</span>
         <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
-          <b>수량 관리</b>는 주문이 들어올 때마다 자동으로 1씩 차감되고, 0이 되면 손님 화면에 품절로 바뀌어요. <b>오늘 품절 처리</b>는 수량 관리 없이 잠깐 막아둘 때 쓰세요 — <b style="color:#92400e;">일시 품절</b>은 준비 후 다시 팔 메뉴, <b style="color:#b91c1c;">완전 품절</b>은 오늘은 더 팔지 않는 메뉴예요. 모두 영업 종료 후 자동으로 초기화돼요.
+          <b>수량 관리</b>는 주문이 들어올 때마다 자동으로 1씩 차감되고, 0이 되면 손님 화면에 품절로 바뀌어요. <b>오늘 품절 처리</b>는 수량 관리 없이 잠깐 막아둘 때 쓰세요 — <b style="color:#92400e;">일시 품절</b>은 준비 후 다시 팔 메뉴, <b style="color:#b91c1c;">완전 품절</b>은 오늘은 더 팔지 않는 메뉴예요. 모두 영업 종료 후 자동으로 초기화돼요. <b>메뉴뿐 아니라 옵션</b>(샷 추가, 시럽 등)도 똑같이 수량 관리·품절 처리할 수 있어요.
         </div>
       </div>
     </div>
@@ -8094,6 +8197,71 @@ function setSoldOut(id, mode){
       : `<span class="ic">🟡</span> '${m.name}'을(를) 일시 품절(준비 후 재판매)로 바꿨어요`;
   showToast(msg, 'ok');
 }
+// 옵션 품절 / 옵션 수량 ----------------------------------------------------
+function ensureOptExtras(it){
+  if(!it) return;
+  if(typeof it.manualSoldOut === 'undefined') it.manualSoldOut = false;
+  if(typeof it.soldOutKind   === 'undefined') it.soldOutKind   = 'temp';
+}
+function setOptSoldOut(gid, idx, mode){
+  const g = OPT_GROUPS.find(x=>x.id===gid); if(!g) return;
+  const it = g.items[idx]; if(!it) return;
+  ensureOptExtras(it);
+  if(mode==='on'){ it.manualSoldOut = false; }
+  else { it.manualSoldOut = true; it.soldOutKind = mode; }
+  renderApp();
+  const msg = mode==='on' ? `<span class="ic">✅</span> 옵션 '${it.name}'을(를) 사용 가능으로 되돌렸어요`
+    : mode==='full' ? `<span class="ic">🔴</span> 옵션 '${it.name}'을(를) 완전 품절(오늘 사용 불가)로 바꿨어요`
+    : `<span class="ic">🟡</span> 옵션 '${it.name}'을(를) 일시 품절(준비 후 재제공)로 바꿨어요`;
+  showToast(msg, 'ok');
+}
+function clearAllOptSoldOut(){
+  let n = 0;
+  OPT_GROUPS.forEach(g => g.items.forEach(it => {
+    if(it.manualSoldOut){ it.manualSoldOut = false; n++; }
+  }));
+  renderApp();
+  showToast(`<span class="ic">↺</span> 옵션 ${n}개의 품절을 모두 해제했어요`, 'ok');
+}
+function changeOptStock(gid, idx, delta){
+  const it = OPT_STOCK.items.find(x=>x.groupId===gid && x.itemIdx===idx);
+  if(!it) return;
+  it.prepared  = Math.max(0, it.prepared + delta);
+  it.remaining = Math.min(it.prepared, Math.max(0, it.remaining + delta));
+  renderApp();
+}
+function setOptStockQty(gid, idx, qty){
+  const it = OPT_STOCK.items.find(x=>x.groupId===gid && x.itemIdx===idx);
+  if(!it) return;
+  const q = Math.max(0, Number(qty)||0);
+  const diff = q - it.prepared;
+  it.prepared  = q;
+  it.remaining = Math.min(q, Math.max(0, it.remaining + diff));
+  renderApp();
+}
+function removeOptStock(gid, idx){
+  const i = OPT_STOCK.items.findIndex(x=>x.groupId===gid && x.itemIdx===idx);
+  if(i<0) return;
+  const g = OPT_GROUPS.find(x=>x.id===gid);
+  const itName = g && g.items && g.items[idx] ? g.items[idx].name : '옵션';
+  OPT_STOCK.items.splice(i, 1);
+  renderApp();
+  showToast(`<span class="ic">🗑️</span> 옵션 '${itName}' 수량 관리를 해제했어요`, 'ok');
+}
+function addOptStock(gid, idx){
+  if(OPT_STOCK.items.some(x=>x.groupId===gid && x.itemIdx===idx)) return;
+  const g = OPT_GROUPS.find(x=>x.id===gid);
+  const it = g && g.items && g.items[idx];
+  if(!it) return;
+  OPT_STOCK.items.push({
+    groupId:gid, itemIdx:idx, enabled:true,
+    prepared:20, remaining:20, unit:'개', lowAlert:5, soldOutAlert:true,
+    yesterdayPrep:0, yesterdaySold:0
+  });
+  renderApp();
+  showToast(`<span class="ic">✅</span> 옵션 '${it.name}' 수량 관리를 시작했어요`, 'ok');
+}
+
 function bulkToggleSoldOut(){
   const ids = [...state.menuSel];
   ids.forEach(id=>{
@@ -8953,6 +9121,16 @@ const MENU_STOCK = {
     { menuId:7, enabled:true,  prepared:30, remaining:18, unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:30, yesterdaySold:27 },
     { menuId:8, enabled:true,  prepared:20, remaining:3,  unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:20, yesterdaySold:18 },
     { menuId:9, enabled:true,  prepared:15, remaining:0,  unit:'개', lowAlert:5, soldOutAlert:true, yesterdayPrep:15, yesterdaySold:15 },
+  ],
+};
+
+// 옵션별 수량 관리 — 옵션도 한정 수량(예: 디카페인 원두, 한정 시럽)으로 운영할 수 있음
+// groupId + itemIdx로 OPT_GROUPS[].items[]의 개별 옵션을 식별
+const OPT_STOCK = {
+  businessDate: '2026-05-15',
+  items: [
+    // 샷 추가 그룹(id 1) - 디카페인 변경(idx 2): 디카페인 원두 한정
+    { groupId:1, itemIdx:2, enabled:true, prepared:30, remaining:11, unit:'잔', lowAlert:5, soldOutAlert:true, yesterdayPrep:30, yesterdaySold:24 },
   ],
 };
 

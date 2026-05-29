@@ -7665,9 +7665,10 @@ function renderMenuEditModal(){
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">판매 상태</label>
         <select id="me-status" class="input" style="width:100%;margin-bottom:6px;">
           <option ${f.status==='판매중'?'selected':''}>판매중</option>
+          <option ${f.status==='품절'?'selected':''}>품절</option>
           <option ${f.status==='숨김'?'selected':''}>숨김</option>
         </select>
-        <div style="font-size:10px;color:var(--ink-4);margin-bottom:16px;line-height:1.5;">품절은 <b style="color:var(--ink-3);cursor:pointer;" onclick="closeModal();setSection('stock');">오늘의 준비량</b>에서 설정할 수 있어요.</div>
+        <div style="font-size:10px;color:var(--ink-4);margin-bottom:16px;line-height:1.5;">💡 한정 수량 메뉴의 자동 품절은 <b style="color:var(--ink-3);cursor:pointer;" onclick="closeModal();setSection('stock');">오늘의 준비량</b>에서도 관리할 수 있어요.</div>
 
         <!-- 설명 -->
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">설명 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>

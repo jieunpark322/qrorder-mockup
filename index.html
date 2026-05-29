@@ -8795,23 +8795,12 @@ function renderCustomerPreview(){
     <div class="modal-head">
       <div>
         <h3>👁️ 고객 화면 미리보기</h3>
-        <div class="modal-sub">${STORE.name} · 손님 휴대폰 화면 그대로</div>
+        <div class="modal-sub">${STORE.name} · 손님이 QR로 보는 화면 그대로</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
 
-    <div style="margin-bottom:14px;padding:10px 12px;background:var(--bg-2);border-radius:10px;">
-      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;align-items:center;">
-        <span style="font-size:11px;color:var(--ink-3);font-weight:700;margin-right:4px;">언어</span>
-        ${langTabs}
-      </div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
-        <span style="font-size:11px;color:var(--ink-3);font-weight:700;margin-right:4px;">카테고리</span>
-        ${catChips}
-      </div>
-    </div>
-
-    <!-- 휴대폰 프레임 안에 손님 화면 그대로 -->
+    <!-- 휴대폰 프레임 안에 손님 화면 그대로 (현재 세팅된 메뉴 기준) -->
     <div style="display:flex;justify-content:center;padding:6px 0 4px;">
       <div class="qrp-phone">
         <div class="qrp-notch"></div>
@@ -8831,7 +8820,7 @@ function renderCustomerPreview(){
     </div>
 
     <div class="banner-info" style="margin-top:14px;font-size:11px;">
-      💡 자동 품절·수동 품절·운영 중지된 카테고리·판매 시간 외 메뉴는 자동으로 빠지거나 회색 처리돼요. 언어를 바꿔 다국어 노출도 바로 확인할 수 있어요.
+      💡 지금 등록·설정된 메뉴 그대로 손님 화면에 보여요. 자동 품절·수동 품절·숨김 메뉴는 자동으로 빠지거나 회색 처리돼요.
     </div>
 
     <div style="display:flex;gap:8px;margin-top:14px;">

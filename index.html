@@ -789,21 +789,32 @@
 
   /* 오늘 품절 처리 — 수량 관리 없는 메뉴 빠른 토글 카드 */
   .qso-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:6px;}
-  .qso-card{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s;user-select:none;}
-  .qso-card:hover{border-color:var(--blue);box-shadow:0 2px 8px rgba(49,130,246,.08);}
-  .qso-card.on{background:#fef2f2;border-color:#fca5a5;}
-  .qso-card.on:hover{border-color:var(--red);box-shadow:0 2px 8px rgba(239,68,68,.10);}
+  .qso-card{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;display:flex;align-items:center;gap:12px;transition:all .15s;user-select:none;}
+  .qso-card.out-full{background:#fef2f2;border-color:#fca5a5;}
+  .qso-card.out-temp{background:#fffbeb;border-color:#fcd34d;}
   .qso-icon{width:32px;height:32px;border-radius:8px;background:var(--bg-2);display:inline-flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;}
-  .qso-card.on .qso-icon{opacity:.55;filter:grayscale(.4);}
+  .qso-card.out-full .qso-icon,.qso-card.out-temp .qso-icon{opacity:.6;filter:grayscale(.35);}
   .qso-info{flex:1;min-width:0;}
   .qso-name{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .qso-card.on .qso-name{color:#7f1d1d;}
+  .qso-card.out-full .qso-name{color:#7f1d1d;}
+  .qso-card.out-temp .qso-name{color:#854d0e;}
   .qso-status{font-size:11px;color:var(--ink-3);margin-top:2px;}
-  .qso-card.on .qso-status{color:#b91c1c;font-weight:600;}
-  .qso-sw{width:38px;height:22px;background:#d1d5db;border-radius:11px;position:relative;transition:background .15s;flex-shrink:0;}
-  .qso-sw::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.18);}
-  .qso-sw.on{background:var(--red);}
-  .qso-sw.on::after{transform:translateX(16px);}
+  .qso-card.out-full .qso-status{color:#b91c1c;font-weight:600;}
+  .qso-card.out-temp .qso-status{color:#92400e;font-weight:600;}
+  .qso-actions{display:flex;gap:6px;flex-shrink:0;}
+  .qso-actions button{border-radius:8px;font-size:11px;font-weight:700;padding:7px 10px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink-2);transition:all .12s;white-space:nowrap;}
+  .qso-temp:hover{background:#fffbeb;border-color:#fcd34d;color:#92400e;}
+  .qso-full:hover{background:#fef2f2;border-color:#fca5a5;color:#b91c1c;}
+  .qso-resume{background:#fff;border-color:var(--blue-100);color:var(--blue);}
+  .qso-resume:hover{background:var(--blue-50);border-color:var(--blue);}
+  /* 오늘의 준비량 — 상단 버튼 탭 */
+  .stk-tabs{display:flex;gap:8px;margin-bottom:14px;}
+  .stk-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-size:14px;font-weight:700;color:var(--ink-2);transition:all .15s;user-select:none;}
+  .stk-tab:hover{border-color:var(--blue);}
+  .stk-tab.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(49,130,246,.25);}
+  .stk-tab .ic{font-size:17px;}
+  .stk-tab .cnt{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--bg-2);color:var(--ink-2);font-size:12px;font-weight:800;}
+  .stk-tab.on .cnt{background:rgba(255,255,255,.25);color:#fff;}
 
   /* QR 메뉴판 — 모바일 미리보기 */
   .qrp-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 0;}
@@ -5156,6 +5167,7 @@ function setPriceRange(s){
 // 메뉴관리 페이지 공통 상태
 state.menuCatFilter   = 'all';
 state.menuStatusFilter= 'all';
+state.menuTagFilter   = 'all';   // 분류 태그(catL2/catL3/tag3) 값별 상세 필터
 state.menuSearch      = '';
 state.trLang          = 'en';     // 번역 현재 언어 탭
 state.trTarget        = 'menu';   // 'menu' | 'option' | 'set'
@@ -5177,6 +5189,9 @@ state.optBulkOpen  = false;
 state.menuActionOpen = null; // menu id
 // 영역 도구 더보기 펼침
 state.mmMoreOpen = false;
+
+// 오늘의 준비량 — 탭 ('qty'=오늘 판매 수량 관리, 'soldout'=오늘 품절 처리)
+state.stockTab = 'qty';
 
 /* ============================================================
    번역 사전 — 한글 단어/구문 → 다국어 매핑 (간단 사전 기반 자동 번역)
@@ -5325,6 +5340,7 @@ function ensureMenuExtras(m){
   if (typeof m.stock === 'undefined')  m.stock  = null;   // null = 무제한
   if (typeof m.sold === 'undefined')   m.sold   = 0;
   if (typeof m.manualSoldOut === 'undefined') m.manualSoldOut = false;
+  if (typeof m.soldOutKind === 'undefined') m.soldOutKind = 'temp'; // 'temp'=일시 품절(준비 후 재판매), 'full'=완전 품절(오늘 판매 불가)
   if (typeof m.takeoutPrice === 'undefined') m.takeoutPrice = null;  // null = 매장가 동일 적용
   // 분류 태그 — 사장님 내부 검색·구분용 자유 키워드 (손님 화면에는 안 노출)
   if (typeof m.catL2 === 'undefined') m.catL2 = '';
@@ -5449,9 +5465,34 @@ function dragRowEnd(){
   document.querySelectorAll('tr.drag-source, tr.drag-over-top, tr.drag-over-bottom').forEach(r=>r.classList.remove('drag-source','drag-over-top','drag-over-bottom'));
   _dragSrc = null;
 }
+// 순서 변경 방법 안내 — '순서' 열 ⓘ 버튼에서 호출
+function showOrderHelp(){
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:460px;">
+      <div class="modal-head"><b>순서 바꾸는 방법</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:20px 22px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;">
+          <span style="font-size:30px;line-height:1;flex-shrink:0;">↕️</span>
+          <div style="font-size:14px;color:var(--ink);line-height:1.75;">
+            <b>순서</b> 칸의 <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:var(--bg-2);border:1px solid var(--line);font-size:15px;vertical-align:middle;">≡</span> <b>세 줄 손잡이</b>를 누른 채<br/>
+            원하는 위치로 <b>끌어다 놓으면</b> 메뉴 순서가 바뀌어요.
+          </div>
+        </div>
+        <div style="background:var(--blue-50);border:1px solid var(--blue-100);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--ink-2);line-height:1.6;">
+          💡 손님 화면의 메뉴판에도 <b>여기서 정한 순서 그대로</b> 보여요. 자주 팔리는 메뉴를 위로 올려 두면 좋아요.
+        </div>
+        <div style="text-align:right;margin-top:18px;">
+          <button class="btn-primary" style="padding:9px 20px;font-size:13px;" onclick="closeModal()">알겠어요</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
 function effectiveStatus(m){
   ensureMenuExtras(m);
-  if (m.manualSoldOut) return { kind:'manual-out', label:'수동 품절', pill:'cancel' };
+  if (m.manualSoldOut) return { kind:'manual-out', label: m.soldOutKind==='full'?'완전 품절':'일시 품절', pill:'cancel' };
   if (m.stock != null && m.sold >= m.stock) return { kind:'auto-out', label:'자동 품절', pill:'cancel' };
   if (m.status === '숨김') return { kind:'hidden', label:'숨김', pill:'hold' };
   if (m.status === '품절') return { kind:'out', label:'품절', pill:'partial' };
@@ -5893,6 +5934,8 @@ function renderStock(main){
   // 수량 관리 없는 메뉴 중 '오늘만 품절' 토글로 막아둔 메뉴
   otherMenus.forEach(m=>ensureMenuExtras(m));
   const manualOutCnt = otherMenus.filter(m=>m.manualSoldOut).length;
+  const fullOutCnt = otherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='full').length;
+  const tempOutCnt = otherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='temp').length;
 
   main.innerHTML = `
     <div class="crumb">메뉴 관리 › 오늘의 준비량</div>
@@ -5903,12 +5946,25 @@ function renderStock(main){
       </div>
     </div>
 
-    <!-- 영업일 정보 + 상태 요약 -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-      <div style="flex:1;min-width:180px;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;">
-        <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;">오늘 영업일</div>
-        <div style="font-size:15px;font-weight:800;color:var(--ink);">${today}</div>
+    <!-- 오늘 영업일 -->
+    <div style="margin-bottom:12px;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:var(--ink-3);font-weight:600;">오늘 영업일</span>
+      <span style="font-size:15px;font-weight:800;color:var(--ink);">${today}</span>
+    </div>
+
+    <!-- 두 개 버튼 탭 -->
+    <div class="stk-tabs">
+      <div class="stk-tab ${state.stockTab==='qty'?'on':''}" onclick="state.stockTab='qty';renderApp()">
+        <span class="ic">📦</span> 오늘 판매 수량 관리 <span class="cnt">${items.length}</span>
       </div>
+      <div class="stk-tab ${state.stockTab==='soldout'?'on':''}" onclick="state.stockTab='soldout';renderApp()">
+        <span class="ic">🚫</span> 오늘 품절 처리 <span class="cnt">${manualOutCnt}</span>
+      </div>
+    </div>
+
+    <!-- 탭1: 오늘 판매 수량 관리 -->
+    <div style="${state.stockTab==='qty'?'':'display:none;'}">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
       <div style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;">
         <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;">수량 관리 메뉴</div>
         <div style="font-size:15px;font-weight:800;color:var(--ink);">${items.length}개</div>
@@ -5920,10 +5976,6 @@ function renderStock(main){
       <div style="flex:1;min-width:140px;padding:12px 16px;background:${outCnt>0?'#fef2f2':'#fff'};border:1px solid ${outCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
         <div style="font-size:11px;color:${outCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 판매 완료</div>
         <div style="font-size:15px;font-weight:800;color:${outCnt>0?'#b91c1c':'var(--ink)'};">${outCnt}개</div>
-      </div>
-      <div style="flex:1;min-width:140px;padding:12px 16px;background:${manualOutCnt>0?'#fef2f2':'#fff'};border:1px solid ${manualOutCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
-        <div style="font-size:11px;color:${manualOutCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 품절 처리</div>
-        <div style="font-size:15px;font-weight:800;color:${manualOutCnt>0?'#b91c1c':'var(--ink)'};">${manualOutCnt}개</div>
       </div>
     </div>
 
@@ -5987,35 +6039,70 @@ function renderStock(main){
         `;
       }).join('')}
     </div>
+    </div>
+    <!-- /탭1 -->
 
-    <!-- 오늘 품절 처리 — 수량 관리 안 하는 메뉴를 오늘만 잠시 막기 -->
-    ${otherMenus.length>0 ? `
-      <div class="panel" style="margin-top:14px;">
+    <!-- 탭2: 오늘 품절 처리 -->
+    <div style="${state.stockTab==='soldout'?'':'display:none;'}">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+      <div style="flex:1;min-width:140px;padding:12px 16px;background:${manualOutCnt>0?'#fef2f2':'#fff'};border:1px solid ${manualOutCnt>0?'#fca5a5':'var(--line)'};border-radius:12px;">
+        <div style="font-size:11px;color:${manualOutCnt>0?'#b91c1c':'var(--ink-3)'};margin-bottom:4px;font-weight:600;">오늘 품절 처리</div>
+        <div style="font-size:15px;font-weight:800;color:${manualOutCnt>0?'#b91c1c':'var(--ink)'};">${manualOutCnt}개${manualOutCnt>0?` <span style="font-size:11px;font-weight:600;color:var(--ink-3);">· 🔴 완전 ${fullOutCnt} · 🟡 일시 ${tempOutCnt}</span>`:''}</div>
+      </div>
+      <div style="flex:1;min-width:140px;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;">
+        <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;">품절 처리 가능한 메뉴</div>
+        <div style="font-size:15px;font-weight:800;color:var(--ink);">${otherMenus.length}개</div>
+      </div>
+    </div>
+
+    <div class="panel">
         <h3>오늘 품절 처리
-          <span class="h-sub">수량 관리는 안 하지만 오늘만 잠깐 안 팔 메뉴를 표시할 수 있어요${manualOutCnt>0?` · 현재 <b style="color:var(--red);">${manualOutCnt}개</b> 품절 중`:''}</span>
+          <span class="h-sub">수량 관리는 안 하지만 오늘 안 팔 메뉴를 표시할 수 있어요. <b>일시 품절</b>은 준비 후 다시 팔 메뉴, <b>완전 품절</b>은 오늘 판매 불가예요.${manualOutCnt>0?` · 현재 <b style="color:var(--red);">${manualOutCnt}개</b> 품절 중`:''}</span>
           ${manualOutCnt>0?`<span class="h-act"><button class="btn-ghost" style="padding:6px 12px;font-size:11px;color:var(--red);" onclick="clearAllManualSoldOut()">↺ 품절 모두 해제</button></span>`:''}
         </h3>
+        ${otherMenus.length===0?`
+          <div style="padding:48px 20px;text-align:center;background:var(--bg-2);border-radius:14px;">
+            <div style="font-size:42px;margin-bottom:14px;">🚫</div>
+            <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">지금은 품절 처리할 메뉴가 없어요</div>
+            <div style="font-size:13px;color:var(--ink-3);line-height:1.6;">
+              모든 메뉴를 수량 관리로 등록했거나, 아직 등록된 메뉴가 없어요.<br/>
+              수량 관리 없이 잠깐만 막아둘 메뉴가 생기면 여기에 표시돼요.
+            </div>
+          </div>
+        `:''}
         <div class="qso-grid">
-          ${otherMenus.map(m=>`
-            <div class="qso-card ${m.manualSoldOut?'on':''}" onclick="quickToggleSoldOut(${m.id})" title="${m.manualSoldOut?'품절 해제하기':'오늘만 품절 처리하기'}">
+          ${otherMenus.map(m=>{
+            ensureMenuExtras(m);
+            const stateCls = m.manualSoldOut ? (m.soldOutKind==='full'?'out-full':'out-temp') : '';
+            const statusTxt = m.manualSoldOut
+              ? (m.soldOutKind==='full' ? '🔴 완전 품절 · 오늘 판매 불가' : '🟡 일시 품절 · 준비 후 재판매 예정')
+              : '✓ 판매 중';
+            return `
+            <div class="qso-card ${stateCls}">
               <span class="qso-icon">${m.img?menuImgHtml(m.img, 32, 8):'🍽️'}</span>
               <div class="qso-info">
                 <div class="qso-name">${m.name}</div>
-                <div class="qso-status">${m.manualSoldOut?'🔴 오늘 품절 중':'✓ 판매 중'} · ${m.cat||'미분류'}</div>
+                <div class="qso-status">${statusTxt} · ${m.cat||'미분류'}</div>
               </div>
-              <span class="qso-sw ${m.manualSoldOut?'on':''}"></span>
-            </div>
-          `).join('')}
+              <div class="qso-actions">
+                ${m.manualSoldOut
+                  ? `<button class="qso-resume" onclick="setSoldOut(${m.id},'on')" title="다시 판매를 시작해요">↺ 판매 재개</button>`
+                  : `<button class="qso-temp" onclick="setSoldOut(${m.id},'temp')" title="준비되면 다시 팔 메뉴예요 (준비 후 재판매)">일시 품절</button>
+                     <button class="qso-full" onclick="setSoldOut(${m.id},'full')" title="오늘은 더 이상 팔지 않아요 (판매 불가)">완전 품절</button>`}
+              </div>
+            </div>`;
+          }).join('')}
         </div>
       </div>
-    ` : ''}
+    </div>
+    <!-- /탭2 -->
 
     <!-- 안내 -->
     <div style="margin-top:8px;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;">
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <span style="font-size:16px;flex-shrink:0;">💡</span>
         <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
-          <b>수량 관리</b>는 주문이 들어올 때마다 자동으로 1씩 차감되고, 0이 되면 손님 화면에 품절로 바뀌어요. <b>오늘 품절 처리</b>는 수량 관리 없이 메뉴 하나를 오늘만 잠시 숨기고 싶을 때 쓰세요. 둘 다 영업 종료 후 자동으로 초기화돼요.
+          <b>수량 관리</b>는 주문이 들어올 때마다 자동으로 1씩 차감되고, 0이 되면 손님 화면에 품절로 바뀌어요. <b>오늘 품절 처리</b>는 수량 관리 없이 잠깐 막아둘 때 쓰세요 — <b style="color:#92400e;">일시 품절</b>은 준비 후 다시 팔 메뉴, <b style="color:#b91c1c;">완전 품절</b>은 오늘은 더 팔지 않는 메뉴예요. 모두 영업 종료 후 자동으로 초기화돼요.
         </div>
       </div>
     </div>
@@ -6130,7 +6217,7 @@ function renderMenuCardGrid(rows){
         <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">${MENUS.length===0?'아직 등록된 메뉴가 없어요':'조건에 맞는 메뉴가 없어요'}</div>
         <div style="font-size:13px;color:var(--ink-3);line-height:1.6;">
           ${MENUS.length===0
-            ? '위 <b style="color:var(--ink-2);">+ 새 메뉴 추가</b>를 눌러서 첫 메뉴를 등록해 주세요.<br/>또는 ⚙️ 고급 설정 → 📤 엑셀 업로드로 한 번에 올릴 수 있어요.'
+            ? '위 <b style="color:var(--ink-2);">✏️ 새 메뉴 입력</b>을 펼쳐 첫 메뉴를 등록해 주세요.<br/>또는 <b>📤 엑셀로 한 번에 올리기</b>로 한 번에 올릴 수 있어요.'
             : '카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}
         </div>
       </div>
@@ -6239,11 +6326,14 @@ function menuNavTabs(){
    ============================================================ */
 function renderMenu(main){
   let rows = MENUS;
+  // 분류 태그 모음 — 사장님이 catL2/catL3/tag3에 입력한 자유 키워드 (중복 제거)
+  const allMenuTags = [...new Set(MENUS.flatMap(m=>{ ensureMenuExtras(m); return [m.catL2,m.catL3,m.tag3]; }).filter(x=>x&&x.trim()))];
   if (state.menuCatFilter !== 'all')    rows = rows.filter(r=>r.cat===state.menuCatFilter);
   if (state.menuStatusFilter !== 'all') rows = rows.filter(r=>r.status===state.menuStatusFilter);
+  if (state.menuTagFilter !== 'all')    rows = rows.filter(r=>{ ensureMenuExtras(r); return [r.catL2,r.catL3,r.tag3].includes(state.menuTagFilter); });
   if (state.menuSearch){
     const q = state.menuSearch.toLowerCase();
-    rows = rows.filter(r=>(r.name+' '+r.code).toLowerCase().includes(q));
+    rows = rows.filter(r=>{ ensureMenuExtras(r); return (r.name+' '+r.code+' '+(r.catL2||'')+' '+(r.catL3||'')+' '+(r.tag3||'')).toLowerCase().includes(q); });
   }
 
   const h = mmHeaderHTML('menu');
@@ -6291,16 +6381,19 @@ function renderMenu(main){
         <h2>메뉴판 관리</h2>
         <div class="page-sub">단품을 등록하고, 옵션 그룹을 연결해요. 여러 개를 한 번에 올릴 수 있어요.</div>
       </div>
-      ${h.tools}
     </div>
 
     <div class="bulk-collapse">
       <div class="bulk-collapse-head" onclick="state.menuBulkOpen=!state.menuBulkOpen;renderApp()">
         <div class="bc-left">
           <span class="ttl">✏️ 새 메뉴 입력</span>
-          <span class="sub">${state.menuBulkRows.length>0?`작성 중 · ${state.menuBulkRows.length}개 행 · 저장 전엔 손님 화면에 안 보여요`:'클릭해서 펼친 뒤 행을 추가해 주세요. · 저장 전엔 손님 화면에 안 보여요'}</span>
+          <span class="sub">${state.menuBulkRows.length>0?`작성 중 · ${state.menuBulkRows.length}개 행 · 저장 전엔 손님 화면에 안 보여요`:'클릭해서 펼친 뒤 행을 추가하거나, 엑셀로 한 번에 올릴 수 있어요. · 저장 전엔 손님 화면에 안 보여요'}</span>
         </div>
-        <span class="arr">${state.menuBulkOpen?'▼':'▶'}</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <button class="btn-ghost" style="padding:8px 14px;font-size:12px;font-weight:700;" onclick="event.stopPropagation();document.getElementById('mm-json-file').click()" title="엑셀(JSON) 파일로 여러 메뉴를 한 번에 등록할 수 있어요">📤 엑셀로 한 번에 올리기</button>
+          <input type="file" id="mm-json-file" accept=".json" style="display:none" onchange="importMenuJSON(event)" />
+          <span class="arr">${state.menuBulkOpen?'▼':'▶'}</span>
+        </div>
       </div>
       <div class="bulk-collapse-body ${state.menuBulkOpen?'':'closed'}">
         <div style="overflow-x:auto;">
@@ -6351,6 +6444,10 @@ function renderMenu(main){
             <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);" onclick="bulkDeleteMenus()">✕ 삭제</button>
             <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="state.menuSel.clear();renderApp()">선택 해제</button>
           ` : ''}
+          ${MENUS.length>0?`
+            <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="exportMenuJSON()" title="등록된 메뉴를 엑셀(JSON) 파일로 내려받아요">📥 엑셀 다운로드</button>
+            <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);" onclick="resetMenuAll()" title="등록된 메뉴를 모두 삭제해요">🗑️ 모두 지우기</button>
+          `:''}
         </span>
       </h3>
 
@@ -6367,9 +6464,16 @@ function renderMenu(main){
           <span class="chip ${state.menuStatusFilter==='품절'?'on':''}" onclick="state.menuStatusFilter='품절';renderApp()">품절</span>
           <span class="chip ${state.menuStatusFilter==='숨김'?'on':''}" onclick="state.menuStatusFilter='숨김';renderApp()">숨김</span>
         </div>
+        ${allMenuTags.length>0?`
+        <div class="row">
+          <span class="field-label" title="메뉴를 만들 때 입력한 분류 태그(중분류·소분류·키워드)로 좁혀 볼 수 있어요. 손님 화면에는 안 보여요.">분류 태그</span>
+          <span class="chip ${state.menuTagFilter==='all'?'on':''}" onclick="state.menuTagFilter='all';renderApp()">전체</span>
+          ${allMenuTags.map(t=>`<span class="chip ${state.menuTagFilter===t?'on':''}" onclick="state.menuTagFilter='${t.replace(/'/g,"\\'")}';renderApp()">🏷️ ${t} <span style="color:${state.menuTagFilter===t?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${MENUS.filter(m=>[m.catL2,m.catL3,m.tag3].includes(t)).length}</span></span>`).join('')}
+        </div>
+        `:''}
         <div class="row">
           <span class="field-label">검색</span>
-          <input class="input" style="flex:1;max-width:320px;" placeholder="메뉴명·상품코드로 찾기" value="${state.menuSearch}" oninput="state.menuSearch=this.value" onchange="renderApp()" />
+          <input class="input" style="flex:1;max-width:320px;" placeholder="메뉴명·상품코드·분류 태그로 찾기" value="${state.menuSearch}" oninput="state.menuSearch=this.value" onchange="renderApp()" />
         </div>
       </div>
 
@@ -6380,7 +6484,7 @@ function renderMenu(main){
         <thead>
           <tr>
             <th style="width:36px;text-align:center;"><span onclick="toggleSelAll('menuSel', ${JSON.stringify(rows.map(r=>r.id))})" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;border:2px solid ${rows.length>0&&rows.every(r=>state.menuSel.has(r.id))?'var(--blue)':'var(--ink-4)'};background:${rows.length>0&&rows.every(r=>state.menuSel.has(r.id))?'var(--blue)':'#fff'};color:#fff;font-weight:800;font-size:10px;cursor:pointer;">${rows.length>0&&rows.every(r=>state.menuSel.has(r.id))?'✓':''}</span></th>
-            <th style="width:50px;">순서</th>
+            <th style="width:62px;">순서 <span onclick="showOrderHelp()" title="순서 바꾸는 방법 보기" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--ink-4);color:#fff;font-size:10px;font-weight:800;font-style:normal;cursor:pointer;vertical-align:middle;">i</span></th>
             <th style="width:42px;">사진</th>
             <th style="width:84px;">상품코드</th>
             <th>메뉴명</th>
@@ -6395,7 +6499,7 @@ function renderMenu(main){
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="13">${MENUS.length===0?'위 + 새 메뉴 추가를 눌러 첫 메뉴를 등록해 주세요. 또는 ⚙️ 고급 설정 → 📤 엑셀 업로드로 한 번에 올릴 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : rows.map(r=>{
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="13">${MENUS.length===0?'위 <b>✏️ 새 메뉴 입력</b>을 펼쳐 첫 메뉴를 등록해 주세요. 또는 <b>📤 엑셀로 한 번에 올리기</b>로 여러 개를 한 번에 올릴 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : rows.map(r=>{
             ensureMenuExtras(r);
             const idx = MENUS.indexOf(r); // 전체 배열 기준 인덱스
             const opts = r.opt.map(oid=>{
@@ -6422,7 +6526,6 @@ function renderMenu(main){
                 <td><b>${r.name}</b>${r.maxQty?`<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:700;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:1px 6px;border-radius:8px;vertical-align:middle;" title="1회 주문 최대 ${r.maxQty}개">최대 ${r.maxQty}개</span>`:''}${r.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${r.desc}</div>`:''}</td>
                 <td>
                   <div style="font-size:12px;color:var(--ink-2);font-weight:700;">${r.cat}</div>
-                  ${[r.catL2,r.catL3,r.tag3].filter(x=>x).length>0?`<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px;">${[r.catL2,r.catL3,r.tag3].filter(x=>x).map(t=>`<span style="font-size:9px;background:#fef9e7;color:#854d0e;padding:1px 6px;border-radius:6px;font-weight:600;border:1px solid #fde047;">🏷️${t}</span>`).join('')}</div>`:''}
                 </td>
                 <td class="num">${priceCell}</td>
                 <td class="num">${r.takeoutPrice!=null&&r.takeoutPrice>=0
@@ -7859,6 +7962,27 @@ function quickToggleSoldOut(id){
   renderApp();
   flashSavedMenu(m.id);
   showToast(`<span class="ic">${m.manualSoldOut?'⛔':'✅'}</span> '${m.name}'을(를) ${m.manualSoldOut?'품절로 바꿨어요':'판매 중으로 되돌렸어요'}`, 'ok');
+}
+// 오늘 품절 처리 — 완전 품절(판매 불가) / 일시 품절(준비 후 재판매) / 판매 재개
+function setSoldOut(id, mode){
+  const m = MENUS.find(x=>x.id===id);
+  if(!m) return;
+  ensureMenuExtras(m);
+  if(mode==='on'){
+    m.manualSoldOut = false;
+  }else{
+    m.manualSoldOut = true;
+    m.soldOutKind = mode; // 'full' | 'temp'
+  }
+  state._flashMenuId = m.id;
+  renderApp();
+  flashSavedMenu(m.id);
+  const msg = mode==='on'
+    ? `<span class="ic">✅</span> '${m.name}'을(를) 판매 중으로 되돌렸어요`
+    : mode==='full'
+      ? `<span class="ic">🔴</span> '${m.name}'을(를) 완전 품절(오늘 판매 불가)로 바꿨어요`
+      : `<span class="ic">🟡</span> '${m.name}'을(를) 일시 품절(준비 후 재판매)로 바꿨어요`;
+  showToast(msg, 'ok');
 }
 function bulkToggleSoldOut(){
   const ids = [...state.menuSel];

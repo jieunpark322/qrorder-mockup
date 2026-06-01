@@ -4889,6 +4889,15 @@ function openDateRangePicker(target){
   renderDatePicker();
 }
 function renderDatePicker(){
+  const isOrders = state.customTarget === 'orders';
+  const ORDER_MIN  = '2025-05-15'; // 1년 보관 한도
+  // 시작일이 있으면 종료일 max = min(오늘, 시작일+90일)
+  const calcEndMax = (s) => {
+    if(!s || !isOrders) return TODAY_DATE;
+    const d = new Date(s); d.setDate(d.getDate() + 90);
+    return toISODate(d) > TODAY_DATE ? TODAY_DATE : toISODate(d);
+  };
+  const endMax = calcEndMax(state.customStart);
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-head">
@@ -4898,6 +4907,12 @@ function renderDatePicker(){
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
+
+    ${isOrders ? `
+      <div style="margin-bottom:12px;padding:8px 12px;background:#fafafa;border:1px solid var(--line);border-radius:8px;font-size:11px;color:var(--ink-3);">
+        🗓️ 주문 내역 · 한 번에 최대 <b style="color:var(--ink-2);">3개월(90일)</b> · 데이터 보관 <b style="color:var(--ink-2);">1년</b>
+      </div>
+    ` : ''}
 
     <div style="margin-bottom:16px;">
       <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:8px;">빠른 선택</div>
@@ -4909,18 +4924,27 @@ function renderDatePicker(){
         <span class="chip" onclick="setQuickRange(30)">지난 30일</span>
         <span class="chip" onclick="setQuickRange('thisMonth')">이번 달</span>
         <span class="chip" onclick="setQuickRange('lastMonth')">지난 달</span>
-        <span class="chip" onclick="setQuickRange('thisQuarter')">이번 분기</span>
-        <span class="chip" onclick="setQuickRange('lastQuarter')">지난 분기</span>
+        ${!isOrders ? `
+          <span class="chip" onclick="setQuickRange('thisQuarter')">이번 분기</span>
+          <span class="chip" onclick="setQuickRange('lastQuarter')">지난 분기</span>
+        ` : ''}
       </div>
     </div>
 
     <div style="margin-bottom:16px;">
       <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:8px;">날짜 직접 선택</div>
       <div style="display:flex;align-items:center;gap:12px;">
-        <input type="date" id="dp-start" class="input" value="${state.customStart}" max="${TODAY_DATE}" style="flex:1;" oninput="onDateChange()" />
+        <input type="date" id="dp-start" class="input" value="${state.customStart}"
+          ${isOrders ? `min="${ORDER_MIN}"` : ''}
+          max="${TODAY_DATE}"
+          style="flex:1;" oninput="onDateChange()" />
         <span style="color:var(--ink-3);">~</span>
-        <input type="date" id="dp-end" class="input" value="${state.customEnd}" max="${TODAY_DATE}" style="flex:1;" oninput="onDateChange()" />
+        <input type="date" id="dp-end" class="input" value="${state.customEnd}"
+          ${isOrders ? `min="${state.customStart||ORDER_MIN}"` : ''}
+          max="${endMax}"
+          style="flex:1;" oninput="onDateChange()" />
       </div>
+      ${isOrders ? `<div style="font-size:11px;color:var(--ink-4);margin-top:6px;">시작일을 고르면 종료일이 90일 이내로 자동 제한돼요.</div>` : ''}
     </div>
 
     <div class="info-card" style="background:linear-gradient(135deg,#eaf3ff,#f5f9ff);border-color:var(--blue-100);color:#1b64da;" id="dp-preview-wrap">
@@ -4937,8 +4961,20 @@ function renderDatePicker(){
 }
 function onDateChange(){
   const s = document.getElementById('dp-start').value;
-  const e = document.getElementById('dp-end').value;
+  let e   = document.getElementById('dp-end').value;
   state.customStart = s;
+  // 주문 내역: 시작일 기준으로 종료일 max를 90일로 동적 제한
+  if(state.customTarget === 'orders' && s){
+    const d = new Date(s); d.setDate(d.getDate() + 90);
+    const newMax = toISODate(d) > TODAY_DATE ? TODAY_DATE : toISODate(d);
+    const endEl = document.getElementById('dp-end');
+    if(endEl){
+      endEl.min = s;
+      endEl.max = newMax;
+      if(e && e > newMax){ endEl.value = newMax; e = newMax; }
+      if(e && e < s){      endEl.value = s;      e = s; }
+    }
+  }
   state.customEnd = e;
   document.getElementById('dp-preview').innerHTML = getRangePreview(s, e);
 }
@@ -4949,6 +4985,10 @@ function getRangePreview(s, e){
   const start = new Date(s);
   const end = new Date(e);
   const diff = Math.round((end - start) / (1000*60*60*24)) + 1;
+  if(state.customTarget === 'orders' && diff > 90)
+    return `<span style="color:var(--red);">선택한 기간이 ${diff}일이에요. 최대 3개월(90일)로 줄여 주세요.</span>`;
+  if(state.customTarget === 'orders' && s < '2025-05-15')
+    return `<span style="color:var(--red);">1년 이전 데이터는 보관 정책상 조회할 수 없어요.</span>`;
   const sLabel = `${start.getMonth()+1}월 ${start.getDate()}일(${DOW[start.getDay()]})`;
   const eLabel = `${end.getMonth()+1}월 ${end.getDate()}일(${DOW[end.getDay()]})`;
   return `${sLabel} ~ ${eLabel} <span style="color:var(--ink-3);font-weight:500;font-size:12px;margin-left:4px;">· ${diff}일간</span>`;
@@ -4990,6 +5030,11 @@ function applyDateRange(){
   }
   if (state.customEnd > TODAY_DATE){
     alert('오늘까지의 날짜에서 선택해 주세요'); return;
+  }
+  if (state.customTarget === 'orders'){
+    const diff = Math.round((new Date(state.customEnd)-new Date(state.customStart))/86400000);
+    if(diff > 90){ alert('주문 내역은 최대 3개월(90일)까지 조회할 수 있어요.'); return; }
+    if(state.customStart < '2025-05-15'){ alert('1년 이전 데이터는 보관 정책상 조회할 수 없어요.'); return; }
   }
   if (state.customTarget === 'overview') state.overviewPeriod = 'custom';
   if (state.customTarget === 'detail')   state.detailGroup = 'custom';

@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <title>QR오더 사장님 관리자 — 인터랙티브 프로토타입</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -547,9 +550,9 @@
   .drag-handle{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;cursor:grab;color:var(--ink-3);border-radius:6px;font-size:18px;line-height:1;transition:background .12s,color .12s;user-select:none;font-weight:700;}
   .drag-handle:hover{background:var(--bg-2);color:var(--ink-2);}
   .drag-handle:active{cursor:grabbing;}
-  tr.drag-source{opacity:.4;}
-  tr.drag-over-top{box-shadow:inset 0 3px 0 0 var(--blue);}
-  tr.drag-over-bottom{box-shadow:inset 0 -3px 0 0 var(--blue);}
+  tr.drag-source,div.drag-source{opacity:.4;}
+  tr.drag-over-top,div.drag-over-top{box-shadow:inset 0 3px 0 0 var(--blue);}
+  tr.drag-over-bottom,div.drag-over-bottom{box-shadow:inset 0 -3px 0 0 var(--blue);}
   /* 손님 화면 미리보기 — 어디서든 호출 가능한 FAB */
   .preview-fab{position:fixed;bottom:24px;right:24px;z-index:50;padding:14px 22px;border-radius:32px;background:var(--ink);color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.22);display:flex;align-items:center;gap:8px;transition:transform .12s,box-shadow .15s,background .15s;}
   .preview-fab:hover{background:var(--blue);box-shadow:0 12px 32px rgba(49,130,246,.42);transform:translateY(-2px);}
@@ -11936,14 +11939,20 @@ function renderStaffCall(main){
 
       <div>
         ${sc.messages.map((m,i)=>`
-          <div class="sc-msg-row ${m.enabled?'':'off'}">
-            <span class="sc-drag">⠿</span>
+          <div class="sc-msg-row ${m.enabled?'':'off'}"
+            draggable="true"
+            ondragstart="scMsgDragStart(event,${i})"
+            ondragover="scMsgDragOver(event,${i})"
+            ondragleave="scMsgDragLeave(event)"
+            ondrop="scMsgDrop(event,${i})"
+            ondragend="scMsgDragEnd(event)">
+            <span class="sc-drag" title="드래그해서 순서 변경">⠿</span>
             <span class="sc-num">${i+1}</span>
             <span class="sc-body">${m.body}</span>
-            <label class="toggle-switch ${m.enabled?'on':''}" onclick="STAFF_CALLS.messages[${i}].enabled=!STAFF_CALLS.messages[${i}].enabled;renderApp()">
+            <label class="toggle-switch ${m.enabled?'on':''}" onclick="STAFF_CALLS.messages[${i}].enabled=!STAFF_CALLS.messages[${i}].enabled;markUnsavedUI();renderApp()">
               <span class="sw"></span>
             </label>
-            <button class="btn-ghost" style="padding:4px 8px;font-size:11px;color:var(--red);flex-shrink:0;" onclick="if(STAFF_CALLS.messages.length>1){STAFF_CALLS.messages.splice(${i},1);renderApp();}else{alert('최소 1개의 메시지가 필요해요.');}">✕</button>
+            <button class="btn-ghost" style="padding:4px 8px;font-size:11px;color:var(--red);flex-shrink:0;" onclick="if(STAFF_CALLS.messages.length>1){STAFF_CALLS.messages.splice(${i},1);markUnsavedUI();renderApp();}else{alert('최소 1개의 메시지가 필요해요.');}">✕</button>
           </div>
         `).join('')}
       </div>
@@ -11951,6 +11960,43 @@ function renderStaffCall(main){
     </div>
   `;
 }
+// 호출 메시지 드래그앤드롭 재정렬
+let _scDragSrc = null;
+function scMsgDragStart(e, idx){
+  _scDragSrc = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(()=>e.currentTarget.classList.add('drag-source'), 0);
+}
+function scMsgDragOver(e, idx){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.sc-msg-row').forEach(r=>r.classList.remove('drag-over-top','drag-over-bottom'));
+  if(idx === _scDragSrc) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.classList.add(e.clientY < rect.top + rect.height/2 ? 'drag-over-top' : 'drag-over-bottom');
+}
+function scMsgDragLeave(e){
+  e.currentTarget.classList.remove('drag-over-top','drag-over-bottom');
+}
+function scMsgDrop(e, idx){
+  e.preventDefault();
+  if(_scDragSrc===null || _scDragSrc===idx){ _scDragSrc=null; return; }
+  const dropAfter = e.clientY >= e.currentTarget.getBoundingClientRect().top + e.currentTarget.getBoundingClientRect().height/2;
+  const src = _scDragSrc;
+  const msgs = STAFF_CALLS.messages;
+  const [item] = msgs.splice(src, 1);
+  const insertAt = src < idx ? (dropAfter ? idx : idx-1) : (dropAfter ? idx+1 : idx);
+  msgs.splice(insertAt, 0, item);
+  msgs.forEach((m,i)=>m.sort=i+1);
+  _scDragSrc = null;
+  markUnsavedUI();
+  renderApp();
+}
+function scMsgDragEnd(e){
+  _scDragSrc = null;
+  document.querySelectorAll('.sc-msg-row').forEach(r=>r.classList.remove('drag-source','drag-over-top','drag-over-bottom'));
+}
+
 function openAddStaffMsgModal(){
   if(STAFF_CALLS.messages.length>=15){ alert('메시지는 최대 15개까지 추가할 수 있어요.'); return; }
   const modal=document.getElementById('modal');
@@ -11979,7 +12025,7 @@ function confirmAddStaffMsg(){
   if(!body){ alert('내용을 입력해 주세요.'); return; }
   const newId=Math.max(0,...STAFF_CALLS.messages.map(m=>m.id))+1;
   STAFF_CALLS.messages.push({ id:newId, body, enabled:true, sort:STAFF_CALLS.messages.length+1 });
-  closeModal(); renderApp();
+  closeModal(); markUnsavedUI(); renderApp();
   showToast(`<span class="ic">✅</span> 직원 호출 메시지를 추가했어요`, 'ok');
 }
 

@@ -7733,26 +7733,46 @@ function renderSet(main){
       <b style="color:var(--ink-2);">아래 + 구성 추가</b>를 눌러 손님이 골라야 할 그룹을 만들어 주세요.<br/>
       <span style="font-size:11px;">예: 음료 1개 선택 / 브레드 1개 선택</span>
     </div>
-  ` : f.slots.map((sl, si)=>`
-    <div style="border:2px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:#fff;">
+  ` : f.slots.map((sl, si)=>{
+    const isEmpty = sl.candidates.length === 0;
+    const isNamed = !!sl.name;
+    // 상태: ① 이름·메뉴 모두 없음(새로 추가) → 파란 강조 / ② 이름은 있는데 메뉴 없음 → 주황 경고 / ③ 메뉴 있음 → 기본
+    const cardBorder = isEmpty ? (isNamed ? '2px solid #f59e0b' : '2px solid var(--blue)') : '2px solid #86efac';
+    const cardBg     = isEmpty ? (isNamed ? '#fffbeb' : '#eef5ff') : '#f0fdf4';
+    return `
+    <div style="border:${cardBorder};border-radius:12px;padding:14px 16px;margin-bottom:10px;background:${cardBg};transition:all .15s;">
+      <!-- 헤더 -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
         <span style="font-size:14px;font-weight:800;color:var(--blue);background:var(--blue-50);padding:4px 10px;border-radius:8px;">구성 ${si+1}</span>
-        <input class="input" placeholder="구성 이름 (예: 음료 선택)" value="${(sl.name||'').replace(/"/g,'&quot;')}" oninput="state.setForm.slots[${si}].name=this.value" style="flex:1;font-size:13px;font-weight:700;" />
+        <input class="input" placeholder="구성 이름 (예: 음료 선택)" value="${(sl.name||'').replace(/"/g,'&quot;')}" oninput="state.setForm.slots[${si}].name=this.value;renderApp()" style="flex:1;font-size:13px;font-weight:700;background:#fff;" />
         <span style="font-size:11px;color:var(--ink-4);">1개 선택</span>
         <button class="btn-ghost" style="padding:5px 8px;font-size:11px;color:var(--red);" onclick="removeSetSlot(${si})" title="구성 삭제">✕ 구성 삭제</button>
       </div>
-      ${sl.candidates.length===0 ? `
-        <div style="padding:16px;text-align:center;background:var(--bg-2);border-radius:8px;color:var(--ink-3);font-size:12px;">아래 <b style="color:var(--ink-2);">+ 메뉴 추가</b>를 눌러 이 구성의 후보 메뉴를 골라 주세요.</div>
+
+      <!-- 단계 안내 (빈 상태) -->
+      ${isEmpty ? `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#fff;border-radius:10px;border:1px dashed ${isNamed?'#f59e0b':'var(--blue-100)'};">
+          <span style="font-size:28px;">${isNamed?'🍽️':'✏️'}</span>
+          <div>
+            ${!isNamed ? `
+              <div style="font-size:13px;font-weight:700;color:var(--blue);">① 구성 이름을 먼저 입력해 주세요</div>
+              <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">예: 음료 선택, 사이드 선택, 빵 선택</div>
+            ` : `
+              <div style="font-size:13px;font-weight:700;color:#d97706;">② 아래 버튼으로 포함할 메뉴를 추가해 주세요</div>
+              <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">손님이 이 구성에서 고를 수 있는 메뉴를 골라요</div>
+            `}
+          </div>
+        </div>
       ` : `
         <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
           ${sl.candidates.map((c, ci)=>`
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:${c.isDefault?'#f0fdf4':'var(--bg-2)'};border:1px solid ${c.isDefault?'#86efac':'var(--line)'};border-radius:8px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:${c.isDefault?'#f0fdf4':'#fff'};border:1px solid ${c.isDefault?'#86efac':'var(--line)'};border-radius:8px;">
               <span style="font-size:18px;">${(MENUS.find(m=>m.code===c.code)?.img)||'🍽️'}</span>
               <div style="flex:1;min-width:0;">
                 <div style="font-size:13px;font-weight:700;color:var(--ink);">${c.name}${c.isDefault?' <span style="font-size:10px;color:#15803d;font-weight:700;background:#dcfce7;padding:1px 6px;border-radius:6px;margin-left:4px;">기본</span>':''}</div>
               </div>
               <span style="font-size:11px;color:var(--ink-4);">추가 금액</span>
-              <input class="input" type="number" value="${c.extraPrice}" oninput="state.setForm.slots[${si}].candidates[${ci}].extraPrice=Number(this.value)||0" onchange="renderApp()" style="width:90px;text-align:right;font-size:12px;color:${c.extraPrice>0?'var(--red)':c.extraPrice<0?'var(--blue)':'var(--ink-2)'};" />
+              <input class="input" type="number" value="${c.extraPrice}" oninput="state.setForm.slots[${si}].candidates[${ci}].extraPrice=Number(this.value)||0" onchange="renderApp()" style="width:90px;text-align:right;font-size:12px;background:#fff;color:${c.extraPrice>0?'var(--red)':c.extraPrice<0?'var(--blue)':'var(--ink-2)'};" />
               <span style="font-size:11px;color:var(--ink-3);">원</span>
               <button class="btn-ghost" style="padding:4px 8px;font-size:10px;" onclick="setDefaultCandidate(${si},${ci})" title="이 메뉴를 기본으로">${c.isDefault?'⭐':'☆'}</button>
               <button class="btn-ghost" style="padding:4px 8px;font-size:10px;color:var(--red);" onclick="removeSetCandidate(${si},${ci})" title="제거">✕</button>
@@ -7760,9 +7780,11 @@ function renderSet(main){
           `).join('')}
         </div>
       `}
-      <button class="btn-ghost" style="width:100%;padding:8px;font-size:12px;font-weight:700;border:1px dashed var(--line);" onclick="openSetCandidatePicker(${si})">+ 메뉴 추가</button>
+
+      <!-- 메뉴 추가 버튼 — 이름 없으면 비활성 -->
+      <button class="${isNamed?'btn-primary':'btn-ghost'}" style="width:100%;padding:9px;font-size:12px;font-weight:800;margin-top:8px;${!isNamed?'opacity:.45;cursor:not-allowed;':''}" onclick="${isNamed?`openSetCandidatePicker(${si})`:'alert(\"먼저 구성 이름을 입력해 주세요.\")'}" >+ 메뉴 추가</button>
     </div>
-  `).join('');
+  `;}).join('');
 
   main.innerHTML = `
     <div class="crumb">메뉴 관리 › 세트 메뉴</div>

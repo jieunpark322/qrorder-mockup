@@ -3625,7 +3625,7 @@ function renderOrders(main){
               <td style="text-align:center;">
                 <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;background:${payType==='선불'?'#eff6ff':'#fff7ed'};color:${payType==='선불'?'#1d4ed8':'#c2410c'};">${payType}</span>
               </td>
-              <td>${o.issuer ? payLabel(o) : '<span style="color:var(--ink-4);font-size:11px;">미결제</span>'}</td>
+              <td>${o.issuer ? `${payLabel(o)}${paySub(o)?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${paySub(o)}</div>`:''}` : '<span style="color:var(--ink-4);font-size:11px;">미결제</span>'}</td>
               <td class="num">${amountCell}</td>
               <td><span class="pill ${o.status==='완료'?'done':o.status==='진행중'?'partial':cancelPillClass}">${isCancelAll?cancelLabel:o.status}</span></td>
               <td style="color:var(--blue);font-weight:600;">자세히 ›</td>

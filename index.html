@@ -1594,10 +1594,10 @@ function paySub(o){
 // 결제수단 라벨 — 1depth만 (표·요약용). 2depth는 paySub()으로 별도 노출.
 // 주문별 결제 방식 — 포장은 항상 선결제, 매장은 저녁(17~21시)만 후결제
 function orderPayType(o){
-  if (!o || o.ch === '포장') return '선결제';
-  if (!o.issuer) return '후결제'; // 결제 정보 없음 = 주문 취소(후결제)
+  if (!o || o.ch === '포장') return '선불';
+  if (!o.issuer) return '후불'; // 결제 정보 없음 = 주문 취소(후불)
   const [h] = (o.time||'00:00').split(':').map(Number);
-  return (h >= 17 && h < 21) ? '후결제' : '선결제';
+  return (h >= 17 && h < 21) ? '후불' : '선불';
 }
 
 function payLabel(o){
@@ -3577,7 +3577,7 @@ function renderOrders(main){
             ${sortableHeader({key:'id', label:'주문번호', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'channel', label:'채널', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'menu', label:'메뉴 요약', currentSort:state.orderSort, setter:'setOrderSort'})}
-            <th style="width:60px;text-align:center;">결제방식</th>
+            <th style="width:60px;text-align:center;">결제 시점</th>
             ${sortableHeader({key:'pay', label:'결제수단', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'amt', label:'결제금액', align:'num', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'status', label:'상태', currentSort:state.orderSort, setter:'setOrderSort'})}
@@ -3588,8 +3588,8 @@ function renderOrders(main){
           ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">다른 조건으로 한번 찾아봐 주세요.</td></tr>` : rows.slice(0,state.orderRowsPerPage).map((o,i)=>{
             const isCancelAll = o.status==='취소';
             const payType = orderPayType(o);
-            const cancelLabel = payType==='선결제' ? '결제 취소' : '주문 취소';
-            const cancelPillClass = payType==='선결제' ? 'cancel' : 'pending';
+            const cancelLabel = payType==='선불' ? '결제 취소' : '주문 취소';
+            const cancelPillClass = payType==='선불' ? 'cancel' : 'pending';
             const rowAttr = isCancelAll ? ' style="background:#fff7f7;"' : '';
             const idStyle = isCancelAll ? 'color:var(--red);font-weight:700;text-decoration:line-through;' : '';
             const dateLabel = o.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3');
@@ -3615,7 +3615,7 @@ function renderOrders(main){
               <td>${o.channel}</td>
               <td>${o.menu}</td>
               <td style="text-align:center;">
-                <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;background:${payType==='선결제'?'#eff6ff':'#fff7ed'};color:${payType==='선결제'?'#1d4ed8':'#c2410c'};">${payType}</span>
+                <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;background:${payType==='선불'?'#eff6ff':'#fff7ed'};color:${payType==='선불'?'#1d4ed8':'#c2410c'};">${payType}</span>
               </td>
               <td>${o.issuer ? payLabel(o) : '<span style="color:var(--ink-4);font-size:11px;">미결제</span>'}</td>
               <td class="num">${amountCell}</td>
@@ -5091,7 +5091,7 @@ function openOrderDetail(o){
 
   const amountBlock = isCancelAll ? `
       <div class="r-line"><span>결제금액 <span style="font-size:11px;color:var(--ink-3);">(원)</span></span><b style="font-size:14px;color:var(--ink-3);text-decoration:line-through;">${fmt(o.amt)}원</b></div>
-      <div class="r-line" style="background:#fff7f7;margin:4px -8px;padding:8px;border-radius:8px;"><span style="color:var(--red);font-weight:600;">↺ ${orderPayType(o)==='선결제'?'결제 취소':'주문 취소'}</span><b style="color:var(--red);">${cancelDateLabel} ${o.cancelTime||'−'}</b></div>
+      <div class="r-line" style="background:#fff7f7;margin:4px -8px;padding:8px;border-radius:8px;"><span style="color:var(--red);font-weight:600;">↺ ${orderPayType(o)==='선불'?'결제 취소':'주문 취소'}</span><b style="color:var(--red);">${cancelDateLabel} ${o.cancelTime||'−'}</b></div>
       <div class="r-line"><span><b>실매출</b></span><b style="font-size:16px;color:var(--red);">0원</b></div>
   ` : `
       <div class="r-line"><span><b>결제금액</b></span><b style="font-size:16px;color:var(--blue);">${fmt(o.amt)}원</b></div>

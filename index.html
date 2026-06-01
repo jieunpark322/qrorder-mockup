@@ -1516,6 +1516,7 @@ const state = {
   customTarget: null,                // 'overview' | 'detail' | 'orders'
   // QR 이미지 추가 신청 폼
   qrReqColor: null,                  // 선택한 색상명
+  qrDesignMode: 'same',              // 'same'=기존 시안 동일 / 'new'=새 색상 선택
   qrReqQty:   9,                     // 신청 수량 (9 단위, 기본 9장)
   qrReqMemo:  '',                    // 메모 (선택)
   // 메뉴 관리 — 더보기 드롭다운
@@ -9587,7 +9588,16 @@ const QR_COLOR_OPTIONS = [
   { name:'초록', hex:'#16a34a', textLight:true  },
 ];
 
-// QR 이미지 추가 신청 — 정책: 10개 단위 + 단일 색상
+// 기존 발송 시안 — 매장 최초 개통 시 소프트먼트가 제작해 발송한 디자인
+const QR_EXISTING_DESIGN = {
+  colorName: '검정',
+  hex: '#191f28',
+  textLight: true,
+  deliveredDate: '2026-01-10',
+  note: '초도 개통 시 발송된 시안이에요',
+};
+
+// QR 이미지 추가 신청 — 정책: 9개 단위 + 단일 색상
 const QR_PRICE_PER_UNIT = 2000;  // 1장당 단가 (원)
 const QR_BATCH_SIZE     = 9;     // 최소 신청 단위
 // QR은 매장의 주문 설정·테이블 설정에서 파생되는 구조
@@ -10467,18 +10477,56 @@ function renderQR(main){
           색상을 여러 가지로 받고 싶다면 신청을 나눠서 진행해 주세요.
         </div>
       </div>
+      <!-- 기존 발송 시안 안내 -->
       <div style="margin-bottom:22px;">
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:10px;">색상 선택 <span style="color:var(--red);">*</span> <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">한 번에 한 가지만 선택할 수 있어요</span></label>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          ${QR_COLOR_OPTIONS.map(c=>`
-            <div onclick="state.qrReqColor='${c.name}';renderApp()"
-              style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;">
-              <div style="width:48px;height:48px;background:${c.hex};border-radius:10px;border:${c.name==='흰색'?'1px solid var(--line)':'none'};
-                ${state.qrReqColor===c.name?'outline:3px solid var(--blue);outline-offset:2px;':''}transition:outline .1s;"></div>
-              <span style="font-size:12px;color:${state.qrReqColor===c.name?'var(--blue)':'var(--ink-2)'};font-weight:${state.qrReqColor===c.name?800:600};">${c.name}</span>
+        <div style="font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:10px;">디자인 선택 <span style="color:var(--red);">*</span></div>
+        <div style="padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;">
+          <div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:10px;">📦 매장에서 사용하시던 기존 QR 스티커 시안이에요</div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+            <!-- 시안 미리보기 (QR 스티커 모형) -->
+            <div style="flex-shrink:0;width:72px;height:72px;background:${QR_EXISTING_DESIGN.hex};border-radius:10px;border:${QR_EXISTING_DESIGN.colorName==='흰색'?'1px solid var(--line)':'none'};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;">
+              <div style="display:grid;grid-template-columns:repeat(4,6px);grid-template-rows:repeat(4,6px);gap:2px;">
+                ${Array.from({length:16},(_,i)=>`<div style="width:6px;height:6px;background:${QR_EXISTING_DESIGN.textLight?'rgba(255,255,255,0.85)':'rgba(0,0,0,0.75)'};border-radius:1px;opacity:${[0,2,4,5,8,9,11,13,15].includes(i)?1:0.25};"></div>`).join('')}
+              </div>
             </div>
-          `).join('')}
+            <div>
+              <div style="font-size:14px;font-weight:800;color:var(--ink);">${QR_EXISTING_DESIGN.colorName} 시안</div>
+              <div style="font-size:11px;color:var(--ink-3);margin-top:3px;">${QR_EXISTING_DESIGN.note}</div>
+              <div style="font-size:11px;color:var(--ink-4);margin-top:2px;">발송일 ${QR_EXISTING_DESIGN.deliveredDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--ink-2);line-height:1.6;margin-bottom:12px;">
+            같은 디자인으로 추가 제작을 원하신다면 <b>기존 시안으로 제작</b> 버튼을 선택해 주세요.
+          </div>
+          <!-- 선택 버튼 -->
+          <div style="display:flex;gap:10px;">
+            <div onclick="state.qrDesignMode='same';state.qrReqColor=null;renderApp()" style="flex:1;padding:12px 16px;border-radius:10px;border:2px solid ${state.qrDesignMode==='same'?'var(--blue)':'var(--line)'};background:${state.qrDesignMode==='same'?'#eef5ff':'#fff'};cursor:pointer;text-align:center;transition:all .12s;">
+              <div style="font-size:13px;font-weight:800;color:${state.qrDesignMode==='same'?'var(--blue)':'var(--ink-2)'};">✓ 기존 시안으로 제작</div>
+              <div style="font-size:11px;color:${state.qrDesignMode==='same'?'#1d4ed8':'var(--ink-4)'};margin-top:2px;">${QR_EXISTING_DESIGN.colorName} · 동일 디자인</div>
+            </div>
+            <div onclick="state.qrDesignMode='new';renderApp()" style="flex:1;padding:12px 16px;border-radius:10px;border:2px solid ${state.qrDesignMode==='new'?'var(--blue)':'var(--line)'};background:${state.qrDesignMode==='new'?'#eef5ff':'#fff'};cursor:pointer;text-align:center;transition:all .12s;">
+              <div style="font-size:13px;font-weight:800;color:${state.qrDesignMode==='new'?'var(--blue)':'var(--ink-2)'};">🎨 새 색상으로 제작</div>
+              <div style="font-size:11px;color:${state.qrDesignMode==='new'?'#1d4ed8':'var(--ink-4)'};margin-top:2px;">아래에서 색상 선택</div>
+            </div>
+          </div>
         </div>
+
+        <!-- 새 색상 선택 (새 색상 제작 선택 시만 표시) -->
+        ${state.qrDesignMode==='new' ? `
+        <div style="padding:16px;background:#fff;border:1px solid var(--line);border-radius:10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--ink-3);margin-bottom:10px;">색상 선택 <span style="color:var(--red);">*</span> <span style="font-weight:400;">한 번에 한 가지만 선택할 수 있어요</span></div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            ${QR_COLOR_OPTIONS.map(c=>`
+              <div onclick="state.qrReqColor='${c.name}';renderApp()"
+                style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;">
+                <div style="width:48px;height:48px;background:${c.hex};border-radius:10px;border:${c.name==='흰색'?'1px solid var(--line)':'none'};
+                  ${state.qrReqColor===c.name?'outline:3px solid var(--blue);outline-offset:2px;':''}transition:outline .1s;"></div>
+                <span style="font-size:12px;color:${state.qrReqColor===c.name?'var(--blue)':'var(--ink-2)'};font-weight:${state.qrReqColor===c.name?800:600};">${c.name}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        ` : ''}
       </div>
       <div style="margin-bottom:22px;">
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:10px;">신청 수량 <span style="color:var(--red);">*</span> <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">${QR_BATCH_SIZE}장 단위</span></label>
@@ -10496,17 +10544,27 @@ function renderQR(main){
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px;">메모 <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">선택 — 어떤 용도인지 알려 주시면 빠르게 처리돼요</span></label>
         <input id="qr-req-memo" class="input" placeholder="예: 옥상 테라스 신규 테이블용, 야외 영업용 예비 등" style="width:100%;" value="${state.qrReqMemo||''}" oninput="state.qrReqMemo=this.value" />
       </div>
-      ${state.qrReqColor && state.qrReqQty ? `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <div style="font-size:13px;color:var(--ink-2);font-weight:700;">${state.qrReqColor} 색상 · ${state.qrReqQty}장</div>
-          <div style="font-size:11px;color:var(--ink-3);">${QR_PRICE_PER_UNIT.toLocaleString()}원 × ${state.qrReqQty}장</div>
-        </div>
-        <div style="font-size:20px;font-weight:800;color:var(--blue);">${(state.qrReqQty * QR_PRICE_PER_UNIT).toLocaleString()}원</div>
-      </div>` : ''}
-      <button class="btn-primary" style="width:100%;padding:14px;font-size:14px;font-weight:800;${(!state.qrReqColor||!state.qrReqQty)?'opacity:.5;cursor:not-allowed;':''}" onclick="submitQRRequest()">
-        ${state.qrReqColor && state.qrReqQty ? `${state.qrReqColor} ${state.qrReqQty}장 · ${(state.qrReqQty * QR_PRICE_PER_UNIT).toLocaleString()}원 신청하기` : '색상과 수량을 모두 선택해 주세요'}
-      </button>
+      ${(() => {
+        const dm = state.qrDesignMode||'same';
+        const colorName = dm==='same' ? QR_EXISTING_DESIGN.colorName : state.qrReqColor;
+        const colorHex  = dm==='same' ? QR_EXISTING_DESIGN.hex : (QR_COLOR_OPTIONS.find(c=>c.name===colorName)?.hex||'');
+        const ready = !!colorName && !!state.qrReqQty;
+        return `
+        ${ready ? `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:20px;height:20px;background:${colorHex};border-radius:4px;border:${colorName==='흰색'?'1px solid var(--line)':'none'};flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:13px;color:var(--ink-2);font-weight:700;">${colorName} ${dm==='same'?'(기존 시안)':''} · ${state.qrReqQty}장</div>
+              <div style="font-size:11px;color:var(--ink-3);">${QR_PRICE_PER_UNIT.toLocaleString()}원 × ${state.qrReqQty}장</div>
+            </div>
+          </div>
+          <div style="font-size:20px;font-weight:800;color:var(--blue);">${(state.qrReqQty * QR_PRICE_PER_UNIT).toLocaleString()}원</div>
+        </div>` : ''}
+        <button class="btn-primary" style="width:100%;padding:14px;font-size:14px;font-weight:800;${!ready?'opacity:.5;cursor:not-allowed;':''}" onclick="submitQRRequest()">
+          ${ready ? `${colorName}${dm==='same'?' (기존 시안)':''} ${state.qrReqQty}장 · ${(state.qrReqQty * QR_PRICE_PER_UNIT).toLocaleString()}원 신청하기` : dm==='new'?'색상을 선택해 주세요':'수량을 선택해 주세요'}
+        </button>`;
+      })()}
       ${QR_REQUESTS.length > 0 ? `
       <h3 style="margin-top:24px;">신청 내역 <span class="h-sub">${QR_REQUESTS.length}건</span></h3>
       <table class="t">
@@ -10681,20 +10739,23 @@ function openTempPrintQRModal(type, id){
 }
 
 function submitQRRequest(){
-  const color = state.qrReqColor;
+  const dm    = state.qrDesignMode || 'same';
+  const color = dm==='same' ? QR_EXISTING_DESIGN.colorName : state.qrReqColor;
   const qty   = state.qrReqQty;
   const memo  = (state.qrReqMemo||'').trim();
   if(!color){ alert('색상을 선택해 주세요.'); return; }
   if(!qty)  { alert(`신청 수량을 선택해 주세요. 최소 ${QR_BATCH_SIZE}장 단위로 신청할 수 있어요.`); return; }
   if(qty % QR_BATCH_SIZE !== 0){ alert(`수량은 ${QR_BATCH_SIZE}장 단위로만 신청할 수 있어요.`); return; }
   const total = qty * QR_PRICE_PER_UNIT;
+  const designLabel = dm==='same' ? `${color} (기존 시안과 동일)` : `${color} (새 색상)`;
   // 최종 더블 체크
-  if(!confirm(`${color} 색상 QR ${qty}장을 신청할게요.\n결제 금액: ${total.toLocaleString()}원\n\n한 번 발주되면 변경이 어려워요. 신청할까요?`)) return;
-  const hex = QR_COLOR_OPTIONS.find(c=>c.name===color)?.hex || '#000';
+  if(!confirm(`${designLabel} QR ${qty}장을 신청할게요.\n결제 금액: ${total.toLocaleString()}원\n\n한 번 발주되면 변경이 어려워요. 신청할까요?`)) return;
+  const hex = dm==='same' ? QR_EXISTING_DESIGN.hex : (QR_COLOR_OPTIONS.find(c=>c.name===color)?.hex || '#000');
   const today = new Date().toISOString().slice(0,10);
   QR_REQUESTS.push({ id: QR_REQUESTS.length+1, qty, colorName:color, hex, memo, reqDate:today, status:'신청중', totalPrice:total });
+  state.qrDesignMode = 'same';
   state.qrReqColor = null;
-  state.qrReqQty = null;
+  state.qrReqQty = 9;
   state.qrReqMemo = '';
   renderApp();
   showToast(`<span class="ic">✅</span> ${color} QR ${qty}장 신청이 접수됐어요`, 'ok');

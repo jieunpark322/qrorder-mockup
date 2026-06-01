@@ -1178,6 +1178,13 @@ const CHANNEL = [
 // 주문 (오늘 5/15 일부)
 // 주문 데이터 — date(결제일) 필드 추가. 1년 초과 거래는 카드번호 전체 마스킹
 const ORDERS = [
+  // 저녁 후결제 주문 — 17:00~21:00 시간대 (후결제 정책)
+  { id:'#20260515-0052', date:'2026-05-15', time:'20:05', channel:'테이블 3', ch:'매장', menu:'아메리카노',           issuer:null, amt:4500, status:'취소', stl:'제외',           cancelDate:'2026-05-15', cancelTime:'20:08',
+    items:[{name:'아메리카노', qty:1, price:4500, options:['HOT']}] },
+  { id:'#20260515-0051', date:'2026-05-15', time:'19:14', channel:'테이블 5', ch:'매장', menu:'카페라떼 외 1건',      issuer:'KB',   amt:11000, status:'완료', stl:'정산예정 5/19', card:'4141209876',
+    items:[{name:'카페라떼', qty:1, price:5500, options:['HOT']}, {name:'크루아상', qty:1, price:5500, options:[]}] },
+  { id:'#20260515-0050', date:'2026-05-15', time:'18:28', channel:'테이블 1', ch:'매장', menu:'아메리카노 외 2건',   issuer:'신한', amt:14500, status:'완료', stl:'정산예정 5/19', card:'4141201234',
+    items:[{name:'아메리카노', qty:2, price:4500, options:['HOT']}, {name:'치즈케이크', qty:1, price:5500, options:[]}] },
   // 진행중 — 결제·조리·픽업 대기. 매출 합계에는 미포함(완료 시점에 합산)
   { id:'#20260515-0049', date:'2026-05-15', time:'10:45', channel:'테이블 6', ch:'매장', menu:'아메리카노 외 1건', issuer:'카카오페이', paySub:'페이', amt:9500, status:'진행중', stl:'−',
     items:[
@@ -1585,6 +1592,14 @@ function paySub(o){
   return o.paySub || '';
 }
 // 결제수단 라벨 — 1depth만 (표·요약용). 2depth는 paySub()으로 별도 노출.
+// 주문별 결제 방식 — 포장은 항상 선결제, 매장은 저녁(17~21시)만 후결제
+function orderPayType(o){
+  if (!o || o.ch === '포장') return '선결제';
+  if (!o.issuer) return '후결제'; // 결제 정보 없음 = 주문 취소(후결제)
+  const [h] = (o.time||'00:00').split(':').map(Number);
+  return (h >= 17 && h < 21) ? '후결제' : '선결제';
+}
+
 function payLabel(o){
   const main = payMain(o);
   return `${payMainIco(main)} ${main}`;
@@ -3562,6 +3577,7 @@ function renderOrders(main){
             ${sortableHeader({key:'id', label:'주문번호', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'channel', label:'채널', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'menu', label:'메뉴 요약', currentSort:state.orderSort, setter:'setOrderSort'})}
+            <th style="width:60px;text-align:center;">결제방식</th>
             ${sortableHeader({key:'pay', label:'결제수단', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'amt', label:'결제금액', align:'num', currentSort:state.orderSort, setter:'setOrderSort'})}
             ${sortableHeader({key:'status', label:'상태', currentSort:state.orderSort, setter:'setOrderSort'})}
@@ -3569,14 +3585,17 @@ function renderOrders(main){
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="9">다른 조건으로 한번 찾아봐 주세요.</td></tr>` : rows.slice(0,state.orderRowsPerPage).map((o,i)=>{
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">다른 조건으로 한번 찾아봐 주세요.</td></tr>` : rows.slice(0,state.orderRowsPerPage).map((o,i)=>{
             const isCancelAll = o.status==='취소';
+            const payType = orderPayType(o);
+            const cancelLabel = payType==='선결제' ? '결제 취소' : '주문 취소';
+            const cancelPillClass = payType==='선결제' ? 'cancel' : 'pending';
             const rowAttr = isCancelAll ? ' style="background:#fff7f7;"' : '';
             const idStyle = isCancelAll ? 'color:var(--red);font-weight:700;text-decoration:line-through;' : '';
             const dateLabel = o.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3');
             const cancelDateLabel = o.cancelDate ? o.cancelDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3') : dateLabel;
             const cancelLine = isCancelAll && o.cancelTime
-              ? `<div style="margin-top:4px;font-size:11px;font-weight:600;color:var(--red);white-space:nowrap;">↺ ${cancelDateLabel} ${o.cancelTime} 취소</div>`
+              ? `<div style="margin-top:4px;font-size:11px;font-weight:600;color:var(--red);white-space:nowrap;">↺ ${cancelDateLabel} ${o.cancelTime} ${cancelLabel}</div>`
               : '';
             const amountCell = isCancelAll
               ? `<b><s style="color:var(--ink-3);">${fmt(o.amt)}</s></b>`
@@ -3595,9 +3614,12 @@ function renderOrders(main){
               </td>
               <td>${o.channel}</td>
               <td>${o.menu}</td>
-              <td>${payLabel(o)}</td>
+              <td style="text-align:center;">
+                <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;background:${payType==='선결제'?'#eff6ff':'#fff7ed'};color:${payType==='선결제'?'#1d4ed8':'#c2410c'};">${payType}</span>
+              </td>
+              <td>${o.issuer ? payLabel(o) : '<span style="color:var(--ink-4);font-size:11px;">미결제</span>'}</td>
               <td class="num">${amountCell}</td>
-              <td><span class="pill ${o.status==='완료'?'done':o.status==='진행중'?'partial':'cancel'}">${o.status}</span></td>
+              <td><span class="pill ${o.status==='완료'?'done':o.status==='진행중'?'partial':cancelPillClass}">${isCancelAll?cancelLabel:o.status}</span></td>
               <td style="color:var(--blue);font-weight:600;">자세히 ›</td>
             </tr>`;
           }).join('')}
@@ -5069,7 +5091,7 @@ function openOrderDetail(o){
 
   const amountBlock = isCancelAll ? `
       <div class="r-line"><span>결제금액 <span style="font-size:11px;color:var(--ink-3);">(원)</span></span><b style="font-size:14px;color:var(--ink-3);text-decoration:line-through;">${fmt(o.amt)}원</b></div>
-      <div class="r-line" style="background:#fff7f7;margin:4px -8px;padding:8px;border-radius:8px;"><span style="color:var(--red);font-weight:600;">↺ 취소 처리</span><b style="color:var(--red);">${cancelDateLabel} ${o.cancelTime||'−'}</b></div>
+      <div class="r-line" style="background:#fff7f7;margin:4px -8px;padding:8px;border-radius:8px;"><span style="color:var(--red);font-weight:600;">↺ ${orderPayType(o)==='선결제'?'결제 취소':'주문 취소'}</span><b style="color:var(--red);">${cancelDateLabel} ${o.cancelTime||'−'}</b></div>
       <div class="r-line"><span><b>실매출</b></span><b style="font-size:16px;color:var(--red);">0원</b></div>
   ` : `
       <div class="r-line"><span><b>결제금액</b></span><b style="font-size:16px;color:var(--blue);">${fmt(o.amt)}원</b></div>
@@ -10622,7 +10644,7 @@ function renderStore(main){
     <div class="toolbar">
       <div>
         <h2>매장 설정</h2>
-        <div class="page-sub">매장 정보·영업시간·휴무일을 관리해요.</div>
+        <div class="page-sub">매장 정보·운영 시간·휴무일을 관리해요.</div>
       </div>
     </div>
 
@@ -10708,7 +10730,7 @@ function renderStore(main){
     </div>
 
     <div class="panel">
-      <h3>영업시간 <span class="h-sub">라스트오더·브레이크타임은 없으면 비워두세요</span></h3>
+      <h3>운영 시간 <span class="h-sub">라스트오더·브레이크타임은 없으면 비워두세요</span></h3>
       <table class="t" style="table-layout:fixed;">
         <colgroup>
           <col style="width:48px;"/>

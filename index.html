@@ -1169,10 +1169,9 @@ const CATEGORY = [
 
 // 판매유형 (오늘 5/15 — DAY 5/15 gross 1,234,500원 / ocnt 46건과 일치)
 const CHANNEL = [
-  { name:'매장 (테이블)', key:'dine',       cnt:32, amt:880000, color:'#3182f6', avg:27500, share:71.3 },
-  { name:'포장',          key:'takeout',     cnt:9,  amt:226000, color:'#1eb18d', avg:25111, share:18.3 },
+  { name:'매장 (테이블)', key:'dine',       cnt:32, amt:880000, color:'#3182f6', avg:27500, share:75.4 },
+  { name:'포장',          key:'takeout',     cnt:9,  amt:226000, color:'#1eb18d', avg:25111, share:19.4 },
   { name:'포장 예약',     key:'reservation', cnt:3,  amt:64000,  color:'#8b5cf6', avg:21333, share:5.2 },
-  { name:'배달',          key:'delivery',    cnt:2,  amt:64500,  color:'#f5b347', avg:32250, share:5.2 },
 ];
 // 합계: 46건 / 1,234,500원 (DAY 5/15와 일치)
 
@@ -1239,13 +1238,6 @@ const ORDERS = [
   { id:'#20260515-0038', date:'2026-05-15', time:'08:14', channel:'테이블 5',   ch:'매장', menu:'아메리카노',         issuer:'신한', amt:8000,  status:'완료',     stl:'정산예정 5/20', card:'4141201234',
     items:[
       {name:'아메리카노', qty:2, price:4000, options:['HOT']},
-    ] },
-  { id:'#20260515-0037', date:'2026-05-15', time:'07:58', channel:'배달',       ch:'배달', menu:'카페라떼 외 3건',        issuer:'카카오페이', paySub:'페이', amt:32000, status:'완료',     stl:'정산예정 5/20',
-    items:[
-      {name:'카페라떼',   qty:2, price:6000, options:['ICE','오트밀크 +500']},
-      {name:'아메리카노', qty:1, price:5000, options:['HOT']},
-      {name:'크루아상',   qty:1, price:5500, options:[]},
-      {name:'치즈케이크', qty:1, price:8500, options:[]},
     ] },
   { id:'#20260515-0036', date:'2026-05-15', time:'07:42', channel:'포장',       ch:'포장', menu:'아메리카노 외 1건',   issuer:'네이버페이', paySub:'페이', amt:10000, status:'완료',     stl:'정산예정 5/20',
     items:[
@@ -1458,7 +1450,7 @@ const state = {
   orderAmountMax: '',
   orderDateFilter: 'today',
   orderStatusFilter: 'all',
-  orderChannelFilter: 'all',        // all | 매장 | 포장 | 배달
+  orderChannelFilter: 'all',        // all | 매장 | 포장
   orderPayFilter: 'all',            // all | 신한 | KB | 삼성 | VISA (해외) | 카카오페이 | 네이버페이 | 현금
   orderStlFilter: 'all',            // all | 정산예정 | 정산완료 | 제외
   orderMenuSearch: '',              // 메뉴 키워드 검색
@@ -2298,7 +2290,7 @@ function renderOverview(main){
           🍽️ 판매유형별 매출
           <span class="h-act">
             <span class="unit-tag">단위 · 원</span>
-            <span class="h-sub">매장 / 포장 / 배달</span>
+            <span class="h-sub">매장 / 포장</span>
           </span>
         </h3>
         <div style="display:flex;align-items:center;gap:16px;">
@@ -3161,7 +3153,7 @@ function renderDetailChannel(body){
   const totCnt = _CH.reduce((s,c)=>s+c.cnt,0);
   body.innerHTML = `
     <div class="banner-info" style="margin-bottom:14px;">
-      💡 <b>오늘(5/15) 기준</b> 주문 방식별 매출이에요. 매장·포장·포장 예약·배달 별로 건수와 금액을 확인할 수 있어요.
+      💡 <b>오늘(5/15) 기준</b> 주문 방식별 매출이에요. 매장·포장·포장 예약별로 건수와 금액을 확인할 수 있어요.
     </div>
     <div class="panel">
       <h3>주문 방식별 매출 <span class="h-sub">오늘 합계 ${fmt(totAmt)}원 · ${fmt(totCnt)}건</span></h3>
@@ -3169,7 +3161,7 @@ function renderDetailChannel(body){
         ${_CH.map(c=>`
           <div style="padding:16px;border-radius:12px;border:1.5px solid ${c.color}22;background:${c.color}08;">
             <div style="font-size:12px;font-weight:700;color:${c.color};margin-bottom:8px;">
-              ${{dine:'🏠',takeout:'🥡',reservation:'📅',delivery:'🛵'}[c.key]||'📦'} ${c.name}
+              ${{dine:'🏠',takeout:'🥡',reservation:'📅'}[c.key]||'📦'} ${c.name}
             </div>
             <div style="font-size:22px;font-weight:800;color:var(--ink);">${fmt(c.amt)}<span style="font-size:12px;color:var(--ink-3);font-weight:500;">원</span></div>
             <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">${fmt(c.cnt)}건 · 평균 ${fmt(c.avg)}원</div>
@@ -3365,7 +3357,7 @@ function renderOrders(main){
   else if (state.orderDateFilter==='custom') rows = rows.filter(o=>o.date>=state.customStart && o.date<=state.customEnd);
   // 'all' 인 경우 1년 초과 거래까지 모두 노출
 
-  // 채널 필터 (매장/포장/배달)
+  // 채널 필터 (매장/포장)
   if (state.orderChannelFilter!=='all') rows = rows.filter(o=>o.ch===state.orderChannelFilter);
 
   // 결제수단 필터 (1depth 기준 매칭 — 카드/카카오페이/네이버페이/토스페이/현금)
@@ -3529,7 +3521,6 @@ function renderOrders(main){
             <span class="chip ${d.channelFilter==='all'?'on':''}" onclick="state.orderFilterDraft.channelFilter='all';renderApp()">전체</span>
             <span class="chip ${d.channelFilter==='매장'?'on':''}" onclick="state.orderFilterDraft.channelFilter='매장';renderApp()">🏠 매장</span>
             <span class="chip ${d.channelFilter==='포장'?'on':''}" onclick="state.orderFilterDraft.channelFilter='포장';renderApp()">🥡 포장</span>
-            <span class="chip ${d.channelFilter==='배달'?'on':''}" onclick="state.orderFilterDraft.channelFilter='배달';renderApp()">🛵 배달</span>
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:12px;">
             <span class="field-label" style="padding-top:7px;">결제수단</span>
@@ -9461,7 +9452,7 @@ const REFUNDS = [
   { id:'RF-2026051402', orderId:'OD-2026051402', date:'2026-05-14', cust:'이**', amt:8600,  reason:'메뉴 누락',     status:'대기', detail:'크로아상 1개 누락' },
   { id:'RF-2026051301', orderId:'OD-2026051301', date:'2026-05-13', cust:'박**', amt:5500,  reason:'품질 불만',     status:'승인', detail:'치즈케이크 신선도 이슈' },
   { id:'RF-2026051201', orderId:'OD-2026051201', date:'2026-05-12', cust:'최**', amt:4500,  reason:'중복 결제',     status:'승인', detail:'결제 중 화면 멈춤으로 2회 결제됨' },
-  { id:'RF-2026051101', orderId:'OD-2026051101', date:'2026-05-11', cust:'정**', amt:7000,  reason:'배달 지연',     status:'거절', detail:'영수증 없이 환불 요청' },
+  { id:'RF-2026051101', orderId:'OD-2026051101', date:'2026-05-11', cust:'정**', amt:7000,  reason:'메뉴 불만족',   status:'거절', detail:'영수증 없이 환불 요청' },
 ];
 
 const ZONE_LIST = [
@@ -9633,8 +9624,8 @@ const STORE_INFO = {
 };
 
 // 매장 편의정보 — 버튼으로 고르는 프리셋 목록 + 아이콘
-const STORE_AMENITIES = ['주차장','단체석','포장','무선 인터넷','남성/여성 화장실 구분','배달','룸','국민지원금','지역화폐(지류형)','지역화폐(카드형)','제로페이','테라스','발렛파킹','반려동물 동반','유아용 의자'];
-const STORE_AMENITY_ICONS = {'주차장':'🅿️','단체석':'👥','포장':'🥡','무선 인터넷':'📶','남성/여성 화장실 구분':'🚻','배달':'🛵','룸':'🚪','국민지원금':'🎫','지역화폐(지류형)':'🧾','지역화폐(카드형)':'💳','제로페이':'📱','테라스':'🌿','발렛파킹':'🚗','반려동물 동반':'🐶','유아용 의자':'🪑'};
+const STORE_AMENITIES = ['주차장','단체석','포장','무선 인터넷','남성/여성 화장실 구분','룸','국민지원금','지역화폐(지류형)','지역화폐(카드형)','제로페이','테라스','발렛파킹','반려동물 동반','유아용 의자'];
+const STORE_AMENITY_ICONS = {'주차장':'🅿️','단체석':'👥','포장':'🥡','무선 인터넷':'📶','남성/여성 화장실 구분':'🚻','룸':'🚪','국민지원금':'🎫','지역화폐(지류형)':'🧾','지역화폐(카드형)':'💳','제로페이':'📱','테라스':'🌿','발렛파킹':'🚗','반려동물 동반':'🐶','유아용 의자':'🪑'};
 
 /* ============================================================
    주문 방식 설정 데이터

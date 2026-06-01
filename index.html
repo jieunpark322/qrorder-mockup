@@ -3148,6 +3148,63 @@ function renderDetailCategory(body){
   drawDonut('ch-cat-donut', filteredCat.map(c=>c.amt), filteredCat.map(c=>c.color), filteredCat.map(c=>c.name));
 }
 
+// 주문 방식별
+function renderDetailChannel(body){
+  const _CH = applyBhFields(CHANNEL, ['cnt','amt']);
+  const totAmt = _CH.reduce((s,c)=>s+c.amt,0);
+  const totCnt = _CH.reduce((s,c)=>s+c.cnt,0);
+  body.innerHTML = `
+    <div class="banner-info" style="margin-bottom:14px;">
+      💡 <b>오늘(5/15) 기준</b> 주문 방식별 매출이에요. 매장·포장·포장 예약·배달 별로 건수와 금액을 확인할 수 있어요.
+    </div>
+    <div class="panel">
+      <h3>주문 방식별 매출 <span class="h-sub">오늘 합계 ${fmt(totAmt)}원 · ${fmt(totCnt)}건</span></h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;">
+        ${_CH.map(c=>`
+          <div style="padding:16px;border-radius:12px;border:1.5px solid ${c.color}22;background:${c.color}08;">
+            <div style="font-size:12px;font-weight:700;color:${c.color};margin-bottom:8px;">
+              ${{dine:'🏠',takeout:'🥡',reservation:'📅',delivery:'🛵'}[c.key]||'📦'} ${c.name}
+            </div>
+            <div style="font-size:22px;font-weight:800;color:var(--ink);">${fmt(c.amt)}<span style="font-size:12px;color:var(--ink-3);font-weight:500;">원</span></div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">${fmt(c.cnt)}건 · 평균 ${fmt(c.avg)}원</div>
+            <div style="margin-top:8px;height:4px;background:var(--line-2);border-radius:2px;">
+              <div style="height:100%;width:${c.share}%;background:${c.color};border-radius:2px;"></div>
+            </div>
+            <div style="font-size:11px;color:var(--ink-4);margin-top:4px;">${c.share}%</div>
+          </div>
+        `).join('')}
+      </div>
+      <table class="t">
+        <thead><tr>
+          <th>주문 방식</th>
+          <th class="num">건수</th>
+          <th class="num">매출</th>
+          <th class="num">평균 객단가</th>
+          <th class="num">비중</th>
+        </tr></thead>
+        <tbody>
+          ${_CH.map(c=>`
+            <tr>
+              <td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c.color};margin-right:6px;"></span>${c.name}</td>
+              <td class="num">${fmt(c.cnt)}건</td>
+              <td class="num">${fmt(c.amt)}원</td>
+              <td class="num">${fmt(c.avg)}원</td>
+              <td class="num">${c.share}%</td>
+            </tr>
+          `).join('')}
+          <tr style="font-weight:700;background:var(--bg-2);">
+            <td>합계</td>
+            <td class="num">${fmt(totCnt)}건</td>
+            <td class="num">${fmt(totAmt)}원</td>
+            <td class="num">−</td>
+            <td class="num">100%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 // 결제수단별
 function renderDetailMethod(body){
   const _METHOD = applyBhFields(METHOD, ['cnt','amt']);
@@ -3519,8 +3576,8 @@ function renderOrders(main){
             const isCancelAll = o.status==='취소';
             const rowAttr = isCancelAll ? ' style="background:#fff7f7;"' : '';
             const idStyle = isCancelAll ? 'color:var(--red);font-weight:700;text-decoration:line-through;' : '';
-            const dateLabel = o.date.slice(5).replace('-','/');
-            const cancelDateLabel = o.cancelDate ? o.cancelDate.slice(5).replace('-','/') : dateLabel;
+            const dateLabel = o.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3');
+            const cancelDateLabel = o.cancelDate ? o.cancelDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3') : dateLabel;
             const cancelLine = isCancelAll && o.cancelTime
               ? `<div style="margin-top:4px;font-size:11px;font-weight:600;color:var(--red);white-space:nowrap;">↺ ${cancelDateLabel} ${o.cancelTime} 취소</div>`
               : '';
@@ -3833,10 +3890,10 @@ function renderStlList(main){
   const hasAdv = advFilters.length > 0;
 
   const rangeLabel = state.stlListQuickRange==='period' && state.stlListPeriodStart && state.stlListPeriodEnd
-    ? `${state.stlListPeriodStart.slice(5).replace('-','/')} ~ ${state.stlListPeriodEnd.slice(5).replace('-','/')}`
+    ? `${state.stlListPeriodStart.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')} ~ ${state.stlListPeriodEnd.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}`
     : state.stlListSpecificDate
-    ? `${state.stlListSpecificDate.slice(5).replace('-','/')}(${dailyList.find(r=>r[basisKey]===state.stlListSpecificDate)?.[state.stlListDateBasis==='approval'?'approvalDow':'settleDow'] || ''})`
-    : state.stlListQuickRange==='today'      ? `오늘 (${TODAY_DATE.slice(5).replace('-','/')})`
+    ? `${state.stlListSpecificDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}(${dailyList.find(r=>r[basisKey]===state.stlListSpecificDate)?.[state.stlListDateBasis==='approval'?'approvalDow':'settleDow'] || ''})`
+    : state.stlListQuickRange==='today'      ? `오늘 (${TODAY_DATE.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')})`
     : state.stlListQuickRange==='1w'         ? '최근 1주일'
     : state.stlListQuickRange==='1m'         ? '최근 1개월'
     : state.stlListQuickRange==='thismonth'  ? '이번 달 (5월)'
@@ -4982,7 +5039,7 @@ function openOrderDetail(o){
     : `<div class="r-line"><span>카드번호</span><div style="text-align:right;"><b style="font-variant-numeric:tabular-nums;">****-****-****-****</b><div style="font-size:11px;color:var(--amber);margin-top:2px;">🔒 1년 초과 마스킹</div></div></div>`) : '';
 
   const isCancelAll = o.status==='취소';
-  const cancelDateLabel = o.cancelDate ? o.cancelDate.slice(5).replace('-','/') : (o.date.slice(5).replace('-','/'));
+  const cancelDateLabel = o.cancelDate ? o.cancelDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3') : (o.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3'));
   const statusPill = `<span class="pill ${isCancelAll?'cancel':'done'}" style="margin-left:8px;font-size:11px;">${o.status}</span>`;
 
   const amountBlock = isCancelAll ? `
@@ -4998,7 +5055,7 @@ function openOrderDetail(o){
     <div class="modal-head">
       <div>
         <h3>주문 상세 — ${o.id} ${statusPill}</h3>
-        <div class="modal-sub">${o.date} ${o.time} · 영업일 ${o.date.slice(5).replace('-','/')} · ${o.channel}</div>
+        <div class="modal-sub">${o.date} ${o.time} · 영업일 ${o.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')} · ${o.channel}</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
@@ -6114,7 +6171,7 @@ function renderStaff(main){
                 <td style="color:var(--ink-3);font-size:12px;">${s.email||'<span style="color:var(--ink-4);">—</span>'}</td>
                 <td style="font-size:12px;color:var(--ink-2);">${usePeriod}</td>
                 <td><span class="pill ${s.enabled==='Y'?'done':'cancel'}" style="font-size:11px;">${s.enabled==='Y'?'사용 중':'사용 안 함'}</span></td>
-                <td style="color:var(--ink-3);font-size:12px;">${s.regDate.slice(5).replace('-','/')}</td>
+                <td style="color:var(--ink-3);font-size:12px;">${s.regDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</td>
                 <td>
                   <button class="btn-ghost" style="padding:5px 9px;font-size:11px;" onclick="openStaffEditModal(${s.id})">수정</button>
                   <button class="btn-ghost" style="padding:5px 9px;font-size:11px;color:var(--red);" onclick="deleteStaff(${s.id})">삭제</button>
@@ -9540,7 +9597,8 @@ const ORDER_CHANNELS = {
   notifications: ['kakao'],        // multi: call_name | kakao | display
   // 포장 설정
   takeoutDiscount: true,           // 포장 할인가 사용
-  waitMinutes: 20,                 // 포장 대기 시간 안내 (분)
+  waitMinMin: 15,                  // 포장 대기 시간 최소 (분)
+  waitMinMax: 25,                  // 포장 대기 시간 최대 (분)
   reservation: false,              // 포장 예약 — ON 시 사장님 수락 필요
   // 결제 정책 (매장 주문 활성 시)
   payment: 'scheduled',            // prepay | postpay | scheduled (시간대별)
@@ -9570,19 +9628,24 @@ const STAFF_CALLS = {
   ],
 };
 
-/* 직원 호출 최근 내역 — 더미 기준시각: 오늘 14:55:00 */
+/* 직원 호출 최근 내역 — 더미 기준시각: 오늘 2026-05-15 14:55:00 */
+/* 호출 데이터는 24시간 보관 후 자동 삭제 (calledDate 기준 오늘·어제만 표시) */
 const STAFF_CALL_NOW = '14:55:00';
+const STAFF_CALL_TODAY = '2026-05-15';
 const STAFF_CALL_HISTORY = [
-  // 진행 중 (completedAt = null) — 카운트가 살아 있어요
-  { id:201, table:'T05',  body:'물',       calledAt:'14:54:25', completedAt:null      },
-  { id:202, table:'T03',  body:'계산',     calledAt:'14:53:10', completedAt:null      },
-  // 처리 완료
-  { id:203, table:'T01',  body:'수저',     calledAt:'14:50:02', completedAt:'14:50:48' },
-  { id:204, table:'바01', body:'물',       calledAt:'14:43:11', completedAt:'14:44:50' },
-  { id:205, table:'T04',  body:'메뉴 추천', calledAt:'14:31:30', completedAt:'14:34:55' },
-  { id:206, table:'T02',  body:'계산',     calledAt:'14:18:08', completedAt:'14:18:42' },
-  { id:207, table:'T06',  body:'물',       calledAt:'14:02:55', completedAt:'14:04:33' },
-  { id:208, table:'바02', body:'수저',     calledAt:'13:48:20', completedAt:'13:49:10' },
+  // 진행 중 (completedAt = null)
+  { id:201, table:'T05',  body:'물',        calledDate:'2026-05-15', calledAt:'14:54:25', completedAt:null       },
+  { id:202, table:'T03',  body:'계산',      calledDate:'2026-05-15', calledAt:'14:53:10', completedAt:null       },
+  // 처리 완료 — 오늘
+  { id:203, table:'T01',  body:'수저',      calledDate:'2026-05-15', calledAt:'14:50:02', completedAt:'14:50:48' },
+  { id:204, table:'바01', body:'물',        calledDate:'2026-05-15', calledAt:'14:43:11', completedAt:'14:44:50' },
+  { id:205, table:'T04',  body:'메뉴 추천', calledDate:'2026-05-15', calledAt:'14:31:30', completedAt:'14:34:55' },
+  { id:206, table:'T02',  body:'계산',      calledDate:'2026-05-15', calledAt:'14:18:08', completedAt:'14:18:42' },
+  { id:207, table:'T06',  body:'물',        calledDate:'2026-05-15', calledAt:'14:02:55', completedAt:'14:04:33' },
+  { id:208, table:'바02', body:'수저',      calledDate:'2026-05-15', calledAt:'13:48:20', completedAt:'13:49:10' },
+  // 24시간 보관 범위 내 — 어제 기록 (자정 이후 자동 삭제 예정)
+  { id:209, table:'T03',  body:'물',        calledDate:'2026-05-14', calledAt:'23:41:05', completedAt:'23:42:00' },
+  { id:210, table:'T01',  body:'계산',      calledDate:'2026-05-14', calledAt:'22:58:30', completedAt:'23:00:12' },
 ];
 
 /* ============================================================
@@ -9826,7 +9889,7 @@ function renderRefund(main){
               <tr>
                 <td style="text-align:center;color:var(--ink-3);font-weight:600;">${i+1}</td>
                 <td style="font-family:ui-monospace,monospace;font-size:11px;color:var(--ink-2);">${r.id}</td>
-                <td>${r.date.slice(5).replace('-','/')}</td>
+                <td>${r.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</td>
                 <td style="font-family:ui-monospace,monospace;font-size:11px;color:var(--ink-2);">${r.orderId}</td>
                 <td>${r.cust}</td>
                 <td class="num"><b>${fmt(r.amt)}</b>원</td>
@@ -9988,7 +10051,7 @@ function renderTable(main){
         </div>
       `).join('')}
       <div style="padding:10px 16px;font-size:13px;color:var(--blue);cursor:pointer;font-weight:600;"
-        onclick="addZone()">+ 구역 추가</div>
+        onclick="addZone()" style="${ZONE_LIST.length>=10?'color:var(--ink-4);cursor:not-allowed;':''}">+ 구역 추가${ZONE_LIST.length>=10?' (최대 10개)':` (${ZONE_LIST.length}/10)`}</div>
       ${ZONE_LIST.length>1 ? `
       <div style="margin-left:auto;padding:10px 14px;font-size:12px;color:var(--red);cursor:pointer;"
         onclick="deleteZone(${zoneId})">현재 구역 삭제</div>` : ''}
@@ -10097,10 +10160,11 @@ function renameTable(id){
 }
 
 function addZone(){
+  if(ZONE_LIST.length >= 10){ alert('구역은 최대 10개까지 추가할 수 있어요.'); return; }
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-head">
-      <div><h3>구역 추가</h3><div class="modal-sub">새 구역 이름을 입력해요 (예: 2층, 테라스, 룸A)</div></div>
+      <div><h3>구역 추가</h3><div class="modal-sub">새 구역 이름을 입력해요 (예: 2층, 테라스, 룸A) · 현재 ${ZONE_LIST.length}/10</div></div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
     <div class="form-grid" style="margin-bottom:18px;">
@@ -10431,7 +10495,7 @@ function renderQR(main){
               <td><b>${r.qty}장</b></td>
               <td class="num"><b>${(r.totalPrice||0).toLocaleString()}</b><span style="color:var(--ink-3);font-size:11px;">원</span></td>
               <td style="color:var(--ink-2);font-size:12px;">${r.memo||'<span style="color:var(--ink-4);">—</span>'}</td>
-              <td style="color:var(--ink-3);">${r.reqDate.slice(5).replace('-','/')}</td>
+              <td style="color:var(--ink-3);">${r.reqDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</td>
               <td><span class="pill ${r.status==='완료'?'done':'partial'}">${r.status}</span></td>
             </tr>
           `).join('')}
@@ -10605,11 +10669,7 @@ function renderStore(main){
     </div>
 
     <div class="panel">
-      <h3>영업시간 <span class="h-sub">라스트오더·브레이크타임은 없으면 비워두세요</span>
-        <span class="h-act">
-          <button class="btn-ghost" onclick="alert('평일·주말 일괄 적용 (와이어프레임)')">📅 일괄 적용</button>
-        </span>
-      </h3>
+      <h3>영업시간 <span class="h-sub">라스트오더·브레이크타임은 없으면 비워두세요</span></h3>
       <table class="t" style="table-layout:fixed;">
         <colgroup>
           <col style="width:48px;"/>
@@ -11087,7 +11147,7 @@ function renderReviews(main){
                 <div>
                   <div style="font-size:14px;font-weight:800;">${r.cust}</div>
                   <div style="font-size:12px;color:var(--amber);font-weight:700;margin-top:2px;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-                  <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${r.date.slice(5).replace('-','/')}</div>
+                  <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${r.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</div>
                 </div>
               </div>
             </div>
@@ -11197,7 +11257,7 @@ function renderCS(host){
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
                 <span class="chip" style="font-size:11px;padding:3px 9px;cursor:default;background:var(--bg-2);color:var(--ink-2);">${c.type}</span>
                 <span class="pill ${c.status==='답변 완료'?'done':'pending'}" style="font-size:11px;">${c.status==='답변 완료'?'✓ 답변 완료':'⏳ 답변 대기'}</span>
-                <span style="font-size:11px;color:var(--ink-4);margin-left:auto;">${c.date.slice(5).replace('-','/')} 남김</span>
+                <span style="font-size:11px;color:var(--ink-4);margin-left:auto;">${c.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')} 남김</span>
               </div>
               <div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px;">${c.title}</div>
               <div style="font-size:13px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;">${c.body}</div>
@@ -11490,7 +11550,8 @@ function removeOrderSlot(i){ ORDER_CHANNELS.schedule.splice(i,1); renderApp(); }
 function updateOrderSlot(i,k,v){ ORDER_CHANNELS.schedule[i][k]=v; renderApp(); }
 function toggleOrderSlotPolicy(i){ ORDER_CHANNELS.schedule[i].policy = ORDER_CHANNELS.schedule[i].policy==='prepay'?'postpay':'prepay'; renderApp(); }
 function toggleOrderField(field){ ORDER_CHANNELS[field] = !ORDER_CHANNELS[field]; renderApp(); }
-function updateOrderWait(v){ ORDER_CHANNELS.waitMinutes = Number(v); renderApp(); }
+function updateOrderWaitMin(v){ ORDER_CHANNELS.waitMinMin = Math.max(1, Number(v)||0); }
+function updateOrderWaitMax(v){ ORDER_CHANNELS.waitMinMax = Math.max(1, Number(v)||0); }
 function saveOrderType(){
   const dineIn = ORDER_CHANNELS.mode==='both'||ORDER_CHANNELS.mode==='dine_in';
   if(dineIn && ORDER_CHANNELS.service==='self' && ORDER_CHANNELS.notifications.length===0){
@@ -11669,8 +11730,11 @@ function renderOrderType(main){
           </div>
           <div class="ot-row">
             <span class="lbl">대기 시간 안내</span>
-            <input type="range" min="5" max="70" step="5" value="${ch.waitMinutes}" oninput="updateOrderWait(this.value)" style="flex:1;max-width:300px;" />
-            <span style="font-size:14px;font-weight:800;min-width:50px;">${ch.waitMinutes}분</span>
+            <input class="input" type="number" min="1" max="999" value="${ch.waitMinMin||10}" oninput="updateOrderWaitMin(this.value)" style="width:72px;text-align:center;" />
+            <span style="font-size:13px;color:var(--ink-3);">분 ~</span>
+            <input class="input" type="number" min="1" max="999" value="${ch.waitMinMax||20}" oninput="updateOrderWaitMax(this.value)" style="width:72px;text-align:center;" />
+            <span style="font-size:13px;color:var(--ink-3);">분</span>
+            <span style="font-size:12px;color:var(--ink-4);">손님 화면에 "${ch.waitMinMin||10}분 ~ ${ch.waitMinMax||20}분" 으로 표시돼요</span>
           </div>
           <div class="ot-row">
             <span class="lbl">포장 예약</span>
@@ -11753,9 +11817,16 @@ function renderStaffCall(main){
   const body = document.getElementById('staff-call-body');
 
   if (tab === 'history') {
+    // 24시간 보관: 오늘 + 어제(자정 이후 기준) 데이터만 표시
+    const cutoffDate = '2026-05-14'; // STAFF_CALL_TODAY 기준 전날
+    const filtered = STAFF_CALL_HISTORY.filter(r => !r.calledDate || r.calledDate >= cutoffDate);
     // 호출 인입 순서(오래된 순)로 번호 부여 → 가장 먼저 들어온 호출이 #1
-    const withNo = STAFF_CALL_HISTORY.slice()
-      .sort((a,b)=>scHmsToSec(a.calledAt)-scHmsToSec(b.calledAt))
+    const withNo = filtered.slice()
+      .sort((a,b)=>{
+        const da = (a.calledDate||STAFF_CALL_TODAY)+a.calledAt;
+        const db = (b.calledDate||STAFF_CALL_TODAY)+b.calledAt;
+        return da.localeCompare(db);
+      })
       .map((r,i)=>Object.assign({}, r, { _no:i+1 }));
 
     const sortState = state.staffCallHistSort || { key:'no', dir:'desc' };
@@ -11777,8 +11848,8 @@ function renderStaffCall(main){
 
     body.innerHTML = `
       <div class="panel">
-        <h3>오늘 들어온 호출
-          <span class="h-sub">총 ${rows.length}건${pendingCnt?` · 처리 대기 ${pendingCnt}건`:''} · 당일 데이터만 보관해요</span>
+        <h3>최근 호출 내역
+          <span class="h-sub">총 ${rows.length}건${pendingCnt?` · 처리 대기 ${pendingCnt}건`:''} · 24시간 보관 후 자동 삭제</span>
         </h3>
         ${rows.length === 0 ? `
           <div style="padding:40px 20px;text-align:center;color:var(--ink-3);font-size:13px;">
@@ -11798,7 +11869,10 @@ function renderStaffCall(main){
               return `
                 <div class="sc-hist-row ${isPending?'pending':''}">
                   <span class="sc-hist-no">#${r._no}</span>
-                  <span class="sc-hist-time">${scHmToShort(r.calledAt)}</span>
+                  <span class="sc-hist-time">
+                    ${r.calledDate && r.calledDate !== STAFF_CALL_TODAY ? `<span style="font-size:10px;color:var(--ink-4);display:block;line-height:1.2;">${r.calledDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</span>` : ''}
+                    ${scHmToShort(r.calledAt)}
+                  </span>
                   <span class="sc-hist-table-cell"><span class="sc-hist-table">${r.table}</span></span>
                   <span class="sc-hist-msg">${r.body}</span>
                   <div class="sc-hist-status">
@@ -11809,7 +11883,7 @@ function renderStaffCall(main){
                       `
                       : `
                         <span style="font-size:12px;color:var(--ink-4);">✓ 처리 완료 <span style="color:var(--ink-3);font-variant-numeric:tabular-nums;margin-left:4px;">· ${scHmToShort(r.completedAt)}</span></span>
-                        <button class="btn-ghost" style="padding:4px 9px;font-size:11px;color:var(--ink-3);" onclick="scUndoComplete(${r.id})" title="실수로 눌렀다면 되돌릴 수 있어요">↺ 되돌리기</button>
+                        <button class="btn-ghost" style="padding:4px 9px;font-size:11px;color:var(--ink-3);" onclick="scUndoComplete(${r.id})" title="실수로 눌렀다면 완료를 취소할 수 있어요">↺ 완료 취소</button>
                       `}
                   </div>
                 </div>

@@ -7360,7 +7360,7 @@ function deleteMenu(id){
   const warnings = cleanupAfterMenuDelete(m.id, m.code);
   const i = MENUS.findIndex(x=>x.id===id);
   if (i>=0) MENUS.splice(i,1);
-  if(warnings.length>0){ alert(`삭제했어요. 다음 세트의 자리가 비었으니 새 후보를 추가해 주세요:\n• ${warnings.join('\n• ')}`); }
+  if(warnings.length>0){ alert(`삭제했어요. 다음 세트의 구성이 비었으니 새 후보를 추가해 주세요:\n• ${warnings.join('\n• ')}`); }
   renderApp();
   showToast(`<span class="ic">🗑️</span> '${m.name}' 메뉴를 삭제했어요`, 'ok');
 }
@@ -7719,20 +7719,20 @@ function renderSet(main){
   // 각 자리 카드 HTML
   const slotsHtml = f.slots.length===0 ? `
     <div style="padding:32px 16px;text-align:center;background:var(--bg-2);border-radius:12px;color:var(--ink-3);font-size:13px;line-height:1.65;">
-      🪑 아직 자리가 없어요.<br/>
-      <b style="color:var(--ink-2);">아래 + 자리 추가</b>를 눌러 손님이 골라야 할 그룹을 만들어 주세요.<br/>
+      🗂️ 아직 구성이 없어요.<br/>
+      <b style="color:var(--ink-2);">아래 + 구성 추가</b>를 눌러 손님이 골라야 할 그룹을 만들어 주세요.<br/>
       <span style="font-size:11px;">예: 음료 1개 선택 / 브레드 1개 선택</span>
     </div>
   ` : f.slots.map((sl, si)=>`
     <div style="border:2px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:#fff;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <span style="font-size:14px;font-weight:800;color:var(--blue);background:var(--blue-50);padding:4px 10px;border-radius:8px;">자리 ${si+1}</span>
-        <input class="input" placeholder="자리 이름 (예: 음료 선택)" value="${(sl.name||'').replace(/"/g,'&quot;')}" oninput="state.setForm.slots[${si}].name=this.value" style="flex:1;font-size:13px;font-weight:700;" />
+        <span style="font-size:14px;font-weight:800;color:var(--blue);background:var(--blue-50);padding:4px 10px;border-radius:8px;">구성 ${si+1}</span>
+        <input class="input" placeholder="구성 이름 (예: 음료 선택)" value="${(sl.name||'').replace(/"/g,'&quot;')}" oninput="state.setForm.slots[${si}].name=this.value" style="flex:1;font-size:13px;font-weight:700;" />
         <span style="font-size:11px;color:var(--ink-4);">1개 선택</span>
-        <button class="btn-ghost" style="padding:5px 8px;font-size:11px;color:var(--red);" onclick="removeSetSlot(${si})" title="자리 삭제">✕ 자리 삭제</button>
+        <button class="btn-ghost" style="padding:5px 8px;font-size:11px;color:var(--red);" onclick="removeSetSlot(${si})" title="구성 삭제">✕ 구성 삭제</button>
       </div>
       ${sl.candidates.length===0 ? `
-        <div style="padding:16px;text-align:center;background:var(--bg-2);border-radius:8px;color:var(--ink-3);font-size:12px;">아래 <b style="color:var(--ink-2);">+ 메뉴 추가</b>를 눌러 이 자리의 후보 메뉴를 골라 주세요.</div>
+        <div style="padding:16px;text-align:center;background:var(--bg-2);border-radius:8px;color:var(--ink-3);font-size:12px;">아래 <b style="color:var(--ink-2);">+ 메뉴 추가</b>를 눌러 이 구성의 후보 메뉴를 골라 주세요.</div>
       ` : `
         <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
           ${sl.candidates.map((c, ci)=>`
@@ -7770,7 +7770,7 @@ function renderSet(main){
     <div class="panel">
       <h3>
         <span>세트 메뉴 구성</span>
-        <span class="h-sub">자리 단위로 손님이 고를 후보를 정해요 (예: 음료 1개 + 브레드 1개)</span>
+        <span class="h-sub">구성 단위로 손님이 고를 후보를 정해요 (예: 음료 1개 + 브레드 1개)</span>
       </h3>
 
       <div class="form-grid" style="margin-bottom:14px;">
@@ -7781,7 +7781,7 @@ function renderSet(main){
         <div class="form-row">
           <label>세트 기본 가격 *</label>
           <input class="input" type="number" placeholder="예) 7000" value="${f.basePrice||''}" oninput="state.setForm.basePrice=Number(this.value)||0" onchange="renderApp()" />
-          <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">각 자리의 기본 메뉴를 골랐을 때 가격이에요</div>
+          <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">각 구성의 기본 메뉴를 골랐을 때 가격이에요</div>
         </div>
       </div>
       <div class="form-row" style="margin-bottom:14px;">
@@ -7789,9 +7789,9 @@ function renderSet(main){
         <textarea placeholder="예) 음료 + 브레드 · 오전 11시까지" oninput="state.setForm.desc=this.value">${(f.desc||'').replace(/</g,'&lt;')}</textarea>
       </div>
 
-      <div style="margin-bottom:8px;font-size:13px;font-weight:800;color:var(--ink-2);">🪑 손님이 골라야 할 자리</div>
+      <div style="margin-bottom:8px;font-size:13px;font-weight:800;color:var(--ink-2);">🗂️ 손님이 골라야 할 구성</div>
       ${slotsHtml}
-      <button class="btn-ghost" style="width:100%;padding:12px;font-size:13px;font-weight:800;border:2px dashed var(--blue-100);color:var(--blue);margin-top:6px;" onclick="addSetSlot()">+ 자리 추가</button>
+      <button class="btn-ghost" style="width:100%;padding:12px;font-size:13px;font-weight:800;border:2px dashed var(--blue-100);color:var(--blue);margin-top:6px;" onclick="addSetSlot()">+ 구성 추가</button>
 
       <!-- 가격 미리보기 -->
       ${f.slots.length>0 ? `
@@ -7799,12 +7799,12 @@ function renderSet(main){
           <div>
             <div style="font-size:11px;color:#15803d;font-weight:700;margin-bottom:4px;">가장 싸게</div>
             <div style="font-size:22px;font-weight:800;color:#15803d;">${fmt(range.min)}<span style="font-size:12px;font-weight:600;color:var(--ink-3);margin-left:2px;">원</span></div>
-            <div style="font-size:10px;color:var(--ink-4);margin-top:2px;">모든 자리에서 추가 금액 ⌄ 최소</div>
+            <div style="font-size:10px;color:var(--ink-4);margin-top:2px;">모든 구성에서 추가 금액 ⌄ 최소</div>
           </div>
           <div>
             <div style="font-size:11px;color:#9a3412;font-weight:700;margin-bottom:4px;">가장 비싸게</div>
             <div style="font-size:22px;font-weight:800;color:#9a3412;">${fmt(range.max)}<span style="font-size:12px;font-weight:600;color:var(--ink-3);margin-left:2px;">원</span></div>
-            <div style="font-size:10px;color:var(--ink-4);margin-top:2px;">모든 자리에서 추가 금액 ⌃ 최대</div>
+            <div style="font-size:10px;color:var(--ink-4);margin-top:2px;">모든 구성에서 추가 금액 ⌃ 최대</div>
           </div>
         </div>
       ` : ''}
@@ -7817,7 +7817,7 @@ function renderSet(main){
       </div>
 
       <div class="hint" style="margin-top:10px;font-size:12px;color:var(--ink-3);line-height:1.6;">
-        💡 자리마다 후보 메뉴를 여러 개 추가하면 손님이 한 가지를 골라요. <b>기본 메뉴(⭐)</b>는 자리당 한 개만 지정할 수 있고, 추가 금액 0원이 자연스러워요. 다른 후보엔 차액을 (+)로 적어 주세요.
+        💡 구성마다 후보 메뉴를 여러 개 추가하면 손님이 한 가지를 골라요. <b>기본 메뉴(⭐)</b>는 구성당 한 개만 지정할 수 있고, 추가 금액 0원이 자연스러워요. 다른 후보엔 차액을 (+)로 적어 주세요.
       </div>
     </div>
 
@@ -7838,7 +7838,7 @@ function renderSet(main){
             <th style="width:50px;">순서</th>
             <th style="width:84px;">상품코드</th>
             <th style="width:160px;">세트명</th>
-            <th>자리 구성</th>
+            <th>구성 항목</th>
             <th class="num" style="width:160px;">가격</th>
             <th style="width:120px;">판매 시간</th>
             <th style="width:130px;"></th>
@@ -7861,7 +7861,7 @@ function renderSet(main){
                 ${dragHandleTd('SETS', idx)}
                 <td style="font-family:ui-monospace,'SF Mono',monospace;color:var(--ink-2);font-size:12px;">${s.code}</td>
                 <td><b>${s.name}</b>${s.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${s.desc}</div>`:''}${dcTxt?`<div style="font-size:10px;color:var(--blue);font-weight:700;margin-top:3px;">🔥 ${dcTxt}</div>`:''}</td>
-                <td>${slotList||'<span style="color:var(--ink-4);font-size:11px;">자리 없음</span>'}</td>
+                <td>${slotList||'<span style="color:var(--ink-4);font-size:11px;">구성 없음</span>'}</td>
                 <td class="num"><b style="color:var(--blue);">${fmt(r2.min)}</b>${r2.min!==r2.max?`<span style="color:var(--ink-3);font-size:11px;"> ~ ${fmt(r2.max)}</span>`:''}<span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span></td>
                 <td><span style="font-size:11px;color:${s.schedule&&s.schedule.enabled?'var(--blue)':'var(--ink-3)'};font-weight:${s.schedule&&s.schedule.enabled?700:400};">${s.schedule&&s.schedule.enabled?'🕒 ':''}${schTxt}</span></td>
                 <td>
@@ -7885,7 +7885,7 @@ function addSetSlot(){
   renderApp();
 }
 function removeSetSlot(si){
-  if(!confirm(`자리 ${si+1}을(를) 삭제할까요? 안의 후보 메뉴도 함께 사라져요.`)) return;
+  if(!confirm(`구성 ${si+1}을(를) 삭제할까요? 안의 후보 메뉴도 함께 사라져요.`)) return;
   state.setForm.slots.splice(si, 1); renderApp();
 }
 // 후보 메뉴 선택 모달 — 자리별 진입
@@ -7896,9 +7896,9 @@ function openSetCandidatePicker(si){
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-box" style="max-width:520px;">
-      <div class="modal-head"><b>자리 ${si+1} — 후보 메뉴 추가</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-head"><b>구성 ${si+1} — 후보 메뉴 추가</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
       <div class="modal-body" style="padding:18px 20px;">
-        <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px;line-height:1.55;">손님이 이 자리에서 고를 수 있는 메뉴를 골라 주세요. 이미 추가한 메뉴는 회색으로 표시돼요.</div>
+        <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px;line-height:1.55;">손님이 이 구성에서 고를 수 있는 메뉴를 골라 주세요. 이미 추가한 메뉴는 회색으로 표시돼요.</div>
         <div style="display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto;">
           ${MENUS.map(m=>{
             const used = usedCodes.includes(m.code);
@@ -7951,10 +7951,10 @@ function saveSet(){
   const f = state.setForm;
   if (!f.name){ alert('세트명을 입력해 주세요.'); return; }
   if (!(f.basePrice>0)){ alert('세트 기본 가격을 입력해 주세요.'); return; }
-  if (f.slots.length===0){ alert('자리를 1개 이상 추가해 주세요.'); return; }
+  if (f.slots.length===0){ alert('구성을 1개 이상 추가해 주세요.'); return; }
   for(const sl of f.slots){
-    if(!sl.name){ alert('모든 자리에 이름을 적어 주세요.'); return; }
-    if(sl.candidates.length===0){ alert(`'${sl.name}' 자리에 후보 메뉴를 1개 이상 추가해 주세요.`); return; }
+    if(!sl.name){ alert('모든 구성에 이름을 적어 주세요.'); return; }
+    if(sl.candidates.length===0){ alert(`'${sl.name}' 구성에 후보 메뉴를 1개 이상 추가해 주세요.`); return; }
   }
   const nextId = (SETS.reduce((m,s)=>Math.max(m,s.id),0))+1;
   SETS.push({
@@ -8459,7 +8459,7 @@ function bulkDeleteMenus(){
   });
   const removedCount = ids.length;
   state.menuSel.clear();
-  if(allWarnings.length>0){ alert(`삭제했어요. 다음 세트 자리가 비었으니 새 후보를 추가해 주세요:\n• ${[...new Set(allWarnings)].join('\n• ')}`); }
+  if(allWarnings.length>0){ alert(`삭제했어요. 다음 세트 구성이 비었으니 새 후보를 추가해 주세요:\n• ${[...new Set(allWarnings)].join('\n• ')}`); }
   renderApp();
   showToast(`<span class="ic">🗑️</span> 메뉴 ${removedCount}개를 삭제했어요`, 'ok');
 }

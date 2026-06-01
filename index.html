@@ -1487,6 +1487,10 @@ const state = {
   staffCallHistSort: { key:'no', dir:'desc' },
   // 우리 매장 리뷰 필터
   reviewFilter: 'all',              // all | wait | done | star5 | low (3점 이하)
+  reviewEnabled: true,              // 리뷰 기능 사용 여부 — 희망 매장만 (상단 토글)
+  reviewRange: 'all',               // 리뷰 조회 기간 — all | 7d | 30d | thismonth | custom
+  reviewStart: '',                  // 직접 기간 시작
+  reviewEnd: '',                    // 직접 기간 종료
   // 직원 계정 관리 검색·필터
   staffSearch: '',
   staffGroupFilter: 'all',          // all | groupId
@@ -9394,11 +9398,30 @@ const MEMBERSHIP = {
 };
 
 const REVIEWS = [
-  { id:1, cust:'홍**', date:'2026-05-15', rating:5, body:'분위기가 너무 좋고 커피도 맛있어요. 또 올게요!',   reply:'',                       photo:'☕' },
-  { id:2, cust:'김**', date:'2026-05-14', rating:4, body:'크로아상이 정말 신선하네요. 다만 카운터 줄이 좀…', reply:'',                       photo:'🥐' },
-  { id:3, cust:'이**', date:'2026-05-13', rating:5, body:'바닐라라떼 진짜 맛있어요!',                          reply:'좋게 봐주셔서 감사해요 :)', photo:'🥤' },
-  { id:4, cust:'박**', date:'2026-05-12', rating:3, body:'치즈케이크가 평소보다 덜 신선했어요.',              reply:'',                       photo:'🍰' },
-  { id:5, cust:'정**', date:'2026-05-11', rating:5, body:'사장님이 친절하세요!',                                reply:'감사합니다 :)',           photo:'' },
+  { id:1,  cust:'홍**', date:'2026-05-15', rating:5, body:'분위기가 너무 좋고 커피도 맛있어요. 또 올게요!',     reply:'',                          photo:'☕' },
+  { id:2,  cust:'김**', date:'2026-05-14', rating:4, body:'크로아상이 정말 신선하네요. 다만 카운터 줄이 좀…',   reply:'',                          photo:'🥐' },
+  { id:3,  cust:'이**', date:'2026-05-13', rating:5, body:'바닐라라떼 진짜 맛있어요!',                            reply:'좋게 봐주셔서 감사해요 :)',  photo:'🥤' },
+  { id:4,  cust:'박**', date:'2026-05-12', rating:3, body:'치즈케이크가 평소보다 덜 신선했어요.',                reply:'',                          photo:'🍰' },
+  { id:5,  cust:'정**', date:'2026-05-11', rating:5, body:'사장님이 친절하세요!',                                  reply:'감사합니다 :)',              photo:'' },
+  { id:6,  cust:'최**', date:'2026-05-09', rating:5, body:'아이스 아메리카노 시원하고 좋아요.',                  reply:'감사합니다!',                photo:'☕' },
+  { id:7,  cust:'강**', date:'2026-05-06', rating:4, body:'디저트 종류가 더 많았으면 좋겠어요.',                reply:'',                          photo:'🍰' },
+  { id:8,  cust:'조**', date:'2026-05-02', rating:5, body:'주말인데 자리도 넉넉하고 좋네요.',                    reply:'또 들러 주세요 :)',          photo:'' },
+  { id:9,  cust:'윤**', date:'2026-04-28', rating:2, body:'주문이 평소보다 늦게 나왔어요.',                      reply:'불편을 드려 죄송해요. 피크타임 인력을 보강했어요.', photo:'' },
+  { id:10, cust:'장**', date:'2026-04-21', rating:5, body:'라떼 아트가 예뻐요.',                                  reply:'',                          photo:'🥛' },
+  { id:11, cust:'임**', date:'2026-04-14', rating:4, body:'사장님이 친절하셔서 기분 좋게 마시고 가요.',          reply:'감사합니다 :)',              photo:'' },
+  { id:12, cust:'한**', date:'2026-04-05', rating:5, body:'케이크가 촉촉하고 달지 않아 좋아요.',                reply:'',                          photo:'🍰' },
+  { id:13, cust:'오**', date:'2026-03-30', rating:3, body:'음악 소리가 조금 컸어요.',                            reply:'의견 감사해요. 볼륨을 조절했어요.', photo:'' },
+  { id:14, cust:'서**', date:'2026-03-22', rating:5, body:'분위기 최고예요. 데이트 코스로 딱이에요.',            reply:'',                          photo:'' },
+  { id:15, cust:'신**', date:'2026-03-15', rating:4, body:'원두 향이 정말 좋네요.',                              reply:'감사합니다!',                photo:'☕' },
+  { id:16, cust:'권**', date:'2026-03-03', rating:5, body:'포장도 꼼꼼하게 해 주세요.',                          reply:'',                          photo:'🥡' },
+  { id:17, cust:'황**', date:'2026-02-24', rating:1, body:'음료가 미지근하게 나왔어요.',                          reply:'정말 죄송합니다. 다음 방문 시 음료 한 잔 서비스로 드릴게요.', photo:'' },
+  { id:18, cust:'안**', date:'2026-02-14', rating:5, body:'발렌타인데이에 분위기가 너무 좋았어요.',              reply:'',                          photo:'' },
+  { id:19, cust:'송**', date:'2026-02-03', rating:4, body:'조용해서 작업하기 좋아요.',                          reply:'',                          photo:'💻' },
+  { id:20, cust:'전**', date:'2026-01-27', rating:5, body:'겨울 신메뉴 맛있어요.',                                reply:'감사합니다 :)',              photo:'' },
+  { id:21, cust:'문**', date:'2026-01-18', rating:4, body:'따뜻한 라떼가 일품이에요.',                          reply:'',                          photo:'🥛' },
+  { id:22, cust:'배**', date:'2026-01-11', rating:5, body:'새해 첫 방문인데 친절하셨어요.',                      reply:'',                          photo:'' },
+  { id:23, cust:'노**', date:'2026-01-05', rating:3, body:'베이커리가 일찍 품절돼서 아쉬워요.',                reply:'아침 물량을 늘렸어요. 알려 주셔서 감사해요.', photo:'🥐' },
+  { id:24, cust:'류**', date:'2026-01-02', rating:5, body:'새해 복 많이 받으세요! 커피 최고예요.',              reply:'새해 복 많이 받으세요 :)',    photo:'☕' },
 ];
 
 // 서비스 관련 문의 — 사장님이 소프트먼트에 남긴 문의 (사장님 입장)
@@ -10893,23 +10916,79 @@ function renameMembershipTier(idx){
 /* ============================================================
    리뷰
    ============================================================ */
+function toggleReviewEnabled(){ state.reviewEnabled = !(state.reviewEnabled !== false); renderApp(); }
+function setReviewRange(r){
+  state.reviewRange = r;
+  if(r==='custom'){ if(!state.reviewStart) state.reviewStart='2026-01-01'; if(!state.reviewEnd) state.reviewEnd='2026-05-15'; }
+  renderApp();
+}
 function renderReviews(main){
-  const avg = REVIEWS.length ? (REVIEWS.reduce((s,r)=>s+r.rating,0)/REVIEWS.length).toFixed(1) : 0;
-  const totalCnt = REVIEWS.length;
-  const waitCnt  = REVIEWS.filter(r=>!r.reply).length;
-  const doneCnt  = REVIEWS.filter(r=>r.reply).length;
-  const star5Cnt = REVIEWS.filter(r=>r.rating===5).length;
-  const lowCnt   = REVIEWS.filter(r=>r.rating<=3).length;
+  const enabled = state.reviewEnabled !== false;
+  const toggleCard = `
+    <div class="panel" style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;">
+      <div>
+        <div style="font-size:15px;font-weight:800;">⭐ 손님 리뷰 받기</div>
+        <div style="font-size:12px;color:var(--ink-3);margin-top:4px;line-height:1.5;">켜면 손님이 주문 후 리뷰를 남기고, 사장님이 여기서 확인하고 답변할 수 있어요. 원치 않으면 꺼 둘 수 있어요.</div>
+      </div>
+      <label class="toggle-switch ${enabled?'on':''}" onclick="toggleReviewEnabled()" style="flex-shrink:0;"><div class="sw"></div><span>${enabled?'사용 중':'사용 안 함'}</span></label>
+    </div>`;
 
-  // 필터 적용
+  if(!enabled){
+    main.innerHTML = `
+      <div class="crumb">마케팅 · CRM › 우리 매장 리뷰</div>
+      <div class="toolbar"><div><h2>우리 매장 리뷰</h2><div class="page-sub">손님이 남긴 리뷰를 확인하고 답변을 등록해요.</div></div></div>
+      ${toggleCard}
+      <div class="panel" style="text-align:center;padding:46px 20px;">
+        <div style="font-size:38px;margin-bottom:12px;">💤</div>
+        <div style="font-size:15px;font-weight:700;color:var(--ink);">리뷰 기능이 꺼져 있어요</div>
+        <div style="font-size:12px;color:var(--ink-3);margin-top:8px;line-height:1.6;">위 <b style="color:var(--ink-2);">손님 리뷰 받기</b>를 켜면<br/>손님이 리뷰를 남기고, 여기서 한곳에 모아 확인할 수 있어요.</div>
+      </div>`;
+    return;
+  }
+
+  // 조회 기간 필터
+  const range = state.reviewRange || 'all';
+  const cut = (n)=>{ const d=new Date(2026,4,15); d.setDate(d.getDate()-n); return toISODate(d); };
+  let dated = REVIEWS.slice();
+  if(range==='7d')             dated = dated.filter(r=>r.date >= cut(6));
+  else if(range==='30d')       dated = dated.filter(r=>r.date >= cut(29));
+  else if(range==='thismonth') dated = dated.filter(r=>r.date.startsWith('2026-05'));
+  else if(range==='custom'){
+    if(state.reviewStart) dated = dated.filter(r=>r.date >= state.reviewStart);
+    if(state.reviewEnd)   dated = dated.filter(r=>r.date <= state.reviewEnd);
+  }
+
+  const avg = dated.length ? (dated.reduce((s,r)=>s+r.rating,0)/dated.length).toFixed(1) : '–';
+  const totalCnt = dated.length;
+  const waitCnt  = dated.filter(r=>!r.reply).length;
+  const doneCnt  = dated.filter(r=>r.reply).length;
+  const star5Cnt = dated.filter(r=>r.rating===5).length;
+  const lowCnt   = dated.filter(r=>r.rating<=3).length;
+
+  // 상태 필터
   const f = state.reviewFilter || 'all';
-  let rows = REVIEWS;
+  let rows = dated;
   if(f==='wait')  rows = rows.filter(r=>!r.reply);
   if(f==='done')  rows = rows.filter(r=>r.reply);
   if(f==='star5') rows = rows.filter(r=>r.rating===5);
   if(f==='low')   rows = rows.filter(r=>r.rating<=3);
 
   const filterLabel = {all:'전체',wait:'답변 대기',done:'답변 완료',star5:'⭐ 5점',low:'⚠️ 3점 이하'}[f];
+
+  const RNG = [['all','전체'],['7d','최근 7일'],['30d','최근 30일'],['thismonth','이번 달'],['custom','직접 선택']];
+  const rangeChips = RNG.map(([k,l])=>`<span class="chip ${range===k?'on':''}" onclick="setReviewRange('${k}')">${l}</span>`).join('');
+  const periodBar = `
+    <div class="panel" style="margin-bottom:14px;padding:13px 18px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:700;color:var(--ink-2);margin-right:2px;">📅 조회 기간</span>
+        ${rangeChips}
+        ${range==='custom'?`<span style="display:inline-flex;align-items:center;gap:6px;margin-left:4px;">
+          <input class="input" type="date" value="${state.reviewStart||'2026-01-01'}" onchange="state.reviewStart=this.value;renderApp()" style="padding:6px 10px;font-size:12px;width:148px;" />
+          <span style="color:var(--ink-3);">~</span>
+          <input class="input" type="date" value="${state.reviewEnd||'2026-05-15'}" onchange="state.reviewEnd=this.value;renderApp()" style="padding:6px 10px;font-size:12px;width:148px;" />
+        </span>`:''}
+      </div>
+    </div>`;
 
   main.innerHTML = `
     <div class="crumb">마케팅 · CRM › 우리 매장 리뷰</div>
@@ -10923,6 +11002,9 @@ function renderReviews(main){
         <div style="font-size:22px;font-weight:800;color:#f59e0b;line-height:1;">⭐ ${avg}</div>
       </div>
     </div>
+
+    ${toggleCard}
+    ${periodBar}
 
     <!-- 클릭형 KPI 카드 필터 -->
     <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
@@ -10954,11 +11036,11 @@ function renderReviews(main){
       </h3>
       ${rows.length===0 ? `
         <div style="padding:40px 20px;text-align:center;background:var(--bg-2);border-radius:12px;">
-          <div style="font-size:36px;margin-bottom:10px;">${f==='wait'?'✅':f==='low'?'😊':'💬'}</div>
+          <div style="font-size:36px;margin-bottom:10px;">${totalCnt===0?'🗓️':f==='wait'?'✅':f==='low'?'😊':'💬'}</div>
           <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;">
-            ${f==='wait'?'답변 대기 중인 리뷰가 없어요':f==='low'?'3점 이하 리뷰가 없어요':'해당 조건의 리뷰가 없어요'}
+            ${totalCnt===0?'이 기간에 등록된 리뷰가 없어요':f==='wait'?'답변 대기 중인 리뷰가 없어요':f==='low'?'3점 이하 리뷰가 없어요':'해당 조건의 리뷰가 없어요'}
           </div>
-          <div style="font-size:12px;color:var(--ink-3);">${f==='wait'?'모든 리뷰에 답변을 남기셨어요. 수고하셨어요!':f==='low'?'손님 만족도가 좋아요!':'다른 필터를 눌러 보세요.'}</div>
+          <div style="font-size:12px;color:var(--ink-3);">${totalCnt===0?'조회 기간을 바꿔 보세요.':f==='wait'?'모든 리뷰에 답변을 남기셨어요. 수고하셨어요!':f==='low'?'손님 만족도가 좋아요!':'다른 필터를 눌러 보세요.'}</div>
         </div>
       ` : `
       <div>

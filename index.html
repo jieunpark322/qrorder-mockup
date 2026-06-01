@@ -487,6 +487,17 @@
   .selected-method:hover{border-color:var(--blue);background:linear-gradient(135deg,#dfecff,#eaf4ff);}
   .selected-method .check{width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
 
+  /* 알람 스타일 운영 시간 슬롯 */
+  .schedule-slot{background:#fff;border:2px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:12px;transition:border-color .15s;}
+  .schedule-slot:hover{border-color:var(--blue-100);}
+  .day-chip{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;user-select:none;border:2px solid var(--line);background:#fff;color:var(--ink-3);transition:all .15s;flex-shrink:0;}
+  .day-chip.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(49,130,246,.3);}
+  .day-chip:hover:not(.on){border-color:var(--blue);color:var(--blue);}
+  .slot-time-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .slot-time-label{font-size:11px;font-weight:700;color:var(--ink-3);}
+  .slot-time-input{padding:10px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:22px;font-weight:800;font-family:ui-monospace,monospace;color:var(--ink);background:#fff;width:110px;text-align:center;letter-spacing:.04em;}
+  .slot-time-input:focus{outline:none;border-color:var(--blue);}
+
   /* Receipt */
   .receipt{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:16px;font-size:12px;}
   .receipt .r-line{display:flex;justify-content:space-between;padding:4px 0;color:var(--ink-2);}
@@ -9780,6 +9791,11 @@ const STORE_INFO = {
     { dow:'토', open:'10:00', close:'22:00', lastOrder:'21:30', breakS:'',      breakE:'',      off:false },
     { dow:'일', open:'10:00', close:'21:00', lastOrder:'20:30', breakS:'',      breakE:'',      off:false },
   ],
+  // 운영 시간 슬롯 — 알람 스타일 (여러 요일 묶어서 관리)
+  scheduleSlots:[
+    { id:1, days:['월','화','수','목','금'], open:'09:00', close:'22:00', lastOrder:'21:30' },
+    { id:2, days:['토','일'],               open:'10:00', close:'22:00', lastOrder:'20:30' },
+  ],
   holidays:['2026-01-01 (신정)', '2026-05-05 (어린이날)'],
 };
 
@@ -11011,36 +11027,44 @@ function renderStore(main){
     </div>
 
     <div class="panel">
-      <h3>가게 운영 시간 <span class="h-sub">라스트오더는 없으면 비워두세요</span></h3>
-      <table class="t" style="table-layout:fixed;">
-        <colgroup>
-          <col style="width:48px;"/>
-          <col style="width:96px;"/>
-          <col style="width:96px;"/>
-          <col style="width:100px;"/>
-          <col/>
-        </colgroup>
-        <thead>
-          <tr>
-            <th>요일</th>
-            <th>오픈</th>
-            <th>마감</th>
-            <th>라스트오더</th>
-            <th>영업 여부</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${s.hours.map((h,i)=>`
-            <tr>
-              <td><b>${h.dow}</b></td>
-              <td><input class="input" type="time" value="${h.open}" style="width:84px;" /></td>
-              <td><input class="input" type="time" value="${h.close}" style="width:84px;" /></td>
-              <td><input class="input" type="time" value="${h.lastOrder||''}" placeholder="없음" style="width:88px;" /></td>
-              <td><label class="toggle-switch ${!h.off?'on':''}" onclick="STORE_INFO.hours[${i}].off=!STORE_INFO.hours[${i}].off;renderApp()"><div class="sw"></div><span>${h.off?'휴무':'영업'}</span></label></td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+      <h3>가게 운영 시간
+        <span class="h-act">
+          <button class="btn-ghost" style="padding:6px 14px;font-size:12px;font-weight:700;" onclick="addScheduleSlot()">+ 행 추가</button>
+        </span>
+      </h3>
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:16px;">요일을 선택하고 오픈·마감·라스트오더 시간을 입력하세요. 여러 요일을 한 행에 묶어서 관리할 수 있어요.</div>
+      ${(s.scheduleSlots||[]).map((slot,si)=>{
+        const DAYS_ORDER = ['일','월','화','수','목','금','토'];
+        const dayChips = DAYS_ORDER.map(d=>`<div class="day-chip ${slot.days.includes(d)?'on':''}" onclick="toggleSlotDay(${slot.id},'${d}')">${d}</div>`).join('');
+        const noDay = slot.days.length===0;
+        return `
+          <div class="schedule-slot${noDay?' border-color:#f59e0b;background:#fffbeb':''}">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div style="display:flex;gap:8px;align-items:center;">
+                ${dayChips}
+              </div>
+              ${(s.scheduleSlots||[]).length>1?`<button class="btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--red);" onclick="removeScheduleSlot(${slot.id})">✕ 삭제</button>`:''}
+            </div>
+            ${noDay?`<div style="font-size:12px;color:#d97706;margin-bottom:10px;">⚠️ 적용할 요일을 하나 이상 선택해 주세요.</div>`:''}
+            <div class="slot-time-group">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <span class="slot-time-label">오픈</span>
+                <input class="slot-time-input" type="time" value="${slot.open||'09:00'}" onchange="updateSlotTime(${slot.id},'open',this.value);markUnsavedUI()" />
+              </div>
+              <span style="font-size:20px;color:var(--ink-4);margin:0 4px;align-self:flex-end;padding-bottom:8px;">—</span>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <span class="slot-time-label">마감</span>
+                <input class="slot-time-input" type="time" value="${slot.close||'22:00'}" onchange="updateSlotTime(${slot.id},'close',this.value);markUnsavedUI()" />
+              </div>
+              <div style="width:1px;background:var(--line);height:48px;margin:0 12px;align-self:flex-end;"></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <span class="slot-time-label">라스트오더</span>
+                <input class="slot-time-input" type="time" value="${slot.lastOrder||''}" placeholder="없음" onchange="updateSlotTime(${slot.id},'lastOrder',this.value);markUnsavedUI()" style="font-size:18px;" />
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
     </div>
 
     <div class="panel">
@@ -11098,6 +11122,30 @@ function renderStore(main){
 }
 
 // 편의정보 프리셋 토글 — 선택/해제
+// ===== 운영 시간 슬롯 관리 =====
+function addScheduleSlot(){
+  if(!STORE_INFO.scheduleSlots) STORE_INFO.scheduleSlots = [];
+  const maxId = STORE_INFO.scheduleSlots.reduce((m,s)=>Math.max(m,s.id),0);
+  STORE_INFO.scheduleSlots.push({ id:maxId+1, days:[], open:'09:00', close:'22:00', lastOrder:'' });
+  markUnsavedUI(); renderApp();
+}
+function removeScheduleSlot(id){
+  if((STORE_INFO.scheduleSlots||[]).length<=1){ alert('운영 시간은 최소 1개 필요해요.'); return; }
+  STORE_INFO.scheduleSlots = STORE_INFO.scheduleSlots.filter(s=>s.id!==id);
+  markUnsavedUI(); renderApp();
+}
+function toggleSlotDay(id, day){
+  const slot = (STORE_INFO.scheduleSlots||[]).find(s=>s.id===id);
+  if(!slot) return;
+  if(slot.days.includes(day)) slot.days = slot.days.filter(d=>d!==day);
+  else slot.days.push(day);
+  markUnsavedUI(); renderApp();
+}
+function updateSlotTime(id, field, value){
+  const slot = (STORE_INFO.scheduleSlots||[]).find(s=>s.id===id);
+  if(slot) slot[field] = value;
+}
+
 function toggleAmenity(name){
   const arr = STORE_INFO.amenities;
   const i = arr.indexOf(name);

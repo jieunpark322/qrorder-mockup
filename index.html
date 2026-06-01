@@ -1201,7 +1201,7 @@ const ORDERS = [
     items:[
       {name:'레몬에이드', qty:1, price:5200, options:[]},
     ] },
-  { id:'#20260515-0046', date:'2026-05-15', time:'10:24', channel:'테이블 4',   ch:'매장', menu:'아메리카노 외 2건',     issuer:'신한', amt:26400, status:'완료',     stl:'정산예정 5/20', card:'4141201234', tid:'tid_3f8a5a13b002xyz',
+  { id:'#20260515-0046', date:'2026-05-15', time:'10:24', channel:'테이블 4',   ch:'매장', menu:'아메리카노 외 2건',     issuer:'신한', amt:21400, status:'완료',     stl:'정산예정 5/20', card:'4141201234', tid:'tid_3f8a5a13b002xyz', originalAmt:26400, couponName:'신규 가입 환영 5천원', couponAmt:5000,
     items:[
       {name:'아메리카노', qty:3, price:4500, options:['HOT']},
       {name:'카페라떼',   qty:1, price:5500, options:['ICE','오트밀크 +500']},
@@ -1216,7 +1216,7 @@ const ORDERS = [
     items:[
       {name:'자몽에이드', qty:1, price:8000, options:['ICE','라지 +1,000']},
     ] },
-  { id:'#20260515-0043', date:'2026-05-15', time:'09:58', channel:'테이블 6',   ch:'매장', menu:'아메리카노 외 4건',     issuer:'VISA (해외)', amt:27420, status:'완료',     stl:'정산예정 5/21', card:'4111001234', currency:'USD 19.90',
+  { id:'#20260515-0043', date:'2026-05-15', time:'09:58', channel:'테이블 6',   ch:'매장', menu:'아메리카노 외 4건',     issuer:'VISA (해외)', amt:24420, status:'완료',     stl:'정산예정 5/21', card:'4111001234', currency:'USD 17.70', originalAmt:27420, couponName:'주말 한정 15% 할인', couponAmt:3000,
     items:[
       {name:'아메리카노', qty:1, price:4500, options:['HOT']},
       {name:'카페라떼',   qty:1, price:5500, options:['ICE']},
@@ -1237,7 +1237,7 @@ const ORDERS = [
     items:[
       {name:'아메리카노', qty:3, price:4000, options:['HOT']},
     ] },
-  { id:'#20260515-0039', date:'2026-05-15', time:'08:32', channel:'테이블 2',   ch:'매장', menu:'치즈케이크 외 1건',   issuer:'현금', amt:12500, status:'완료',     stl:'−',
+  { id:'#20260515-0039', date:'2026-05-15', time:'08:32', channel:'테이블 2',   ch:'매장', menu:'치즈케이크 외 1건',   issuer:'현금', amt:11500, status:'완료',     stl:'−', originalAmt:12500, discountAmt:1000, discountLabel:'해피아워 할인',
     items:[
       {name:'치즈케이크', qty:1, price:7000, options:[]},
       {name:'카페라떼',   qty:1, price:5500, options:['HOT']},
@@ -3627,7 +3627,11 @@ function renderOrders(main){
                 <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;background:${payType==='선불'?'#eff6ff':'#fff7ed'};color:${payType==='선불'?'#1d4ed8':'#c2410c'};">${payType}</span>
               </td>
               <td>${o.issuer ? `${payLabel(o)}${paySub(o)?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${paySub(o)}</div>`:''}` : '<span style="color:var(--ink-4);font-size:11px;">미결제</span>'}</td>
-              <td class="num">${amountCell}</td>
+              <td class="num">
+                ${amountCell}
+                ${o.couponAmt>0?`<div style="margin-top:3px;"><span style="font-size:10px;font-weight:700;background:#f0fdf4;color:#15803d;border:1px solid #86efac;padding:1px 6px;border-radius:4px;">🎟️ 쿠폰 −${fmt(o.couponAmt)}원</span></div>`:''}
+                ${o.discountAmt>0?`<div style="margin-top:3px;"><span style="font-size:10px;font-weight:700;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:1px 6px;border-radius:4px;">🔥 할인 −${fmt(o.discountAmt)}원</span></div>`:''}
+              </td>
               <td><span class="pill ${o.status==='완료'?'done':o.status==='진행중'?'partial':cancelPillClass}">${isCancelAll?cancelLabel:o.status}</span></td>
               <td style="color:var(--blue);font-weight:600;">자세히 ›</td>
             </tr>`;
@@ -5149,12 +5153,21 @@ function openOrderDetail(o){
   const cancelDateLabel = o.cancelDate ? o.cancelDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3') : (o.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3'));
   const statusPill = `<span class="pill ${isCancelAll?'cancel':'done'}" style="margin-left:8px;font-size:11px;">${o.status}</span>`;
 
+  // 할인·쿠폰 적용 여부
+  const hasDiscount = (o.couponAmt > 0) || (o.discountAmt > 0);
+  const discountLines = hasDiscount ? `
+      ${o.originalAmt ? `<div class="r-line"><span>소계</span><b style="color:var(--ink-2);">${fmt(o.originalAmt)}원</b></div>` : ''}
+      ${o.couponAmt > 0 ? `<div class="r-line"><span style="color:#15803d;">🎟️ 쿠폰 할인<span style="font-size:11px;font-weight:400;margin-left:4px;color:var(--ink-3);">${o.couponName||''}</span></span><b style="color:#15803d;">−${fmt(o.couponAmt)}원</b></div>` : ''}
+      ${o.discountAmt > 0 ? `<div class="r-line"><span style="color:var(--blue);">🔥 ${o.discountLabel||'할인'}</span><b style="color:var(--blue);">−${fmt(o.discountAmt)}원</b></div>` : ''}
+  ` : '';
   const amountBlock = isCancelAll ? `
+      ${discountLines}
       <div class="r-line"><span>결제금액 <span style="font-size:11px;color:var(--ink-3);">(원)</span></span><b style="font-size:14px;color:var(--ink-3);text-decoration:line-through;">${fmt(o.amt)}원</b></div>
       <div class="r-line" style="background:#fff7f7;margin:4px -8px;padding:8px;border-radius:8px;"><span style="color:var(--red);font-weight:600;">↺ ${orderPayType(o)==='선불'?'결제 취소':'주문 취소'}</span><b style="color:var(--red);">${cancelDateLabel} ${o.cancelTime||'−'}</b></div>
       <div class="r-line"><span><b>실매출</b></span><b style="font-size:16px;color:var(--red);">0원</b></div>
   ` : `
-      <div class="r-line"><span><b>결제금액</b></span><b style="font-size:16px;color:var(--blue);">${fmt(o.amt)}원</b></div>
+      ${discountLines}
+      <div class="r-line"><span><b>${hasDiscount ? '최종 결제금액' : '결제금액'}</b></span><b style="font-size:16px;color:var(--blue);">${fmt(o.amt)}원</b></div>
   `;
 
   const modal = document.getElementById('modal');

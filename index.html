@@ -1516,7 +1516,7 @@ const state = {
   customTarget: null,                // 'overview' | 'detail' | 'orders'
   // QR 이미지 추가 신청 폼
   qrReqColor: null,                  // 선택한 색상명
-  qrReqQty:   null,                  // 신청 수량 (10/20/30/50/100)
+  qrReqQty:   9,                     // 신청 수량 (9 단위, 기본 9장)
   qrReqMemo:  '',                    // 메모 (선택)
   // 메뉴 관리 — 더보기 드롭다운
   mmMoreOpen: false,
@@ -9589,7 +9589,7 @@ const QR_COLOR_OPTIONS = [
 
 // QR 이미지 추가 신청 — 정책: 10개 단위 + 단일 색상
 const QR_PRICE_PER_UNIT = 2000;  // 1장당 단가 (원)
-const QR_BATCH_SIZE     = 10;    // 최소 신청 단위
+const QR_BATCH_SIZE     = 9;     // 최소 신청 단위
 // QR은 매장의 주문 설정·테이블 설정에서 파생되는 구조
 // - 테이블 QR: TABLES에서 자동 (테이블 관리에서 관리)
 // - 포장 QR: ORDER_CHANNELS.mode가 takeout/both일 때 매장당 1개 자동
@@ -10481,13 +10481,15 @@ function renderQR(main){
         </div>
       </div>
       <div style="margin-bottom:22px;">
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:10px;">신청 수량 <span style="color:var(--red);">*</span> <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">${QR_BATCH_SIZE}장 단위로만 신청할 수 있어요</span></label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${[10,20,30,50,100].map(q=>{
-            const on = state.qrReqQty===q;
-            return `<div onclick="state.qrReqQty=${q};renderApp()"
-              style="padding:12px 22px;background:${on?'var(--blue)':'#fff'};color:${on?'#fff':'var(--ink-2)'};border:2px solid ${on?'var(--blue)':'var(--line)'};border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;min-width:80px;text-align:center;${on?'box-shadow:0 4px 12px rgba(49,130,246,.25);':''}">${q}장</div>`;
-          }).join('')}
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:10px;">신청 수량 <span style="color:var(--red);">*</span> <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">${QR_BATCH_SIZE}장 단위</span></label>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button onclick="if(state.qrReqQty>${QR_BATCH_SIZE}){state.qrReqQty-=${QR_BATCH_SIZE};renderApp();}" style="width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:#fff;font-size:22px;font-weight:700;cursor:pointer;color:var(--ink-2);display:flex;align-items:center;justify-content:center;transition:all .12s;${state.qrReqQty<=${QR_BATCH_SIZE}?'opacity:.35;cursor:not-allowed;':''}" title="9장 줄이기">−</button>
+          <div style="text-align:center;min-width:80px;">
+            <div style="font-size:32px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums;line-height:1;">${state.qrReqQty||QR_BATCH_SIZE}</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">장</div>
+          </div>
+          <button onclick="state.qrReqQty=(state.qrReqQty||${QR_BATCH_SIZE})+${QR_BATCH_SIZE};renderApp();" style="width:44px;height:44px;border-radius:50%;border:2px solid var(--blue);background:var(--blue);font-size:22px;font-weight:700;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;transition:all .12s;" title="9장 늘리기">+</button>
+          <div style="font-size:12px;color:var(--ink-3);line-height:1.5;">${QR_BATCH_SIZE}장 단위로<br/>조절할 수 있어요</div>
         </div>
       </div>
       <div style="margin-bottom:22px;">

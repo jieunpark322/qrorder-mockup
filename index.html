@@ -1271,7 +1271,7 @@ const ORDERS = [
 // === 정산 회차 (영업일 D+2 송금 · DAY 기반 동적 생성) ===
 // 정산 달력 · 정산내역 조회 공통 데이터 소스
 // 필드: id / approvalDate(영업일) / settleDate(정산일) / cnt / grossAmt
-//        / couponBizAmt(가맹점 발행) / couponTableAmt(테이블 발행)
+//        / couponPlatformAmt(소프트먼트 발행 보전) / couponMerchantAmt(사장님 발행, 정산 제외)
 //        / feeBase + feeVat = feeTotal (입금 수수료, 결제수단별 가중평균 요율)
 //        / couponSettle(쿠폰 정산금) / txSettle(거래금 정산) / totalSettle(총 정산)
 //        / status: 정산완료|정산대기 / usedCoupon
@@ -1286,7 +1286,11 @@ const isHoliday = (date) => HOLIDAYS_2026.includes(toISODate(date));
 // (카드국내 60%×2.0 + 해외 3%×3.5 + 카카오 17%×2.3 + 네이버 10%×2.4 + 토스 2%×2.3 + 계좌이체 1%×1.5)
 const AVG_FEE_RATE = 0.02;
 const SETTLEMENTS = (function(){
-  const couponPattern = DAY.map((_, i) => i % 3 === 0 || i % 7 === 0);
+  // 쿠폰 발행 주체 분리
+  // 소프트먼트 발행: 플랫폼이 가맹점에 보전 → 정산에 더함
+  // 사장님 발행: 가맹점 부담 → 정산 제외 (이미 gross에 반영된 실매출)
+  const couponPatternPlatform = DAY.map((_, i) => i % 5 === 0 || i % 11 === 0);
+  const couponPatternMerchant = DAY.map((_, i) => i % 4 === 0 || i % 9 === 0);
   const today = new Date(2026, 4, 15);
   const DOW_ARR = ['일','월','화','수','목','금','토'];
   // 영업일 D+N 정산 (주말·공휴일 스킵)
@@ -1321,17 +1325,23 @@ const SETTLEMENTS = (function(){
     const gross = days.reduce((s,d)=>s+d.gross, 0);
     const ref = days.reduce((s,d)=>s+d.ref, 0);
     const cnt = days.reduce((s,d)=>s+d.ocnt, 0);
-    const usedCoupon = days.some(d => couponPattern[d._idx]);
-    const couponBaseGross = days.filter(d => couponPattern[d._idx]).reduce((s,d)=>s+d.gross, 0);
-    const couponTable = usedCoupon ? Math.round(couponBaseGross * 0.012) : 0; // 테이블 발행 쿠폰 보전 (1.2%)
-    const couponBiz   = usedCoupon ? Math.round(couponBaseGross * 0.005) : 0; // 가맹점 발행 쿠폰 차감 (0.5%)
+    // 소프트먼트 발행 쿠폰 — 플랫폼이 가맹점에 보전 (정산에 +)
+    const usedPlatformCoupon = days.some(d => couponPatternPlatform[d._idx]);
+    const platformBase = days.filter(d => couponPatternPlatform[d._idx]).reduce((s,d)=>s+d.gross, 0);
+    const couponPlatformAmt = usedPlatformCoupon ? Math.round(platformBase * 0.012) : 0;
+    // 사장님 발행 쿠폰 — 가맹점 부담, 정산 제외 (참고용 표시만)
+    const usedMerchantCoupon = days.some(d => couponPatternMerchant[d._idx]);
+    const merchantBase = days.filter(d => couponPatternMerchant[d._idx]).reduce((s,d)=>s+d.gross, 0);
+    const couponMerchantAmt = usedMerchantCoupon ? Math.round(merchantBase * 0.005) : 0;
+    const usedCoupon = usedPlatformCoupon || usedMerchantCoupon;
     // 입금 수수료 — 결제수단별 차등 요율의 가중평균 적용 (실효 2.06%)
     // 환불액에 대해서는 카드사가 수수료도 환급하므로 (gross - ref) × 평균요율
     const feeBase = Math.round((gross - ref) * AVG_FEE_RATE);
     const feeVat  = Math.round(feeBase * 0.1);
     const feeTotal = feeBase + feeVat;
-    const couponSettle = couponTable;
-    const txSettle = gross - ref - feeTotal - couponBiz;
+    // 정산 = 결제 − 환불 − 수수료 + 소프트먼트쿠폰보전 (사장님쿠폰은 제외)
+    const couponSettle = couponPlatformAmt;
+    const txSettle = gross - ref - feeTotal;
     const totalSettle = txSettle + couponSettle;
     const status = sKey <= todayISO ? '정산완료' : '정산대기'; // 문자열 비교로 타임존 버그 방지
     // 회차 ID: STL-YYYYMMDD-MMDD (정산일-승인일 첫째일) 형식으로 고유 보장
@@ -1359,8 +1369,10 @@ const SETTLEMENTS = (function(){
       cnt,
       grossAmt: gross,
       refundAmt: ref,
-      couponBizAmt: couponBiz,
-      couponTableAmt: couponTable,
+      couponPlatformAmt,   // 소프트먼트 발행 → 보전금 (정산에 더함)
+      couponMerchantAmt,   // 사장님 발행 → 참고용 (정산 제외)
+      usedPlatformCoupon,
+      usedMerchantCoupon,
       feeBase, feeVat, feeTotal,
       feeRate: AVG_FEE_RATE,
       couponSettle,
@@ -3778,14 +3790,16 @@ function renderStlList(main){
     const [m, dd] = d.d.split('/').map(Number);
     const iso = `2026-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
     const stl = findSettlementByOrderDate(iso);
-    const usedCoupon = stl?.usedCoupon || false;
-    const couponTable = usedCoupon ? Math.round(d.gross * 0.012) : 0;
-    const couponBiz   = usedCoupon ? Math.round(d.gross * 0.005) : 0;
+    const usedPlatformCoupon = stl?.usedPlatformCoupon || false;
+    const usedMerchantCoupon = stl?.usedMerchantCoupon || false;
+    const usedCoupon = usedPlatformCoupon || usedMerchantCoupon;
+    const couponPlatformAmt = usedPlatformCoupon ? Math.round(d.gross * 0.012) : 0; // 소프트먼트 보전
+    const couponMerchantAmt = usedMerchantCoupon ? Math.round(d.gross * 0.005) : 0; // 사장님 쿠폰(참고)
     const feeBase = Math.round((d.gross - d.ref) * AVG_FEE_RATE);
     const feeVat  = Math.round(feeBase * 0.1);
     const feeTotal = feeBase + feeVat;
-    const txSettle = d.gross - d.ref - feeTotal - couponBiz;
-    const totalSettle = txSettle + couponTable;
+    const txSettle = d.gross - d.ref - feeTotal;
+    const totalSettle = txSettle + couponPlatformAmt; // 사장님 쿠폰은 정산 제외
     return {
       approvalDate: d.d,
       approvalDow: d.w,
@@ -3796,12 +3810,13 @@ function renderStlList(main){
       cnt: d.ocnt,
       grossAmt: d.gross,
       refundAmt: d.ref,
-      couponBizAmt: couponBiz,
-      couponTableAmt: couponTable,
-      couponDiscount: couponBiz + couponTable,
+      couponPlatformAmt,
+      couponMerchantAmt,
       feeBase, feeVat, feeTotal,
       txSettle,
       totalSettle,
+      usedPlatformCoupon,
+      usedMerchantCoupon,
       usedCoupon,
       status: stl?.status || '정산대기',
       statusPill: stl?.statusPill || 'pending',
@@ -3862,7 +3877,7 @@ function renderStlList(main){
     settleISO: r => r.settleISO,
     cnt: r => r.cnt,
     grossAmt: r => r.grossAmt,
-    couponDiscount: r => r.couponDiscount,
+    couponPlatformAmt: r => r.couponPlatformAmt,
     feeTotal: r => r.feeTotal,
     totalSettle: r => r.totalSettle,
     status: r => r.status,
@@ -4018,7 +4033,7 @@ function renderStlList(main){
             ${sortableHeader({key:'settleISO', label:'정산일', currentSort:state.stlListSort, setter:'setStlListSort'})}
             ${sortableHeader({key:'cnt', label:'건수', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
             ${sortableHeader({key:'grossAmt', label:'결제 금액', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
-            ${sortableHeader({key:'couponDiscount', label:'쿠폰 할인', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
+            ${sortableHeader({key:'couponPlatformAmt', label:'쿠폰 보전', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
             ${sortableHeader({key:'feeTotal', label:'수수료', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
             ${sortableHeader({key:'totalSettle', label:'받으실 금액', align:'num', currentSort:state.stlListSort, setter:'setStlListSort'})}
             ${sortableHeader({key:'status', label:'상태', currentSort:state.stlListSort, setter:'setStlListSort'})}
@@ -4033,7 +4048,11 @@ function renderStlList(main){
               <td>${fmtMD(r.settleDate)}${r.settleDow?`(${r.settleDow})`:''}</td>
               <td class="num">${fmt(r.cnt)}</td>
               <td class="num">${fmt(r.grossAmt)}</td>
-              <td class="num">${r.usedCoupon?`<b style="color:#a25e00;">−${fmt(r.couponDiscount)}</b>`:'−'}</td>
+              <td class="num">
+                ${r.usedPlatformCoupon?`<span style="color:#15803d;font-weight:700;">+${fmt(r.couponPlatformAmt)}</span><br/><span style="font-size:10px;color:var(--ink-4);">소프트먼트 보전</span>`:''}
+                ${r.usedMerchantCoupon?`<span style="color:var(--ink-3);font-size:11px;">${r.usedPlatformCoupon?'<br/>':''}-${fmt(r.couponMerchantAmt)} <span title="사장님 발행 쿠폰은 정산에 포함되지 않아요">정산 제외</span></span>`:''}
+                ${!r.usedCoupon?'−':''}
+              </td>
               <td class="num">−${fmt(r.feeTotal)}</td>
               <td class="num"><b style="color:${r.status==='정산완료'?'var(--blue)':'#a25e00'};">${fmt(r.totalSettle)}원</b></td>
               <td><span class="pill ${r.statusPill}">${r.status==='정산대기'?'곧 들어와요':'입금 완료'}</span></td>
@@ -4107,14 +4126,15 @@ function renderStlDetail(main){
           <div style="font-size:13px;color:var(--ink-3);font-weight:700;margin-bottom:6px;">${stl.status==='정산완료'?'입금된 금액':'받으실 금액'}</div>
           <div style="font-size:36px;font-weight:800;letter-spacing:-.02em;color:${settleColor};font-variant-numeric:tabular-nums;line-height:1.1;">${fmt(stl.totalSettle)}원</div>
           <div style="font-size:13px;color:var(--ink-2);margin-top:8px;">
-            결제 ${fmt(stl.grossAmt)}원에서 수수료 ${fmt(stl.feeTotal)}원 빼고${stl.usedCoupon?`, 쿠폰 정산 ${fmt(stl.couponSettle)}원 더해서 드려요`:' 드려요'}
+            결제 ${fmt(stl.grossAmt)}원에서 수수료 ${fmt(stl.feeTotal)}원 빼고${stl.usedPlatformCoupon?`, 소프트먼트 쿠폰 보전 ${fmt(stl.couponPlatformAmt)}원 더해서`:''} 드려요
+            ${stl.usedMerchantCoupon?`<span style="font-size:11px;color:var(--ink-4);display:block;margin-top:2px;">💡 사장님이 발행한 쿠폰(-${fmt(stl.couponMerchantAmt)}원)은 가맹점 부담이라 정산에 포함되지 않아요.</span>`:''}
           </div>
         </div>
         <div style="text-align:right;font-size:13px;color:var(--ink-2);line-height:1.7;">
           <div>받을 계좌 <b style="color:var(--ink);">신한 ****1234</b></div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line-2);">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line-2);">
         <div>
           <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">결제 금액</div>
           <div style="font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;">${fmt(stl.grossAmt)}원</div>
@@ -4127,6 +4147,20 @@ function renderStlDetail(main){
           <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">수수료 (부가세 포함)</div>
           <div style="font-size:20px;font-weight:800;color:var(--ink-2);font-variant-numeric:tabular-nums;">−${fmt(stl.feeTotal)}원</div>
         </div>
+        ${stl.usedPlatformCoupon ? `
+        <div>
+          <div style="font-size:12px;color:#15803d;font-weight:600;margin-bottom:4px;">소프트먼트 쿠폰 보전</div>
+          <div style="font-size:20px;font-weight:800;color:#15803d;font-variant-numeric:tabular-nums;">+${fmt(stl.couponPlatformAmt)}원</div>
+          <div style="font-size:10px;color:var(--ink-4);margin-top:2px;">플랫폼이 발행한 쿠폰 할인분을 가맹점에 보전해요</div>
+        </div>
+        ` : ''}
+        ${stl.usedMerchantCoupon ? `
+        <div>
+          <div style="font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">사장님 발행 쿠폰</div>
+          <div style="font-size:20px;font-weight:800;color:var(--ink-3);font-variant-numeric:tabular-nums;">−${fmt(stl.couponMerchantAmt)}원</div>
+          <div style="font-size:10px;color:var(--ink-4);margin-top:2px;">가맹점 부담 · 정산 제외</div>
+        </div>
+        ` : ''}
       </div>
     </div>
 

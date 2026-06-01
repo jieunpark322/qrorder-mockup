@@ -2041,7 +2041,7 @@ function renderHome(main){
 
     <!-- ② 처리 필요 일감 -->
     <div class="panel">
-      <h3>📌 사장님이 챙겨야 할 일 <span class="h-sub">${reviewWait+inquiryWait+notifyUnread}건</span></h3>
+      <h3>📌 사장님이 챙겨야 할 일 <span class="h-sub">${reviewWait+inquiryWait+notifyUnread}건 ${[reviewWait&&`리뷰 ${reviewWait}`,inquiryWait&&`문의 ${inquiryWait}`,notifyUnread&&`알림 ${notifyUnread}`].filter(Boolean).join(' · ')}</span></h3>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
         <div onclick="setSection('reviews');state.reviewFilter='wait';renderApp()" style="padding:18px 20px;background:#fff;border:2px solid ${reviewWait>0?'#fbbf24':'var(--line)'};border-radius:12px;cursor:pointer;transition:all .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(0,0,0,.06)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -2172,7 +2172,7 @@ function renderOverview(main){
     <div class="toolbar">
       <div>
         <h2>매출 한눈에 보기</h2>
-        <div class="page-sub">어제까지 집계된 매출이에요. 오늘 매출은 <span style="color:var(--blue);font-weight:700;cursor:pointer;" onclick="setSection('orders')">주문 내역 ›</span> 에서 실시간으로 확인해 주세요.</div>
+        <div class="page-sub"><b style="color:var(--amber);">어제(5/14)까지</b> 집계된 매출이에요. 오늘 매출은 <span style="color:var(--blue);font-weight:700;cursor:pointer;" onclick="setSection('orders')">주문 내역 ›</span> 에서 실시간으로 확인해 주세요.</div>
       </div>
       <div class="left">
         ${basisToggleInline()}
@@ -3593,7 +3593,7 @@ function renderOrders(main){
           </tr>
         </thead>
         <tbody>
-          ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">다른 조건으로 한번 찾아봐 주세요.</td></tr>` : rows.slice(0,state.orderRowsPerPage).map((o,i)=>{
+          ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">조건에 맞는 주문이 없어요. 날짜 범위를 넓히거나 필터를 해제해 보세요.</td></tr>` : rows.slice(0,state.orderRowsPerPage).map((o,i)=>{
             const isCancelAll = o.status==='취소';
             const payType = orderPayType(o);
             const cancelLabel = payType==='선불' ? '결제 취소' : '주문 취소';
@@ -3754,7 +3754,7 @@ function renderStlCalendar(main){
     <div class="info-card" style="text-align:center;padding:22px;">
       ${hasData
         ? '💡 금액이 적힌 날짜를 누르면, 그날 받은 정산을 자세히 볼 수 있어요.'
-        : `🗓️ ${year}년 ${month}월은 표시할 정산 내역이 없어요. 위의 화살표로 다른 달을 확인할 수 있어요.`}
+        : `<div style="text-align:center;padding:8px 0;"><div style="font-size:24px;margin-bottom:8px;">🗓️</div><div style="font-weight:700;color:var(--ink-2);">${year}년 ${month}월 정산 내역이 없어요</div><div style="font-size:12px;color:var(--ink-3);margin-top:4px;">좌우 화살표로 다른 달을 확인할 수 있어요</div></div>`}
     </div>
   `;
 }
@@ -4066,13 +4066,13 @@ function renderStlList(main){
             <tr class="clickable" ${r.settlementId?`onclick="openStlDetail('${r.settlementId}')"`:''}>
               <td style="text-align:center;color:var(--ink-3);font-weight:600;">${i+1}</td>
               <td><b>${fmtMD(r.approvalDate)}(${r.approvalDow})</b></td>
-              <td>${fmtMD(r.settleDate)}${r.settleDow?`(${r.settleDow})`:''}</td>
+              <td>${r.settleDate&&r.settleDate!=='−' ? `${fmtMD(r.settleDate)}${r.settleDow?`(${r.settleDow})`:''}`:`<span style="font-size:11px;color:var(--ink-4);">산정 중</span>`}</td>
               <td class="num">${fmt(r.cnt)}</td>
               <td class="num">${fmt(r.grossAmt)}</td>
               <td class="num">
-                ${r.usedPlatformCoupon?`<span style="color:#15803d;font-weight:700;">+${fmt(r.couponPlatformAmt)}</span><br/><span style="font-size:10px;color:var(--ink-4);">소프트먼트 보전</span>`:''}
-                ${r.usedMerchantCoupon?`<span style="color:var(--ink-3);font-size:11px;">${r.usedPlatformCoupon?'<br/>':''}-${fmt(r.couponMerchantAmt)} <span title="사장님 발행 쿠폰은 정산에 포함되지 않아요">정산 제외</span></span>`:''}
-                ${!r.usedCoupon?'−':''}
+                ${r.usedPlatformCoupon?`<span style="color:#15803d;font-weight:800;font-size:13px;">+${fmt(r.couponPlatformAmt)}원</span><div style="font-size:11px;color:#15803d;font-weight:600;margin-top:1px;">소프트먼트 보전</div>`:''}
+                ${r.usedMerchantCoupon?`<div style="margin-top:${r.usedPlatformCoupon?4:0}px;"><span style="color:var(--ink-2);font-weight:700;">-${fmt(r.couponMerchantAmt)}원</span><div style="font-size:11px;color:var(--ink-4);margin-top:1px;" title="사장님 발행 쿠폰은 가맹점 부담이라 정산에서 제외돼요">사장님 발행 · 정산 제외</div></div>`:''}
+                ${!r.usedCoupon?'<span style="color:var(--ink-4);">−</span>':''}
               </td>
               <td class="num">−${fmt(r.feeTotal)}</td>
               <td class="num"><b style="color:${r.status==='정산완료'?'var(--blue)':'#a25e00'};">${fmt(r.totalSettle)}원</b></td>
@@ -4132,7 +4132,8 @@ function renderStlDetail(main){
           <div class="stl-detail-date">${fmtMD(stl.settleDate)}(${stl.settleDow})</div>
           <div class="stl-detail-status ${stl.statusPill}">${statusLabel}</div>
         </div>
-        <div class="stl-detail-meta">${stl.id} · 결제일 ${fmtMD(stl.approvalDate)}(${stl.approvalDow}) · 신한 ****1234</div>
+        <div class="stl-detail-meta">결제일 ${fmtMD(stl.approvalDate)}(${stl.approvalDow}) · 신한 ****1234</div>
+        <div style="margin-top:4px;font-size:11px;color:var(--ink-4);font-family:ui-monospace,monospace;letter-spacing:.03em;">회차 ID: ${stl.id}</div>
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력으로</button>
@@ -4290,7 +4291,7 @@ function renderTax(main){
             <tr class="clickable" onclick="alert('4월 PDF 다운로드')"><td>2026-05-01</td><td>2026년 4월</td><td>일반</td><td class="num">529,600</td><td class="num">52,960</td><td class="num"><b>582,560</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
             <tr class="clickable" onclick="alert('3월 수정분 PDF')"><td>2026-04-03</td><td>2026년 3월</td><td>수정</td><td class="num neg">−24,000</td><td class="num neg">−2,400</td><td class="num"><b style="color:var(--red);">−26,400</b></td><td><span class="pill partial">수정</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
             <tr class="clickable"><td>2026-04-01</td><td>2026년 3월</td><td>일반</td><td class="num">483,600</td><td class="num">48,360</td><td class="num"><b>531,960</b></td><td><span class="pill done">발행</span></td><td style="color:var(--blue);font-weight:600;">⬇ PDF</td></tr>
-            <tr style="background:#fffaf0;"><td>2026-03-01</td><td>2026년 2월</td><td>일반</td><td class="num">381,600</td><td class="num">38,160</td><td class="num"><b>419,760</b></td><td><span class="pill cancel">반송</span></td><td style="color:var(--red);font-weight:600;cursor:pointer;" onclick="alert('재발송')">⚠️ 재발송 필요</td></tr>
+            <tr style="background:#fff1f2;border-left:3px solid var(--red);"><td>2026-03-01</td><td>2026년 2월</td><td>일반</td><td class="num">381,600</td><td class="num">38,160</td><td class="num"><b>419,760</b></td><td><span class="pill cancel">반송</span></td><td style="color:var(--red);font-weight:700;cursor:pointer;" onclick="alert('재발송')">⚠️ 재발송 필요</td></tr>
           </tbody>
         </table>
         <div class="table-footer">
@@ -4397,6 +4398,7 @@ function renderMypage(main){
       </div>
       <div style="margin-top:14px;text-align:right;">
         <button class="btn-primary" onclick="changeMypagePw()">비밀번호 변경</button>
+        <div style="font-size:11px;color:var(--ink-4);margin-top:8px;">변경 후 보안을 위해 재로그인이 필요해요.</div>
       </div>
     </div>
 
@@ -4446,7 +4448,7 @@ function renderBank(main){
       <span class="vtag">✓ 본인 인증 완료 · 2026-02-14</span>
     </div>
     <div class="info-card" style="max-width:540px;margin-top:14px;font-size:12px;">
-      💡 계좌 변경은 고객센터에서 도와드려요. 📞 <b style="color:var(--ink);">1833-8540</b>
+      💡 계좌 변경은 고객센터에서 도와드려요. 📞 <b style="color:var(--ink);">1833-8540</b> · 영업일 기준 <b style="color:var(--ink);">2~3일</b> 소요
     </div>
   `;
 }
@@ -7308,7 +7310,9 @@ function renderMenu(main){
             const stockColor = r.stock != null && r.sold >= r.stock ? 'var(--red)' : (r.stock != null && (r.stock - r.sold) <= 3 ? 'var(--amber)' : 'var(--ink-2)');
             const schTxt = scheduleLabel(r.schedule);
             const dcTxt = discountLabel(r.discount);
-            const priceCell = r.discount && r.discount.enabled
+            const priceCell = r.discountAmt > 0
+              ? `<span style="color:var(--ink-4);text-decoration:line-through;font-size:11px;">${fmt(r.price)}원</span><div style="color:var(--red);font-weight:800;">${fmt(r.price-r.discountAmt)}<span style="font-size:11px;font-weight:500;margin-left:1px;">원</span> <span style="font-size:10px;background:#fef2f2;padding:1px 5px;border-radius:4px;">−${fmt(r.discountAmt)}</span></div>${r.discount&&r.discount.enabled?`<div style="font-size:10px;color:var(--blue);font-weight:700;margin-top:1px;">🔥 ${dcTxt}</div>`:''}`
+              : r.discount && r.discount.enabled
               ? `<b>${fmt(r.price)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span><div style="font-size:10px;color:var(--blue);font-weight:700;margin-top:2px;">🔥 ${dcTxt}</div>`
               : `<b>${fmt(r.price)}</b><span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>`;
             const isSel = state.menuSel.has(r.id);
@@ -8216,7 +8220,7 @@ function renderTranslate(main){
           </div>
           <div style="text-align:right;">
             <div style="font-size:22px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums;line-height:1;">${pct}%</div>
-            <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${filled}/${total}개 완료</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${filled}/${total}개 완료${total-filled>0?` · <b style="color:var(--amber);">미입력 ${total-filled}개</b>`:' · <b style="color:#15803d;">모두 완료</b>'}</div>
           </div>
         </div>
 
@@ -10237,7 +10241,7 @@ function renderTable(main){
         <tbody>
           ${zoneTables.map(t=>`
             <tr>
-              <td><b>${t.name}</b>${_pendingTablePos[t.id]?'<span style="font-size:10px;color:var(--amber);margin-left:6px;">●미저장</span>':''}</td>
+              <td><b>${t.name}</b>${_pendingTablePos[t.id]?'<span style="font-size:10px;font-weight:700;color:#fff;background:var(--amber);padding:1px 6px;border-radius:4px;margin-left:6px;">미저장</span>':''}</td>
               <td>
                 <div class="shape-toggle">
                   <span class="opt ${t.shape==='square'?'on':''}" onclick="setTableShape(${t.id},'square')">▢ 사각</span>
@@ -10979,11 +10983,15 @@ function renderCoupon(main){
     </div>
 
     <div class="panel tight">
-      <h3>쿠폰 목록 <span class="h-sub">${COUPONS.length}개</span></h3>
+      <h3>쿠폰 목록 <span class="h-sub">${COUPONS.length}개</span>
+        <span class="h-act" style="display:flex;gap:6px;">
+          ${['전체','사용중','종료','예약'].map(s=>`<span class="chip ${!state.couponStatusFilter||state.couponStatusFilter==='전체'?(s==='전체'?'on':''):(state.couponStatusFilter===s?'on':'')}" style="padding:4px 10px;font-size:11px;" onclick="state.couponStatusFilter='${s}';renderApp()">${s}</span>`).join('')}
+        </span>
+      </h3>
       <table class="t">
         <thead><tr><th>이름</th><th style="width:120px;">코드</th><th style="width:100px;">종류</th><th style="width:130px;">조건</th><th style="width:140px;">기간</th><th>사용 현황</th><th style="width:80px;">상태</th><th style="width:64px;"></th></tr></thead>
         <tbody>
-          ${COUPONS.map(c=>{
+          ${COUPONS.filter(c=>!state.couponStatusFilter||state.couponStatusFilter==='전체'||c.status===state.couponStatusFilter).map(c=>{
             const rate = c.issued ? Math.round(c.used/c.issued*100) : 0;
             return `
               <tr>
@@ -11291,7 +11299,7 @@ function renderReviews(main){
                 <div style="color:var(--ink-2);line-height:1.5;">${r.reply}</div>
               </div>
             ` : `
-              <button class="btn-ghost" style="padding:8px 14px;font-size:12px;" onclick="const t=prompt('답변을 입력해 주세요');if(t){REVIEWS.find(x=>x.id===${r.id}).reply=t;renderApp();}">+ 답변 작성</button>
+              <button class="btn-ghost" style="padding:8px 14px;font-size:12px;" onclick="const t=prompt('답변을 입력해 주세요');if(t){REVIEWS.find(x=>x.id===${r.id}).reply=t;renderApp();showToast('<span class=\'ic\'>✅</span> 답변을 등록했어요','ok');}">+ 답변 작성</button>
             `}
           </div>
         `).join('')}
@@ -11883,7 +11891,7 @@ function renderOrderType(main){
           </div>
           ${ch.reservation ? `
             <div style="margin-left:120px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:11px;color:#9a3412;line-height:1.55;margin-top:4px;">
-              ℹ️ 손님이 픽업 시간을 선택하면 매장에 즉시 들어가지 않아요. <b>사장님이 [수락]을 눌러야</b> 주문이 확정돼요. 예약 건수 제한 없음 · 영업 종료 30분 전 슬롯 자동 차단.
+              ℹ️ 손님이 픽업 시간을 선택하면 사장님이 수락해야 확정돼요. (영업 종료 30분 전 자동 마감)
             </div>
           ` : ''}
         </div>
@@ -12071,8 +12079,9 @@ function renderStaffCall(main){
       </h3>
 
       ${enabledCnt===0 ? `
-        <div style="padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#c2410c;margin-bottom:12px;">
-          ⚠️ 모든 메시지가 꺼져 있어요. 손님 화면에 직원 호출 버튼이 나타나지 않아요.
+        <div style="padding:14px 16px;background:#fef2f2;border:2px solid #fca5a5;border-radius:10px;font-size:13px;font-weight:700;color:#b91c1c;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">🚨</span>
+          <div>모든 메시지가 비활성화됐어요.<div style="font-size:11px;font-weight:400;color:#c2410c;margin-top:2px;">손님 화면에 직원 호출 버튼이 표시되지 않아요. 최소 1개 이상 켜두세요.</div></div>
         </div>
       ` : ''}
 

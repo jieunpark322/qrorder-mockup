@@ -2502,7 +2502,7 @@ function renderDetailPeriod(body){
 
     <div class="panel" style="padding:14px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
       <div style="font-size:12px;color:var(--ink-2);">
-        💡 <b style="color:var(--ink);">총매출 − 할인 − 포인트 − 환불 = 실매출 → 부가세 빼면 순매출</b>
+        💡 <b style="color:var(--ink);">총매출 − 할인 − 포인트 − 환불 = 실매출 → 과세금액(공급가액) + 부가세</b>
         <span style="color:var(--ink-3);margin-left:6px;">환불은 결제한 날 매출에서 자동으로 빠져요</span>
       </div>
     </div>
@@ -2538,7 +2538,7 @@ function renderDetailPeriod(body){
     <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
       <div class="pc-card"><div class="label">총매출 <span class="tip"><span class="tip-i">i</span><span class="body">결제 승인 합계 (부가세 포함)</span></span></div><div class="num">${fmt(tot.gross)}원</div><div class="sub">${fmt(tot.ocnt)}건 결제</div></div>
       <div class="pc-card"><div class="label">실매출 <span class="tip"><span class="tip-i">i</span><span class="body">총매출에서 할인·포인트·환불을<br/>뺀 실제 발생 매출이에요</span></span></div><div class="num">${fmt(tot.actual)}원</div><div class="sub">건당 ${fmt(avgPrice)}원</div></div>
-      <div class="pc-card"><div class="label">순매출 <span class="tip"><span class="tip-i">i</span><span class="body">실매출에서 부가세를 뺀<br/>사장님 공급가액이에요</span></span></div><div class="num pos">${fmt(tot.net)}원</div><div class="sub">부가세 ${fmt(tot.vat)}원</div></div>
+      <div class="pc-card"><div class="label">과세금액</div><div class="num pos">${fmt(tot.taxable)}원</div><div class="sub">부가세 ${fmt(tot.vat)}원</div></div>
     </div>
 
     ${isSingleDay && singleDayKpi ? `
@@ -2580,7 +2580,7 @@ function renderDetailPeriod(body){
             ${sortableHeader({key:'actual', label:'= 실매출', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'taxable', label:'과세금액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'vat', label:'부가세', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
-            ${sortableHeader({key:'net', label:'= 순매출', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
+            ${sortableHeader({key:'taxable', label:'과세금액', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'ocnt', label:'결제건수', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
             ${sortableHeader({key:'rcnt', label:'환불건수', align:'num', currentSort:state.detailPeriodSort, setter:'setDetailPeriodSort'})}
           </tr>
@@ -2601,7 +2601,6 @@ function renderDetailPeriod(body){
               <td class="num"><b>${fmt(r.actual)}</b></td>
               <td class="num">${fmt(r.taxable)}</td>
               <td class="num">${fmt(r.vat)}</td>
-              <td class="num pos"><b>${fmt(r.net)}</b></td>
               <td class="num">${fmt(r.ocnt)}</td>
               <td class="num">${r.rcnt}</td>
             </tr>
@@ -2615,7 +2614,6 @@ function renderDetailPeriod(body){
             <td class="num"><b>${fmt(tot.actual)}</b></td>
             <td class="num">${fmt(tot.taxable)}</td>
             <td class="num">${fmt(tot.vat)}</td>
-            <td class="num pos"><b>${fmt(tot.net)}</b></td>
             <td class="num">${fmt(tot.ocnt)}</td>
             <td class="num">${tot.rcnt}</td>
           </tr>
@@ -2633,7 +2631,7 @@ function renderDetailPeriod(body){
     </div>
 
     <div class="banner-info">
-      💡 <b>순매출액</b>은 총매출에서 <b>할인·포인트 사용·환불액</b>을 모두 뺀 금액이에요. 환불은 발생한 날이 아니라 <b>원래 결제한 날 매출에서 차감</b>되니, 어제 환불이 발생하면 어제 매출이 줄어드는 것처럼 표시돼요.
+      💡 <b>실매출</b>은 총매출에서 <b>할인·포인트 사용·환불액</b>을 모두 뺀 금액이에요. 환불은 발생한 날이 아니라 <b>원래 결제한 날 매출에서 차감</b>되니, 어제 환불이 발생하면 어제 매출이 줄어드는 것처럼 표시돼요.
     </div>
   `;
 
@@ -2696,8 +2694,8 @@ function renderDetailPeriod(body){
       labels: rows.map(r=>r.label),
       datasets:[
         {
-          label:'순매출',
-          data:rows.map(r=>r.net),
+          label:'실매출',
+          data:rows.map(r=>r.actual),
           borderColor:'#3182f6',
           backgroundColor:'rgba(49,130,246,.10)',
           borderWidth:3,
@@ -9272,6 +9270,24 @@ function renderCustomerPreview(){
               ? `<div class="qrp-empty" style="padding:60px 14px;">노출할 메뉴가 없어요.</div>`
               : phoneListHtml}
           </div>
+          ${renderOriginPreviewInner()}
+          ${(()=>{
+            const notice = (typeof STORE_ALLERGY!=='undefined'&&STORE_ALLERGY.notice)?STORE_ALLERGY.notice:'';
+            const menuAllergens = MENUS.filter(m=>m.status!=='숨김'&&(m.allergens||[]).length>0);
+            if(!notice&&menuAllergens.length===0) return '';
+            return '<div class="qrp-origin">'
+              +'<div class="qrp-otitle">⚠️ 알레르기 안내</div>'
+              +(notice?`<div class="qrp-orow">${notice}</div>`:'')
+              +(menuAllergens.length>0
+                ? '<div style="margin-top:6px;font-size:10px;color:var(--ink-3);">'
+                  + menuAllergens.map(m=>{
+                    const icons=(m.allergens||[]).map(c=>(typeof ALLERGENS!=='undefined'?ALLERGENS.find(a=>a.code===c):null)).filter(Boolean).map(a=>a.icon).join('');
+                    return `<div style="margin-top:3px;">${m.name} ${icons}</div>`;
+                  }).join('')
+                  +'</div>'
+                : '')
+              +'</div>';
+          })()}
         </div>
       </div>
     </div>
@@ -10995,16 +11011,13 @@ function renderStore(main){
     </div>
 
     <div class="panel">
-      <h3>운영 시간 <span class="h-sub">라스트오더·브레이크타임은 없으면 비워두세요</span></h3>
+      <h3>가게 운영 시간 <span class="h-sub">라스트오더는 없으면 비워두세요</span></h3>
       <table class="t" style="table-layout:fixed;">
         <colgroup>
           <col style="width:48px;"/>
           <col style="width:96px;"/>
           <col style="width:96px;"/>
           <col style="width:100px;"/>
-          <col style="width:84px;"/>
-          <col style="width:16px;"/>
-          <col style="width:84px;"/>
           <col/>
         </colgroup>
         <thead>
@@ -11013,7 +11026,6 @@ function renderStore(main){
             <th>오픈</th>
             <th>마감</th>
             <th>라스트오더</th>
-            <th colspan="3" style="text-align:center;">브레이크타임</th>
             <th>영업 여부</th>
           </tr>
         </thead>
@@ -11024,10 +11036,40 @@ function renderStore(main){
               <td><input class="input" type="time" value="${h.open}" style="width:84px;" /></td>
               <td><input class="input" type="time" value="${h.close}" style="width:84px;" /></td>
               <td><input class="input" type="time" value="${h.lastOrder||''}" placeholder="없음" style="width:88px;" /></td>
-              <td><input class="input" type="time" value="${h.breakS||''}" placeholder="시작" style="width:72px;" /></td>
-              <td style="text-align:center;color:var(--ink-3);font-size:12px;">~</td>
-              <td><input class="input" type="time" value="${h.breakE||''}" placeholder="종료" style="width:72px;" /></td>
               <td><label class="toggle-switch ${!h.off?'on':''}" onclick="STORE_INFO.hours[${i}].off=!STORE_INFO.hours[${i}].off;renderApp()"><div class="sw"></div><span>${h.off?'휴무':'영업'}</span></label></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h3>가게 휴게 시간 <span class="h-sub">브레이크타임이 없는 요일은 비워두세요</span></h3>
+      <table class="t" style="table-layout:fixed;">
+        <colgroup>
+          <col style="width:48px;"/>
+          <col style="width:96px;"/>
+          <col style="width:16px;"/>
+          <col style="width:96px;"/>
+          <col/>
+        </colgroup>
+        <thead>
+          <tr>
+            <th>요일</th>
+            <th>휴게 시작</th>
+            <th></th>
+            <th>휴게 종료</th>
+            <th style="color:var(--ink-3);font-weight:400;font-size:11px;">비워두면 해당 요일 휴게 없음</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${s.hours.map((h,i)=>`
+            <tr>
+              <td><b>${h.dow}</b></td>
+              <td><input class="input" type="time" value="${h.breakS||''}" placeholder="없음" style="width:84px;" /></td>
+              <td style="text-align:center;color:var(--ink-3);font-size:12px;">~</td>
+              <td><input class="input" type="time" value="${h.breakE||''}" placeholder="없음" style="width:84px;" /></td>
+              <td style="font-size:12px;color:var(--ink-4);">${h.breakS&&h.breakE?`${h.breakS} ~ ${h.breakE}`:'휴게 없음'}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -11758,26 +11800,8 @@ function renderOrigin(main){
         💡 <b style="color:var(--ink-2);">한 줄에 하나씩</b> 적어 주세요. 줄 바꿈도 그대로 메뉴판에 반영돼요.
       </div>
     </div>
-    <div class="panel">
-      <h3>QR 메뉴판 적용 모습 <span class="h-sub">손님 휴대폰에서 보이는 모습이에요</span></h3>
-      <div class="qrp-wrap">
-        <div class="qrp-phone">
-          <div class="qrp-notch"></div>
-          <div class="qrp-screen">
-            <div class="qrp-header">
-              <div class="qrp-store">소프트커피 합정점</div>
-              <div class="qrp-tag">맛있는 커피 한 잔의 여유</div>
-              <div class="qrp-table-chip">T03 테이블</div>
-            </div>
-            <div class="qrp-list">
-              <div class="qrp-card"><div class="qrp-mimg">☕</div><div class="qrp-minfo"><div class="qrp-mname">아메리카노</div><div class="qrp-mdesc">에티오피아 원두 100%</div><div class="qrp-mprice">4,500원</div></div></div>
-              <div class="qrp-card"><div class="qrp-mimg">🥐</div><div class="qrp-minfo"><div class="qrp-mname">크로아상</div><div class="qrp-mdesc">매일 매장에서 구워요</div><div class="qrp-mprice">3,800원</div></div></div>
-            </div>
-            <div class="qrp-origin" id="qrp-origin-area">${renderOriginPreviewInner()}</div>
-          </div>
-        </div>
-        <div class="qrp-hint"><span class="arrow">↑</span> 메뉴판 가장 아래에 <b style="color:var(--ink-2);">원산지가 자동으로 표시</b>돼요.</div>
-      </div>
+    <div style="padding:10px 14px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:10px;font-size:12px;color:#1b64da;margin-bottom:6px;">
+      💡 원산지 정보가 손님 화면에 어떻게 보이는지 확인하려면 화면 우측 하단 <b>👁️ 손님 화면 미리보기</b> 버튼을 눌러 주세요.
     </div>
     ` : `
     <div class="panel" style="background:#fff8ed;border:1px solid #fed7aa;padding:14px 18px;margin-bottom:6px;">
@@ -11809,37 +11833,8 @@ function renderOrigin(main){
       <div style="margin-top:12px;font-size:12px;color:var(--ink-4);">💡 아이콘이 선명하면 해당 알레르기 성분을 포함해요. 흐리면 미포함이에요. 클릭해서 토글할 수 있어요.</div>
     </div>
 
-    <div class="panel">
-      <h3>손님 메뉴판 적용 모습 <span class="h-sub">알레르기 아이콘이 메뉴 카드에 표시돼요</span></h3>
-      <div class="qrp-wrap">
-        <div class="qrp-phone">
-          <div class="qrp-notch"></div>
-          <div class="qrp-screen">
-            <div class="qrp-header">
-              <div class="qrp-store">소프트커피 합정점</div>
-              <div class="qrp-table-chip">T03 테이블</div>
-            </div>
-            <div class="qrp-list">
-              ${MENUS.filter(m=>m.status!=='숨김').slice(0,3).map(m=>{
-                const als = (m.allergens||[]).map(c=>ALLERGENS.find(a=>a.code===c)).filter(Boolean);
-                return `<div class="qrp-card">
-                  <div class="qrp-mimg">${m.img||'🍽️'}</div>
-                  <div class="qrp-minfo">
-                    <div class="qrp-mname">${m.name}</div>
-                    ${als.length?`<div style="margin-top:3px;display:flex;gap:3px;flex-wrap:wrap;">${als.map(a=>`<span style="font-size:13px;" title="${a.label}">${a.icon}</span>`).join('')}</div>`:'<div style="font-size:10px;color:var(--ink-4);margin-top:2px;">알레르기 성분 없음</div>'}
-                    <div class="qrp-mprice">${fmt(m.price)}원</div>
-                  </div>
-                </div>`;
-              }).join('')}
-            </div>
-            <div class="qrp-origin">
-              <div class="qrp-otitle">⚠️ 알레르기 안내</div>
-              <div class="qrp-orow">${STORE_ALLERGY.notice}</div>
-            </div>
-          </div>
-        </div>
-        <div class="qrp-hint"><span class="arrow">↑</span> 메뉴 카드에 알레르기 아이콘이 표시되고, 하단에 공통 안내문이 나와요.</div>
-      </div>
+    <div style="padding:10px 14px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:10px;font-size:12px;color:#1b64da;margin-bottom:6px;">
+      💡 알레르기 정보가 손님 화면에 어떻게 보이는지 확인하려면 화면 우측 하단 <b>👁️ 손님 화면 미리보기</b> 버튼을 눌러 주세요.
     </div>
     `}
   `;

@@ -3478,7 +3478,7 @@ function renderOrders(main){
         state.orderChannelFilter!=='all' && '채널',
         state.orderPayFilter!=='all' && '결제수단',
         (state.orderAmountMin || state.orderAmountMax) && '금액',
-        state.orderSearch && '주문번호',
+        state.orderSearch && '주문/승인번호',
       ].filter(Boolean);
       const advCount = advFilters.length;
       const hasAdv = advCount > 0;
@@ -3494,7 +3494,7 @@ function renderOrders(main){
           <div class="adv-desc">
             <b style="color:var(--ink-2);">${periodLabel} · ${statusLabel}</b>${hasAdv && advFilters.filter(f=>f!=='기간'&&f!=='상태').length>0
               ? ` · ${advFilters.filter(f=>f!=='기간'&&f!=='상태').join('·')}(으)로 좁혀서 보고 있어요`
-              : ' · 기간·상태·메뉴·채널·결제수단·금액·주문번호(승인번호)로 더 정확하게 찾을 수 있어요'}
+              : ' · 기간·상태·메뉴·채널·결제수단·금액·주문번호·승인번호로 더 정확하게 찾을 수 있어요'}
           </div>
         </div>
         <span class="adv-toggle-btn">
@@ -3556,8 +3556,8 @@ function renderOrders(main){
             <span style="font-size:13px;color:var(--ink-3);">원</span>
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
-            <span class="field-label">주문번호</span>
-            <input class="input" placeholder="🔍 주문번호·결제번호·승인번호 (예: #20260515-0046, 30000046, tid_3f8a...)" value="${d.search}" oninput="state.orderFilterDraft.search=this.value" style="flex:1;min-width:340px;" />
+            <span class="field-label">주문번호 / 승인번호</span>
+            <input class="input" placeholder="🔍 주문번호·승인번호·결제번호 (예: #20260515-0046, 30000046, tid_3f8a...)" value="${d.search}" oninput="state.orderFilterDraft.search=this.value" style="flex:1;min-width:340px;" />
           </div>
           <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px dashed var(--line-2);">
             <button class="btn-ghost" onclick="clearOrderFilterDraft()" style="padding:9px 16px;font-size:13px;">조건 비우기</button>

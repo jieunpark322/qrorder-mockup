@@ -378,6 +378,7 @@
 
   /* Input */
   .input{padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;transition:border .12s;}
+  .input:disabled{background:var(--bg-2);color:var(--ink-3);cursor:not-allowed;border-style:dashed;}
   .input:focus{outline:none;border-color:var(--blue);}
   .input:hover{border-color:var(--ink-4);}
   .input::placeholder, input::placeholder, textarea::placeholder{color:#cfd5dc;font-weight:400;opacity:1;}
@@ -9357,11 +9358,15 @@ const FAQS = [
 
 const STORE_INFO = {
   name:'소프트커피 합정점',
+  displayName:'소프트커피 합정점',   // 표시용 매장명 — 고객 화면 노출용, 자유 수정 가능
   owner:'홍길동',
   bizNo:'123-45-67890',
   phone:'02-1234-5678',
   addr:'서울 마포구 양화로 45',
   extra:'2시간 무료 주차 (3만원 이상)',
+  intro:'매일 직접 로스팅한 원두로 내린 커피와 갓 구운 베이커리를 즐길 수 있는 동네 카페예요.',  // 매장 소개글
+  amenities:['주차장','무선 인터넷','포장'],     // 선택된 편의정보 (STORE_AMENITIES 중)
+  amenitiesCustom:[],                            // 직접입력 편의정보
   extraImages: 0,          // 메인 로고 외 추가 이미지 수 (0~2)
   hours:[
     { dow:'월', open:'09:00', close:'22:00', lastOrder:'21:30', breakS:'15:00', breakE:'17:00', off:false },
@@ -9374,6 +9379,10 @@ const STORE_INFO = {
   ],
   holidays:['2026-01-01 (신정)', '2026-05-05 (어린이날)'],
 };
+
+// 매장 편의정보 — 버튼으로 고르는 프리셋 목록 + 아이콘
+const STORE_AMENITIES = ['주차장','단체석','포장','무선 인터넷','남성/여성 화장실 구분','배달','룸','국민지원금','지역화폐(지류형)','지역화폐(카드형)','제로페이','테라스','발렛파킹','반려동물 동반','유아용 의자'];
+const STORE_AMENITY_ICONS = {'주차장':'🅿️','단체석':'👥','포장':'🥡','무선 인터넷':'📶','남성/여성 화장실 구분':'🚻','배달':'🛵','룸':'🚪','국민지원금':'🎫','지역화폐(지류형)':'🧾','지역화폐(카드형)':'💳','제로페이':'📱','테라스':'🌿','발렛파킹':'🚗','반려동물 동반':'🐶','유아용 의자':'🪑'};
 
 /* ============================================================
    주문 방식 설정 데이터
@@ -10373,14 +10382,15 @@ function renderStore(main){
 
     <div class="grid-2-eq">
       <div class="panel">
-        <h3>기본 정보</h3>
+        <h3>기본 정보 <span class="h-sub">사업자등록증 기준 정보예요</span></h3>
+        <div style="font-size:12px;color:#8a6d00;background:#fff8e6;border:1px solid #ffe3a3;border-radius:8px;padding:9px 12px;margin-bottom:14px;line-height:1.5;">🔒 <b>매장명·대표자명·사업자등록번호·주소</b>는 가입 시 사업자등록증 정보로 시스템 관리자가 설정해, 여기서는 바꿀 수 없어요. 변경이 필요하면 고객센터로 알려 주세요.</div>
         <div class="form-grid">
-          <div class="form-row"><label>매장명 *</label><input class="input" value="${s.name}" /></div>
-          <div class="form-row"><label>대표자명</label><input class="input" value="${s.owner}" /></div>
-          <div class="form-row"><label>사업자등록번호</label><input class="input" value="${s.bizNo}" /></div>
+          <div class="form-row"><label>매장명 🔒</label><input class="input" value="${s.name}" disabled /></div>
+          <div class="form-row"><label>표시용 매장명</label><input class="input" value="${s.displayName}" oninput="STORE_INFO.displayName=this.value" placeholder="고객 화면에 보일 이름" /><div style="font-size:11px;color:var(--ink-3);margin-top:5px;line-height:1.4;">고객 주문 화면에 이 이름이 보여요. 매장명과 다르게 자유롭게 정할 수 있어요.</div></div>
+          <div class="form-row"><label>대표자명 🔒</label><input class="input" value="${s.owner}" disabled /></div>
+          <div class="form-row"><label>사업자등록번호 🔒</label><input class="input" value="${s.bizNo}" disabled /></div>
           <div class="form-row"><label>대표 전화</label><input class="input" value="${s.phone}" /></div>
-          <div class="form-row" style="grid-column:1/-1;"><label>주소</label><input class="input" value="${s.addr}" /></div>
-          <div class="form-row" style="grid-column:1/-1;"><label>기타 안내 사항</label><input class="input" value="${s.extra}" placeholder="예: 주차 안내, 반려동물 동반 가능 여부 등" /></div>
+          <div class="form-row" style="grid-column:1/-1;"><label>주소 🔒</label><input class="input" value="${s.addr}" disabled /></div>
         </div>
       </div>
 
@@ -10421,6 +10431,33 @@ function renderStore(main){
             </div>` : ''}
         </div>
         <div style="margin-top:8px;font-size:11px;color:var(--ink-3);">PNG·JPG / 가로형 권장 / 장당 최대 5MB</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>매장 소개 · 편의정보 <span class="h-sub">고객 주문 화면에 함께 보여요</span></h3>
+
+      <div class="form-row" style="margin-bottom:20px;">
+        <label>매장 소개글</label>
+        <textarea class="input" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;line-height:1.5;" oninput="STORE_INFO.intro=this.value" placeholder="예: 매일 직접 로스팅한 원두로 내린 커피와 갓 구운 베이커리를 즐길 수 있는 동네 카페예요.">${s.intro}</textarea>
+      </div>
+
+      <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:4px;">가게 편의정보</label>
+      <div style="font-size:11px;color:var(--ink-3);margin-bottom:10px;">해당하는 항목을 눌러 선택할 수 있어요. 다시 누르면 해제돼요.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${STORE_AMENITIES.map(a=>`<span class="chip ${s.amenities.includes(a)?'on':''}" onclick="toggleAmenity('${a}')">${STORE_AMENITY_ICONS[a]||''} ${a}</span>`).join('')}
+      </div>
+
+      <div style="margin-top:18px;padding-top:16px;border-top:1px dashed var(--line-2);">
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:4px;">직접입력</label>
+        <div style="font-size:11px;color:var(--ink-3);margin-bottom:10px;">목록에 없는 편의정보를 직접 적어 추가할 수 있어요.</div>
+        ${s.amenitiesCustom.length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          ${s.amenitiesCustom.map((c,i)=>`<span class="chip on" style="gap:8px;">${c}<button onclick="removeCustomAmenity(${i})" style="background:none;border:none;color:#fff;cursor:pointer;font-size:12px;padding:0;line-height:1;opacity:.85;">✕</button></span>`).join('')}
+        </div>` : ''}
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="input" id="amenity-custom-input" placeholder="예: 콘센트 좌석, 흡연 부스, 주류 판매" style="flex:1;max-width:320px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomAmenity();}" />
+          <button class="btn-ghost" onclick="addCustomAmenity()" style="white-space:nowrap;">+ 추가</button>
+        </div>
       </div>
     </div>
 
@@ -10487,6 +10524,32 @@ function renderStore(main){
       </div>
     </div>
   `;
+}
+
+// 편의정보 프리셋 토글 — 선택/해제
+function toggleAmenity(name){
+  const arr = STORE_INFO.amenities;
+  const i = arr.indexOf(name);
+  if (i>=0) arr.splice(i,1); else arr.push(name);
+  renderApp();
+}
+// 편의정보 직접입력 추가
+function addCustomAmenity(){
+  const el = document.getElementById('amenity-custom-input');
+  if(!el) return;
+  const v = el.value.trim();
+  if(!v){ el.focus(); return; }
+  if (STORE_INFO.amenities.includes(v) || STORE_INFO.amenitiesCustom.includes(v)){
+    showToast('<span class="ic">ℹ️</span> 이미 추가된 편의정보예요', 'ok');
+    el.value=''; return;
+  }
+  STORE_INFO.amenitiesCustom.push(v);
+  renderApp();
+}
+// 편의정보 직접입력 삭제
+function removeCustomAmenity(i){
+  STORE_INFO.amenitiesCustom.splice(i,1);
+  renderApp();
 }
 
 function openHolidayModal(){

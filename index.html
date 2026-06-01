@@ -9608,7 +9608,9 @@ function isTakeoutQRActive(){
   return ORDER_CHANNELS.mode === 'takeout' || ORDER_CHANNELS.mode === 'both';
 }
 const QR_REQUESTS = [
-  { id:1, qty:10, colorName:'검정', hex:'#191f28', memo:'옥상 테라스 신규 테이블용', reqDate:'2026-05-10', status:'신청중', totalPrice:20000 },
+  { id:1, qty: 9, colorName:'검정', hex:'#191f28', memo:'테라스 신규 테이블용',    reqDate:'2026-05-13', status:'신청중', totalPrice:18000 },
+  { id:2, qty:18, colorName:'흰색', hex:'#f0f0f0', memo:'카운터 포장용',          reqDate:'2026-04-20', status:'제작중', totalPrice:36000 },
+  { id:3, qty: 9, colorName:'초록', hex:'#16a34a', memo:'',                       reqDate:'2026-03-08', status:'완료',   totalPrice:18000 },
 ];
 
 const COUPONS = [
@@ -10533,18 +10535,27 @@ function renderQRStickerTab(){
   // 신청 내역 테이블
   const history = QR_REQUESTS.length===0 ? '' : (
     '<h3 style="margin-top:24px;">신청 내역 <span class="h-sub">' + QR_REQUESTS.length + '건</span></h3>'
-    + '<table class="t"><thead><tr><th style="width:40px;">#</th><th style="width:110px;">색상</th><th style="width:80px;">수량</th><th class="num" style="width:110px;">결제 금액</th><th>메모</th><th style="width:110px;">신청일</th><th style="width:100px;">상태</th></tr></thead><tbody>'
+    + '<div style="font-size:12px;color:var(--ink-3);margin-bottom:10px;padding:9px 12px;background:var(--bg-2);border-radius:8px;line-height:1.55;">'
+    + '💡 주문 취소는 상품 제작이 시작되기 전, <b style="color:var(--ink-2);">취소</b> 버튼이 활성화되어 있는 상태에서만 가능해요.'
+    + '</div>'
+    + '<table class="t"><thead><tr><th style="width:40px;">#</th><th style="width:110px;">색상</th><th style="width:80px;">수량</th><th class="num" style="width:110px;">결제 금액</th><th>메모</th><th style="width:110px;">신청일</th><th style="width:100px;">상태</th><th style="width:72px;"></th></tr></thead><tbody>'
     + QR_REQUESTS.map(function(r,i){
         const rb = r.colorName==='흰색' ? '1px solid var(--line)' : 'none';
         const rd = r.reqDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3');
-        const rp = r.status==='완료' ? 'done' : 'partial';
+        const rp = r.status==='완료' ? 'done' : r.status==='제작중' ? 'partial' : r.status==='취소' ? 'cancel' : 'pending';
+        const canCancel = r.status === '신청중';
+        const cancelBtn = canCancel
+          ? '<button onclick="cancelQRRequest('+r.id+')" style="padding:5px 10px;font-size:11px;font-weight:700;background:#fff;border:1px solid var(--red);color:var(--red);border-radius:6px;cursor:pointer;">취소</button>'
+          : r.status==='취소' ? '<span style="font-size:11px;color:var(--ink-4);">—</span>'
+          : '<span style="font-size:11px;color:var(--ink-4);">'+(r.status==='제작중'?'제작 중':'—')+'</span>';
         return '<tr><td style="color:var(--ink-3);">'+(i+1)+'</td>'
           +'<td><div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:18px;background:'+r.hex+';border-radius:4px;border:'+rb+';flex-shrink:0;"></div><span style="font-size:13px;">'+r.colorName+'</span></div></td>'
           +'<td><b>'+r.qty+'장</b></td>'
           +'<td class="num"><b>'+(r.totalPrice||0).toLocaleString()+'</b><span style="color:var(--ink-3);font-size:11px;">원</span></td>'
           +'<td style="color:var(--ink-2);font-size:12px;">'+(r.memo||'<span style="color:var(--ink-4);">—</span>')+'</td>'
           +'<td style="color:var(--ink-3);">'+rd+'</td>'
-          +'<td><span class="pill '+rp+'">'+r.status+'</span></td></tr>';
+          +'<td><span class="pill '+rp+'">'+r.status+'</span></td>'
+          +'<td style="text-align:center;">'+cancelBtn+'</td></tr>';
       }).join('')
     + '</tbody></table>'
   );
@@ -10820,6 +10831,15 @@ function submitQRRequest(){
   state.qrReqMemo = '';
   renderApp();
   showToast(`<span class="ic">✅</span> ${color} QR ${qty}장 신청이 접수됐어요`, 'ok');
+}
+function cancelQRRequest(id){
+  const r = QR_REQUESTS.find(x=>x.id===id);
+  if(!r) return;
+  if(r.status !== '신청중'){ alert('제작이 이미 시작돼 취소할 수 없어요.'); return; }
+  if(!confirm('신청을 취소할까요?\n취소 후엔 복구할 수 없어요.')) return;
+  r.status = '취소';
+  renderApp();
+  showToast('<span class="ic">🗑️</span> QR 스티커 신청을 취소했어요', 'ok');
 }
 
 /* ============================================================

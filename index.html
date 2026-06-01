@@ -1201,7 +1201,7 @@ const ORDERS = [
     items:[
       {name:'레몬에이드', qty:1, price:5200, options:[]},
     ] },
-  { id:'#20260515-0046', date:'2026-05-15', time:'10:24', channel:'테이블 4',   ch:'매장', menu:'아메리카노 외 2건',     issuer:'신한', amt:21400, status:'완료',     stl:'정산예정 5/20', card:'4141201234', tid:'tid_3f8a5a13b002xyz', originalAmt:26400, couponName:'신규 가입 환영 5천원', couponAmt:5000,
+  { id:'#20260515-0046', date:'2026-05-15', time:'10:24', channel:'테이블 4',   ch:'매장', menu:'아메리카노 외 2건',     issuer:'신한', amt:21400, status:'완료',     stl:'정산예정 5/20', card:'4141201234', tid:'tid_3f8a5a13b002xyz', originalAmt:26400, couponName:'신규 가입 환영 5천원', couponAmt:5000, couponIssuer:'softment',
     items:[
       {name:'아메리카노', qty:3, price:4500, options:['HOT']},
       {name:'카페라떼',   qty:1, price:5500, options:['ICE','오트밀크 +500']},
@@ -1216,7 +1216,7 @@ const ORDERS = [
     items:[
       {name:'자몽에이드', qty:1, price:8000, options:['ICE','라지 +1,000']},
     ] },
-  { id:'#20260515-0043', date:'2026-05-15', time:'09:58', channel:'테이블 6',   ch:'매장', menu:'아메리카노 외 4건',     issuer:'VISA (해외)', amt:24420, status:'완료',     stl:'정산예정 5/21', card:'4111001234', currency:'USD 17.70', originalAmt:27420, couponName:'주말 한정 15% 할인', couponAmt:3000,
+  { id:'#20260515-0043', date:'2026-05-15', time:'09:58', channel:'테이블 6',   ch:'매장', menu:'아메리카노 외 4건',     issuer:'VISA (해외)', amt:24420, status:'완료',     stl:'정산예정 5/21', card:'4111001234', currency:'USD 17.70', originalAmt:27420, couponName:'주말 한정 15% 할인', couponAmt:3000, couponIssuer:'merchant',
     items:[
       {name:'아메리카노', qty:1, price:4500, options:['HOT']},
       {name:'카페라떼',   qty:1, price:5500, options:['ICE']},
@@ -1288,8 +1288,28 @@ const SETTLEMENTS = (function(){
   // 쿠폰 발행 주체 분리
   // 소프트먼트 발행: 플랫폼이 가맹점에 보전 → 정산에 더함
   // 사장님 발행: 가맹점 부담 → 정산 제외 (이미 gross에 반영된 실매출)
-  const couponPatternPlatform = DAY.map((_, i) => i % 5 === 0 || i % 11 === 0);
-  const couponPatternMerchant = DAY.map((_, i) => i % 4 === 0 || i % 9 === 0);
+  // ORDERS 실데이터가 있는 날짜는 실제 couponIssuer로, 그 외는 결정적 패턴 사용
+  const orderCouponByDate = {};  // { 'YYYY-MM-DD': { platform: 합계, merchant: 합계 } }
+  if (typeof ORDERS !== 'undefined') {
+    ORDERS.forEach(function(o){
+      if (!o.couponAmt || !o.couponIssuer) return;
+      if (!orderCouponByDate[o.date]) orderCouponByDate[o.date] = { platform:0, merchant:0 };
+      if (o.couponIssuer === 'softment') orderCouponByDate[o.date].platform += o.couponAmt;
+      else orderCouponByDate[o.date].merchant += o.couponAmt;
+    });
+  }
+  const couponPatternPlatform = DAY.map(function(d, i){
+    const [m, dd] = d.d.split('/').map(Number);
+    const iso = '2026-' + String(m).padStart(2,'0') + '-' + String(dd).padStart(2,'0');
+    if (orderCouponByDate[iso]) return orderCouponByDate[iso].platform > 0;
+    return i % 5 === 0 || i % 11 === 0;  // 실데이터 없는 날은 시뮬레이션 패턴
+  });
+  const couponPatternMerchant = DAY.map(function(d, i){
+    const [m, dd] = d.d.split('/').map(Number);
+    const iso = '2026-' + String(m).padStart(2,'0') + '-' + String(dd).padStart(2,'0');
+    if (orderCouponByDate[iso]) return orderCouponByDate[iso].merchant > 0;
+    return i % 4 === 0 || i % 9 === 0;
+  });
   const today = new Date(2026, 4, 15);
   const DOW_ARR = ['일','월','화','수','목','금','토'];
   // 영업일 D+N 정산 (주말·공휴일 스킵)
@@ -3629,7 +3649,7 @@ function renderOrders(main){
               <td>${o.issuer ? `${payLabel(o)}${paySub(o)?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${paySub(o)}</div>`:''}` : '<span style="color:var(--ink-4);font-size:11px;">미결제</span>'}</td>
               <td class="num">
                 ${amountCell}
-                ${o.couponAmt>0?`<div style="margin-top:3px;"><span style="font-size:10px;font-weight:700;background:#f0fdf4;color:#15803d;border:1px solid #86efac;padding:1px 6px;border-radius:4px;">🎟️ 쿠폰 −${fmt(o.couponAmt)}원</span></div>`:''}
+                ${o.couponAmt>0?`<div style="margin-top:3px;"><span style="font-size:10px;font-weight:700;${o.couponIssuer==='softment'?'background:#f0fdf4;color:#15803d;border:1px solid #86efac;':'background:#fef3c7;color:#d97706;border:1px solid #fcd34d;'}padding:1px 6px;border-radius:4px;">🎟️ ${o.couponIssuer==='softment'?'소프트먼트':'가게'} 쿠폰 −${fmt(o.couponAmt)}원</span></div>`:''}
                 ${o.discountAmt>0?`<div style="margin-top:3px;"><span style="font-size:10px;font-weight:700;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:1px 6px;border-radius:4px;">🔥 할인 −${fmt(o.discountAmt)}원</span></div>`:''}
               </td>
               <td><span class="pill ${o.status==='완료'?'done':o.status==='진행중'?'partial':cancelPillClass}">${isCancelAll?cancelLabel:o.status}</span></td>
@@ -5157,7 +5177,7 @@ function openOrderDetail(o){
   const hasDiscount = (o.couponAmt > 0) || (o.discountAmt > 0);
   const discountLines = hasDiscount ? `
       ${o.originalAmt ? `<div class="r-line"><span>소계</span><b style="color:var(--ink-2);">${fmt(o.originalAmt)}원</b></div>` : ''}
-      ${o.couponAmt > 0 ? `<div class="r-line"><span style="color:#15803d;">🎟️ 쿠폰 할인<span style="font-size:11px;font-weight:400;margin-left:4px;color:var(--ink-3);">${o.couponName||''}</span></span><b style="color:#15803d;">−${fmt(o.couponAmt)}원</b></div>` : ''}
+      ${o.couponAmt > 0 ? `<div class="r-line"><span>🎟️ 쿠폰 할인<div style="font-size:11px;font-weight:400;color:var(--ink-3);margin-top:2px;">${o.couponName||''}<span style="margin-left:6px;padding:1px 6px;border-radius:4px;font-weight:700;${o.couponIssuer==='softment'?'background:#f0fdf4;color:#15803d;':'background:#fef3c7;color:#d97706;'}">${o.couponIssuer==='softment'?'소프트먼트 발행 · 정산 보전':'가게 발행 · 정산 제외'}</span></div></span><b style="color:${o.couponIssuer==='softment'?'#15803d':'#d97706'};">−${fmt(o.couponAmt)}원</b></div>` : ''}
       ${o.discountAmt > 0 ? `<div class="r-line"><span style="color:var(--blue);">🔥 ${o.discountLabel||'할인'}</span><b style="color:var(--blue);">−${fmt(o.discountAmt)}원</b></div>` : ''}
   ` : '';
   const amountBlock = isCancelAll ? `
@@ -9626,11 +9646,12 @@ const QR_REQUESTS = [
   { id:3, qty: 9, colorName:'초록', hex:'#16a34a', memo:'',                       reqDate:'2026-03-08', status:'완료',   totalPrice:18000 },
 ];
 
+// issuer: 'softment' = 소프트먼트 발행(정산 보전), 'merchant' = 가게 발행(가맹점 부담·정산 제외)
 const COUPONS = [
-  { id:1, name:'신규 가입 환영 5천원', code:'WELCOME5K', kind:'정액',   value:5000, condition:'1만원 이상', period:'~2026-12-31', used:42,  issued:200, status:'사용중' },
-  { id:2, name:'주말 한정 15% 할인',  code:'WEEKEND15', kind:'비율',   value:15,   condition:'주말 결제',  period:'~2026-06-30', used:18,  issued:100, status:'사용중' },
-  { id:3, name:'생일 축하 무료 음료', code:'BDAY-FREE', kind:'무료',   value:0,    condition:'생일주간',    period:'상시',         used:6,   issued:50,  status:'사용중' },
-  { id:4, name:'겨울 시즌 1+1',      code:'WINTER11',  kind:'증정',   value:0,    condition:'특정 메뉴',  period:'~2026-02-29', used:80,  issued:80,  status:'종료' },
+  { id:1, name:'신규 가입 환영 5천원', code:'WELCOME5K', kind:'정액',   value:5000, condition:'1만원 이상', period:'~2026-12-31', used:42,  issued:200, status:'사용중', issuer:'softment'  },
+  { id:2, name:'주말 한정 15% 할인',  code:'WEEKEND15', kind:'비율',   value:15,   condition:'주말 결제',  period:'~2026-06-30', used:18,  issued:100, status:'사용중', issuer:'merchant'  },
+  { id:3, name:'생일 축하 무료 음료', code:'BDAY-FREE', kind:'무료',   value:0,    condition:'생일주간',    period:'상시',         used:6,   issued:50,  status:'사용중', issuer:'softment'  },
+  { id:4, name:'겨울 시즌 1+1',      code:'WINTER11',  kind:'증정',   value:0,    condition:'특정 메뉴',  period:'~2026-02-29', used:80,  issued:80,  status:'종료',   issuer:'softment'  },
 ];
 
 const STAMPS = {
@@ -11134,10 +11155,13 @@ function renderCoupon(main){
         </span>
       </h3>
       <table class="t">
-        <thead><tr><th>이름</th><th style="width:120px;">코드</th><th style="width:100px;">종류</th><th style="width:130px;">조건</th><th style="width:140px;">기간</th><th>사용 현황</th><th style="width:80px;">상태</th><th style="width:64px;"></th></tr></thead>
+        <thead><tr><th>이름</th><th style="width:120px;">코드</th><th style="width:100px;">종류</th><th style="width:130px;">조건</th><th style="width:130px;">기간</th><th style="width:110px;">발행처</th><th>사용 현황</th><th style="width:80px;">상태</th><th style="width:64px;"></th></tr></thead>
         <tbody>
           ${COUPONS.filter(c=>!state.couponStatusFilter||state.couponStatusFilter==='전체'||c.status===state.couponStatusFilter).map(c=>{
             const rate = c.issued ? Math.round(c.used/c.issued*100) : 0;
+            const issuerLabel = c.issuer==='softment'
+              ? '<span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;background:#f0fdf4;color:#15803d;border:1px solid #86efac;">소프트먼트</span><div style="font-size:10px;color:var(--ink-4);margin-top:2px;">정산 보전</div>'
+              : '<span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;background:#fef3c7;color:#d97706;border:1px solid #fcd34d;">가게 발행</span><div style="font-size:10px;color:var(--ink-4);margin-top:2px;">정산 제외</div>';
             return `
               <tr>
                 <td><b>${c.name}</b></td>
@@ -11145,6 +11169,7 @@ function renderCoupon(main){
                 <td><span style="font-size:12px;">${c.kind} ${c.kind==='정액'?fmt(c.value)+'원':c.kind==='비율'?c.value+'%':''}</span></td>
                 <td><span style="font-size:12px;color:var(--ink-2);">${c.condition}</span></td>
                 <td><span style="font-size:12px;color:var(--ink-2);">${c.period}</span></td>
+                <td>${issuerLabel}</td>
                 <td>
                   <div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;"><b>${c.used}</b>/${c.issued} · ${rate}%</div>
                   <div style="height:5px;background:var(--bg-2);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${rate}%;background:var(--blue);"></div></div>

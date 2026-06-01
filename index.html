@@ -1134,7 +1134,7 @@ const CHANNEL = [
 // 합계: 46건 / 1,234,500원 (DAY 5/15와 일치)
 
 // 주문 (오늘 5/15 일부)
-// 주문 데이터 — date(결제일) 필드 추가. 1년 초과 거래는 카드번호 검색 차단 + 전체 마스킹
+// 주문 데이터 — date(결제일) 필드 추가. 1년 초과 거래는 카드번호 전체 마스킹
 const ORDERS = [
   // 진행중 — 결제·조리·픽업 대기. 매출 합계에는 미포함(완료 시점에 합산)
   { id:'#20260515-0049', date:'2026-05-15', time:'10:45', channel:'테이블 6', ch:'매장', menu:'아메리카노 외 1건', issuer:'카카오페이', paySub:'페이', amt:9500, status:'진행중', stl:'−',
@@ -1213,7 +1213,7 @@ const ORDERS = [
     items:[
       {name:'카푸치노', qty:1, price:5000, options:['HOT']},
     ] },
-  // === 1년 초과 거래 샘플 (카드 검색 불가, 카드번호 전체 마스킹) ===
+  // === 1년 초과 거래 샘플 (카드번호 전체 마스킹) ===
   { id:'#20250410-0218', date:'2025-04-10', time:'14:22', channel:'테이블 2',   ch:'매장', menu:'아메리카노 외 1건',     issuer:'신한', amt:8500,  status:'완료',     stl:'정산완료',         card:'4141209999', _expired:true,
     items:[
       {name:'아메리카노', qty:1, price:4500, options:['HOT']},
@@ -1396,8 +1396,6 @@ const state = {
   orderRowsPerPage: 50,
   orderPage: 1,
   orderSearch: '',
-  orderCardMode: 'last4',           // last4 | first6
-  orderCardValue: '',
   orderAmountMin: '',
   orderAmountMax: '',
   orderDateFilter: 'today',
@@ -1409,6 +1407,9 @@ const state = {
   orderAdvancedOpen: false,         // 세부 검색 접기/펴기
   orderFilterDraft: null,            // 패널 안 변경을 라이브와 분리 — 열 때 동기화, [이 조건으로 찾기]로 일괄 적용
   exportDateRange: '',              // 조회 기간 안내 문구
+  exportFormat: 'xlsx',             // 내보내기 파일 형식 — xlsx | csv (택 1, 마지막 선택 기억)
+  exportRowsCount: 0,               // 내보내기 모달 재렌더용 — 건수
+  exportSource: '',                 // 내보내기 모달 재렌더용 — 대상 이름
   exportEmail: '',                  // 메일로 받기 시 발송 주소 (default STORE_EMAIL)
   exportEmailEditing: false,        // 이메일 변경 인풋 활성화 여부
   calendarSelectedDate: '2026-05-15', // 정산 달력에서 강조용
@@ -3277,17 +3278,6 @@ function renderOrders(main){
     rows = rows.filter(o=>(o.id+' '+(o.tid||'')+' '+makeApproval(o)).toLowerCase().includes(q));
   }
 
-  // 🔒 카드번호 검색은 결제일로부터 1년 이내만 적용 — 그 이상은 사전 차단
-  if (state.orderCardValue){
-    const v = state.orderCardValue;
-    rows = rows.filter(o=>{
-      if (!o.card) return false;
-      if (!isWithinYear(o.date)) return false; // 보안 정책 차단
-      if (state.orderCardMode==='last4') return o.card.endsWith(v);
-      return o.card.startsWith(v);
-    });
-  }
-
   // 금액 범위
   if (state.orderAmountMin) rows = rows.filter(o=>o.amt >= Number(state.orderAmountMin));
   if (state.orderAmountMax) rows = rows.filter(o=>o.amt <= Number(state.orderAmountMax));
@@ -3370,7 +3360,6 @@ function renderOrders(main){
         state.orderMenuSearch && '메뉴',
         state.orderChannelFilter!=='all' && '채널',
         state.orderPayFilter!=='all' && '결제수단',
-        state.orderCardValue && '카드번호',
         (state.orderAmountMin || state.orderAmountMax) && '금액',
         state.orderSearch && '주문번호',
       ].filter(Boolean);
@@ -3388,7 +3377,7 @@ function renderOrders(main){
           <div class="adv-desc">
             <b style="color:var(--ink-2);">${periodLabel} · ${statusLabel}</b>${hasAdv && advFilters.filter(f=>f!=='기간'&&f!=='상태').length>0
               ? ` · ${advFilters.filter(f=>f!=='기간'&&f!=='상태').join('·')}(으)로 좁혀서 보고 있어요`
-              : ' · 기간·상태·메뉴·채널·결제수단·카드번호·금액·주문번호(승인번호)로 더 정확하게 찾을 수 있어요'}
+              : ' · 기간·상태·메뉴·채널·결제수단·금액·주문번호(승인번호)로 더 정확하게 찾을 수 있어요'}
           </div>
         </div>
         <span class="adv-toggle-btn">
@@ -3444,15 +3433,6 @@ function renderOrders(main){
             </div>
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
-            <span class="field-label">카드번호</span>
-            <div class="seg sm">
-              <div class="b ${d.cardMode==='first6'?'on':''}" onclick="setCardMode('first6')">앞 6자리</div>
-              <div class="b ${d.cardMode==='last4'?'on':''}" onclick="setCardMode('last4')">끝 4자리</div>
-            </div>
-            <input class="input" placeholder="${d.cardMode==='first6'?'예) 414120':'예) 1234'}" value="${d.cardValue}" oninput="state.orderFilterDraft.cardValue=this.value" maxlength="${d.cardMode==='first6'?6:4}" style="width:160px;font-variant-numeric:tabular-nums;" />
-            <span style="font-size:11px;color:#a25e00;background:#fff3d4;padding:4px 8px;border-radius:6px;">🔒 결제일로부터 1년 이내 거래만 검색돼요</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
             <span class="field-label">금액 범위</span>
             <input class="input" placeholder="최소" value="${d.amountMin}" oninput="state.orderFilterDraft.amountMin=this.value" style="width:140px;" />
             <span style="color:var(--ink-3);">~</span>
@@ -3472,7 +3452,7 @@ function renderOrders(main){
     </div>
 
     <div class="panel tight">
-      <h3>주문 목록 <span class="h-sub">${rows.length}건 조회됨 <span style="color:var(--ink-3);font-size:11px;font-weight:500;cursor:pointer;margin-left:6px;" onclick="alert('🔒 개인정보 보호 정책\\n\\n• 결제일로부터 1년 이내 거래: 카드번호 앞 6자리(BIN) + 끝 4자리만 노출\\n• 1년 초과 거래: 카드번호 전체 마스킹, 카드번호 검색 결과에도 포함되지 않음\\n• 결제번호(tid)도 일부만 노출됨')" title="개인정보 보호 정책">ⓘ 카드번호 표시 정책</span></span></h3>
+      <h3>주문 목록 <span class="h-sub">${rows.length}건 조회됨 <span style="color:var(--ink-3);font-size:11px;font-weight:500;cursor:pointer;margin-left:6px;" onclick="alert('🔒 개인정보 보호 정책\\n\\n• 결제일로부터 1년 이내 거래: 카드번호 앞 6자리(BIN) + 끝 4자리만 노출\\n• 1년 초과 거래: 카드번호 전체 마스킹\\n• 결제번호(tid)도 일부만 노출됨')" title="개인정보 보호 정책">ⓘ 카드번호 표시 정책</span></span></h3>
       <table class="t">
         <thead>
           <tr>
@@ -4449,13 +4429,6 @@ function setDetailCategory(c){
   state.detailTab='menu';
   renderApp();
 }
-// 카드번호 모드 토글 — 패널 안 draft에 반영
-function setCardMode(m){
-  ensureOrderFilterDraft();
-  state.orderFilterDraft.cardMode = m;
-  state.orderFilterDraft.cardValue = '';
-  renderApp();
-}
 // 주문 KPI 카드 클릭 — 즉시 적용 + draft도 동기화 (열려 있을 때 칩 상태 일치)
 function setOrderStatus(s){
   const next = (state.orderStatusFilter === s && s !== 'all') ? 'all' : s;
@@ -4470,7 +4443,7 @@ function clearOrderFilterDraft(){
 }
 // 기존 동선 호환 (외부에서 호출되던 케이스)
 function resetOrderFilters(){
-  state.orderSearch=''; state.orderCardValue=''; state.orderAmountMin=''; state.orderAmountMax='';
+  state.orderSearch=''; state.orderAmountMin=''; state.orderAmountMax='';
   state.orderMenuSearch=''; state.orderChannelFilter='all'; state.orderPayFilter='all'; state.orderStlFilter='all';
   state.orderDateFilter='today'; state.orderStatusFilter='all';
   state.orderFilterDraft = makeOrderFilterDraftDefault();
@@ -4479,7 +4452,7 @@ function resetOrderFilters(){
 function makeOrderFilterDraftDefault(){
   return {
     dateFilter:'today', statusFilter:'all', channelFilter:'all', payFilter:'all',
-    menuSearch:'', cardMode:'last4', cardValue:'',
+    menuSearch:'',
     amountMin:'', amountMax:'', search:'',
   };
 }
@@ -4491,8 +4464,6 @@ function ensureOrderFilterDraft(){
       channelFilter:state.orderChannelFilter,
       payFilter:   state.orderPayFilter,
       menuSearch:  state.orderMenuSearch,
-      cardMode:    state.orderCardMode,
-      cardValue:   state.orderCardValue,
       amountMin:   state.orderAmountMin,
       amountMax:   state.orderAmountMax,
       search:      state.orderSearch,
@@ -4508,8 +4479,6 @@ function toggleOrderAdvanced(){
       channelFilter:state.orderChannelFilter,
       payFilter:   state.orderPayFilter,
       menuSearch:  state.orderMenuSearch,
-      cardMode:    state.orderCardMode,
-      cardValue:   state.orderCardValue,
       amountMin:   state.orderAmountMin,
       amountMax:   state.orderAmountMax,
       search:      state.orderSearch,
@@ -4527,8 +4496,6 @@ function applyOrderFilters(){
   state.orderChannelFilter= d.channelFilter;
   state.orderPayFilter    = d.payFilter;
   state.orderMenuSearch   = d.menuSearch;
-  state.orderCardMode     = d.cardMode;
-  state.orderCardValue    = d.cardValue;
   state.orderAmountMin    = d.amountMin;
   state.orderAmountMax    = d.amountMax;
   state.orderSearch       = d.search;
@@ -4794,10 +4761,60 @@ function applyDateRange(){
   renderApp();
 }
 
-// ========== 통합 내보내기 모달 — 1단계 흐름 ==========
-// 받는 방법(파일/메일) 선택 시 바로 다운로드/발송 (형식은 엑셀로 고정)
+// ========== 내보내기 공용 — 형식 선택(엑셀/CSV) · CSV 변환 · 다운로드 ==========
+// 형식 선택 카드 (엑셀 / CSV 택 1) — 여러 내보내기 화면에서 공용
+function exportFormatCards(pickFn){
+  const f = state.exportFormat || 'xlsx';
+  return `
+    <div style="font-size:12px;font-weight:700;color:var(--ink-2);margin:2px 0 8px;">받을 파일 형식을 골라 주세요</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
+      <div class="opt-card ${f==='xlsx'?'on':''}" onclick="${pickFn}('xlsx')">
+        <div class="ico-lg">📊</div>
+        <div class="ttl">엑셀 (.xlsx)</div>
+        <div class="sub-ttl">추천 · 표 서식 그대로 받을 수 있어요</div>
+      </div>
+      <div class="opt-card ${f==='csv'?'on':''}" onclick="${pickFn}('csv')">
+        <div class="ico-lg">📄</div>
+        <div class="ttl">CSV (.csv)</div>
+        <div class="sub-ttl">엑셀·구글시트 어디서나 열 수 있어요</div>
+      </div>
+    </div>
+  `;
+}
+// 헤더 + 행 배열 → CSV 문자열 (BOM 포함 — 엑셀에서 한글 안 깨지게)
+function toCSV(headers, rows){
+  const esc = v => {
+    const s = (v==null ? '' : String(v));
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+  return '﻿' + [headers.map(esc).join(','), ...rows.map(r=>r.map(esc).join(','))].join('\n');
+}
+// Blob 즉시 다운로드
+function triggerDownload(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ========== 통합 내보내기 모달 — 엑셀/CSV 택 1 ==========
 function openExport(rowsCount, source, dateRange){
+  state.exportRowsCount = rowsCount;
+  state.exportSource = source;
   state.exportDateRange = dateRange || '';
+  if(!state.exportFormat) state.exportFormat = 'xlsx';
+  renderExportModal();
+  document.getElementById('modal-bg').classList.add('on');
+}
+function pickExportFormat(fmt){
+  state.exportFormat = fmt;
+  renderExportModal();
+}
+function renderExportModal(){
+  const rowsCount = state.exportRowsCount;
+  const source = state.exportSource;
+  const ext = state.exportFormat==='csv' ? 'CSV(.csv)' : '엑셀(.xlsx)';
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-head">
@@ -4812,20 +4829,22 @@ function openExport(rowsCount, source, dateRange){
       <div style="padding:14px 16px;background:#fafcff;border:1px solid var(--blue-100);border-radius:10px;margin-bottom:18px;">
         <div style="font-size:11px;color:#1b64da;font-weight:700;margin-bottom:6px;">📅 지금 조회한 기간</div>
         <div style="font-size:14px;color:var(--ink);font-weight:700;line-height:1.4;">${state.exportDateRange}</div>
-        <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">이 기간 + 적용한 필터 기준으로 <b style="color:var(--ink-2);">전체 ${fmt(rowsCount)}건</b>이 엑셀(.xlsx)로 내려가요</div>
+        <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">이 기간 + 적용한 필터 기준으로 <b style="color:var(--ink-2);">전체 ${fmt(rowsCount)}건</b>을 ${ext} 파일로 받을 수 있어요</div>
       </div>
     ` : ''}
 
+    ${exportFormatCards('pickExportFormat')}
+
     <div style="display:flex;gap:8px;margin-top:8px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
-      <button class="btn-primary" style="flex:2;" onclick='confirmExport(${rowsCount},${JSON.stringify(source)})'>📂 엑셀 파일로 받기</button>
+      <button class="btn-primary" style="flex:2;" onclick='confirmExport(${rowsCount},${JSON.stringify(source)})'>📂 ${ext} 파일로 받기</button>
     </div>
   `;
-  document.getElementById('modal-bg').classList.add('on');
 }
 function confirmExport(cnt, src){
+  const label = state.exportFormat==='csv' ? 'CSV' : '엑셀';
   closeModal();
-  showToast(`<span class="ic">📥</span> ${src} ${fmt(cnt)}건을 엑셀로 내려받았어요`, 'ok');
+  showToast(`<span class="ic">📥</span> ${src} ${fmt(cnt)}건을 ${label} 파일로 내려받았어요`, 'ok');
 }
 
 function openOrderDetail(o){
@@ -5791,15 +5810,60 @@ function applyMenuExcel(){
   renderApp();
 }
 
-function exportMenuJSON(){
-  const payload = { menus:MENUS, optGroups:OPT_GROUPS, catMenu:CAT_MENU, sets:SETS, exportedAt:new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `qrorder-menu-${new Date().toISOString().slice(0,10)}.json`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast(`<span class="ic">📥</span> 메뉴 데이터를 내려받았어요`, 'ok');
+// 등록 메뉴 내보내기 — 엑셀/CSV 택 1 (가져오기 양식과 동일한 컬럼이라 그대로 다시 올릴 수 있어요)
+function openMenuExport(){
+  if(!state.exportFormat) state.exportFormat = 'xlsx';
+  renderMenuExportModal();
+  document.getElementById('modal-bg').classList.add('on');
+}
+function pickMenuExportFormat(fmt){
+  state.exportFormat = fmt;
+  renderMenuExportModal();
+}
+function renderMenuExportModal(){
+  const ext = state.exportFormat==='csv' ? 'CSV(.csv)' : '엑셀(.xlsx)';
+  const modal = document.getElementById('modal');
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div>
+        <h3>📥 메뉴 내려받기</h3>
+        <div class="modal-sub">등록된 메뉴 <b style="color:var(--ink);">${fmt(MENUS.length)}개</b>를 파일로 받을 수 있어요</div>
+      </div>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+    ${exportFormatCards('pickMenuExportFormat')}
+    <div style="font-size:11px;color:var(--ink-3);margin-bottom:14px;background:#fafcff;border:1px solid var(--blue-100);border-radius:8px;padding:10px 12px;line-height:1.5;">💡 받은 파일은 <b style="color:var(--ink-2);">📊 엑셀로 한 번에 올리기</b> 양식과 컬럼이 같아, 수정해서 그대로 다시 올릴 수 있어요.</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
+      <button class="btn-primary" style="flex:2;" onclick="confirmMenuExport()">📂 ${ext} 파일로 받기</button>
+    </div>
+  `;
+}
+function menuExportRows(){
+  // 가져오기 양식(MENU_EXCEL_COLUMNS) 순서에 맞춰 행 구성
+  return MENUS.map(m=>[
+    m.code||'', m.name||'', (m.price==null?'':m.price), (m.takeoutPrice==null?'':m.takeoutPrice),
+    m.cat||'', m.desc||'', m.status||'판매중', (m.maxQty==null?'':m.maxQty),
+    m.catL2||'', m.catL3||'', m.tag3||'',
+  ]);
+}
+function confirmMenuExport(){
+  const isCsv = state.exportFormat==='csv';
+  const rows = menuExportRows();
+  const date = new Date().toISOString().slice(0,10);
+  if(isCsv){
+    const blob = new Blob([toCSV(MENU_EXCEL_COLUMNS, rows)], { type:'text/csv;charset=utf-8;' });
+    triggerDownload(blob, `qrorder-menu-${date}.csv`);
+  } else {
+    if(typeof XLSX==='undefined'){ alert('엑셀 라이브러리를 불러오는 중이에요. 잠시 후 다시 시도해 주세요.'); return; }
+    const ws = XLSX.utils.aoa_to_sheet([MENU_EXCEL_COLUMNS, ...rows]);
+    ws['!cols'] = MENU_EXCEL_COLUMNS.map(c=>({ wch: Math.max(c.length*2.2, 14) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '메뉴');
+    XLSX.writeFile(wb, `qrorder-menu-${date}.xlsx`);
+  }
+  closeModal();
+  showToast(`<span class="ic">📥</span> 메뉴 ${fmt(MENUS.length)}개를 ${isCsv?'CSV':'엑셀'} 파일로 내려받았어요`, 'ok');
 }
 
 function importMenuJSON(ev){
@@ -6876,7 +6940,7 @@ function renderMenu(main){
             <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="state.menuSel.clear();renderApp()">선택 해제</button>
           ` : ''}
           ${MENUS.length>0?`
-            <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="exportMenuJSON()" title="등록된 메뉴를 엑셀(JSON) 파일로 내려받아요">📥 엑셀 다운로드</button>
+            <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="openMenuExport()" title="등록된 메뉴를 엑셀 또는 CSV 파일로 내려받을 수 있어요">📥 엑셀·CSV 받기</button>
             <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);" onclick="resetMenuAll()" title="등록된 메뉴를 모두 삭제해요">🗑️ 모두 지우기</button>
           `:''}
         </span>

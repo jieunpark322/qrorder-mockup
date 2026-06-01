@@ -1437,7 +1437,6 @@ const state = {
   detailTab: 'period',              // period | hour | menu | category | method
   detailGroup: 'day',               // day | week | month | custom
   detailDayIdx: 13,                 // 일간 모드 — DAY 배열에서 보고 있는 일자 (기본 13 = 5/14 어제)
-  detailCompare: false,
   detailRowsPerPage: 50,
   detailCategoryFilter: '전체',
   orderRowsPerPage: 50,
@@ -2466,7 +2465,6 @@ function renderDetailPeriod(body){
         💡 <b style="color:var(--ink);">총매출 − 할인 − 포인트 − 환불 = 실매출 → 부가세 빼면 순매출</b>
         <span style="color:var(--ink-3);margin-left:6px;">환불은 결제한 날 매출에서 자동으로 빠져요</span>
       </div>
-      <span class="toggle-switch ${state.detailCompare?'on':''}" onclick="toggleDetailCompare()"><span class="sw"></span>전월 같은 시기와 비교</span>
     </div>
 
     ${(() => {
@@ -2671,21 +2669,6 @@ function renderDetailPeriod(body){
           pointBorderWidth:3,
           fill:true,
         },
-        ...(state.detailCompare ? [{
-          label:'전월 동일 시기',
-          data:rows.map(r=>Math.round(r.net*0.92)),
-          borderColor:'#b0b8c1',
-          backgroundColor:'transparent',
-          borderDash:[6,6],
-          borderWidth:2,
-          tension:.35,
-          pointRadius:4,
-          pointHoverRadius:6,
-          pointBackgroundColor:'#fff',
-          pointBorderColor:'#b0b8c1',
-          pointBorderWidth:2,
-          fill:false,
-        }] : [])
       ]
     },
     options:{
@@ -4626,7 +4609,6 @@ function setDetailDayPrev(){
 function setDetailDayNext(){
   if (state.detailDayIdx < 13) { state.detailDayIdx++; renderApp(); }
 }
-function toggleDetailCompare(){ state.detailCompare = !state.detailCompare; renderApp(); }
 function setDetailCategory(c){
   state.detailCategoryFilter = c;
   state.detailTab='menu';

@@ -1030,28 +1030,61 @@
    ============================================================ */
 const STORE = { name:'소프트커피 합정점', owner:'홍길동' };
 
-// 15일치 일별 (5/1 ~ 5/15)
+// 일별 매출 (2026-01-01 ~ 05-31) — 5/1~5/15는 실측 더미(결제수단·메뉴 집계와 정합), 그 외는 날짜 기반 결정적 생성
 // gross 총매출 / disc 할인 / pt 포인트사용 / ref 환불액 / rcnt 환불건수 / ocnt 결제건수
 // 실매출 = 총매출 − 할인 − 포인트 − 환불
 // 부가세 = 실매출 × 10/110, 순매출 = 실매출 − 부가세
-const DAY = [
-  // {date, day, gross, discount, point, refund, refundCnt, orderCnt}
-  { d:'5/1',  w:'금', gross:1180000, disc:11000, pt:16000, ref:25000, rcnt:1, ocnt:44 },
-  { d:'5/2',  w:'토', gross:1520000, disc:14000, pt:18000, ref:35000, rcnt:2, ocnt:58 },
-  { d:'5/3',  w:'일', gross:1450000, disc:13000, pt:17000, ref:30000, rcnt:2, ocnt:54 },
-  { d:'5/4',  w:'월', gross: 894000, disc: 7000, pt:15000, ref:22000, rcnt:1, ocnt:35 },
-  { d:'5/5',  w:'화', gross: 920000, disc: 8500, pt:14000, ref:18000, rcnt:1, ocnt:36 },
-  { d:'5/6',  w:'수', gross: 890000, disc: 6500, pt:14500, ref:22000, rcnt:1, ocnt:34 },
-  { d:'5/7',  w:'목', gross:1200000, disc:11500, pt:15500, ref:28000, rcnt:1, ocnt:44 },
-  { d:'5/8',  w:'금', gross:1180000, disc:11000, pt:17000, ref:28000, rcnt:2, ocnt:44 },
-  { d:'5/9',  w:'토', gross:1520000, disc:10000, pt:15000, ref:25000, rcnt:1, ocnt:58 },
-  { d:'5/10', w:'일', gross:1450000, disc:14000, pt:16000, ref:30000, rcnt:2, ocnt:54 },
-  { d:'5/11', w:'월', gross: 894000, disc: 7000, pt:15000, ref:22000, rcnt:1, ocnt:35 },
-  { d:'5/12', w:'화', gross:1120000, disc: 9500, pt:12500, ref:22000, rcnt:1, ocnt:42 },
-  { d:'5/13', w:'수', gross: 982400, disc: 6000, pt:12000, ref:18000, rcnt:1, ocnt:38 },
-  { d:'5/14', w:'목', gross:1098200, disc: 8000, pt:16000, ref:24000, rcnt:1, ocnt:41 },
-  { d:'5/15', w:'금', gross:1234500, disc:12000, pt:22000, ref:34000, rcnt:2, ocnt:46 },
-];
+const DAY = (function(){
+  const DOW = ['일','월','화','수','목','금','토'];
+  const HOL = new Set(['1/1','2/16','2/17','2/18','3/1','5/1','5/5','5/25']); // 1~5월 공휴일
+  // 5/1~5/15 실측 더미 — 기존 값 그대로 유지
+  const MAY = [
+    { d:'5/1',  w:'금', gross:1180000, disc:11000, pt:16000, ref:25000, rcnt:1, ocnt:44 },
+    { d:'5/2',  w:'토', gross:1520000, disc:14000, pt:18000, ref:35000, rcnt:2, ocnt:58 },
+    { d:'5/3',  w:'일', gross:1450000, disc:13000, pt:17000, ref:30000, rcnt:2, ocnt:54 },
+    { d:'5/4',  w:'월', gross: 894000, disc: 7000, pt:15000, ref:22000, rcnt:1, ocnt:35 },
+    { d:'5/5',  w:'화', gross: 920000, disc: 8500, pt:14000, ref:18000, rcnt:1, ocnt:36 },
+    { d:'5/6',  w:'수', gross: 890000, disc: 6500, pt:14500, ref:22000, rcnt:1, ocnt:34 },
+    { d:'5/7',  w:'목', gross:1200000, disc:11500, pt:15500, ref:28000, rcnt:1, ocnt:44 },
+    { d:'5/8',  w:'금', gross:1180000, disc:11000, pt:17000, ref:28000, rcnt:2, ocnt:44 },
+    { d:'5/9',  w:'토', gross:1520000, disc:10000, pt:15000, ref:25000, rcnt:1, ocnt:58 },
+    { d:'5/10', w:'일', gross:1450000, disc:14000, pt:16000, ref:30000, rcnt:2, ocnt:54 },
+    { d:'5/11', w:'월', gross: 894000, disc: 7000, pt:15000, ref:22000, rcnt:1, ocnt:35 },
+    { d:'5/12', w:'화', gross:1120000, disc: 9500, pt:12500, ref:22000, rcnt:1, ocnt:42 },
+    { d:'5/13', w:'수', gross: 982400, disc: 6000, pt:12000, ref:18000, rcnt:1, ocnt:38 },
+    { d:'5/14', w:'목', gross:1098200, disc: 8000, pt:16000, ref:24000, rcnt:1, ocnt:41 },
+    { d:'5/15', w:'금', gross:1234500, disc:12000, pt:22000, ref:34000, rcnt:2, ocnt:46 },
+  ];
+  const mayMap = {}; MAY.forEach(x => mayMap[x.d] = x);
+  const out = [];
+  for (let m = 1; m <= 5; m++) {
+    const dim = new Date(2026, m, 0).getDate();       // 그 달의 마지막 날
+    for (let dd = 1; dd <= dim; dd++) {
+      const key = m + '/' + dd;
+      if (mayMap[key]) { out.push(mayMap[key]); continue; }
+      const date = new Date(2026, m - 1, dd);
+      const dow = date.getDay();
+      const weekend = (dow === 0 || dow === 6);
+      const wob = ((m * 131 + dd * 97) % 100) / 100;  // 0~0.99 결정적 변동(새로고침해도 동일)
+      let base = weekend ? 1400000 : 880000;
+      base += Math.round(wob * 280000);
+      if (HOL.has(key)) base = Math.round(base * 0.5); // 공휴일 매출 절반
+      const gross = Math.round(base / 100) * 100;
+      out.push({
+        d: key, w: DOW[dow], gross,
+        disc: Math.round(gross * 0.008 / 100) * 100,
+        pt:   12000 + Math.round(wob * 10000),
+        ref:  18000 + Math.round(wob * 16000),
+        rcnt: wob > 0.5 ? 2 : 1,
+        ocnt: Math.round(gross / 26500),
+      });
+    }
+  }
+  return out;
+})();
+// 날짜 기준 앵커(오늘=5/15) — DAY 길이에 무관하게 현재 기간을 가리킴
+const TODAY_IDX = DAY.findIndex(d => d.d === '5/15');
+const MAY1_IDX  = DAY.findIndex(d => d.d === '5/1');
 
 // 시간대별 (오늘 5/15)
 const HOUR = [
@@ -1249,7 +1282,7 @@ const isHoliday = (date) => HOLIDAYS_2026.includes(toISODate(date));
 // (카드국내 60%×2.0 + 해외 3%×3.5 + 카카오 17%×2.3 + 네이버 10%×2.4 + 토스 2%×2.3 + 계좌이체 1%×1.5)
 const AVG_FEE_RATE = 0.02;
 const SETTLEMENTS = (function(){
-  const couponPattern = [true,false,true,false,false,true,false,false,true,false,true,false,false,true,true];
+  const couponPattern = DAY.map((_, i) => i % 3 === 0 || i % 7 === 0);
   const today = new Date(2026, 4, 15);
   const DOW_ARR = ['일','월','화','수','목','금','토'];
   // 영업일 D+N 정산 (주말·공휴일 스킵)
@@ -1564,9 +1597,9 @@ function maskBizNo(bizNo){
 }
 
 function periodDays(){
-  if (state.overviewPeriod==='day') return [DAY[14]]; // 5/15
-  if (state.overviewPeriod==='week') return DAY.slice(8); // 5/9 ~ 5/15
-  if (state.overviewPeriod==='month') return DAY;
+  if (state.overviewPeriod==='day') return [DAY[TODAY_IDX]]; // 오늘 5/15
+  if (state.overviewPeriod==='week') return DAY.slice(TODAY_IDX-6, TODAY_IDX+1); // 최근 7일 (5/9~5/15)
+  if (state.overviewPeriod==='month') return DAY.slice(MAY1_IDX, TODAY_IDX+1); // 이번 달 1~15일
   if (state.overviewPeriod==='custom') {
     return DAY.filter(d => {
       const [m, dd] = d.d.split('/').map(Number);
@@ -1908,8 +1941,8 @@ function saveBusinessHours(){
    ============================================================ */
 function renderHome(main){
   // 어제 / 그저께 매출 (DAY 배열 기준 — 5/14, 5/13)
-  const yesterday = DAY[13] || { gross:0, ocnt:0 };
-  const dayBefore = DAY[12] || { gross:1, ocnt:1 };
+  const yesterday = DAY[TODAY_IDX-1] || { gross:0, ocnt:0 };
+  const dayBefore = DAY[TODAY_IDX-2] || { gross:1, ocnt:1 };
   const grossDiff = yesterday.gross - dayBefore.gross;
   const grossDiffPct = dayBefore.gross>0 ? Math.round(grossDiff / dayBefore.gross * 100) : 0;
   const cntDiff = yesterday.ocnt - dayBefore.ocnt;
@@ -2310,15 +2343,15 @@ function renderDetailPeriod(body){
   if (state.detailGroup==='day') {
     // 일간 모드 — 어제(또는 사용자가 화살표로 이동한 날짜) 1일치만
     // ※ 매출 상세는 어제까지 집계이므로 5/14가 마지막 (idx 13). 여러 날 한번에 보려면 [기간 선택] 사용
-    const idx = Math.max(0, Math.min(13, state.detailDayIdx));
+    const idx = MAY1_IDX + Math.max(0, Math.min(13, state.detailDayIdx));
     rows = [enrichDay(DAY[idx])];
     rows[0].label = `${DAY[idx].d}(${DAY[idx].w})`;
   } else if (state.detailGroup==='week') {
     // 주별 묶음: 5/1~5/3 (1주), 5/4~5/10 (2주), 5/11~5/15 (3주)
     const groups = [
-      { label:'5월 1주차 (5/1~5/3)',   days:DAY.slice(0,3) },
-      { label:'5월 2주차 (5/4~5/10)',  days:DAY.slice(3,10) },
-      { label:'5월 3주차 (5/11~5/15)', days:DAY.slice(10) },
+      { label:'5월 1주차 (5/1~5/3)',   days:DAY.slice(MAY1_IDX, MAY1_IDX+3) },
+      { label:'5월 2주차 (5/4~5/10)',  days:DAY.slice(MAY1_IDX+3, MAY1_IDX+10) },
+      { label:'5월 3주차 (5/11~5/15)', days:DAY.slice(MAY1_IDX+10, TODAY_IDX+1) },
     ];
     rows = groups.map(g=>{
       const ag = { gross:sum(g.days,'gross'), disc:sum(g.days,'disc'), pt:sum(g.days,'pt'), ref:sum(g.days,'ref'), rcnt:sum(g.days,'rcnt'), ocnt:sum(g.days,'ocnt') };
@@ -2327,14 +2360,9 @@ function renderDetailPeriod(body){
     });
   } else if (state.detailGroup==='month') {
     // 월별 — 과거 → 최신 순으로 정렬 (day/week 모드와 일관)
-    const m5 = { gross:sum(DAY,'gross'), disc:sum(DAY,'disc'), pt:sum(DAY,'pt'), ref:sum(DAY,'ref'), rcnt:sum(DAY,'rcnt'), ocnt:sum(DAY,'ocnt') };
-    const m4 = { gross:26480000, disc:265000, pt:295000, ref:600000, rcnt:13, ocnt:984 };
-    const m3 = { gross:24180000, disc:241000, pt:268000, ref:560000, rcnt:12, ocnt:912 };
-    rows = [
-      { ...enrichDay({...m3, d:'', w:''}), label:'2026년 3월' },
-      { ...enrichDay({...m4, d:'', w:''}), label:'2026년 4월' },
-      { ...enrichDay({...m5, d:'', w:''}), label:'2026년 5월' },
-    ];
+    // 1~5월 각 월 합계를 DAY에서 직접 집계 (정산·일별과 정합)
+    const monthSum = (mm)=>{ const ds = DAY.filter(d=>Number(d.d.split('/')[0])===mm); return { gross:sum(ds,'gross'), disc:sum(ds,'disc'), pt:sum(ds,'pt'), ref:sum(ds,'ref'), rcnt:sum(ds,'rcnt'), ocnt:sum(ds,'ocnt') }; };
+    rows = [1,2,3,4,5].map(mm => ({ ...enrichDay({...monthSum(mm), d:'', w:''}), label:`2026년 ${mm}월` }));
   } else { // custom — 시작일 ~ 종료일 사이의 일별 데이터
     rows = DAY.filter(d => {
       const [m, dd] = d.d.split('/').map(Number);
@@ -2388,7 +2416,7 @@ function renderDetailPeriod(body){
     ${(() => {
       // 일간 모드 — 단일 일자 보기. 화살표로 일자 이동 (5/1 ~ 5/14 = idx 0~13)
       const isDay = state.detailGroup==='day';
-      const dayIdx = Math.max(0, Math.min(13, state.detailDayIdx));
+      const dayIdx = MAY1_IDX + Math.max(0, Math.min(13, state.detailDayIdx));
       const dayCenter = isDay ? `2026년 5월 ${DAY[dayIdx].d.split('/')[1]}일(${DAY[dayIdx].w})` : '';
       return basisCombo({
         periods:[{key:'day',label:'일간'},{key:'week',label:'주간'},{key:'month',label:'월간'},{key:'custom',label:'기간 선택'}],
@@ -2405,7 +2433,7 @@ function renderDetailPeriod(body){
         onPrev:      isDay ? 'setDetailDayPrev' : undefined,
         onNext:      isDay ? 'setDetailDayNext' : undefined,
         startTime: isDay ? `${DAY[dayIdx].d}(${DAY[dayIdx].w}) 03:00` : state.detailGroup==='week' ? '5/1(금) 03:00' : state.detailGroup==='month' ? '3/1(일) 03:00' : cStart,
-        endTime:   isDay ? `${DAY[Math.min(14,dayIdx+1)].d}(${DAY[Math.min(14,dayIdx+1)].w}) 02:59` : state.detailGroup==='week' ? '5/16(토) 02:59' : state.detailGroup==='month' ? '5/31(일) 02:59' : cEnd,
+        endTime:   isDay ? `${DAY[Math.min(TODAY_IDX,dayIdx+1)].d}(${DAY[Math.min(TODAY_IDX,dayIdx+1)].w}) 02:59` : state.detailGroup==='week' ? '5/16(토) 02:59' : state.detailGroup==='month' ? '5/31(일) 02:59' : cEnd,
       });
     })()}
 

@@ -7005,7 +7005,10 @@ function renderMenuCardGrid(rows){
             <div class="menu-card-meta">
               ${r.cat?`<span class="menu-card-cat" title="${[r.catL2,r.catL3,r.tag3].filter(x=>x).map(x=>'🏷️ '+x).join(', ')||'분류 태그 없음'}">${r.cat}</span>`:''}
               <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:90px;">
-                <div class="menu-card-price">${fmt(r.price)}<span style="font-size:11px;color:var(--ink-3);font-weight:500;margin-left:1px;">원</span></div>
+                ${r.discountAmt>0
+                  ? `<div style="font-size:10px;color:var(--ink-4);text-decoration:line-through;">${fmt(r.price)}원</div>
+                     <div class="menu-card-price" style="color:var(--red);">${fmt(r.price-r.discountAmt)}<span style="font-size:11px;font-weight:500;margin-left:1px;">원</span> <span style="font-size:10px;background:#fef2f2;padding:1px 5px;border-radius:4px;">−${fmt(r.discountAmt)}</span></div>`
+                  : `<div class="menu-card-price">${fmt(r.price)}<span style="font-size:11px;color:var(--ink-3);font-weight:500;margin-left:1px;">원</span></div>`}
                 ${r.takeoutPrice!=null&&r.takeoutPrice>=0
                   ? `<div style="font-size:10px;color:#15803d;font-weight:700;">🛍️ ${fmt(r.takeoutPrice)}원</div>`
                   : ''}
@@ -8629,7 +8632,7 @@ function openMenuEditModal(id){
   const m = MENUS.find(x=>x.id===id);
   if(!m) return;
   ensureMenuExtras(m);
-  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, cat:m.cat, catL2:m.catL2||'', catL3:m.catL3||'', tag3:m.tag3||'', desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty };
+  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, discountAmt:m.discountAmt||null, cat:m.cat, catL2:m.catL2||'', catL3:m.catL3||'', tag3:m.tag3||'', desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty };
   renderMenuEditModal();
 }
 function renderMenuEditModal(){
@@ -8660,19 +8663,28 @@ function renderMenuEditModal(){
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">메뉴 이름 <span style="color:var(--red);">*</span></label>
         <input id="me-name" class="input" value="${f.name.replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:16px;" />
 
-        <!-- 가격 — 매장가 / 포장가 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <!-- 가격 — 매장가 / 포장가 / 할인가 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:6px;">
           <div>
             <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">매장 판매가 <span style="color:var(--red);">*</span></label>
             <input id="me-price" class="input" type="number" value="${f.price}" style="width:100%;" />
-            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">매장에서 드시는 손님이 보는 가격</div>
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">기본 정가</div>
           </div>
           <div>
             <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">포장가 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
             <input id="me-takeout" class="input" type="number" value="${f.takeoutPrice!=null?f.takeoutPrice:''}" placeholder="비워 두면 매장가" style="width:100%;color:#15803d;" />
-            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">포장 주문 시 적용할 가격</div>
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">포장 주문 시 가격</div>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">할인 금액 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <span style="font-size:13px;font-weight:800;color:var(--red);">−</span>
+              <input id="me-discount" class="input" type="number" min="0" value="${f.discountAmt!=null?f.discountAmt:''}" placeholder="0" style="flex:1;color:var(--red);" oninput="(()=>{const p=Number(document.getElementById('me-price').value)||0;const d=Number(this.value)||0;const el=document.getElementById('me-discount-result');if(el)el.textContent=d>0?'→ 실제 '+(p-d).toLocaleString()+'원':'';})()"/>
+            </div>
+            <div id="me-discount-result" style="font-size:10px;color:var(--red);font-weight:700;margin-top:3px;">${(f.discountAmt&&f.discountAmt>0)?'→ 실제 '+(f.price-f.discountAmt).toLocaleString()+'원':''}</div>
           </div>
         </div>
+        <div style="font-size:11px;color:var(--ink-4);margin-bottom:16px;line-height:1.5;">💡 <b>할인 금액</b>을 입력하면 매장 판매가에서 해당 금액만큼 차감돼 손님에게 노출돼요. 포장가도 별도로 입력하지 않은 경우 할인가 기준으로 적용돼요.</div>
 
         <!-- 카테고리 (손님 메뉴판 노출용) -->
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">카테고리 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">손님 메뉴판에 보이는 분류 · 필수</span></label>
@@ -8809,6 +8821,8 @@ function saveMenuEdit(){
   }
   const tpVal = document.getElementById('me-takeout').value;
   const takeoutPrice = tpVal==='' ? null : Math.max(0, Number(tpVal)||0);
+  const dcVal = document.getElementById('me-discount')?.value;
+  const discountAmt = (!dcVal||dcVal===''||Number(dcVal)<=0) ? null : Math.min(Number(dcVal), price); // 할인 금액이 정가 초과 불가
   // 포장가 > 매장가 안내 (사장님 의도 존중, 차단 X)
   if(takeoutPrice!=null && takeoutPrice > price){
     if(!confirm(`포장가(${fmt(takeoutPrice)}원)가 매장 판매가(${fmt(price)}원)보다 비싸요.\n보통은 포장이 더 저렴해요. 그래도 저장할까요?`)) return;
@@ -8816,6 +8830,7 @@ function saveMenuEdit(){
   m.name = name;
   m.price = price;
   m.takeoutPrice = takeoutPrice;
+  m.discountAmt = discountAmt;
   m.cat = document.getElementById('me-cat').value;
   m.catL2 = (document.getElementById('me-catL2').value||'').trim();
   m.catL3 = (document.getElementById('me-catL3').value||'').trim();
@@ -11802,9 +11817,14 @@ function renderOrderType(main){
           <div class="ot-subsection">
             <div class="ot-subsection-title">💳 결제 정책 <span class="sub">손님이 언제 결제할지</span></div>
             <div class="ot-row" style="border:none;padding-top:0;">
-              ${[['prepay','💳','선결제 고정'],['postpay','🧾','후결제 고정'],['scheduled','⏰','시간대별 자동']].map(([k,ic,l])=>`
-                <div class="ot-opt ${ch.payment===k?'sel':''}" onclick="setOrderPayment('${k}')">
+              ${[
+                ['prepay',   '💳', '선불', '주문할 때 바로 결제'],
+                ['postpay',  '🧾', '후불', '자리에서 나갈 때 결제'],
+                ['scheduled','⏰', '시간대별', '시간대에 따라 선불·후불 자동 전환'],
+              ].map(([k,ic,l,desc])=>`
+                <div class="ot-opt ${ch.payment===k?'sel':''}" onclick="setOrderPayment('${k}')" title="${desc}">
                   <span>${ic}</span>${l}
+                  <div style="font-size:10px;color:${ch.payment===k?'var(--blue)':'var(--ink-4)'};font-weight:400;margin-top:2px;line-height:1.3;">${desc}</div>
                 </div>
               `).join('')}
             </div>
@@ -11839,8 +11859,8 @@ function renderOrderType(main){
           <h3>🛍️ 포장 주문 설정 <span class="h-sub">${dineIn?'포장 채널 전용 항목':'포장 활성 시'}</span></h3>
           <div class="ot-row">
             <span class="lbl">결제 시점</span>
-            <span class="ot-pay-fixed"><span class="ic">💳</span>선결제 (고정)</span>
-            <span style="font-size:11px;color:var(--ink-4);">포장은 항상 선결제로 진행돼요</span>
+            <span class="ot-pay-fixed"><span class="ic">💳</span>선불</span>
+            <span style="font-size:11px;color:var(--ink-4);">포장은 주문 즉시 결제해요</span>
           </div>
           <div class="ot-row">
             <span class="lbl">포장가</span>

@@ -1166,9 +1166,10 @@ const CATEGORY = [
 
 // 판매유형 (오늘 5/15 — DAY 5/15 gross 1,234,500원 / ocnt 46건과 일치)
 const CHANNEL = [
-  { name:'매장 (테이블)', cnt:32, amt:880000, color:'#3182f6', avg:27500, share:71.3 },
-  { name:'포장',          cnt:12, amt:290000, color:'#1eb18d', avg:24167, share:23.5 },
-  { name:'배달',          cnt:2,  amt:64500,  color:'#f5b347', avg:32250, share:5.2 },
+  { name:'매장 (테이블)', key:'dine',       cnt:32, amt:880000, color:'#3182f6', avg:27500, share:71.3 },
+  { name:'포장',          key:'takeout',     cnt:9,  amt:226000, color:'#1eb18d', avg:25111, share:18.3 },
+  { name:'포장 예약',     key:'reservation', cnt:3,  amt:64000,  color:'#8b5cf6', avg:21333, share:5.2 },
+  { name:'배달',          key:'delivery',    cnt:2,  amt:64500,  color:'#f5b347', avg:32250, share:5.2 },
 ];
 // 합계: 46건 / 1,234,500원 (DAY 5/15와 일치)
 
@@ -1297,9 +1298,13 @@ const SETTLEMENTS = (function(){
     return d;
   }
   // 같은 정산일에 여러 영업일 매출이 합쳐지는 경우(토/일/공휴일) 그룹화
+  // 미래 날짜(today 이후)는 아직 발생하지 않은 매출이므로 정산 회차 생성에서 제외
+  const todayISO = toISODate(today);
   const groups = new Map();
   DAY.forEach((d, i) => {
     const [m, dd] = d.d.split('/').map(Number);
+    const approvalISO = `2026-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    if (approvalISO > todayISO) return; // 오늘 이후 매출은 정산 대상 아님
     const sDate = addBizDays(new Date(2026, m - 1, dd), 2);
     const key = toISODate(sDate);
     if (!groups.has(key)) groups.set(key, []);
@@ -1325,7 +1330,7 @@ const SETTLEMENTS = (function(){
     const couponSettle = couponTable;
     const txSettle = gross - ref - feeTotal - couponBiz;
     const totalSettle = txSettle + couponSettle;
-    const status = sDate <= today ? '정산완료' : '정산대기';
+    const status = sKey <= todayISO ? '정산완료' : '정산대기'; // 문자열 비교로 타임존 버그 방지
     // 회차 ID: STL-YYYYMMDD-MMDD (정산일-승인일 첫째일) 형식으로 고유 보장
     const firstApproval = days[0]._approval;
     const aMM = String(firstApproval.getMonth()+1).padStart(2,'0');
@@ -2322,7 +2327,8 @@ function renderDetail(main){
       <div class="t ${state.detailTab==='hour'?'on':''}"     onclick="setDetailTab('hour')">⏰ 시간대별</div>
       <div class="t ${state.detailTab==='menu'?'on':''}"     onclick="setDetailTab('menu')">🥐 메뉴별</div>
       <div class="t ${state.detailTab==='category'?'on':''}" onclick="setDetailTab('category')">🗂️ 메뉴 카테고리별</div>
-      <div class="t ${state.detailTab==='method'?'on':''}"   onclick="setDetailTab('method')">💳 결제수단별</div>
+      <div class="t ${state.detailTab==='method'?'on':''}"    onclick="setDetailTab('method')">💳 결제수단별</div>
+      <div class="t ${state.detailTab==='channel'?'on':''}"   onclick="setDetailTab('channel')">🛵 주문 방식별</div>
     </div>
 
     <div id="detail-body"></div>
@@ -2334,6 +2340,7 @@ function renderDetail(main){
   if (state.detailTab==='menu')     renderDetailMenu(body);
   if (state.detailTab==='category') renderDetailCategory(body);
   if (state.detailTab==='method')   renderDetailMethod(body);
+  if (state.detailTab==='channel')  renderDetailChannel(body);
 }
 
 // 기간별 — 일간/주간/월간/기간선택 모두 동작

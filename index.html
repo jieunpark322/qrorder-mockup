@@ -4547,22 +4547,29 @@ function confirmLeaveUnsaved(){
   if(typeof fn === 'function') fn();
 }
 
-// ===== 하단 저장 바 (GLOBAL_SAVE_SECTIONS 공통) =====
+// ===== 우측 상단 저장 버튼 (GLOBAL_SAVE_SECTIONS 공통) =====
 function saveBarInner(){
   const dirty = !!state.unsaved;
-  return `<span class="sb-info ${dirty?'dirty':''}">${dirty?'⚠️ 저장하지 않은 변경 사항이 있어요':'변경 사항이 모두 저장됐어요'}</span>`
-       + `<button class="${dirty?'btn-save-cta pulse':'btn-ghost'}"${dirty?'':' disabled'} onclick="saveCurrentPage()">저장</button>`;
+  return `<button class="${dirty?'btn-save-cta pulse':'btn-ghost'}"${dirty?'':' disabled'} onclick="saveCurrentPage()" id="save-bar">저장</button>`;
 }
 function appendSaveBar(main){
   if(!GLOBAL_SAVE_SECTIONS.includes(state.section)) return;
-  const bar = document.createElement('div');
-  bar.className = 'save-bar'; bar.id = 'save-bar';
-  bar.innerHTML = saveBarInner();
-  main.appendChild(bar);
+  // toolbar 우측에 삽입
+  const toolbar = main.querySelector('.toolbar');
+  if(toolbar){
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:8px;flex-shrink:0;';
+    wrap.innerHTML = saveBarInner();
+    toolbar.appendChild(wrap);
+  }
 }
 function updateSaveBar(){
-  const bar = document.getElementById('save-bar');
-  if(bar) bar.innerHTML = saveBarInner();
+  const btn = document.getElementById('save-bar');
+  if(btn){
+    const dirty = !!state.unsaved;
+    btn.className = dirty ? 'btn-save-cta pulse' : 'btn-ghost';
+    btn.disabled = !dirty;
+  }
 }
 // 설정 페이지에서 입력/토글/칩을 건드리면 '미저장' 상태로 표시 (전체 리렌더 없이 저장 바만 갱신)
 function markUnsavedUI(){
@@ -8556,12 +8563,6 @@ function renderMenuEditModal(){
             <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">포장 주문 시 적용할 가격</div>
           </div>
         </div>
-        ${(typeof ORDER_CHANNELS!=='undefined' && ORDER_CHANNELS.takeoutDiscount===false) ? `
-          <div style="margin-top:-6px;margin-bottom:16px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:11px;color:#9a3412;line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:10px;">
-            <span>⚠️ 현재 주문 방식에서 <b>포장 할인이 꺼져 있어</b>, 입력하신 포장가는 손님 화면에 적용되지 않아요.</span>
-            <button class="btn-ghost" style="padding:5px 10px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="closeModal();setSection('order-type');">설정 →</button>
-          </div>
-        ` : ''}
 
         <!-- 카테고리 (손님 메뉴판 노출용) -->
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">카테고리 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">손님 메뉴판에 보이는 분류 · 필수</span></label>
@@ -9604,7 +9605,6 @@ const ORDER_CHANNELS = {
   service: 'self',                 // server | self — 직원 서빙 vs 손님 셀프 수령 (시스템 자동 결정)
   notifications: ['kakao'],        // multi: call_name | kakao | display
   // 포장 설정
-  takeoutDiscount: true,           // 포장 할인가 사용
   waitMinMin: 15,                  // 포장 대기 시간 최소 (분)
   waitMinMax: 25,                  // 포장 대기 시간 최대 (분)
   reservation: false,              // 포장 예약 — ON 시 사장님 수락 필요
@@ -11601,6 +11601,10 @@ function renderOrderType(main){
         <h2>주문 방식</h2>
         <div class="page-sub">매장 운영 방식에 맞춰 주문 채널·결제 정책·손님 안내 방식을 한곳에서 관리해요.</div>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <button class="btn-ghost" onclick="resetOrderType()">↺ 초기화</button>
+        <button class="${dirty?'btn-save-cta pulse':'btn-ghost'}" onclick="saveOrderType()">저장</button>
+      </div>
     </div>
 
     <!-- 상단 — 채널별 결제 방식 한눈에 보기 -->
@@ -11729,12 +11733,8 @@ function renderOrderType(main){
             <span style="font-size:11px;color:var(--ink-4);">포장은 항상 선결제로 진행돼요</span>
           </div>
           <div class="ot-row">
-            <span class="lbl">포장 할인가</span>
-            <label class="toggle-switch ${ch.takeoutDiscount?'on':''}" onclick="toggleOrderField('takeoutDiscount')">
-              <span class="sw"></span>
-            </label>
-            <span style="font-size:12px;color:var(--ink-2);">${ch.takeoutDiscount?'메뉴별 포장가를 따로 받아요':'매장가와 동일하게 적용돼요'}</span>
-            ${ch.takeoutDiscount ? `<span style="font-size:12px;color:var(--blue);font-weight:700;cursor:pointer;margin-left:auto;" onclick="setSection('menu')">메뉴 관리에서 포장가 입력 →</span>` : ''}
+            <span class="lbl">포장가</span>
+            <span style="font-size:12px;color:var(--ink-2);">메뉴별 포장가는 <b style="cursor:pointer;color:var(--blue);" onclick="setSection('menu')">메뉴 관리</b>에서 각 메뉴마다 입력할 수 있어요. 비워두면 매장가가 그대로 적용돼요.</span>
           </div>
           <div class="ot-row">
             <span class="lbl">대기 시간 안내</span>
@@ -11761,14 +11761,6 @@ function renderOrderType(main){
     </div>
     ` : ''}
 
-    <!-- 저장 바 -->
-    <div class="ot-savebar">
-      <span class="info ${dirty?'dirty':''}">${dirty?'⚠️ 저장하지 않은 변경 사항이 있어요':'변경된 내용 없음'}</span>
-      <div class="actions">
-        <button class="btn-ghost" onclick="resetOrderType()">↺ 초기화</button>
-        <button class="${dirty?'btn-save-cta pulse':'btn-ghost'}" onclick="saveOrderType()">저장</button>
-      </div>
-    </div>
 
   `;
 }

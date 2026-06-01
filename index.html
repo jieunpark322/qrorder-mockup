@@ -550,7 +550,7 @@
   tr.drag-source{opacity:.4;}
   tr.drag-over-top{box-shadow:inset 0 3px 0 0 var(--blue);}
   tr.drag-over-bottom{box-shadow:inset 0 -3px 0 0 var(--blue);}
-  /* 고객 화면 미리보기 — 어디서든 호출 가능한 FAB */
+  /* 손님 화면 미리보기 — 어디서든 호출 가능한 FAB */
   .preview-fab{position:fixed;bottom:24px;right:24px;z-index:50;padding:14px 22px;border-radius:32px;background:var(--ink);color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.22);display:flex;align-items:center;gap:8px;transition:transform .12s,box-shadow .15s,background .15s;}
   .preview-fab:hover{background:var(--blue);box-shadow:0 12px 32px rgba(49,130,246,.42);transform:translateY(-2px);}
   .preview-fab .ic{font-size:18px;line-height:1;}
@@ -1018,10 +1018,10 @@
   <div class="modal" id="modal"></div>
 </div>
 
-<!-- 어디서든 클릭해서 고객 화면 미리보기를 띄우는 FAB -->
-<button class="preview-fab" onclick="openCustomerPreview()" title="지금 적용된 고객 화면을 띄워서 봐요">
+<!-- 어디서든 클릭해서 손님 화면 미리보기를 띄우는 FAB -->
+<button class="preview-fab" onclick="openCustomerPreview()" title="지금 적용된 손님 화면을 띄워서 봐요">
   <span class="ic">👁️</span>
-  <span>고객 화면 미리보기</span>
+  <span>손님 화면 미리보기</span>
 </button>
 
 <script>
@@ -1706,7 +1706,7 @@ function renderApp(){
     requestAnimationFrame(() => { main.scrollTop = prevScroll; });
   }
   state._lastNavKey = navKey;
-  // 고객 화면 미리보기 FAB은 메뉴판 관리 화면(메뉴/옵션/카테고리/세트/원산지)에서만 노출
+  // 손님 화면 미리보기 FAB은 메뉴판 관리 화면(메뉴/옵션/카테고리/세트/원산지)에서만 노출
   const MENU_MGMT_KEYS = ['menu','option','category','set','origin'];
   const fab = document.querySelector('.preview-fab');
   if (fab) fab.style.display = MENU_MGMT_KEYS.includes(state.section) ? 'flex' : 'none';
@@ -4207,11 +4207,11 @@ function renderMypage(main){
         <span class="h-act"><span style="font-size:11px;color:var(--ink-4);">읽기 전용</span></span>
       </h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:6px 0;">
-        <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">매장명</div><div style="font-size:14px;font-weight:700;color:var(--ink);">${s.name}</div></div>
+        <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">가게 이름</div><div style="font-size:14px;font-weight:700;color:var(--ink);">${s.name}</div></div>
         <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">사업자등록번호</div><div style="font-size:14px;color:var(--ink-2);font-family:ui-monospace,monospace;">${s.bizNo}</div></div>
-        <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">대표자</div><div style="font-size:14px;color:var(--ink-2);">${s.owner}</div></div>
+        <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">대표자명</div><div style="font-size:14px;color:var(--ink-2);">${s.owner}</div></div>
         <div><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">매장 연락처</div><div style="font-size:14px;color:var(--ink-2);">${s.phone}</div></div>
-        <div style="grid-column:1/-1;"><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">주소</div><div style="font-size:14px;color:var(--ink-2);">${s.addr}</div></div>
+        <div style="grid-column:1/-1;"><div style="font-size:11px;color:var(--ink-3);font-weight:600;margin-bottom:4px;">가게 주소</div><div style="font-size:14px;color:var(--ink-2);">${s.addr}</div></div>
       </div>
       <div style="margin-top:12px;padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:10px;">
         <span>💡 매장 정보 변경은 본사 확인이 필요해요. 변경할 항목과 사유를 적어 주시면 안내해 드려요.</span>
@@ -4997,7 +4997,7 @@ function openOrderDetail(o){
     <div style="margin-top:14px;display:flex;gap:8px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeModal()">🖨️ 영수증 출력</button>
       ${within && o.status==='완료' ? `
-        <button class="btn-danger" style="flex:1;" onclick="alert('취소 확인 사항: 고객 카드로 환불 영업일 3~5일 소요')">취소</button>
+        <button class="btn-danger" style="flex:1;" onclick="alert('취소 확인 사항: 손님 카드로 환불 영업일 3~5일 소요')">취소</button>
       ` : !within ? `
         <button class="btn-ghost" style="flex:1;opacity:.5;cursor:not-allowed;" disabled>🔒 취소 기간 만료</button>
       ` : ''}
@@ -7966,7 +7966,7 @@ function renderTranslate(main){
     <div class="toolbar">
       <div>
         <h2>번역 <span style="font-size:11px;color:#1b64da;background:#e6f0ff;padding:3px 8px;border-radius:6px;font-weight:700;margin-left:6px;vertical-align:middle;">${langInfo.flag} ${langInfo.label}</span></h2>
-        <div class="page-sub">고객이 보는 메뉴명·설명을 4개 언어로 입력해요. 사전 기반 자동 번역도 가능해요.</div>
+        <div class="page-sub">손님이 보는 메뉴명·설명을 4개 언어로 입력해요. 사전 기반 자동 번역도 가능해요.</div>
       </div>
       ${h.tools}
     </div>
@@ -8171,7 +8171,7 @@ function renderScheduleModal(){
     <div class="modal-head">
       <div>
         <h3>판매 시간 — ${item.name}</h3>
-        <div class="modal-sub">설정한 요일·시간에만 고객 화면에 노출돼요</div>
+        <div class="modal-sub">설정한 요일·시간에만 손님 화면에 노출돼요</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
@@ -8905,7 +8905,7 @@ function openCategoryScheduleModal(id){
 }
 
 /* ============================================================
-   고객 화면 미리보기 모달 — 사장님이 즉시 확인
+   손님 화면 미리보기 모달 — 사장님이 즉시 확인
    ============================================================ */
 function openCustomerPreview(){
   state._cpCat = 'all';      // 카테고리 필터
@@ -8983,7 +8983,7 @@ function renderCustomerPreview(){
   modal.innerHTML = `
     <div class="modal-head">
       <div>
-        <h3>👁️ 고객 화면 미리보기</h3>
+        <h3>👁️ 손님 화면 미리보기</h3>
         <div class="modal-sub">${STORE.name} · 손님이 QR로 보는 화면 그대로</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
@@ -9196,7 +9196,7 @@ function openCategoryFormModal(id){
       </div>
     </div>
     <div class="info-card" style="margin-top:14px;">
-      💡 카테고리는 <b>고객 주문 화면</b>에 그대로 노출돼요. 정렬 순서가 작을수록 위에 표시돼요.
+      💡 카테고리는 <b>손님 주문 화면</b>에 그대로 노출돼요. 정렬 순서가 작을수록 위에 표시돼요.
     </div>
     <div style="display:flex;gap:8px;margin-top:18px;">
       ${c?`<button class="btn-ghost" style="color:var(--red);border-color:#ffd0d4;" onclick="closeModal()">삭제</button>`:''}
@@ -9288,7 +9288,7 @@ const NOTIFICATIONS = [
     issuer:'소프트커피 (주)', date:'2026-05-13 10:00', read:false },
   { id:5, level:'brand', tag:'프로모션',
     title:'본사 프로모션 — 여름 시즌 1+1 쿠폰 일괄 발급',
-    body:'6/15 ~ 7/15 기간 동안 본사에서 1+1 쿠폰을 전 매장에 일괄 발급해요. 사장님은 따로 설정해 두실 게 없고, 고객 결제 시 자동 적용돼요.',
+    body:'6/15 ~ 7/15 기간 동안 본사에서 1+1 쿠폰을 전 매장에 일괄 발급해요. 사장님은 따로 설정해 두실 게 없고, 손님 결제 시 자동 적용돼요.',
     issuer:'소프트커피 본사', date:'2026-05-12 14:30', read:true },
   { id:6, level:'softment', tag:'약관',
     title:'이용약관·개인정보 처리방침 개정 안내 (6/15 시행)',
@@ -9312,7 +9312,7 @@ const NOTIFY_LEVELS = {
 };
 
 const REFUNDS = [
-  { id:'RF-2026051501', orderId:'OD-2026051501', date:'2026-05-15', cust:'김**', amt:12400, reason:'고객 변심',     status:'대기', detail:'주문 후 5분 내 취소 요청' },
+  { id:'RF-2026051501', orderId:'OD-2026051501', date:'2026-05-15', cust:'김**', amt:12400, reason:'손님 변심',     status:'대기', detail:'주문 후 5분 내 취소 요청' },
   { id:'RF-2026051402', orderId:'OD-2026051402', date:'2026-05-14', cust:'이**', amt:8600,  reason:'메뉴 누락',     status:'대기', detail:'크로아상 1개 누락' },
   { id:'RF-2026051301', orderId:'OD-2026051301', date:'2026-05-13', cust:'박**', amt:5500,  reason:'품질 불만',     status:'승인', detail:'치즈케이크 신선도 이슈' },
   { id:'RF-2026051201', orderId:'OD-2026051201', date:'2026-05-12', cust:'최**', amt:4500,  reason:'중복 결제',     status:'승인', detail:'결제 중 화면 멈춤으로 2회 결제됨' },
@@ -9446,7 +9446,7 @@ const FAQS = [
 
 const STORE_INFO = {
   name:'소프트커피 합정점',
-  displayName:'소프트커피 합정점',   // 표시용 매장명 — 고객 화면 노출용, 자유 수정 가능
+  displayName:'소프트커피 합정점',   // 손님이 보는 가게 이름 — 손님 화면 노출용, 자유 수정 가능
   owner:'홍길동',
   bizNo:'123-45-67890',
   phone:'02-1234-5678',
@@ -9734,7 +9734,7 @@ function renderRefund(main){
     <div class="toolbar">
       <div>
         <h2>환불 관리</h2>
-        <div class="page-sub">고객 환불 요청을 검토하고 승인·거절해요.</div>
+        <div class="page-sub">손님 환불 요청을 검토하고 승인·거절해요.</div>
       </div>
     </div>
 
@@ -9754,7 +9754,7 @@ function renderRefund(main){
             <th style="width:140px;">환불번호</th>
             <th style="width:90px;">날짜</th>
             <th>주문번호</th>
-            <th style="width:80px;">고객</th>
+            <th style="width:80px;">손님</th>
             <th class="num" style="width:90px;">금액</th>
             <th>사유</th>
             <th style="width:90px;">상태</th>
@@ -10468,20 +10468,20 @@ function renderStore(main){
     <div class="grid-2-eq">
       <div class="panel">
         <h3>기본 정보 <span class="h-sub">사업자등록증 기준 정보예요</span></h3>
-        <div style="font-size:12px;color:#8a6d00;background:#fff8e6;border:1px solid #ffe3a3;border-radius:8px;padding:9px 12px;margin-bottom:14px;line-height:1.5;">🔒 <b>매장명·대표자명·사업자등록번호·주소</b>는 가입 시 사업자등록증 정보로 시스템 관리자가 설정해, 여기서는 바꿀 수 없어요. 변경이 필요하면 고객센터로 알려 주세요.</div>
+        <div style="font-size:12px;color:#8a6d00;background:#fff8e6;border:1px solid #ffe3a3;border-radius:8px;padding:9px 12px;margin-bottom:14px;line-height:1.5;">🔒 <b>가게 이름·대표자명·사업자등록번호·가게 주소</b>는 가입 시 사업자등록증 정보로 시스템 관리자가 설정해, 여기서는 바꿀 수 없어요. 변경이 필요하면 고객센터로 알려 주세요.</div>
         <div class="form-grid">
-          <div class="form-row"><label>매장명 🔒</label><input class="input" value="${s.name}" disabled /></div>
-          <div class="form-row"><label>표시용 매장명</label><input class="input" value="${s.displayName}" oninput="STORE_INFO.displayName=this.value" placeholder="고객 화면에 보일 이름" /><div style="font-size:11px;color:var(--ink-3);margin-top:5px;line-height:1.4;">고객 주문 화면에 이 이름이 보여요. 매장명과 다르게 자유롭게 정할 수 있어요.</div></div>
+          <div class="form-row"><label>가게 이름 🔒</label><input class="input" value="${s.name}" disabled /></div>
+          <div class="form-row"><label>손님이 보는 가게 이름</label><input class="input" value="${s.displayName}" oninput="STORE_INFO.displayName=this.value" placeholder="손님 화면에 보일 이름" /><div style="font-size:11px;color:var(--ink-3);margin-top:5px;line-height:1.4;">손님 주문 화면에 이 이름이 보여요. 가게 이름과 다르게 자유롭게 정할 수 있어요.</div></div>
           <div class="form-row"><label>대표자명 🔒</label><input class="input" value="${s.owner}" disabled /></div>
           <div class="form-row"><label>사업자등록번호 🔒</label><input class="input" value="${s.bizNo}" disabled /></div>
-          <div class="form-row"><label>대표 전화</label><input class="input" value="${s.phone}" /></div>
-          <div class="form-row" style="grid-column:1/-1;"><label>주소 🔒</label><input class="input" value="${s.addr}" disabled /></div>
+          <div class="form-row"><label>가게 전화번호</label><input class="input" value="${s.phone}" /></div>
+          <div class="form-row" style="grid-column:1/-1;"><label>가게 주소 🔒</label><input class="input" value="${s.addr}" disabled /></div>
         </div>
       </div>
 
       <div class="panel">
         <div style="font-size:12px;color:var(--blue);background:var(--blue-50);border-radius:8px;padding:8px 12px;margin-bottom:16px;">
-          📱 아래 로고와 매장 대표 이미지는 고객의 QR오더 주문 화면에 표시돼요.
+          📱 아래 로고와 매장 대표 이미지는 손님의 QR오더 주문 화면에 표시돼요.
         </div>
 
         <!-- ① 매장 로고 (1장, 작은 정사각형) -->
@@ -10520,7 +10520,7 @@ function renderStore(main){
     </div>
 
     <div class="panel">
-      <h3>매장 소개 · 편의정보 <span class="h-sub">고객 주문 화면에 함께 보여요</span></h3>
+      <h3>매장 소개 · 편의정보 <span class="h-sub">손님 주문 화면에 함께 보여요</span></h3>
 
       <div class="form-row" style="margin-bottom:20px;">
         <label>매장 소개글</label>
@@ -10713,7 +10713,7 @@ function renderCoupon(main){
     <div class="toolbar">
       <div>
         <h2>쿠폰</h2>
-        <div class="page-sub">고객에게 발급할 쿠폰을 만들고 사용 현황을 봐요.</div>
+        <div class="page-sub">손님에게 발급할 쿠폰을 만들고 사용 현황을 봐요.</div>
       </div>
       <div class="left">
         <button class="btn-primary" onclick="alert('쿠폰 발급 (와이어프레임)')">+ 쿠폰 만들기</button>
@@ -10766,7 +10766,7 @@ function renderStamp(main){
     <div class="toolbar">
       <div>
         <h2>스탬프·포인트</h2>
-        <div class="page-sub">고객이 모은 스탬프와 받은 리워드를 관리해요.</div>
+        <div class="page-sub">손님이 모은 스탬프와 받은 리워드를 관리해요.</div>
       </div>
     </div>
 
@@ -10786,16 +10786,16 @@ function renderStamp(main){
       <div class="panel">
         <h3>스탬프 현황</h3>
         <div class="kpi-row" style="grid-template-columns:repeat(2,1fr);margin-bottom:0;">
-          <div class="pc-card"><div class="label">스탬프 보유 고객</div><div class="num">${s.members.length}<span style="font-size:13px;color:var(--ink-3);font-weight:600;">명</span></div></div>
+          <div class="pc-card"><div class="label">스탬프 보유 손님</div><div class="num">${s.members.length}<span style="font-size:13px;color:var(--ink-3);font-weight:600;">명</span></div></div>
           <div class="pc-card blue"><div class="label">리워드 지급 누계</div><div class="num">${s.members.reduce((a,m)=>a+m.rewards,0)}</div></div>
         </div>
       </div>
     </div>
 
     <div class="panel tight">
-      <h3>고객별 스탬프 <span class="h-sub">${s.members.length}명</span></h3>
+      <h3>손님별 스탬프 <span class="h-sub">${s.members.length}명</span></h3>
       <table class="t">
-        <thead><tr><th>고객</th><th>연락처</th><th>스탬프</th><th class="num">리워드 받은 횟수</th><th style="width:64px;"></th></tr></thead>
+        <thead><tr><th>손님</th><th>연락처</th><th>스탬프</th><th class="num">리워드 받은 횟수</th><th style="width:64px;"></th></tr></thead>
         <tbody>
           ${s.members.map(m=>{
             const pct = Math.round(m.stamps/s.rule.rewardAt*100);
@@ -11413,7 +11413,7 @@ function renderOrderType(main){
     <div class="toolbar">
       <div>
         <h2>주문 방식</h2>
-        <div class="page-sub">매장 운영 방식에 맞춰 주문 채널·결제 정책·고객 안내 방식을 한곳에서 관리해요.</div>
+        <div class="page-sub">매장 운영 방식에 맞춰 주문 채널·결제 정책·손님 안내 방식을 한곳에서 관리해요.</div>
       </div>
     </div>
 
@@ -11495,7 +11495,7 @@ function renderOrderType(main){
               <div style="margin-left:120px;padding:9px 12px;background:#fef2f2;border-radius:8px;font-size:11px;color:#b91c1c;display:flex;align-items:center;gap:6px;">
                 ⚠️ 호출 방식을 최소 1개 선택해 주세요.
               </div>
-            ` : `<div style="margin-left:120px;font-size:11px;color:var(--ink-4);">고객 식별자: 휴대폰 끝 4자리</div>`}
+            ` : `<div style="margin-left:120px;font-size:11px;color:var(--ink-4);">손님 식별자: 휴대폰 끝 4자리</div>`}
           ` : ''}
 
           <!-- 결제 정책 — 매장에 종속된 서브섹션 -->
@@ -11564,7 +11564,7 @@ function renderOrderType(main){
           </div>
           ${ch.reservation ? `
             <div style="margin-left:120px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:11px;color:#9a3412;line-height:1.55;margin-top:4px;">
-              ℹ️ 고객이 픽업 시간을 선택하면 매장에 즉시 들어가지 않아요. <b>사장님이 [수락]을 눌러야</b> 주문이 확정돼요. 예약 건수 제한 없음 · 영업 종료 30분 전 슬롯 자동 차단.
+              ℹ️ 손님이 픽업 시간을 선택하면 매장에 즉시 들어가지 않아요. <b>사장님이 [수락]을 눌러야</b> 주문이 확정돼요. 예약 건수 제한 없음 · 영업 종료 30분 전 슬롯 자동 차단.
             </div>
           ` : ''}
         </div>
@@ -11617,7 +11617,7 @@ function renderStaffCall(main){
     <div class="toolbar">
       <div>
         <h2>직원 호출</h2>
-        <div class="page-sub">고객이 테이블에서 직원을 부를 수 있는 기능이에요. 매장 식사 채널에서만 작동해요.</div>
+        <div class="page-sub">손님이 테이블에서 직원을 부를 수 있는 기능이에요. 매장 식사 채널에서만 작동해요.</div>
       </div>
       <label class="toggle-switch ${sc.enabled?'on':''}" style="font-size:13px;" onclick="STAFF_CALLS.enabled=!STAFF_CALLS.enabled;renderApp()">
         <span class="sw"></span>
@@ -11714,7 +11714,7 @@ function renderStaffCall(main){
       <div class="panel" style="text-align:center;padding:48px 20px;">
         <div style="font-size:36px;margin-bottom:14px;">🛎️</div>
         <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px;">직원 호출이 꺼져 있어요</div>
-        <div style="font-size:13px;color:var(--ink-3);">위 토글을 켜면 고객이 테이블에서 직원을 부를 수 있어요.</div>
+        <div style="font-size:13px;color:var(--ink-3);">위 토글을 켜면 손님이 테이블에서 직원을 부를 수 있어요.</div>
       </div>
     `;
     return;
@@ -11739,7 +11739,7 @@ function renderStaffCall(main){
 
       ${enabledCnt===0 ? `
         <div style="padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#c2410c;margin-bottom:12px;">
-          ⚠️ 모든 메시지가 꺼져 있어요. 고객 화면에 직원 호출 버튼이 나타나지 않아요.
+          ⚠️ 모든 메시지가 꺼져 있어요. 손님 화면에 직원 호출 버튼이 나타나지 않아요.
         </div>
       ` : ''}
 

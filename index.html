@@ -3364,13 +3364,17 @@ function renderOrders(main){
   // 필터링
   let rows = ORDERS;
 
-  // 기간 필터 (오늘/어제/이번 주/이번 달/전체/사용자 지정)
+  // 기간 필터 — 최대 조회 3개월 / 보관 1년 정책
+  const ORDER_3M_START = '2026-02-15'; // 오늘(5/15) 기준 3개월 전
+  const ORDER_1Y_START = '2025-05-15'; // 오늘(5/15) 기준 1년 전 (보관 한도)
   if (state.orderDateFilter==='today')      rows = rows.filter(o=>o.date===TODAY_DATE);
   else if (state.orderDateFilter==='yesterday') rows = rows.filter(o=>o.date==='2026-05-14');
   else if (state.orderDateFilter==='week')  rows = rows.filter(o=>o.date>='2026-05-09' && o.date<='2026-05-15');
   else if (state.orderDateFilter==='month') rows = rows.filter(o=>o.date.startsWith('2026-05'));
+  else if (state.orderDateFilter==='3m')    rows = rows.filter(o=>o.date>=ORDER_3M_START && o.date<=TODAY_DATE);
   else if (state.orderDateFilter==='custom') rows = rows.filter(o=>o.date>=state.customStart && o.date<=state.customEnd);
-  // 'all' 인 경우 1년 초과 거래까지 모두 노출
+  // 기본(all)은 최대 3개월 범위로 제한
+  else rows = rows.filter(o=>o.date>=ORDER_3M_START && o.date<=TODAY_DATE);
 
   // 채널 필터 (매장/포장)
   if (state.orderChannelFilter!=='all') rows = rows.filter(o=>o.ch===state.orderChannelFilter);
@@ -3442,8 +3446,9 @@ function renderOrders(main){
           state.orderDateFilter==='yesterday'?'어제 (2026년 5월 14일(목))':
           state.orderDateFilter==='week'?'이번 주 (5/9(토) ~ 5/15(금))':
           state.orderDateFilter==='month'?'이번 달 (2026년 5월 1일(금) ~ 5월 15일(금))':
+          state.orderDateFilter==='3m'?'최근 3개월 (2026년 2월 15일 ~ 5월 15일)':
           state.orderDateFilter==='custom'?`사용자 지정 (${state.customStart} ~ ${state.customEnd})`:
-          '전체 기간'
+          '최근 3개월'
         )})'>📤 내보내기</button>
       </div>
     </div>
@@ -3508,16 +3513,19 @@ function renderOrders(main){
         const d = state.orderFilterDraft;
         return `
         <div style="padding:0 18px 18px;border-top:1px solid var(--line-2);">
-          <div class="info-card" style="margin:14px 0 12px;background:#f4f8ff;border-color:#cfe0fa;color:#1b64da;font-size:12px;">
+          <div class="info-card" style="margin:14px 0 8px;background:#f4f8ff;border-color:#cfe0fa;color:#1b64da;font-size:12px;">
             💡 여러 조건을 함께 골라 두고 아래 <b>검색</b> 버튼을 눌러야 적용돼요.
           </div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px;">
+          <div style="margin-bottom:12px;padding:9px 12px;background:#fafafa;border:1px solid var(--line);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.6;">
+            🗓️ <b style="color:var(--ink-2);">조회 정책</b> · 한 번에 최대 <b style="color:var(--ink-2);">3개월</b> 조회 가능 · 데이터는 <b style="color:var(--ink-2);">1년</b> 보관 후 자동 삭제
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;">
             <span class="field-label">기간</span>
             <span class="chip ${d.dateFilter==='today'?'on':''}" onclick="state.orderFilterDraft.dateFilter='today';renderApp()">오늘 (5/15)</span>
             <span class="chip ${d.dateFilter==='yesterday'?'on':''}" onclick="state.orderFilterDraft.dateFilter='yesterday';renderApp()">어제</span>
             <span class="chip ${d.dateFilter==='week'?'on':''}" onclick="state.orderFilterDraft.dateFilter='week';renderApp()">이번 주</span>
             <span class="chip ${d.dateFilter==='month'?'on':''}" onclick="state.orderFilterDraft.dateFilter='month';renderApp()">이번 달</span>
-            <span class="chip ${d.dateFilter==='all'?'on':''}" onclick="state.orderFilterDraft.dateFilter='all';renderApp()">전체</span>
+            <span class="chip ${d.dateFilter==='3m'?'on':''}" onclick="state.orderFilterDraft.dateFilter='3m';renderApp()">최근 3개월</span>
             <span class="chip ${d.dateFilter==='custom'?'on':''}" onclick="openDateRangePicker('orders')">📅 기간 직접 선택${d.dateFilter==='custom'?` (${state.customStart.slice(5)} ~ ${state.customEnd.slice(5)})`:''}</span>
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;">
@@ -4739,6 +4747,10 @@ function applyOrderInlineRange(){
   if (!s || !e) { alert('시작일과 종료일을 모두 선택해주세요'); return; }
   if (s > e)    { alert('종료일을 시작일 이후로 선택해 주세요'); return; }
   if (e > TODAY_DATE) { alert('오늘까지의 날짜에서 선택해 주세요'); return; }
+  // 정책: 1회 최대 3개월(90일) / 1년 이상 과거 데이터 없음
+  const diffDays = Math.round((new Date(e) - new Date(s)) / 86400000);
+  if (diffDays > 90) { alert('주문 내역은 한 번에 최대 3개월(90일)까지만 조회할 수 있어요.\n기간을 줄여서 다시 선택해 주세요.'); return; }
+  if (s < '2025-05-15') { alert('1년 이전 데이터는 보관 정책에 따라 조회할 수 없어요.\n(보관 기간: 1년)'); return; }
   state.customStart = s;
   state.customEnd = e;
   state.orderDateFilter = 'custom';

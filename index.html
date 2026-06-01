@@ -7036,7 +7036,6 @@ function qrQuickTabs(){
     { key:'table',   ic:'🪑', label:'테이블 QR',       cnt: TABLES.length },
     { key:'takeout', ic:'🛍️', label:'포장 주문 QR',   cnt: takeoutActive ? 1 : 0 },
     { key:'menu',    ic:'📖', label:'메뉴판 QR',       cnt: 1 },
-    { key:'sticker', ic:'📦', label:'QR 스티커 신청', cnt: QR_REQUESTS.length },
   ];
   return `
     <div class="qr-quick-tabs">
@@ -10430,7 +10429,9 @@ function qrMock(id){
 }
 
 function renderQR(main){
+  if(!state.qrMainTab) state.qrMainTab = 'code';
   if(!state.qrReqColor) state.qrReqColor = null;
+  const qrTab = state.qrMainTab;
 
   // 구역별로 테이블 그룹화
   const zoneGroups = ZONE_LIST.map(z=>({
@@ -10445,12 +10446,87 @@ function renderQR(main){
     <div class="toolbar">
       <div>
         <h2>QR 관리</h2>
-        <div class="page-sub">테이블·포장 QR을 즉시 임시 출력해서 쓰고, 정식 스티커는 따로 신청할 수 있어요.</div>
+        <div class="page-sub">테이블·포장 QR을 즉시 임시 출력하거나, 정식 스티커를 신청할 수 있어요.</div>
       </div>
     </div>
 
-    ${qrQuickTabs()}
+    <div class="tabs">
+      <div class="t ${qrTab==='code'?'on':''}" onclick="state.qrMainTab='code';renderApp()">📱 QR 코드 현황</div>
+      <div class="t ${qrTab==='sticker'?'on':''}" onclick="state.qrMainTab='sticker';renderApp()">📦 QR 스티커 신청${QR_REQUESTS.length>0?` <span style="display:inline-block;margin-left:4px;font-size:11px;font-weight:800;color:#fff;background:var(--blue);border-radius:10px;padding:1px 7px;vertical-align:middle;">${QR_REQUESTS.length}</span>`:''}</div>
+    </div>
 
+    ${qrTab==='sticker' ? `
+    <!-- ★ 탭 2: QR 스티커 신청 -->
+    <div class="panel">
+      <h3>📦 정식 QR 스티커 신청</h3>
+      <div class="page-sub" style="margin-bottom:14px;">추가 QR이 필요할 땐 <b style="color:var(--ink-2);">${QR_BATCH_SIZE}장 단위</b>로 한 번에 신청해 주세요. 한 번 신청 시 <b style="color:var(--ink-2);">색상 1가지</b>만 선택할 수 있어요.</div>
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;margin-bottom:20px;">
+        <span style="font-size:16px;flex-shrink:0;">💰</span>
+        <div style="font-size:13px;color:#9a3412;line-height:1.65;">
+          QR 이미지 1장당 <b>${QR_PRICE_PER_UNIT.toLocaleString()}원</b>, 최소 신청 단위는 <b>${QR_BATCH_SIZE}장</b>이에요.
+          색상을 여러 가지로 받고 싶다면 신청을 나눠서 진행해 주세요.
+        </div>
+      </div>
+      <div style="margin-bottom:22px;">
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:10px;">색상 선택 <span style="color:var(--red);">*</span> <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">한 번에 한 가지만 선택할 수 있어요</span></label>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          ${QR_COLOR_OPTIONS.map(c=>`
+            <div onclick="state.qrReqColor='${c.name}';renderApp()"
+              style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;">
+              <div style="width:48px;height:48px;background:${c.hex};border-radius:10px;border:${c.name==='흰색'?'1px solid var(--line)':'none'};
+                ${state.qrReqColor===c.name?'outline:3px solid var(--blue);outline-offset:2px;':''}transition:outline .1s;"></div>
+              <span style="font-size:12px;color:${state.qrReqColor===c.name?'var(--blue)':'var(--ink-2)'};font-weight:${state.qrReqColor===c.name?800:600};">${c.name}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div style="margin-bottom:22px;">
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:10px;">신청 수량 <span style="color:var(--red);">*</span> <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">${QR_BATCH_SIZE}장 단위로만 신청할 수 있어요</span></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${[10,20,30,50,100].map(q=>{
+            const on = state.qrReqQty===q;
+            return `<div onclick="state.qrReqQty=${q};renderApp()"
+              style="padding:12px 22px;background:${on?'var(--blue)':'#fff'};color:${on?'#fff':'var(--ink-2)'};border:2px solid ${on?'var(--blue)':'var(--line)'};border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;min-width:80px;text-align:center;${on?'box-shadow:0 4px 12px rgba(49,130,246,.25);':''}">${q}장</div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div style="margin-bottom:22px;">
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px;">메모 <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">선택 — 어떤 용도인지 알려 주시면 빠르게 처리돼요</span></label>
+        <input id="qr-req-memo" class="input" placeholder="예: 옥상 테라스 신규 테이블용, 야외 영업용 예비 등" style="width:100%;" value="${state.qrReqMemo||''}" oninput="state.qrReqMemo=this.value" />
+      </div>
+      ${state.qrReqColor && state.qrReqQty ? `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <div style="font-size:13px;color:var(--ink-2);font-weight:700;">${state.qrReqColor} 색상 · ${state.qrReqQty}장</div>
+          <div style="font-size:11px;color:var(--ink-3);">${QR_PRICE_PER_UNIT.toLocaleString()}원 × ${state.qrReqQty}장</div>
+        </div>
+        <div style="font-size:20px;font-weight:800;color:var(--blue);">${(state.qrReqQty * QR_PRICE_PER_UNIT).toLocaleString()}원</div>
+      </div>` : ''}
+      <button class="btn-primary" style="width:100%;padding:14px;font-size:14px;font-weight:800;${(!state.qrReqColor||!state.qrReqQty)?'opacity:.5;cursor:not-allowed;':''}" onclick="submitQRRequest()">
+        ${state.qrReqColor && state.qrReqQty ? `${state.qrReqColor} ${state.qrReqQty}장 · ${(state.qrReqQty * QR_PRICE_PER_UNIT).toLocaleString()}원 신청하기` : '색상과 수량을 모두 선택해 주세요'}
+      </button>
+      ${QR_REQUESTS.length > 0 ? `
+      <h3 style="margin-top:24px;">신청 내역 <span class="h-sub">${QR_REQUESTS.length}건</span></h3>
+      <table class="t">
+        <thead><tr><th style="width:40px;">#</th><th style="width:110px;">색상</th><th style="width:80px;">수량</th><th class="num" style="width:110px;">결제 금액</th><th>메모</th><th style="width:110px;">신청일</th><th style="width:100px;">상태</th></tr></thead>
+        <tbody>
+          ${QR_REQUESTS.map((r,i)=>`
+            <tr>
+              <td style="color:var(--ink-3);">${i+1}</td>
+              <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:18px;background:${r.hex};border-radius:4px;border:${r.colorName==='흰색'?'1px solid var(--line)':'none'};flex-shrink:0;"></div><span style="font-size:13px;">${r.colorName}</span></div></td>
+              <td><b>${r.qty}장</b></td>
+              <td class="num"><b>${(r.totalPrice||0).toLocaleString()}</b><span style="color:var(--ink-3);font-size:11px;">원</span></td>
+              <td style="color:var(--ink-2);font-size:12px;">${r.memo||'<span style="color:var(--ink-4);">—</span>'}</td>
+              <td style="color:var(--ink-3);">${r.reqDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}</td>
+              <td><span class="pill ${r.status==='완료'?'done':'partial'}">${r.status}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>` : ''}
+    </div>
+    ` : `
+    <!-- ★ 탭 1: QR 코드 현황 -->
+    ${qrQuickTabs()}
     <!-- 안내 — 임시 출력 vs 정식 스티커 -->
     <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
       <span style="font-size:16px;flex-shrink:0;">💡</span>
@@ -10550,95 +10626,7 @@ function renderQR(main){
       </div>
     </div>
 
-    <!-- ④ QR 이미지 추가 신청 -->
-    <div class="panel" id="qr-section-sticker">
-      <h3>📦 정식 QR 스티커 신청</h3>
-      <div class="page-sub" style="margin-bottom:14px;">추가 QR이 필요할 땐 <b style="color:var(--ink-2);">${QR_BATCH_SIZE}장 단위</b>로 한 번에 신청해 주세요. 한 번 신청 시 <b style="color:var(--ink-2);">색상 1가지</b>만 선택할 수 있어요.</div>
-
-      <!-- 정책 안내 박스 -->
-      <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;margin-bottom:20px;">
-        <span style="font-size:16px;flex-shrink:0;">💰</span>
-        <div style="font-size:13px;color:#9a3412;line-height:1.65;">
-          QR 이미지 1장당 <b>${QR_PRICE_PER_UNIT.toLocaleString()}원</b>, 최소 신청 단위는 <b>${QR_BATCH_SIZE}장</b>이에요.
-          색상을 여러 가지로 받고 싶다면 신청을 나눠서 진행해 주세요.
-        </div>
-      </div>
-
-      <!-- 색상 선택 -->
-      <div style="margin-bottom:22px;">
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:10px;">색상 선택 <span style="color:var(--red);">*</span> <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">한 번에 한 가지만 선택할 수 있어요</span></label>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          ${QR_COLOR_OPTIONS.map(c=>`
-            <div onclick="state.qrReqColor='${c.name}';renderApp()"
-              style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;">
-              <div style="width:48px;height:48px;background:${c.hex};border-radius:10px;border:${c.name==='흰색'?'1px solid var(--line)':'none'};
-                ${state.qrReqColor===c.name?'outline:3px solid var(--blue);outline-offset:2px;':''}transition:outline .1s;"></div>
-              <span style="font-size:12px;color:${state.qrReqColor===c.name?'var(--blue)':'var(--ink-2)'};font-weight:${state.qrReqColor===c.name?800:600};">${c.name}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <!-- 수량 선택 -->
-      <div style="margin-bottom:22px;">
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:10px;">신청 수량 <span style="color:var(--red);">*</span> <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">${QR_BATCH_SIZE}장 단위로만 신청할 수 있어요</span></label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${[10,20,30,50,100].map(q=>{
-            const on = state.qrReqQty===q;
-            return `<div onclick="state.qrReqQty=${q};renderApp()"
-              style="padding:12px 22px;background:${on?'var(--blue)':'#fff'};color:${on?'#fff':'var(--ink-2)'};border:2px solid ${on?'var(--blue)':'var(--line)'};border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;min-width:80px;text-align:center;${on?'box-shadow:0 4px 12px rgba(49,130,246,.25);':''}">${q}장</div>`;
-          }).join('')}
-        </div>
-      </div>
-
-      <!-- 메모 (선택) -->
-      <div style="margin-bottom:22px;">
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:8px;">메모 <span style="color:var(--ink-4);font-weight:400;font-size:12px;margin-left:4px;">선택 — 어떤 용도인지 알려 주시면 빠르게 처리돼요</span></label>
-        <input id="qr-req-memo" class="input" placeholder="예: 옥상 테라스 신규 테이블용, 야외 영업용 예비 등" style="width:100%;" value="${state.qrReqMemo||''}" oninput="state.qrReqMemo=this.value" />
-      </div>
-
-      <!-- 결제 요약 -->
-      ${state.qrReqColor && state.qrReqQty ? `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
-        <div style="display:flex;flex-direction:column;gap:2px;">
-          <div style="font-size:13px;color:var(--ink-2);font-weight:700;">${state.qrReqColor} 색상 · ${state.qrReqQty}장</div>
-          <div style="font-size:11px;color:var(--ink-3);">${QR_PRICE_PER_UNIT.toLocaleString()}원 × ${state.qrReqQty}장</div>
-        </div>
-        <div style="font-size:20px;font-weight:800;color:var(--blue);">
-          ${(state.qrReqQty * QR_PRICE_PER_UNIT).toLocaleString()}원
-        </div>
-      </div>` : ''}
-
-      <!-- 신청 버튼 -->
-      <button class="btn-primary" style="width:100%;padding:14px;font-size:14px;font-weight:800;${(!state.qrReqColor||!state.qrReqQty)?'opacity:.5;cursor:not-allowed;':''}" onclick="submitQRRequest()">
-        ${state.qrReqColor && state.qrReqQty ? `${state.qrReqColor} ${state.qrReqQty}장 · ${(state.qrReqQty * QR_PRICE_PER_UNIT).toLocaleString()}원 신청하기` : '색상과 수량을 모두 선택해 주세요'}
-      </button>
-
-      <!-- 신청 이력 -->
-      ${QR_REQUESTS.length > 0 ? `
-      <h3 style="margin-top:24px;">신청 내역 <span class="h-sub">${QR_REQUESTS.length}건</span></h3>
-      <table class="t">
-        <thead><tr><th style="width:40px;">#</th><th style="width:110px;">색상</th><th style="width:80px;">수량</th><th class="num" style="width:110px;">결제 금액</th><th>메모</th><th style="width:110px;">신청일</th><th style="width:100px;">상태</th></tr></thead>
-        <tbody>
-          ${QR_REQUESTS.map((r,i)=>`
-            <tr>
-              <td style="color:var(--ink-3);">${i+1}</td>
-              <td>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <div style="width:18px;height:18px;background:${r.hex};border-radius:4px;border:${r.colorName==='흰색'?'1px solid var(--line)':'none'};flex-shrink:0;"></div>
-                  <span style="font-size:13px;">${r.colorName}</span>
-                </div>
-              </td>
-              <td><b>${r.qty}장</b></td>
-              <td class="num"><b>${(r.totalPrice||0).toLocaleString()}</b><span style="color:var(--ink-3);font-size:11px;">원</span></td>
-              <td style="color:var(--ink-2);font-size:12px;">${r.memo||'<span style="color:var(--ink-4);">—</span>'}</td>
-              <td style="color:var(--ink-3);">${r.reqDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}</td>
-              <td><span class="pill ${r.status==='완료'?'done':'partial'}">${r.status}</span></td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>` : ''}
-    </div>
+    `}
   `;
 }
 

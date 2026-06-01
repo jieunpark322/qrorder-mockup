@@ -1380,7 +1380,7 @@ ORDERS.forEach(o => {
   if (o.issuer === '현금') { o.stl = '− (현금 즉시)'; return; }
   const s = findSettlementByOrderDate(o.date);
   if (!s) { o.stl = '−'; return; }
-  o.stl = s.status === '정산완료' ? `정산완료 ${s.settleDate}` : `정산예정 ${s.settleDate}`;
+  o.stl = s.status === '정산완료' ? `정산완료 ${fmtMD(s.settleDate)}` : `정산예정 ${fmtMD(s.settleDate)}`;
   o._settlementId = s.id;
 });
 
@@ -1596,6 +1596,14 @@ function maskTid(tid){
   return tid.slice(0,8) + '****' + tid.slice(-4);
 }
 // 사업자번호 마스킹
+// "M/D" 또는 "M/D~M/D" → "2026.MM.DD" 또는 "2026.MM.DD~MM.DD"
+function fmtMD(md){
+  if(!md || md==='−') return md;
+  const cvt = s => { const [m,d]=s.trim().split('/'); return `2026.${String(m).padStart(2,'0')}.${String(d).padStart(2,'0')}`; };
+  const parts = md.split('~');
+  return parts.length===1 ? cvt(parts[0]) : `${cvt(parts[0])}~${cvt(parts[1]).slice(5)}`;
+}
+
 function maskBizNo(bizNo){
   if (!bizNo) return '';
   return bizNo.replace(/^(\d{3})-(\d{2})-(\d{2})(\d{3})$/, '$1-**-**$4');
@@ -3576,8 +3584,8 @@ function renderOrders(main){
             const isCancelAll = o.status==='취소';
             const rowAttr = isCancelAll ? ' style="background:#fff7f7;"' : '';
             const idStyle = isCancelAll ? 'color:var(--red);font-weight:700;text-decoration:line-through;' : '';
-            const dateLabel = o.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3');
-            const cancelDateLabel = o.cancelDate ? o.cancelDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3') : dateLabel;
+            const dateLabel = o.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3');
+            const cancelDateLabel = o.cancelDate ? o.cancelDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3') : dateLabel;
             const cancelLine = isCancelAll && o.cancelTime
               ? `<div style="margin-top:4px;font-size:11px;font-weight:600;color:var(--red);white-space:nowrap;">↺ ${cancelDateLabel} ${o.cancelTime} 취소</div>`
               : '';
@@ -3717,7 +3725,7 @@ function renderStlCalendar(main){
           if (stl) {
             inner += `<div class="cal-amt ${stl.statusPill}">${fmt(stl.totalSettle)}원</div>`;
             inner += `<div><span class="cal-tag ${stl.statusPill}">${stl.status==='정산완료'?'입금 완료':'곧 들어와요'}</span></div>`;
-            inner += `<div class="cal-sub">결제일 ${stl.approvalDate}(${stl.approvalDow})</div>`;
+            inner += `<div class="cal-sub">결제일 ${fmtMD(stl.approvalDate)}(${stl.approvalDow})</div>`;
           }
           return `<div class="cal-cell ${isSelected?'selected':''} ${stl?'has-data':''}" ${stl?`onclick="selectStlDate('${iso}')"`:''}>${inner}</div>`;
         }).join('')}
@@ -3890,10 +3898,10 @@ function renderStlList(main){
   const hasAdv = advFilters.length > 0;
 
   const rangeLabel = state.stlListQuickRange==='period' && state.stlListPeriodStart && state.stlListPeriodEnd
-    ? `${state.stlListPeriodStart.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')} ~ ${state.stlListPeriodEnd.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}`
+    ? `${state.stlListPeriodStart.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')} ~ ${state.stlListPeriodEnd.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}`
     : state.stlListSpecificDate
-    ? `${state.stlListSpecificDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}(${dailyList.find(r=>r[basisKey]===state.stlListSpecificDate)?.[state.stlListDateBasis==='approval'?'approvalDow':'settleDow'] || ''})`
-    : state.stlListQuickRange==='today'      ? `오늘 (${TODAY_DATE.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')})`
+    ? `${state.stlListSpecificDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}(${dailyList.find(r=>r[basisKey]===state.stlListSpecificDate)?.[state.stlListDateBasis==='approval'?'approvalDow':'settleDow'] || ''})`
+    : state.stlListQuickRange==='today'      ? `오늘 (${TODAY_DATE.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')})`
     : state.stlListQuickRange==='1w'         ? '최근 1주일'
     : state.stlListQuickRange==='1m'         ? '최근 1개월'
     : state.stlListQuickRange==='thismonth'  ? '이번 달 (5월)'
@@ -4035,8 +4043,8 @@ function renderStlList(main){
           ${rows.length===0 ? `<tr class="empty-row"><td colspan="10">다른 조건으로 다시 찾아봐 주세요. <span style="color:var(--blue);cursor:pointer;font-weight:600;" onclick="resetStlListFilters()">처음으로 돌리기</span></td></tr>` : rows.map((r,i) => `
             <tr class="clickable" ${r.settlementId?`onclick="openStlDetail('${r.settlementId}')"`:''}>
               <td style="text-align:center;color:var(--ink-3);font-weight:600;">${i+1}</td>
-              <td><b>${r.approvalDate}(${r.approvalDow})</b></td>
-              <td>${r.settleDate}${r.settleDow?`(${r.settleDow})`:''}</td>
+              <td><b>${fmtMD(r.approvalDate)}(${r.approvalDow})</b></td>
+              <td>${fmtMD(r.settleDate)}${r.settleDow?`(${r.settleDow})`:''}</td>
               <td class="num">${fmt(r.cnt)}</td>
               <td class="num">${fmt(r.grossAmt)}</td>
               <td class="num">${r.usedCoupon?`<b style="color:#a25e00;">−${fmt(r.couponDiscount)}</b>`:'−'}</td>
@@ -4095,14 +4103,14 @@ function renderStlDetail(main){
     <div class="toolbar">
       <div>
         <div class="stl-detail-head" style="margin-bottom:8px;">
-          <div class="stl-detail-date">${stl.settleDate}(${stl.settleDow})</div>
+          <div class="stl-detail-date">${fmtMD(stl.settleDate)}(${stl.settleDow})</div>
           <div class="stl-detail-status ${stl.statusPill}">${statusLabel}</div>
         </div>
-        <div class="stl-detail-meta">${stl.id} · 결제일 ${stl.approvalDate}(${stl.approvalDow}) · 신한 ****1234</div>
+        <div class="stl-detail-meta">${stl.id} · 결제일 ${fmtMD(stl.approvalDate)}(${stl.approvalDow}) · 신한 ****1234</div>
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력으로</button>
-        <button class="btn-primary" onclick='openExport(${stl.cnt}, "결제 내역", "영업일 ${stl.approvalDate}(${stl.approvalDow}) · 정산일 ${stl.settleDate}(${stl.settleDow})")'>📤 엑셀로 받기</button>
+        <button class="btn-primary" onclick='openExport(${stl.cnt}, "결제 내역", "영업일 ${fmtMD(stl.approvalDate)}(${stl.approvalDow}) · 정산일 ${fmtMD(stl.settleDate)}(${stl.settleDow})")'>📤 엑셀로 받기</button>
       </div>
     </div>
 
@@ -5039,7 +5047,7 @@ function openOrderDetail(o){
     : `<div class="r-line"><span>카드번호</span><div style="text-align:right;"><b style="font-variant-numeric:tabular-nums;">****-****-****-****</b><div style="font-size:11px;color:var(--amber);margin-top:2px;">🔒 1년 초과 마스킹</div></div></div>`) : '';
 
   const isCancelAll = o.status==='취소';
-  const cancelDateLabel = o.cancelDate ? o.cancelDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3') : (o.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3'));
+  const cancelDateLabel = o.cancelDate ? o.cancelDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3') : (o.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3'));
   const statusPill = `<span class="pill ${isCancelAll?'cancel':'done'}" style="margin-left:8px;font-size:11px;">${o.status}</span>`;
 
   const amountBlock = isCancelAll ? `
@@ -5055,7 +5063,7 @@ function openOrderDetail(o){
     <div class="modal-head">
       <div>
         <h3>주문 상세 — ${o.id} ${statusPill}</h3>
-        <div class="modal-sub">${o.date} ${o.time} · 영업일 ${o.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')} · ${o.channel}</div>
+        <div class="modal-sub">${o.date} ${o.time} · 영업일 ${o.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')} · ${o.channel}</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
@@ -6171,7 +6179,7 @@ function renderStaff(main){
                 <td style="color:var(--ink-3);font-size:12px;">${s.email||'<span style="color:var(--ink-4);">—</span>'}</td>
                 <td style="font-size:12px;color:var(--ink-2);">${usePeriod}</td>
                 <td><span class="pill ${s.enabled==='Y'?'done':'cancel'}" style="font-size:11px;">${s.enabled==='Y'?'사용 중':'사용 안 함'}</span></td>
-                <td style="color:var(--ink-3);font-size:12px;">${s.regDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</td>
+                <td style="color:var(--ink-3);font-size:12px;">${s.regDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}</td>
                 <td>
                   <button class="btn-ghost" style="padding:5px 9px;font-size:11px;" onclick="openStaffEditModal(${s.id})">수정</button>
                   <button class="btn-ghost" style="padding:5px 9px;font-size:11px;color:var(--red);" onclick="deleteStaff(${s.id})">삭제</button>
@@ -9889,7 +9897,7 @@ function renderRefund(main){
               <tr>
                 <td style="text-align:center;color:var(--ink-3);font-weight:600;">${i+1}</td>
                 <td style="font-family:ui-monospace,monospace;font-size:11px;color:var(--ink-2);">${r.id}</td>
-                <td>${r.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</td>
+                <td>${r.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}</td>
                 <td style="font-family:ui-monospace,monospace;font-size:11px;color:var(--ink-2);">${r.orderId}</td>
                 <td>${r.cust}</td>
                 <td class="num"><b>${fmt(r.amt)}</b>원</td>
@@ -10495,7 +10503,7 @@ function renderQR(main){
               <td><b>${r.qty}장</b></td>
               <td class="num"><b>${(r.totalPrice||0).toLocaleString()}</b><span style="color:var(--ink-3);font-size:11px;">원</span></td>
               <td style="color:var(--ink-2);font-size:12px;">${r.memo||'<span style="color:var(--ink-4);">—</span>'}</td>
-              <td style="color:var(--ink-3);">${r.reqDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</td>
+              <td style="color:var(--ink-3);">${r.reqDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}</td>
               <td><span class="pill ${r.status==='완료'?'done':'partial'}">${r.status}</span></td>
             </tr>
           `).join('')}
@@ -11147,7 +11155,7 @@ function renderReviews(main){
                 <div>
                   <div style="font-size:14px;font-weight:800;">${r.cust}</div>
                   <div style="font-size:12px;color:var(--amber);font-weight:700;margin-top:2px;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-                  <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${r.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</div>
+                  <div style="font-size:11px;color:var(--ink-3);margin-top:2px;">${r.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}</div>
                 </div>
               </div>
             </div>
@@ -11257,7 +11265,7 @@ function renderCS(host){
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
                 <span class="chip" style="font-size:11px;padding:3px 9px;cursor:default;background:var(--bg-2);color:var(--ink-2);">${c.type}</span>
                 <span class="pill ${c.status==='답변 완료'?'done':'pending'}" style="font-size:11px;">${c.status==='답변 완료'?'✓ 답변 완료':'⏳ 답변 대기'}</span>
-                <span style="font-size:11px;color:var(--ink-4);margin-left:auto;">${c.date.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')} 남김</span>
+                <span style="font-size:11px;color:var(--ink-4);margin-left:auto;">${c.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')} 남김</span>
               </div>
               <div style="font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px;">${c.title}</div>
               <div style="font-size:13px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;">${c.body}</div>
@@ -11870,7 +11878,7 @@ function renderStaffCall(main){
                 <div class="sc-hist-row ${isPending?'pending':''}">
                   <span class="sc-hist-no">#${r._no}</span>
                   <span class="sc-hist-time">
-                    ${r.calledDate && r.calledDate !== STAFF_CALL_TODAY ? `<span style="font-size:10px;color:var(--ink-4);display:block;line-height:1.2;">${r.calledDate.replace(/(\d{4})-0?(\d+)-0?(\d+)/,'$1년 $2/$3')}</span>` : ''}
+                    ${r.calledDate && r.calledDate !== STAFF_CALL_TODAY ? `<span style="font-size:10px;color:var(--ink-4);display:block;line-height:1.2;">${r.calledDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3')}</span>` : ''}
                     ${scHmToShort(r.calledAt)}
                   </span>
                   <span class="sc-hist-table-cell"><span class="sc-hist-table">${r.table}</span></span>

@@ -10469,6 +10469,27 @@ function renderQRStickerTab(){
   const nSub    = dm==='new' ? '#1d4ed8' : 'var(--ink-4)';
   const deliveredFmt = ed.deliveredDate.replace(/(\d{4})-(\d{2})-(\d{2})/,'$1.$2.$3');
 
+  // 기존 시안 선택 시 이미지 미리보기 박스
+  const samePreview = dm !== 'same' ? '' : (
+    '<div style="margin-top:14px;padding:18px;background:#fff;border:2px dashed var(--blue-100);border-radius:12px;text-align:center;">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:12px;">기존 시안 미리보기</div>'
+    +'<div style="display:inline-flex;flex-direction:column;align-items:center;gap:10px;padding:20px 28px;background:#f8f9fa;border-radius:10px;border:1px solid var(--line);">'
+    // 스티커 실물 모형
+    +'<div style="position:relative;width:120px;">'
+    +'<div style="width:120px;height:120px;background:'+ed.hex+';border-radius:8px;border:'+edBorder+';display:flex;align-items:center;justify-content:center;">'
+    +'<div style="display:grid;grid-template-columns:repeat(5,8px);grid-template-rows:repeat(5,8px);gap:2.5px;">'
+    + Array.from({length:25},(_,i)=>{
+        const lit = [0,1,2,4,5,9,10,11,13,14,15,19,20,22,23,24].includes(i);
+        return '<div style="width:8px;height:8px;background:'+dotFg+';border-radius:1px;opacity:'+(lit?1:0.2)+';"></div>';
+      }).join('')
+    +'</div></div>'
+    +'<div style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;white-space:nowrap;">기존 시안</div>'
+    +'</div>'
+    +'</div>'
+    +'<div style="margin-top:16px;font-size:11px;color:var(--ink-3);line-height:1.6;">실제 시안 파일은 소프트먼트에 보관돼 있어요.<br/>동일한 디자인으로 제작이 진행돼요.</div>'
+    +'</div>'
+  );
+
   // 색상 선택 (새 색상 모드에서만)
   const colorPicker = dm !== 'new' ? '' : (
     '<div style="padding:16px;background:#fff;border:1px solid var(--line);border-radius:10px;">'
@@ -10537,18 +10558,19 @@ function renderQRStickerTab(){
     +'<div style="padding:16px;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;">'
     +'<div style="font-size:12px;color:var(--ink-3);font-weight:700;margin-bottom:10px;">📦 매장에서 사용하시던 기존 QR 스티커 시안이에요</div>'
     +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">'+qrPreview
-    +'<div><div style="font-size:14px;font-weight:800;color:var(--ink);">'+ed.colorName+' 시안</div>'
+    +'<div><div style="font-size:14px;font-weight:800;color:var(--ink);">기존 발송 시안</div>'
     +'<div style="font-size:11px;color:var(--ink-3);margin-top:3px;">'+ed.note+'</div>'
     +'<div style="font-size:11px;color:var(--ink-4);margin-top:2px;">발송일 '+deliveredFmt+'</div></div></div>'
     +'<div style="font-size:12px;color:var(--ink-2);line-height:1.6;margin-bottom:12px;">같은 디자인으로 추가 제작을 원하신다면 <b>기존 시안으로 제작</b> 버튼을 선택해 주세요.</div>'
     +'<div style="display:flex;gap:10px;">'
     +'<div onclick="state.qrDesignMode=\'same\';state.qrReqColor=null;renderApp()" style="flex:1;padding:12px 16px;border-radius:10px;border:2px solid '+sBorder+';background:'+sBg+';cursor:pointer;text-align:center;transition:all .12s;">'
     +'<div style="font-size:13px;font-weight:800;color:'+sColor+';">✓ 기존 시안으로 제작</div>'
-    +'<div style="font-size:11px;color:'+sSub+';margin-top:2px;">'+ed.colorName+' · 동일 디자인</div></div>'
+    +'<div style="font-size:11px;color:'+sSub+';margin-top:2px;">발송된 시안 그대로</div></div>'
     +'<div onclick="state.qrDesignMode=\'new\';renderApp()" style="flex:1;padding:12px 16px;border-radius:10px;border:2px solid '+nBorder+';background:'+nBg+';cursor:pointer;text-align:center;transition:all .12s;">'
     +'<div style="font-size:13px;font-weight:800;color:'+nColor+';">🎨 새 색상으로 제작</div>'
     +'<div style="font-size:11px;color:'+nSub+';margin-top:2px;">아래에서 색상 선택</div></div>'
     +'</div></div>'
+    + samePreview
     + colorPicker
     +'</div>'
     +'<div style="margin-bottom:22px;">'

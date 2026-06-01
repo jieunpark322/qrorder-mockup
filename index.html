@@ -5439,15 +5439,15 @@ document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeModal(); })
    상품코드: M=메뉴 / O=옵션 / S=세트 (6자리)
    ============================================================ */
 const MENUS = [
-  { id:1, code:'M00101', name:'아메리카노',         cat:'커피', catL2:'에스프레소', catL3:'',       price:4500, takeoutPrice:4000, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%' },
-  { id:2, code:'M00102', name:'카페라떼',           cat:'커피', catL2:'밀크',       catL3:'',       price:5000, takeoutPrice:4500, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%' },
-  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피', catL2:'밀크',       catL3:'시그니처', price:5500, takeoutPrice:5000, status:'판매중', img:'🥤', opt:[1,2,3], desc:'' },
-  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피', catL2:'에스프레소', catL3:'아이스',   price:4500, takeoutPrice:4000, status:'판매중', img:'🧊', opt:[1,2,3], desc:'' },
-  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료', catL2:'티',         catL3:'',       price:4800, takeoutPrice:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'' },
-  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료', catL2:'에이드',     catL3:'',       price:5200, takeoutPrice:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'' },
-  { id:7, code:'M00301', name:'크로아상',           cat:'디저트', catL2:'빵',       catL3:'',       price:3800, takeoutPrice:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요' },
-  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트', catL2:'케이크',   catL3:'',       price:5500, takeoutPrice:null, status:'품절',   img:'🍰', opt:[],      desc:'' },
-  { id:9, code:'M00303', name:'마들렌',             cat:'디저트', catL2:'쿠키',     catL3:'',       price:2800, takeoutPrice:null, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴' },
+  { id:1, code:'M00101', name:'아메리카노',         cat:'커피', catL2:'에스프레소', catL3:'',       price:4500, takeoutPrice:4000, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergens:[] },
+  { id:2, code:'M00102', name:'카페라떼',           cat:'커피', catL2:'밀크',       catL3:'',       price:5000, takeoutPrice:4500, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergens:['milk'] },
+  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피', catL2:'밀크',       catL3:'시그니처', price:5500, takeoutPrice:5000, status:'판매중', img:'🥤', opt:[1,2,3], desc:'',                     allergens:['milk','soy'] },
+  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피', catL2:'에스프레소', catL3:'아이스',   price:4500, takeoutPrice:4000, status:'판매중', img:'🧊', opt:[1,2,3], desc:'',                     allergens:[] },
+  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료', catL2:'티',         catL3:'',       price:4800, takeoutPrice:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'',                     allergens:['peach'] },
+  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료', catL2:'에이드',     catL3:'',       price:5200, takeoutPrice:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'',                     allergens:[] },
+  { id:7, code:'M00301', name:'크로아상',           cat:'디저트', catL2:'빵',       catL3:'',       price:3800, takeoutPrice:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요',   allergens:['wheat','egg','milk'] },
+  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트', catL2:'케이크',   catL3:'',       price:5500, takeoutPrice:null, status:'품절',   img:'🍰', opt:[],      desc:'',                     allergens:['egg','milk','wheat'] },
+  { id:9, code:'M00303', name:'마들렌',             cat:'디저트', catL2:'쿠키',     catL3:'',       price:2800, takeoutPrice:null, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴',         allergens:['egg','milk','wheat','peanut'] },
 ];
 
 const OPT_GROUPS = [
@@ -5531,6 +5531,7 @@ state.stockL2Filter   = 'all';
 state.stockL3Filter   = 'all';
 state.stockTag3Filter = 'all';
 state.trLang          = 'en';     // 번역 현재 언어 탭
+state.originTab       = 'origin'; // 'origin' | 'allergy'
 state.trTarget        = 'menu';   // 'menu' | 'option' | 'set'
 state.trSearch        = '';
 state.trOnlyEmpty     = false;    // 미입력 항목만 보기
@@ -9841,6 +9842,28 @@ const STORE_ORIGIN = {
   updatedAt: '2026-05-22',
 };
 
+// 한국 식품 알레르기 14종 의무 표시 항목
+const ALLERGENS = [
+  { code:'egg',       label:'난류(계란)',  icon:'🥚' },
+  { code:'milk',      label:'우유',        icon:'🥛' },
+  { code:'wheat',     label:'밀',          icon:'🌾' },
+  { code:'peanut',    label:'땅콩',        icon:'🥜' },
+  { code:'soy',       label:'대두',        icon:'🫘' },
+  { code:'shellfish', label:'갑각류',      icon:'🦐' },
+  { code:'fish',      label:'생선',        icon:'🐟' },
+  { code:'buckwheat', label:'메밀',        icon:'🌿' },
+  { code:'pork',      label:'돼지고기',    icon:'🐷' },
+  { code:'beef',      label:'쇠고기',      icon:'🥩' },
+  { code:'peach',     label:'복숭아',      icon:'🍑' },
+  { code:'tomato',    label:'토마토',      icon:'🍅' },
+  { code:'walnut',    label:'호두',        icon:'🌰' },
+  { code:'squid',     label:'오징어',      icon:'🦑' },
+];
+const STORE_ALLERGY = {
+  notice: '알레르기 성분에 관한 자세한 문의는 직원에게 말씀해 주세요.',
+  updatedAt: '2026-05-22',
+};
+
 /* ============================================================
    직원 계정 관리 — 사장님이 직원에게 권한을 나누어 주는 구조
    매장 자체는 본사(소프트먼트)에서 생성, 직원만 사장님이 추가
@@ -11658,22 +11681,64 @@ function submitInquiry(){
 }
 
 /* ============================================================
-   원산지 표시 페이지
+   원산지 · 알레르기 정보 페이지
    ============================================================ */
 function renderOrigin(main){
+  const tab = state.originTab || 'origin';
   const lines = STORE_ORIGIN.text.split('\n').filter(l=>l.trim()).length;
+
+  // 알레르기 탭: 메뉴별 체크 표
+  const allergyTable = (()=>{
+    const visibleMenus = MENUS.filter(m=>m.status!=='숨김');
+    const cols = ALLERGENS.slice(0,8); // 주요 8종 표시 (나머지는 기타로)
+    const rows = visibleMenus.map(m=>{
+      const als = m.allergens||[];
+      const cells = cols.map(a=>{
+        const has = als.includes(a.code);
+        return `<td style="text-align:center;padding:8px 6px;">
+          <label style="cursor:pointer;user-select:none;">
+            <input type="checkbox" ${has?'checked':''} onchange="toggleMenuAllergen(${m.id},'${a.code}',this.checked)" style="display:none;" />
+            <span style="font-size:18px;opacity:${has?1:0.15};" title="${has?a.label+' 포함':'없음'}">${a.icon}</span>
+          </label>
+        </td>`;
+      }).join('');
+      const extra = als.filter(c=>!cols.find(a=>a.code===c));
+      const extraLabel = extra.map(c=>ALLERGENS.find(a=>a.code===c)?.label||c).join(', ');
+      return `<tr style="border-bottom:1px solid var(--line-2);">
+        <td style="padding:8px 12px;font-weight:600;">${m.img||'🍽️'} ${m.name}</td>
+        ${cells}
+        <td style="padding:8px 10px;font-size:11px;color:var(--ink-3);">${extraLabel||'−'}</td>
+      </tr>`;
+    }).join('');
+    const headers = cols.map(a=>`<th style="text-align:center;padding:8px 6px;font-size:11px;color:var(--ink-3);"><div style="font-size:16px;">${a.icon}</div>${a.label}</th>`).join('');
+    return `<div style="overflow-x:auto;">
+      <table class="t" style="min-width:700px;">
+        <thead><tr>
+          <th style="min-width:130px;">메뉴</th>
+          ${headers}
+          <th style="min-width:90px;font-size:11px;color:var(--ink-3);">기타</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  })();
+
   main.innerHTML = `
-    <div class="crumb">메뉴 관리 › 원산지</div>
-
+    <div class="crumb">메뉴 관리 › 원산지 · 알레르기</div>
     ${menuNavTabs()}
-
     <div class="toolbar">
       <div>
-        <h2>원산지 표시</h2>
-        <div class="page-sub">매장에서 쓰는 식재료의 원산지를 자유롭게 적어 주세요. QR 메뉴판 하단에 그대로 노출돼요.</div>
+        <h2>원산지 · 알레르기 정보</h2>
+        <div class="page-sub">법적 의무 표시 항목이에요. QR 메뉴판 하단에 자동으로 노출돼요.</div>
       </div>
     </div>
 
+    <div class="tabs">
+      <div class="t ${tab==='origin'?'on':''}" onclick="state.originTab='origin';renderApp()">🌿 원산지 표시</div>
+      <div class="t ${tab==='allergy'?'on':''}" onclick="state.originTab='allergy';renderApp()">⚠️ 알레르기 정보</div>
+    </div>
+
+    ${tab==='origin' ? `
     <div class="panel" style="background:var(--blue-50);border:1px solid var(--blue-100);padding:14px 18px;margin-bottom:6px;">
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <span style="font-size:16px;flex-shrink:0;">ℹ️</span>
@@ -11682,82 +11747,114 @@ function renderOrigin(main){
         </div>
       </div>
     </div>
-
     <div class="panel">
       <h3>원산지 입력 <span class="h-sub">${lines}줄 작성됨</span>
-        <span class="h-act">
-          <span style="font-size:11px;color:var(--ink-4);">최종 수정 ${STORE_ORIGIN.updatedAt}</span>
-        </span>
+        <span class="h-act"><span style="font-size:11px;color:var(--ink-4);">최종 수정 ${STORE_ORIGIN.updatedAt}</span></span>
       </h3>
       <textarea id="origin-textarea" class="input" style="width:100%;min-height:200px;font-size:14px;line-height:1.7;font-family:inherit;resize:vertical;padding:14px 16px;"
         placeholder="예시)&#10;돼지고기: 국내산&#10;닭고기: 국내산&#10;쌀: 국내산&#10;배추김치: 국내산&#10;고춧가루: 중국산"
         oninput="STORE_ORIGIN.text=this.value;updateOriginPreview()">${STORE_ORIGIN.text}</textarea>
       <div style="margin-top:12px;padding:12px 14px;background:var(--bg-2);border-radius:8px;font-size:12px;color:var(--ink-3);line-height:1.65;">
-        💡 <b style="color:var(--ink-2);">한 줄에 하나씩</b> 적어 주세요. 줄 바꿈도 그대로 메뉴판에 반영돼요.<br/>
-        예: <span style="font-family:ui-monospace,monospace;color:var(--ink-2);">돼지고기: 국내산</span> · <span style="font-family:ui-monospace,monospace;color:var(--ink-2);">갈비살: 호주산 / 등심: 국내산</span>
+        💡 <b style="color:var(--ink-2);">한 줄에 하나씩</b> 적어 주세요. 줄 바꿈도 그대로 메뉴판에 반영돼요.
       </div>
     </div>
-
     <div class="panel">
       <h3>QR 메뉴판 적용 모습 <span class="h-sub">손님 휴대폰에서 보이는 모습이에요</span></h3>
       <div class="qrp-wrap">
         <div class="qrp-phone">
           <div class="qrp-notch"></div>
           <div class="qrp-screen">
-            <!-- 상단 헤더 -->
             <div class="qrp-header">
               <div class="qrp-store">소프트커피 합정점</div>
               <div class="qrp-tag">맛있는 커피 한 잔의 여유</div>
               <div class="qrp-table-chip">T03 테이블</div>
             </div>
-            <!-- 샘플 메뉴 -->
             <div class="qrp-list">
-              <div class="qrp-card">
-                <div class="qrp-mimg">☕</div>
-                <div class="qrp-minfo">
-                  <div class="qrp-mname">아메리카노</div>
-                  <div class="qrp-mdesc">에티오피아 원두 100%</div>
-                  <div class="qrp-mprice">4,500원</div>
-                </div>
-              </div>
-              <div class="qrp-card">
-                <div class="qrp-mimg">🥪</div>
-                <div class="qrp-minfo">
-                  <div class="qrp-mname">햄치즈 샌드위치</div>
-                  <div class="qrp-mdesc">국내산 식빵·돼지고기·계란</div>
-                  <div class="qrp-mprice">6,500원</div>
-                </div>
-              </div>
-              <div class="qrp-card">
-                <div class="qrp-mimg">🍰</div>
-                <div class="qrp-minfo">
-                  <div class="qrp-mname">치즈케이크</div>
-                  <div class="qrp-mdesc">매일 매장에서 직접 구워요</div>
-                  <div class="qrp-mprice">5,800원</div>
-                </div>
-              </div>
-              <div class="qrp-card">
-                <div class="qrp-mimg">🍚</div>
-                <div class="qrp-minfo">
-                  <div class="qrp-mname">치킨 마요 덮밥</div>
-                  <div class="qrp-mdesc">국내산 닭고기·쌀 · 셰프 추천</div>
-                  <div class="qrp-mprice">8,900원</div>
-                </div>
-              </div>
+              <div class="qrp-card"><div class="qrp-mimg">☕</div><div class="qrp-minfo"><div class="qrp-mname">아메리카노</div><div class="qrp-mdesc">에티오피아 원두 100%</div><div class="qrp-mprice">4,500원</div></div></div>
+              <div class="qrp-card"><div class="qrp-mimg">🥐</div><div class="qrp-minfo"><div class="qrp-mname">크로아상</div><div class="qrp-mdesc">매일 매장에서 구워요</div><div class="qrp-mprice">3,800원</div></div></div>
             </div>
-            <!-- 메뉴판 하단 원산지 영역 -->
-            <div class="qrp-origin" id="qrp-origin-area">
-              ${renderOriginPreviewInner()}
-            </div>
+            <div class="qrp-origin" id="qrp-origin-area">${renderOriginPreviewInner()}</div>
           </div>
         </div>
-        <div class="qrp-hint">
-          <span class="arrow">↑</span> 손님이 QR을 찍으면 휴대폰으로 이 화면이 보여요.<br/>
-          메뉴판 가장 아래에 <b style="color:var(--ink-2);">원산지가 자동으로 표시</b>돼요.
+        <div class="qrp-hint"><span class="arrow">↑</span> 메뉴판 가장 아래에 <b style="color:var(--ink-2);">원산지가 자동으로 표시</b>돼요.</div>
+      </div>
+    </div>
+    ` : `
+    <div class="panel" style="background:#fff8ed;border:1px solid #fed7aa;padding:14px 18px;margin-bottom:6px;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:16px;flex-shrink:0;">⚠️</span>
+        <div style="font-size:13px;color:#9a3412;line-height:1.65;">
+          <b>식품 알레르기 14종</b>은 식품위생법에 따라 표시 의무가 있어요. 알레르기 정보가 정확하지 않으면 손님에게 피해가 갈 수 있어요. <b>실제 식재료를 확인 후 정확하게 입력</b>해 주세요.
         </div>
       </div>
     </div>
+
+    <div class="panel">
+      <h3>공통 알레르기 안내문 <span class="h-sub">메뉴판 하단에 노출돼요</span>
+        <span class="h-act"><span style="font-size:11px;color:var(--ink-4);">최종 수정 ${STORE_ALLERGY.updatedAt}</span></span>
+      </h3>
+      <textarea id="allergy-notice" class="input" style="width:100%;min-height:80px;font-size:13px;line-height:1.7;font-family:inherit;resize:vertical;padding:12px 14px;"
+        oninput="STORE_ALLERGY.notice=this.value">${STORE_ALLERGY.notice}</textarea>
+      <div style="font-size:11px;color:var(--ink-4);margin-top:6px;">예: "알레르기 성분에 관한 자세한 문의는 직원에게 말씀해 주세요."</div>
+    </div>
+
+    <div class="panel">
+      <h3>메뉴별 알레르기 정보
+        <span class="h-sub">해당하는 항목을 체크해 주세요 (아이콘 클릭으로 토글)</span>
+      </h3>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+        ${ALLERGENS.map(a=>`<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--bg-2);border:1px solid var(--line);">${a.icon} ${a.label}</span>`).join('')}
+      </div>
+      ${allergyTable}
+      <div style="margin-top:12px;font-size:12px;color:var(--ink-4);">💡 아이콘이 선명하면 해당 알레르기 성분을 포함해요. 흐리면 미포함이에요. 클릭해서 토글할 수 있어요.</div>
+    </div>
+
+    <div class="panel">
+      <h3>손님 메뉴판 적용 모습 <span class="h-sub">알레르기 아이콘이 메뉴 카드에 표시돼요</span></h3>
+      <div class="qrp-wrap">
+        <div class="qrp-phone">
+          <div class="qrp-notch"></div>
+          <div class="qrp-screen">
+            <div class="qrp-header">
+              <div class="qrp-store">소프트커피 합정점</div>
+              <div class="qrp-table-chip">T03 테이블</div>
+            </div>
+            <div class="qrp-list">
+              ${MENUS.filter(m=>m.status!=='숨김').slice(0,3).map(m=>{
+                const als = (m.allergens||[]).map(c=>ALLERGENS.find(a=>a.code===c)).filter(Boolean);
+                return `<div class="qrp-card">
+                  <div class="qrp-mimg">${m.img||'🍽️'}</div>
+                  <div class="qrp-minfo">
+                    <div class="qrp-mname">${m.name}</div>
+                    ${als.length?`<div style="margin-top:3px;display:flex;gap:3px;flex-wrap:wrap;">${als.map(a=>`<span style="font-size:13px;" title="${a.label}">${a.icon}</span>`).join('')}</div>`:'<div style="font-size:10px;color:var(--ink-4);margin-top:2px;">알레르기 성분 없음</div>'}
+                    <div class="qrp-mprice">${fmt(m.price)}원</div>
+                  </div>
+                </div>`;
+              }).join('')}
+            </div>
+            <div class="qrp-origin">
+              <div class="qrp-otitle">⚠️ 알레르기 안내</div>
+              <div class="qrp-orow">${STORE_ALLERGY.notice}</div>
+            </div>
+          </div>
+        </div>
+        <div class="qrp-hint"><span class="arrow">↑</span> 메뉴 카드에 알레르기 아이콘이 표시되고, 하단에 공통 안내문이 나와요.</div>
+      </div>
+    </div>
+    `}
   `;
+}
+// 메뉴 알레르기 토글
+function toggleMenuAllergen(menuId, code, checked){
+  const m = MENUS.find(x=>x.id===menuId);
+  if(!m) return;
+  if(!m.allergens) m.allergens = [];
+  if(checked){ if(!m.allergens.includes(code)) m.allergens.push(code); }
+  else { m.allergens = m.allergens.filter(c=>c!==code); }
+  markUnsavedUI();
+  // 미리보기 아이콘만 즉시 갱신 (전체 리렌더 없이)
+  const icon = event.target.nextElementSibling;
+  if(icon){ icon.style.opacity = checked ? 1 : 0.15; }
 }
 // 원산지 미리보기 영역 내용 — 폰 미리보기 안에서 재사용
 function renderOriginPreviewInner(){

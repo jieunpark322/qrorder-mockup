@@ -1192,9 +1192,9 @@ const ORDERS = [
   // 저녁 후결제 주문 — 17:00~21:00 시간대 (후결제 정책)
   { id:'#20260515-0052', date:'2026-05-15', time:'20:05', channel:'테이블 3', ch:'매장', menu:'아메리카노',           issuer:null, amt:4500, status:'취소', stl:'제외',           cancelDate:'2026-05-15', cancelTime:'20:08',
     items:[{name:'아메리카노', qty:1, price:4500, options:['HOT']}] },
-  { id:'#20260515-0051', date:'2026-05-15', time:'19:14', channel:'테이블 5', ch:'매장', menu:'카페라떼 외 1건',      issuer:'KB',   amt:11000, status:'완료', stl:'정산예정 5/19', card:'4141209876',
+  { id:'#20260515-0051', date:'2026-05-15', time:'19:14', channel:'테이블 5', ch:'매장', menu:'카페라떼 외 1건',      issuer:'KB',   amt:11000, status:'완료', stl:'정산예정 5/20', card:'4141209876',
     items:[{name:'카페라떼', qty:1, price:5500, options:['HOT']}, {name:'크루아상', qty:1, price:5500, options:[]}] },
-  { id:'#20260515-0050', date:'2026-05-15', time:'18:28', channel:'테이블 1', ch:'매장', menu:'아메리카노 외 2건',   issuer:'신한', amt:14500, status:'완료', stl:'정산예정 5/19', card:'4141201234',
+  { id:'#20260515-0050', date:'2026-05-15', time:'18:28', channel:'테이블 1', ch:'매장', menu:'아메리카노 외 2건',   issuer:'신한', amt:14500, status:'완료', stl:'정산예정 5/20', card:'4141201234',
     items:[{name:'아메리카노', qty:2, price:4500, options:['HOT']}, {name:'치즈케이크', qty:1, price:5500, options:[]}] },
   // 진행중 — 결제·조리·픽업 대기. 매출 합계에는 미포함(완료 시점에 합산)
   { id:'#20260515-0049', date:'2026-05-15', time:'10:45', channel:'테이블 6', ch:'매장', menu:'아메리카노 외 1건', issuer:'카카오페이', paySub:'페이', amt:9500, status:'진행중', stl:'−',
@@ -1212,13 +1212,13 @@ const ORDERS = [
     items:[
       {name:'레몬에이드', qty:1, price:5200, options:[]},
     ] },
-  { id:'#20260515-0046', date:'2026-05-15', time:'10:24', channel:'테이블 4',   ch:'매장', menu:'아메리카노 외 2건',     issuer:'신한', amt:21400, status:'완료',     stl:'정산예정 5/19', card:'4141201234', tid:'tid_3f8a5a13b002xyz', originalAmt:26400, couponName:'신규 가입 환영 5천원', couponAmt:5000, couponIssuer:'softment',
+  { id:'#20260515-0046', date:'2026-05-15', time:'10:24', channel:'테이블 4',   ch:'매장', menu:'아메리카노 외 2건',     issuer:'신한', amt:21400, status:'완료',     stl:'정산예정 5/20', card:'4141201234', tid:'tid_3f8a5a13b002xyz', originalAmt:26400, couponName:'신규 가입 환영 5천원', couponAmt:5000, couponIssuer:'softment',
     items:[
       {name:'아메리카노', qty:3, price:4500, options:['HOT']},
       {name:'카페라떼',   qty:1, price:5500, options:['ICE','오트밀크 +500']},
       {name:'치즈케이크', qty:1, price:7400, options:[]},
     ] },
-  { id:'#20260515-0045', date:'2026-05-15', time:'10:18', channel:'포장',       ch:'포장', menu:'카페라떼 외 1건',    issuer:'카카오페이', paySub:'페이', amt:12000, status:'완료',     stl:'정산예정 5/19',
+  { id:'#20260515-0045', date:'2026-05-15', time:'10:18', channel:'포장',       ch:'포장', menu:'카페라떼 외 1건',    issuer:'카카오페이', paySub:'페이', amt:12000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'카페라떼', qty:1, price:5500, options:['ICE','오트밀크 +500']},
       {name:'크루아상', qty:1, price:6000, options:[]},
@@ -1227,7 +1227,7 @@ const ORDERS = [
     items:[
       {name:'자몽에이드', qty:1, price:8000, options:['ICE','라지 +1,000']},
     ] },
-  { id:'#20260515-0043', date:'2026-05-15', time:'09:58', channel:'테이블 6',   ch:'매장', menu:'아메리카노 외 4건',     issuer:'VISA (해외)', amt:24420, status:'완료',     stl:'정산예정 5/19', card:'4111001234', currency:'USD 17.70', originalAmt:27420, couponName:'주말 한정 15% 할인', couponAmt:3000, couponIssuer:'merchant',
+  { id:'#20260515-0043', date:'2026-05-15', time:'09:58', channel:'테이블 6',   ch:'매장', menu:'아메리카노 외 4건',     issuer:'VISA (해외)', amt:24420, status:'완료',     stl:'정산예정 5/20', card:'4111001234', currency:'USD 17.70', originalAmt:27420, couponName:'주말 한정 15% 할인', couponAmt:3000, couponIssuer:'merchant',
     items:[
       {name:'아메리카노', qty:1, price:4500, options:['HOT']},
       {name:'카페라떼',   qty:1, price:5500, options:['ICE']},
@@ -1235,16 +1235,16 @@ const ORDERS = [
       {name:'크루아상',   qty:1, price:4420, options:[]},
       {name:'치즈케이크', qty:1, price:7800, options:[]},
     ] },
-  { id:'#20260515-0042', date:'2026-05-15', time:'09:42', channel:'테이블 1',   ch:'매장', menu:'카페라떼',               issuer:'네이버페이', paySub:'머니', amt:5500,  status:'완료',     stl:'정산예정 5/19',
+  { id:'#20260515-0042', date:'2026-05-15', time:'09:42', channel:'테이블 1',   ch:'매장', menu:'카페라떼',               issuer:'네이버페이', paySub:'머니', amt:5500,  status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'카페라떼', qty:1, price:5500, options:['ICE','시럽 추가 +500']},
     ] },
-  { id:'#20260515-0041', date:'2026-05-15', time:'09:21', channel:'테이블 3',   ch:'매장', menu:'아메리카노 외 1건',   issuer:'삼성', amt:10000, status:'완료',     stl:'정산예정 5/19', card:'4523019012',
+  { id:'#20260515-0041', date:'2026-05-15', time:'09:21', channel:'테이블 3',   ch:'매장', menu:'아메리카노 외 1건',   issuer:'삼성', amt:10000, status:'완료',     stl:'정산예정 5/20', card:'4523019012',
     items:[
       {name:'아메리카노', qty:1, price:4500, options:['HOT','샷 추가 +500']},
       {name:'크루아상',   qty:1, price:5000, options:[]},
     ] },
-  { id:'#20260515-0040', date:'2026-05-15', time:'08:55', channel:'포장',       ch:'포장', menu:'아메리카노',         issuer:'카카오페이', paySub:'머니', amt:12000, status:'완료',     stl:'정산예정 5/19',
+  { id:'#20260515-0040', date:'2026-05-15', time:'08:55', channel:'포장',       ch:'포장', menu:'아메리카노',         issuer:'카카오페이', paySub:'머니', amt:12000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'아메리카노', qty:3, price:4000, options:['HOT']},
     ] },
@@ -1253,16 +1253,16 @@ const ORDERS = [
       {name:'치즈케이크', qty:1, price:7000, options:[]},
       {name:'카페라떼',   qty:1, price:5500, options:['HOT']},
     ] },
-  { id:'#20260515-0038', date:'2026-05-15', time:'08:14', channel:'테이블 5',   ch:'매장', menu:'아메리카노',         issuer:'신한', amt:8000,  status:'완료',     stl:'정산예정 5/19', card:'4141201234',
+  { id:'#20260515-0038', date:'2026-05-15', time:'08:14', channel:'테이블 5',   ch:'매장', menu:'아메리카노',         issuer:'신한', amt:8000,  status:'완료',     stl:'정산예정 5/20', card:'4141201234',
     items:[
       {name:'아메리카노', qty:2, price:4000, options:['HOT']},
     ] },
-  { id:'#20260515-0036', date:'2026-05-15', time:'07:42', channel:'포장',       ch:'포장', menu:'아메리카노 외 1건',   issuer:'네이버페이', paySub:'페이', amt:10000, status:'완료',     stl:'정산예정 5/19',
+  { id:'#20260515-0036', date:'2026-05-15', time:'07:42', channel:'포장',       ch:'포장', menu:'아메리카노 외 1건',   issuer:'네이버페이', paySub:'페이', amt:10000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'아메리카노', qty:1, price:5000, options:['HOT']},
       {name:'크루아상',   qty:1, price:5000, options:[]},
     ] },
-  { id:'#20260515-0035', date:'2026-05-15', time:'07:28', channel:'테이블 4',   ch:'매장', menu:'카푸치노',                issuer:'토스페이', paySub:'페이', amt:5000,  status:'완료',     stl:'정산예정 5/19',
+  { id:'#20260515-0035', date:'2026-05-15', time:'07:28', channel:'테이블 4',   ch:'매장', menu:'카푸치노',                issuer:'토스페이', paySub:'페이', amt:5000,  status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'카푸치노', qty:1, price:5000, options:['HOT']},
     ] },
@@ -1278,14 +1278,14 @@ const ORDERS = [
     ] },
 ];
 
-// === 정산 회차 (영업일 D+2 송금 · DAY 기반 동적 생성) ===
+// === 정산 회차 (영업일 D+3 송금 · DAY 기반 동적 생성) ===
 // 정산 달력 · 정산내역 조회 공통 데이터 소스
 // 필드: id / approvalDate(영업일) / settleDate(정산일) / cnt / grossAmt
 //        / couponPlatformAmt(소프트먼트 발행 보전) / couponMerchantAmt(사장님 발행, 정산 제외)
 //        / feeBase + feeVat = feeTotal (입금 수수료, 결제수단별 가중평균 요율)
 //        / couponSettle(쿠폰 정산금) / txSettle(거래금 정산) / totalSettle(총 정산)
 //        / status: 정산완료|정산대기 / usedCoupon
-// 한국 카드사 영업일 표준: D+2 (영세·중소 우대 구간 D+1~D+2)
+// QR오더 정산 주기: 영업일 D+3
 // 결제수단별 차등 요율: 카드 국내 2.0% / 해외 3.5% / 카카오 2.3% / 네이버 2.4% / 토스 2.3% / 계좌이체 1.5%
 // 결제수단별 거래 비중을 가중평균하여 일별 평균 수수료율 ≈ 2.06% 산출 (수수료 페이지 표와 일치)
 const HOLIDAYS_2026 = ['2026-01-01','2026-02-16','2026-02-17','2026-02-18','2026-03-01','2026-05-01','2026-05-05','2026-05-25','2026-06-06','2026-08-15','2026-09-24','2026-09-25','2026-09-26','2026-10-03','2026-10-09','2026-12-25'];
@@ -1342,7 +1342,7 @@ const SETTLEMENTS = (function(){
     const [m, dd] = d.d.split('/').map(Number);
     const approvalISO = `2026-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
     if (approvalISO > todayISO) return; // 오늘 이후 매출은 정산 대상 아님
-    const sDate = addBizDays(new Date(2026, m - 1, dd), 2);
+    const sDate = addBizDays(new Date(2026, m - 1, dd), 3);
     const key = toISODate(sDate);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push({...d, _idx:i, _approval:new Date(2026, m-1, dd)});
@@ -3740,7 +3740,7 @@ function renderStlCalendar(main){
     <div class="toolbar">
       <div>
         <h2>정산 달력</h2>
-        <div class="page-sub">정산일을 한눈에 · 정산 주기 D+2 영업일</div>
+        <div class="page-sub">정산일을 한눈에 · 정산 주기 D+3 영업일</div>
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="setSection('stl-list')">🔎 정산 내역 보기</button>

@@ -497,6 +497,9 @@
   .slot-time-label{font-size:11px;font-weight:700;color:var(--ink-3);}
   .slot-time-input{padding:10px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:22px;font-weight:800;font-family:ui-monospace,monospace;color:var(--ink);background:#fff;width:110px;text-align:center;letter-spacing:.04em;}
   .slot-time-input:focus{outline:none;border-color:var(--blue);}
+  /* 시간 선택 드롭다운 — 일부 브라우저가 time input의 step(10분)을 무시해서, 어디서나 10분 단위만 뜨는 select로 통일 */
+  select.input{cursor:pointer;background:#fff;-webkit-appearance:menulist;appearance:menulist;}
+  select.slot-time-input{cursor:pointer;width:120px;-webkit-appearance:menulist;appearance:menulist;}
 
   /* Receipt */
   .receipt{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:16px;font-size:12px;}
@@ -1999,11 +2002,11 @@ function openBusinessHoursModal(){
     <div style="padding:8px 0;">
       <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
         <label style="font-size:13px;color:var(--ink-2);font-weight:600;width:80px;">영업 시작</label>
-        <input class="input" id="bh-open" type="time" step="600" value="${state.businessHoursOpen}" style="flex:1;" />
+        <select class="input" id="bh-open" style="flex:1;">${timeOptions10(state.businessHoursOpen)}</select>
       </div>
       <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
         <label style="font-size:13px;color:var(--ink-2);font-weight:600;width:80px;">영업 마감</label>
-        <input class="input" id="bh-close" type="time" step="600" value="${state.businessHoursClose}" style="flex:1;" />
+        <select class="input" id="bh-close" style="flex:1;">${timeOptions10(state.businessHoursClose)}</select>
       </div>
       <div style="padding:12px 14px;background:var(--bg-2);border-radius:10px;font-size:12px;color:var(--ink-2);line-height:1.65;">
         💡 호프집·24시간 매장처럼 자정을 넘기는 경우 마감 시각을 새벽(예: 04:00)으로 설정하세요.<br/>
@@ -8492,9 +8495,9 @@ function renderScheduleModal(){
 
       <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:8px;">시간</label>
       <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px;">
-        <input class="input" type="time" step="600" value="${d.start}" oninput="state._schDraft.start=this.value" />
+        <select class="input" onchange="state._schDraft.start=this.value">${timeOptions10(d.start)}</select>
         <span style="color:var(--ink-3);">~</span>
-        <input class="input" type="time" step="600" value="${d.end}" oninput="state._schDraft.end=this.value" />
+        <select class="input" onchange="state._schDraft.end=this.value">${timeOptions10(d.end)}</select>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         ${SCH_PRESETS.filter(p=>p.start).map(p=>`<span class="chip" onclick="applySchPreset('time', null, '${p.start}', '${p.end}')">${p.label} ${p.start}~${p.end}</span>`).join('')}
@@ -8589,9 +8592,9 @@ function renderDiscountModal(){
 
       <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:8px;">시간</label>
       <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px;">
-        <input class="input" type="time" step="600" value="${d.start}" oninput="state._dcDraft.start=this.value" />
+        <select class="input" onchange="state._dcDraft.start=this.value">${timeOptions10(d.start)}</select>
         <span style="color:var(--ink-3);">~</span>
-        <input class="input" type="time" step="600" value="${d.end}" oninput="state._dcDraft.end=this.value" />
+        <select class="input" onchange="state._dcDraft.end=this.value">${timeOptions10(d.end)}</select>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         ${SCH_PRESETS.filter(p=>p.start).map(p=>`<span class="chip" onclick="state._dcDraft.start='${p.start}';state._dcDraft.end='${p.end}';renderDiscountModal()">${p.label} ${p.start}~${p.end}</span>`).join('')}
@@ -11076,17 +11079,17 @@ function renderStore(main){
             <div class="slot-time-group">
               <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
                 <span class="slot-time-label">오픈</span>
-                <input class="slot-time-input" type="time" step="600" value="${slot.open||'09:00'}" onchange="updateSlotTime(${slot.id},'open',this.value);markUnsavedUI()" />
+                <select class="slot-time-input" onchange="updateSlotTime(${slot.id},'open',this.value);markUnsavedUI()">${timeOptions10(slot.open||'09:00')}</select>
               </div>
               <span style="font-size:20px;color:var(--ink-4);margin:0 4px;align-self:flex-end;padding-bottom:8px;">—</span>
               <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
                 <span class="slot-time-label">마감</span>
-                <input class="slot-time-input" type="time" step="600" value="${slot.close||'22:00'}" onchange="updateSlotTime(${slot.id},'close',this.value);markUnsavedUI()" />
+                <select class="slot-time-input" onchange="updateSlotTime(${slot.id},'close',this.value);markUnsavedUI()">${timeOptions10(slot.close||'22:00')}</select>
               </div>
               <div style="width:1px;background:var(--line);height:48px;margin:0 12px;align-self:flex-end;"></div>
               <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
                 <span class="slot-time-label">라스트오더</span>
-                <input class="slot-time-input" type="time" step="600" value="${slot.lastOrder||''}" placeholder="없음" onchange="updateSlotTime(${slot.id},'lastOrder',this.value);markUnsavedUI()" style="font-size:18px;" />
+                <select class="slot-time-input" onchange="updateSlotTime(${slot.id},'lastOrder',this.value);markUnsavedUI()" style="font-size:18px;">${timeOptions10(slot.lastOrder||'', true)}</select>
               </div>
             </div>
           </div>
@@ -11117,9 +11120,9 @@ function renderStore(main){
           ${s.hours.map((h,i)=>`
             <tr>
               <td><b>${h.dow}</b></td>
-              <td><input class="input" type="time" step="600" value="${h.breakS||''}" placeholder="없음" style="width:84px;" /></td>
+              <td><select class="input" style="width:84px;" onchange="updateBreak(${i},'breakS',this.value)">${timeOptions10(h.breakS||'', true)}</select></td>
               <td style="text-align:center;color:var(--ink-3);font-size:12px;">~</td>
-              <td><input class="input" type="time" step="600" value="${h.breakE||''}" placeholder="없음" style="width:84px;" /></td>
+              <td><select class="input" style="width:84px;" onchange="updateBreak(${i},'breakE',this.value)">${timeOptions10(h.breakE||'', true)}</select></td>
               <td style="font-size:12px;color:var(--ink-4);">${h.breakS&&h.breakE?`${h.breakS} ~ ${h.breakE}`:'휴게 없음'}</td>
             </tr>
           `).join('')}
@@ -12022,6 +12025,24 @@ function toggleOrderNotif(k){
   renderApp();
 }
 function setOrderPayment(p){ ORDER_CHANNELS.payment = p; renderApp(); }
+// 10분 단위 시간 드롭다운 옵션 (값·표기 모두 24시간 HH:MM). time input의 step을 무시하는 브라우저 대응으로 select 통일.
+function timeOptions10(selected, allowEmpty){
+  selected = selected || '';
+  var opts = '', has = false;
+  for (var h=0; h<24; h++){
+    var hh = (h<10?'0':'')+h;
+    for (var m=0; m<60; m+=10){
+      var v = hh+':'+(m<10?'0'+m:m);
+      if (v===selected) has = true;
+      opts += '<option value="'+v+'"'+(v===selected?' selected':'')+'>'+v+'</option>';
+    }
+  }
+  var extra = (selected && !has) ? '<option value="'+selected+'" selected>'+selected+' (10분 단위 아님)</option>' : '';
+  var empty = allowEmpty ? '<option value=""'+(selected===''?' selected':'')+'>없음</option>' : '';
+  return empty + extra + opts;
+}
+// 휴게 시간 변경 저장 (요일별)
+function updateBreak(i, field, val){ if (STORE_INFO.hours[i]) STORE_INFO.hours[i][field] = val; markUnsavedUI(); renderApp(); }
 // 결제 방식별 "언제 결제되는지" 예시 흐름도
 function otPayExample(payment){
   const step = (ic,cap,cls='') => `<div class="ot-flowstep ${cls}"><div class="dot">${ic}</div><div class="cap">${cap}</div></div>`;
@@ -12224,9 +12245,9 @@ function renderOrderType(main){
                 ${ch.schedule.map((s,i)=>`
                   <div class="ot-slot">
                     <input class="input" style="width:70px;" value="${s.name}" oninput="updateOrderSlot(${i},'name',this.value)" />
-                    <input class="input" type="time" step="600" value="${s.start}" style="width:108px;" onchange="updateOrderSlot(${i},'start',this.value)" />
+                    <select class="input" style="width:108px;" onchange="updateOrderSlot(${i},'start',this.value)">${timeOptions10(s.start)}</select>
                     <span style="color:var(--ink-4);">~</span>
-                    <input class="input" type="time" step="600" value="${s.end}" style="width:108px;" onchange="updateOrderSlot(${i},'end',this.value)" />
+                    <select class="input" style="width:108px;" onchange="updateOrderSlot(${i},'end',this.value)">${timeOptions10(s.end)}</select>
                     <span class="pmt" style="margin-left:auto;" onclick="toggleOrderSlotPolicy(${i})">${s.policy==='prepay'?'선결제':'후결제'}</span>
                     <span class="x" onclick="removeOrderSlot(${i})">×</span>
                   </div>

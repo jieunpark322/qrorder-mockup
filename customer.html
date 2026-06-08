@@ -59,8 +59,8 @@
   .mcard{display:flex;gap:13px;padding:13px 16px;background:#fff;cursor:pointer;border-bottom:1px solid var(--line2);width:100%;border:none;font-family:inherit;text-align:left;align-items:center;}
   .mcard:active{background:var(--bg);}
   .mcard.out{opacity:.5;cursor:not-allowed;}
-  .mimg{font-size:34px;width:62px;height:62px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:13px;flex-shrink:0;position:relative;overflow:hidden;}
-  .mimg img,.ci-img img,.sheet-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .mimg{font-size:34px;width:90px;height:60px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:13px;flex-shrink:0;position:relative;overflow:hidden;}
+  .mimg img,.ci-img img,.sheet-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
   .minfo{flex:1;min-width:0;}
   .mname{font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px;}
   .badge-out{font-size:10px;font-weight:800;color:var(--red);background:#fff0f0;padding:2px 7px;border-radius:6px;}
@@ -114,7 +114,7 @@
   .sec-h{font-size:14px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
   .citem{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line2);}
   .citem:last-child{border-bottom:none;}
-  .ci-img{font-size:26px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:10px;flex-shrink:0;position:relative;overflow:hidden;}
+  .ci-img{font-size:26px;width:60px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:10px;flex-shrink:0;position:relative;overflow:hidden;}
   .ci-name{font-size:14px;font-weight:700;}
   .ci-opt{font-size:11.5px;color:var(--ink3);margin-top:2px;line-height:1.5;}
   .ci-bot{display:flex;align-items:center;justify-content:space-between;margin-top:7px;}
@@ -216,11 +216,11 @@ const STORE = {
   logo:'☕',          // 매장 로고 (사장님 등록)
   table:'T03',        // 먹고가기: 스캔한 테이블 QR
 };
-// 주문 유형 — QR별 전용 진입 (먹고가기 QR / 포장 QR / 미리주문 QR 은 서로 다른 QR)
+// 주문 유형 — QR별 전용 진입 (먹고가기 QR / 포장 QR / 포장 예약 QR 은 서로 다른 QR)
 const ORDER_TYPES = {
   dinein:   { key:'dinein',   name:'먹고가기', emoji:'🍽️' },
   takeout:  { key:'takeout',  name:'포장하기', emoji:'🥡' },
-  preorder: { key:'preorder', name:'미리주문', emoji:'📅' },
+  preorder: { key:'preorder', name:'포장 예약', emoji:'📅' },
 };
 const ALLERGEN_ICON = { milk:'🥛', soy:'🫘', wheat:'🌾', egg:'🥚', peach:'🍑', peanut:'🥜' };
 const ALLERGEN_NAME = { milk:'우유', soy:'대두', wheat:'밀', egg:'달걀', peach:'복숭아', peanut:'땅콩' };
@@ -270,17 +270,17 @@ const REVIEWS = [
 /* ===== 실사 이미지 (메뉴 사진·매장 대표 이미지) — 키워드 매칭 실제 사진, 로드 실패 시 이모지 폴백 ===== */
 const PHOTO = {
   cover:'https://loremflickr.com/640/360/coffeeshop?lock=70',
-  1:'https://loremflickr.com/300/300/coffee?lock=31',
-  2:'https://loremflickr.com/300/300/latte?lock=32',
-  3:'https://loremflickr.com/300/300/latteart?lock=33',
-  4:'https://loremflickr.com/300/300/icedcoffee?lock=34',
-  5:'https://loremflickr.com/300/300/icedtea?lock=35',
-  6:'https://loremflickr.com/300/300/lemonade?lock=36',
-  7:'https://loremflickr.com/300/300/croissant?lock=37',
-  8:'https://loremflickr.com/300/300/cheesecake?lock=38',
-  9:'https://loremflickr.com/300/300/madeleine?lock=39',
-  set1:'https://loremflickr.com/300/300/coffee?lock=51',
-  set2:'https://loremflickr.com/300/300/cake?lock=52',
+  1:'https://loremflickr.com/360/240/coffee?lock=31',
+  2:'https://loremflickr.com/360/240/latte?lock=32',
+  3:'https://loremflickr.com/360/240/latteart?lock=33',
+  4:'https://loremflickr.com/360/240/icedcoffee?lock=34',
+  5:'https://loremflickr.com/360/240/icedtea?lock=35',
+  6:'https://loremflickr.com/360/240/lemonade?lock=36',
+  7:'https://loremflickr.com/360/240/croissant?lock=37',
+  8:'https://loremflickr.com/360/240/cheesecake?lock=38',
+  9:'https://loremflickr.com/360/240/madeleine?lock=39',
+  set1:'https://loremflickr.com/360/240/coffee?lock=51',
+  set2:'https://loremflickr.com/360/240/cake?lock=52',
 };
 function pic(emoji, photo){ return emoji + (photo?`<img src="${photo}" loading="lazy" onerror="this.remove()" alt="">`:''); }
 
@@ -329,7 +329,7 @@ function brandHero(){
     ? `${ot.emoji} 먹고가기 · <span class="btable">🪑 ${STORE.table} 테이블</span>`
     : S.orderType==='takeout'
       ? `${ot.emoji} 포장하기 · 즉시 포장`
-      : `${ot.emoji} 미리주문 · 포장 예약`;
+      : `${ot.emoji} 포장 예약 · 시간 지정 픽업`;
   return `
     <div class="cover" style="background-image:url('${PHOTO.cover}'),linear-gradient(135deg,var(--coffee1),var(--coffee2));"></div>
     <div class="brandinfo">
@@ -356,8 +356,8 @@ function scrMenu(){
       ${['전체','세트',...CATS].map(c=>`<button class="cattab ${S.cat===c?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
     </div>
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
-    ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>미리주문은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
-    ${S.orderType==='dinein'?`<div class="notice blue">🪑 <span><b>${STORE.table} 테이블</b> 주문이에요. ${S.serve==='self'?'준비되면 <b>알림톡</b>으로 알려드려요 (셀프 수령).':'준비되면 <b>직원이 자리로 가져다 드려요</b>.'}</span></div>`:''}
+    ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
+    ${S.orderType==='dinein'?`<div class="notice blue">🪑 <span><b>${STORE.table} 테이블</b> 주문이에요. ${S.serve==='self'?'준비되면 <b>카카오 알림톡</b>으로 알려드려요 (셀프 수령).':'준비되면 <b>직원이 자리로 가져다 드려요</b>.'}</span></div>`:''}
     ${S.orderType==='dinein'?`<button class="callbtn" onclick="openCallSheet()">🛎 직원 호출하기</button>`:''}
     <div style="padding-top:4px;">${(S.cat==='전체'||S.cat==='세트')?setsSection():''}${list}</div>
     ${reviewsSection()}
@@ -549,13 +549,13 @@ function timeSlots(){ const out=[]; for(let h=12;h<=20;h++){ out.push(h+':00',h+
 function scrCheckout(){
   const ot=ORDER_TYPES[S.orderType]; const needTime=S.orderType==='preorder';
   const isPostpay = S.orderType==='dinein' && S.payTiming==='postpay';   // 먹고가기 후불
-  const notify = (S.orderType!=='dinein') || S.serve==='self';            // 알림톡 발송 = 픽업 유형 또는 셀프 수령
+  const notify = (S.orderType!=='dinein') || S.serve==='self';            // 카카오 알림톡 발송 = 픽업 유형 또는 셀프 수령
   return `<div class="topbar"><button class="back" onclick="S.screen='cart';render()">‹</button>
       <div><div class="ttl">주문 확인 · 결제</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
     <div class="sec"><div class="sec-h">📋 주문 내용</div>
       ${S.cart.map(c=>`<div class="rowline"><span style="flex:1;">${c.name} ${c.optText?`<span style="color:var(--ink4);font-size:11.5px;">· ${c.optText}</span>`:''} ×${c.qty}</span><span style="font-weight:700;color:var(--ink);">${won(c.unit*c.qty)}원</span></div>`).join('')}</div>
-    ${S.orderType==='dinein'?`<div class="sec"><div class="sec-h">🍽️ 받는 방법</div>${S.serve==='self'?`<div class="info-pill">🚶 <span><b>${STORE.table} 테이블</b> 주문 · <b>손님 셀프 수령</b> — 준비되면 <b>알림톡</b>으로 알려드려요.</span></div>`:`<div class="info-pill">🍳 <span><b>${STORE.table} 테이블</b> 주문 · 준비되면 <b>직원이 자리로 가져다 드려요</b>. 알림톡은 보내지 않아요.</span></div>`}</div>`:''}
-    ${S.orderType==='takeout'?`<div class="sec"><div class="sec-h">🥡 포장 안내</div><div class="info-pill amber">⏱️ <span>결제 후 <b>약 15~25분</b> 뒤 준비돼요. 준비되면 알림톡으로 알려드려요.</span></div></div>`:''}
+    ${S.orderType==='dinein'?`<div class="sec"><div class="sec-h">🍽️ 받는 방법</div>${S.serve==='self'?`<div class="info-pill">🚶 <span><b>${STORE.table} 테이블</b> 주문 · <b>손님 셀프 수령</b> — 준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>`:`<div class="info-pill">🍳 <span><b>${STORE.table} 테이블</b> 주문 · 준비되면 <b>직원이 자리로 가져다 드려요</b>. 카카오 알림톡은 보내지 않아요.</span></div>`}</div>`:''}
+    ${S.orderType==='takeout'?`<div class="sec"><div class="sec-h">🥡 포장 안내</div><div class="info-pill amber">⏱️ <span>결제 후 <b>약 15~25분</b> 뒤 준비돼요. 준비되면 카카오 알림톡으로 알려드려요.</span></div></div>`:''}
     ${needTime?`<div class="sec"><div class="sec-h">📅 수령 시간 <span class="req">필수</span></div>
       <div class="chips">${timeSlots().map(t=>`<button class="pchip timechip ${S.pickup===t?'on':''}" onclick="S.pickup='${t}';render()">${t}</button>`).join('')}</div>
       <div class="info-pill amber" style="margin-top:12px;">📨 <span>주문하면 <b>사장님이 수락</b>해야 확정돼요. 영업 종료 30분 전까지 신청할 수 있어요.</span></div></div>`:''}
@@ -564,8 +564,8 @@ function scrCheckout(){
           <div class="info-pill amber">🧾 <span>지금은 주문만 넣고, <b>나갈 때 카운터에서 결제</b>해요.</span></div></div>`
       : `<div class="sec"><div class="sec-h">💳 결제 수단 <span class="opt-pick" style="font-weight:600;">선불 · 주문 시 바로 결제</span></div>
           <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div></div>`}
-    ${notify?`<div class="sec"><div class="sec-h">📨 주문 알림 <span class="opt-pick" style="font-weight:600;">알림톡 발송</span></div>
-      <div class="field"><label>알림톡 받을 연락처 (끝 4자리)</label>
+    ${notify?`<div class="sec"><div class="sec-h">📨 주문 알림 <span class="opt-pick" style="font-weight:600;">카카오 알림톡 발송</span></div>
+      <div class="field"><label>카카오 알림톡 받을 연락처 (끝 4자리)</label>
         <input id="phoneInput" inputmode="numeric" maxlength="4" placeholder="1234" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div></div>`:''}
     <div class="sec"><div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>
       <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':'결제 금액'}</span><span style="color:var(--blue);">${won(cartTotal())}원</span></div></div>
@@ -574,7 +574,7 @@ function scrCheckout(){
 function placeOrder(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
   const notify = (S.orderType!=='dinein') || S.serve==='self';
-  if(notify && (!S.phone || S.phone.length<4)){ toast('알림톡 받을 연락처 끝 4자리를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }
+  if(notify && (!S.phone || S.phone.length<4)){ toast('카카오 알림톡 받을 연락처 끝 4자리를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }
   S.orderNo='#20260515-'+String(50+Math.floor((cartTotal()%900))).padStart(4,'0'); S.screen='done'; render();
 }
 
@@ -586,18 +586,18 @@ function scrDone(){
       ? `<div class="status-line"><span class="dot"></span> 주문 접수 · 주방으로 전달됐어요</div>`
       : `<div class="status-line"><span class="dot"></span> 결제 완료 · 주방으로 전달됐어요</div>`;
     const serveLine = S.serve==='self'
-      ? `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중 — 준비되면 <b>알림톡</b>으로 알려드려요</div>
+      ? `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중 — 준비되면 <b>카카오 알림톡</b>으로 알려드려요</div>
          <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 셀프 수령</div>`
       : `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중 — 준비되면 <b>직원이 자리로 가져다 드려요</b></div>
-         <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 직접 서빙 (알림톡 없음)</div>`;
+         <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 직접 서빙 (카카오 알림톡 없음)</div>`;
     const payLine = S.payTiming==='postpay'
       ? `<div class="status-line"><span class="dot" style="background:var(--line);"></span> 🧾 나갈 때 카운터에서 결제해 주세요</div>` : '';
     statusHtml = acceptLine + serveLine + payLine;
   } else if(S.orderType==='takeout'){ head='포장 주문 완료!';
     statusHtml=`<div class="status-line"><span class="dot"></span> 결제 완료 · 포장 준비를 시작했어요</div>
-      <div class="status-line"><span class="dot" style="background:var(--amber);"></span> 약 <b>15~25분</b> 뒤 준비 완료 · 알림톡 발송</div>`;
+      <div class="status-line"><span class="dot" style="background:var(--amber);"></span> 약 <b>15~25분</b> 뒤 준비 완료 · 카카오 알림톡 발송</div>`;
     extra=`<div style="text-align:center;"><div class="qrbox"></div><div style="font-size:12px;color:var(--ink3);font-weight:700;margin-top:8px;">픽업 시 이 QR을 보여주세요</div></div>`;
-  } else { head='미리주문 신청 완료!';
+  } else { head='포장 예약 신청 완료!';
     statusHtml=`<div class="status-line"><span class="dot" style="background:var(--amber);"></span> <b>사장님 수락 대기 중</b> — 수락하면 확정 알림이 와요</div>
       <div class="status-line"><span class="dot"></span> 결제 완료 · 수령 예정 <b>오늘 ${S.pickup}</b></div>`;
   }

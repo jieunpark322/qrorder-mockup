@@ -1216,9 +1216,9 @@ const CATEGORY = [
 const CHANNEL = [
   { name:'먹고가기',      key:'dine',       cnt:32, amt:880000, color:'#3182f6', avg:27500, share:75.4 },
   { name:'포장하기',      key:'takeout',     cnt:9,  amt:226000, color:'#1eb18d', avg:25111, share:19.4 },
-  { name:'미리주문',     key:'reservation', cnt:3,  amt:64000,  color:'#8b5cf6', avg:21333, share:5.2 },
+  { name:'포장 예약',     key:'reservation', cnt:3,  amt:64000,  color:'#8b5cf6', avg:21333, share:5.2 },
 ];
-// 미리주문(포장예약) 미활성 시 reservation 채널 숨김 — ORDER_CHANNELS.reservation 기준
+// 포장 예약 미활성 시 reservation 채널 숨김 — ORDER_CHANNELS.reservation 기준
 const visCHANNEL = () => (typeof ORDER_CHANNELS!=='undefined' && ORDER_CHANNELS.reservation) ? CHANNEL : CHANNEL.filter(c=>c.key!=='reservation');
 // 합계: 46건 / 1,234,500원 (DAY 5/15와 일치)
 
@@ -1302,12 +1302,12 @@ const ORDERS = [
     items:[
       {name:'카푸치노', qty:1, price:5000, options:['HOT']},
     ] },
-  // === 미리주문(사전 픽업 예약) 주문 — 손님이 수령 시간 지정, 사장님 수락 후 접수 ===
-  { id:'#20260515-0037', date:'2026-05-15', time:'09:50', channel:'미리주문', ch:'미리주문', menu:'바닐라라떼 외 1건', issuer:'카카오페이', paySub:'페이', amt:21000, status:'완료', stl:'정산예정 5/20',
+  // === 포장 예약(사전 픽업 예약) 주문 — 손님이 수령 시간 지정, 사장님 수락 후 접수 ===
+  { id:'#20260515-0037', date:'2026-05-15', time:'09:50', channel:'포장 예약', ch:'포장 예약', menu:'바닐라라떼 외 1건', issuer:'카카오페이', paySub:'페이', amt:21000, status:'완료', stl:'정산예정 5/20',
     items:[{name:'바닐라라떼', qty:2, price:5500, options:['ICE']},{name:'치즈케이크', qty:1, price:10000, options:[]}] },
-  { id:'#20260515-0034', date:'2026-05-15', time:'09:30', channel:'미리주문', ch:'미리주문', menu:'아메리카노 외 1건', issuer:'네이버페이', paySub:'페이', amt:21000, status:'완료', stl:'정산예정 5/20',
+  { id:'#20260515-0034', date:'2026-05-15', time:'09:30', channel:'포장 예약', ch:'포장 예약', menu:'아메리카노 외 1건', issuer:'네이버페이', paySub:'페이', amt:21000, status:'완료', stl:'정산예정 5/20',
     items:[{name:'아메리카노', qty:3, price:4500, options:['HOT']},{name:'크루아상', qty:1, price:7500, options:[]}] },
-  { id:'#20260515-0033', date:'2026-05-15', time:'09:05', channel:'미리주문', ch:'미리주문', menu:'카페라떼 외 1건', issuer:'토스페이', paySub:'페이', amt:22000, status:'완료', stl:'정산예정 5/20',
+  { id:'#20260515-0033', date:'2026-05-15', time:'09:05', channel:'포장 예약', ch:'포장 예약', menu:'카페라떼 외 1건', issuer:'토스페이', paySub:'페이', amt:22000, status:'완료', stl:'정산예정 5/20',
     items:[{name:'카페라떼', qty:2, price:5500, options:['ICE']},{name:'아메리카노', qty:1, price:11000, options:['HOT']}] },
   // === 1년 초과 거래 샘플 (카드번호 전체 마스킹) ===
   { id:'#20250410-0218', date:'2025-04-10', time:'14:22', channel:'테이블 2',   ch:'매장', menu:'아메리카노 외 1건',     issuer:'신한', amt:8500,  status:'완료',     stl:'정산완료',         card:'4141209999', _expired:true,
@@ -1669,7 +1669,7 @@ function paySub(o){
 // 결제수단 라벨 — 1depth만 (표·요약용). 2depth는 paySub()으로 별도 노출.
 // 주문별 결제 방식 — 포장은 항상 선불, 매장은 저녁(17~21시)만 후결제
 function orderPayType(o){
-  if (!o || o.ch === '포장' || o.ch === '미리주문') return '선불';
+  if (!o || o.ch === '포장' || o.ch === '포장 예약') return '선불';
   if (!o.issuer) return '후불'; // 결제 정보 없음 = 주문 취소(후불)
   const [h] = (o.time||'00:00').split(':').map(Number);
   return (h >= 17 && h < 21) ? '후불' : '선불';
@@ -2380,7 +2380,7 @@ function renderOverview(main){
           🍽️ 판매유형별 매출
           <span class="h-act">
             <span class="unit-tag">단위 · 원</span>
-            <span class="h-sub">${ORDER_CHANNELS.reservation?'먹고가기 / 포장하기 / 미리주문':'먹고가기 / 포장하기'}</span>
+            <span class="h-sub">${ORDER_CHANNELS.reservation?'먹고가기 / 포장하기 / 포장 예약':'먹고가기 / 포장하기'}</span>
           </span>
         </h3>
         <div style="display:flex;align-items:center;gap:16px;">
@@ -3240,7 +3240,7 @@ function renderDetailChannel(body){
   const totCnt = _CH.reduce((s,c)=>s+c.cnt,0);
   body.innerHTML = `
     <div class="banner-info" style="margin-bottom:14px;">
-      💡 <b>오늘(5/15) 기준</b> 주문 방식별 매출이에요. ${ORDER_CHANNELS.reservation?'먹고가기·포장하기·미리주문':'먹고가기·포장하기'}별로 건수와 금액을 확인할 수 있어요.
+      💡 <b>오늘(5/15) 기준</b> 주문 방식별 매출이에요. ${ORDER_CHANNELS.reservation?'먹고가기·포장하기·포장 예약':'먹고가기·포장하기'}별로 건수와 금액을 확인할 수 있어요.
     </div>
     <div class="panel">
       <h3>주문 방식별 매출 <span class="h-sub">오늘 합계 ${fmt(totAmt)}원 · ${fmt(totCnt)}건</span></h3>
@@ -3448,9 +3448,9 @@ function renderOrders(main){
   // 기본(all)은 최대 3개월 범위로 제한
   else rows = rows.filter(o=>o.date>=ORDER_3M_START && o.date<=TODAY_DATE);
 
-  // 미리주문(포장예약) 미활성 시 미리주문 주문 숨김
-  if (!ORDER_CHANNELS.reservation) rows = rows.filter(o=>o.ch!=='미리주문');
-  // 채널 필터 (먹고가기/포장하기/미리주문)
+  // 포장 예약 미활성 시 포장 예약 주문 숨김
+  if (!ORDER_CHANNELS.reservation) rows = rows.filter(o=>o.ch!=='포장 예약');
+  // 채널 필터 (먹고가기/포장하기/포장 예약)
   if (state.orderChannelFilter!=='all') rows = rows.filter(o=>o.ch===state.orderChannelFilter);
 
   // 결제수단 필터 (1depth 기준 매칭 — 카드/카카오페이/네이버페이/토스페이/현금)
@@ -3618,7 +3618,7 @@ function renderOrders(main){
             <span class="chip ${d.channelFilter==='all'?'on':''}" onclick="state.orderFilterDraft.channelFilter='all';renderApp()">전체</span>
             <span class="chip ${d.channelFilter==='매장'?'on':''}" onclick="state.orderFilterDraft.channelFilter='매장';renderApp()">🍽️ 먹고가기</span>
             <span class="chip ${d.channelFilter==='포장'?'on':''}" onclick="state.orderFilterDraft.channelFilter='포장';renderApp()">🥡 포장하기</span>
-            ${ORDER_CHANNELS.reservation ? `<span class="chip ${d.channelFilter==='미리주문'?'on':''}" onclick="state.orderFilterDraft.channelFilter='미리주문';renderApp()">📅 미리주문</span>` : ''}
+            ${ORDER_CHANNELS.reservation ? `<span class="chip ${d.channelFilter==='포장 예약'?'on':''}" onclick="state.orderFilterDraft.channelFilter='포장 예약';renderApp()">📅 포장 예약</span>` : ''}
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:12px;">
             <span class="field-label" style="padding-top:7px;">결제수단</span>
@@ -9358,7 +9358,7 @@ function renderCustomerPreview(){
 
     <div style="display:flex;gap:8px;margin-top:14px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeModal()">닫기</button>
-      <button class="btn-primary" style="flex:1.7;" onclick="window.open('customer.html','_blank')" title="손님이 실제로 주문하는 전체 화면(먹고가기·포장하기·미리주문)을 새 탭에서 체험해요">🛒 실제 주문 화면 체험 →</button>
+      <button class="btn-primary" style="flex:1.7;" onclick="window.open('customer.html','_blank')" title="손님이 실제로 주문하는 전체 화면(먹고가기·포장하기·포장 예약)을 새 탭에서 체험해요">🛒 실제 주문 화면 체험 →</button>
     </div>
   `;
 }
@@ -9864,7 +9864,7 @@ const ORDER_CHANNELS = {
   // 포장 설정
   waitMinMin: 15,                  // 포장 대기 시간 최소 (분)
   waitMinMax: 25,                  // 포장 대기 시간 최대 (분)
-  reservation: false,              // 미리주문 — ON 시 사장님 수락 필요
+  reservation: false,              // 포장 예약 — ON 시 사장님 수락 필요
   // 결제 방식 (매장 주문 활성 시)
   payment: 'scheduled',            // prepay | postpay | scheduled (시간대별)
   schedule: [
@@ -9876,7 +9876,7 @@ const ORDER_CHANNELS = {
 const ORDER_LABELS = {
   mode: { both:'먹고가기 + 포장하기', dine_in:'먹고가기만', takeout:'포장하기만' },
   modeDesc: { both:'먹고가기 · 포장하기 둘 다', dine_in:'먹고가기 전용 (매장 취식)', takeout:'포장하기 전용 (가져가기)' },
-  notify: { call_name:'호명', kakao:'알림톡', display:'전광판' },
+  notify: { call_name:'호명', kakao:'카카오 알림톡', display:'전광판' },
 };
 
 /* ============================================================
@@ -12306,11 +12306,11 @@ function renderOrderType(main){
             <span style="font-size:12px;color:var(--ink-4);">손님 화면에 "${ch.waitMinMin||10}분 ~ ${ch.waitMinMax||20}분" 으로 표시돼요</span>
           </div>
           <div class="ot-row">
-            <span class="lbl">미리주문</span>
+            <span class="lbl">포장 예약</span>
             <label class="toggle-switch ${ch.reservation?'on':''}" onclick="toggleOrderField('reservation')">
               <span class="sw"></span>
             </label>
-            <span style="font-size:12px;color:var(--ink-2);">${ch.reservation?'미리주문 ON — 손님이 수령 시간 선택, 사장님 수락 후 접수':'미리주문 OFF — 포장하기만 즉시 접수'}</span>
+            <span style="font-size:12px;color:var(--ink-2);">${ch.reservation?'포장 예약 ON — 손님이 수령 시간 선택, 사장님 수락 후 접수':'포장 예약 OFF — 포장하기만 즉시 접수'}</span>
           </div>
           ${ch.reservation ? `
             <div style="margin-left:120px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:11px;color:#9a3412;line-height:1.55;margin-top:4px;">

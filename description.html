@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<title>QR오더 사장님 어드민 — 화면 기획 주석 보드 (디스크립션)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --blue:#3182f6; --blue-50:#e8f3ff; --blue-100:#cfe4ff; --blue-700:#1b64da;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1; --ink-4:#b0b8c1;
+    --line:#e5e8eb; --line-2:#f2f4f6;
+    --bg:#f4f6f8; --bg-2:#f2f4f6;
+    --red:#f04452; --green:#1eb18d; --amber:#f59e0b; --purple:#8b5cf6;
+    --cat-purpose:#3182f6; --cat-behavior:#1eb18d; --cat-data:#8b5cf6; --cat-exception:#f59e0b;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Pretendard','Apple SD Gothic Neo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ===== 상단 헤더 ===== */
+  .db-top{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(0,0,0,.02);}
+  .db-top-in{max-width:1520px;margin:0 auto;padding:14px 28px;}
+  .db-top h1{font-size:18px;margin:0 0 2px;letter-spacing:-.02em;}
+  .db-top h1 b{color:var(--blue);}
+  .db-top .sub{font-size:12.5px;color:var(--ink-2);margin:0;}
+  .db-legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .db-legend .lg{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink-2);background:#fff;border:1px solid var(--line);padding:5px 10px;border-radius:8px;}
+  .db-legend .lg .dot{width:9px;height:9px;border-radius:3px;}
+  .db-index{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+  .db-index a{font-size:12px;font-weight:600;color:var(--ink-2);background:#fff;border:1px solid var(--line);padding:6px 11px;border-radius:20px;transition:all .12s;display:inline-flex;align-items:center;gap:5px;}
+  .db-index a:hover{border-color:var(--blue-100);background:var(--blue-50);color:var(--blue-700);}
+  .db-howto{margin-top:12px;padding:10px 14px;background:linear-gradient(135deg,#f6f3ff,#fafcff);border:1px solid #e3d8ff;border-radius:10px;font-size:12px;color:#5b3aa8;line-height:1.6;}
+  .db-howto b{color:#3f2a76;}
+
+  /* ===== 보드 ===== */
+  .db-wrap{max-width:1520px;margin:0 auto;padding:8px 28px 80px;}
+  .db-board{margin-top:34px;scroll-margin-top:170px;}
+  .db-board-head{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;background:#fff;border:1px solid var(--line);border-radius:14px 14px 0 0;border-bottom:none;}
+  .db-board-head .seq{flex-shrink:0;width:34px;height:34px;border-radius:9px;background:var(--ink);color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;}
+  .db-board-head .meta{min-width:0;flex:1;}
+  .db-board-head .name{font-size:17px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .db-board-head .name .ic{font-size:18px;}
+  .db-board-head .tag{font-size:11px;font-weight:700;color:var(--blue-700);background:var(--blue-50);padding:3px 8px;border-radius:6px;}
+  .db-board-head .tag.k{color:var(--ink-3);background:var(--bg-2);font-family:ui-monospace,Menlo,monospace;}
+  .db-board-head .purpose{font-size:13px;color:var(--ink-2);margin-top:4px;line-height:1.5;}
+  .db-board-head .pincount{flex-shrink:0;font-size:11.5px;color:var(--ink-3);font-weight:700;background:var(--bg-2);padding:5px 10px;border-radius:8px;align-self:center;}
+
+  .db-grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;background:#fff;border:1px solid var(--line);border-radius:0 0 14px 14px;overflow:hidden;}
+  .db-stage-col{border-right:1px solid var(--line);background:#eceef1;padding:18px;min-width:0;}
+  .db-stage{position:relative;width:100%;border-radius:10px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.10);background:#fff;min-height:120px;}
+  .db-host{position:absolute;top:0;left:0;transform-origin:top left;}
+  .db-frame-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13px;font-weight:600;background:#fff;gap:8px;z-index:8;}
+  .db-spin{width:16px;height:16px;border:2.5px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:dbspin .8s linear infinite;}
+  @keyframes dbspin{to{transform:rotate(360deg);}}
+
+  /* 핀 오버레이 */
+  .db-pinlayer{position:absolute;inset:0;pointer-events:none;z-index:6;}
+  .db-pin{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:800;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(49,130,246,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s,background .12s;}
+  .db-pin:hover,.db-pin.active{background:var(--ink);transform:translate(-50%,-50%) scale(1.18);z-index:9;}
+  .db-pin::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--blue);opacity:0;}
+  .db-pin.active::after{opacity:1;animation:dbpulse 1.2s ease-out infinite;}
+  @keyframes dbpulse{0%{transform:scale(.6);opacity:.7;}100%{transform:scale(1.6);opacity:0;}}
+
+  /* 카드 레일 */
+  .db-cards{padding:16px;background:#fbfcfe;}
+  .db-card{border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:12px;overflow:hidden;scroll-margin-top:180px;transition:box-shadow .15s,border-color .15s;}
+  .db-card:last-child{margin-bottom:0;}
+  .db-card.flash{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-50);}
+  .db-card-head{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--line-2);cursor:pointer;}
+  .db-card-head .num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .db-card-head .ct{font-size:14px;font-weight:800;letter-spacing:-.01em;color:var(--ink);}
+  .db-card-body{padding:6px 13px 13px;}
+  .db-row{padding:9px 0 2px;border-top:1px dashed var(--line-2);}
+  .db-row:first-child{border-top:none;}
+  .db-row .rlabel{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;padding:2px 0;margin-bottom:4px;}
+  .db-row .rlabel .dot{width:8px;height:8px;border-radius:3px;}
+  .db-row.c-purpose .rlabel{color:var(--cat-purpose);} .db-row.c-purpose .rlabel .dot{background:var(--cat-purpose);}
+  .db-row.c-behavior .rlabel{color:var(--cat-behavior);} .db-row.c-behavior .rlabel .dot{background:var(--cat-behavior);}
+  .db-row.c-data .rlabel{color:var(--cat-data);} .db-row.c-data .rlabel .dot{background:var(--cat-data);}
+  .db-row.c-exception .rlabel{color:var(--cat-exception);} .db-row.c-exception .rlabel .dot{background:var(--cat-exception);}
+  .db-row ul{margin:0;padding-left:16px;}
+  .db-row li{font-size:12.5px;color:var(--ink-2);line-height:1.6;margin-bottom:3px;}
+  .db-row li b{color:var(--ink);font-weight:700;}
+  .db-row li code{background:var(--bg-2);padding:1px 5px;border-radius:4px;font-size:11.5px;font-family:ui-monospace,Menlo,monospace;color:var(--ink-2);}
+
+  .db-foot{max-width:1520px;margin:0 auto;padding:30px 28px 60px;color:var(--ink-3);font-size:12px;text-align:center;}
+
+  @media (max-width:1100px){
+    .db-grid{grid-template-columns:1fr;}
+    .db-stage-col{border-right:none;border-bottom:1px solid var(--line);}
+  }
+</style>
+</head>
+<body>
+
+<div class="db-top">
+  <div class="db-top-in">
+    <h1><b>QR오더</b> 사장님 어드민 — 화면 기획 주석 보드 <span style="font-size:12px;color:var(--ink-3);font-weight:600;">(디스크립션)</span></h1>
+    <p class="sub">각 화면에 번호 핀을 달고, 오른쪽에 번호별 상세 기획을 카드로 정리했어요. 개발자·디자이너와 이 내용을 기준으로 소통합니다.</p>
+    <div class="db-legend">
+      <span class="lg"><span class="dot" style="background:var(--cat-purpose)"></span>기능·목적</span>
+      <span class="lg"><span class="dot" style="background:var(--cat-behavior)"></span>동작·상태값</span>
+      <span class="lg"><span class="dot" style="background:var(--cat-data)"></span>데이터·연동</span>
+      <span class="lg"><span class="dot" style="background:var(--cat-exception)"></span>예외처리·UX문구</span>
+    </div>
+    <div class="db-index" id="dbIndex"></div>
+    <div class="db-howto">
+      💬 <b>Figma 활용 안내</b> · 이 페이지를 <b>html.to.design</b> 플러그인으로 가져오거나, 보드별로 화면 캡처해 붙여넣은 뒤 핀 번호 위에 댓글을 달아 소통할 수 있어요. 핀을 클릭하면 해당 카드로 이동합니다.
+    </div>
+  </div>
+</div>
+
+<div class="db-wrap" id="dbWrap"></div>
+
+<div class="db-foot">QR오더 사장님 어드민 · 화면 기획 주석 보드 — 소프트먼트 · 박지은</div>
+
+<script>
+/* =========================================================
+   주석 데이터 — SCREENS 배열에 보드를 추가하면 자동 렌더링.
+   pin: { n, title, sel, nth, offX, offY, purpose[], behavior[], data[], exception[] }
+   - sel(+nth) : 화면 속 실제 요소를 가리키면 핀이 그 위치에 자동 정렬됩니다.
+   - offX/offY : 요소 좌상단에서의 픽셀 보정(기본 24,22). sel 없으면 x/y(%) 사용.
+   ========================================================= */
+const CAT = [
+  ['purpose',  '기능·목적'],
+  ['behavior', '동작·상태값'],
+  ['data',     '데이터·연동'],
+  ['exception','예외처리·UX문구'],
+];
+
+const SCREENS = [
+  {
+    key:'home', name:'홈 (대시보드)', icon:'🏠', group:'시작',
+    purpose:'로그인 직후 첫 화면. 어제 운영 결과 · 오늘 챙길 일 · 운영 상태를 한눈에 요약하고, 각 카드에서 상세 화면으로 바로 이동합니다.',
+    h:1370,
+    pins:[
+      { n:1, sel:'.sidenav .grp', nth:0, offX:60, offY:0, x:5.8, y:18.9,
+        title:'좌측 사이드바 (전체 메뉴)',
+        purpose:['어드민 전체 기능 진입점. <b>9개 그룹 · 21개 메뉴</b>로 구성','그룹 헤더 클릭으로 접기/펼치기, 현재 화면은 파란색으로 강조'],
+        behavior:['현재 섹션 메뉴에 <code>.navitem.on</code> 강조 (파란 배경)','메뉴 우측 빨간 배지 숫자 = 미처리 건수 (알림 센터 4 · 정산 내역 2 등)','그룹 헤더 클릭 시 하위 메뉴 토글, 현재 화면이 속한 그룹은 자동 펼침'],
+        data:['메뉴 구성은 고정값. 배지 수치는 알림·정산·리뷰 카운트 조회','역할(<code>owner</code>/<code>staff</code>)에 따라 노출·활성 제어 — SPEC §1.6.2 권한 매트릭스'],
+        exception:['<b>staff 계정</b>은 매출·정산·권한·결제 메뉴 비활성(회색 + 자물쇠 아이콘)','권한 없는 메뉴 클릭 시 모달: <b>"사장님 권한이 필요해요. 가맹점주 본인 계정으로 로그인해 주세요"</b>'],
+      },
+      { n:2, sel:'.userbox', offX:24, offY:22, x:3, y:8.7,
+        title:'사용자 박스 (매장 · 사장님)',
+        purpose:['로그인 계정과 매장을 식별','클릭 시 <b>내 정보</b> 화면으로 이동 — 계정·비밀번호·정산 계좌 관리'],
+        behavior:['호버 시 강조, 내 정보 화면일 때 선택 상태(on)','우측 <code>›</code> 화살표로 진입 가능 표시'],
+        data:['매장명(<code>STORE.name</code>) · 사장님명(<code>STORE.owner</code>) · 역할 표시','계정/정산 계좌 상세는 내 정보 화면에서 로드'],
+        exception:['툴팁: "내 정보·비밀번호·정산 계좌"','staff 계정은 정산 계좌 항목 비노출'],
+      },
+      { n:3, sel:'.main .toolbar', offX:26, offY:22, x:23.7, y:8.4,
+        title:'페이지 헤더 (인사 · 오늘 날짜 · 매장)',
+        purpose:['오늘 영업일과 매장 위치를 확인','사장님 호칭으로 친근하게 시작'],
+        behavior:['날짜 = <b>현재 영업일</b> 기준 (영업일 시작 03:00 KST — SPEC §1.1)','우측 상단에 매장명·주소 표시'],
+        data:['영업일은 서버 시각 기준 계산','<code>STORE_INFO.owner / name / addr</code>'],
+        exception:['문구: "안녕하세요, OOO 사장님 👋"','보조: "오늘은 YYYY-MM-DD(요일)이에요. 어제 매장 운영 결과와 오늘 챙겨야 할 일감을 한눈에 모았어요."'],
+      },
+      { n:4, sel:'.main .panel', nth:0, offX:26, offY:22, x:23.7, y:12.9,
+        title:'① 어제 매장 운영 결과 (KPI 3종)',
+        purpose:['어제 영업 성과(<b>총매출 · 주문 수 · 평균 객단가</b>)와 그저께 대비 증감 요약','패널 클릭 시 <b>매출 한눈에 보기</b>로 이동'],
+        behavior:['증감 표시 ▲파랑(증가) / ▼빨강(감소)','매출은 <b>어제까지 집계된 값</b> — 오늘 실시간 매출은 주문 내역에서 확인','패널 전체가 클릭 영역 (호버 시 살짝 떠오름)'],
+        data:['매출 집계식 <code>actual = gross − disc − pt − ref</code> (SPEC §2.1)','어제·그저께 두 영업일 집계 비교. 객단가 = 총매출 ÷ 주문 수'],
+        exception:['데이터 없음(신규 매장)일 때 0원 / 0건 + 안내 노출','헤더 보조: "5/14(수) · 그저께(5/13 화)와 비교"'],
+      },
+      { n:5, sel:'.main .panel', nth:1, offX:26, offY:22, x:23.7, y:26.8,
+        title:'② 사장님이 챙겨야 할 일',
+        purpose:['미처리 업무를 한곳에: <b>답변 안 한 리뷰 · 답변 받을 문의 · 확인 안 한 알림</b>','각 카드 클릭 시 해당 처리 화면으로 이동'],
+        behavior:['건수 > 0 이면 테두리 강조색 (리뷰=노랑 / 문의=파랑 / 알림=빨강), 0이면 회색','리뷰 카드 클릭 시 <b>리뷰 화면을 \'답변 대기\' 필터로</b> 열기'],
+        data:['리뷰: 답변(reply) 없는 건 수','문의: CS 문의 중 <code>status=\'답변 대기\'</code>','알림: 미확인(<code>read=false</code>) 건 수'],
+        exception:['0건일 때 능동·긍정 문구: "모든 리뷰에 답변하셨어요" / "문의 모두 답변 받음" / "모든 알림을 확인하셨어요"','부정형("없어요") 회피 — SPEC §3.2 톤'],
+      },
+      { n:6, sel:'.main .panel', nth:2, offX:26, offY:22, x:23.7, y:41.9,
+        title:'③ 오늘 운영 상태 (2×2)',
+        purpose:['오늘 <b>영업시간 · 받는 주문 방식 · 오늘의 준비량 · 오늘 품절 메뉴</b> 점검','각 카드 클릭 시 해당 설정 화면으로 이동'],
+        behavior:['영업시간 = 오늘 요일 기준 (휴무면 "휴무" 표시)','준비량 카드: 곧 품절·완료 배지 노출','품절 메뉴 0이면 "모든 메뉴 정상 판매 중"'],
+        data:['<code>STORE_INFO.hours</code>(요일별) · <code>ORDER_CHANNELS.mode</code>','<code>MENU_STOCK</code>(remaining/lowAlert) · <code>MENUS.manualSoldOut</code>','메뉴 효과적 상태 규칙 SPEC §2.3'],
+        exception:['곧 품절 "⚠️ 곧 품절 N" · 완료 "🔴 완료 N"','브레이크타임 있으면 "브레이크 HH:MM~HH:MM" 노출'],
+      },
+      { n:7, sel:'.main .panel', nth:3, offX:26, offY:22, x:23.7, y:65.7,
+        title:'④ 자주 쓰는 메뉴 (바로가기)',
+        purpose:['사용 빈도 높은 4개 화면 즉시 진입: 주문 내역 · 매출 한눈에 보기 · 메뉴판 관리 · 정산 내역'],
+        behavior:['버튼 클릭 시 해당 섹션으로 이동','1차에서는 고정 4개 버튼'],
+        data:['정적 링크 (차후 사용 빈도 기반 개인화 여지)'],
+        exception:['staff 계정은 매출·정산 버튼 비활성 가능(권한)','라벨에 이모지 병행 — 색만으로 의미 전달 금지(접근성)'],
+      },
+    ],
+  },
+];
+
+/* ========================= 엔진 ========================= */
+const BASE_W = 1280;
+const SNAP = {};
+let driver = null;
+
+function el(tag, cls, html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; }
+
+function buildIndex(){
+  const idx = document.getElementById('dbIndex');
+  SCREENS.forEach((s,i)=>{
+    const a = el('a'); a.href = '#board-'+s.key;
+    a.innerHTML = '<span class="ic">'+s.icon+'</span><b>'+(i+1)+'.</b> '+s.name;
+    idx.appendChild(a);
+  });
+}
+
+function buildCards(s){
+  const wrap = el('div','db-cards');
+  s.pins.forEach(p=>{
+    const card = el('div','db-card'); card.id = 'card-'+s.key+'-'+p.n;
+    const head = el('div','db-card-head','<span class="num">'+p.n+'</span><span class="ct">'+p.title+'</span>');
+    head.addEventListener('click',()=>focusPin(s.key,p.n));
+    card.appendChild(head);
+    const body = el('div','db-card-body');
+    CAT.forEach(([key,label])=>{
+      const items = p[key]; if(!items || !items.length) return;
+      const row = el('div','db-row c-'+key);
+      row.appendChild(el('div','rlabel','<span class="dot"></span>'+label));
+      const ul = el('ul');
+      items.forEach(it=> ul.appendChild(el('li', null, it)));
+      row.appendChild(ul);
+      body.appendChild(row);
+    });
+    card.appendChild(body);
+    wrap.appendChild(card);
+  });
+  return wrap;
+}
+
+function buildBoard(s, i){
+  const board = el('div','db-board'); board.id = 'board-'+s.key;
+  const head = el('div','db-board-head');
+  head.innerHTML =
+    '<div class="seq">'+(i+1)+'</div>'+
+    '<div class="meta"><div class="name"><span class="ic">'+s.icon+'</span>'+s.name+
+      ' <span class="tag">'+s.group+'</span> <span class="tag k">'+s.key+'</span></div>'+
+      '<div class="purpose">'+s.purpose+'</div></div>'+
+    '<div class="pincount">📍 핀 '+s.pins.length+'개</div>';
+  board.appendChild(head);
+
+  const grid = el('div','db-grid');
+  const stageCol = el('div','db-stage-col');
+  const stage = el('div','db-stage'); stage.dataset.key = s.key; stage.dataset.h = s.h||1200;
+  const pinlayer = el('div','db-pinlayer');
+  s.pins.forEach(p=>{
+    const pin = el('button','db-pin', String(p.n));
+    pin.style.left = (p.x!=null?p.x:50)+'%'; pin.style.top = (p.y!=null?p.y:50)+'%';
+    pin.dataset.key = s.key; pin.dataset.n = p.n;
+    pin.title = p.n+'. '+p.title;
+    pin.addEventListener('click',()=>focusCard(s.key,p.n));
+    pinlayer.appendChild(pin);
+  });
+  stage.appendChild(pinlayer);
+  stage.appendChild(el('div','db-frame-loading','<span class="db-spin"></span> 화면 불러오는 중…'));
+  stageCol.appendChild(stage);
+  grid.appendChild(stageCol);
+  grid.appendChild(buildCards(s));
+  board.appendChild(grid);
+  return board;
+}
+
+/* 숨은 드라이버로 목업을 1회 구동 → 각 화면 스냅샷 수집 → 정적 마운트 후 드라이버 제거 */
+function snapshotAll(){
+  try{
+    const w = driver.contentWindow, d = driver.contentDocument;
+    const dh = d.querySelector('.doc-head'); if(dh) dh.style.display='none';
+    d.body.style.padding='0';
+    SCREENS.forEach(s=>{
+      try{
+        if(typeof w.setSection === 'function') w.setSection(s.key);
+        // 사이드바 모든 그룹을 펼친 상태로 캡처 (전체 메뉴 노출)
+        d.querySelectorAll('.grp-items.closed').forEach(g=>g.classList.remove('closed'));
+        d.querySelectorAll('.grp .arr:not(.open)').forEach(a=>a.classList.add('open'));
+        const pc = d.querySelector('.pc');
+        SNAP[s.key] = { html: pc?pc.outerHTML:'', h: pc?pc.scrollHeight:(s.h||1200) };
+      }catch(e){ SNAP[s.key] = { html:'', h:(s.h||1200) }; }
+    });
+  }catch(e){ console.warn('snapshotAll', e); }
+  document.querySelectorAll('.db-stage').forEach(mountStage);
+  setTimeout(()=>{ if(driver){ driver.remove(); driver=null; } }, 80);
+}
+
+function mountStage(stage){
+  const key = stage.dataset.key;
+  const snap = SNAP[key];
+  if(!snap || !snap.html){
+    const l = stage.querySelector('.db-frame-loading');
+    if(l) l.innerHTML = '화면 스냅샷을 불러오지 못했어요. (로컬 서버에서 열어 주세요)';
+    return;
+  }
+  let host = stage.querySelector('.db-host');
+  if(!host){ host = el('div','db-host'); stage.insertBefore(host, stage.firstChild); }
+  const root = host.shadowRoot || host.attachShadow({mode:'open'});
+  root.innerHTML =
+    '<link rel="stylesheet" href="mockup.css">'+
+    '<style>:host{display:block;width:'+BASE_W+'px;}.pc{margin:0!important;border-radius:0!important;box-shadow:none!important;border:none!important;}</style>'+
+    snap.html;
+  stage.dataset.h = snap.h;
+  const finalize = ()=>{ layoutStage(stage); placePins(stage); const l=stage.querySelector('.db-frame-loading'); if(l) l.remove(); };
+  const link = root.querySelector('link');
+  if(link){ link.addEventListener('load', finalize); link.addEventListener('error', finalize); }
+  setTimeout(finalize, 300);
+  setTimeout(finalize, 900);
+  layoutStage(stage);
+}
+
+function layoutStage(stage){
+  const host = stage.querySelector('.db-host'); if(!host) return;
+  const colW = stage.clientWidth || (stage.parentElement && stage.parentElement.clientWidth) || BASE_W;
+  const scale = colW / BASE_W;
+  host.style.width = BASE_W+'px';
+  host.style.transformOrigin = 'top left';
+  host.style.transform = 'scale('+scale+')';
+  const root = host.shadowRoot; const pc = root && root.querySelector('.pc');
+  const h = (pc && pc.scrollHeight) || (+stage.dataset.h) || 1200;
+  stage.dataset.h = h;
+  stage.style.height = (h*scale)+'px';
+}
+
+function placePins(stage){
+  const host = stage.querySelector('.db-host'); if(!host || !host.shadowRoot) return;
+  const root = host.shadowRoot; const pc = root.querySelector('.pc'); if(!pc) return;
+  const screen = SCREENS.find(s=>s.key===stage.dataset.key); if(!screen) return;
+  const pr = pc.getBoundingClientRect(); if(!pr.width) return;
+  const scale = pr.width / BASE_W || 1;
+  screen.pins.forEach(p=>{
+    if(!p.sel) return;
+    const els = root.querySelectorAll(p.sel);
+    const e = (p.nth!=null) ? els[p.nth] : els[0];
+    if(!e) return;
+    const r = e.getBoundingClientRect();
+    const x = ((r.left-pr.left) + (p.offX!=null?p.offX:24)*scale) / pr.width  * 100;
+    const y = ((r.top -pr.top ) + (p.offY!=null?p.offY:22)*scale) / pr.height * 100;
+    const pin = stage.querySelector('.db-pin[data-n="'+p.n+'"]');
+    if(pin){ pin.style.left=x+'%'; pin.style.top=y+'%'; }
+  });
+}
+
+let _rt;
+window.addEventListener('resize',()=>{
+  clearTimeout(_rt);
+  _rt = setTimeout(()=>document.querySelectorAll('.db-stage').forEach(st=>{ layoutStage(st); placePins(st); }), 120);
+});
+
+/* 핀 ↔ 카드 상호작용 */
+function focusCard(key,n){
+  const card = document.getElementById('card-'+key+'-'+n);
+  if(!card) return;
+  card.scrollIntoView({behavior:'smooth', block:'center'});
+  document.querySelectorAll('.db-card.flash').forEach(c=>c.classList.remove('flash'));
+  card.classList.add('flash');
+  setTimeout(()=>card.classList.remove('flash'), 1600);
+  setActivePin(key,n);
+}
+function focusPin(key,n){ setActivePin(key,n); }
+function setActivePin(key,n){
+  document.querySelectorAll('.db-pin.active').forEach(p=>p.classList.remove('active'));
+  const pin = document.querySelector('.db-pin[data-key="'+key+'"][data-n="'+n+'"]');
+  if(pin){ pin.classList.add('active'); pin.scrollIntoView({block:'nearest'}); setTimeout(()=>pin.classList.remove('active'),2200); }
+}
+
+/* 부팅 */
+buildIndex();
+const wrap = document.getElementById('dbWrap');
+SCREENS.forEach((s,i)=> wrap.appendChild(buildBoard(s,i)));
+driver = el('iframe');
+driver.style.cssText = 'position:fixed;left:-10000px;top:0;width:1340px;height:1200px;border:0;visibility:hidden;';
+driver.addEventListener('load', snapshotAll);
+driver.src = 'index.html';
+document.body.appendChild(driver);
+</script>
+</body>
+</html>

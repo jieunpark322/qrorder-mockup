@@ -47,7 +47,10 @@
   .bamen{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px;}
   .bamen span{font-size:11px;font-weight:600;color:var(--ink2);background:var(--bg);border:1px solid var(--line);padding:4px 9px;border-radius:8px;}
 
-  .cattabs{position:sticky;top:0;z-index:15;background:#fff;display:flex;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);overflow-x:auto;margin-top:14px;}
+  .maintabs{position:sticky;top:0;z-index:18;background:#fff;display:flex;border-bottom:1px solid var(--line);margin-top:14px;}
+  .maintab{flex:1;padding:13px 0;font-size:13.5px;font-weight:700;color:var(--ink3);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;font-family:inherit;}
+  .maintab.on{color:var(--ink);border-bottom-color:var(--ink);}
+  .cattabs{position:sticky;top:45px;z-index:15;background:#fff;display:flex;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);overflow-x:auto;}
   .cattab{flex-shrink:0;font-size:13px;font-weight:700;color:var(--ink3);padding:7px 14px;border-radius:20px;background:var(--bg);border:none;cursor:pointer;font-family:inherit;}
   .cattab.on{background:var(--ink);color:#fff;}
 
@@ -286,7 +289,7 @@ function pic(emoji, photo){ return emoji + (photo?`<img src="${photo}" loading="
 
 /* ===== 상태 ===== */
 const S = { screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pay:'카드', phone:'', orderNo:null,
-  serve:'self', payTiming:'prepay' };   // serve: self(셀프수령)/server(직접서빙) · payTiming: prepay(선불)/postpay(후불) — 먹고가기에만 적용
+  serve:'self', payTiming:'prepay', tab:'menu' };   // serve: self/server · payTiming: prepay/postpay(먹고가기) · tab: menu/review/info
 const won = n => n.toLocaleString('ko-KR');
 const priceOf = m => (S.orderType==='dinein') ? m.price : (m.takeout!=null ? m.takeout : m.price);
 const isOut = m => m.status==='품절';
@@ -319,7 +322,7 @@ function setPayTiming(v){ if(v==='postpay' && S.serve!=='server'){ toast('셀프
 function switchMode(m){
   if(S.orderType===m && S.screen==='menu') return;
   if(S.cart.length && !confirm('진입 QR을 바꾸면 담은 메뉴가 비워져요. 바꿀까요?')){ renderDemo(); return; }
-  S.orderType=m; S.cart=[]; S.cat='전체'; S.pickup=null; S.screen='menu'; render();
+  S.orderType=m; S.cart=[]; S.cat='전체'; S.pickup=null; S.screen='menu'; S.tab='menu'; render();
 }
 
 /* --- 브랜딩 헤더 (매장 로고 + 대표 이미지) --- */
@@ -338,8 +341,6 @@ function brandHero(){
     </div>
     <div class="bsub">
       <span class="bmode">${modeLine}</span>
-      <div class="bintro">${STORE.intro}</div>
-      <div class="bamen">${STORE.amenities.map(a=>`<span>${a.i} ${a.n}</span>`).join('')}</div>
     </div>`;
 }
 
@@ -350,8 +351,7 @@ function scrMenu(){
     if(!items.length) return '';
     return `<div class="catsec-h">${cat}</div>` + items.map(menuCard).join('');
   }).join('');
-  return `
-    ${brandHero()}
+  const menuTab = `
     <div class="cattabs">
       ${['전체','세트',...CATS].map(c=>`<button class="cattab ${S.cat===c?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
     </div>
@@ -359,9 +359,21 @@ function scrMenu(){
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
     ${S.orderType==='dinein'?`<div class="notice blue">🪑 <span><b>${STORE.table} 테이블</b> 주문이에요. ${S.serve==='self'?'준비되면 <b>카카오 알림톡</b>으로 알려드려요 (셀프 수령).':'준비되면 <b>직원이 자리로 가져다 드려요</b>.'}</span></div>`:''}
     ${S.orderType==='dinein'?`<button class="callbtn" onclick="openCallSheet()">🛎 직원 호출하기</button>`:''}
-    <div style="padding-top:4px;">${(S.cat==='전체'||S.cat==='세트')?setsSection():''}${list}</div>
-    ${reviewsSection()}
-    ${storeInfoSection()}`;
+    <div style="padding-top:4px;">${(S.cat==='전체'||S.cat==='세트')?setsSection():''}${list}</div>`;
+  return `
+    ${brandHero()}
+    ${mainTabs()}
+    ${S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab}`;
+}
+function mainTabs(){
+  return `<div class="maintabs">${[['menu','🍽️ 메뉴'],['review','⭐ 리뷰'],['info','🏪 매장정보']].map(([k,l])=>`<button class="maintab ${S.tab===k?'on':''}" onclick="setTab('${k}')">${l}</button>`).join('')}</div>`;
+}
+function setTab(t){ S.tab=t; render(); window.scrollTo(0,0); }
+function infoTab(){
+  return `<div class="bsub" style="padding-top:16px;">
+      <div class="bintro" style="margin-top:0;">${STORE.intro}</div>
+      <div class="bamen">${STORE.amenities.map(a=>`<span>${a.i} ${a.n}</span>`).join('')}</div>
+    </div>${storeInfoSection()}`;
 }
 function menuCard(m){
   const out = isOut(m);
@@ -516,7 +528,7 @@ function storeInfoSection(){
 function cartCount(){ return S.cart.reduce((s,c)=>s+c.qty,0); }
 function cartTotal(){ return S.cart.reduce((s,c)=>s+c.unit*c.qty,0); }
 function renderCartBar(){
-  if(S.screen!=='menu' || S.cart.length===0){ $('cartbar').innerHTML=''; return; }
+  if(S.screen!=='menu' || S.tab!=='menu' || S.cart.length===0){ $('cartbar').innerHTML=''; return; }
   $('cartbar').innerHTML = `<div class="cartbar"><button class="cartbtn" onclick="S.screen='cart';render()">
       <span class="cnt">${cartCount()}</span> 장바구니 보기 <span class="amt">${won(cartTotal())}원 ›</span></button></div>`;
 }

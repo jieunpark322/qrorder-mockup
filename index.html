@@ -12683,6 +12683,25 @@ function renderFAQ(host){
    INIT
    ============================================================ */
 renderApp();
+
+/* 캡처 진입점: ?cap=<섹션키> 가 있을 때만 작동. description.html 화면 이미지 생성용 (평상시 영향 없음) */
+(function(){
+  var m = /[?&]cap=([\w-]+)/.exec(location.search || '');
+  if(!m) return;
+  function go(){
+    try{
+      if(typeof setSection==='function') setSection(m[1]);
+      document.querySelectorAll('.grp-items.closed').forEach(function(g){ g.classList.remove('closed'); });
+      document.querySelectorAll('.grp .arr:not(.open)').forEach(function(a){ a.classList.add('open'); });
+      var dh=document.querySelector('.doc-head'); if(dh) dh.style.display='none';
+      document.body.style.padding='0'; document.body.style.margin='0'; document.body.style.background='#fff';
+      var pc=document.querySelector('.pc');
+      if(pc){ pc.style.margin='0'; pc.style.width='1280px'; pc.style.maxWidth='1280px'; pc.style.borderRadius='0'; pc.style.boxShadow='none'; pc.style.border='none'; }
+      document.documentElement.setAttribute('data-cap','ready');
+    }catch(e){}
+  }
+  go(); setTimeout(go,250); setTimeout(go,700);
+})();
 </script>
 
 </body>

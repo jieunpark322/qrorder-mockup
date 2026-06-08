@@ -52,6 +52,7 @@
   .db-stage-col{border-right:1px solid var(--line);background:#eceef1;padding:18px;min-width:0;}
   .db-stage{position:relative;width:100%;border-radius:10px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.10);background:#fff;min-height:120px;}
   .db-host{position:absolute;top:0;left:0;transform-origin:top left;}
+  .db-shot{display:block;width:100%;height:auto;}
   .db-frame-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13px;font-weight:600;background:#fff;gap:8px;z-index:8;}
   .db-spin{width:16px;height:16px;border:2.5px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:dbspin .8s linear infinite;}
   @keyframes dbspin{to{transform:rotate(360deg);}}
@@ -130,6 +131,16 @@ const CAT = [
   ['data',     '데이터·연동'],
   ['exception','예외처리·UX문구'],
 ];
+
+/* 핀 좌표(%) — 목업 화면(pc 1280px 기준)에서 실측. 화면 이미지는 desc/img/<key>.png */
+const POS = {
+  home:{1:{x:5.86,y:19.02},2:{x:3.05,y:8.78},3:{x:23.67,y:8.41},4:{x:23.67,y:12.95},5:{x:23.67,y:26.92},6:{x:23.67,y:42.21},7:{x:23.67,y:66.28}},
+  orders:{1:{x:23.67,y:6.89},2:{x:23.67,y:10.25},3:{x:23.67,y:17.91},4:{x:23.67,y:23.16},5:{x:82.66,y:27.93}},
+  menu:{1:{x:23.52,y:7.02},2:{x:23.67,y:19.07},3:{x:23.67,y:24.54},4:{x:23.67,y:30.2},5:{x:78.05,y:52.42},6:{x:23.52,y:94.77}},
+  overview:{1:{x:23.67,y:8.41},2:{x:23.67,y:12.66},3:{x:23.67,y:24.51},4:{x:23.67,y:33.58},5:{x:23.67,y:42.79}},
+  'order-type':{1:{x:23.67,y:6.54},2:{x:23.67,y:9.72},3:{x:23.67,y:18.95},4:{x:23.67,y:33.47}},
+  stock:{1:{x:23.52,y:16.46},2:{x:23.52,y:21.29},3:{x:23.67,y:29.99},4:{x:45.08,y:16.46},5:{x:23.67,y:85}}
+};
 
 const SCREENS = [
   {
@@ -457,18 +468,21 @@ function buildBoard(s, i){
 
   const grid = el('div','db-grid');
   const stageCol = el('div','db-stage-col');
-  const stage = el('div','db-stage'); stage.dataset.key = s.key; stage.dataset.h = s.h||1200;
+  const stage = el('div','db-stage'); stage.dataset.key = s.key;
+  const img = el('img','db-shot'); img.src = 'desc/img/'+s.key+'.png'; img.alt = s.name+' 화면'; img.loading = 'lazy';
+  stage.appendChild(img);
+  const pos = POS[s.key] || {};
   const pinlayer = el('div','db-pinlayer');
   s.pins.forEach(p=>{
+    const c = pos[p.n] || {x:(p.x!=null?p.x:50), y:(p.y!=null?p.y:50)};
     const pin = el('button','db-pin', String(p.n));
-    pin.style.left = (p.x!=null?p.x:50)+'%'; pin.style.top = (p.y!=null?p.y:50)+'%';
+    pin.style.left = c.x+'%'; pin.style.top = c.y+'%';
     pin.dataset.key = s.key; pin.dataset.n = p.n;
     pin.title = p.n+'. '+p.title;
     pin.addEventListener('click',()=>focusCard(s.key,p.n));
     pinlayer.appendChild(pin);
   });
   stage.appendChild(pinlayer);
-  stage.appendChild(el('div','db-frame-loading','<span class="db-spin"></span> 화면 불러오는 중…'));
   stageCol.appendChild(stage);
   grid.appendChild(stageCol);
   grid.appendChild(buildCards(s));
@@ -580,11 +594,6 @@ function setActivePin(key,n){
 buildIndex();
 const wrap = document.getElementById('dbWrap');
 SCREENS.forEach((s,i)=> wrap.appendChild(buildBoard(s,i)));
-driver = el('iframe');
-driver.style.cssText = 'position:fixed;left:-10000px;top:0;width:1340px;height:1200px;border:0;visibility:hidden;';
-driver.addEventListener('load', snapshotAll);
-driver.src = 'index.html';
-document.body.appendChild(driver);
 </script>
 </body>
 </html>

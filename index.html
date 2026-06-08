@@ -394,12 +394,12 @@
   .btn-danger{padding:10px 22px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;}
   .btn-danger:hover{background:#d83849;}
   /* 저장 강조 CTA — 페이지 단위 저장 버튼이 한눈에 띄도록 초록 + 그림자, 미저장 변경 시 펄스 */
-  .btn-save-cta{padding:10px 22px;background:#10b981;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;transition:background .15s,box-shadow .15s,transform .12s;box-shadow:0 4px 12px rgba(16,185,129,.32);}
-  .btn-save-cta:hover{background:#059669;box-shadow:0 6px 18px rgba(16,185,129,.45);transform:translateY(-1px);}
-  .btn-save-cta.pulse{animation:save-pulse 1.6s ease-in-out infinite;}
+  .btn-save-cta{padding:11px 26px;background:#10b981;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:800;cursor:pointer;transition:background .15s,box-shadow .15s,transform .12s;box-shadow:0 4px 14px rgba(16,185,129,.42);}
+  .btn-save-cta:hover{background:#059669;box-shadow:0 8px 22px rgba(16,185,129,.55);transform:translateY(-1px);}
+  .btn-save-cta.pulse{animation:save-pulse 1.25s ease-in-out infinite;}
   @keyframes save-pulse{
-    0%,100%{box-shadow:0 4px 12px rgba(16,185,129,.32);}
-    50%{box-shadow:0 6px 22px rgba(16,185,129,.6);}
+    0%,100%{box-shadow:0 4px 14px rgba(16,185,129,.42);transform:scale(1);}
+    50%{box-shadow:0 8px 26px rgba(16,185,129,.72),0 0 0 4px rgba(16,185,129,.2);transform:scale(1.04);}
   }
   /* 페이지 하단 고정 저장 바 — 설정 페이지마다 공통 노출 */
   .save-bar{position:sticky;bottom:16px;margin:22px 0 4px;padding:12px 18px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);display:flex;align-items:center;gap:14px;z-index:30;}

@@ -269,18 +269,18 @@ const REVIEWS = [
 
 /* ===== 실사 이미지 (메뉴 사진·매장 대표 이미지) — 키워드 매칭 실제 사진, 로드 실패 시 이모지 폴백 ===== */
 const PHOTO = {
-  cover:'https://loremflickr.com/640/360/cafe,coffeeshop,interior?lock=77',
-  1:'https://loremflickr.com/300/300/americano,espresso?lock=31',
-  2:'https://loremflickr.com/300/300/cafe,latte?lock=32',
-  3:'https://loremflickr.com/300/300/vanilla,latte?lock=33',
-  4:'https://loremflickr.com/300/300/iced,coffee?lock=34',
-  5:'https://loremflickr.com/300/300/peach,icedtea?lock=35',
+  cover:'https://loremflickr.com/640/360/coffeeshop?lock=70',
+  1:'https://loremflickr.com/300/300/coffee?lock=31',
+  2:'https://loremflickr.com/300/300/latte?lock=32',
+  3:'https://loremflickr.com/300/300/latteart?lock=33',
+  4:'https://loremflickr.com/300/300/icedcoffee?lock=34',
+  5:'https://loremflickr.com/300/300/icedtea?lock=35',
   6:'https://loremflickr.com/300/300/lemonade?lock=36',
   7:'https://loremflickr.com/300/300/croissant?lock=37',
   8:'https://loremflickr.com/300/300/cheesecake?lock=38',
-  9:'https://loremflickr.com/300/300/madeleine,cookie?lock=39',
-  set1:'https://loremflickr.com/300/300/coffee,croissant?lock=41',
-  set2:'https://loremflickr.com/300/300/coffee,cake?lock=42',
+  9:'https://loremflickr.com/300/300/madeleine?lock=39',
+  set1:'https://loremflickr.com/300/300/coffee?lock=51',
+  set2:'https://loremflickr.com/300/300/cake?lock=52',
 };
 function pic(emoji, photo){ return emoji + (photo?`<img src="${photo}" loading="lazy" onerror="this.remove()" alt="">`:''); }
 

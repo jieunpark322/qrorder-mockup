@@ -469,20 +469,9 @@ function buildBoard(s, i){
   const grid = el('div','db-grid');
   const stageCol = el('div','db-stage-col');
   const stage = el('div','db-stage'); stage.dataset.key = s.key;
-  const img = el('img','db-shot'); img.src = 'desc/img/'+s.key+'.png'; img.alt = s.name+' 화면'; img.decoding = 'sync';
+  // 핀이 이미지에 합성된 정적 PNG (Figma 임포트 시 화면+핀이 한 장이라 절대 틀어지지 않음)
+  const img = el('img','db-shot'); img.src = 'desc/img/'+s.key+'_pin.png'; img.alt = s.name+' 화면 (번호 핀 포함)'; img.decoding = 'sync';
   stage.appendChild(img);
-  const pos = POS[s.key] || {};
-  const pinlayer = el('div','db-pinlayer');
-  s.pins.forEach(p=>{
-    const c = pos[p.n] || {x:(p.x!=null?p.x:50), y:(p.y!=null?p.y:50)};
-    const pin = el('button','db-pin', String(p.n));
-    pin.style.left = c.x+'%'; pin.style.top = c.y+'%';
-    pin.dataset.key = s.key; pin.dataset.n = p.n;
-    pin.title = p.n+'. '+p.title;
-    pin.addEventListener('click',()=>focusCard(s.key,p.n));
-    pinlayer.appendChild(pin);
-  });
-  stage.appendChild(pinlayer);
   stageCol.appendChild(stage);
   grid.appendChild(stageCol);
   grid.appendChild(buildCards(s));

@@ -150,6 +150,35 @@
   .primarybtn{display:block;width:calc(100% - 32px);margin:20px 16px 8px;background:var(--blue);color:#fff;border:none;border-radius:13px;padding:16px;font-size:15.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 22px rgba(49,130,246,.36);}
   .ghostbtn{display:block;width:100%;margin:14px 0 0;background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:14px;font-size:14px;font-weight:800;color:var(--ink2);cursor:pointer;font-family:inherit;}
   .primarybtn:active,.cartbtn:active{transform:scale(.99);}
+
+  /* 직원 호출 */
+  .callbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 28px);margin:12px 14px 0;background:#fff;border:1.5px solid var(--blue);color:var(--blue-d);border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .callbtn:active{transform:scale(.99);background:var(--blue-50);}
+  .callopt{padding:17px 10px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .callopt:active{background:var(--blue-50);border-color:var(--blue);}
+  /* 손님 리뷰 */
+  .rvsec{background:#fff;margin:11px 0;padding:16px 18px;}
+  .rv-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+  .rv-ttl{font-size:15px;font-weight:800;}
+  .rv-sub{font-size:11.5px;color:var(--ink3);margin-top:2px;}
+  .rv-score{text-align:right;flex-shrink:0;}
+  .rv-num{display:block;font-size:18px;font-weight:800;color:#f08c00;}
+  .rv-cnt{font-size:11px;color:var(--ink3);font-weight:600;}
+  .rv-card{border-top:1px solid var(--line2);padding:12px 0;}
+  .rv-top{display:flex;align-items:center;gap:7px;font-size:12px;}
+  .rv-stars{color:#f59f00;letter-spacing:1px;font-size:13px;}
+  .rv-cust{font-weight:700;color:var(--ink2);}
+  .rv-date{color:var(--ink4);margin-left:auto;}
+  .rv-body{font-size:13.5px;color:var(--ink);margin-top:6px;line-height:1.5;}
+  .rv-reply{font-size:12.5px;color:var(--ink2);background:var(--bg);border-radius:9px;padding:9px 11px;margin-top:8px;line-height:1.5;}
+  .rv-reply b{color:var(--blue-d);margin-right:5px;}
+  /* 매장 정보 */
+  .stsec{background:#fff;margin:11px 0 0;padding:16px 18px;}
+  .st-ttl{font-size:15px;font-weight:800;margin-bottom:10px;}
+  .st-row{display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--line2);font-size:13px;}
+  .st-row:first-of-type{border-top:none;}
+  .st-k{flex-shrink:0;width:98px;color:var(--ink3);font-weight:700;}
+  .st-v{color:var(--ink);flex:1;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -165,8 +194,20 @@
 const STORE = {
   name:'소프트커피 합정점',              // displayName(손님이 보는 매장 이름)
   addr:'서울 마포구 양화로 45',
+  owner:'홍길동',                        // 대표자명
+  bizNo:'123-45-67890',                  // 사업자등록번호
+  phone:'02-1234-5678',                  // 매장 연락처
   intro:'매일 직접 로스팅한 원두로 내린 커피와 갓 구운 베이커리를 즐길 수 있는 동네 카페예요.',
   amenities:[{i:'🅿️',n:'주차'},{i:'📶',n:'무선 인터넷'},{i:'🥡',n:'포장'}],
+  hours:[
+    { d:'월~목', t:'09:00 ~ 22:00', note:'브레이크 15:00~17:00' },
+    { d:'금',    t:'09:00 ~ 22:00', note:'' },
+    { d:'토',    t:'10:00 ~ 22:00', note:'' },
+    { d:'일',    t:'10:00 ~ 21:00', note:'' },
+  ],
+  lastOrder:'영업 종료 30분 전',
+  holidays:['1/1 신정','5/5 어린이날'],
+  reviewOn:true,      // 손님 리뷰 받기 ON 매장
   logo:'☕',          // 매장 로고 (사장님 등록)
   table:'T03',        // 먹고가기: 스캔한 테이블 QR
 };
@@ -195,6 +236,30 @@ const MENU = [
 ];
 const CATS = ['커피','음료','디저트'];
 const PAY_METHODS = [{k:'카드',e:'💳'},{k:'카카오페이',e:'🟡'},{k:'네이버페이',e:'🟢'},{k:'토스페이',e:'🔵'}];
+// 직원 호출 메시지 (먹고가기 전용 · 사장님이 켠 항목)
+const STAFF_CALL_MSGS = ['물','수저','계산','메뉴 추천'];
+// 세트 메뉴 (자리마다 후보 1개 선택 · 추가금)
+const SETS = [
+  { id:1, name:'모닝 세트', base:7000, desc:'음료 + 브레드 · 오전 11시까지', img:'🌅', slots:[
+    { name:'음료', cands:[{n:'아메리카노',x:0},{n:'카페라떼',x:300}] },
+    { name:'브레드', cands:[{n:'크로아상',x:0}] },
+  ]},
+  { id:2, name:'오후의 휴식', base:8500, desc:'음료 + 디저트', img:'🍰', slots:[
+    { name:'음료', cands:[{n:'바닐라라떼',x:0},{n:'아이스 아메리카노',x:-500}] },
+    { name:'디저트', cands:[{n:'크로아상',x:0}] },
+  ]},
+];
+// 손님 리뷰 (다른 손님들이 남긴 평점·후기 + 사장님 답글)
+const REVIEWS = [
+  {c:'홍**',d:'2026-05-15',r:5,b:'분위기가 너무 좋고 커피도 맛있어요. 또 올게요!',reply:''},
+  {c:'김**',d:'2026-05-14',r:4,b:'크로아상이 정말 신선하네요. 다만 카운터 줄이 좀…',reply:''},
+  {c:'이**',d:'2026-05-13',r:5,b:'바닐라라떼 진짜 맛있어요!',reply:'좋게 봐주셔서 감사해요 :)'},
+  {c:'박**',d:'2026-05-12',r:3,b:'치즈케이크가 평소보다 덜 신선했어요.',reply:''},
+  {c:'정**',d:'2026-05-11',r:5,b:'사장님이 친절하세요!',reply:'감사합니다 :)'},
+  {c:'최**',d:'2026-05-09',r:5,b:'아이스 아메리카노 시원하고 좋아요.',reply:'감사합니다!'},
+  {c:'강**',d:'2026-05-06',r:4,b:'디저트 종류가 더 많았으면 좋겠어요.',reply:''},
+  {c:'윤**',d:'2026-04-28',r:2,b:'주문이 평소보다 늦게 나왔어요.',reply:'불편을 드려 죄송해요. 피크타임 인력을 보강했어요.'},
+];
 
 /* ===== 상태 ===== */
 const S = { screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pay:'카드', phone:'', orderNo:null };
@@ -254,12 +319,15 @@ function scrMenu(){
   return `
     ${brandHero()}
     <div class="cattabs">
-      ${['전체',...CATS].map(c=>`<button class="cattab ${S.cat===c?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
+      ${['전체','세트',...CATS].map(c=>`<button class="cattab ${S.cat===c?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
     </div>
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>미리주문은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
     ${S.orderType==='dinein'?`<div class="notice blue">🪑 <span><b>${STORE.table} 테이블</b>에서 주문해요. 음식이 준비되면 알림톡으로 알려드려요.</span></div>`:''}
-    <div style="padding-top:4px;">${list}</div>`;
+    ${S.orderType==='dinein'?`<button class="callbtn" onclick="openCallSheet()">🛎 직원 호출하기</button>`:''}
+    <div style="padding-top:4px;">${(S.cat==='전체'||S.cat==='세트')?setsSection():''}${list}</div>
+    ${reviewsSection()}
+    ${storeInfoSection()}`;
 }
 function menuCard(m){
   const out = isOut(m);
@@ -285,7 +353,7 @@ function openSheet(id){
   (m.opt||[]).forEach(gid=>{ const g=OPTS[gid]; sel[gid] = (!g.multi && g.required) ? [0] : []; });
   S.sheet={ id, sel, qty:1 }; renderSheet(); $('sheetbg').classList.add('on');
 }
-function closeSheet(){ S.sheet=null; $('sheetbg').classList.remove('on'); $('sheet').innerHTML=''; }
+function closeSheet(){ S.sheet=null; S.setSheet=null; $('sheetbg').classList.remove('on'); $('sheet').innerHTML=''; }
 function sheetUnit(){ const m=MENU.find(x=>x.id===S.sheet.id); let p=priceOf(m);
   (m.opt||[]).forEach(gid=>{ const g=OPTS[gid]; (S.sheet.sel[gid]||[]).forEach(i=>p+=g.items[i].p); }); return p; }
 function toggleOpt(gid,idx){ const g=OPTS[gid]; const cur=S.sheet.sel[gid]||[];
@@ -325,6 +393,91 @@ function toast(msg){ let el=$('toast'); if(!el){ el=document.createElement('div'
     el.style.cssText='position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:90;background:rgba(25,31,40,.92);color:#fff;font-size:13px;font-weight:700;padding:11px 18px;border-radius:22px;transition:opacity .25s;';
     document.body.appendChild(el); }
   el.textContent='✓ '+msg; el.style.opacity='1'; clearTimeout(_toastT); _toastT=setTimeout(()=>el.style.opacity='0',1500); }
+
+/* --- 세트 메뉴 --- */
+function setsSection(){
+  if(!SETS.length) return '';
+  return `<div class="catsec-h">🎁 세트 메뉴</div>` + SETS.map(s=>`
+    <button class="mcard" onclick="openSet(${s.id})">
+      <span class="mimg">${s.img}</span>
+      <span class="minfo">
+        <span class="mname">${s.name}</span>
+        <span class="mdesc" style="display:block;">${s.desc}</span>
+        <span class="mprice" style="display:block;">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:500;">구성 선택</span></span>
+      </span>
+      <span class="mplus">+</span>
+    </button>`).join('');
+}
+function openSet(id){ const s=SETS.find(x=>x.id===id); const sel={}; s.slots.forEach((sl,i)=>sel[i]=0);
+  S.setSheet={ id, sel, qty:1 }; renderSetSheet(); $('sheetbg').classList.add('on'); }
+function setUnit(){ const s=SETS.find(x=>x.id===S.setSheet.id); let p=s.base; s.slots.forEach((sl,i)=>p+=sl.cands[S.setSheet.sel[i]].x); return p; }
+function setPick(i,ci){ S.setSheet.sel[i]=ci; renderSetSheet(); }
+function setQtyF(d){ S.setSheet.qty=Math.max(1,S.setSheet.qty+d); renderSetSheet(); }
+function renderSetSheet(){
+  const s=SETS.find(x=>x.id===S.setSheet.id);
+  const slots=s.slots.map((sl,i)=>`<div class="optg"><div class="optg-h">${sl.name} 선택 <span class="req">필수</span></div>
+    ${sl.cands.map((c,ci)=>`<div class="optrow ${S.setSheet.sel[i]===ci?'sel':''}" onclick="setPick(${i},${ci})">
+      <span class="optck">${S.setSheet.sel[i]===ci?'●':''}</span><span class="opt-nm">${c.n}</span>
+      <span class="opt-pr">${c.x>0?'+'+won(c.x)+'원':(c.x<0?won(c.x)+'원':'무료')}</span></div>`).join('')}</div>`).join('');
+  $('sheet').innerHTML=`<div class="sheet"><div class="sheet-img">${s.img}</div>
+    <div class="sheet-body"><div class="sheet-name">[세트] ${s.name}</div><div class="sheet-desc">${s.desc}</div>
+      <div class="sheet-base">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:600;">세트 기본가</span></div>
+      ${slots}
+      <div class="qtyrow"><span class="lbl">수량</span>
+        <span class="stepper"><button onclick="setQtyF(-1)">−</button><span class="n">${S.setSheet.qty}</span><button onclick="setQtyF(1)">+</button></span></div></div>
+    <div class="sheet-foot"><button class="addbtn" onclick="addSet()">담기 · ${won(setUnit()*S.setSheet.qty)}원</button></div></div>`;
+}
+function addSet(){
+  const s=SETS.find(x=>x.id===S.setSheet.id);
+  const optText=s.slots.map((sl,i)=>sl.cands[S.setSheet.sel[i]].n).join(' + ');
+  const unit=setUnit(); const key='set'+s.id+'|'+optText; const ex=S.cart.find(c=>c.key===key);
+  if(ex) ex.qty+=S.setSheet.qty; else S.cart.push({ key, id:'set'+s.id, name:'[세트] '+s.name, img:s.img, qty:S.setSheet.qty, unit, optText });
+  const nm=s.name; closeSheet(); S._keepScroll=true; render(); S._keepScroll=false; toast(`'${nm}' 담았어요`);
+}
+
+/* --- 직원 호출 (먹고가기 전용) --- */
+function openCallSheet(){
+  $('sheet').innerHTML=`<div class="sheet"><div class="sheet-body">
+      <div class="sheet-name">🛎 직원 호출</div>
+      <div class="sheet-desc">필요한 항목을 누르면 <b>${STORE.table} 테이블</b>로 직원이 와요. (사장님 QR오더 프로그램에 알림이 떠요)</div>
+      <div style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        ${STAFF_CALL_MSGS.map(m=>`<button class="callopt" onclick="sendCall('${m}')">${m}</button>`).join('')}
+      </div></div>
+    <div class="sheet-foot"><button class="addbtn" style="background:var(--bg);color:var(--ink2);box-shadow:none;" onclick="closeSheet()">닫기</button></div></div>`;
+  $('sheetbg').classList.add('on');
+}
+function sendCall(m){ closeSheet(); toast(`직원을 호출했어요 · "${m}"`); }
+
+/* --- 손님 리뷰 --- */
+function stars(r){ return '★★★★★'.slice(0,r)+'☆☆☆☆☆'.slice(0,5-r); }
+function avgRating(){ return (REVIEWS.reduce((s,v)=>s+v.r,0)/REVIEWS.length).toFixed(1); }
+function reviewsSection(){
+  if(!STORE.reviewOn) return '';
+  return `<div class="rvsec">
+    <div class="rv-head">
+      <div><div class="rv-ttl">💬 손님 리뷰</div><div class="rv-sub">실제 방문 손님이 남긴 후기예요</div></div>
+      <div class="rv-score"><span class="rv-num">⭐ ${avgRating()}</span><span class="rv-cnt">리뷰 ${REVIEWS.length}개</span></div>
+    </div>
+    ${REVIEWS.map(v=>`<div class="rv-card">
+      <div class="rv-top"><span class="rv-stars">${stars(v.r)}</span><span class="rv-cust">${v.c}</span><span class="rv-date">${v.d}</span></div>
+      <div class="rv-body">${v.b}</div>
+      ${v.reply?`<div class="rv-reply"><b>사장님</b>${v.reply}</div>`:''}
+    </div>`).join('')}
+  </div>`;
+}
+
+/* --- 매장 정보 --- */
+function storeInfoSection(){
+  return `<div class="stsec">
+    <div class="st-ttl">🏪 매장 정보</div>
+    <div class="st-row"><span class="st-k">대표자</span><span class="st-v">${STORE.owner}</span></div>
+    <div class="st-row"><span class="st-k">매장 주소</span><span class="st-v">${STORE.addr}</span></div>
+    <div class="st-row"><span class="st-k">사업자등록번호</span><span class="st-v">${STORE.bizNo}</span></div>
+    <div class="st-row"><span class="st-k">매장 연락처</span><span class="st-v">${STORE.phone}</span></div>
+    <div class="st-row"><span class="st-k">운영 시간</span><span class="st-v">${STORE.hours.map(h=>`${h.d} ${h.t}${h.note?` <span style="color:var(--ink4);">· ${h.note}</span>`:''}`).join('<br/>')}<br/><span style="color:var(--ink4);">라스트오더 ${STORE.lastOrder}</span></span></div>
+    <div class="st-row"><span class="st-k">휴무일</span><span class="st-v">${STORE.holidays.join(' · ')}</span></div>
+  </div>`;
+}
 
 /* --- 장바구니 바 --- */
 function cartCount(){ return S.cart.reduce((s,c)=>s+c.qty,0); }

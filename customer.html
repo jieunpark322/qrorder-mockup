@@ -33,9 +33,7 @@
   .scroll{padding-bottom:120px;}
 
   /* 브랜딩 헤더 — 매장 대표 이미지(커버) + 로고 */
-  .cover{height:158px;position:relative;overflow:hidden;
-    background:linear-gradient(135deg,var(--coffee1) 0%,var(--coffee2) 70%,#b07d4f 100%);}
-  .cover::before{content:'☕';position:absolute;right:-8px;bottom:-24px;font-size:150px;opacity:.13;transform:rotate(-12deg);}
+  .cover{height:158px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--coffee1) 0%,var(--coffee2) 70%,#b07d4f 100%);background-size:cover;background-position:center;background-repeat:no-repeat;}
   .cover::after{content:'';position:absolute;inset:0;background:radial-gradient(120% 90% at 25% 18%,rgba(255,255,255,.22),transparent 55%);}
   .cover .ctag{position:absolute;top:10px;left:12px;z-index:2;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.32);padding:3px 9px;border-radius:20px;}
   .brandinfo{display:flex;align-items:flex-end;gap:13px;padding:0 18px;margin-top:-34px;position:relative;z-index:3;}
@@ -61,7 +59,8 @@
   .mcard{display:flex;gap:13px;padding:13px 16px;background:#fff;cursor:pointer;border-bottom:1px solid var(--line2);width:100%;border:none;font-family:inherit;text-align:left;align-items:center;}
   .mcard:active{background:var(--bg);}
   .mcard.out{opacity:.5;cursor:not-allowed;}
-  .mimg{font-size:34px;width:62px;height:62px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:13px;flex-shrink:0;}
+  .mimg{font-size:34px;width:62px;height:62px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:13px;flex-shrink:0;position:relative;overflow:hidden;}
+  .mimg img,.ci-img img,.sheet-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
   .minfo{flex:1;min-width:0;}
   .mname{font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px;}
   .badge-out{font-size:10px;font-weight:800;color:var(--red);background:#fff0f0;padding:2px 7px;border-radius:6px;}
@@ -86,7 +85,7 @@
   .sheet-bg.on{display:block;}
   .sheet{position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;border-radius:22px 22px 0 0;max-height:88%;overflow-y:auto;animation:slideup .22s ease;}
   @keyframes slideup{from{transform:translate(-50%,100%);}to{transform:translate(-50%,0);}}
-  .sheet-img{font-size:60px;text-align:center;padding:22px 0 6px;background:var(--line2);}
+  .sheet-img{position:relative;overflow:hidden;height:172px;background:var(--line2);display:flex;align-items:center;justify-content:center;font-size:60px;}
   .sheet-body{padding:18px 18px 12px;}
   .sheet-name{font-size:19px;font-weight:800;}
   .sheet-desc{font-size:13px;color:var(--ink3);margin-top:4px;}
@@ -115,7 +114,7 @@
   .sec-h{font-size:14px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
   .citem{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line2);}
   .citem:last-child{border-bottom:none;}
-  .ci-img{font-size:26px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:10px;flex-shrink:0;}
+  .ci-img{font-size:26px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:10px;flex-shrink:0;position:relative;overflow:hidden;}
   .ci-name{font-size:14px;font-weight:700;}
   .ci-opt{font-size:11.5px;color:var(--ink3);margin-top:2px;line-height:1.5;}
   .ci-bot{display:flex;align-items:center;justify-content:space-between;margin-top:7px;}
@@ -268,6 +267,23 @@ const REVIEWS = [
   {c:'윤**',d:'2026-04-28',r:2,b:'주문이 평소보다 늦게 나왔어요.',reply:'불편을 드려 죄송해요. 피크타임 인력을 보강했어요.'},
 ];
 
+/* ===== 실사 이미지 (메뉴 사진·매장 대표 이미지) — 키워드 매칭 실제 사진, 로드 실패 시 이모지 폴백 ===== */
+const PHOTO = {
+  cover:'https://loremflickr.com/640/360/cafe,coffeeshop,interior?lock=77',
+  1:'https://loremflickr.com/300/300/americano,espresso?lock=31',
+  2:'https://loremflickr.com/300/300/cafe,latte?lock=32',
+  3:'https://loremflickr.com/300/300/vanilla,latte?lock=33',
+  4:'https://loremflickr.com/300/300/iced,coffee?lock=34',
+  5:'https://loremflickr.com/300/300/peach,icedtea?lock=35',
+  6:'https://loremflickr.com/300/300/lemonade?lock=36',
+  7:'https://loremflickr.com/300/300/croissant?lock=37',
+  8:'https://loremflickr.com/300/300/cheesecake?lock=38',
+  9:'https://loremflickr.com/300/300/madeleine,cookie?lock=39',
+  set1:'https://loremflickr.com/300/300/coffee,croissant?lock=41',
+  set2:'https://loremflickr.com/300/300/coffee,cake?lock=42',
+};
+function pic(emoji, photo){ return emoji + (photo?`<img src="${photo}" loading="lazy" onerror="this.remove()" alt="">`:''); }
+
 /* ===== 상태 ===== */
 const S = { screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pay:'카드', phone:'', orderNo:null,
   serve:'self', payTiming:'prepay' };   // serve: self(셀프수령)/server(직접서빙) · payTiming: prepay(선불)/postpay(후불) — 먹고가기에만 적용
@@ -312,10 +328,10 @@ function brandHero(){
   const modeLine = S.orderType==='dinein'
     ? `${ot.emoji} 먹고가기 · <span class="btable">🪑 ${STORE.table} 테이블</span>`
     : S.orderType==='takeout'
-      ? `${ot.emoji} 포장하기 · 가져가기`
-      : `${ot.emoji} 미리주문 · 시간 맞춰 픽업`;
+      ? `${ot.emoji} 포장하기 · 즉시 포장`
+      : `${ot.emoji} 미리주문 · 포장 예약`;
   return `
-    <div class="cover"><span class="ctag">📷 매장 대표 이미지</span></div>
+    <div class="cover" style="background-image:url('${PHOTO.cover}'),linear-gradient(135deg,var(--coffee1),var(--coffee2));"></div>
     <div class="brandinfo">
       <div class="logo">${STORE.logo}</div>
       <div class="bstore">${STORE.name}</div>
@@ -352,7 +368,7 @@ function menuCard(m){
   const showTakeout = S.orderType!=='dinein' && m.takeout!=null && m.takeout!==m.price;
   return `
     <button class="mcard ${out?'out':''}" ${out?'disabled':`onclick="openSheet(${m.id})"`}>
-      <span class="mimg">${m.img}</span>
+      <span class="mimg">${pic(m.img, PHOTO[m.id])}</span>
       <span class="minfo">
         <span class="mname">${m.name} ${out?'<span class="badge-out">품절</span>':''}</span>
         ${m.desc?`<span class="mdesc" style="display:block;">${m.desc}</span>`:''}
@@ -385,7 +401,7 @@ function renderSheet(){
         <span class="opt-pr">${it.p>0?'+'+won(it.p)+'원':'무료'}</span></div>`).join('')}</div>`;
   }).join('');
   $('sheet').innerHTML = `<div class="sheet">
-      <div class="sheet-img">${m.img}</div>
+      <div class="sheet-img">${pic(m.img, PHOTO[m.id])}</div>
       <div class="sheet-body">
         <div class="sheet-name">${m.name}</div>
         ${m.desc?`<div class="sheet-desc">${m.desc}</div>`:''}
@@ -402,7 +418,7 @@ function addToCart(){
   const m=MENU.find(x=>x.id===S.sheet.id);
   const optText=(m.opt||[]).flatMap(gid=>(S.sheet.sel[gid]||[]).map(i=>OPTS[gid].items[i].n)).join(', ');
   const unit=sheetUnit(); const key=S.sheet.id+'|'+optText; const ex=S.cart.find(c=>c.key===key);
-  if(ex) ex.qty+=S.sheet.qty; else S.cart.push({ key, id:m.id, name:m.name, img:m.img, qty:S.sheet.qty, unit, optText });
+  if(ex) ex.qty+=S.sheet.qty; else S.cart.push({ key, id:m.id, name:m.name, img:m.img, photo:PHOTO[m.id], qty:S.sheet.qty, unit, optText });
   const nm=m.name; closeSheet(); S._keepScroll=true; render(); S._keepScroll=false; toast(`'${nm}' 담았어요`);
 }
 let _toastT;
@@ -416,7 +432,7 @@ function setsSection(){
   if(!SETS.length) return '';
   return `<div class="catsec-h">🎁 세트 메뉴</div>` + SETS.map(s=>`
     <button class="mcard" onclick="openSet(${s.id})">
-      <span class="mimg">${s.img}</span>
+      <span class="mimg">${pic(s.img, PHOTO['set'+s.id])}</span>
       <span class="minfo">
         <span class="mname">${s.name}</span>
         <span class="mdesc" style="display:block;">${s.desc}</span>
@@ -436,7 +452,7 @@ function renderSetSheet(){
     ${sl.cands.map((c,ci)=>`<div class="optrow ${S.setSheet.sel[i]===ci?'sel':''}" onclick="setPick(${i},${ci})">
       <span class="optck">${S.setSheet.sel[i]===ci?'●':''}</span><span class="opt-nm">${c.n}</span>
       <span class="opt-pr">${c.x>0?'+'+won(c.x)+'원':(c.x<0?won(c.x)+'원':'무료')}</span></div>`).join('')}</div>`).join('');
-  $('sheet').innerHTML=`<div class="sheet"><div class="sheet-img">${s.img}</div>
+  $('sheet').innerHTML=`<div class="sheet"><div class="sheet-img">${pic(s.img, PHOTO['set'+s.id])}</div>
     <div class="sheet-body"><div class="sheet-name">[세트] ${s.name}</div><div class="sheet-desc">${s.desc}</div>
       <div class="sheet-base">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:600;">세트 기본가</span></div>
       ${slots}
@@ -448,7 +464,7 @@ function addSet(){
   const s=SETS.find(x=>x.id===S.setSheet.id);
   const optText=s.slots.map((sl,i)=>sl.cands[S.setSheet.sel[i]].n).join(' + ');
   const unit=setUnit(); const key='set'+s.id+'|'+optText; const ex=S.cart.find(c=>c.key===key);
-  if(ex) ex.qty+=S.setSheet.qty; else S.cart.push({ key, id:'set'+s.id, name:'[세트] '+s.name, img:s.img, qty:S.setSheet.qty, unit, optText });
+  if(ex) ex.qty+=S.setSheet.qty; else S.cart.push({ key, id:'set'+s.id, name:'[세트] '+s.name, img:s.img, photo:PHOTO['set'+s.id], qty:S.setSheet.qty, unit, optText });
   const nm=s.name; closeSheet(); S._keepScroll=true; render(); S._keepScroll=false; toast(`'${nm}' 담았어요`);
 }
 
@@ -507,7 +523,7 @@ function renderCartBar(){
 
 /* --- 장바구니 --- */
 function cartLine(c,i){
-  return `<div class="citem"><span class="ci-img">${c.img}</span>
+  return `<div class="citem"><span class="ci-img">${pic(c.img, c.photo)}</span>
     <div style="flex:1;min-width:0;"><div class="ci-name">${c.name}</div>
       ${c.optText?`<div class="ci-opt">${c.optText}</div>`:''}
       <div class="ci-bot"><span class="mini-step"><button onclick="chgQty(${i},-1)">−</button><span class="n">${c.qty}</span><button onclick="chgQty(${i},1)">+</button></span>

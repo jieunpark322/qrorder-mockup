@@ -144,7 +144,7 @@ const POS = {
 
 const SCREENS = [
   {
-    key:'home', name:'홈 (대시보드)', icon:'🏠', group:'시작',
+    key:'home', ord:1, name:'홈 (대시보드)', icon:'🏠', group:'시작',
     purpose:'로그인 직후 첫 화면. 어제 운영 결과 · 오늘 챙길 일 · 운영 상태를 한눈에 요약하고, 각 카드에서 상세 화면으로 바로 이동합니다.',
     h:1370,
     pins:[
@@ -201,7 +201,7 @@ const SCREENS = [
   },
 
   {
-    key:'orders', name:'주문 내역', icon:'📋', group:'주문 관리',
+    key:'orders', ord:3, name:'주문 내역', icon:'📋', group:'주문 관리',
     purpose:'실시간 들어오는 주문을 조회·검색하고 상태를 확인하는 핵심 운영 화면. 집계 기준에 따라 KPI·목록이 재계산됩니다.',
     h:1690,
     pins:[
@@ -244,7 +244,7 @@ const SCREENS = [
   },
 
   {
-    key:'menu', name:'메뉴판 관리', icon:'🍽️', group:'메뉴 관리',
+    key:'menu', ord:10, name:'메뉴판 관리', icon:'🍽️', group:'메뉴 관리',
     purpose:'단품 메뉴를 등록·수정하고 옵션·카테고리·세트·원산지를 탭으로 관리. 손님 주문 화면에 그대로 반영됩니다.',
     h:1620,
     pins:[
@@ -294,7 +294,7 @@ const SCREENS = [
   },
 
   {
-    key:'overview', name:'매출 한눈에 보기', icon:'📊', group:'매출 관리',
+    key:'overview', ord:17, name:'매출 한눈에 보기', icon:'📊', group:'매출 관리',
     purpose:'영업일 단위 매출을 흐름(총매출 → 차감 → 실매출)과 시간대·결제수단으로 요약. 어제까지 집계된 값입니다.',
     h:1370,
     pins:[
@@ -337,7 +337,7 @@ const SCREENS = [
   },
 
   {
-    key:'order-type', name:'주문 방식', icon:'🛒', group:'주문 관리',
+    key:'order-type', ord:4, name:'주문 방식', icon:'🛒', group:'주문 관리',
     purpose:'매장이 받을 주문 채널·결제 방식·손님 안내를 한곳에서 설정. 변경은 손님 주문 화면에 즉시 영향을 줍니다.',
     h:1760,
     pins:[
@@ -373,7 +373,7 @@ const SCREENS = [
   },
 
   {
-    key:'stock', name:'오늘의 준비량', icon:'📦', group:'메뉴 관리',
+    key:'stock', ord:15, name:'오늘의 준비량', icon:'📦', group:'메뉴 관리',
     purpose:'한정 수량 메뉴의 준비량을 관리(주문 시 자동 차감)하고, 잠시 안 팔 메뉴를 오늘만 품절 처리. 매일 갱신합니다.',
     h:1370,
     pins:[
@@ -469,7 +469,7 @@ function buildBoard(s, i){
   const grid = el('div','db-grid');
   const stageCol = el('div','db-stage-col');
   const stage = el('div','db-stage'); stage.dataset.key = s.key;
-  const img = el('img','db-shot'); img.src = 'desc/img/'+s.key+'.png'; img.alt = s.name+' 화면'; img.loading = 'lazy';
+  const img = el('img','db-shot'); img.src = 'desc/img/'+s.key+'.png'; img.alt = s.name+' 화면'; img.decoding = 'sync';
   stage.appendChild(img);
   const pos = POS[s.key] || {};
   const pinlayer = el('div','db-pinlayer');
@@ -590,7 +590,8 @@ function setActivePin(key,n){
   if(pin){ pin.classList.add('active'); pin.scrollIntoView({block:'nearest'}); setTimeout(()=>pin.classList.remove('active'),2200); }
 }
 
-/* 부팅 */
+/* 부팅 — 사이드바(제품) 순서대로 정렬 후 렌더 */
+SCREENS.sort((a,b)=>(a.ord||999)-(b.ord||999));
 buildIndex();
 const wrap = document.getElementById('dbWrap');
 SCREENS.forEach((s,i)=> wrap.appendChild(buildBoard(s,i)));

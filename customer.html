@@ -25,6 +25,7 @@
   .ds-chip{font-size:11px;font-weight:700;color:#ced4da;background:#343a40;border:1px solid #495057;border-radius:20px;padding:5px 11px;cursor:pointer;font-family:inherit;}
   .ds-chip.on{background:#fff;color:#191f28;border-color:#fff;}
   .ds-div{font-size:10px;color:#868e96;font-weight:700;margin-left:8px;}
+  .ds-chip.dis{opacity:.4;}
 
   .device{width:100%;max-width:440px;background:var(--bg);min-height:calc(100vh - 46px);position:relative;
     box-shadow:0 0 0 1px rgba(0,0,0,.04),0 18px 50px rgba(0,0,0,.22);overflow:hidden;}
@@ -293,12 +294,12 @@ function renderDemo(){
       + `<button class="ds-chip ${S.serve==='self'?'on':''}" onclick="setServe('self')">🚶 셀프 수령</button>`
       + `<button class="ds-chip ${S.serve==='server'?'on':''}" onclick="setServe('server')">🍳 직접 서빙</button>`
       + `<button class="ds-chip ${S.payTiming==='prepay'?'on':''}" onclick="setPayTiming('prepay')">💳 선불</button>`
-      + `<button class="ds-chip ${S.payTiming==='postpay'?'on':''}" onclick="setPayTiming('postpay')">🧾 후불</button>`;
+      + `<button class="ds-chip ${S.payTiming==='postpay'?'on':''} ${S.serve==='self'?'dis':''}" onclick="setPayTiming('postpay')"${S.serve==='self'?' title="셀프 수령은 선불만 가능해요"':''}>🧾 후불</button>`;
   }
   $('demobar').innerHTML = html;
 }
-function setServe(v){ S.serve=v; render(); }
-function setPayTiming(v){ S.payTiming=v; render(); }
+function setServe(v){ S.serve=v; if(v==='self') S.payTiming='prepay'; render(); }   // 셀프 수령은 선불만 가능
+function setPayTiming(v){ if(v==='postpay' && S.serve!=='server'){ toast('셀프 수령은 선불만 가능해요'); return; } S.payTiming=v; render(); }
 function switchMode(m){
   if(S.orderType===m && S.screen==='menu') return;
   if(S.cart.length && !confirm('진입 QR을 바꾸면 담은 메뉴가 비워져요. 바꿀까요?')){ renderDemo(); return; }

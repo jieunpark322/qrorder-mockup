@@ -1211,9 +1211,9 @@ const CATEGORY = [
 
 // 판매유형 (오늘 5/15 — DAY 5/15 gross 1,234,500원 / ocnt 46건과 일치)
 const CHANNEL = [
-  { name:'매장 (테이블)', key:'dine',       cnt:32, amt:880000, color:'#3182f6', avg:27500, share:75.4 },
-  { name:'포장',          key:'takeout',     cnt:9,  amt:226000, color:'#1eb18d', avg:25111, share:19.4 },
-  { name:'포장 예약',     key:'reservation', cnt:3,  amt:64000,  color:'#8b5cf6', avg:21333, share:5.2 },
+  { name:'먹고가기',      key:'dine',       cnt:32, amt:880000, color:'#3182f6', avg:27500, share:75.4 },
+  { name:'포장하기',      key:'takeout',     cnt:9,  amt:226000, color:'#1eb18d', avg:25111, share:19.4 },
+  { name:'미리주문',     key:'reservation', cnt:3,  amt:64000,  color:'#8b5cf6', avg:21333, share:5.2 },
 ];
 // 합계: 46건 / 1,234,500원 (DAY 5/15와 일치)
 
@@ -1239,7 +1239,7 @@ const ORDERS = [
       {name:'아메리카노', qty:1, price:4500, options:['HOT']},
       {name:'복숭아 아이스티', qty:1, price:2700, options:[]},
     ] },
-  { id:'#20260515-0047', date:'2026-05-15', time:'10:30', channel:'포장', ch:'포장', menu:'레몬에이드', issuer:'토스페이', paySub:'페이', amt:5200, status:'진행중', stl:'−',
+  { id:'#20260515-0047', date:'2026-05-15', time:'10:30', channel:'포장하기', ch:'포장', menu:'레몬에이드', issuer:'토스페이', paySub:'페이', amt:5200, status:'진행중', stl:'−',
     items:[
       {name:'레몬에이드', qty:1, price:5200, options:[]},
     ] },
@@ -1249,7 +1249,7 @@ const ORDERS = [
       {name:'카페라떼',   qty:1, price:5500, options:['ICE','오트밀크 +500']},
       {name:'치즈케이크', qty:1, price:7400, options:[]},
     ] },
-  { id:'#20260515-0045', date:'2026-05-15', time:'10:18', channel:'포장',       ch:'포장', menu:'카페라떼 외 1건',    issuer:'카카오페이', paySub:'페이', amt:12000, status:'완료',     stl:'정산예정 5/20',
+  { id:'#20260515-0045', date:'2026-05-15', time:'10:18', channel:'포장하기',       ch:'포장', menu:'카페라떼 외 1건',    issuer:'카카오페이', paySub:'페이', amt:12000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'카페라떼', qty:1, price:5500, options:['ICE','오트밀크 +500']},
       {name:'크루아상', qty:1, price:6000, options:[]},
@@ -1275,7 +1275,7 @@ const ORDERS = [
       {name:'아메리카노', qty:1, price:4500, options:['HOT','샷 추가 +500']},
       {name:'크루아상',   qty:1, price:5000, options:[]},
     ] },
-  { id:'#20260515-0040', date:'2026-05-15', time:'08:55', channel:'포장',       ch:'포장', menu:'아메리카노',         issuer:'카카오페이', paySub:'머니', amt:12000, status:'완료',     stl:'정산예정 5/20',
+  { id:'#20260515-0040', date:'2026-05-15', time:'08:55', channel:'포장하기',       ch:'포장', menu:'아메리카노',         issuer:'카카오페이', paySub:'머니', amt:12000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'아메리카노', qty:3, price:4000, options:['HOT']},
     ] },
@@ -1288,7 +1288,7 @@ const ORDERS = [
     items:[
       {name:'아메리카노', qty:2, price:4000, options:['HOT']},
     ] },
-  { id:'#20260515-0036', date:'2026-05-15', time:'07:42', channel:'포장',       ch:'포장', menu:'아메리카노 외 1건',   issuer:'네이버페이', paySub:'페이', amt:10000, status:'완료',     stl:'정산예정 5/20',
+  { id:'#20260515-0036', date:'2026-05-15', time:'07:42', channel:'포장하기',       ch:'포장', menu:'아메리카노 외 1건',   issuer:'네이버페이', paySub:'페이', amt:10000, status:'완료',     stl:'정산예정 5/20',
     items:[
       {name:'아메리카노', qty:1, price:5000, options:['HOT']},
       {name:'크루아상',   qty:1, price:5000, options:[]},
@@ -1297,13 +1297,20 @@ const ORDERS = [
     items:[
       {name:'카푸치노', qty:1, price:5000, options:['HOT']},
     ] },
+  // === 미리주문(사전 픽업 예약) 주문 — 손님이 수령 시간 지정, 사장님 수락 후 접수 ===
+  { id:'#20260515-0037', date:'2026-05-15', time:'09:50', channel:'미리주문', ch:'미리주문', menu:'바닐라라떼 외 1건', issuer:'카카오페이', paySub:'페이', amt:21000, status:'완료', stl:'정산예정 5/20',
+    items:[{name:'바닐라라떼', qty:2, price:5500, options:['ICE']},{name:'치즈케이크', qty:1, price:10000, options:[]}] },
+  { id:'#20260515-0034', date:'2026-05-15', time:'09:30', channel:'미리주문', ch:'미리주문', menu:'아메리카노 외 1건', issuer:'네이버페이', paySub:'페이', amt:21000, status:'완료', stl:'정산예정 5/20',
+    items:[{name:'아메리카노', qty:3, price:4500, options:['HOT']},{name:'크루아상', qty:1, price:7500, options:[]}] },
+  { id:'#20260515-0033', date:'2026-05-15', time:'09:05', channel:'미리주문', ch:'미리주문', menu:'카페라떼 외 1건', issuer:'토스페이', paySub:'페이', amt:22000, status:'완료', stl:'정산예정 5/20',
+    items:[{name:'카페라떼', qty:2, price:5500, options:['ICE']},{name:'아메리카노', qty:1, price:11000, options:['HOT']}] },
   // === 1년 초과 거래 샘플 (카드번호 전체 마스킹) ===
   { id:'#20250410-0218', date:'2025-04-10', time:'14:22', channel:'테이블 2',   ch:'매장', menu:'아메리카노 외 1건',     issuer:'신한', amt:8500,  status:'완료',     stl:'정산완료',         card:'4141209999', _expired:true,
     items:[
       {name:'아메리카노', qty:1, price:4500, options:['HOT']},
       {name:'크루아상',   qty:1, price:4000, options:[]},
     ] },
-  { id:'#20241102-0061', date:'2024-11-02', time:'18:14', channel:'포장',       ch:'포장', menu:'카페라떼',           issuer:'KB',   amt:9000,  status:'완료',     stl:'정산완료',         card:'5388008888', _expired:true,
+  { id:'#20241102-0061', date:'2024-11-02', time:'18:14', channel:'포장하기',       ch:'포장', menu:'카페라떼',           issuer:'KB',   amt:9000,  status:'완료',     stl:'정산완료',         card:'5388008888', _expired:true,
     items:[
       {name:'카페라떼', qty:2, price:4500, options:['ICE']},
     ] },
@@ -1657,7 +1664,7 @@ function paySub(o){
 // 결제수단 라벨 — 1depth만 (표·요약용). 2depth는 paySub()으로 별도 노출.
 // 주문별 결제 방식 — 포장은 항상 선불, 매장은 저녁(17~21시)만 후결제
 function orderPayType(o){
-  if (!o || o.ch === '포장') return '선불';
+  if (!o || o.ch === '포장' || o.ch === '미리주문') return '선불';
   if (!o.issuer) return '후불'; // 결제 정보 없음 = 주문 취소(후불)
   const [h] = (o.time||'00:00').split(':').map(Number);
   return (h >= 17 && h < 21) ? '후불' : '선불';
@@ -3228,7 +3235,7 @@ function renderDetailChannel(body){
   const totCnt = _CH.reduce((s,c)=>s+c.cnt,0);
   body.innerHTML = `
     <div class="banner-info" style="margin-bottom:14px;">
-      💡 <b>오늘(5/15) 기준</b> 주문 방식별 매출이에요. 매장·포장·포장 예약별로 건수와 금액을 확인할 수 있어요.
+      💡 <b>오늘(5/15) 기준</b> 주문 방식별 매출이에요. 먹고가기·포장하기·미리주문별로 건수와 금액을 확인할 수 있어요.
     </div>
     <div class="panel">
       <h3>주문 방식별 매출 <span class="h-sub">오늘 합계 ${fmt(totAmt)}원 · ${fmt(totCnt)}건</span></h3>
@@ -3236,7 +3243,7 @@ function renderDetailChannel(body){
         ${_CH.map(c=>`
           <div style="padding:16px;border-radius:12px;border:1.5px solid ${c.color}22;background:${c.color}08;">
             <div style="font-size:12px;font-weight:700;color:${c.color};margin-bottom:8px;">
-              ${{dine:'🏠',takeout:'🥡',reservation:'📅'}[c.key]||'📦'} ${c.name}
+              ${{dine:'🍽️',takeout:'🥡',reservation:'📅'}[c.key]||'📦'} ${c.name}
             </div>
             <div style="font-size:22px;font-weight:800;color:var(--ink);">${fmt(c.amt)}<span style="font-size:12px;color:var(--ink-3);font-weight:500;">원</span></div>
             <div style="font-size:12px;color:var(--ink-3);margin-top:4px;">${fmt(c.cnt)}건 · 평균 ${fmt(c.avg)}원</div>
@@ -3602,8 +3609,9 @@ function renderOrders(main){
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;">
             <span class="field-label">채널</span>
             <span class="chip ${d.channelFilter==='all'?'on':''}" onclick="state.orderFilterDraft.channelFilter='all';renderApp()">전체</span>
-            <span class="chip ${d.channelFilter==='매장'?'on':''}" onclick="state.orderFilterDraft.channelFilter='매장';renderApp()">🏠 매장</span>
-            <span class="chip ${d.channelFilter==='포장'?'on':''}" onclick="state.orderFilterDraft.channelFilter='포장';renderApp()">🥡 포장</span>
+            <span class="chip ${d.channelFilter==='매장'?'on':''}" onclick="state.orderFilterDraft.channelFilter='매장';renderApp()">🍽️ 먹고가기</span>
+            <span class="chip ${d.channelFilter==='포장'?'on':''}" onclick="state.orderFilterDraft.channelFilter='포장';renderApp()">🥡 포장하기</span>
+            <span class="chip ${d.channelFilter==='미리주문'?'on':''}" onclick="state.orderFilterDraft.channelFilter='미리주문';renderApp()">📅 미리주문</span>
           </div>
           <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:12px;">
             <span class="field-label" style="padding-top:7px;">결제수단</span>
@@ -7108,7 +7116,7 @@ function qrQuickTabs(){
   const takeoutActive = isTakeoutQRActive();
   const tabs = [
     { key:'table',   ic:'🪑', label:'테이블 QR',       cnt: TABLES.length },
-    { key:'takeout', ic:'🛍️', label:'포장 주문 QR',   cnt: takeoutActive ? 1 : 0 },
+    { key:'takeout', ic:'🛍️', label:'포장하기 QR',   cnt: takeoutActive ? 1 : 0 },
     { key:'menu',    ic:'📖', label:'메뉴판 QR',       cnt: 1 },
   ];
   return `
@@ -8750,7 +8758,7 @@ function renderMenuEditModal(){
           <div>
             <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">포장가 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
             <input id="me-takeout" class="input" type="number" value="${f.takeoutPrice!=null?f.takeoutPrice:''}" placeholder="비워 두면 매장가" style="width:100%;color:#15803d;" />
-            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">포장 주문 시 가격</div>
+            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">포장하기 가격</div>
           </div>
           <div>
             <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">할인 금액 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
@@ -9844,7 +9852,7 @@ const ORDER_CHANNELS = {
   // 포장 설정
   waitMinMin: 15,                  // 포장 대기 시간 최소 (분)
   waitMinMax: 25,                  // 포장 대기 시간 최대 (분)
-  reservation: false,              // 포장 예약 — ON 시 사장님 수락 필요
+  reservation: false,              // 미리주문 — ON 시 사장님 수락 필요
   // 결제 방식 (매장 주문 활성 시)
   payment: 'scheduled',            // prepay | postpay | scheduled (시간대별)
   schedule: [
@@ -9854,8 +9862,8 @@ const ORDER_CHANNELS = {
   defaultPolicy: 'prepay',         // 미정 시간대 기본값
 };
 const ORDER_LABELS = {
-  mode: { both:'매장 + 포장', dine_in:'매장 주문만', takeout:'포장 주문만' },
-  modeDesc: { both:'매장 식사와 픽업 둘 다', dine_in:'테이블 취식 전용', takeout:'픽업 전용' },
+  mode: { both:'먹고가기 + 포장하기', dine_in:'먹고가기만', takeout:'포장하기만' },
+  modeDesc: { both:'먹고가기 · 포장하기 둘 다', dine_in:'먹고가기 전용 (매장 취식)', takeout:'포장하기 전용 (가져가기)' },
   notify: { call_name:'호명', kakao:'알림톡', display:'전광판' },
 };
 
@@ -10782,7 +10790,7 @@ function renderQR(main){
     <div style="display:flex;gap:10px;align-items:flex-start;padding:14px 18px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:12px;margin-bottom:14px;">
       <span style="font-size:16px;flex-shrink:0;">💡</span>
       <div style="font-size:13px;color:var(--ink-2);line-height:1.65;">
-        QR은 <b>매장 주문 설정·테이블 설정</b>을 보고 <b>자동 생성</b>돼요. 따로 추가하실 필요가 없어요.<br/>
+        QR은 <b>먹고가기 설정·테이블 설정</b>을 보고 <b>자동 생성</b>돼요. 따로 추가하실 필요가 없어요.<br/>
         <span style="font-size:12px;color:var(--ink-3);">테이블 QR은 <b style="color:var(--blue);cursor:pointer;" onclick="setSection('table')">테이블 관리</b>, 포장 QR은 <b style="color:var(--blue);cursor:pointer;" onclick="setSection('order-type')">주문 방식</b> 설정을 따라가요. 정식 QR 스티커는 아래 <b style="color:var(--ink-2);">추가 QR 신청</b>에서 진행해 주세요.</span>
       </div>
     </div>
@@ -10820,16 +10828,16 @@ function renderQR(main){
       `).join('')}
     </div>
 
-    <!-- ② 포장 주문 QR — ORDER_CHANNELS.mode 기반 자동 -->
+    <!-- ② 포장하기 QR — ORDER_CHANNELS.mode 기반 자동 -->
     <div class="panel" id="qr-section-takeout">
-      <h3>🛍️ 포장 주문 QR <span class="h-sub">${isTakeoutQRActive()?'주문 방식에서 포장이 켜져 있어 자동 생성돼요':'포장 주문이 꺼져 있어요'}</span>
+      <h3>🥡 포장하기 QR <span class="h-sub">${isTakeoutQRActive()?'주문 방식에서 포장하기가 켜져 있어 자동 생성돼요':'포장하기가 꺼져 있어요'}</span>
         <span class="h-act"><span style="font-size:12px;color:var(--blue);font-weight:700;cursor:pointer;" onclick="setSection('order-type')">주문 방식 →</span></span>
       </h3>
       ${isTakeoutQRActive() ? `
         <div style="display:flex;align-items:center;gap:16px;padding:14px 16px;background:var(--bg-2);border-radius:12px;border:1px solid var(--line-2);">
           ${qrMock(1000)}
           <div style="flex:1;min-width:0;">
-            <div style="font-size:15px;font-weight:800;margin-bottom:4px;">포장 주문 <span style="font-size:10px;color:var(--blue);font-weight:700;background:var(--blue-50);padding:2px 7px;border-radius:8px;margin-left:4px;">자동 생성</span></div>
+            <div style="font-size:15px;font-weight:800;margin-bottom:4px;">포장하기 <span style="font-size:10px;color:var(--blue);font-weight:700;background:var(--blue-50);padding:2px 7px;border-radius:8px;margin-left:4px;">자동 생성</span></div>
             <div style="font-size:12px;color:var(--ink-3);font-family:ui-monospace,monospace;background:#fff;border:1px solid var(--line-2);border-radius:6px;padding:4px 8px;display:inline-block;cursor:pointer;"
               onclick="navigator.clipboard?.writeText('order.qrorder.co.kr/${storeCode}/takeout').then(()=>alert('링크가 복사됐어요'))">
               order.qrorder.co.kr/${storeCode}/takeout
@@ -10842,8 +10850,8 @@ function renderQR(main){
         </div>
       ` : `
         <div style="padding:32px 18px;text-align:center;background:var(--bg-2);border-radius:12px;color:var(--ink-3);font-size:13px;line-height:1.65;">
-          🛍️ 현재 매장은 <b style="color:var(--ink-2);">포장 주문을 받지 않아요</b>.<br/>
-          <span style="font-size:12px;">주문 방식에서 <b style="color:var(--ink-2);">매장 + 포장</b> 또는 <b style="color:var(--ink-2);">포장 주문만</b>으로 바꾸시면 포장 QR이 자동 생성돼요.</span><br/>
+          🛍️ 현재 매장은 <b style="color:var(--ink-2);">포장하기를 받지 않아요</b>.<br/>
+          <span style="font-size:12px;">주문 방식에서 <b style="color:var(--ink-2);">먹고가기 + 포장하기</b> 또는 <b style="color:var(--ink-2);">포장하기만</b>으로 바꾸시면 포장 QR이 자동 생성돼요.</span><br/>
           <button class="btn-ghost" style="margin-top:14px;padding:8px 16px;font-size:12px;font-weight:700;" onclick="setSection('order-type')">🛒 주문 방식 설정으로 이동</button>
         </div>
       `}
@@ -10897,7 +10905,7 @@ function openTempPrintQRModal(type, id){
     qrId = 2000;
     isMenuOnly = true;
   } else {
-    title = `포장 주문`;
+    title = `포장하기`;
     link = `order.qrorder.co.kr/softcoffee-hapjeong/takeout`;
     qrId = 1000;
   }
@@ -11985,8 +11993,8 @@ function confirmOrderModeChange(m){
   const willTakeOff  = (ORDER_CHANNELS.mode==='both'||ORDER_CHANNELS.mode==='takeout') && m==='dine_in';
   const impacts = [];
   if(willDineOff) impacts.push('테이블 QR 주문이 손님 화면에서 사라져요.');
-  if(willTakeOff) impacts.push('포장 주문 QR이 손님 화면에서 사라져요.');
-  if(m==='both')  impacts.push('매장 주문과 포장 주문을 모두 받게 돼요.');
+  if(willTakeOff) impacts.push('포장하기 QR이 손님 화면에서 사라져요.');
+  if(m==='both')  impacts.push('먹고가기와 포장하기를 모두 받게 돼요.');
   impacts.push('손님 메뉴판에 보이는 주문 방식이 바로 바뀌어요.');
   impacts.push('이미 들어온 주문은 그대로 유지돼요.');
   const modal = document.getElementById('modal');
@@ -12126,8 +12134,8 @@ function renderOrderType(main){
   const now = new Date();
   const hhmm = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   const dirty = ot_isDirty();
-  const channelIcons = { both:'🍽️🛍️', dine_in:'🪑', takeout:'🛍️' };
-  const channelDescs = { both:'매장 식사와 픽업 둘 다', dine_in:'테이블 취식 전용', takeout:'픽업 전용' };
+  const channelIcons = { both:'🍽️🥡', dine_in:'🍽️', takeout:'🥡' };
+  const channelDescs = { both:'먹고가기 · 포장하기 둘 다', dine_in:'먹고가기 전용 (매장 취식)', takeout:'포장하기 전용 (가져가기)' };
   main.innerHTML = `
     <div class="crumb">주문 관리 › 주문 방식</div>
     <div class="toolbar">
@@ -12147,16 +12155,16 @@ function renderOrderType(main){
       const polCls  = (lbl) => lbl==='선불' ? 'prepay' : 'postpay';
       const dineInBlock = dineIn ? `
         <div class="ch">
-          <div class="ch-head">🪑 매장 주문</div>
+          <div class="ch-head">🍽️ 먹고가기</div>
           <div class="ch-policy ${polCls(cp.label)}"><span class="ic">${polIcon(cp.label)}</span>${cp.label}</div>
           <div class="ch-scope">${cp.scope}${ch.payment==='scheduled'?' · 시간대별 자동':''}</div>
         </div>
       ` : '';
       const takeoutBlock = takeout ? `
         <div class="ch">
-          <div class="ch-head">🛍️ 포장 주문</div>
+          <div class="ch-head">🥡 포장하기</div>
           <div class="ch-policy prepay"><span class="ic">💳</span>선불</div>
-          <div class="ch-scope">포장은 항상 선불 · 고정</div>
+          <div class="ch-scope">포장하기는 항상 선불 · 고정</div>
         </div>
       ` : '';
       return `
@@ -12193,9 +12201,9 @@ function renderOrderType(main){
     ${(dineIn || takeout) ? `
     <div class="${dineIn && takeout ? 'ot-channel-grid' : ''}">
       ${dineIn ? `
-        <!-- ② 매장 주문 설정 (결제 방식 포함) -->
+        <!-- ② 먹고가기 설정 (결제 방식 포함) -->
         <div class="panel">
-          <h3>🪑 매장 주문 설정 <span class="h-sub">${takeout?'매장 채널 전용 항목':'매장 활성 시'}</span></h3>
+          <h3>🍽️ 먹고가기 설정 <span class="h-sub">${takeout?'먹고가기 전용 항목':'먹고가기 활성 시'}</span></h3>
           <div class="ot-row">
             <span class="lbl">서빙 방식<small>본사 설정 항목</small></span>
             <div class="ot-locked">
@@ -12265,13 +12273,13 @@ function renderOrderType(main){
       ` : ''}
 
       ${takeout ? `
-        <!-- ③ 포장 주문 설정 -->
+        <!-- ③ 포장하기 설정 -->
         <div class="panel">
-          <h3>🛍️ 포장 주문 설정 <span class="h-sub">${dineIn?'포장 채널 전용 항목':'포장 활성 시'}</span></h3>
+          <h3>🥡 포장하기 설정 <span class="h-sub">${dineIn?'포장하기 전용 항목':'포장하기 활성 시'}</span></h3>
           <div class="ot-row">
             <span class="lbl">결제 시점</span>
             <span class="ot-pay-fixed"><span class="ic">💳</span>선불</span>
-            <span style="font-size:11px;color:var(--ink-4);">포장은 주문 즉시 결제해요</span>
+            <span style="font-size:11px;color:var(--ink-4);">포장하기는 주문 즉시 결제해요</span>
           </div>
           <div class="ot-row">
             <span class="lbl">포장가</span>
@@ -12286,15 +12294,15 @@ function renderOrderType(main){
             <span style="font-size:12px;color:var(--ink-4);">손님 화면에 "${ch.waitMinMin||10}분 ~ ${ch.waitMinMax||20}분" 으로 표시돼요</span>
           </div>
           <div class="ot-row">
-            <span class="lbl">포장 예약</span>
+            <span class="lbl">미리주문</span>
             <label class="toggle-switch ${ch.reservation?'on':''}" onclick="toggleOrderField('reservation')">
               <span class="sw"></span>
             </label>
-            <span style="font-size:12px;color:var(--ink-2);">${ch.reservation?'예약 ON — 사장님 수락 후 접수':'예약 OFF — 즉시 접수'}</span>
+            <span style="font-size:12px;color:var(--ink-2);">${ch.reservation?'미리주문 ON — 손님이 수령 시간 선택, 사장님 수락 후 접수':'미리주문 OFF — 포장하기만 즉시 접수'}</span>
           </div>
           ${ch.reservation ? `
             <div style="margin-left:120px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:11px;color:#9a3412;line-height:1.55;margin-top:4px;">
-              ℹ️ 손님이 픽업 시간을 선택하면 사장님이 수락해야 확정돼요. (영업 종료 30분 전 자동 마감)
+              ℹ️ 손님이 수령 시간을 선택하면 사장님이 수락해야 확정돼요. (영업 종료 30분 전 자동 마감)
             </div>
           ` : ''}
         </div>
@@ -12339,7 +12347,7 @@ function renderStaffCall(main){
     <div class="toolbar">
       <div>
         <h2>직원 호출</h2>
-        <div class="page-sub">손님이 테이블에서 직원을 부를 수 있는 기능이에요. 매장 식사 채널에서만 작동해요.</div>
+        <div class="page-sub">손님이 테이블에서 직원을 부를 수 있는 기능이에요. 먹고가기 채널에서만 작동해요.</div>
       </div>
     </div>
 

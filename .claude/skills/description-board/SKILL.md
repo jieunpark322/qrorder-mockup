@@ -13,6 +13,7 @@ description: 목업/프로토타입 사이트(HTML)를 화면별 "기획 주석 
 - `desc/img/<key>.png` / `<key>_pin.png` — 화면 캡처 / 핀 합성본
 - `desc/details.js` — `window.DETAILS = {화면키:{핀번호:{purpose,behavior,data,exception}}}` (그린필드 상세 정의)
 - `REVIEW_NOTES.md` — 검수 결과·결정 기록
+- `desc/boards/<NN>-<key>.html` + `index.html` + `board.css` — **화면별 분리본(Figma 레이어 분리용, 기본 산출)**
 
 ## 왜 이 구조인가 (반드시 지킬 원칙)
 - **핀은 이미지에 구워 넣는다(별도 레이어 금지).** 핀을 CSS %로 이미지 위에 따로 얹으면 html.to.design 임포트 시 좌표가 찌부러져 화면을 키울 때 핀이 따로 논다. 핀이 그림의 일부면 절대 안 틀어진다.
@@ -65,6 +66,14 @@ chrome --headless=new --disable-gpu --no-sandbox --hide-scrollbars \
 - 본체: `SCREENS` 배열(각 `{key, ord, name, icon, group, h, pins:[{n,title}]}`)을 `ord`로 정렬해, 화면마다 좌측 `<img src="desc/img/<key>_pin.png">` + 우측 카드 렌더.
 - 카드 4분류는 base 핀의 내용 위에 `window.DETAILS[key][n]`를 **병합**(있으면 우선). `<script src="desc/details.js">`를 본문 스크립트 앞에 로드.
 - 핀은 이미지에 이미 합성돼 있으므로 별도 핀 레이어를 만들지 않는다.
+
+### 5b. 화면별 분리본 (Figma 레이어 분리 — 기본 산출, 별도 요청 없어도 함께 생성)
+한 파일에 전 화면을 담으면 Figma 임포트 시 레이어가 한 덩어리가 되어 기능별로 찾기 어렵다. 그래서 **화면별 분리본을 기본으로 함께** 만든다:
+- `desc/boards/<NN>-<key>.html` — 화면 1개 = 파일 1개(보드 1개: 좌측 `../img/<key>_pin.png` + 우측 4분류 카드). 파일명은 `ord` 2자리 접두(예: `03-orders.html`)로 사이드바 순서 정렬.
+- `desc/boards/board.css` — `description.html`의 `<style>` 블록을 추출한 공용 스타일(각 파일이 `<link rel=stylesheet href="board.css">`로 참조).
+- `desc/boards/index.html` — 카테고리(사이드바 그룹)별로 화면 링크를 묶은 목록 페이지.
+- 생성은 **스크립트로**(per-screen 수작업 금지): 화면 메타(`key/ord/name/icon/group/pins[{n,title}]`)와 `details.js`의 `DETAILS`를 읽어 각 파일을 찍어낸다. 카드 마크업은 `description.html`의 `buildCards`와 동일 규칙(핀 번호+title 헤더, 4분류 행, 내용은 DETAILS).
+- Figma 활용: 화면별 URL을 각각 import하면 화면마다 독립 프레임이 되어 기능별 레이어를 쉽게 찾는다. 전체 한 장(`description.html`)도 개요용으로 함께 유지한다.
 
 ### 6. 그린필드 상세 정의 (details.js) — 멀티에이전트 워크플로
 화면당 1 에이전트가 ① `description.html`의 해당 화면 핀 목록(n+title) 확인(번호 유지) ② `index.html` 렌더 코드 Grep+Read로 실제 버튼·필드·탭·표 컬럼·상태·모달 파악 ③ 스펙 문서 참고 ④ 4분류를 **외주 개발자가 추가 질문 없이 구현할 수준**으로 작성(버튼별 동작·상태전이·기본값·검증·계산식·데이터 바인딩·연동 화면·실제 노출 문구). 스키마로 `{key, pins:[{n,purpose[],behavior[],data[],exception[]}]}` 강제.

@@ -53,6 +53,7 @@
   .searchbar .clr{border:none;background:var(--ink4);color:#fff;width:20px;height:20px;border-radius:50%;font-size:11px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;}
   .search-empty{text-align:center;color:var(--ink3);font-size:15px;line-height:1.7;padding:46px 20px;}
   .origin-note{font-size:12.5px;color:var(--ink4);margin-top:12px;line-height:1.55;}
+  .origin-text{white-space:pre-line;font-size:14.5px;color:var(--ink);line-height:1.8;}
   .brandinfo{display:flex;align-items:flex-end;gap:13px;padding:0 18px;margin-top:-34px;position:relative;z-index:3;}
   .logo{width:72px;height:72px;border-radius:18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);
     display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;border:3px solid #fff;}
@@ -74,9 +75,15 @@
   .maintabs{position:sticky;top:0;z-index:18;background:#fff;display:flex;border-bottom:1px solid var(--line);margin-top:14px;}
   .maintab{flex:1;padding:15px 0;font-size:16px;font-weight:700;color:var(--ink3);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:inherit;}
   .maintab.on{color:var(--ink);border-bottom-color:var(--ink);font-weight:800;}
-  .cattabs{position:sticky;top:54px;z-index:15;background:#fff;display:flex;gap:7px;padding:12px 14px;border-bottom:1px solid var(--line);overflow-x:auto;}
-  .cattab{flex-shrink:0;font-size:15px;font-weight:700;color:var(--ink3);padding:9px 16px;border-radius:20px;background:var(--bg);border:none;cursor:pointer;font-family:inherit;}
+  .cattabs-wrap{position:sticky;top:54px;z-index:15;background:#fff;border-bottom:1px solid var(--line);}
+  .cattabs-wrap::after{content:'';position:absolute;top:0;right:0;bottom:1px;width:42px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff 72%);pointer-events:none;}
+  .cattabs{display:flex;gap:7px;padding:12px 14px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;}
+  .cattabs::-webkit-scrollbar{display:none;}
+  .cattab{flex-shrink:0;font-size:15px;font-weight:700;color:var(--ink3);padding:9px 16px;border-radius:20px;background:var(--bg);border:none;cursor:pointer;font-family:inherit;white-space:nowrap;}
   .cattab.on{background:var(--blue);color:#fff;font-weight:800;}
+  /* 탭(메뉴/리뷰/매장정보) 전환 슬라이딩 */
+  @keyframes tabSlide{from{opacity:0;transform:translateX(var(--tab-dx,20px));}to{opacity:1;transform:translateX(0);}}
+  .tab-anim{animation:tabSlide .28s cubic-bezier(.22,.61,.36,1);}
 
   .notice{margin:12px 14px 0;display:flex;gap:9px;align-items:flex-start;border-radius:11px;padding:13px 14px;font-size:14px;line-height:1.6;}
   .notice.blue{background:var(--blue-50);border:1px solid #d6deec;color:var(--blue-d);}
@@ -314,14 +321,15 @@ const STORE = {
     'https://loremflickr.com/640/360/cafe,interior?lock=71',
     'https://loremflickr.com/640/360/coffee,beans?lock=72',
   ],
-  // 원산지 정보 (매장정보 하단 노출)
-  origin:[
-    {n:'커피 원두', o:'에티오피아 / 콜롬비아'},
-    {n:'우유', o:'국산'},
-    {n:'밀(베이커리)', o:'미국산'},
-    {n:'달걀', o:'국산'},
-    {n:'버터', o:'프랑스산'},
-  ],
+  // 원산지 정보 (사장님이 텍스트 상자에 서술형으로 입력 → 입력한 그대로 노출)
+  originText:`원두 : 에티오피아, 콜롬비아산
+우유/유제품 : 국산 (서울우유)
+밀가루 : 미국산
+버터 : 프랑스산
+계란 : 국산
+딸기/복숭아 등 과일 : 국산 또는 수입산(시즌에 따라 상이)
+
+※ 원산지는 수급 상황에 따라 변경될 수 있으며, 자세한 내용은 직원에게 문의해 주세요.`,
 };
 const ORDER_TYPES = {
   dinein:   { key:'dinein',   name:'먹고가기', emoji:'🍽️' },
@@ -336,17 +344,46 @@ const OPTS = {
   3:{ id:3, name:'얼음·온도',  multi:false, required:true,  items:[{n:'얼음 보통',p:0},{n:'얼음 적게',p:0},{n:'따뜻하게',p:0}] },
 };
 const MENU = [
-  { id:1, name:'아메리카노',        cat:'커피',   price:4500, takeout:4000, status:'판매중', img:'☕', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:[] },
-  { id:2, name:'카페라떼',          cat:'커피',   price:5000, takeout:4500, status:'판매중', img:'🥛', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:['milk'] },
-  { id:3, name:'바닐라라떼',        cat:'커피',   price:5500, takeout:5000, status:'판매중', img:'🥤', opt:[2,3,1], desc:'부드러운 바닐라 시그니처', allerg:['milk','soy'] },
-  { id:4, name:'아이스 아메리카노', cat:'커피',   price:4500, takeout:4000, status:'판매중', img:'🧊', opt:[2,3,1], desc:'', allerg:[] },
-  { id:5, name:'복숭아 아이스티',   cat:'음료',   price:4800, takeout:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'', allerg:['peach'] },
-  { id:6, name:'레몬에이드',        cat:'음료',   price:5200, takeout:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'상큼한 수제 레몬', allerg:[] },
-  { id:7, name:'크로아상',          cat:'디저트', price:3800, takeout:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요', allerg:['wheat','egg','milk'] },
-  { id:8, name:'치즈케이크',        cat:'디저트', price:5500, takeout:null, status:'품절',   img:'🍰', opt:[],      desc:'', allerg:['egg','milk','wheat'] },
-  { id:9, name:'마들렌',            cat:'디저트', price:2800, takeout:null, status:'숨김',   img:'🍪', opt:[],      desc:'', allerg:[] },
+  // 커피
+  { id:1,  name:'아메리카노',        cat:'커피',         price:4500, takeout:4000, status:'판매중', img:'☕', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:[] },
+  { id:4,  name:'아이스 아메리카노', cat:'커피',         price:4500, takeout:4000, status:'판매중', img:'🧊', opt:[2,3,1], desc:'', allerg:[] },
+  { id:2,  name:'카페라떼',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'🥛', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:['milk'] },
+  { id:3,  name:'바닐라라떼',        cat:'커피',         price:5500, takeout:5000, status:'판매중', img:'🥤', opt:[2,3,1], desc:'부드러운 바닐라 시그니처', allerg:['milk','soy'] },
+  { id:10, name:'콜드브루',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'🧋', opt:[2,3],   desc:'12시간 저온 추출', allerg:[] },
+  { id:11, name:'카푸치노',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'☕', opt:[2,3,1], desc:'풍성한 우유 거품', allerg:['milk'] },
+  // 논커피
+  { id:12, name:'초코라떼',          cat:'논커피',       price:5500, takeout:5000, status:'판매중', img:'🍫', opt:[2,3],   desc:'진한 다크초코', allerg:['milk'] },
+  { id:13, name:'녹차라떼',          cat:'논커피',       price:5500, takeout:5000, status:'판매중', img:'🍵', opt:[2,3],   desc:'제주산 녹차', allerg:['milk'] },
+  { id:14, name:'고구마라떼',        cat:'논커피',       price:5800, takeout:5300, status:'품절',   img:'🍠', opt:[2,3],   desc:'국산 호박고구마', allerg:['milk'] },
+  // 티·에이드
+  { id:5,  name:'복숭아 아이스티',   cat:'티·에이드',    price:4800, takeout:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'', allerg:['peach'] },
+  { id:6,  name:'레몬에이드',        cat:'티·에이드',    price:5200, takeout:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'상큼한 수제 레몬', allerg:[] },
+  { id:15, name:'자몽에이드',        cat:'티·에이드',    price:5500, takeout:5000, status:'판매중', img:'🍊', opt:[2,3],   desc:'', allerg:[] },
+  { id:16, name:'캐모마일 티',       cat:'티·에이드',    price:4500, takeout:4000, status:'판매중', img:'🌼', opt:[3],     desc:'', allerg:[] },
+  // 스무디·프라페
+  { id:17, name:'딸기 스무디',       cat:'스무디·프라페', price:6000, takeout:5500, status:'판매중', img:'🍓', opt:[2],     desc:'생딸기 듬뿍', allerg:['milk'] },
+  { id:18, name:'망고 스무디',       cat:'스무디·프라페', price:6000, takeout:5500, status:'판매중', img:'🥭', opt:[2],     desc:'', allerg:['milk'] },
+  { id:19, name:'자바칩 프라페',     cat:'스무디·프라페', price:6300, takeout:5800, status:'판매중', img:'🧋', opt:[2],     desc:'초코칩 가득', allerg:['milk'] },
+  // 베이커리
+  { id:7,  name:'크로아상',          cat:'베이커리',     price:3800, takeout:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요', allerg:['wheat','egg','milk'] },
+  { id:20, name:'소금빵',            cat:'베이커리',     price:3500, takeout:null, status:'판매중', img:'🥖', opt:[],      desc:'겉바속촉', allerg:['wheat','milk'] },
+  { id:21, name:'베이글',            cat:'베이커리',     price:3800, takeout:null, status:'판매중', img:'🥯', opt:[],      desc:'', allerg:['wheat'] },
+  // 디저트
+  { id:8,  name:'치즈케이크',        cat:'디저트',       price:5500, takeout:null, status:'품절',   img:'🍰', opt:[],      desc:'', allerg:['egg','milk','wheat'] },
+  { id:22, name:'티라미수',          cat:'디저트',       price:6000, takeout:null, status:'판매중', img:'🍮', opt:[],      desc:'마스카포네 듬뿍', allerg:['egg','milk','wheat'] },
+  { id:23, name:'브라우니',          cat:'디저트',       price:4500, takeout:null, status:'판매중', img:'🍫', opt:[],      desc:'', allerg:['egg','milk','wheat'] },
+  { id:9,  name:'마들렌',            cat:'디저트',       price:2800, takeout:null, status:'숨김',   img:'🍪', opt:[],      desc:'', allerg:[] },
+  // 브런치
+  { id:24, name:'아보카도 토스트',   cat:'브런치',       price:8500, takeout:null, status:'판매중', img:'🥑', opt:[],      desc:'사워도우 + 아보카도', allerg:['wheat','egg'] },
+  { id:25, name:'에그 베네딕트',     cat:'브런치',       price:9500, takeout:null, status:'판매중', img:'🍳', opt:[],      desc:'수란 + 홀랜다이즈 소스', allerg:['egg','milk','wheat'] },
+  // 병음료
+  { id:26, name:'생수',              cat:'병음료',       price:1500, takeout:1500, status:'판매중', img:'💧', opt:[],      desc:'500ml', allerg:[] },
+  { id:27, name:'탄산수',            cat:'병음료',       price:2000, takeout:2000, status:'판매중', img:'🫧', opt:[],      desc:'', allerg:[] },
+  // 시즌 한정
+  { id:28, name:'딸기 라떼',         cat:'시즌 한정',    price:6000, takeout:5500, status:'판매중', img:'🍓', opt:[2,3],   desc:'겨울 시즌 한정', allerg:['milk'] },
+  { id:29, name:'흑임자 라떼',       cat:'시즌 한정',    price:6000, takeout:5500, status:'판매중', img:'⚫', opt:[2,3],   desc:'고소한 국산 흑임자', allerg:['milk'] },
 ];
-const CATS = ['커피','음료','디저트'];
+const CATS = ['커피','논커피','티·에이드','스무디·프라페','베이커리','디저트','브런치','병음료','시즌 한정'];
 const PAY_METHODS = [{k:'카드',e:'💳'},{k:'카카오페이',e:'🟡'},{k:'네이버페이',e:'🟢'},{k:'토스페이',e:'🔵'}];
 const STAFF_CALL_MSGS = ['물','수저','계산','메뉴 추천'];
 const SETS = [
@@ -375,10 +412,19 @@ const PHOTO = {
   2:'https://loremflickr.com/360/240/latte?lock=32',
   3:'https://loremflickr.com/360/240/latteart?lock=33',
   4:'https://loremflickr.com/360/240/icedcoffee?lock=34',
-  // 5(복숭아 아이스티)·6(레몬에이드)는 이미지 미등록 → 공란 처리 데모
   7:'https://loremflickr.com/360/240/croissant?lock=37',
   8:'https://loremflickr.com/360/240/cheesecake?lock=38',
   9:'https://loremflickr.com/360/240/madeleine?lock=39',
+  10:'https://loremflickr.com/360/240/coldbrew?lock=40',
+  11:'https://loremflickr.com/360/240/cappuccino?lock=41',
+  12:'https://loremflickr.com/360/240/chocolate,drink?lock=42',
+  13:'https://loremflickr.com/360/240/matchalatte?lock=43',
+  17:'https://loremflickr.com/360/240/strawberry,smoothie?lock=44',
+  18:'https://loremflickr.com/360/240/mango,smoothie?lock=45',
+  22:'https://loremflickr.com/360/240/tiramisu?lock=46',
+  24:'https://loremflickr.com/360/240/avocado,toast?lock=47',
+  28:'https://loremflickr.com/360/240/strawberry,latte?lock=48',
+  // 그 외(5·6·14·15·16·19·20·21·23·25·26·27·29)는 이미지 미등록 → 공란 처리 데모
   set1:'https://loremflickr.com/360/240/coffee?lock=51',
   set2:'https://loremflickr.com/360/240/cake?lock=52',
 };
@@ -409,6 +455,7 @@ function render(){
   const r = { menu:scrMenu, checkout:scrCheckout, terms:scrTerms, done:scrDone }[S.screen];
   $('screen').innerHTML = r();
   if(!(S.screen==='menu' && S._keepScroll)) window.scrollTo(0,0);
+  S._tabAnim=null;
   renderCartBar();
   setupScrollTop();
   ensureCover();
@@ -550,18 +597,23 @@ function scrMenu(){
         <button class="clr" id="searchClear" style="display:${S.search?'flex':'none'};" onclick="clearMenuSearch()">✕</button>
       </div>
     </div>
-    <div class="cattabs">
-      ${['전체','세트',...CATS].map(c=>`<button class="cattab ${S.cat===c?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
+    <div class="cattabs-wrap">
+      <div class="cattabs" id="cattabs">
+        ${['전체','세트',...CATS].map(c=>`<button class="cattab ${S.cat===c?'on':''}" onclick="setCat('${c}',this)">${c}</button>`).join('')}
+      </div>
     </div>
     ${closedBanner}
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
     ${S.orderType==='dinein'?`<div class="notice blue">🪑 <span>${S.serve==='self'?'준비되면 <b>카카오 알림톡</b>으로 알려드려요 (셀프 수령).':'준비되면 <b>직원이 자리로 가져다 드려요</b>.'}</span></div>`:''}
     <div id="menuResults">${menuResultsHtml()}</div>`;
+  const content = S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab;
+  const dx = S._tabAnim==='left' ? '-22px' : '22px';
+  const animCls = S._tabAnim ? 'tab-anim' : '';
   return `
     ${brandHero()}
     ${mainTabs()}
-    ${S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab}`;
+    <div id="tabContent" class="${animCls}" style="--tab-dx:${dx};">${content}</div>`;
 }
 /* --- 메뉴 검색 --- */
 function onMenuSearch(v){
@@ -605,7 +657,12 @@ function menuResultsHtml(){
 function mainTabs(){
   return `<div class="maintabs">${[['menu','🍽️ 메뉴'],['review','⭐ 리뷰'],['info','🏪 매장정보']].map(([k,l])=>`<button class="maintab ${S.tab===k?'on':''}" onclick="setTab('${k}')">${l}</button>`).join('')}</div>`;
 }
-function setTab(t){ S.tab=t; render(); window.scrollTo(0,0); }
+function setTab(t){
+  if(t===S.tab){ window.scrollTo(0,0); return; }
+  const order=['menu','review','info'];
+  S._tabAnim = order.indexOf(t) > order.indexOf(S.tab) ? 'right' : 'left';
+  S.tab=t; render(); window.scrollTo(0,0);
+}
 function infoTab(){
   return `<div class="bsub" style="padding-top:16px;">
       <div class="bintro" style="margin-top:0;">${STORE.intro}</div>
@@ -613,13 +670,14 @@ function infoTab(){
     </div>${storeInfoSection()}${originSection()}`;
 }
 function originSection(){
-  if(!STORE.origin || !STORE.origin.length) return '';
+  if(!STORE.originText || !STORE.originText.trim()) return '';
+  // 사장님이 입력한 서술형 텍스트를 줄바꿈·배열 그대로 노출 (제목/내용 구분 없음)
   return `<div class="stsec" style="margin-bottom:11px;">
     <div class="st-ttl">🌱 원산지 정보</div>
-    ${STORE.origin.map(o=>`<div class="st-row"><span class="st-k">${o.n}</span><span class="st-v">${o.o}</span></div>`).join('')}
-    <div class="origin-note">※ 원산지는 매장 사정에 따라 변경될 수 있어요. 자세한 내용은 직원에게 문의해 주세요.</div>
+    <div class="origin-text">${escapeHtml(STORE.originText)}</div>
   </div>`;
 }
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function menuCard(m){
   const out = isOut(m);
   const closed = !S.businessOpen;
@@ -639,7 +697,12 @@ function menuCard(m){
       ${(out||closed)?'':`<span class="mplus">+</span>`}
     </button>`;
 }
-function setCat(c){ S.cat=c; S._keepScroll=true; render(); S._keepScroll=false; }
+function setCat(c, el){
+  S.cat=c; S._keepScroll=true; render(); S._keepScroll=false;
+  // 선택한 카테고리 칩을 가로 스크롤 영역 가운데로 이동
+  const tabs=$('cattabs'); const active=tabs&&tabs.querySelector('.cattab.on');
+  if(active&&active.scrollIntoView) active.scrollIntoView({inline:'center',block:'nearest'});
+}
 
 /* --- 옵션 바텀시트 --- */
 function openSheet(id){

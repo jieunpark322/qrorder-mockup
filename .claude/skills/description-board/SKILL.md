@@ -57,6 +57,7 @@ chrome --headless=new --disable-gpu --no-sandbox --hide-scrollbars \
 ```
 - 높이는 2단계에서 잰 `pc.scrollHeight` 사용. **차트(canvas)** 화면은 `--virtual-time-budget`로 렌더 대기(그래야 캔버스가 캡처에 담김).
 - **매우 긴 화면**(예: 리뷰 목록 수천 px)은 상단~대표 일부만 보이게 **높이를 잘라** 캡처(임포트 안정화). 자른 높이에 맞춰 핀 %를 다시 산정(`px / 자른높이 * 100`).
+- **[중요] Figma 이미지 한 변 최대 4096px.** 캡처 PNG의 가장 긴 변이 4096을 넘으면 Figma(html.to.design) 임포트 시 그 화면만 **공백**으로 떨어진다. `device-scale-factor × 화면높이 ≤ 4096`이 되도록 할 것 — 기본 2배 기준 **화면 논리높이 2048px 초과면 scale-factor를 1.5(또는 1)로 낮춰** 재캡처(예: 2516px 화면은 2배=5036 ✗ → 1.5배=3774 ✓). 캡처 후 `struct`로 PNG 치수를 확인해 4096 초과분을 잡는다.
 
 ### 4. 핀 합성본 생성 (cap.html)
 `cap.html`(`?key=<key>`): `desc/img/<key>.png`를 width 1280으로 깔고, 그 위에 `POS[key]`의 번호 핀(파란 원+흰 숫자)을 %로 오버레이. 이걸 다시 헤드리스 캡처 → `desc/img/<key>_pin.png`. (POS는 cap.html에 단일 보관.)

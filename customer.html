@@ -54,11 +54,12 @@
   .search-empty{text-align:center;color:var(--ink3);font-size:15px;line-height:1.7;padding:46px 20px;}
   .origin-note{font-size:12.5px;color:var(--ink4);margin-top:12px;line-height:1.55;}
   .origin-text{white-space:pre-line;font-size:14.5px;color:var(--ink);line-height:1.8;}
-  .brandinfo{display:flex;align-items:flex-end;gap:13px;padding:0 18px;margin-top:-34px;position:relative;z-index:3;}
+  /* 로고만 커버에 살짝 겹치고, 매장명·상태는 흰 배경 위에 배치(겹침 방지) */
+  .brandinfo{padding:0 18px;margin-top:-32px;position:relative;z-index:3;}
   .logo{width:72px;height:72px;border-radius:18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);
-    display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;border:3px solid #fff;}
-  .binfo{padding-bottom:2px;min-width:0;}
-  .bstore{font-size:24px;font-weight:800;letter-spacing:-.02em;}
+    display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid #fff;}
+  .binfo{margin-top:12px;min-width:0;}
+  .bstore{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--ink);}
   .bstatus{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;margin-top:6px;}
   .bstatus .sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
   .bstatus.open{color:var(--green);}
@@ -92,6 +93,10 @@
 
   /* 영업 종료 배너 */
   .closed-banner{margin:12px 14px 0;display:flex;gap:9px;align-items:center;background:#fff0f0;border:1.5px solid #ffa8a8;border-radius:11px;padding:14px 15px;font-size:14.5px;font-weight:700;color:#c92a2a;}
+  /* 카카오 알림톡 강조 (카톡 연상 노랑 + 말풍선 아이콘) */
+  .kakao-note{margin:12px 14px 0;display:flex;gap:11px;align-items:center;background:#FEE500;border-radius:13px;padding:14px 15px;font-size:14.5px;font-weight:700;color:#3c1e1e;line-height:1.5;box-shadow:0 3px 12px rgba(254,229,0,.55);}
+  .kakao-note .kic{width:30px;height:30px;border-radius:9px;background:#3c1e1e;color:#FEE500;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .kakao-note b{color:#1c1714;}
 
   .catsec-h{padding:18px 18px 8px;font-size:16.5px;font-weight:800;}
   .mcard{display:flex;gap:14px;padding:16px 16px;background:#fff;cursor:pointer;border-bottom:1px solid var(--line2);width:100%;border:none;font-family:inherit;text-align:left;align-items:center;}
@@ -250,7 +255,8 @@
   .primarybtn:active,.cartbtn:active{transform:scale(.99);}
   .callbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 28px);margin:12px 14px 0;background:#fff;border:1.5px solid var(--blue);color:var(--blue-d);border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
   .callbtn:active{transform:scale(.99);background:var(--blue-50);}
-  .callopt{padding:19px 10px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:16.5px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .callgrid{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+  .callopt{padding:16px 6px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);text-align:center;}
   .callopt:active{background:var(--blue-50);border-color:var(--blue);}
   .rvsec{background:#fff;margin:11px 0;padding:16px 18px;}
   .rv-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
@@ -385,7 +391,8 @@ const MENU = [
 ];
 const CATS = ['커피','논커피','티·에이드','스무디·프라페','베이커리','디저트','브런치','병음료','시즌 한정'];
 const PAY_METHODS = [{k:'카드',e:'💳'},{k:'카카오페이',e:'🟡'},{k:'네이버페이',e:'🟢'},{k:'토스페이',e:'🔵'}];
-const STAFF_CALL_MSGS = ['물','수저','계산','메뉴 추천'];
+// 직원 호출 요청 항목 (사장님이 최대 15개까지 설정 가능 · 3열 노출)
+const STAFF_CALL_MSGS = ['물','물티슈','수저/포크','앞접시','휴지','빨대','얼음','추천 메뉴','계산 도움','아기 의자','담요','기타 문의'];
 const SETS = [
   { id:1, name:'모닝 세트', base:7000, desc:'음료 + 브레드 · 오전 11시까지', img:'🌅', slots:[
     { name:'음료', cands:[{n:'아메리카노',x:0},{n:'카페라떼',x:300}] },
@@ -605,7 +612,9 @@ function scrMenu(){
     ${closedBanner}
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
-    ${S.orderType==='dinein'?`<div class="notice blue">🪑 <span>${S.serve==='self'?'준비되면 <b>카카오 알림톡</b>으로 알려드려요 (셀프 수령).':'준비되면 <b>직원이 자리로 가져다 드려요</b>.'}</span></div>`:''}
+    ${S.orderType==='dinein'?(S.serve==='self'
+      ? `<div class="kakao-note"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요. <span style="font-weight:600;">(셀프 수령)</span></span></div>`
+      : `<div class="notice blue">🪑 <span>준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div>`):''}
     <div id="menuResults">${menuResultsHtml()}</div>`;
   const content = S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab;
   const dx = S._tabAnim==='left' ? '-22px' : '22px';
@@ -833,8 +842,8 @@ function addSet(){
 function openCallSheet(){
   $('sheet').innerHTML=`<div class="sheet"><div class="sheet-body">
       <div class="sheet-name">🛎 직원 호출</div>
-      <div class="sheet-desc">필요한 항목을 누르면 <b>${STORE.table} 테이블</b>로 직원이 와요.</div>
-      <div style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="sheet-desc">필요한 걸 눌러주세요. <b>${STORE.table} 테이블</b>로 직원이 갈게요.</div>
+      <div class="callgrid">
         ${STAFF_CALL_MSGS.map(m=>`<button class="callopt" onclick="sendCall('${m}')">${m}</button>`).join('')}
       </div></div>
     <div class="sheet-foot"><button class="addbtn" style="background:var(--bg);color:var(--ink2);box-shadow:none;" onclick="closeSheet()">닫기</button></div></div>`;
@@ -940,7 +949,8 @@ function scrCheckout(){
           <div class="info-pill amber">🧾 <span>지금은 주문만 넣고, <b>나갈 때 카운터에서 결제</b>해요.</span></div></div>`
       : `<div class="sec"><div class="sec-h">💳 결제 수단 <span class="opt-pick" style="font-weight:600;">선불 · 주문 시 바로 결제</span></div>
           <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div></div>`}
-    ${notify?`<div class="sec"><div class="sec-h">📨 주문 알림 <span class="opt-pick" style="font-weight:600;">카카오 알림톡 발송</span></div>
+    ${notify?`<div class="sec"><div class="sec-h">📨 주문 알림</div>
+      <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>
       <div class="field"><label>카카오 알림톡 받을 연락처 (끝 4자리)</label>
         <input id="phoneInput" inputmode="numeric" maxlength="4" placeholder="1234" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div></div>`:''}
     <div class="sec"><div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>

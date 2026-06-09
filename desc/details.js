@@ -1,9 +1,9 @@
-/* 화면별 상세 정의(그린필드) — description.html이 base 핀 위에 병합. 자동 생성. */
+/* 화면별 상세 정의(그린필드) — description.html이 base 핀 위에 병합. 자동 생성 + 검수 반영. */
 window.DETAILS = {
  "home": {
   "1": {
    "purpose": [
-    "어드민 전체 기능의 <b>상시 진입점</b>. 모든 화면 좌측에 고정 노출되며 9개 그룹·21개 메뉴로 구성된다.",
+    "어드민 전체 기능의 <b>상시 진입점</b>. 모든 화면 좌측에 고정 노출되며 8개 그룹·21개 메뉴로 구성된다.",
     "현재 보고 있는 화면을 시각적으로 알려 주고(파란 강조), 미처리 업무 건수를 배지로 즉시 인지시킨다.",
     "50~60대 사장님 인지 부담을 줄이기 위해 그룹 단위 접기/펼치기를 제공한다."
    ],
@@ -21,7 +21,7 @@ window.DETAILS = {
     "클릭 라우팅은 섹션 key → <code>SECTION_MAP[key].fn</code>(render 함수) + <code>url</code> 매핑."
    ],
    "exception": [
-    "SPEC §1.6.2: 좌측 메뉴는 <b>모두 노출</b>하되 staff 권한 없는 항목(매출 한눈에 보기·매출 상세 보기·정산 달력·정산 내역·결제 관리·직원 계정 관리·주문 방식·QR 관리·매장 설정)은 <b>회색 + 자물쇠 아이콘</b>으로 표시.",
+    "SPEC §1.6.2: 좌측 메뉴는 <b>모두 노출</b>하되 staff 권한 없는 항목(매출 한눈에 보기·매출 상세 보기·정산 달력·정산 내역·직원 계정 관리·주문 방식·QR 관리·매장 설정)은 <b>회색 + 자물쇠 아이콘</b>으로 표시.",
     "권한 없는 항목 클릭 시 모달: <b>\"사장님 권한이 필요해요. 가맹점주 본인 계정으로 로그인해 주세요\"</b> (spec/08-common.md §4 403 처리).",
     "배지는 색만으로 의미 전달하지 않도록 숫자를 병기(접근성).",
     "그룹 접힘 상태에서도 현재 화면이 속한 그룹은 자동으로 펼쳐 길을 잃지 않게 한다."
@@ -84,7 +84,7 @@ window.DETAILS = {
     "어제 = <code>DAY[TODAY_IDX-1]</code>, 그저께 = <code>DAY[TODAY_IDX-2]</code> (각 {gross, ocnt}).",
     "매출 집계식 <code>actual = gross − disc − pt − ref</code> (SPEC §2.1). 환불은 원거래일 영업일 매출에서 차감(SPEC §1.5).",
     "증감 계산: <code>grossDiff = 어제.gross − 그저께.gross</code>, <code>grossDiffPct = round(grossDiff/그저께.gross*100)</code>(분모 0이면 0%).",
-    "평균 객단가 = <code>round(어제.gross / 어제.ocnt)</code> (주문 수 0이면 0).",
+    "평균 객단가 = <code>round(어제.gross / 어제.ocnt)</code> — 홈 KPI는 <b>총매출(gross) 기준 요약</b>이라 매출 화면의 실매출(actual) 객단가와 값이 다름(라벨로 구분 권장). 주문 수 0이면 0.",
     "부가세 round(taxable/11) 등 세부 계산은 상세 화면에서 처리(SPEC §1.3)."
    ],
    "exception": [
@@ -347,7 +347,7 @@ window.DETAILS = {
    ],
    "data": [
     "집계 식: <code>inProgressCnt=count(status='진행중')</code>, <code>completedCnt=count(status='완료')</code>, <code>cancelAllCnt=count(status='취소')</code>, <code>totalCnt=rows.length</code>.",
-    "<code>totalAmt = Σ(o.amt where status='완료')</code> — 취소/환불 건은 합산 제외(실매출 0원). 환불은 원거래일 매출에서 차감(SPEC §1.5).",
+    "<code>totalAmt = Σ(o.amt where status='완료')</code> = <b>완료 결제금액 합계(결제 기준)</b> — 매출 화면의 실매출(actual=gross−할인−포인트−환불)과는 다른 개념이라 라벨은 '완료 결제 합계' 권장. 취소/환불 건 제외, 환불은 원거래일 매출에서 차감(SPEC §1.5).",
     "표시 단위: 건수는 '건', 매출은 '원'. 천단위 콤마(<code>fmt()</code>).",
     "필드: <code>status:'진행중'|'완료'|'취소'</code>(표시값), <code>amt:number</code> 결제금액."
    ],
@@ -576,7 +576,7 @@ window.DETAILS = {
     "<b>+ 등급 추가 버튼 클릭</b>: 등급 추가 모달을 연다(목업은 <code>alert('멤버십 등급 추가 (와이어프레임)')</code> 플레이스홀더 — 정식 구현은 모달). 입력: 등급명(필수), 승급 기준 누적 결제액(원, 정수), 혜택 텍스트. 색상은 팔레트에서 자동/선택.",
     "저장 시 <code>MEMBERSHIP.tiers</code> 배열에 추가하고 <code>threshold</code> 오름차순으로 자동 재정렬 후 화면 재렌더. 신규 등급 <code>members</code> 초기값 0.",
     "등급 추가/수정/삭제는 <b>매월 1일 자동 산정(핀 4)</b>에 반영되며, 등급 순서는 항상 <code>threshold</code> 오름차순으로 유지(가장 낮은 단계 = 누적 0원 시작).",
-    "<b>권한 기본값</b>: 마케팅·CRM 영역은 <b>owner 전용</b>. staff 로그인 시 좌측 메뉴에서 멤버십 항목 자체가 보이지 않는다(SPEC §1.6.2, index.html 권한노트 \"화면 자체가 안 보여요\")."
+    "<b>권한 기본값</b>: 마케팅·CRM 영역은 <b>owner 전용</b>. staff 로그인 시 좌측 메뉴에 멤버십 항목이 <b>회색+자물쇠</b>로 노출되고 클릭 시 403 모달(SPEC §1.6.2 \"메뉴는 모두 노출, 권한 없는 항목은 회색+자물쇠\" 원칙 통일). [확정 필요] §1.6.2 매트릭스에 마케팅·CRM 행 신설 요망."
    ],
    "data": [
     "엔터티 <code>MEMBERSHIP.tiers[]</code> = <code>{name:string, color:hex, threshold:int(원,≥0), benefit:string, members:int}</code>.",
@@ -686,7 +686,7 @@ window.DETAILS = {
     "<code>dirty</code> 플래그는 클라이언트 상태(<code>state</code>)로만 관리, 서버 미전송."
    ],
    "exception": [
-    "<b>권한</b>: 마케팅·CRM 영역은 <b>owner 전용</b>이며 staff는 좌측 메뉴 자체가 회색+자물쇠로 보이고 화면에 진입하지 못한다(index.html:6393, SPEC §1.6 \"화면 자체가 안 보여요\"). 직접 URL 진입 시 권한 부족(403) 모달 \"<b>사장님 권한이 필요해요. 가맹점주 본인 계정으로 로그인해 주세요</b>\"(§08-common 4.1).",
+    "<b>권한</b>: 마케팅·CRM 영역은 <b>owner 전용</b>이며 staff는 좌측 메뉴에 회색+자물쇠로 노출되고 클릭 시 403 모달(SPEC §1.6.2 회색+자물쇠 원칙). [확정 필요] §1.6.2에 마케팅·CRM 행 신설 요망. 직접 URL 진입 시 권한 부족(403) 모달 \"<b>사장님 권한이 필요해요. 가맹점주 본인 계정으로 로그인해 주세요</b>\"(§08-common 4.1).",
     "<b>세션 만료(401)</b>: 로그인 화면 리다이렉트 + \"<b>다시 로그인이 필요해요</b>\".",
     "<b>저장 실패(5xx)</b>: error 토스트 + \"다시 시도\" 버튼, 폼 값 유지. 5회 연속 실패 시 본사 자동 알림(§08-common 4.1).",
     "<b>네트워크 오프라인</b>: 상단 노란 배너 \"<b>네트워크 연결을 확인해 주세요</b>\", 자동 재시도 3회."
@@ -720,11 +720,11 @@ window.DETAILS = {
   },
   "3": {
    "purpose": [
-    "우측 상단 \"<b>스탬프 현황</b>\" KPI 카드 2개와 하단 \"<b>손님별 스탬프</b>\" 표 헤더를 포함하는, 적립 현황 요약·목록 영역이다.",
+    "우측 상단 \"<b>스탬프 현황</b>\" KPI 카드 2개와 하단 \"<b>회원별 스탬프</b>\" 표 헤더를 포함하는, 적립 현황 요약·목록 영역이다.",
     "사장님이 스탬프를 보유한 손님 규모와 누적 지급된 리워드 규모를 한눈에 보고, 손님별 적립 상세를 목록으로 탐색하게 한다."
    ],
    "behavior": [
-    "<b>KPI 카드 — 스탬프 보유 손님</b>: <code>members.length</code> 명. <b>리워드 지급 누계</b>(파란 카드): <code>members.reduce((a,m)=>a+m.rewards,0)</code>로 전체 손님의 리워드 받은 횟수 합계.",
+    "<b>KPI 카드 — 스탬프 보유 회원</b>: <code>members.length</code> 명. <b>리워드 지급 누계</b>(파란 카드): <code>members.reduce((a,m)=>a+m.rewards,0)</code>로 전체 회원의 리워드 받은 횟수 합계.",
     "<b>표 헤더</b>: <code>손님 | 연락처 | 스탬프 | 리워드 받은 횟수(우측정렬) | (상세 버튼 열)</code>. 헤더 우측 \"<span>N명</span>\" 카운트 표시.",
     "<b>헤더 클릭 정렬</b>(description.html 핀3 + SPEC §2.6): 손님명·스탬프 수·리워드 횟수 컬럼 클릭 시 오름차순↔내림차순 토글, 활성 컬럼에 화살표 표시. 기본 정렬은 스탬프 수 내림차순 권장.",
     "<b>검색</b>: 손님명·연락처 부분 일치(대소문자 무시, §2.6). 목록 30건 초과 시 페이징/무한스크롤 적용(§2.6).",
@@ -745,7 +745,7 @@ window.DETAILS = {
   },
   "4": {
    "purpose": [
-    "\"손님별 스탬프\" 표의 <b>개별 손님 행</b>. 한 손님의 적립 진행 상태와 리워드 수령 이력을 시각적으로 보여 주고 상세 진입을 제공한다."
+    "\"회원별 스탬프\" 표의 <b>개별 회원 행</b>. 한 회원의 적립 진행 상태와 리워드 수령 이력을 시각적으로 보여 주고 상세 진입을 제공한다."
    ],
    "behavior": [
     "<b>셀 구성</b>: 손님명(<b>bold</b>) / 연락처(모노스페이스) / 스탬프 진행 셀(\"<b>{stamps}</b>/{rewardAt}개 · {pct}%\" + 진행 바) / 리워드 받은 횟수(\"<b>{rewards}</b>회\", 우측정렬) / [상세] 버튼.",
@@ -1147,7 +1147,7 @@ window.DETAILS = {
     "연동: 핀2 기준/기간 토글, 핀4·5 표·상세, stl-calendar(정산 달력), 엑셀 내보내기(openExport)."
    ],
    "exception": [
-    "권한: <b>owner/staff 모두 조회 가능</b>(SPEC §1.6), 단 계좌·입금 관련 수정 권한은 없음(읽기 전용 화면).",
+    "권한: <b>owner 전용</b> — 정산은 staff 비노출(좌측 메뉴 회색+자물쇠, 진입 시 403 모달). [확정 필요] SPEC §1.6.2에 정산 \"조회\" 행이 없어 출금 기준(owner 전용)을 적용 — staff 조회 허용이 제품 의도면 매트릭스에 행 신설 요망.",
     "조회 결과가 0건이면 합계는 <code>0원</code>으로 표기하고 부정형(\"내역이 없어요\")은 피한다 — 빈 상태 문구는 핀4에서 처리.",
     "톤: 합계 라벨은 능동·긍정형 <code>받으실 금액</code> 사용(\"정산액\"·\"미지급\" 등 부정·딱딱한 표현 회피)."
    ]
@@ -1203,7 +1203,7 @@ window.DETAILS = {
     "금액 범위 min>max 경계는 결과 0건으로 자연 처리, 폼 검증 경고 토스트 권장.",
     "주문/승인번호로 검색 중에는 기간 칩 선택이 결과에 영향 없음을 안내(우회 동작) — 혼란 방지 보조문구 권장.",
     "안내 보조문구는 가능형: <code>주문/승인번호·영업일 요일·거래금액 범위·정산금액 범위로 더 정확하게 찾을 수 있어요</code>.",
-    "권한: owner/staff 동일하게 사용 가능(SPEC §1.6, 조회 전용)."
+    "권한: owner 전용(정산 영역) — stl-calendar·home과 통일, staff 진입 차단(403)."
    ]
   },
   "4": {
@@ -1223,7 +1223,7 @@ window.DETAILS = {
    "data": [
     "행 필드: <code>approvalDate/Dow</code>, <code>settleDate/Dow</code>, <code>cnt</code>(int), <code>grossAmt</code>(int 원), <code>couponPlatformAmt</code>(소프트먼트 보전 +), <code>couponMerchantAmt</code>(사장님, 참고), <code>feeTotal</code>(int), <code>totalSettle</code>(int), <code>status</code>, <code>settlementId</code>.",
     "<b>핵심 계산식</b>: <code>feeBase = round((gross − ref) × AVG_FEE_RATE)</code>(요율 0.02, 환불분은 카드사가 수수료 환급하므로 gross−ref 기준), <code>feeVat = round(feeBase × 0.1)</code>, <code>feeTotal = feeBase + feeVat</code>.",
-    "<code>txSettle = gross − ref − feeTotal</code>, <code>totalSettle = txSettle + couponPlatformAmt</code>. <b>사장님 발행 쿠폰(couponMerchantAmt)은 정산에서 제외</b>(이미 gross에 반영된 가맹점 부담). 화면 핀 타이틀의 \"받으실 금액 = 결제금액 + 쿠폰 보전 − 수수료\"는 환불 0 가정의 단순식이며, 실제식은 위 환불 차감 포함식이 우선.",
+    "<code>txSettle = gross − ref − feeTotal</code>, <code>totalSettle = txSettle + couponPlatformAmt</code>. <b>사장님 발행 쿠폰(couponMerchantAmt)은 정산에서 제외</b>(사장님 할인 disc로 실매출에서 차감되는 가맹점 부담 — 정산은 결제 실액 기준이라 보전 무가산, coupon 화면과 동일). 화면 핀 타이틀의 \"받으실 금액 = 결제금액 + 쿠폰 보전 − 수수료\"는 환불 0 가정의 단순식이며, 실제식은 위 환불 차감 포함식이 우선.",
     "쿠폰 보전 라벨 '쿠폰 보전'=본사(소프트먼트) 발행 쿠폰 보전액, '수수료'=PG 결제 수수료(부가세 포함). 부가세는 round(taxable/11) 규칙(SPEC §1.3)을 매출 화면과 공유.",
     "연동: 결제 금액·건수는 매출 통계/주문 내역과 동일 <code>DAY</code> 소스, 행 클릭은 stl-detail로 <code>settlementId</code> 전달."
    ],
@@ -1231,7 +1231,7 @@ window.DETAILS = {
     "<b>빈 상태</b>(rows 0건): <code>다른 조건으로 다시 찾아봐 주세요.</code> + 파란 링크 <code>처음으로 돌리기</code>(<code>resetStlListFilters()</code>). colspan 10 한 줄.",
     "정산일 미산정 행(미래·산정 전): 정산일 셀에 <code>산정 중</code>(회색 11px) 표기, <code>settlementId</code> 없으면 행 클릭 비활성·자세히 칸은 <code>−</code>.",
     "<b>환불 반영</b>: 환불은 원거래일 매출에서 차감(SPEC §1.5)되어 gross−ref로 같은 행에 반영. 다만 마감 후(정산 paid_out 이후) 환불은 다음 회차 차감(STATES §8.1, §8.2) — 해당 행 결제 금액은 그대로, 차감은 다음 회차 행에서 보임.",
-    "권한: 표는 owner/staff 모두 열람(SPEC §1.6). 엑셀 내보내기 안내문구는 가능형 유지.",
+    "권한: owner 전용(정산 영역, staff 진입 차단). 엑셀 내보내기 안내문구는 가능형 유지.",
     "경계: 정산 금액이 음수(환불>매출)인 회차도 그대로 음수 표기하고 색상은 대기색 처리, 다음 회차 차감/보류 로직은 핀5에서 안내."
    ]
   },
@@ -1258,7 +1258,7 @@ window.DETAILS = {
     "<b>보류(held)</b>: 다음 회차 정산액이 환불액보다 작으면 회차 <code>status='held'</code> 처리, 본사 CS 채널로 후속 처리(STATES §8.2). 표/상세에 보류 상태 별도 안내 노출 권장.",
     "<b>주문 취소 vs 결제 취소 구분</b>: 선불/후불이 아니라 <code>Payment.status='paid'</code> 여부로 구분 — paid면 결제 취소(환불 발생→정산 차감), 아니면 주문 취소(정산 영향 없음). 후불도 결제 완료 후 환불은 결제 취소로 처리.",
     "<code>settlementId</code> 없는 산정 중 행은 클릭 비활성, 자세히 칸 <code>−</code>로 진입 차단.",
-    "권한: 상세 열람 owner/staff 가능(SPEC §1.6). 톤은 능동·긍정형 <code>곧 들어와요</code>/<code>입금 완료</code> 사용."
+    "권한: owner 전용(정산 영역, staff 진입 차단). 톤은 능동·긍정형 <code>곧 들어와요</code>/<code>입금 완료</code> 사용."
    ]
   }
  },
@@ -1330,7 +1330,7 @@ window.DETAILS = {
     "권한: 메시지 추가·수정·삭제·순서·사용 토글은 owner 전용(핀 정의·SPEC §1.6). staff는 내역 열람·처리까지만."
    ],
    "exception": [
-    "활성 메시지가 0개면(모든 메시지 OFF) 빨간 경고 배너: 🚨 \"<b>모든 메시지가 비활성화됐어요.</b>\" + \"손님 화면에 직원 호출 버튼이 표시되지 않아요. 최소 1개 이상 켜두세요.\"",
+    "활성 메시지가 0개면(모든 메시지 OFF) 안내 표시: ℹ️ \"<b>메시지를 1개 이상 켜면 손님 화면에 호출 버튼이 보여요.</b>\" (공포·부정 표현 없이 가능형 — spec/08-common §3.2).",
     "메시지가 1개만 남았을 때 삭제(✕) 시도 시 차단 alert: \"최소 1개의 메시지가 필요해요.\" (마지막 1개는 삭제 불가).",
     "추가 모달에서 내용 미입력(공백) 후 [추가하기] 시 alert \"내용을 입력해 주세요.\". 이미 15개일 때 추가 시도 시 alert \"메시지는 최대 15개까지 추가할 수 있어요.\"",
     "전역 토글 OFF 상태에서는 이 탭 전체가 빈 상태(핀 2 참조)로 대체되어 메시지 편집 UI가 숨겨진다."
@@ -1562,8 +1562,8 @@ window.DETAILS = {
     "영업상태와 영업일은 별개(§1.1) — 배너는 '영업시간 내 여부'(손님 주문 가능 여부) 기준."
    ],
    "exception": [
-    "영업 중 평면도 테이블을 드래그 시도하면 모달 \"테이블 배치 변경 불가 / 영업 마감 후에 작업할 수 있어요\" + 본문 \"🟢 현재 영업 중이에요. 테이블 위치 변경은 영업 마감 후에만 가능해요.\"",
-    "영업 중 저장 버튼 클릭 시 모달 \"저장 불가 / 영업 중에는 테이블 배치를 저장할 수 없어요\" + 본문 \"테이블 배치 변경은 영업 마감 상태에서만 저장할 수 있어요.\"",
+    "영업 중 평면도 테이블을 드래그 시도하면 모달 \"영업 마감 후에 배치를 바꿀 수 있어요\" + 본문 \"🟢 지금은 영업 중이에요. 테이블 위치는 영업 마감 후에 바꿀 수 있어요.\"",
+    "영업 중 저장 버튼 클릭 시 모달 \"영업 마감 후에 저장할 수 있어요\" + 본문 \"테이블 배치는 영업 마감 후에 저장할 수 있어요.\"",
     "이름·모양 변경은 이 배너의 잠금 대상이 아님 — 영업 중에도 허용(즉시 반영)."
    ]
   },
@@ -1613,7 +1613,7 @@ window.DETAILS = {
    ],
    "exception": [
     "빈 상태(구역 테이블 0개): 평면도 중앙 \"🪑 아직 테이블이 없어요. [+ 테이블 추가]로 추가해 보세요.\"",
-    "영업 중 드래그 차단 모달: \"테이블 배치 변경 불가 / 영업 마감 후에 작업할 수 있어요\".",
+    "영업 중 드래그 차단 모달: \"영업 마감 후에 배치를 바꿀 수 있어요\".",
     "단순 클릭(이동 4px 이하)은 위치 변경으로 처리하지 않음 — 의도치 않은 미세 이동 방지.",
     "staff는 드래그 저장 불가(이름 변경만 허용, §1.6.2)."
    ]
@@ -2200,10 +2200,10 @@ window.DETAILS = {
     "<code>coupon{ id, name, code, kind('정액'|'비율'|'무료'|'증정'), value:number, condition:string, period:string, issued:number, used:number, status('사용중'|'종료'|'예약'), issuer('merchant'|'softment') }</code>.",
     "신규 생성 API는 <code>POST /coupons</code> 성격. <code>code</code>는 매장 내 유일(중복 불가).",
     "기간 만료(종료일 < 영업일 당일) 시 배치/조회 시점에 <code>status='종료'</code>로 자동 전환(자동 종료, 핀4와 동일 규칙).",
-    "발행처 기본 <code>issuer='merchant'</code> → 정산 제외(사장님 할인 <code>disc</code>로 매출 차감, SPEC §settlement). <code>issuer='softment'</code>는 본사 발행분으로 정산 시 보전."
+    "발행처 기본 <code>issuer='merchant'</code> → 정산 제외(사장님 할인 <code>disc</code>로 매출 차감, SPEC §2.1·정산 STATES §8). <code>issuer='softment'</code>는 본사 발행분으로 정산 시 보전."
    ],
    "exception": [
-    "권한: 쿠폰 생성·발급은 <b>owner 전용</b>(SPEC §1.6). staff 계정은 <code>[+ 쿠폰 만들기]</code> 버튼을 비활성(disabled)하고 \"점주만 쿠폰을 만들 수 있어요.\" 툴팁 노출.",
+    "권한: 쿠폰 생성·발급은 <b>owner 전용</b>(SPEC §1.6). staff 계정은 <code>[+ 쿠폰 만들기]</code> 버튼을 비활성(disabled)하고 \"사장님만 쿠폰을 만들 수 있어요.\" 툴팁 노출.",
     "필수값 누락 시 폼 검증: 이름 빈값 \"쿠폰 이름을 적어 주세요.\", 정액 value≤0 \"할인 금액을 1원 이상 입력해 주세요.\", 비율 value 1~100 벗어남 \"할인율은 1~100% 사이로 입력해 주세요.\".",
     "코드 중복 시 \"이미 사용 중인 코드예요. 다른 코드를 적어 주세요.\".",
     "기간 종료일이 시작일보다 빠르면 \"종료일은 시작일 이후로 정해 주세요.\". 발급 수량을 비우면 \"수량을 비워 두면 무제한으로 발급할 수 있어요.\" 안내(가능형)."
@@ -2266,7 +2266,7 @@ window.DETAILS = {
    ],
    "data": [
     "행 필드: <code>name, code(monospace), kind, value, condition, period, issuer, used, issued, status</code>.",
-    "<b>소프트먼트 발행(<code>issuer='softment'</code>) 쿠폰은 정산 시 보전</b>: 정산 내역 화면의 <code>couponPlatformAmt</code>(보전금, 정산에 가산)로 연동. <b>매장 발행(merchant)</b>은 <code>couponMerchantAmt</code> 참고용으로 정산 제외이며 사장님 할인 <code>disc</code>로 당일 매출 차감(SPEC settlement).",
+    "<b>소프트먼트 발행(<code>issuer='softment'</code>) 쿠폰은 정산 시 보전</b>: 정산 내역 화면의 <code>couponPlatformAmt</code>(보전금, 정산에 가산)로 연동. <b>매장 발행(merchant)</b>은 <code>couponMerchantAmt</code> 참고용으로 정산 제외이며 사장님 할인 <code>disc</code>로 당일 매출 차감(정산 STATES §8).",
     "환불 발생 시 해당 거래의 쿠폰 사용은 <b>원거래일 매출/보전에서 차감</b>(SPEC §1.5). 결제 완료(<code>Payment.status=paid</code>) 거래의 취소는 결제 취소(환불)로 처리되어 쿠폰 사용 카운트·보전금도 함께 되돌린다.",
     "주문/결제 화면 쿠폰 적용 이벤트(<code>order.couponName, couponAmt, couponIssuer</code>)와 <code>used</code> 누계가 동기화된다."
    ],
@@ -2274,7 +2274,7 @@ window.DETAILS = {
     "기간 만료 시 <b>자동 종료</b>: 종료일 < 영업일 당일이면 조회 시점에 <code>status='종료'</code> 전환, pill 회색. [관리]에서 재발급 안내 \"기간이 끝난 쿠폰이에요. 기간을 늘려 다시 사용할 수 있어요.\".",
     "예약 쿠폰(시작일 미래)은 손님 사용 불가, 상태 \"예약\" + \"YYYY-MM-DD부터 쓸 수 있어요\" 보조문구.",
     "발급 수량 소진(<code>used>=issued</code>, 무제한 제외) 시 사용 막대 100%·\"모두 사용했어요\" 표기, 신규 사용 차단.",
-    "[관리]는 owner 전용 — staff는 비활성 + \"점주만 쿠폰을 관리할 수 있어요.\" 툴팁."
+    "[관리]는 owner 전용 — staff는 비활성 + \"사장님만 쿠폰을 관리할 수 있어요.\" 툴팁."
    ]
   }
  },

@@ -99,21 +99,21 @@ window.DETAILS = {
     "각 카드 클릭 시 해당 처리 화면으로 바로 이동해 즉시 처리하도록 유도한다."
    ],
    "behavior": [
-    "카드 3종. 건수 > 0이면 테두리 강조색(<b>리뷰=노랑 #fbbf24 / 문의=파랑 / 알림=빨강 #fca5a5</b>), 0이면 회색 테두리(<code>--line</code>).",
+    "카드 3종. 건수 &gt; 0이면 테두리 강조색(<b>리뷰=노랑 #fbbf24 / 문의=파랑 / 알림=빨강 #fca5a5</b>), 0이면 회색 테두리(<code>--line</code>).",
     "리뷰 카드 클릭 → <code>setSection('reviews')</code> + <code>state.reviewFilter='wait'</code> 설정 후 렌더(리뷰 화면을 '답변 대기' 필터로 연다).",
     "문의 카드 클릭 → <code>setSection('cs')</code>. 알림 카드 클릭 → <code>setSection('notify')</code>.",
     "호버 시 카드 떠오름 효과. 헤더에 총 건수 + 항목별 분해(\"N건 리뷰 N · 문의 N · 알림 N\") 표시.",
-    "숫자 색상: >0이면 강조색(리뷰 #d97706, 문의 파랑, 알림 빨강), 0이면 회색."
+    "숫자 색상: &gt;0이면 강조색(리뷰 #d97706, 문의 파랑, 알림 빨강), 0이면 회색."
    ],
    "data": [
-    "리뷰 미처리 = <code>REVIEWS.filter(r=>!r.reply).length</code> (사장님 답변 reply 없는 건).",
-    "문의 미처리 = <code>CS_INQUIRIES.filter(c=>c.status==='답변 대기').length</code>.",
-    "알림 미확인 = <code>NOTIFICATIONS.filter(n=>!n.read).length</code> (없으면 목업 기본 4).",
+    "리뷰 미처리 = <code>REVIEWS.filter(r=&gt;!r.reply).length</code> (사장님 답변 reply 없는 건).",
+    "문의 미처리 = <code>CS_INQUIRIES.filter(c=&gt;c.status==='답변 대기').length</code>.",
+    "알림 미확인 = <code>NOTIFICATIONS.filter(n=&gt;!n.read).length</code> (없으면 목업 기본 4).",
     "각 수치는 해당 도메인 카운트 API로 조회, 사이드바 배지(핀 1)와 동일 소스 사용."
    ],
    "exception": [
     "0건일 때 능동·긍정 문구: 리뷰 \"모든 리뷰에 답변하셨어요\" / 문의 \"문의 모두 답변 받음\" / 알림 \"모든 알림을 확인하셨어요\".",
-    ">0일 때 행동 유도 문구: 리뷰 \"클릭해서 답변하기 →\", 문의 \"운영팀 답변 대기 중\", 알림 \"클릭해서 확인하기 →\".",
+    "&gt;0일 때 행동 유도 문구: 리뷰 \"클릭해서 답변하기 →\", 문의 \"운영팀 답변 대기 중\", 알림 \"클릭해서 확인하기 →\".",
     "부정형(\"없어요\") 회피 — 능동·긍정 톤(SPEC §3.2).",
     "staff 계정도 리뷰·문의·알림은 접근 가능(권한 매트릭스상 운영 기능)."
    ]
@@ -126,20 +126,20 @@ window.DETAILS = {
    "behavior": [
     "영업시간 카드 → <code>setSection('store')</code>. 오늘 요일 기준 영업시간 표시, 휴무면 \"휴무\". 브레이크타임 있으면 \"브레이크 HH:MM~HH:MM\" 보조 노출.",
     "주문 방식 카드 → <code>setSection('order-type')</code>. 현재 채널 모드(<code>ORDER_CHANNELS.mode</code>)를 라벨로 표시.",
-    "준비량 카드 → <code>setSection('stock')</code>. \"N개 관리 중\" + <b>곧 품절 ⚠️ / 완료 🔴</b> 배지. 곧 품절·완료 > 0이면 테두리 노랑(#fbbf24).",
-    "품절 메뉴 카드 → <code>setSection('menu')</code>. 수동 품절 메뉴 수 표시. >0이면 테두리 빨강(#fca5a5), 숫자 빨강.",
+    "준비량 카드 → <code>setSection('stock')</code>. \"N개 관리 중\" + <b>곧 품절 ⚠️ / 완료 🔴</b> 배지. 곧 품절·완료 &gt; 0이면 테두리 노랑(#fbbf24).",
+    "품절 메뉴 카드 → <code>setSection('menu')</code>. 수동 품절 메뉴 수 표시. &gt;0이면 테두리 빨강(#fca5a5), 숫자 빨강.",
     "각 카드 우측 상단에 진입 링크(\"매장 설정 ›\" 등). 호버 시 떠오름."
    ],
    "data": [
     "영업시간 = <code>STORE_INFO.hours.find(dow===오늘요일)</code> → <code>off</code>면 휴무, 아니면 <code>open~close</code>, <code>breakS/breakE</code>.",
     "주문 방식 = <code>ORDER_CHANNELS.mode</code> → <code>ORDER_LABELS.mode[modeKey]</code>로 한글 라벨.",
-    "준비량: <code>MENU_STOCK.items.filter(enabled)</code> 중 곧 품절 <code>remaining>0 && remaining<=lowAlert</code>, 완료 <code>remaining===0</code>.",
-    "품절 메뉴 = <code>MENUS.filter(m=>m.manualSoldOut)</code>. 새 영업일 시작 시 manualSoldOut 전부 자동 해제(SPEC §2.5).",
+    "준비량: <code>MENU_STOCK.items.filter(enabled)</code> 중 곧 품절 <code>remaining&gt;0 &amp;&amp; remaining&lt;=lowAlert</code>, 완료 <code>remaining===0</code>.",
+    "품절 메뉴 = <code>MENUS.filter(m=&gt;m.manualSoldOut)</code>. 새 영업일 시작 시 manualSoldOut 전부 자동 해제(SPEC §2.5).",
     "메뉴 효과적 판매 상태 규칙 SPEC §2.3."
    ],
    "exception": [
     "준비량 배지: \"⚠️ 곧 품절 N\" / \"🔴 완료 N\". 둘 다 0이면 \"한정 수량 메뉴 정상 운영 중\".",
-    "품절 메뉴 0이면 \"모든 메뉴 정상 판매 중\", >0이면 \"손님 화면에 품절로 표시 중\".",
+    "품절 메뉴 0이면 \"모든 메뉴 정상 판매 중\", &gt;0이면 \"손님 화면에 품절로 표시 중\".",
     "휴무일이면 영업시간 카드에 \"휴무\" 표시(에러 아님).",
     "주문 방식 카드 보조: \"클릭해서 채널·결제 방식 확인\". 매장 설정·주문 방식 변경은 owner 전용 — staff는 진입 후 액션 비활성(SPEC §1.6.2)."
    ]
@@ -219,7 +219,7 @@ window.DETAILS = {
    ],
    "behavior": [
     "<b>매장 로고</b>(1장): 80x80 정사각 업로드 카드(클릭 시 업로드). 보조문구 'PNG·JPG / 정사각형 권장 / 최대 2MB'.",
-    "<b>매장 대표 이미지</b>(최대 3장): <code>addStoreImage()</code>로 추가, 각 카드 ✕로 <code>removeStoreImage(idx)</code> 삭제. 3장 도달 시 '+ 이미지 추가' 카드 숨김. 보조문구 'PNG·JPG / 가로형 권장 / 장당 최대 5MB'. (주의: mockup의 <code>extraImages<2</code> 한계는 버그성 — 기획상 <b>최대 3장</b>으로 구현.)",
+    "<b>매장 대표 이미지</b>(최대 3장): <code>addStoreImage()</code>로 추가, 각 카드 ✕로 <code>removeStoreImage(idx)</code> 삭제. 3장 도달 시 '+ 이미지 추가' 카드 숨김. 보조문구 'PNG·JPG / 가로형 권장 / 장당 최대 5MB'. (주의: mockup의 <code>extraImages&lt;2</code> 한계는 버그성 — 기획상 <b>최대 3장</b>으로 구현.)",
     "<b>매장 소개글</b>(<code>textarea</code> 3행, <code>intro</code>, <code>oninput</code> 즉시 반영, placeholder '예: 매일 직접 로스팅한 원두로 내린 커피와 갓 구운 베이커리를 즐길 수 있는 동네 카페예요.').",
     "<b>편의정보 칩</b>: 프리셋 14종(주차장·단체석·포장·무선 인터넷·남성/여성 화장실 구분·룸·국민지원금·지역화폐(지류형)·지역화폐(카드형)·제로페이·테라스·발렛파킹·반려동물 동반·유아용 의자)을 칩 클릭으로 선택/해제(<code>toggleAmenity</code>). 보조문구 '해당하는 항목을 눌러 선택할 수 있어요. 다시 누르면 해제돼요.'",
     "<b>직접입력</b>: 텍스트 입력 후 '+ 추가'(<code>addCustomAmenity()</code>, Enter 동일)로 <code>amenitiesCustom</code>에 칩 추가, 칩의 ✕로 <code>removeCustomAmenity(i)</code> 삭제. 보조문구 '목록에 없는 편의정보를 직접 적어 추가할 수 있어요.'"
@@ -250,7 +250,7 @@ window.DETAILS = {
    ],
    "data": [
     "필드: <code>scheduleSlots[{id:number, days:string[], open:'HH:mm', close:'HH:mm', lastOrder:'HH:mm'|''}]</code>. <code>id</code>는 기존 최대값+1로 부여.",
-    "검증: <code>open</code>·<code>close</code> 형식 HH:mm, <code>close>open</code>(마감<오픈 모순 차단), <code>lastOrder<=close</code> 권장. 슬롯 간 같은 요일 중복 배정 금지. (참고로 기존 <code>hours[].open/close</code> 배열은 요일별 표시·휴게 기준으로 공존.)",
+    "검증: <code>open</code>·<code>close</code> 형식 HH:mm, <code>close&gt;open</code>(마감&lt;오픈 모순 차단), <code>lastOrder&lt;=close</code> 권장. 슬롯 간 같은 요일 중복 배정 금지. (참고로 기존 <code>hours[].open/close</code> 배열은 요일별 표시·휴게 기준으로 공존.)",
     "연동: 손님 주문 화면 영업 판단·라스트오더 안내에 사용. <b>영업시간 ≠ 영업일</b> — 매출/재고 집계는 03:00 시작 영업일 기준(SPEC §1.1)."
    ],
    "exception": [
@@ -273,7 +273,7 @@ window.DETAILS = {
    ],
    "data": [
     "필드: <code>hours[i].breakS</code> / <code>hours[i].breakE</code> ('HH:mm'|''). 인덱스 <code>i</code>는 요일 순서(월=0...일=6) 고정.",
-    "검증: 한쪽만 입력 불가(시작·종료 동시 입력 필요), <code>breakE>breakS</code>, 브레이크는 해당 요일 운영 시간(open~close) 범위 안이어야 함.",
+    "검증: 한쪽만 입력 불가(시작·종료 동시 입력 필요), <code>breakE&gt;breakS</code>, 브레이크는 해당 요일 운영 시간(open~close) 범위 안이어야 함.",
     "연동: 손님 주문 화면의 브레이크 안내(대시보드 '오늘' 카드에도 '브레이크 HH:mm~HH:mm' 노출, index 2159행)에 사용."
    ],
    "exception": [
@@ -342,7 +342,7 @@ window.DETAILS = {
     "5개 카드 그리드(<code>repeat(5,1fr)</code>): ①총 주문 ②진행중 ③완료 ④취소 ⑤매출 합계.",
     "<b>총 주문/진행중/완료/취소 카드 클릭</b> → <code>setOrderStatus('all'|'진행중'|'완료'|'cancel-all')</code>. 이미 선택된 카드를 다시 누르면 <code>'all'</code>로 토글 해제. 선택 카드는 색 테두리+box-shadow로 강조(진행중=amber, 완료=blue, 취소=red).",
     "<b>매출 합계 카드</b>: <b>완료 기준</b>으로만 합산(<code>status==='완료'</code>인 주문의 <code>amt</code> 합), 클릭 진입점 없음. 하단에 \"완료 기준\" 라벨 고정.",
-    "<b>진행중 카드</b>: 건수>0이면 \"처리 대기\" 보조 라벨을 amber로 노출.",
+    "<b>진행중 카드</b>: 건수&gt;0이면 \"처리 대기\" 보조 라벨을 amber로 노출.",
     "KPI는 <b>상태 필터 적용 전 기준</b>으로 산출(카드가 진입점 역할을 하므로 항상 전체 상태 수치를 보여줌). 단 기간·채널·결제수단·메뉴·금액·번호 검색은 반영된 수치."
    ],
    "data": [
@@ -353,7 +353,7 @@ window.DETAILS = {
    ],
    "exception": [
     "해당 기간 주문 0건이면 모든 카드 0 표시, 목록은 빈 상태 안내로 전환.",
-    "취소 0건이면 취소 카드 숫자를 회색(<code>--ink-3</code>)으로 톤다운, >0이면 red 강조.",
+    "취소 0건이면 취소 카드 숫자를 회색(<code>--ink-3</code>)으로 톤다운, &gt;0이면 red 강조.",
     "선택된 상태 필터는 카드 강조와 '더 자세히 찾기' 패널 요약 라벨에 동시 반영(\"전체 상태/진행중/완료/취소·환불\")."
    ]
   },
@@ -372,14 +372,14 @@ window.DETAILS = {
    "data": [
     "검색은 부분 일치·대소문자 무시(SPEC §2.6). 번호 검색은 <code>id + tid + makeApproval(o)</code> 결합 문자열 대상.",
     "필드: <code>orderDateFilter</code>(today/yesterday/week/month/3m/custom/all), <code>orderStatusFilter</code>(all/진행중/완료/cancel-all), <code>orderChannelFilter</code>(all/매장/포장/포장 예약), <code>orderPayFilter</code>(<code>payMain(o)</code> 1depth 매칭), <code>orderMenuSearch:string</code>, <code>orderAmountMin/Max:number</code>, <code>orderSearch:string</code>.",
-    "조회 정책: <b>한 번에 최대 3개월(90일)</b>, <b>데이터 1년 보관 후 자동 삭제</b>. custom 종료일 max는 시작일 기준 90일로 동적 제한, 시작일 <code>&lt; 2025-05-15</code> 차단.",
+    "조회 정책: <b>한 번에 최대 3개월(90일)</b>, <b>데이터 1년 보관 후 자동 삭제</b>. custom 종료일 max는 시작일 기준 90일로 동적 제한, 시작일 <code>&amp;lt; 2025-05-15</code> 차단.",
     "페이징: 페이지당 10/20/50/100 (<b>기본 20</b>), 이전/다음+번호 페이징(SPEC §2.6)."
    ],
    "exception": [
     "결과 0건: <b>\"조건에 맞는 주문이 없어요. 날짜 범위를 넓히거나 필터를 해제해 보세요.\"</b> (능동 톤).",
     "패널 안내 카드: <b>\"💡 여러 조건을 함께 골라 두고 아래 검색 버튼을 눌러야 적용돼요.\"</b> / 조회 정책 안내 \"🗓️ 한 번에 최대 3개월 조회 가능 · 데이터는 1년 보관 후 자동 삭제\".",
     "기간 90일 초과: <b>\"주문 내역은 한 번에 최대 3개월(90일)까지만 조회할 수 있어요. 기간을 줄여서 다시 선택해 주세요.\"</b>",
-    "1년 이전: <b>\"1년 이전 데이터는 보관 정책에 따라 조회할 수 없어요. (보관 기간: 1년)\"</b>. 종료일<시작일: \"종료일을 시작일 이후로 선택해 주세요\". 미래일: \"오늘까지의 날짜에서 선택해 주세요\".",
+    "1년 이전: <b>\"1년 이전 데이터는 보관 정책에 따라 조회할 수 없어요. (보관 기간: 1년)\"</b>. 종료일&lt;시작일: \"종료일을 시작일 이후로 선택해 주세요\". 미래일: \"오늘까지의 날짜에서 선택해 주세요\".",
     "staff도 기간 칩 전체 사용 가능 — <b>전체 기간 조회</b>(사장님과 동일)."
    ]
   },
@@ -484,7 +484,7 @@ window.DETAILS = {
     "정렬/검색/페이징 공통 규칙(SPEC §2.6)을 따른다 — 본 화면은 분류 필터 중심이며 별도 페이징은 카드 스크롤로 처리."
    ],
    "exception": [
-    "매장에 카테고리·분류 태그가 하나도 없으면 필터 바 자체를 렌더하지 않음(<code>stockAllCats.length===0 && !hasStockTags</code>).",
+    "매장에 카테고리·분류 태그가 하나도 없으면 필터 바 자체를 렌더하지 않음(<code>stockAllCats.length===0 &amp;&amp; !hasStockTags</code>).",
     "필터 결과 0건 빈 상태(수량/품절 목록 공통): \"필터 조건에 맞는 메뉴가 없어요\" + 보조 \"다른 분류를 선택하거나 필터를 초기화해 보세요.\"(능동·가능형).",
     "분류 태그가 없으면 \"분류 태그\" 행 자체를 생략(있는 단계의 셀렉트만 노출)."
    ]
@@ -496,20 +496,20 @@ window.DETAILS = {
     "동일 패널 하단에 <b>옵션 수량 관리</b>(<code>OPT_STOCK</code>) 목록을 같은 카드 UI로 함께 제공(샷·시럽 등 한정 옵션)."
    ],
    "behavior": [
-    "상단 요약 카드 3개: \"수량 관리 메뉴 N개\", \"곧 품절 N개\", \"오늘 판매 완료 N개\". 곧 품절>0이면 노랑, 판매 완료>0이면 빨강 배경 강조.",
+    "상단 요약 카드 3개: \"수량 관리 메뉴 N개\", \"곧 품절 N개\", \"오늘 판매 완료 N개\". 곧 품절&gt;0이면 노랑, 판매 완료&gt;0이면 빨강 배경 강조.",
     "메뉴 카드별 수량 조정: <code>−10 / − / 입력칸 / + / +10</code> 버튼. <code>changeStock(menuId, delta)</code>는 <code>prepared</code>를 <code>max(0, prepared+delta)</code>로, <code>remaining</code>을 <code>min(prepared, max(0, remaining+delta))</code>로 갱신. 숫자 입력 <code>onchange</code>는 <code>setStock(menuId, qty)</code>로 절대값 세팅(음수 입력 시 0으로 보정).",
-    "상태 뱃지/카드 클래스: <code>remaining===0</code> → <code>.out</code> \"🔴 오늘 판매 완료\"; <code>0&lt;remaining≤lowAlert</code> → <code>.low</code> \"⚠️ 곧 품절 (N개 남음)\"; 그 외 → <code>.ok</code> \"✓ 판매 중\". 진행바 너비 = <code>round(remaining/prepared*100)%</code>.",
+    "상태 뱃지/카드 클래스: <code>remaining===0</code> → <code>.out</code> \"🔴 오늘 판매 완료\"; <code>0&amp;lt;remaining≤lowAlert</code> → <code>.low</code> \"⚠️ 곧 품절 (N개 남음)\"; 그 외 → <code>.ok</code> \"✓ 판매 중\". 진행바 너비 = <code>round(remaining/prepared*100)%</code>.",
     "헤더 액션 버튼: \"📥 전체 메뉴 불러오기 (N개)\"(<code>loadAllMenus()</code> — 미등록 메뉴를 준비량 0으로 일괄 추가), \"+ 메뉴 추가\"(<code>openAddStockModal()</code> — 모달에서 메뉴 선택, <code>addStockForMenu</code>는 준비량 50 기본 추가), \"✕ 전체 삭제\"(<code>deleteAllStock()</code>).",
     "카드별 \"✕\" 버튼 = <code>removeStock(menuId)</code>로 해당 메뉴 수량 관리 해제(확인창). 옵션 목록은 <code>changeOptStock/setOptStockQty/removeOptStock</code>로 동일 동작.",
     "기본값: \"+ 메뉴 추가\" 시 <code>prepared=50, remaining=50, unit='개', lowAlert=5, soldOutAlert=true</code>; \"전체 불러오기\" 시 <code>prepared=0, remaining=0</code>."
    ],
    "data": [
     "<code>MENU_STOCK.items[]</code> 필드: <code>menuId</code>(FK→MENUS.id), <code>enabled</code>(bool, true만 노출), <code>prepared</code>(int≥0 준비량), <code>remaining</code>(int≥0 남은 수량), <code>unit</code>(string 단위, 기본 '개'), <code>lowAlert</code>(int 곧 품절 임계값, 기본 5), <code>soldOutAlert</code>(bool 품절 알림), <code>yesterdayPrep</code>/<code>yesterdaySold</code>(전일 실적).",
-    "주문 차감은 <b>비관적 락</b> <code>SELECT ... FOR UPDATE</code>로 동시성 보장(SPEC §1.7 / spec 재고 §4.1). <code>remaining&lt;quantity</code>면 주문 거절.",
-    "환불 시 복구: <code>remaining = LEAST(prepared, remaining+환불수량)</code>, 복구 후 <code>remaining&gt;0</code>이면 자동 품절 해제(재고 §4.2). 환불은 원거래일 영업일 매출에서 차감(SPEC §1.5).",
+    "주문 차감은 <b>비관적 락</b> <code>SELECT ... FOR UPDATE</code>로 동시성 보장(SPEC §1.7 / spec 재고 §4.1). <code>remaining&amp;lt;quantity</code>면 주문 거절.",
+    "환불 시 복구: <code>remaining = LEAST(prepared, remaining+환불수량)</code>, 복구 후 <code>remaining&amp;gt;0</code>이면 자동 품절 해제(재고 §4.2). 환불은 원거래일 영업일 매출에서 차감(SPEC §1.5).",
     "<b>영업일 리셋</b>(03:00 배치, 재고 §4.4): <code>yesterday_prep=prepared</code>, <code>yesterday_sold=prepared−remaining+당일환불복구</code>, <code>remaining=prepared</code>로 리셋하되 <b><code>prepared</code> 자체는 유지</b>(사장님이 매일 직접 갱신).",
-    "임계 이벤트: <code>remaining=0 && soldOutAlert=true</code> → 품절 알림 트리거, <code>remaining≤lowAlert</code> → 곧 품절 경고(재고 §4.3).",
-    "연동: 손님 화면 자동 품절(spec/02-menu.md §1.4 <code>stock!=null && sold≥stock</code>) 및 메뉴판 카드 \"📦 잔여/준비\" 배지(클릭 시 본 화면 이동)."
+    "임계 이벤트: <code>remaining=0 &amp;&amp; soldOutAlert=true</code> → 품절 알림 트리거, <code>remaining≤lowAlert</code> → 곧 품절 경고(재고 §4.3).",
+    "연동: 손님 화면 자동 품절(spec/02-menu.md §1.4 <code>stock!=null &amp;&amp; sold≥stock</code>) 및 메뉴판 카드 \"📦 잔여/준비\" 배지(클릭 시 본 화면 이동)."
    ],
    "exception": [
     "전체 빈 상태(등록 0건): \"아직 수량 관리하는 메뉴가 없어요\" + \"한정 수량으로 파는 메뉴(예: 떡볶이 100인분, 도시락 30개)를 등록하면 주문이 들어올 때마다 자동 차감되고, 다 팔리면 손님 화면에 품절 표시돼요.\"",
@@ -525,7 +525,7 @@ window.DETAILS = {
     "대상은 \"수량 관리에 등록되지 않은\" 메뉴 중 판매 가능 상태인 것(<code>otherMenus</code>) — 수량 관리와 역할을 분리해 중복을 피한다."
    ],
    "behavior": [
-    "요약 카드 2개: \"오늘 품절 처리 N개\"(품절 중 건수, >0이면 빨강), \"품절 처리 가능한 메뉴 N개\".",
+    "요약 카드 2개: \"오늘 품절 처리 N개\"(품절 중 건수, &gt;0이면 빨강), \"품절 처리 가능한 메뉴 N개\".",
     "메뉴 카드(<code>.qso-card</code>)별 토글 버튼: 판매 중이면 \"품절\" 버튼 → <code>setSoldOut(id,'out')</code>로 <code>manualSoldOut=true</code> 설정. 품절 중이면 \"↺ 판매 재개\" 버튼 → <code>setSoldOut(id,'on')</code>로 <code>manualSoldOut=false</code>.",
     "품절 처리 시 손님 화면에서 즉시 \"품절\"(회색·선택 불가)로 노출(spec/02-menu.md §1.4 우선순위 1: <code>manualSoldOut</code>).",
     "헤더 \"↺ 품절 모두 해제\" 버튼 = <code>clearAllManualSoldOut()</code>(확인창 후 일괄 해제). 옵션 영역은 \"↺ 옵션 품절 모두 해제\"(<code>clearAllOptSoldOut()</code>).",
@@ -534,7 +534,7 @@ window.DETAILS = {
    ],
    "data": [
     "<code>MENUS[].manualSoldOut</code>(bool, 기본 false), <code>MENUS[].soldOutKind</code>(enum <code>temp|full</code>, 기본 <code>temp</code> — <code>temp</code>=일시 품절(재판매), <code>full</code>=오늘 완전 품절). 옵션은 <code>OPT_GROUPS.items[].manualSoldOut/soldOutKind</code>(<code>ensureMenuExtras/ensureOptExtras</code>가 기본값 채움).",
-    "대상 산출: <code>otherMenus = MENUS.filter(수량관리 미등록 && status!=='숨김')</code>. 옵션 대상은 <code>OPT_STOCK</code>에 없는 옵션 항목.",
+    "대상 산출: <code>otherMenus = MENUS.filter(수량관리 미등록 &amp;&amp; status!=='숨김')</code>. 옵션 대상은 <code>OPT_STOCK</code>에 없는 옵션 항목.",
     "<b>영업일 리셋</b>(03:00, 재고 §4.4 / spec/02-menu §5.3): 새 영업일 시작 시 <code>manualSoldOut</code> 자동 해제(품절 처리는 오늘 하루만 유효). <code>full</code>도 다음 영업일엔 자동 판매 재개.",
     "권한: owner/staff 모두 토글 가능(SPEC §1.6).",
     "[중요] 품절은 결제와 무관한 <b>판매 가능 상태</b> 플래그일 뿐 — 환불·취소(결제 완료 여부=Payment.status=paid 기준)와는 별개 도메인."
@@ -597,7 +597,7 @@ window.DETAILS = {
     "4열 그리드: 첫 카드 <code>전체 회원</code> + 등급 수만큼 등급별 카드. 사장님이 회원 규모와 등급 쏠림을 빠르게 파악하도록 함."
    ],
    "behavior": [
-    "<b>전체 회원 카드</b>: 값 = <code>m.tiers.reduce((s,t)=>s+t.members,0)</code>, 단위 <code>명</code> 표기.",
+    "<b>전체 회원 카드</b>: 값 = <code>m.tiers.reduce((s,t)=&gt;s+t.members,0)</code>, 단위 <code>명</code> 표기.",
     "<b>등급별 카드</b>: 각 등급 <code>members</code> 수치 표시. 카드 라벨은 등급 색상(<code>t.color</code>)·굵게, 테두리는 등급 색상 40% 투명도(<code>${t.color}40</code>).",
     "등급 수에 따라 카드 개수 가변(등급 추가/삭제 시 카드도 증감). 등급 순서는 핀1·핀3과 동일하게 <code>threshold</code> 오름차순.",
     "카드는 <b>집계 표시 전용</b> — 클릭 동작 없음(필터 등 인터랙션 없음). 등급 정의 편집은 핀3 표에서 수행."
@@ -694,7 +694,7 @@ window.DETAILS = {
   },
   "2": {
    "purpose": [
-    "좌측 패널 \"<b>적립 규칙</b> <span>전 매장 공통</span>\". 손님이 주문할 때 스탬프가 얼마나 적립되고 몇 개를 모으면 어떤 리워드를 받는지를 사장님이 설정하는 영역이다.",
+    "좌측 패널 \"<b>적립 규칙</b> &lt;span&gt;전 매장 공통&lt;/span&gt;\". 손님이 주문할 때 스탬프가 얼마나 적립되고 몇 개를 모으면 어떤 리워드를 받는지를 사장님이 설정하는 영역이다.",
     "하단 안내 배너로 현재 규칙을 자연어로 요약해 사장님이 설정 결과를 즉시 확인할 수 있게 한다.",
     "여기서 정한 규칙이 핀3·핀4의 진행률(<code>stamps/rewardAt</code>) 계산과 리워드 발급 판정의 기준이 된다."
    ],
@@ -724,8 +724,8 @@ window.DETAILS = {
     "사장님이 스탬프를 보유한 손님 규모와 누적 지급된 리워드 규모를 한눈에 보고, 손님별 적립 상세를 목록으로 탐색하게 한다."
    ],
    "behavior": [
-    "<b>KPI 카드 — 스탬프 보유 회원</b>: <code>members.length</code> 명. <b>리워드 지급 누계</b>(파란 카드): <code>members.reduce((a,m)=>a+m.rewards,0)</code>로 전체 회원의 리워드 받은 횟수 합계.",
-    "<b>표 헤더</b>: <code>손님 | 연락처 | 스탬프 | 리워드 받은 횟수(우측정렬) | (상세 버튼 열)</code>. 헤더 우측 \"<span>N명</span>\" 카운트 표시.",
+    "<b>KPI 카드 — 스탬프 보유 회원</b>: <code>members.length</code> 명. <b>리워드 지급 누계</b>(파란 카드): <code>members.reduce((a,m)=&gt;a+m.rewards,0)</code>로 전체 회원의 리워드 받은 횟수 합계.",
+    "<b>표 헤더</b>: <code>손님 | 연락처 | 스탬프 | 리워드 받은 횟수(우측정렬) | (상세 버튼 열)</code>. 헤더 우측 \"&lt;span&gt;N명&lt;/span&gt;\" 카운트 표시.",
     "<b>헤더 클릭 정렬</b>(description.html 핀3 + SPEC §2.6): 손님명·스탬프 수·리워드 횟수 컬럼 클릭 시 오름차순↔내림차순 토글, 활성 컬럼에 화살표 표시. 기본 정렬은 스탬프 수 내림차순 권장.",
     "<b>검색</b>: 손님명·연락처 부분 일치(대소문자 무시, §2.6). 목록 30건 초과 시 페이징/무한스크롤 적용(§2.6).",
     "각 행의 진행률·리워드 가능 배지는 핀4에서 렌더(핀2 규칙 기준)."
@@ -733,7 +733,7 @@ window.DETAILS = {
    "data": [
     "바인딩: <code>STAMPS.members[]</code> = <code>{id, name, phone, stamps, rewards}</code> (index.html:9738~9741).",
     "신규 데이터 모델 제안: <code>STAMP_MEMBER</code> — <code>id</code>, <code>brand_id</code>, <code>customer_id</code>(손님 식별, 연락처 해시 기반), <code>name</code>, <code>phone</code>, <code>stamps int default 0</code>, <code>rewards int default 0</code>, <code>updated_at</code>. 손님은 결제 시 입력/연동된 연락처로 식별·자동 생성된다.",
-    "조회 API: <code>GET /stamp/members?sort=&q=&page=</code> (정렬·검색·페이징 쿼리). KPI는 동일 응답의 집계 필드 또는 별도 <code>GET /stamp/summary</code>.",
+    "조회 API: <code>GET /stamp/members?sort=&amp;q=&amp;page=</code> (정렬·검색·페이징 쿼리). KPI는 동일 응답의 집계 필드 또는 별도 <code>GET /stamp/summary</code>.",
     "계산식: 보유 손님 수 = 행 수, 리워드 누계 = Σ<code>rewards</code>. 표는 단순 조회이므로 토스트 미사용(§08-common 1.3)."
    ],
    "exception": [
@@ -749,7 +749,7 @@ window.DETAILS = {
    ],
    "behavior": [
     "<b>셀 구성</b>: 손님명(<b>bold</b>) / 연락처(모노스페이스) / 스탬프 진행 셀(\"<b>{stamps}</b>/{rewardAt}개 · {pct}%\" + 진행 바) / 리워드 받은 횟수(\"<b>{rewards}</b>회\", 우측정렬) / [상세] 버튼.",
-    "<b>진행률</b>: <code>pct = round(stamps/rewardAt*100)</code>, 진행 바 폭은 <code>min(100, pct)%</code>. <code>stamps >= rewardAt</code>이면 파란색 \"<b>🎉 리워드 가능</b>\" 배지 표시.",
+    "<b>진행률</b>: <code>pct = round(stamps/rewardAt*100)</code>, 진행 바 폭은 <code>min(100, pct)%</code>. <code>stamps &gt;= rewardAt</code>이면 파란색 \"<b>🎉 리워드 가능</b>\" 배지 표시.",
     "<b>[상세] 버튼</b>(btn-ghost): 클릭 시 해당 손님의 스탬프 적립/리워드 내역 상세를 연다. 현재 목업은 <code>alert('{name} 스탬프 내역 (와이어프레임)')</code> 자리표시자이며, 정식 구현은 <b>적립·차감·리워드 발급 타임라인 모달</b>(form/info 모달, §08-common 6)로 구현한다.",
     "<b>행 클릭 시 상세</b>(description.html 핀4): 행 전체 클릭으로도 상세 모달 진입 가능(상세 버튼과 동일 동작)."
    ],
@@ -757,10 +757,10 @@ window.DETAILS = {
     "필드: <code>m.name</code>, <code>m.phone</code>, <code>m.stamps</code>(=<code>stampCount</code>), <code>m.rewards</code>(=<code>rewardCount</code>) (description.html 핀4 data).",
     "상세 모달 데이터: <code>STAMP_LEDGER</code> 제안 — <code>member_id</code>, <code>delta int</code>(+적립/−회수/−리워드차감), <code>reason enum</code>(<code>earn</code>/<code>refund_revoke</code>/<code>reward_issue</code>), <code>order_id</code>(연동), <code>occurred_at</code>. 적립/회수는 결제 완료·환불(결제 취소) 이벤트와 연동.",
     "상세 API: <code>GET /stamp/members/{id}/ledger</code>.",
-    "리워드 발급은 <code>stamps>=rewardAt</code> 도달 시 자동(핀2 순환 차감)으로 <code>rewards</code> 증가."
+    "리워드 발급은 <code>stamps&gt;=rewardAt</code> 도달 시 자동(핀2 순환 차감)으로 <code>rewards</code> 증가."
    ],
    "exception": [
-    "<b>경계값 — rewardAt 도달/초과</b>: <code>stamps>=rewardAt</code>일 때 \"🎉 리워드 가능\" 배지 노출, 진행 바는 100%로 클램프. 다회 적립으로 <code>pct>100</code>이어도 바는 100% 고정.",
+    "<b>경계값 — rewardAt 도달/초과</b>: <code>stamps&gt;=rewardAt</code>일 때 \"🎉 리워드 가능\" 배지 노출, 진행 바는 100%로 클램프. 다회 적립으로 <code>pct&gt;100</code>이어도 바는 100% 고정.",
     "<b>리워드 0회 손님</b>: \"<b>0</b>회\"로 정상 표시(부정 문구 미사용).",
     "<b>상세 내역 없음</b>: 모달 빈 상태 \"<b>아직 적립 내역이 없어요</b>\".",
     "<b>결제 취소(환불) 반영</b>: 환불로 스탬프 회수 시 진행률·배지가 즉시 갱신되며, 회수로 <code>stamps</code>가 음수가 되지 않도록 0으로 하한 처리(<code>max(0, stamps)</code>).",
@@ -850,7 +850,7 @@ window.DETAILS = {
    "exception": [
     "오늘 이후 날짜로 이동 시도: ▶ 화살표 <b>비활성(disabled)</b> 처리하여 클릭 불가 — 미래 매출은 아직 집계 전.",
     "custom 종료일을 어제(5/14)보다 이후로 지정 시: 어제까지로 자동 보정 또는 '어제까지 조회할 수 있어요' 안내.",
-    "custom 시작>종료 등 잘못된 범위: 폼 검증으로 '시작일은 종료일보다 앞이어야 해요' 인라인 에러(spec/08-common.md 폼검증).",
+    "custom 시작&gt;종료 등 잘못된 범위: 폼 검증으로 '시작일은 종료일보다 앞이어야 해요' 인라인 에러(spec/08-common.md 폼검증).",
     "주간/월간 모드에서는 단일 일자 KPI 패널 대신 추이 라인 차트로 전환(데이터 1행일 때만 단일 일자 처리)."
    ]
   },
@@ -938,7 +938,7 @@ window.DETAILS = {
     "미래 이동 차단: 「다음」 화살표는 흐리게 처리되어 노출되지 않음(누를 수 없음). 날짜 입력기에서도 <code>max=오늘</code>로 미래일 입력 불가.",
     "custom 기간 라벨은 일수를 계산해 <b>\"5월 9일(토) ~ 5월 15일(금) · 7일간\"</b> 형식으로 노출.",
     "빠른 선택 모달 안내: <b>\"시작일과 종료일을 정해주세요. 빠른 선택도 가능해요.\"</b>",
-    "시작일 > 종료일 등 잘못된 범위 입력 시 종료일 <code>min</code> 제약으로 보정하고, 보정 불가 시 적용 버튼 비활성(spec/08-common §5.2 검증)."
+    "시작일 &gt; 종료일 등 잘못된 범위 입력 시 종료일 <code>min</code> 제약으로 보정하고, 보정 불가 시 적용 버튼 비활성(spec/08-common §5.2 검증)."
    ]
   },
   "3": {
@@ -998,7 +998,7 @@ window.DETAILS = {
    ],
    "behavior": [
     "<b>⏰ 시간대별 매출</b>: <code>drawHourChart('ch-hour')</code> 막대/선 차트, '오늘 vs 4주 평균' 비교. \"시간대별 상세 보기 ›\" → <code>setDetailTab('hour')</code>.",
-    "<b>💳 결제수단별 매출</b>: <code>ch-donut-pay</code> 도넛 + 범례(스와치·금액). 금액>0인 결제수단만 노출(<code>filter(m=>m.amt>0)</code>). \"결제수단별 상세 보기 ›\" → <code>setDetailTab('method')</code>.",
+    "<b>💳 결제수단별 매출</b>: <code>ch-donut-pay</code> 도넛 + 범례(스와치·금액). 금액&gt;0인 결제수단만 노출(<code>filter(m=&gt;m.amt&gt;0)</code>). \"결제수단별 상세 보기 ›\" → <code>setDetailTab('method')</code>.",
     "<b>🥐 메뉴별 매출 TOP 5</b>: 표 컬럼 <code>#</code>/메뉴/수량/매출/비중(%). 행 클릭 시 <code>setDetailTab('menu')</code>. 🔥(hot)·신규 배지 표시. 비중=<code>amt/합계*100</code> 소수 1자리.",
     "<b>🍽️ 판매유형별 매출</b>: <code>ch-donut-ch</code> 도넛 + <code>visCHANNEL()</code> 채널별 금액·비중·건수·평균. 부제는 포장 예약 채널 활성 여부(<code>ORDER_CHANNELS.reservation</code>)에 따라 '먹고가기 / 포장하기 / 포장 예약' 또는 '먹고가기 / 포장하기'.",
     "기간·집계 기준 변경 시 네 패널과 차트가 모두 파괴(<code>destroy</code>) 후 재생성된다."
@@ -1060,7 +1060,7 @@ window.DETAILS = {
    ],
    "data": [
     "입력 소스: <code>OrderChannelConfig.mode</code>, <code>.payment</code>, <code>.defaultPolicy</code>, <code>PaymentSchedule[].{name,start,end,policy}</code> — DATA_MODEL §5.1/§5.2.",
-    "현재 정책 계산식(<code>ot_currentPolicy()</code>): mode가 takeout 전용이면 무조건 선불/포장 전용; prepay·postpay면 고정 라벨; scheduled면 <code>schedule.find(s => HH:MM >= s.start && HH:MM <= s.end)</code>, 없으면 defaultPolicy.",
+    "현재 정책 계산식(<code>ot_currentPolicy()</code>): mode가 takeout 전용이면 무조건 선불/포장 전용; prepay·postpay면 고정 라벨; scheduled면 <code>schedule.find(s =&gt; HH:MM &gt;= s.start &amp;&amp; HH:MM &lt;= s.end)</code>, 없으면 defaultPolicy.",
     "시각 기준은 영업일이 아니라 <b>벽시계 시:분</b>(시간대 슬롯 매칭용). 영업일 경계(03:00)는 매출·재고용이며 결제 정책 판정과 무관 — SPEC §1.1.",
     "저장 전 변경(dirty)이 있어도 이 요약은 현재 <code>ORDER_CHANNELS</code> 기준으로 즉시 미리보기되지만, 실제 손님 적용은 저장 후예요(핀1)."
    ],
@@ -1087,10 +1087,10 @@ window.DETAILS = {
     "필드: <code>OrderChannelConfig.mode</code> enum(<code>both</code>/<code>dine_in</code>/<code>takeout</code>), NN — DATA_MODEL §5.1.",
     "연동: 저장 시 <code>mode</code>에 따라 테이블 QR 활성(먹고가기 포함 시)·포장 QR 활성(<code>isTakeoutQRActive()</code>, 포장 포함 시) 자동 갱신 → QR 관리 화면이 이를 따라가요.",
     "라벨 매핑(<code>ORDER_LABELS.mode</code>): both=\"먹고가기 + 포장하기\", dine_in=\"먹고가기만\", takeout=\"포장하기만\". 아이콘: both 🍽️🥡 / dine_in 🍽️ / takeout 🥡.",
-    "변경 영향 계산: <code>willDineOff</code>=현재 매장 포함 && 목표 takeout, <code>willTakeOff</code>=현재 포장 포함 && 목표 dine_in."
+    "변경 영향 계산: <code>willDineOff</code>=현재 매장 포함 &amp;&amp; 목표 takeout, <code>willTakeOff</code>=현재 포장 포함 &amp;&amp; 목표 dine_in."
    ],
    "exception": [
-    "<b>포장 끄기 차단</b>: 변경 후 미수락 포장 예약(<code>status='accepted'</code> && <code>reservation_accepted_at IS NULL</code>)이 있으면 저장 차단 + \"포장 예약 N건을 먼저 수락/거절해 주세요\" — STATES §6.3.",
+    "<b>포장 끄기 차단</b>: 변경 후 미수락 포장 예약(<code>status='accepted'</code> &amp;&amp; <code>reservation_accepted_at IS NULL</code>)이 있으면 저장 차단 + \"포장 예약 N건을 먼저 수락/거절해 주세요\" — STATES §6.3.",
     "진행 중 매장 주문이 있을 때 매장을 끄면 경고만 노출하고, 이미 들어온 주문은 완료까지 그대로 유지(모달 영향 문구 \"이미 들어온 주문은 그대로 유지돼요.\") — STATES §6.2.",
     "<b>권한</b>: 채널 변경은 <code>owner</code>만. staff는 카드가 비활성 — SPEC §1.6.",
     "모달에서 [그대로 둘게요] 또는 ✕로 닫으면 선택이 원래 채널로 유지돼요(변경 미적용).",
@@ -1121,7 +1121,7 @@ window.DETAILS = {
     "셀프+먹고가기인데 호출 방식 0개면 저장 차단 alert \"호출 방식을 최소 1개 선택해 주세요.\" + 인라인 \"⚠️ 호출 방식을 최소 1개 선택해 주세요.\"",
     "시간대 슬롯 검증: 슬롯의 시작≥종료면 저장 차단 alert \"{슬롯명} 시간대의 시작 시각이 종료보다 빨라야 해요.\" + 슬롯 간 시간 겹침 차단(저장 시) — DATA_MODEL §5.2.",
     "🔒 본사 설정(서빙 방식)·미연결(전광판)은 비활성 처리 + 사유 안내. 전광판 클릭 시 \"전광판은 아직 매장에 연결되지 않았어요. 본사 문의로 신청해 주세요.\"",
-    "대기 시간 입력 경계: 최소값 보정(<code>Math.max(1, …)</code>), 비숫자는 0 방지. min>max 같은 역전 입력은 저장 전 보정/안내 권장.",
+    "대기 시간 입력 경계: 최소값 보정(<code>Math.max(1, …)</code>), 비숫자는 0 방지. min&gt;max 같은 역전 입력은 저장 전 보정/안내 권장.",
     "포장 예약 OFF 시 손님은 즉시 접수만 가능(\"포장 예약 OFF — 포장하기만 즉시 접수\"). ON 시 미수락 예약은 채널 변경을 막아요(핀3·STATES §6.3).",
     "<b>권한</b>: 모든 세부 설정 변경은 <code>owner</code>만. staff 열람 시 입력 비활성 — SPEC §1.6."
    ]
@@ -1168,13 +1168,13 @@ window.DETAILS = {
    ],
    "data": [
     "상태 필드: <code>state.stlListDateBasis</code>('settle'|'approval'), <code>stlListQuickRange</code>('today'|'1w'|'1m'|'thismonth'|'3m'|'all'|'period'|'specific'), <code>stlListPeriodStart/End</code>(ISO date str), <code>stlListSpecificDate</code>(ISO date str), <code>stlListStatus</code>, <code>stlListCoupon</code>.",
-    "정산 상태값 3종: <code>정산완료</code>(pill=done, '입금 완료') / <code>정산대기</code>(pill=pending, '곧 들어와요') / <code>보류(held)</code>(pill=hold, '확인 중' — 마감 후 환불>다음 회차 등, STATES §8.2·DATA_MODEL §8.1). 기본 산정은 <code>settleISO ≤ todayISO ? 정산완료 : 정산대기</code>, held는 정산 시스템 플래그로 별도 표기.",
-    "기간 필터는 <code>basisKey</code> 값으로 <code>r[basisKey] >= start && <= end</code> 비교. 정산일 기준이면 settleISO 없는 미래/산정중 행은 자연히 제외.",
+    "정산 상태값 3종: <code>정산완료</code>(pill=done, '입금 완료') / <code>정산대기</code>(pill=pending, '곧 들어와요') / <code>보류(held)</code>(pill=hold, '확인 중' — 마감 후 환불&gt;다음 회차 등, STATES §8.2·DATA_MODEL §8.1). 기본 산정은 <code>settleISO ≤ todayISO ? 정산완료 : 정산대기</code>, held는 정산 시스템 플래그로 별도 표기.",
+    "기간 필터는 <code>basisKey</code> 값으로 <code>r[basisKey] &gt;= start &amp;&amp; &lt;= end</code> 비교. 정산일 기준이면 settleISO 없는 미래/산정중 행은 자연히 제외.",
     "조회 대상: <code>settlements</code>(회차) ↔ <code>DAY</code> 매핑. 영업일 03:00 경계(SPEC §1.1), 정산 사이클 D+3 영업일(STATES §8.1)."
    ],
    "exception": [
-    "직접 기간 선택 시 두 date input 모두 <code>max=TODAY_DATE</code>로 오늘 이후 선택 차단(미래 매출은 정산 대상 아님 — SETTLEMENTS 생성에서 <code>approvalISO > todayISO</code> 제외).",
-    "시작일 > 종료일 등 역순 입력 시 결과 0건 빈 상태로 떨어지며, 폼 검증 경고 토스트 권장(spec/08-common 폼검증). 경계: start==end은 하루 조회로 정상.",
+    "직접 기간 선택 시 두 date input 모두 <code>max=TODAY_DATE</code>로 오늘 이후 선택 차단(미래 매출은 정산 대상 아님 — SETTLEMENTS 생성에서 <code>approvalISO &gt; todayISO</code> 제외).",
+    "시작일 &gt; 종료일 등 역순 입력 시 결과 0건 빈 상태로 떨어지며, 폼 검증 경고 토스트 권장(spec/08-common 폼검증). 경계: start==end은 하루 조회로 정상.",
     "톤: 쿠폰 미사용 칩은 부정형 대신 친근체 <code>안 썼어요</code>, 초기화는 <code>처음으로 돌리기</code> 사용.",
     "기준 토글로 정산일 선택 시 아직 산정 안 된 회차는 정산일이 비어 표에서 <code>산정 중</code>으로 노출(핀4 참조)."
    ]
@@ -1200,7 +1200,7 @@ window.DETAILS = {
    ],
    "exception": [
     "조건 적용 후 결과 0건이면 표에 빈 상태 행 노출(핀4) — <code>다른 조건으로 다시 찾아봐 주세요.</code> + <code>처음으로 돌리기</code> 링크.",
-    "금액 범위 min>max 경계는 결과 0건으로 자연 처리, 폼 검증 경고 토스트 권장.",
+    "금액 범위 min&gt;max 경계는 결과 0건으로 자연 처리, 폼 검증 경고 토스트 권장.",
     "주문/승인번호로 검색 중에는 기간 칩 선택이 결과에 영향 없음을 안내(우회 동작) — 혼란 방지 보조문구 권장.",
     "안내 보조문구는 가능형: <code>주문/승인번호·영업일 요일·거래금액 범위·정산금액 범위로 더 정확하게 찾을 수 있어요</code>.",
     "권한: owner 전용(정산 영역) — stl-calendar·home과 통일, staff 진입 차단(403)."
@@ -1232,7 +1232,7 @@ window.DETAILS = {
     "정산일 미산정 행(미래·산정 전): 정산일 셀에 <code>산정 중</code>(회색 11px) 표기, <code>settlementId</code> 없으면 행 클릭 비활성·자세히 칸은 <code>−</code>.",
     "<b>환불 반영</b>: 환불은 원거래일 매출에서 차감(SPEC §1.5)되어 gross−ref로 같은 행에 반영. 다만 마감 후(정산 paid_out 이후) 환불은 다음 회차 차감(STATES §8.1, §8.2) — 해당 행 결제 금액은 그대로, 차감은 다음 회차 행에서 보임.",
     "권한: owner 전용(정산 영역, staff 진입 차단). 엑셀 내보내기 안내문구는 가능형 유지.",
-    "경계: 정산 금액이 음수(환불>매출)인 회차도 그대로 음수 표기하고 색상은 대기색 처리, 다음 회차 차감/보류 로직은 핀5에서 안내."
+    "경계: 정산 금액이 음수(환불&gt;매출)인 회차도 그대로 음수 표기하고 색상은 대기색 처리, 다음 회차 차감/보류 로직은 핀5에서 안내."
    ]
   },
   "5": {
@@ -1242,7 +1242,7 @@ window.DETAILS = {
     "D+3 영업일 입금 약속과 마감 후 환불 차감/보류 규칙을 사장님에게 투명하게 전달."
    ],
    "behavior": [
-    "<b>상태 pill</b>: <code>정산완료</code> → <code><span class=\"pill done\">입금 완료</span></code>, <code>정산대기</code> → <code><span class=\"pill pending\">곧 들어와요</span></code>, <code>보류(held)</code> → <code><span class=\"pill hold\">확인 중</span></code>(STATES §8.2). 기본 산정은 <code>settleISO ≤ todayISO</code> 비교 + held 플래그.",
+    "<b>상태 pill</b>: <code>정산완료</code> → <code>&lt;span class=\"pill done\"&gt;입금 완료&lt;/span&gt;</code>, <code>정산대기</code> → <code>&lt;span class=\"pill pending\"&gt;곧 들어와요&lt;/span&gt;</code>, <code>보류(held)</code> → <code>&lt;span class=\"pill hold\"&gt;확인 중&lt;/span&gt;</code>(STATES §8.2). 기본 산정은 <code>settleISO ≤ todayISO</code> 비교 + held 플래그.",
     "<b>행 클릭</b>: <code>settlementId</code>가 있으면 행 전체 클릭 → <code>openStlDetail(settlementId)</code> → stl-detail 화면(<code>state.stlDetailId</code> 세팅). 자세히 칸은 파란 <code>자세히 ›</code> 표시.",
     "상세 화면(stl-detail)은 해당 회차의 결제·환불·수수료·쿠폰 보전 내역과 승인일 묶음(토/일/공휴일은 한 정산일에 여러 영업일이 합쳐짐), D+3 영업일 정산일을 보여준다.",
     "정렬에서 status 키로 정렬 시 정산완료/대기 그룹핑 가능."
@@ -1315,7 +1315,7 @@ window.DETAILS = {
     "\"호출 메시지\"는 손님 테이블 화면에 버튼으로 노출되는 요청 항목 목록(예: 물, 수저, 계산, 메뉴 추천)을 사장이 직접 구성하는 영역."
    ],
    "behavior": [
-    "\"최근 호출 내역\" 탭에는 <b>처리 대기 건수</b>(미완료 호출 수)가 주황 배지(<code>#c2410c</code>)로 표시된다. 대기 0건이면 배지 숨김. <code>pendingCnt = STAFF_CALL_HISTORY.filter(r=>!r.completedAt).length</code>.",
+    "\"최근 호출 내역\" 탭에는 <b>처리 대기 건수</b>(미완료 호출 수)가 주황 배지(<code>#c2410c</code>)로 표시된다. 대기 0건이면 배지 숨김. <code>pendingCnt = STAFF_CALL_HISTORY.filter(r=&gt;!r.completedAt).length</code>.",
     "\"호출 메시지\" 탭: 메시지는 <b>최대 15개</b>(<code>MAX_MSG=15</code>). 헤더 우측에 한도 미만이면 <b>[+ 메시지 추가 (현재수/15)]</b> 버튼, 한도 도달 시 \"최대 15개\" 텍스트로 대체.",
     "각 메시지 행: 드래그 핸들 ⠿(드래그로 순서 변경, <code>sort</code> 재계산), 순번, 본문, <b>사용 토글</b>(ON/OFF), 삭제 버튼 ✕. 토글 OFF면 행이 흐리게(off) 처리되고 손님 화면에서 해당 항목 숨김.",
     "[+ 메시지 추가] 클릭 시 모달 \"메시지 추가\": 입력 라벨 \"호출 단어\", placeholder \"예: 앞치마, 냅킨, 빨대\", <b>최대 10자</b>(<code>maxlength=10</code>) + 실시간 \"N/10자\" 카운터, 안내 \"💡 한눈에 보이도록 짧은 단어로 적어 주세요. 예: 물, 수저, 계산, 메뉴 추천\". 버튼 [취소] / [추가하기].",
@@ -1424,7 +1424,7 @@ window.DETAILS = {
     "헤더 클릭으로 펼침/접힘 토글(<code>state.menuBulkOpen</code>, 화살표 ▼/▶). 닫힌 상태 보조문구 \"클릭해서 펼친 뒤 행을 추가하면 이름·가격만 빠르게 입력할 수 있어요…\", 작성 중이면 \"작성 중 · N개 행 · 저장 전엔 손님 화면에 안 보여요\".",
     "<b>+ 메뉴 행 추가</b>(<code>addMenuBulkRow</code>) → 기본값 행 추가: <code>{code:'',name:'',price:0,takeoutPrice:null,cat:'',desc:'',img:'',status:'판매중'}</code>. <b>전체 행 삭제</b>는 확인 후 비움.",
     "행별 입력: 상품코드(⚙️ <code>genCode('M')</code> 자동, 입력값 자동 대문자화), 메뉴 이름(필수), 매장 판매가(필수), 포장가(비우면 매장가), 카테고리(미지정 허용), 설명, 사진(클릭 시 <code>SAMPLE_ICONS</code> 순환), 상태, ✕ 행 삭제.",
-    "<b>저장</b>(<code>saveMenuBulk</code>): <code>name && price>=0</code>인 행만 <code>MENUS</code>에 추가, 코드 미입력 시 자동생성, 카테고리 미지정 시 첫 카테고리 또는 '미분류'. 저장 후 행 비우고 토스트 \"새 메뉴 N개를 저장했어요\".",
+    "<b>저장</b>(<code>saveMenuBulk</code>): <code>name &amp;&amp; price&gt;=0</code>인 행만 <code>MENUS</code>에 추가, 코드 미입력 시 자동생성, 카테고리 미지정 시 첫 카테고리 또는 '미분류'. 저장 후 행 비우고 토스트 \"새 메뉴 N개를 저장했어요\".",
     "<b>📊 엑셀로 한 번에 등록</b>(<code>openMenuExcelModal</code>): 엑셀 양식 다운로드 후 작성→업로드 일괄 import. 컬럼 순서는 코드·이름·매장가·포장가·카테고리·설명·상태·최대수량·대/중/소분류."
    ],
    "data": [
@@ -1448,7 +1448,7 @@ window.DETAILS = {
    ],
    "behavior": [
     "<b>행 클릭</b> → <code>openMenuEditModal(id)</code> 정보·가격 수정 모달. <b>추가 설정 ▼</b>(<code>state.menuActionOpen</code>): 메뉴 정보·가격 수정 / 🧩 옵션 그룹 연결(<code>openOptLinkModal</code>) / 🕒 판매 시간(<code>openScheduleModal</code>) / 🔥 해피아워 할인(<code>openDiscountModal</code>) / 📋 복제하기(<code>duplicateMenu</code>) / ✕ 삭제(<code>deleteMenu</code>).",
-    "<b>순서 변경</b>: ≡ 손잡이 드래그&드롭(손님 메뉴판 순서와 동일), ⓘ 클릭 시 <code>showOrderHelp()</code> 안내. 순서는 last-write-wins (SPEC §1.7).",
+    "<b>순서 변경</b>: ≡ 손잡이 드래그&amp;드롭(손님 메뉴판 순서와 동일), ⓘ 클릭 시 <code>showOrderHelp()</code> 안내. 순서는 last-write-wins (SPEC §1.7).",
     "<b>헤더 정렬</b>(<code>sortMenu</code>): 순서/메뉴명/카테고리/매장가/포장가/오늘준비량/상태 토글(asc↔desc, 문자열은 ko 로케일). <b>필터</b>: 카테고리 칩, 판매상태 칩(전체·판매중·품절·숨김), 분류태그 대/중/소 드롭다운, 검색어(메뉴명·상품코드·분류태그) → <code>applyMenuFilters</code>/<code>resetMenuFilters</code>.",
     "<b>페이징</b>: 한 페이지 10/20/50/100개(<code>menuRowsPerPage</code>, 기본 20) + 페이지 이동(« ‹ 1..5 › »). <b>오늘 준비량 셀</b> 클릭 → <code>setSection('stock')</code> 이동.",
     "<b>체크박스 일괄작업</b>(<code>menuSel</code>): 📋 복제 / 💰 가격 조정(<code>openBulkPriceModal</code>) / 🗂️ 카테고리 이동(<code>openBulkCatModal</code>) / ✕ 삭제(<code>bulkDeleteMenus</code>) / 선택 해제. <b>📥 엑셀·CSV 받기</b>(<code>openMenuExport</code>) → xlsx/csv 택1 다운로드, export 컬럼=import 양식과 동일."
@@ -1475,7 +1475,7 @@ window.DETAILS = {
     "여러 상태 입력(<code>status</code>·<code>manualSoldOut</code>·재고)을 우선순위로 하나의 결과로 정리해 혼선을 막는다."
    ],
    "behavior": [
-    "<b>우선순위(먼저 맞는 것 적용)</b>: ① <code>manualSoldOut=true</code> → 수동 품절(<code>soldOutKind</code> temp=일시/full=완전) ② <code>stock!=null && sold>=stock</code> → 자동 품절(준비량 소진) ③ <code>status='숨김'</code> → 숨김 ④ <code>status='품절'</code> → 품절(레거시) ⑤ 그 외 → 판매중 (spec/02-menu §1.4, SPEC §2.3).",
+    "<b>우선순위(먼저 맞는 것 적용)</b>: ① <code>manualSoldOut=true</code> → 수동 품절(<code>soldOutKind</code> temp=일시/full=완전) ② <code>stock!=null &amp;&amp; sold&gt;=stock</code> → 자동 품절(준비량 소진) ③ <code>status='숨김'</code> → 숨김 ④ <code>status='품절'</code> → 품절(레거시) ⑤ 그 외 → 판매중 (spec/02-menu §1.4, SPEC §2.3).",
     "<b>'오늘 품절' 토글</b>: 당일만 판매 차단(<code>manualSoldOut</code> ON). 추가 설정의 품절/준비량 흐름과 연동. 일시/완전 품절(<code>soldOutKind</code>) 선택 가능.",
     "어드민 pill 매핑: 판매중=<code>done</code>(초록), 품절(일시/완전)=<code>partial</code>/<code>cancel</code>, 숨김=<code>hold</code>(회색).",
     "판매 시간(<code>schedule</code>) 미충족 시간대에는 판매중이라도 손님 화면 회색 처리(상태 pill과 별개 노출 규칙)."
@@ -1640,7 +1640,7 @@ window.DETAILS = {
     "빈 상태: 목록 패널 \"이 구역에 테이블이 없어요.\" (평면도와 별도 문구).",
     "이름 빈 값 입력 시 alert \"테이블 이름은 비워 둘 수 없어요.\" / 중복 시 alert \"'OO'은(는) 이미 사용 중인 테이블 이름이에요.\" — 둘 다 반영하지 않고 종료.",
     "이름 변경 prompt 취소(null)·동일 이름 입력 시 변경 없이 종료.",
-    "삭제 confirm 취소 시 변경 없음. 진행 중 주문이 있는 테이블(<code>status='사용중'</code>, orderCnt>0) 삭제는 운영 혼선 우려 — 경고 또는 차단 권장(1차 목업은 단순 confirm).",
+    "삭제 confirm 취소 시 변경 없음. 진행 중 주문이 있는 테이블(<code>status='사용중'</code>, orderCnt&gt;0) 삭제는 운영 혼선 우려 — 경고 또는 차단 권장(1차 목업은 단순 confirm).",
     "staff는 이름 변경·정렬만 가능, 모양 변경·삭제·추가는 비활성 + 툴팁 \"사장님 권한이 필요해요\"(§1.6.2)."
    ]
   }
@@ -1726,7 +1726,7 @@ window.DETAILS = {
     "클릭·토글 동작 없는 정적 안내. 핀2의 월 이동에 따라 hasData가 바뀌면 문구가 자동 전환."
    ],
    "data": [
-    "<code>hasData = SETTLEMENTS.some(s => s.settleISO.startsWith(monthKey))</code>로 분기. 별도 API 호출 없이 핀3과 동일 데이터셋 재사용.",
+    "<code>hasData = SETTLEMENTS.some(s =&gt; s.settleISO.startsWith(monthKey))</code>로 분기. 별도 API 호출 없이 핀3과 동일 데이터셋 재사용.",
     "동적 바인딩 값은 <code>year</code>·<code>month</code>(보고 있는 월)뿐. 그 외는 고정 카피."
    ],
    "exception": [
@@ -1779,7 +1779,7 @@ window.DETAILS = {
    ],
    "data": [
     "<code>faqCnt = FAQS.length</code> — FAQ 배지 소스.",
-    "<code>csWait = CS_INQUIRIES.filter(c=>c.status==='답변 대기').length</code> — CS 배지 소스.",
+    "<code>csWait = CS_INQUIRIES.filter(c=&gt;c.status==='답변 대기').length</code> — CS 배지 소스.",
     "활성 상태 플래그 <code>state.supportTab</code>: <code>'faq' | 'cs'</code>. 외부 라우팅 키 <code>'faq'</code>/<code>'cs'</code>는 모두 section=support로 정규화(<code>targetSection</code> 로직).",
     "CS 배지(대기 N)는 핀1의 홈 대시보드 <code>inquiryWait</code> KPI와 같은 계산식을 공유 → 문의 등록/답변 시 양쪽이 함께 갱신."
    ],
@@ -1806,9 +1806,9 @@ window.DETAILS = {
    ],
    "data": [
     "소스 <code>FAQS[]</code>(읽기 전용). 필터 결과 <code>rows</code>는 cat 필터 후 search 필터 순차 적용.",
-    "UI 상태 플래그: <code>state.faqCat:string</code>(기본 '전체'), <code>state.faqSearch:string</code>(기본 ''), <code>state.faqOpen:Set<int></code>(펼친 항목 id).",
-    "카테고리 목록 = <code>['전체', ...new Set(FAQS.map(f=>f.cat))]</code> — 자동 생성이므로 운영팀이 신규 cat 추가 시 칩도 자동 노출.",
-    "답변 본문은 <code>white-space:pre-wrap</code>으로 줄바꿈 보존. 검색·카테고리는 클라이언트 필터(그린필드 API에서는 <code>GET /faqs?cat=&q=</code> 서버 필터로 확장 가능, <b>SPEC §2.6</b> 검색·정렬 표준)."
+    "UI 상태 플래그: <code>state.faqCat:string</code>(기본 '전체'), <code>state.faqSearch:string</code>(기본 ''), <code>state.faqOpen:Set&lt;int&gt;</code>(펼친 항목 id).",
+    "카테고리 목록 = <code>['전체', ...new Set(FAQS.map(f=&gt;f.cat))]</code> — 자동 생성이므로 운영팀이 신규 cat 추가 시 칩도 자동 노출.",
+    "답변 본문은 <code>white-space:pre-wrap</code>으로 줄바꿈 보존. 검색·카테고리는 클라이언트 필터(그린필드 API에서는 <code>GET /faqs?cat=&amp;q=</code> 서버 필터로 확장 가능, <b>SPEC §2.6</b> 검색·정렬 표준)."
    ],
    "exception": [
     "검색/카테고리 결과 0건 빈 상태: 아이콘 🔍 + \"조건에 맞는 답변이 없어요\" + 안내 \"다른 키워드로 검색해 보시거나, 아래 버튼을 눌러 직접 문의해 주세요.\" + <code>📨 서비스 관련 문의 남기기</code> 버튼.",
@@ -1897,7 +1897,7 @@ window.DETAILS = {
    "behavior": [
     "각 카드 클릭 시 <code>state.reviewFilter</code>를 <code>all|wait|done|star5|low</code>로 설정하고 목록을 재필터. 선택 카드에 <code>on</code> 강조 테두리(전체=먹색, 대기=주황, 완료=파랑, 5점=주황, 3점이하=빨강).",
     "집계식: 전체=dated.length, 답변대기=reply 빈 건수, 답변완료=reply 있는 건수, 5점=rating===5, 3점이하=rating≤3.",
-    "수치 색상 규칙: 답변 대기·3점 이하는 건수>0일 때 강조색(주황/빨강), 0이면 회색으로 차분히 표시.",
+    "수치 색상 규칙: 답변 대기·3점 이하는 건수&gt;0일 때 강조색(주황/빨강), 0이면 회색으로 차분히 표시.",
     "홈 \"답변 안 한 리뷰\"로 진입하면 <code>wait</code> 카드가 선택된 상태로 열린다(핀 1 behavior)."
    ],
    "data": [
@@ -1924,7 +1924,7 @@ window.DETAILS = {
     "<b>그린필드 보강</b>: 답변 등록은 prompt 대신 인라인 textarea + [등록]/[취소] 버튼으로 구현하고, 등록된 답변은 [답변 수정]/[답변 삭제]로 편집 가능하도록 정의한다."
    ],
    "data": [
-    "행 바인딩 필드: <code>cust, photo, rating(1~5), date, body, reply</code>. 답변 저장 = <code>REVIEWS.find(x=>x.id===id).reply = 입력값</code>.",
+    "행 바인딩 필드: <code>cust, photo, rating(1~5), date, body, reply</code>. 답변 저장 = <code>REVIEWS.find(x=&gt;x.id===id).reply = 입력값</code>.",
     "답변 본문 <code>reply:string</code> — 검증: 공백만 입력 불가, 최대 길이 500자 권장(폼 검증, 공통 §폼). 빈 문자열은 \"미답변\" 상태로 간주.",
     "답변 등록/수정/삭제는 owner 전용 권장(SPEC §1.6). 손님은 답변을 읽기만 한다.",
     "<b>연동</b>: 답변 등록 시 답변 대기 카운트(핀 4)·홈 reviewWait 즉시 감소. 손님 주문 내역/리뷰 화면에 답변 노출.",
@@ -2092,7 +2092,7 @@ window.DETAILS = {
     "언어 마스터 <code>TR_LANGS = [{code:'en',label:'English',flag:🇺🇸}, {code:'zhTw',label:'繁體中文'}, {code:'zhCn',label:'簡体中文'}, {code:'ja',label:'日本語'}]</code> — 4개 고정, 1차 릴리즈 범위(SPEC §1.1: 서비스 자체는 한국어, 손님 다국어만 이 4종)",
     "항목별 번역 필드: <code>item.tr[langCode]</code>(메뉴명 번역), <code>item.trDesc[langCode]</code>(설명 번역). 둘 다 <code>trEnsure()</code>로 4개 언어 키를 빈 문자열 보장",
     "확정 데이터 모델은 <code>Translation</code> 행 단위(DATA_MODEL §2.11): <code>{store_id, entity_type(menu|category|option_group|option_item), entity_id, locale(en/ja/zh-CN 등), field(name|description), value(≤200자)}</code>, UQ=(entity_type,entity_id,locale,field). 프로토타입의 <code>tr/trDesc</code> 맵은 이 행 집합으로 정규화 저장",
-    "진행률 계산식: <code>filled = 현재 대상 항목 중 tr[lang] 비어있지 않은 수</code>, <code>pct = total>0 ? round(filled/total*100) : 0</code> (total=0이면 0%)",
+    "진행률 계산식: <code>filled = 현재 대상 항목 중 tr[lang] 비어있지 않은 수</code>, <code>pct = total&gt;0 ? round(filled/total*100) : 0</code> (total=0이면 0%)",
     "로케일 코드 매핑 주의: 화면 내부 코드 <code>zhTw/zhCn</code> ↔ 표준 <code>zh-TW/zh-CN</code>, <code>en/ja</code>는 동일 — 저장 시 표준 BCP-47로 정규화 권장"
    ],
    "exception": [
@@ -2148,7 +2148,7 @@ window.DETAILS = {
    "data": [
     "행 키: <code>item.id</code>로 <code>MENUS/OPT_GROUPS/SETS</code>에서 항목 조회. 표시 상품코드 <code>item.code</code>(영문1자+숫자5 = 6자, 매장 내 유니크, M=메뉴/O=옵션/S=세트 — spec/02-menu §1.5.1·§8)",
     "원문 바인딩: <code>origName=item.name</code>, <code>origDesc=item.desc</code>. 번역 바인딩: <code>trName=tr[lang]</code>, <code>trDesc=trDesc[lang]</code>",
-    "검증: <code>value</code> 길이 ≤200자(Translation.value), 메뉴명 번역도 원문과 동일하게 1~30자 권장. HTML 주입 방지 위해 따옴표 이스케이프(<code>\"→&quot;</code>) 후 바인딩",
+    "검증: <code>value</code> 길이 ≤200자(Translation.value), 메뉴명 번역도 원문과 동일하게 1~30자 권장. HTML 주입 방지 위해 따옴표 이스케이프(<code>\"→&amp;quot;</code>) 후 바인딩",
     "연동: 입력값은 손님 QR 화면(언어 전환)에서 해당 상품의 표시명/설명으로 노출. <code>entity_type</code>는 대상별로 menu/option_group(+option_item)/세트로 매핑(DATA_MODEL §2.11)",
     "<code>autoTranslateOne</code>은 <code>trAuto</code> 결과가 빈 문자열이면 값을 쓰지 않고 안내만 표시"
    ],
@@ -2199,7 +2199,7 @@ window.DETAILS = {
    "data": [
     "<code>coupon{ id, name, code, kind('정액'|'비율'|'무료'|'증정'), value:number, condition:string, period:string, issued:number, used:number, status('사용중'|'종료'|'예약'), issuer('merchant'|'softment') }</code>.",
     "신규 생성 API는 <code>POST /coupons</code> 성격. <code>code</code>는 매장 내 유일(중복 불가).",
-    "기간 만료(종료일 < 영업일 당일) 시 배치/조회 시점에 <code>status='종료'</code>로 자동 전환(자동 종료, 핀4와 동일 규칙).",
+    "기간 만료(종료일 &lt; 영업일 당일) 시 배치/조회 시점에 <code>status='종료'</code>로 자동 전환(자동 종료, 핀4와 동일 규칙).",
     "발행처 기본 <code>issuer='merchant'</code> → 정산 제외(사장님 할인 <code>disc</code>로 매출 차감, SPEC §2.1·정산 STATES §8). <code>issuer='softment'</code>는 본사 발행분으로 정산 시 보전."
    ],
    "exception": [
@@ -2215,7 +2215,7 @@ window.DETAILS = {
     "쿠폰 운영 성과(얼마나 발급했고 실제 사용으로 이어졌는지)를 요약해 다음 쿠폰 기획 판단을 돕는다."
    ],
    "behavior": [
-    "<b>사용중 쿠폰</b> = <code>COUPONS.filter(c=>c.status==='사용중').length</code>, 접미사 \"개\".",
+    "<b>사용중 쿠폰</b> = <code>COUPONS.filter(c=&gt;c.status==='사용중').length</code>, 접미사 \"개\".",
     "<b>발급 누계</b> = <code>sum(c.issued)</code> 전체 쿠폰 발급 수량 합.",
     "<b>사용 누계</b> = <code>sum(c.used)</code>, 파란색(<code>--blue</code>) 강조.",
     "<b>사용률</b> = <code>round(sum(used)/sum(issued)*100)</code> %. 분모 0이면 0% 표시. 4개 지표는 현재 상태 필터(핀3)와 무관하게 항상 전체 기준으로 집계(요약 성격)."
@@ -2271,9 +2271,9 @@ window.DETAILS = {
     "주문/결제 화면 쿠폰 적용 이벤트(<code>order.couponName, couponAmt, couponIssuer</code>)와 <code>used</code> 누계가 동기화된다."
    ],
    "exception": [
-    "기간 만료 시 <b>자동 종료</b>: 종료일 < 영업일 당일이면 조회 시점에 <code>status='종료'</code> 전환, pill 회색. [관리]에서 재발급 안내 \"기간이 끝난 쿠폰이에요. 기간을 늘려 다시 사용할 수 있어요.\".",
+    "기간 만료 시 <b>자동 종료</b>: 종료일 &lt; 영업일 당일이면 조회 시점에 <code>status='종료'</code> 전환, pill 회색. [관리]에서 재발급 안내 \"기간이 끝난 쿠폰이에요. 기간을 늘려 다시 사용할 수 있어요.\".",
     "예약 쿠폰(시작일 미래)은 손님 사용 불가, 상태 \"예약\" + \"YYYY-MM-DD부터 쓸 수 있어요\" 보조문구.",
-    "발급 수량 소진(<code>used>=issued</code>, 무제한 제외) 시 사용 막대 100%·\"모두 사용했어요\" 표기, 신규 사용 차단.",
+    "발급 수량 소진(<code>used&gt;=issued</code>, 무제한 제외) 시 사용 막대 100%·\"모두 사용했어요\" 표기, 신규 사용 차단.",
     "[관리]는 owner 전용 — staff는 비활성 + \"사장님만 쿠폰을 관리할 수 있어요.\" 툴팁."
    ]
   }
@@ -2327,7 +2327,7 @@ window.DETAILS = {
    "behavior": [
     "3개 카드 가로 배치(<code>grid-template-columns:repeat(3,1fr)</code>). 클릭 동작 없는 수치 표시 전용.",
     "카드1 \"전체 직원 계정\" = <code>totalCnt</code> = staff 전체 수. 카드2 \"사용 중\" = <code>activeCnt</code>(enabled==='Y'), 파란색 강조. 카드3 \"사용 안 함\" = <code>offCnt</code>(enabled==='N').",
-    "각 수치 뒤 단위 \"명\" 표기. 사용 안 함 카드는 <code>offCnt>0</code>이면 진한 회색, 0이면 연한 회색으로 표시.",
+    "각 수치 뒤 단위 \"명\" 표기. 사용 안 함 카드는 <code>offCnt&gt;0</code>이면 진한 회색, 0이면 연한 회색으로 표시.",
     "수치는 <b>필터·검색과 무관하게 항상 전체 집계</b>(<code>STAFF_LIST.filter(groupId!==1)</code> 기준)로 고정."
    ],
    "data": [
@@ -2422,7 +2422,7 @@ window.DETAILS = {
     "상단 헤더에 제목 <code>공지·안내</code>와 안내 문구, 우측에 <b>확인이 필요한 공지 강조 칩</b>을 배치해 사장님이 미확인 건을 바로 인지하게 함"
    ],
    "behavior": [
-    "미확인 건수는 사이드바 <code>알림 센터</code> 메뉴 우측 <b>빨간 배지</b>로 표시 (값: <code>NOTIFICATIONS.filter(n=>!n.read).length</code>, 0이면 배지 숨김)",
+    "미확인 건수는 사이드바 <code>알림 센터</code> 메뉴 우측 <b>빨간 배지</b>로 표시 (값: <code>NOTIFICATIONS.filter(n=&gt;!n.read).length</code>, 0이면 배지 숨김)",
     "헤더 강조 칩은 <code>🔔 N건 확인해 주세요</code> 형태로 미확인 수를 노출, 클릭 시 <code>state.notifyOnlyUnread</code> 토글 → 활성 시 칩 색 반전 + 라벨 끝에 <code>· 보는 중</code> 추가",
     "홈 대시보드 \"챙겨야 할 일\" 카드에도 미확인 수가 합산 노출 (<code>notifyUnread</code>), 카드 클릭 시 <code>setSection('notify')</code>로 진입",
     "최초 진입 기본 상태: 발신처 필터 접힘(<code>notifyFilterOpen=false</code>), 전체 발신처(<code>notifyFilter='all'</code>), 미확인만 보기 꺼짐(<code>notifyOnlyUnread=false</code>)"

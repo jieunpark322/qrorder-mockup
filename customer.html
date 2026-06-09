@@ -6,7 +6,7 @@
 <title>소프트커피 합정점 · QR 주문</title>
 <style>
   :root{
-    --blue:#3182f6; --blue-d:#1b64da; --blue-50:#eef5ff;
+    --blue:#16315b; --blue-d:#0f2444; --blue-50:#eef1f7;
     --ink:#191f28; --ink2:#4e5968; --ink3:#8b95a1; --ink4:#b0b8c1;
     --line:#e5e8eb; --line2:#f1f3f5; --bg:#f2f4f6; --card:#fff;
     --green:#12b886; --red:#e03131; --amber:#f59f00;
@@ -39,7 +39,14 @@
   .brandinfo{display:flex;align-items:flex-end;gap:13px;padding:0 18px;margin-top:-34px;position:relative;z-index:3;}
   .logo{width:72px;height:72px;border-radius:18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);
     display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;border:3px solid #fff;}
-  .bstore{font-size:21px;font-weight:800;letter-spacing:-.02em;padding-bottom:3px;}
+  .binfo{padding-bottom:2px;min-width:0;}
+  .bstore{font-size:21px;font-weight:800;letter-spacing:-.02em;}
+  .bstatus{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-top:5px;}
+  .bstatus .sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .bstatus.open{color:var(--green);}
+  .bstatus.open .sdot{background:var(--green);box-shadow:0 0 0 3px rgba(18,184,134,.15);}
+  .bstatus.closed{color:var(--red);}
+  .bstatus.closed .sdot{background:var(--red);box-shadow:0 0 0 3px rgba(224,49,49,.15);}
   .bsub{padding:13px 18px 0;}
   .bmode{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--blue-d);background:var(--blue-50);padding:7px 13px;border-radius:20px;}
   .btable{font-weight:800;color:var(--ink);}
@@ -52,10 +59,10 @@
   .maintab.on{color:var(--ink);border-bottom-color:var(--ink);}
   .cattabs{position:sticky;top:45px;z-index:15;background:#fff;display:flex;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);overflow-x:auto;}
   .cattab{flex-shrink:0;font-size:13px;font-weight:700;color:var(--ink3);padding:7px 14px;border-radius:20px;background:var(--bg);border:none;cursor:pointer;font-family:inherit;}
-  .cattab.on{background:var(--ink);color:#fff;}
+  .cattab.on{background:var(--blue);color:#fff;}
 
   .notice{margin:12px 14px 0;display:flex;gap:9px;align-items:flex-start;border-radius:11px;padding:11px 13px;font-size:12.5px;line-height:1.55;}
-  .notice.blue{background:var(--blue-50);border:1px solid #d3e4ff;color:var(--blue-d);}
+  .notice.blue{background:var(--blue-50);border:1px solid #d6deec;color:var(--blue-d);}
   .notice.amber{background:#fff8e6;border:1px solid #ffe3a3;color:#92400e;}
   .notice.red{background:#fff0f0;border:1px solid #ffc9c9;color:#c92a2a;}
 
@@ -80,7 +87,7 @@
 
   /* 장바구니 바 + 담기 애니메이션 */
   .cartbar{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(100% - 28px);max-width:412px;z-index:40;}
-  .cartbtn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:14px;padding:15px 18px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 8px 22px rgba(49,130,246,.4);font-family:inherit;transition:transform .1s;}
+  .cartbtn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:14px;padding:15px 18px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 8px 22px rgba(22,49,91,.32);font-family:inherit;transition:transform .1s;}
   .cartbtn .cnt{background:#fff;color:var(--blue);min-width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12.5px;transition:transform .15s,background .15s,color .15s;}
   .cartbtn .amt{margin-left:auto;}
   .cartbtn:active{transform:scale(.99)!important;}
@@ -94,10 +101,10 @@
   .scroll-top-btn.show{display:flex;}
   @media(min-width:480px){.scroll-top-btn{right:calc(50% - 220px + 14px);}}
 
-  .topbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:14px 16px;}
-  .topbar .back{font-size:20px;background:none;border:none;cursor:pointer;color:var(--ink);padding:2px 4px;margin-left:-4px;}
-  .topbar .ttl{font-size:16px;font-weight:800;}
-  .topbar .sub{font-size:11px;color:var(--ink3);font-weight:600;}
+  .topbar{position:sticky;top:0;z-index:20;background:var(--blue);color:#fff;display:flex;align-items:center;gap:10px;padding:15px 16px;}
+  .topbar .back{font-size:20px;background:none;border:none;cursor:pointer;color:#fff;padding:2px 4px;margin-left:-4px;}
+  .topbar .ttl{font-size:16px;font-weight:800;color:#fff;}
+  .topbar .sub{font-size:11px;color:rgba(255,255,255,.7);font-weight:600;}
 
   /* 공통 바텀시트 */
   .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:none;}
@@ -203,7 +210,7 @@
   .status-line{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--ink);padding:9px 0;}
   .status-line .dot{width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0;}
   .qrbox{width:120px;height:120px;margin:14px auto 4px;border-radius:14px;background:repeating-conic-gradient(#191f28 0% 25%,#fff 0% 50%) 50%/16px 16px;border:7px solid #fff;box-shadow:0 0 0 1px var(--line);}
-  .primarybtn{display:block;width:calc(100% - 32px);margin:20px 16px 8px;background:var(--blue);color:#fff;border:none;border-radius:13px;padding:16px;font-size:15.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 22px rgba(49,130,246,.36);}
+  .primarybtn{display:block;width:calc(100% - 32px);margin:20px 16px 8px;background:var(--blue);color:#fff;border:none;border-radius:13px;padding:16px;font-size:15.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 22px rgba(22,49,91,.3);}
   .primarybtn:disabled{background:var(--line);box-shadow:none;cursor:not-allowed;color:var(--ink3);}
   .ghostbtn{display:block;width:100%;margin:14px 0 0;background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:14px;font-size:14px;font-weight:800;color:var(--ink2);cursor:pointer;font-family:inherit;}
   .primarybtn:active,.cartbtn:active{transform:scale(.99);}
@@ -431,7 +438,12 @@ function brandHero(){
     </div>
     <div class="brandinfo">
       <div class="logo">${STORE.logo}</div>
-      <div class="bstore">${STORE.name}</div>
+      <div class="binfo">
+        <div class="bstore">${STORE.name}</div>
+        <div class="bstatus ${S.businessOpen?'open':'closed'}">
+          <span class="sdot"></span>${S.businessOpen?'영업 중 · 지금 주문할 수 있어요':'영업 종료 · 메뉴만 확인할 수 있어요'}
+        </div>
+      </div>
     </div>`;
 }
 

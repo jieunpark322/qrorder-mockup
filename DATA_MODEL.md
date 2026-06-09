@@ -404,7 +404,7 @@
 | sort_order | int | NN | |
 | created_at | timestamptz | NN | |
 
-매장당 최대 10개.
+매장당 최대 15개.
 
 ### 6.3 StaffCallEvent (호출 이벤트)
 

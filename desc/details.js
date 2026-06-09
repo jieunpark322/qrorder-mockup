@@ -315,7 +315,7 @@ window.DETAILS = {
    ],
    "behavior": [
     "<b>🟢 실시간 배지</b>(<code>주문 내역</code> 제목 옆): 항상 표시되는 상태 표식. 신규 주문 도착 시 PC 에이전트 팝업+사운드, 모바일 앱 푸시로 알린다(SPEC §1.8). 배지 자체는 클릭 동작 없음.",
-    "<b>집계 기준 세그먼트 토글</b> <code>🕛 자정 기준 ↔ 🕒 영업시간 기준</code>: 클릭 시 <code>state.useBusinessHours</code> false↔true 전환 후 즉시 <code>renderApp()</code>. <b>기본값=자정 기준(false)</b>. '영업시간 기준' 선택 시 라벨에 <code>(open~close)</code> 시각을 함께 노출하고, 본문 상단에 안내 배너(<code>bhActiveNotice()</code>)를 띄운다.",
+    "<b>집계 기준 세그먼트 토글</b> <code>🕛 자정 기준 ↔ 🕒 영업시간 기준</code>: 클릭 시 <code>state.useBusinessHours</code> false↔true 전환 후 즉시 <code>renderApp()</code>. <b>기본값=자정 기준(false)</b>. <b>매장이 영업시간 기준으로 바꾸면 그 선택을 매장별로 저장(라스트 메모리)</b>해 다음 진입·이후에도 같은 기준으로 보여준다. '영업시간 기준' 선택 시 라벨에 <code>(open~close)</code> 시각을 함께 노출하고, 본문 상단에 안내 배너(<code>bhActiveNotice()</code>)를 띄운다.",
     "<b>⚙️ 영업시간 설정 버튼</b>: <code>openBusinessHoursModal()</code> 호출 — 사장님이 영업 시작/마감 시각을 직접 변경(자정 넘김 매장 지원).",
     "<b>📤 내보내기 버튼</b>(<code>.btn-primary</code>): <code>openExport(rows.length, '주문 내역', 기간라벨)</code> 호출. <b>현재 필터/정렬이 적용된 조회 결과 전체(rows.length 건)</b>를 xlsx로 내보낸다(표시 개수 페이징과 무관).",
     "<b>ⓘ 카드번호 표시 정책</b>(목록 헤더): 클릭 시 마스킹 정책 alert 노출."
@@ -785,7 +785,7 @@ window.DETAILS = {
     "기본 진입 탭은 <code>state.detailTab='period'</code>(날짜별)."
    ],
    "data": [
-    "집계 기준 플래그: <code>state.useBusinessHours</code> (boolean, 기본 false=자정 기준). 영업시간 값 <code>businessHoursOpen</code>/<code>businessHoursClose</code>.",
+    "집계 기준 플래그: <code>state.useBusinessHours</code> (boolean, 기본 false=자정 기준). <b>매장이 영업시간 기준 선택 시 매장별로 영속 저장(라스트 메모리)</b>해 다음 진입에도 유지(예: <code>store_settings.sales_basis</code>). 영업시간 값 <code>businessHoursOpen</code>/<code>businessHoursClose</code>.",
     "데이터 출처(SPEC §2.2): <b>당일</b>은 결제 트랜잭션 raw를 시간 단위 <code>GROUP BY</code>(실시간), <b>과거</b>는 영업일 마감(다음 날 02:59:59 직후 배치) 시 사전 집계된 테이블 조회. 매출 상세는 어제까지(사전 집계 완료분)만 다룬다.",
     "영업일 정의(SPEC §1.1): 영업일 03:00 시작 ~ 다음 날 02:59 종료. '오늘/어제'는 영업일 기준.",
     "권한(SPEC §1.6.2): 화면 접근 <code>role=owner</code> 전용. staff 토큰으로는 라우트 진입 차단.",
@@ -898,7 +898,7 @@ window.DETAILS = {
     "영업시간 기준 ON일 때 본문 위에 <code>bhActiveNotice()</code> 안내 박스가 노출된다. 영업이 자정을 넘기는 매장(<code>bhCrossesMidnight()</code>=true)이면 강한 안내(💡 큰 박스), 아니면 한 줄 안내(🕒)로 분기한다.",
     "<b>⚙️ 버튼</b>: <code>openBusinessHoursModal()</code> — 영업 시작·마감 시각 입력 모달을 연다. 저장 시 다음 재집계부터 비율(<code>bhRatio()</code>)이 반영된다.",
     "<b>📤 내보내기 버튼</b>: <code>openExport(행수, '매출 한눈에 보기', 기간라벨)</code> 모달. 형식은 엑셀(.xlsx, 기본) / CSV 선택, 「⬇ 다운로드」 시 토스트 노출.",
-    "기본 집계 기준은 <b>자정 기준</b>이지만, 제품 표준은 <b>영업일 03:00 시작</b>(SPEC §1.1)이므로 실서비스 마감 집계는 영업일 경계를 따른다 — 토글은 사장님이 시간대 분포를 영업시간으로 한정해 보고 싶을 때의 보조 뷰다."
+    "<b>기본값=자정 기준</b>. 매장이 [🕒 영업시간 기준]으로 바꾸면 그 선택을 <b>매장별로 저장(라스트 메모리)</b>해 다음 진입·이후에도 같은 기준으로 보여준다(store 단위 영속). 영업일 03:00 경계(SPEC §1.1)는 영업시간 기준일 때 적용."
    ],
    "data": [
     "과거(어제까지) 데이터는 영업일 마감 직후 배치로 적재된 <b>사전 집계 테이블</b>에서 조회 — SPEC §2.2. 오늘 데이터는 이 화면에 포함하지 않는다(주문 내역에서 실시간).",
@@ -1325,7 +1325,7 @@ window.DETAILS = {
    "data": [
     "바인딩: <code>StaffCallMessage[{id, body, enabled, sort_order}]</code>(DATA_MODEL §6.2). 목업 <code>STAFF_CALLS.messages[{id, body, enabled, sort}]</code>. <code>callHistory[]</code>는 <code>StaffCallEvent</code>.",
     "<code>body</code>: string, NN, <b>최대 10자</b>(입력 maxlength=10) — DATA_MODEL §6.2 string(10)과 일치. 공백만 입력 불가.",
-    "개수 한도: 본 정의는 핀/코드 기준 <b>최대 15개</b>를 적용한다. (DATA_MODEL §6.2는 \"매장당 최대 10개\"로 기재돼 있어 <b>15개로 정정 필요</b> — 구현 시 상한값 단일화.)",
+    "개수 한도: <b>최대 15개</b>로 확정(<code>MAX_MSG=15</code>). DATA_MODEL §6.2도 15개로 정정 반영 완료.",
     "메시지 <code>enabled</code> 토글과 전역 <code>StaffCallConfig.enabled</code>는 별개: 전역 ON이어도 모든 메시지가 OFF면 손님 화면에 노출할 항목이 없다.",
     "권한: 메시지 추가·수정·삭제·순서·사용 토글은 owner 전용(핀 정의·SPEC §1.6). staff는 내역 열람·처리까지만."
    ],

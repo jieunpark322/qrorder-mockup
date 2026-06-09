@@ -703,8 +703,19 @@ function menuCard(m){
         ${m.desc?`<span class="mdesc" style="display:block;">${m.desc}</span>`:''}
         <span class="mprice" style="display:block;">${won(priceOf(m))}원${showTakeout?` <span class="was">매장 ${won(m.price)}원</span>`:''}</span>
       </span>
-      ${(out||closed)?'':`<span class="mplus">+</span>`}
+      ${(out||closed)?'':`<span class="mplus" onclick="event.stopPropagation();${(m.opt||[]).length?`openSheet(${m.id})`:`quickAdd(${m.id})`}">+</span>`}
     </button>`;
+}
+/* 옵션 없는 메뉴 — 메인에서 + 누르면 바로 담기 */
+function quickAdd(id){
+  const m=MENU.find(x=>x.id===id);
+  if(!m || isOut(m) || !S.businessOpen) return;
+  const key=id+'|';
+  const ex=S.cart.find(c=>c.key===key);
+  if(ex) ex.qty+=1;
+  else S.cart.push({ key, id, name:m.name, img:m.img, photo:PHOTO[m.id], qty:1, unit:priceOf(m), optText:'' });
+  S._keepScroll=true; render(); S._keepScroll=false;
+  toast(`'${m.name}' 담았어요`); triggerCartAnim();
 }
 function setCat(c, el){
   S.cat=c; S._keepScroll=true; render(); S._keepScroll=false;

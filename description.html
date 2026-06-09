@@ -118,6 +118,8 @@
 
 <div class="db-foot">QR오더 사장님 어드민 · 화면 기획 주석 보드 — 소프트먼트 · 박지은</div>
 
+<!-- 화면별 상세 정의(그린필드) — 있으면 base 핀 내용 위에 병합 -->
+<script src="desc/details.js"></script>
 <script>
 /* =========================================================
    주석 데이터 — SCREENS 배열에 보드를 추가하면 자동 렌더링.
@@ -895,8 +897,10 @@ function buildCards(s){
     head.addEventListener('click',()=>focusPin(s.key,p.n));
     card.appendChild(head);
     const body = el('div','db-card-body');
+    const D = (window.DETAILS && window.DETAILS[s.key] && window.DETAILS[s.key][p.n]) || null;
     CAT.forEach(([key,label])=>{
-      const items = p[key]; if(!items || !items.length) return;
+      const items = (D && D[key] && D[key].length) ? D[key] : p[key];
+      if(!items || !items.length) return;
       const row = el('div','db-row c-'+key);
       row.appendChild(el('div','rlabel','<span class="dot"></span>'+label));
       const ul = el('ul');

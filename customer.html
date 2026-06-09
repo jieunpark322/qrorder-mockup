@@ -36,6 +36,22 @@
   .cover .ctag{position:absolute;top:10px;left:12px;z-index:2;font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,.32);padding:3px 9px;border-radius:20px;}
   .cover-badge{position:absolute;top:12px;right:12px;z-index:3;display:inline-flex;align-items:center;gap:5px;max-width:calc(100% - 24px);font-size:12px;font-weight:800;color:#fff;background:rgba(0,0,0,.46);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);padding:7px 12px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.18);white-space:nowrap;}
   .cover-badge .btable{color:#fff;}
+  /* 대표 이미지 캐러셀 (최대 3장 자동 전환) */
+  .cover-slides{position:absolute;inset:0;}
+  .cover-slide{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0;transition:opacity .9s ease;}
+  .cover-slide.on{opacity:1;}
+  .cover-dots{position:absolute;bottom:42px;right:14px;display:flex;gap:5px;z-index:4;}
+  .cover-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);transition:.3s;}
+  .cover-dot.on{width:16px;border-radius:3px;background:#fff;}
+  /* 메뉴 검색 */
+  .searchwrap{background:#fff;padding:12px 14px 2px;}
+  .searchbar{display:flex;align-items:center;gap:9px;background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;transition:border-color .15s;}
+  .searchbar.focus{border-color:var(--blue);background:#fff;}
+  .searchbar .ic{font-size:15px;line-height:1;flex-shrink:0;}
+  .searchbar input{flex:1;min-width:0;border:none;background:none;font-size:14px;font-family:inherit;color:var(--ink);outline:none;}
+  .searchbar .clr{border:none;background:var(--ink4);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;}
+  .search-empty{text-align:center;color:var(--ink3);font-size:13.5px;line-height:1.7;padding:42px 20px;}
+  .origin-note{font-size:11.5px;color:var(--ink4);margin-top:11px;line-height:1.55;}
   .brandinfo{display:flex;align-items:flex-end;gap:13px;padding:0 18px;margin-top:-34px;position:relative;z-index:3;}
   .logo{width:72px;height:72px;border-radius:18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);
     display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0;border:3px solid #fff;}
@@ -278,6 +294,20 @@ const STORE = {
   reviewOn:true,
   logo:'☕',
   table:'T03',
+  // 매장 대표 이미지 (최대 3장 · 자동 전환)
+  covers:[
+    'https://loremflickr.com/640/360/coffeeshop?lock=70',
+    'https://loremflickr.com/640/360/cafe,interior?lock=71',
+    'https://loremflickr.com/640/360/coffee,beans?lock=72',
+  ],
+  // 원산지 정보 (매장정보 하단 노출)
+  origin:[
+    {n:'커피 원두', o:'에티오피아 / 콜롬비아'},
+    {n:'우유', o:'국산'},
+    {n:'밀(베이커리)', o:'미국산'},
+    {n:'달걀', o:'국산'},
+    {n:'버터', o:'프랑스산'},
+  ],
 };
 const ORDER_TYPES = {
   dinein:   { key:'dinein',   name:'먹고가기', emoji:'🍽️' },
@@ -344,7 +374,7 @@ function pic(emoji, photo){ return emoji + (photo?`<img src="${photo}" loading="
 /* ===== 상태 ===== */
 const S = {
   screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pay:'카드', phone:'', orderNo:null,
-  serve:'self', payTiming:'prepay', tab:'menu',
+  serve:'self', payTiming:'prepay', tab:'menu', search:'',
   businessOpen:true,     // 영업시간 시뮬레이션
   authType:'kakao',      // 'kakao' | 'anon' — 약관 분기용
   termsChecked:{},       // { termId: true/false }
@@ -362,6 +392,27 @@ function render(){
   if(!(S.screen==='menu' && S._keepScroll)) window.scrollTo(0,0);
   renderCartBar();
   setupScrollTop();
+  ensureCover();
+}
+
+/* --- 대표 이미지 캐러셀 --- */
+let _coverIdx=0, _coverTimer=null;
+function applyCover(){
+  const slides=document.querySelectorAll('.cover-slide');
+  const dots=document.querySelectorAll('.cover-dot');
+  if(!slides.length) return;
+  const i=_coverIdx%slides.length;
+  slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+  dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+}
+function ensureCover(){
+  applyCover();
+  if(_coverTimer) return;
+  _coverTimer=setInterval(()=>{
+    const slides=document.querySelectorAll('.cover-slide');
+    if(slides.length<2) return;
+    _coverIdx=(_coverIdx+1)%slides.length; applyCover();
+  },3500);
 }
 
 /* --- 데모 바 --- */
@@ -432,9 +483,15 @@ function brandHero(){
     ? `${ot.emoji} 먹고가기 · <span class="btable">🪑 ${STORE.table} 테이블</span>`
     : S.orderType==='takeout' ? `${ot.emoji} 포장하기 · 즉시 포장`
     : `${ot.emoji} 포장 예약 · 시간 지정 픽업`;
+  const grad='linear-gradient(135deg,var(--coffee1),var(--coffee2))';
+  const covers=(STORE.covers&&STORE.covers.length)?STORE.covers:[PHOTO.cover];
   return `
-    <div class="cover" style="background-image:url('${PHOTO.cover}'),linear-gradient(135deg,var(--coffee1),var(--coffee2));">
+    <div class="cover">
+      <div class="cover-slides">
+        ${covers.map(u=>`<div class="cover-slide" style="background-image:url('${u}'),${grad};"></div>`).join('')}
+      </div>
       <div class="cover-badge">${modeLine}</div>
+      ${covers.length>1?`<div class="cover-dots">${covers.map(()=>'<span class="cover-dot"></span>').join('')}</div>`:''}
     </div>
     <div class="brandinfo">
       <div class="logo">${STORE.logo}</div>
@@ -449,14 +506,19 @@ function brandHero(){
 
 /* --- 메뉴판 --- */
 function scrMenu(){
-  const list = (S.cat==='전체'?CATS:[S.cat]).map(cat=>{
-    const items = visibleMenu().filter(m=>m.cat===cat);
-    if(!items.length) return '';
-    return `<div class="catsec-h">${cat}</div>` + items.map(menuCard).join('');
-  }).join('');
   const closedBanner = !S.businessOpen
     ? `<div class="closed-banner">🔕 지금은 영업 시간이 아니에요. 메뉴 확인만 가능해요.</div>` : '';
+  const sv=(S.search||'').replace(/"/g,'&quot;');
   const menuTab = `
+    <div class="searchwrap">
+      <div class="searchbar" id="searchbar">
+        <span class="ic">🔍</span>
+        <input id="menuSearch" placeholder="메뉴를 검색해 보세요" value="${sv}"
+          oninput="onMenuSearch(this.value)"
+          onfocus="$('searchbar').classList.add('focus')" onblur="$('searchbar').classList.remove('focus')" />
+        <button class="clr" id="searchClear" style="display:${S.search?'flex':'none'};" onclick="clearMenuSearch()">✕</button>
+      </div>
+    </div>
     <div class="cattabs">
       ${['전체','세트',...CATS].map(c=>`<button class="cattab ${S.cat===c?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('')}
     </div>
@@ -465,11 +527,50 @@ function scrMenu(){
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
     ${S.orderType==='dinein'?`<div class="notice blue">🪑 <span>${S.serve==='self'?'준비되면 <b>카카오 알림톡</b>으로 알려드려요 (셀프 수령).':'준비되면 <b>직원이 자리로 가져다 드려요</b>.'}</span></div>`:''}
     ${S.orderType==='dinein'?`<button class="callbtn" onclick="openCallSheet()">🛎 직원 호출하기</button>`:''}
-    <div style="padding-top:4px;">${(S.cat==='전체'||S.cat==='세트')?setsSection():''}${list}</div>`;
+    <div id="menuResults">${menuResultsHtml()}</div>`;
   return `
     ${brandHero()}
     ${mainTabs()}
     ${S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab}`;
+}
+/* --- 메뉴 검색 --- */
+function onMenuSearch(v){
+  S.search=v;
+  const c=$('searchClear'); if(c) c.style.display=v?'flex':'none';
+  renderMenuResults();
+}
+function clearMenuSearch(){ S.search=''; S._keepScroll=true; render(); S._keepScroll=false; const i=$('menuSearch'); if(i) i.focus(); }
+function renderMenuResults(){ const el=$('menuResults'); if(el) el.innerHTML=menuResultsHtml(); }
+function setCard(s){
+  return `
+    <button class="mcard ${!S.businessOpen?'closed-mode':''}" onclick="${S.businessOpen?`openSet(${s.id})`:`toast('지금은 영업 시간이 아니에요')`}">
+      <span class="mimg">${pic(s.img, PHOTO['set'+s.id])}</span>
+      <span class="minfo">
+        <span class="mname">${s.name}</span>
+        <span class="mdesc" style="display:block;">${s.desc}</span>
+        <span class="mprice" style="display:block;">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:500;">구성 선택</span></span>
+      </span>
+      ${S.businessOpen?'<span class="mplus">+</span>':''}
+    </button>`;
+}
+function menuResultsHtml(){
+  const q=(S.search||'').trim().toLowerCase();
+  if(q){
+    const sets=SETS.filter(s=>(s.name+' '+(s.desc||'')).toLowerCase().includes(q));
+    const items=visibleMenu().filter(m=>(m.name+' '+(m.desc||'')+' '+m.cat).toLowerCase().includes(q));
+    if(!sets.length && !items.length)
+      return `<div class="search-empty">🔍 ‘${S.search.trim()}’ 검색 결과가 없어요.<br>다른 키워드로 찾아보세요.</div>`;
+    return `<div style="padding-top:4px;">`
+      + (sets.length?`<div class="catsec-h">🎁 세트 메뉴</div>`+sets.map(setCard).join(''):'')
+      + (items.length?`<div class="catsec-h">메뉴 ${items.length}개</div>`+items.map(menuCard).join(''):'')
+      + `</div>`;
+  }
+  const list=(S.cat==='전체'?CATS:[S.cat]).map(cat=>{
+    const items=visibleMenu().filter(m=>m.cat===cat);
+    if(!items.length) return '';
+    return `<div class="catsec-h">${cat}</div>`+items.map(menuCard).join('');
+  }).join('');
+  return `<div style="padding-top:4px;">${(S.cat==='전체'||S.cat==='세트')?setsSection():''}${list}</div>`;
 }
 function mainTabs(){
   return `<div class="maintabs">${[['menu','🍽️ 메뉴'],['review','⭐ 리뷰'],['info','🏪 매장정보']].map(([k,l])=>`<button class="maintab ${S.tab===k?'on':''}" onclick="setTab('${k}')">${l}</button>`).join('')}</div>`;
@@ -479,7 +580,15 @@ function infoTab(){
   return `<div class="bsub" style="padding-top:16px;">
       <div class="bintro" style="margin-top:0;">${STORE.intro}</div>
       <div class="bamen">${STORE.amenities.map(a=>`<span>${a.i} ${a.n}</span>`).join('')}</div>
-    </div>${storeInfoSection()}`;
+    </div>${storeInfoSection()}${originSection()}`;
+}
+function originSection(){
+  if(!STORE.origin || !STORE.origin.length) return '';
+  return `<div class="stsec" style="margin-bottom:11px;">
+    <div class="st-ttl">🌱 원산지 정보</div>
+    ${STORE.origin.map(o=>`<div class="st-row"><span class="st-k">${o.n}</span><span class="st-v">${o.o}</span></div>`).join('')}
+    <div class="origin-note">※ 원산지는 매장 사정에 따라 변경될 수 있어요. 자세한 내용은 직원에게 문의해 주세요.</div>
+  </div>`;
 }
 function menuCard(m){
   const out = isOut(m);

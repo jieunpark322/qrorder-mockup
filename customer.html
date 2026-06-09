@@ -375,7 +375,7 @@ const MENU = [
   { id:20, name:'소금빵',            cat:'베이커리',     price:3500, takeout:null, status:'판매중', img:'🥖', opt:[],      desc:'겉바속촉', allerg:['wheat','milk'] },
   { id:21, name:'베이글',            cat:'베이커리',     price:3800, takeout:null, status:'판매중', img:'🥯', opt:[],      desc:'', allerg:['wheat'] },
   // 디저트
-  { id:8,  name:'치즈케이크',        cat:'디저트',       price:5500, takeout:null, status:'품절',   img:'🍰', opt:[],      desc:'', allerg:['egg','milk','wheat'] },
+  { id:8,  name:'치즈케이크',        cat:'디저트',       price:5500, takeout:null, status:'품절',   img:'🍰', opt:[],      desc:'꾸덕한 뉴욕 스타일 치즈케이크', allerg:['egg','milk','wheat'] },
   { id:22, name:'티라미수',          cat:'디저트',       price:6000, takeout:null, status:'판매중', img:'🍮', opt:[],      desc:'마스카포네 듬뿍', allerg:['egg','milk','wheat'] },
   { id:23, name:'브라우니',          cat:'디저트',       price:4500, takeout:null, status:'판매중', img:'🍫', opt:[],      desc:'', allerg:['egg','milk','wheat'] },
   { id:9,  name:'마들렌',            cat:'디저트',       price:2800, takeout:null, status:'숨김',   img:'🍪', opt:[],      desc:'', allerg:[] },
@@ -759,17 +759,16 @@ function renderSheet(){
   $('sheet').innerHTML = `<div class="sheet">
       ${imgBox('sheet-img', m.img, PHOTO[m.id], out)}
       <div class="sheet-body">
-        <div class="sheet-name">${m.name} ${out?'<span class="badge-out" style="font-size:13px;vertical-align:middle;">품절</span>':''}</div>
+        <div class="sheet-name">${m.name}</div>
         ${m.desc?`<div class="sheet-desc">${m.desc}</div>`:''}
         <div class="sheet-base">${won(priceOf(m))}원${S.orderType!=='dinein'&&m.takeout!=null&&m.takeout!==m.price?` <span style="font-size:11px;color:var(--ink4);font-weight:600;">(포장가)</span>`:''}</div>
-        ${out?`<div class="notice red" style="margin:14px 0 0;">🚫 <span>지금은 <b>품절된 메뉴</b>예요. 담을 수 없어요.</span></div>`:''}
         ${(m.allerg||[]).length?`<div class="allergy"><span class="al-h">⚠️ 알레르기 유발 성분</span><span class="al-list">${m.allerg.map(a=>(ALLERGEN_ICON[a]||'')+' '+(ALLERGEN_NAME[a]||a)).join(' · ')}</span></div>`:''}
         ${out?'':(groups || '<div style="margin-top:16px;font-size:13px;color:var(--ink3);">옵션 없이 바로 담을 수 있어요.</div>')}
         ${out?'':`<div class="qtyrow"><span class="lbl">수량</span>
           <span class="stepper"><button onclick="sheetQty(-1)">−</button><span class="n">${S.sheet.qty}</span><button onclick="sheetQty(1)">+</button></span></div>`}
       </div>
       <div class="sheet-foot">${out
-        ? `<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">품절된 메뉴예요</button>`
+        ? `<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">지금은 담을 수 없어요</button>`
         : `<button class="addbtn" onclick="addToCart()">담기 · ${won(sheetUnit()*S.sheet.qty)}원</button>`}</div>
     </div>`;
 }

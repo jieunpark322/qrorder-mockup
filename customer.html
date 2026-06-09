@@ -451,7 +451,7 @@ function scrMenu(){
     ${closedBanner}
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
-    ${S.orderType==='dinein'?`<div class="notice blue">🪑 <span><b>${STORE.table} 테이블</b> 주문이에요. ${S.serve==='self'?'준비되면 <b>카카오 알림톡</b>으로 알려드려요 (셀프 수령).':'준비되면 <b>직원이 자리로 가져다 드려요</b>.'}</span></div>`:''}
+    ${S.orderType==='dinein'?`<div class="notice blue">🪑 <span>${S.serve==='self'?'준비되면 <b>카카오 알림톡</b>으로 알려드려요 (셀프 수령).':'준비되면 <b>직원이 자리로 가져다 드려요</b>.'}</span></div>`:''}
     ${S.orderType==='dinein'?`<button class="callbtn" onclick="openCallSheet()">🛎 직원 호출하기</button>`:''}
     <div style="padding-top:4px;">${(S.cat==='전체'||S.cat==='세트')?setsSection():''}${list}</div>`;
   return `

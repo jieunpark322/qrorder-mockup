@@ -715,7 +715,7 @@ function quickAdd(id){
   if(ex) ex.qty+=1;
   else S.cart.push({ key, id, name:m.name, img:m.img, photo:PHOTO[m.id], qty:1, unit:priceOf(m), optText:'' });
   S._keepScroll=true; render(); S._keepScroll=false;
-  toast(`'${m.name}' 담았어요`); triggerCartAnim();
+  toast('장바구니에 담았어요'); triggerCartAnim();
 }
 function setCat(c, el){
   S.cat=c; S._keepScroll=true; render(); S._keepScroll=false;
@@ -789,7 +789,7 @@ function addToCart(){
   const optText=(m.opt||[]).flatMap(gid=>(S.sheet.sel[gid]||[]).map(i=>OPTS[gid].items[i].n)).join(', ');
   const unit=sheetUnit(); const key=S.sheet.id+'|'+optText; const ex=S.cart.find(c=>c.key===key);
   if(ex) ex.qty+=S.sheet.qty; else S.cart.push({ key, id:m.id, name:m.name, img:m.img, photo:PHOTO[m.id], qty:S.sheet.qty, unit, optText });
-  const nm=m.name; closeSheet(); S._keepScroll=true; render(); S._keepScroll=false; toast(`'${nm}' 담았어요`);
+  closeSheet(); S._keepScroll=true; render(); S._keepScroll=false; toast('장바구니에 담았어요');
   triggerCartAnim();
 }
 function triggerCartAnim(){
@@ -844,7 +844,7 @@ function addSet(){
   const optText=s.slots.map((sl,i)=>sl.cands[S.setSheet.sel[i]].n).join(' + ');
   const unit=setUnit(); const key='set'+s.id+'|'+optText; const ex=S.cart.find(c=>c.key===key);
   if(ex) ex.qty+=S.setSheet.qty; else S.cart.push({ key, id:'set'+s.id, name:'[세트] '+s.name, img:s.img, photo:PHOTO['set'+s.id], qty:S.setSheet.qty, unit, optText });
-  const nm=s.name; closeSheet(); S._keepScroll=true; render(); S._keepScroll=false; toast(`'${nm}' 담았어요`);
+  closeSheet(); S._keepScroll=true; render(); S._keepScroll=false; toast('장바구니에 담았어요');
   triggerCartAnim();
 }
 

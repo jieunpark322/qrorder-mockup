@@ -285,6 +285,22 @@
   .st-row:first-of-type{border-top:none;}
   .st-k{flex-shrink:0;width:106px;color:var(--ink3);font-weight:700;}
   .st-v{color:var(--ink);flex:1;line-height:1.65;}
+  /* 재고 임박 배지 (INF) */
+  .stock-pill{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:800;color:var(--amber);background:#fff4e6;border:1px solid #ffd8a8;padding:3px 9px;border-radius:20px;}
+  /* 결제 진행/접수 처리 화면 (STA) */
+  .proc{text-align:center;padding:90px 28px 40px;min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .spinner{width:54px;height:54px;border:5px solid var(--blue-50);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .proc h2{font-size:22px;font-weight:800;margin:0 0 10px;}
+  .proc p{font-size:14.5px;color:var(--ink2);line-height:1.65;}
+  .proc .code{margin-top:20px;font-size:11px;color:var(--ink4);background:var(--bg);padding:6px 12px;border-radius:8px;font-family:monospace;}
+  /* 에러 화면 (ERR) */
+  .errbox{text-align:center;padding:46px 28px 22px;}
+  .errbox .eic{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:42px;margin:0 auto 20px;background:#fff0f0;color:var(--red);box-shadow:0 8px 22px rgba(224,49,49,.16);}
+  .errbox h2{font-size:22px;font-weight:800;margin:0 0 11px;line-height:1.32;}
+  .errbox p{font-size:14.5px;color:var(--ink2);line-height:1.65;}
+  .errbox .code{display:inline-block;margin-top:18px;font-size:11px;color:var(--ink4);background:var(--bg);padding:6px 12px;border-radius:8px;font-family:monospace;}
+  .err-link{display:block;width:100%;text-align:center;margin-top:14px;background:none;border:none;color:var(--ink3);font-size:13.5px;text-decoration:underline;cursor:pointer;font-family:inherit;}
 </style>
 </head>
 <body>
@@ -367,10 +383,10 @@ const MENU = [
   // 티·에이드
   { id:5,  name:'복숭아 아이스티',   cat:'티·에이드',    price:4800, takeout:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'', allerg:['peach'] },
   { id:6,  name:'레몬에이드',        cat:'티·에이드',    price:5200, takeout:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'상큼한 수제 레몬', allerg:[] },
-  { id:15, name:'자몽에이드',        cat:'티·에이드',    price:5500, takeout:5000, status:'판매중', img:'🍊', opt:[2,3],   desc:'', allerg:[] },
+  { id:15, name:'자몽에이드',        cat:'티·에이드',    price:5500, takeout:5000, status:'판매중', img:'🍊', opt:[2,3],   desc:'', allerg:[], stock:0 },
   { id:16, name:'캐모마일 티',       cat:'티·에이드',    price:4500, takeout:4000, status:'판매중', img:'🌼', opt:[3],     desc:'', allerg:[] },
   // 스무디·프라페
-  { id:17, name:'딸기 스무디',       cat:'스무디·프라페', price:6000, takeout:5500, status:'판매중', img:'🍓', opt:[2],     desc:'생딸기 듬뿍', allerg:['milk'] },
+  { id:17, name:'딸기 스무디',       cat:'스무디·프라페', price:6000, takeout:5500, status:'판매중', img:'🍓', opt:[2],     desc:'생딸기 듬뿍', allerg:['milk'], stock:2 },
   { id:18, name:'망고 스무디',       cat:'스무디·프라페', price:6000, takeout:5500, status:'판매중', img:'🥭', opt:[2],     desc:'', allerg:['milk'] },
   { id:19, name:'자바칩 프라페',     cat:'스무디·프라페', price:6300, takeout:5800, status:'판매중', img:'🧋', opt:[2],     desc:'초코칩 가득', allerg:['milk'] },
   // 베이커리
@@ -379,7 +395,7 @@ const MENU = [
   { id:21, name:'베이글',            cat:'베이커리',     price:3800, takeout:null, status:'판매중', img:'🥯', opt:[],      desc:'', allerg:['wheat'] },
   // 디저트
   { id:8,  name:'치즈케이크',        cat:'디저트',       price:5500, takeout:null, status:'품절',   img:'🍰', opt:[],      desc:'꾸덕한 뉴욕 스타일 치즈케이크', allerg:['egg','milk','wheat'] },
-  { id:22, name:'티라미수',          cat:'디저트',       price:6000, takeout:null, status:'판매중', img:'🍮', opt:[],      desc:'마스카포네 듬뿍', allerg:['egg','milk','wheat'] },
+  { id:22, name:'티라미수',          cat:'디저트',       price:6000, takeout:null, status:'판매중', img:'🍮', opt:[],      desc:'마스카포네 듬뿍', allerg:['egg','milk','wheat'], stock:3 },
   { id:23, name:'브라우니',          cat:'디저트',       price:4500, takeout:null, status:'판매중', img:'🍫', opt:[],      desc:'', allerg:['egg','milk','wheat'] },
   { id:9,  name:'마들렌',            cat:'디저트',       price:2800, takeout:null, status:'숨김',   img:'🍪', opt:[],      desc:'', allerg:[] },
   // 브런치
@@ -451,18 +467,20 @@ const S = {
   screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pay:'카드', phone:'', orderNo:null,
   serve:'self', payTiming:'prepay', tab:'menu', search:'', callSel:[],
   businessOpen:true,     // 영업시간 시뮬레이션
+  errSim:'none', procStep:null, errType:null,   // 결제 처리상태/에러 시뮬레이션
   authType:'kakao',      // 'kakao' | 'anon' — 약관 분기용
   termsChecked:{},       // { termId: true/false }
 };
 const won = n => n.toLocaleString('ko-KR');
 const priceOf = m => (S.orderType==='dinein') ? m.price : (m.takeout!=null ? m.takeout : m.price);
-const isOut = m => m.status==='품절';
+const isOut = m => m.status==='품절' || m.stock===0;
+const lowStock = m => m.stock!=null && m.stock>0 && m.stock<=3;
 const visibleMenu = () => MENU.filter(m=>m.status!=='숨김');
 const $ = id => document.getElementById(id);
 
 function render(){
   renderDemo();
-  const r = { menu:scrMenu, checkout:scrCheckout, terms:scrTerms, done:scrDone }[S.screen];
+  const r = { menu:scrMenu, checkout:scrCheckout, terms:scrTerms, processing:scrProcessing, error:scrError, done:scrDone }[S.screen];
   $('screen').innerHTML = r();
   if(!(S.screen==='menu' && S._keepScroll)) window.scrollTo(0,0);
   S._tabAnim=null;
@@ -520,8 +538,12 @@ function renderDemo(){
   html += `<span class="ds-div">로그인 ›</span>`
     + `<button class="ds-chip ${S.authType==='kakao'?'on':''}" onclick="S.authType='kakao';render()">🟡 카카오</button>`
     + `<button class="ds-chip ${S.authType==='anon'?'on':''}" onclick="S.authType='anon';render()">👤 비회원</button>`;
+  html += `<span class="ds-div">결제 시 에러 ›</span>`
+    + [['none','✅ 정상'],['payfail','💳 결제실패'],['pos','🔌 POS끊김'],['network','🌐 네트워크']]
+        .map(([k,l])=>`<button class="ds-chip ${S.errSim===k?'on':''}" onclick="setErrSim('${k}')">${l}</button>`).join('');
   $('demobar').innerHTML = html;
 }
+function setErrSim(v){ S.errSim=v; renderDemo(); }
 function setServe(v){ S.serve=v; if(v==='self') S.payTiming='prepay'; render(); }
 function setPayTiming(v){ if(v==='postpay' && S.serve!=='server'){ toast('셀프 수령은 선불만 가능해요'); return; } S.payTiming=v; render(); }
 function switchMode(m){
@@ -704,6 +726,7 @@ function menuCard(m){
       <span class="minfo">
         <span class="mname">${m.name} ${out?'<span class="badge-out">품절</span>':''}</span>
         ${m.desc?`<span class="mdesc" style="display:block;">${m.desc}</span>`:''}
+        ${lowStock(m)?`<span class="stock-pill" style="margin-top:5px;">⚡ 잔여 ${m.stock}개</span>`:''}
         <span class="mprice" style="display:block;">${won(priceOf(m))}원${showTakeout?` <span class="was">매장 ${won(m.price)}원</span>`:''}</span>
       </span>
       ${(out||closed)?'':`<span class="mplus" onclick="event.stopPropagation();${(m.opt||[]).length?`openSheet(${m.id})`:`quickAdd(${m.id})`}">+</span>`}
@@ -776,6 +799,7 @@ function renderSheet(){
         <div class="sheet-name">${m.name}</div>
         ${m.desc?`<div class="sheet-desc">${m.desc}</div>`:''}
         <div class="sheet-base">${won(priceOf(m))}원${S.orderType!=='dinein'&&m.takeout!=null&&m.takeout!==m.price?` <span style="font-size:11px;color:var(--ink4);font-weight:600;">(포장가)</span>`:''}</div>
+        ${lowStock(m)?`<div class="stock-pill" style="margin-top:10px;">⚡ 잔여 ${m.stock}개 · 서둘러 주세요</div>`:''}
         ${(m.allerg||[]).length?`<div class="allergy"><span class="al-h">⚠️ 알레르기 유발 성분</span><span class="al-list">${m.allerg.map(a=>(ALLERGEN_ICON[a]||'')+' '+(ALLERGEN_NAME[a]||a)).join(' · ')}</span></div>`:''}
         ${out?'':(groups || '<div style="margin-top:16px;font-size:13px;color:var(--ink3);">옵션 없이 바로 담을 수 있어요.</div>')}
         ${out?'':`<div class="qtyrow"><span class="lbl">수량</span>
@@ -1081,9 +1105,60 @@ function scrTerms(){
     <div style="height:20px;"></div>`;
 }
 
+/* --- 결제 진행 → 주문 접수 (STA_001·STA_002) → 완료 / 에러 분기 --- */
 function placeOrder(){
+  const isPrepay = !(S.orderType==='dinein' && S.payTiming==='postpay');
+  S.screen='processing'; S.procStep = isPrepay ? 'pay' : 'submit'; render();
+  if(isPrepay){
+    setTimeout(()=>{ if(S.screen!=='processing') return; S.procStep='submit'; render(); setTimeout(finishOrder,1300); }, 1500);
+  } else {
+    setTimeout(finishOrder, 1300);
+  }
+}
+function finishOrder(){
+  if(S.screen!=='processing') return;
+  if(S.errSim!=='none'){ S.errType=S.errSim; S.screen='error'; render(); return; }
   S.orderNo='#20260515-'+String(50+Math.floor((cartTotal()%900))).padStart(4,'0'); S.screen='done'; render();
 }
+function scrProcessing(){
+  const isPay = S.procStep==='pay';
+  return `<div class="proc">
+    <div class="spinner"></div>
+    <h2>${isPay?'결제 처리 중이에요':'주문 접수 중이에요'}</h2>
+    <p>${isPay
+      ? `<b>${S.pay}</b>로 결제를 진행하고 있어요.<br>잠시만 기다려 주세요.`
+      : `결제가 완료됐어요.<br>매장에 주문을 전달하고 있어요.`}</p>
+    <div class="code">STATUS: ${isPay?'PAYMENT_IN_PROGRESS':'ORDER_SUBMITTING'}</div>
+  </div>`;
+}
+const ERR_CASES = {
+  payfail:{icon:'💳', title:'결제에 실패했어요', code:'PAYMENT_FAILED',
+    msg:'카드 한도·잔액 또는 일시적인 오류일 수 있어요.<br>다른 결제수단으로 다시 시도해 주세요.',
+    primary:'다른 방법으로 결제', onPrimary:'backToCheckout()'},
+  pos:{icon:'🔌', title:'매장 시스템이<br>일시 연결 끊김', code:'POS_OFFLINE',
+    msg:'매장 POS와 통신이 잠시 끊겼어요.<br>직원 호출 후 주문하거나 잠시 뒤 다시 시도해 주세요.',
+    primary:'다시 시도', onPrimary:'placeOrder()'},
+  network:{icon:'🌐', title:'연결이 불안정해요', code:'NETWORK_ERROR',
+    msg:'네트워크 연결이 원활하지 않아요.<br>연결 상태를 확인하고 다시 시도해 주세요.',
+    primary:'다시 시도', onPrimary:'placeOrder()'},
+};
+function scrError(){
+  const e=ERR_CASES[S.errType]||ERR_CASES.network;
+  return `<div class="topbar"><button class="back" onclick="backToCheckout()">‹</button>
+      <div><div class="ttl">주문 처리 오류</div></div></div>
+    <div class="errbox">
+      <div class="eic">${e.icon}</div>
+      <h2>${e.title}</h2>
+      <p>${e.msg}</p>
+      <div class="code">CODE: ${e.code}</div>
+    </div>
+    <button class="primarybtn" onclick="${e.onPrimary}">${e.primary}</button>
+    <div style="padding:0 16px 24px;">
+      <button class="ghostbtn" onclick="openCallSheet()">🛎 직원 호출</button>
+      <button class="err-link" onclick="backToCheckout()">결제 화면으로 돌아가기</button>
+    </div>`;
+}
+function backToCheckout(){ S.screen='checkout'; S.errType=null; render(); }
 
 /* --- 완료 --- */
 function scrDone(){

@@ -390,7 +390,7 @@ window.DETAILS = {
    ],
    "behavior": [
     "<b>헤더 클릭 정렬</b>: 주문일시/주문번호/채널/메뉴/결제수단/결제금액/상태 컬럼에 ▲▼ 토글(<code>setOrderSort</code>, <code>applySort</code>). 결제 시점/No./자세히 컬럼은 정렬 없음.",
-    "<b>채널 셀</b>: 먹고가기(테이블 N)/포장하기/포장 예약 표시(<code>o.channel</code>). <b>결제 시점 셀</b>: 선불/후불 pill(<code>orderPayType(o)</code> — 포장·예약=선불, 매장 17~21시=후불 데모 규칙). <b>결제수단 셀</b>: <code>payLabel</code>+<code>paySub</code>, 미결제는 \"미결제\".",
+    "<b>채널 셀</b>: 먹고가기(테이블 N)/포장하기/포장 예약 표시(<code>o.channel</code> — \"포장 예약\"은 channel=<code>takeout</code> + 예약 속성(pickup_time·reservation_accepted_at)의 <b>표시 파생 라벨</b>, DATA_MODEL §4.1). <b>결제 시점 셀</b>: 선불/후불 pill(<code>orderPayType(o)</code> — 포장·예약=선불, 매장 17~21시=후불 데모 규칙). <b>결제수단 셀</b>: <code>payLabel</code>+<code>paySub</code>, 미결제는 \"미결제\".",
     "<b>결제금액 셀</b>: 정상은 <code>amt</code> 굵게; 취소는 취소선. 쿠폰/할인 적용 시 칩 노출 — 🎟️ 소프트먼트/매장 쿠폰 −금액, 🔥 할인 −금액.",
     "<b>취소 행</b>: 연한 적색 배경(<code>#fff7f7</code>), 주문번호 취소선+red, \"↺ 취소일시 + 취소/결제 취소\" 보조 라인.",
     "<b>표시 개수 셀렉트</b>(10/20/50/100, 기본 20)는 화면 페이징에만 적용 — \"💡 화면에만 적용돼요 · 내보내기는 조회된 N건 전체\". 하단 페이지네이션 제공.",
@@ -1168,7 +1168,7 @@ window.DETAILS = {
    ],
    "data": [
     "상태 필드: <code>state.stlListDateBasis</code>('settle'|'approval'), <code>stlListQuickRange</code>('today'|'1w'|'1m'|'thismonth'|'3m'|'all'|'period'|'specific'), <code>stlListPeriodStart/End</code>(ISO date str), <code>stlListSpecificDate</code>(ISO date str), <code>stlListStatus</code>, <code>stlListCoupon</code>.",
-    "정산 상태값: <code>정산완료</code>(pill=done, 라벨 '입금 완료') / <code>정산대기</code>(pill=pending, 라벨 '곧 들어와요'). 회차 status는 <code>settleISO ≤ todayISO ? 정산완료 : 정산대기</code> 문자열 비교로 산정.",
+    "정산 상태값 3종: <code>정산완료</code>(pill=done, '입금 완료') / <code>정산대기</code>(pill=pending, '곧 들어와요') / <code>보류(held)</code>(pill=hold, '확인 중' — 마감 후 환불>다음 회차 등, STATES §8.2·DATA_MODEL §8.1). 기본 산정은 <code>settleISO ≤ todayISO ? 정산완료 : 정산대기</code>, held는 정산 시스템 플래그로 별도 표기.",
     "기간 필터는 <code>basisKey</code> 값으로 <code>r[basisKey] >= start && <= end</code> 비교. 정산일 기준이면 settleISO 없는 미래/산정중 행은 자연히 제외.",
     "조회 대상: <code>settlements</code>(회차) ↔ <code>DAY</code> 매핑. 영업일 03:00 경계(SPEC §1.1), 정산 사이클 D+3 영업일(STATES §8.1)."
    ],
@@ -1242,7 +1242,7 @@ window.DETAILS = {
     "D+3 영업일 입금 약속과 마감 후 환불 차감/보류 규칙을 사장님에게 투명하게 전달."
    ],
    "behavior": [
-    "<b>상태 pill</b>: <code>정산완료</code> → <code><span class=\"pill done\">입금 완료</span></code>, <code>정산대기</code> → <code><span class=\"pill pending\">곧 들어와요</span></code>. 상태는 <code>settleISO ≤ todayISO</code> 비교로 자동 산정.",
+    "<b>상태 pill</b>: <code>정산완료</code> → <code><span class=\"pill done\">입금 완료</span></code>, <code>정산대기</code> → <code><span class=\"pill pending\">곧 들어와요</span></code>, <code>보류(held)</code> → <code><span class=\"pill hold\">확인 중</span></code>(STATES §8.2). 기본 산정은 <code>settleISO ≤ todayISO</code> 비교 + held 플래그.",
     "<b>행 클릭</b>: <code>settlementId</code>가 있으면 행 전체 클릭 → <code>openStlDetail(settlementId)</code> → stl-detail 화면(<code>state.stlDetailId</code> 세팅). 자세히 칸은 파란 <code>자세히 ›</code> 표시.",
     "상세 화면(stl-detail)은 해당 회차의 결제·환불·수수료·쿠폰 보전 내역과 승인일 묶음(토/일/공휴일은 한 정산일에 여러 영업일이 합쳐짐), D+3 영업일 정산일을 보여준다.",
     "정렬에서 status 키로 정렬 시 정산완료/대기 그룹핑 가능."
@@ -1677,7 +1677,7 @@ window.DETAILS = {
    "behavior": [
     "<b>‹ 전월</b> 버튼(<code>cal-nav</code>, aria-label '전월') → <code>setCalendarMonth(-1)</code>, <b>› 익월</b> → <code>setCalendarMonth(1)</code>. 보고 있는 월 상태 <code>state.calendarMonth</code>(기본 <code>'2026-05'</code>)를 갱신 후 재렌더.",
     "현재 월(<code>2026-05</code>)이 아닐 때만 <b>오늘로</b> 버튼(<code>btn-ghost</code>) 노출 → <code>setCalendarMonth('today')</code>로 기준월을 <code>'2026-05'</code>로 복귀. 현재 월에서는 숨김.",
-    "범례: <code>cal-legend done</code>=<b>입금 완료</b>(정산완료), <code>cal-legend pending</code>=<b>곧 들어와요</b>(정산대기). 색은 의미와 1:1.",
+    "범례: <code>cal-legend done</code>=<b>입금 완료</b>(정산완료), <code>cal-legend pending</code>=<b>곧 들어와요</b>(정산대기), <code>cal-legend hold</code>=<b>확인 중</b>(보류/held, STATES §8.2). 색은 의미와 1:1.",
     "월 라벨은 <code>min-width:140px</code> 중앙 정렬로 자릿수 변동에도 화살표 위치 고정."
    ],
    "data": [

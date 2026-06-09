@@ -264,7 +264,7 @@
 | id | uuid | PK | |
 | store_id | uuid | FK, NN | |
 | order_number | string | NN, UQ per store | 표시용 주문 번호 (예: 매장 일련번호) |
-| channel | enum | NN | `dine_in` / `takeout` |
+| channel | enum | NN | `dine_in` / `takeout` — 화면의 "포장 예약"은 채널 값이 아니라 channel=`takeout` + `pickup_time`/`reservation_accepted_at`가 있는 주문의 **표시 파생 라벨** |
 | table_id | uuid | FK, NL | 매장 주문일 때 |
 | status | enum | NN | `pending` / `accepted` / `cooking` / `ready` / `completed` / `cancelled` |
 | payment_id | uuid | FK, NL | Payment.id |
@@ -341,10 +341,29 @@
 | id | uuid | PK | |
 | order_id | uuid | FK, NN | |
 | source | enum | NN | `happy_hour` / `coupon` / `set` |
-| ref_id | uuid | NL | source에 따른 참조 ID |
+| ref_id | uuid | NL | source에 따른 참조 ID (coupon이면 Coupon.id) |
+| coupon_issuer | enum | NL | source=coupon일 때 `merchant`(매장 발행) / `softment`(소프트먼트 발행) — 정산 보전 판정에 사용 |
 | amount | int | NN | 할인액 (양수) |
 
-매출 `disc` 컬럼 합계에 사용.
+매출 `disc` 컬럼 합계에 사용. `coupon_issuer='softment'` 분은 정산 시 매장에 보전(§8.1 `platform_coupon_comp`), `merchant` 분은 매장 부담(보전 없음).
+
+### 4.7 Coupon (쿠폰 마스터)
+
+| 필드 | 타입 | 제약 | 설명 |
+|---|---|---|---|
+| id | uuid | PK | |
+| store_id | uuid | FK, NL | 매장 발행 시 (softment 발행은 NULL 가능) |
+| issuer | enum | NN | `merchant`(매장) / `softment`(소프트먼트 본사) |
+| name | string | NN | 쿠폰 이름 |
+| discount_type | enum | NN | `amount`(정액) / `rate`(정률) |
+| discount_value | int | NN | 금액(원) 또는 비율(%) |
+| min_order_amount | int | NN, default 0 | 사용 최소 주문금액 |
+| issued_count | int | NN, default 0 | 발급 수량 |
+| used_count | int | NN, default 0 | 사용 수량 |
+| starts_at / ends_at | timestamptz | NN | 사용 기간 |
+| status | enum | NN | `active` / `scheduled` / `ended` |
+
+`issuer='softment'` 쿠폰 할인분은 정산 시 매장에 보전된다(§8.1 `platform_coupon_comp`).
 
 ---
 
@@ -362,7 +381,8 @@
 | reservation | bool | NN, default false | 포장 예약 ON/OFF |
 | reservation_slot_minutes | int | NN, default 30 | 슬롯 단위 |
 | reservation_block_before_close_minutes | int | NN, default 30 | 영업 종료 N분 전 슬롯 차단 |
-| wait_minutes | int | NN | 대기 시간 안내 (5~70, 5분 간격) |
+| wait_minutes_min | int | NN | 포장 대기 시간 안내 — 최소(분) |
+| wait_minutes_max | int | NN | 포장 대기 시간 안내 — 최대(분). 손님 화면에 "min~max분" 범위로 노출 |
 | notifications | jsonb | NN | 매장 식사 셀프 모드 시 호출 방식 `["call_name","kakao","display"]` |
 | updated_at | timestamptz | NN | |
 
@@ -470,7 +490,8 @@
 | gross | int | NN | 해당일 결제 합계 |
 | refund | int | NN | 해당일 결제분에 대한 환불 합계 (사후 환불 포함) |
 | pg_fee | int | NN | 결제 수수료 합계 |
-| net_payable | int | NN | 출금 예정액 = gross - refund - pg_fee |
+| platform_coupon_comp | int | NN, default 0 | 소프트먼트 발행 쿠폰 보전액(+) |
+| net_payable | int | NN | 출금 예정액 = gross − refund − pg_fee + platform_coupon_comp |
 | status | enum | NN | `pending` / `paid_out` / `held` |
 | paid_out_at | timestamptz | NL | |
 | created_at | timestamptz | NN | |

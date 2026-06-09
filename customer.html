@@ -256,7 +256,8 @@
   .callbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 28px);margin:12px 14px 0;background:#fff;border:1.5px solid var(--blue);color:var(--blue-d);border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
   .callbtn:active{transform:scale(.99);background:var(--blue-50);}
   .callgrid{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
-  .callopt{padding:16px 6px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);text-align:center;}
+  .callopt{padding:16px 6px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);text-align:center;transition:.12s;}
+  .callopt.sel{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);font-weight:800;box-shadow:inset 0 0 0 1px var(--blue);}
   .callopt:active{background:var(--blue-50);border-color:var(--blue);}
   .rvsec{background:#fff;margin:11px 0;padding:16px 18px;}
   .rv-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
@@ -446,7 +447,7 @@ function imgBox(cls, emoji, photo, soldout){
 /* ===== 상태 ===== */
 const S = {
   screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pay:'카드', phone:'', orderNo:null,
-  serve:'self', payTiming:'prepay', tab:'menu', search:'',
+  serve:'self', payTiming:'prepay', tab:'menu', search:'', callSel:[],
   businessOpen:true,     // 영업시간 시뮬레이션
   authType:'kakao',      // 'kakao' | 'anon' — 약관 분기용
   termsChecked:{},       // { termId: true/false }
@@ -850,16 +851,31 @@ function addSet(){
 
 /* --- 직원 호출 --- */
 function openCallSheet(){
-  $('sheet').innerHTML=`<div class="sheet"><div class="sheet-body">
-      <div class="sheet-name">🛎 직원 호출</div>
-      <div class="sheet-desc">필요한 걸 눌러주세요. <b>${STORE.table} 테이블</b>로 직원이 갈게요.</div>
-      <div class="callgrid">
-        ${STAFF_CALL_MSGS.map(m=>`<button class="callopt" onclick="sendCall('${m}')">${m}</button>`).join('')}
-      </div></div>
-    <div class="sheet-foot"><button class="addbtn" style="background:var(--bg);color:var(--ink2);box-shadow:none;" onclick="closeSheet()">닫기</button></div></div>`;
+  S.callSel=[];
+  renderCallSheet();
   $('sheetbg').classList.add('on'); syncScrollLock();
 }
-function sendCall(m){ closeSheet(); toast(`직원을 호출했어요 · "${m}"`); }
+function toggleCall(i){
+  const idx=S.callSel.indexOf(i);
+  if(idx>=0) S.callSel.splice(idx,1); else S.callSel.push(i);
+  renderCallSheet();
+}
+function renderCallSheet(){
+  const n=S.callSel.length;
+  $('sheet').innerHTML=`<div class="sheet"><div class="sheet-body">
+      <div class="sheet-name">🛎 직원 호출</div>
+      <div class="sheet-desc">필요한 걸 <b>모두 선택</b>한 뒤 호출해 주세요. <b>${STORE.table} 테이블</b>로 직원이 갈게요.</div>
+      <div class="callgrid">
+        ${STAFF_CALL_MSGS.map((m,i)=>`<button class="callopt ${S.callSel.includes(i)?'sel':''}" onclick="toggleCall(${i})">${m}</button>`).join('')}
+      </div></div>
+    <div class="sheet-foot"><button class="addbtn" ${n?`onclick="sendCalls()"`:'disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;"'}>${n?`직원 호출하기 · ${n}개`:'필요한 항목을 선택해 주세요'}</button></div></div>`;
+}
+function sendCalls(){
+  if(!S.callSel.length) return;
+  const items=S.callSel.map(i=>STAFF_CALL_MSGS[i]);
+  closeSheet();
+  toast(`직원을 호출했어요 · ${items.join(', ')}`);
+}
 
 /* --- 장바구니 팝업 시트 --- */
 function cartCount(){ return S.cart.reduce((s,c)=>s+c.qty,0); }

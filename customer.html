@@ -613,7 +613,7 @@ function scrMenu(){
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
     ${S.orderType==='dinein'?(S.serve==='self'
-      ? `<div class="kakao-note"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요. <span style="font-weight:600;">(셀프 수령)</span></span></div>`
+      ? `<div class="kakao-note"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드릴게요. <span style="font-weight:600;">(셀프 수령)</span></span></div>`
       : `<div class="notice blue">🪑 <span>준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div>`):''}
     <div id="menuResults">${menuResultsHtml()}</div>`;
   const content = S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab;
@@ -950,7 +950,7 @@ function scrCheckout(){
       : `<div class="sec"><div class="sec-h">💳 결제 수단 <span class="opt-pick" style="font-weight:600;">선불 · 주문 시 바로 결제</span></div>
           <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div></div>`}
     ${notify?`<div class="sec"><div class="sec-h">📨 주문 알림</div>
-      <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>
+      <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드릴게요.</span></div>
       <div class="field"><label>카카오 알림톡 받을 연락처 (끝 4자리)</label>
         <input id="phoneInput" inputmode="numeric" maxlength="4" placeholder="1234" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div></div>`:''}
     <div class="sec"><div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>

@@ -82,6 +82,8 @@
   .cattabs::-webkit-scrollbar{display:none;}
   .cattab{flex-shrink:0;font-size:15px;font-weight:700;color:var(--ink3);padding:9px 16px;border-radius:20px;background:var(--bg);border:none;cursor:pointer;font-family:inherit;white-space:nowrap;}
   .cattab.on{background:var(--blue);color:#fff;font-weight:800;}
+  .cattab-ic{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;color:var(--ink2);font-family:inherit;}
+  .cattab-ic.on{background:var(--blue);color:#fff;}
   /* 탭(메뉴/리뷰/매장정보) 전환 슬라이딩 */
   @keyframes tabSlide{from{opacity:0;transform:translateX(var(--tab-dx,20px));}to{opacity:1;transform:translateX(0);}}
   .tab-anim{animation:tabSlide .28s cubic-bezier(.22,.61,.36,1);}
@@ -134,8 +136,6 @@
   .fab-stack{position:fixed;right:16px;bottom:22px;z-index:39;display:flex;flex-direction:column;align-items:flex-end;gap:11px;transition:bottom .22s ease;}
   .fab-stack.lifted{bottom:92px;}
   @media(min-width:480px){.fab-stack{right:calc(50% - 220px + 16px);}}
-  .scroll-top-btn{width:46px;height:46px;border-radius:50%;background:#fff;border:1.5px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.16);display:none;align-items:center;justify-content:center;font-size:20px;cursor:pointer;color:var(--ink2);font-family:inherit;align-self:flex-end;}
-  .scroll-top-btn.show{display:flex;}
   .staff-fab{display:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:58px;height:58px;border-radius:50%;background:var(--blue);color:#fff;border:none;box-shadow:0 6px 18px rgba(22,49,91,.4);cursor:pointer;font-family:inherit;padding:0;}
   .staff-fab.show{display:flex;}
   .staff-fab:active{transform:scale(.95);}
@@ -313,9 +313,8 @@
 <div class="sheet-bg" id="sheetbg" onclick="if(event.target===this)closeSheet()"><div id="sheet"></div></div>
 <!-- 장바구니 팝업 시트 -->
 <div class="sheet-bg" id="cartsheetbg" onclick="if(event.target===this)closeCartSheet()"><div id="cartsheet"></div></div>
-<!-- 플로팅 버튼 스택 (스크롤 탑 + 직원 호출) -->
+<!-- 플로팅 버튼 (직원 호출) -->
 <div class="fab-stack" id="fabStack">
-  <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()" title="맨 위로">↑</button>
   <button class="staff-fab" id="staffFab" onclick="openCallSheet()"><span class="fi">🛎</span><span class="ft">직원호출</span></button>
 </div>
 
@@ -468,6 +467,7 @@ const S = {
   serve:'self', payTiming:'prepay', tab:'menu', search:'', callSel:[],
   businessOpen:true,     // 영업시간 시뮬레이션
   errSim:'none', procStep:null, errType:null,   // 결제 처리상태/에러 시뮬레이션
+  searchOpen:false, activeCat:null,             // 검색창 토글 / 현재 보이는 카테고리
   authType:'kakao',      // 'kakao' | 'anon' — 약관 분기용
   termsChecked:{},       // { termId: true/false }
 };
@@ -485,9 +485,10 @@ function render(){
   if(!(S.screen==='menu' && S._keepScroll)) window.scrollTo(0,0);
   S._tabAnim=null;
   renderCartBar();
-  setupScrollTop();
+  setupScrollSpy();
   ensureCover();
   syncFabs();
+  _lastActiveSec=null;
 }
 
 /* --- 플로팅 버튼(직원 호출 / 위로) 표시·위치 --- */
@@ -619,21 +620,21 @@ function scrMenu(){
   const closedBanner = !S.businessOpen
     ? `<div class="closed-banner">🔕 지금은 영업 시간이 아니에요. 메뉴 확인만 가능해요.</div>` : '';
   const sv=(S.search||'').replace(/"/g,'&quot;');
+  const secs=[{label:'세트',id:'sec-0'}, ...CATS.map((c,i)=>({label:c,id:'sec-'+(i+1)}))];
   const menuTab = `
-    <div class="searchwrap">
-      <div class="searchbar" id="searchbar">
-        <span class="ic">🔍</span>
-        <input id="menuSearch" placeholder="메뉴를 검색해 보세요" value="${sv}"
-          oninput="onMenuSearch(this.value)"
-          onfocus="$('searchbar').classList.add('focus')" onblur="$('searchbar').classList.remove('focus')" />
-        <button class="clr" id="searchClear" style="display:${S.search?'flex':'none'};" onclick="clearMenuSearch()">✕</button>
-      </div>
-    </div>
     <div class="cattabs-wrap">
       <div class="cattabs" id="cattabs">
-        ${['전체','세트',...CATS].map(c=>`<button class="cattab ${S.cat===c?'on':''}" onclick="setCat('${c}',this)">${c}</button>`).join('')}
+        <button class="cattab-ic ${S.searchOpen?'on':''}" onclick="toggleSearch()" aria-label="메뉴 검색">🔍</button>
+        ${secs.map(s=>`<button class="cattab" data-sec="${s.id}" onclick="scrollToSec('${s.id}')">${s.label}</button>`).join('')}
       </div>
     </div>
+    ${S.searchOpen?`<div class="searchwrap">
+      <div class="searchbar focus" id="searchbar">
+        <span class="ic">🔍</span>
+        <input id="menuSearch" placeholder="메뉴를 검색해 보세요" value="${sv}" oninput="onMenuSearch(this.value)" />
+        <button class="clr" style="display:flex;" onclick="toggleSearch()">✕</button>
+      </div>
+    </div>`:''}
     ${closedBanner}
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
@@ -650,13 +651,41 @@ function scrMenu(){
     <div id="tabContent" class="${animCls}" style="--tab-dx:${dx};">${content}</div>`;
 }
 /* --- 메뉴 검색 --- */
-function onMenuSearch(v){
-  S.search=v;
-  const c=$('searchClear'); if(c) c.style.display=v?'flex':'none';
-  renderMenuResults();
+function onMenuSearch(v){ S.search=v; renderMenuResults(); }
+function toggleSearch(){
+  S.searchOpen=!S.searchOpen;
+  if(!S.searchOpen) S.search='';
+  S._keepScroll=true; render(); S._keepScroll=false;
+  if(S.searchOpen){ const i=$('menuSearch'); if(i) i.focus(); }
 }
-function clearMenuSearch(){ S.search=''; S._keepScroll=true; render(); S._keepScroll=false; const i=$('menuSearch'); if(i) i.focus(); }
 function renderMenuResults(){ const el=$('menuResults'); if(el) el.innerHTML=menuResultsHtml(); }
+/* --- 카테고리 = 해당 섹션으로 스크롤 (잘라내기 X) --- */
+function stickyOffset(){
+  const mt=document.querySelector('.maintabs'), ct=document.querySelector('.cattabs-wrap');
+  return (mt?mt.offsetHeight:0)+(ct?ct.offsetHeight:0)+4;
+}
+function scrollToSec(id){
+  const el=document.getElementById(id);
+  if(el){ const y=el.getBoundingClientRect().top+window.scrollY-stickyOffset(); window.scrollTo({top:Math.max(0,y),behavior:'smooth'}); }
+  _lastActiveSec=id; setActiveChip(id,true);
+}
+let _lastActiveSec=null;
+function setActiveChip(id,center){
+  const tabs=$('cattabs'); if(!tabs) return;
+  let activeEl=null;
+  tabs.querySelectorAll('.cattab').forEach(b=>{ const on=b.getAttribute('data-sec')===id; b.classList.toggle('on',on); if(on) activeEl=b; });
+  if(center&&activeEl&&activeEl.scrollIntoView) activeEl.scrollIntoView({inline:'center',block:'nearest'});
+}
+function setupScrollSpy(){
+  window.onscroll=()=>{
+    if(S.screen!=='menu'||S.tab!=='menu') return;
+    const secs=[...document.querySelectorAll('#menuResults [id^="sec-"]')];
+    if(!secs.length) return;
+    const off=stickyOffset()+8; let cur=secs[0].id;
+    for(const s of secs){ if(s.getBoundingClientRect().top<=off) cur=s.id; }
+    if(cur!==_lastActiveSec){ _lastActiveSec=cur; setActiveChip(cur,true); }
+  };
+}
 function setCard(s){
   return `
     <button class="mcard ${!S.businessOpen?'closed-mode':''}" onclick="${S.businessOpen?`openSet(${s.id})`:`toast('지금은 영업 시간이 아니에요')`}">
@@ -681,12 +710,15 @@ function menuResultsHtml(){
       + (items.length?`<div class="catsec-h">메뉴 ${items.length}개</div>`+items.map(menuCard).join(''):'')
       + `</div>`;
   }
-  const list=(S.cat==='전체'?CATS:[S.cat]).map(cat=>{
+  // 검색 안 할 때 — 세트 + 전체 카테고리를 한 화면에(섹션 앵커 포함)
+  let html=`<div style="padding-top:4px;">`;
+  if(SETS.length) html+=`<div id="sec-0">${setsSection()}</div>`;
+  CATS.forEach((cat,ci)=>{
     const items=visibleMenu().filter(m=>m.cat===cat);
-    if(!items.length) return '';
-    return `<div class="catsec-h">${cat}</div>`+items.map(menuCard).join('');
-  }).join('');
-  return `<div style="padding-top:4px;">${(S.cat==='전체'||S.cat==='세트')?setsSection():''}${list}</div>`;
+    if(!items.length) return;
+    html+=`<div id="sec-${ci+1}"><div class="catsec-h">${cat}</div>${items.map(menuCard).join('')}</div>`;
+  });
+  return html+`</div>`;
 }
 function mainTabs(){
   return `<div class="maintabs">${[['menu','🍽️ 메뉴'],['review','⭐ 리뷰'],['info','🏪 매장정보']].map(([k,l])=>`<button class="maintab ${S.tab===k?'on':''}" onclick="setTab('${k}')">${l}</button>`).join('')}</div>`;
@@ -743,13 +775,6 @@ function quickAdd(id){
   S._keepScroll=true; render(); S._keepScroll=false;
   toast('장바구니에 담았어요'); triggerCartAnim();
 }
-function setCat(c, el){
-  S.cat=c; S._keepScroll=true; render(); S._keepScroll=false;
-  // 선택한 카테고리 칩을 가로 스크롤 영역 가운데로 이동
-  const tabs=$('cattabs'); const active=tabs&&tabs.querySelector('.cattab.on');
-  if(active&&active.scrollIntoView) active.scrollIntoView({inline:'center',block:'nearest'});
-}
-
 /* --- 옵션 바텀시트 --- */
 function openSheet(id){
   const m = MENU.find(x=>x.id===id); const sel={};
@@ -1222,17 +1247,6 @@ function storeInfoSection(){
     <div class="st-row"><span class="st-k">휴무일</span><span class="st-v">${STORE.holidays.join(' · ')}</span></div>
   </div>`;
 }
-
-/* --- 플로팅 스크롤 탑 버튼 --- */
-function setupScrollTop(){
-  window.onscroll = function(){
-    const btn = $('scrollTopBtn');
-    if(!btn) return;
-    if(window.scrollY > 200) btn.classList.add('show');
-    else btn.classList.remove('show');
-  };
-}
-function scrollToTop(){ window.scrollTo({ top:0, behavior:'smooth' }); }
 
 render();
 </script>

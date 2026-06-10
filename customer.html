@@ -309,6 +309,8 @@
   .st-v{color:var(--ink);flex:1;line-height:1.65;}
   /* 재고 임박 배지 (INF) */
   .stock-pill{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:800;color:var(--amber);background:#fff4e6;border:1px solid #ffd8a8;padding:3px 9px;border-radius:20px;}
+  /* 할인 배지 */
+  .disc-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;background:#fff0f0;color:var(--red);border:1px solid #ffc9c9;vertical-align:middle;white-space:nowrap;margin-left:4px;}
   /* 결제 진행/접수 처리 화면 (STA) */
   .proc{text-align:center;padding:90px 28px 40px;min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .spinner{width:54px;height:54px;border:5px solid var(--blue-50);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px;}
@@ -361,7 +363,7 @@ const STORE = {
     { d:'토',    t:'10:00 ~ 22:00', note:'' },
     { d:'일',    t:'10:00 ~ 21:00', note:'' },
   ],
-  lastOrder:'영업 종료 30분 전',
+  lastOrder:'21:30',
   holidays:['1/1 신정','5/5 어린이날'],
   reviewOn:true,
   logo:'☕',
@@ -401,10 +403,10 @@ const OPTS = {
 };
 const MENU = [
   // 커피
-  { id:1,  name:'아메리카노',        cat:'커피',         price:4500, takeout:4000, status:'판매중', img:'☕', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:[], badges:['hot'] },
+  { id:1,  name:'아메리카노',        cat:'커피',         price:4500, takeout:4000, status:'판매중', img:'☕', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:[], badges:['hot'], discount:500 },
   { id:4,  name:'아이스 아메리카노', cat:'커피',         price:4500, takeout:4000, status:'판매중', img:'🧊', opt:[2,3,1], desc:'', allerg:[] },
   { id:2,  name:'카페라떼',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'🥛', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:['milk'] },
-  { id:3,  name:'바닐라라떼',        cat:'커피',         price:5500, takeout:5000, status:'판매중', img:'🥤', opt:[2,3,1], desc:'부드러운 바닐라 시그니처', allerg:['milk','soy'], badges:['reco'] },
+  { id:3,  name:'바닐라라떼',        cat:'커피',         price:5500, takeout:5000, status:'판매중', img:'🥤', opt:[2,3,1], desc:'부드러운 바닐라 시그니처', allerg:['milk','soy'], badges:['reco'], discount:1000 },
   { id:10, name:'콜드브루',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'🧋', opt:[2,3],   desc:'12시간 저온 추출', allerg:[], badges:['hot','reco'] },
   { id:11, name:'카푸치노',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'☕', opt:[2,3,1], desc:'풍성한 우유 거품', allerg:['milk'] },
   // 논커피
@@ -512,6 +514,7 @@ const S = {
 };
 const won = n => n.toLocaleString('ko-KR');
 const priceOf = m => (S.orderType==='dinein') ? m.price : (m.takeout!=null ? m.takeout : m.price);
+const effectivePrice = m => priceOf(m) - (m.discount || 0);
 const isOut = m => m.status==='품절' || m.stock===0;
 const lowStock = m => m.stock!=null && m.stock>0 && m.stock<=3;
 const badgesHtml = m => (m.badges||[]).map(k=>BADGE[k]?`<span class="mbadge ${k}">${BADGE[k].e} ${BADGE[k].l}</span>`:'').join('');
@@ -621,7 +624,7 @@ function showClosedAlert(){
       <div style="font-size:12.5px;color:var(--ink3);background:var(--bg);border-radius:10px;padding:11px 14px;margin-bottom:20px;text-align:left;line-height:1.7;">
         🕐 <b>영업 시간</b><br>
         평일 09:00 ~ 22:00 &nbsp;·&nbsp; 주말 10:00 ~ 21:00<br>
-        라스트 오더 영업 종료 30분 전
+        라스트 오더 ${STORE.lastOrder}
       </div>
       <button onclick="closeClosedAlert()" style="width:100%;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:15px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">메뉴 구경하기</button>
     </div>`;
@@ -793,6 +796,7 @@ function setTab(t){
 function infoTab(){
   return `<div class="bsub" style="padding-top:16px;">
       <div class="bintro" style="margin-top:0;">${STORE.intro}</div>
+      <div style="font-size:13px;font-weight:800;color:var(--ink3);margin-top:16px;margin-bottom:6px;">매장 편의 정보</div>
       <div class="bamen">${STORE.amenities.map(a=>`<span>${a.i} ${a.n}</span>`).join('')}</div>
     </div>${storeInfoSection()}${originSection()}`;
 }
@@ -809,7 +813,9 @@ function menuCard(m){
   const out = isOut(m);
   const closed = !S.businessOpen;
   const showTakeout = S.orderType!=='dinein' && m.takeout!=null && m.takeout!==m.price;
-  // 품절이어도 상세는 열림 / 영업 종료 시엔 안내만
+  const baseP = priceOf(m);
+  const effP = effectivePrice(m);
+  const hasDisc = !!m.discount;
   const clickHandler = closed
     ? `onclick="toast('지금은 영업 시간이 아니에요')"`
     : `onclick="openSheet(${m.id})"`;
@@ -820,7 +826,12 @@ function menuCard(m){
         <span class="mname">${m.name} ${badgesHtml(m)} ${out?'<span class="badge-out">품절</span>':''}</span>
         ${m.desc?`<span class="mdesc" style="display:block;">${m.desc}</span>`:''}
         ${lowStock(m)?`<span class="stock-pill" style="margin-top:5px;">⚡ 잔여 ${m.stock}개</span>`:''}
-        <span class="mprice" style="display:block;">${won(priceOf(m))}원${showTakeout?` <span class="was">매장 ${won(m.price)}원</span>`:''}</span>
+        <span class="mprice" style="display:block;">
+          ${hasDisc?`<span style="text-decoration:line-through;color:var(--ink4);font-size:14px;font-weight:500;">${won(baseP)}원</span> `:''}
+          ${won(effP)}원
+          ${hasDisc?`<span class="disc-badge">🏷 ${won(m.discount)}원 할인</span>`:''}
+          ${showTakeout&&!hasDisc?` <span class="was">매장 ${won(m.price)}원</span>`:''}
+        </span>
       </span>
       ${(out||closed)?'':`<span class="mplus" onclick="event.stopPropagation();${(m.opt||[]).length?`openSheet(${m.id})`:`quickAdd(${m.id})`}">+</span>`}
     </button>`;
@@ -832,7 +843,7 @@ function quickAdd(id){
   const key=id+'|';
   const ex=S.cart.find(c=>c.key===key);
   if(ex) ex.qty+=1;
-  else S.cart.push({ key, id, name:m.name, img:m.img, photo:PHOTO[m.id], qty:1, unit:priceOf(m), optText:'' });
+  else S.cart.push({ key, id, name:m.name, img:m.img, photo:PHOTO[m.id], qty:1, unit:effectivePrice(m), optText:'' });
   S._keepScroll=true; render(); S._keepScroll=false;
   toast('장바구니에 담았어요'); triggerCartAnim();
 }
@@ -865,7 +876,7 @@ function syncScrollLock(){
     window.scrollTo(0, _scrollLockY);
   }
 }
-function sheetUnit(){ const m=MENU.find(x=>x.id===S.sheet.id); let p=priceOf(m);
+function sheetUnit(){ const m=MENU.find(x=>x.id===S.sheet.id); let p=effectivePrice(m);
   (m.opt||[]).forEach(gid=>{ const g=OPTS[gid]; const sel=S.sheet.sel[gid]||{}; Object.keys(sel).forEach(i=>{ p+=g.items[i].p*sel[i]; }); }); return p; }
 // 옵션 토글·수량 변경 시엔 전체 시트를 다시 그리지 않고(이미지 깜빡임 방지) 바뀐 부분만 갱신
 function setOptSingle(gid,idx){ S.sheet.sel[gid]={[idx]:1}; updateSheet(); }   // 1개만(라디오)
@@ -924,7 +935,15 @@ function renderSheet(){
       <div class="sheet-body">
         <div class="sheet-name">${m.name} ${badgesHtml(m)}</div>
         ${m.desc?`<div class="sheet-desc">${m.desc}</div>`:''}
-        <div class="sheet-base">${won(priceOf(m))}원${S.orderType!=='dinein'&&m.takeout!=null&&m.takeout!==m.price?` <span style="font-size:11px;color:var(--ink4);font-weight:600;">(포장가)</span>`:''}</div>
+        <div class="sheet-base">
+          ${(()=>{ const baseP=priceOf(m); const effP=effectivePrice(m); const hasDisc=!!m.discount;
+            const isTakeout=S.orderType!=='dinein'&&m.takeout!=null&&m.takeout!==m.price;
+            return (hasDisc?`<span style="text-decoration:line-through;color:var(--ink4);font-size:14px;font-weight:500;">${won(baseP)}원</span> `:'')
+              + won(effP)+'원'
+              + (hasDisc?`<span class="disc-badge">🏷 ${won(m.discount)}원 할인</span>`:'')
+              + (isTakeout?`<div style="font-size:12.5px;color:var(--ink3);font-weight:600;margin-top:4px;">포장가 · 매장가 <span style="text-decoration:line-through;">${won(m.price)}원</span></div>`:'');
+          })()}
+        </div>
         ${lowStock(m)?`<div class="stock-pill" style="margin-top:10px;">⚡ 잔여 ${m.stock}개 · 서둘러 주세요</div>`:''}
         ${allergyTextOf(m)?`<div class="allergy"><span class="al-h">⚠️ 알레르기 정보</span><span class="al-list" style="white-space:pre-line;">${escapeHtml(allergyTextOf(m))}</span></div>`:''}
         ${out?'':`<div id="sheetDyn">${sheetDynHtml(m)}</div>`}
@@ -1040,7 +1059,9 @@ function toggleCall(i){
 }
 function renderCallSheet(){
   const n=S.callSel.length;
-  $('sheet').innerHTML=`<div class="sheet"><div class="sheet-body">
+  $('sheet').innerHTML=`<div class="sheet">
+    <button class="sheet-close" onclick="closeSheet()" aria-label="닫기">✕</button>
+    <div class="sheet-body">
       <div class="sheet-name">🛎 직원 호출</div>
       <div class="sheet-desc">필요한 걸 <b>모두 선택</b>한 뒤 호출해 주세요. <b>${STORE.table} 테이블</b>로 직원이 갈게요.</div>
       <div class="callgrid">

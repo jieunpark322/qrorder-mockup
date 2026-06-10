@@ -58,7 +58,18 @@
   .brandinfo{padding:0 18px;margin-top:-32px;position:relative;z-index:3;}
   .logo{width:72px;height:72px;border-radius:18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);
     display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid #fff;}
-  .binfo{margin-top:12px;min-width:0;}
+  .brow{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:12px;}
+  .binfo{min-width:0;}
+  .histbtn{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:var(--blue-d);background:var(--blue-50);border:1px solid #d6deec;border-radius:20px;padding:8px 13px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .histbtn:active{transform:scale(.97);}
+  .histbtn .hist-cnt{background:var(--blue);color:#fff;min-width:18px;height:18px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;}
+  .hist-card{border:1px solid var(--line);border-radius:13px;padding:14px;margin-top:14px;}
+  .hist-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .hist-round{font-size:15px;font-weight:800;color:var(--blue-d);background:var(--blue-50);padding:4px 11px;border-radius:8px;}
+  .hist-meta{font-size:12.5px;color:var(--ink3);font-weight:600;}
+  .hist-line{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:5px 0;color:var(--ink2);}
+  .hist-opt{color:var(--ink4);font-size:12px;}
+  .hist-tot{display:flex;justify-content:space-between;font-size:15px;font-weight:800;border-top:1px solid var(--line2);margin-top:8px;padding-top:9px;}
   .bstore{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--ink);}
   .bstatus{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;margin-top:6px;}
   .bstatus .sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
@@ -441,6 +452,11 @@ const REVIEWS = [
   {c:'강**',d:'2026-05-06',r:4,b:'디저트 종류가 더 많았으면 좋겠어요.',reply:''},
   {c:'윤**',d:'2026-04-28',r:2,b:'주문이 평소보다 늦게 나왔어요.',reply:'불편을 드려 죄송해요. 피크타임 인력을 보강했어요.'},
 ];
+// 주문 내역 (차수별 · 같은 테이블에서 여러 번 주문 · 사장님 사이트와 연동되는 누적 내역)
+let ORDER_HISTORY = [
+  { round:1, time:'18:05', status:'서빙 완료', items:[{n:'아메리카노',o:'Regular · 얼음 보통',q:1,p:4500},{n:'바닐라라떼',o:'Large',q:1,p:6300}], total:10800 },
+  { round:2, time:'18:34', status:'조리 중',   items:[{n:'치즈케이크',o:'',q:1,p:5500},{n:'아이스 아메리카노',o:'Regular · 얼음 보통',q:2,p:9000}], total:14500 },
+];
 const PHOTO = {
   cover:'https://loremflickr.com/640/360/coffeeshop?lock=70',
   1:'https://loremflickr.com/360/240/coffee?lock=31',
@@ -618,11 +634,14 @@ function brandHero(){
     </div>
     <div class="brandinfo">
       <div class="logo">${STORE.logo}</div>
-      <div class="binfo">
-        <div class="bstore">${STORE.name}</div>
-        <div class="bstatus ${S.businessOpen?'open':'closed'}">
-          <span class="sdot"></span>${S.businessOpen?'영업 중 · 지금 주문할 수 있어요':'영업 종료 · 메뉴만 확인할 수 있어요'}
+      <div class="brow">
+        <div class="binfo">
+          <div class="bstore">${STORE.name}</div>
+          <div class="bstatus ${S.businessOpen?'open':'closed'}">
+            <span class="sdot"></span>${S.businessOpen?'영업 중 · 지금 주문할 수 있어요':'영업 종료 · 메뉴만 확인할 수 있어요'}
+          </div>
         </div>
+        <button class="histbtn" onclick="openHistory()">🧾 주문내역${ORDER_HISTORY.length?` <span class="hist-cnt">${ORDER_HISTORY.length}</span>`:''}</button>
       </div>
     </div>`;
 }
@@ -940,6 +959,27 @@ function addSet(){
   triggerCartAnim();
 }
 
+/* --- 주문 내역 (차수별 · 내림차순) --- */
+function histRoundCard(r){
+  return `<div class="hist-card">
+    <div class="hist-head"><span class="hist-round">${r.round}차 주문</span><span class="hist-meta">${r.time} · ${r.status}</span></div>
+    ${r.items.map(it=>`<div class="hist-line"><span style="flex:1;">${it.n}${it.o?` <span class="hist-opt">· ${it.o}</span>`:''} ×${it.q}</span><span style="font-weight:700;color:var(--ink);white-space:nowrap;">${won(it.p)}원</span></div>`).join('')}
+    <div class="hist-tot"><span>합계</span><span>${won(r.total)}원</span></div>
+  </div>`;
+}
+function openHistory(){
+  const rounds=ORDER_HISTORY.slice().sort((a,b)=>b.round-a.round);   // 내림차순(최신 차수 먼저)
+  const body = rounds.length
+    ? rounds.map(histRoundCard).join('')
+    : `<div style="padding:36px 0;text-align:center;color:var(--ink3);font-size:14px;">아직 주문 내역이 없어요</div>`;
+  $('sheet').innerHTML=`<div class="sheet"><div class="sheet-body">
+      <div class="sheet-name">🧾 주문 내역</div>
+      <div class="sheet-desc">${S.orderType==='dinein'?STORE.table+' 테이블 · ':''}오늘 주문${rounds.length?` · 총 ${rounds.length}차`:''}</div>
+      ${body}</div>
+    <div class="sheet-foot"><button class="addbtn" style="background:var(--bg);color:var(--ink2);box-shadow:none;" onclick="closeSheet()">닫기</button></div></div>`;
+  $('sheetbg').classList.add('on'); syncScrollLock();
+}
+
 /* --- 직원 호출 --- */
 function openCallSheet(){
   S.callSel=[];
@@ -1218,6 +1258,10 @@ function finishOrder(){
   if(S.errSim!=='none'){ S.errType=S.errSim; S.screen='error'; render(); return; }
   S.orderNo='#20260515-'+String(50+Math.floor((cartTotal()%900))).padStart(4,'0');
   S.callNo = (S.orderType!=='dinein') ? genCallNo() : null;   // 포장·예약만 호출 번호 발급
+  // 주문 내역에 차수 누적
+  const nextRound=ORDER_HISTORY.reduce((m,r)=>Math.max(m,r.round),0)+1;
+  ORDER_HISTORY.push({ round:nextRound, time:'방금', status:'주문 접수',
+    items:S.cart.map(c=>({n:c.name,o:c.optText,q:c.qty,p:c.unit*c.qty})), total:cartTotal() });
   S.screen='done'; render();
 }
 function scrProcessing(){

@@ -2267,7 +2267,7 @@ function renderOverview(main){
       </div>
       <div class="left">
         ${basisToggleInline()}
-        <button class="btn-primary" onclick='openExport(${days.length}, "매출 한눈에 보기", ${JSON.stringify(centerLabel)})'>📤 내보내기</button>
+        <button class="btn-primary" onclick='openExport(${days.length}, "매출 한눈에 보기", ${JSON.stringify(centerLabel)})'>📥 엑셀 다운로드</button>
       </div>
     </div>
 
@@ -2436,7 +2436,7 @@ function renderDetail(main){
       </div>
       <div class="left">
         ${basisToggleInline()}
-        <button class="btn-primary" onclick='openExport(15, "매출 상세 · " + ${JSON.stringify(tabName)}, "2026년 5월 1일(금) ~ 5월 15일(금)")'>📤 내보내기</button>
+        <button class="btn-primary" onclick='openExport(15, "매출 상세 · " + ${JSON.stringify(tabName)}, "2026년 5월 1일(금) ~ 5월 15일(금)")'>📥 엑셀 다운로드</button>
       </div>
     </div>
 
@@ -3539,7 +3539,7 @@ function renderOrders(main){
           state.orderDateFilter==='3m'?'최근 3개월 (2026년 2월 15일 ~ 5월 15일)':
           state.orderDateFilter==='custom'?`사용자 지정 (${state.customStart} ~ ${state.customEnd})`:
           '최근 3개월'
-        )})'>📤 내보내기</button>
+        )})'>📥 엑셀 다운로드</button>
       </div>
     </div>
 
@@ -3733,7 +3733,7 @@ function renderOrders(main){
           <span>표시 개수</span>
           ${rowsSelect('orderRowsPerPage')}
           <span class="cnt">총 <b>${rows.length}</b>건 조회</span>
-          <span style="font-size:11px;color:var(--ink-3);margin-left:8px;">💡 화면에만 적용돼요 · 내보내기는 조회된 ${fmt(rows.length)}건 전체</span>
+          <span style="font-size:11px;color:var(--ink-3);margin-left:8px;">💡 화면에만 적용돼요 · 엑셀 다운로드는 조회된 ${fmt(rows.length)}건 전체</span>
         </div>
         ${paginationStatic(state.orderPage, Math.max(1, Math.ceil(rows.length/state.orderRowsPerPage)))}
       </div>
@@ -4038,7 +4038,7 @@ function renderStlList(main){
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력으로</button>
-        <button class="btn-primary" onclick='openExport(${rows.length}, "정산 내역", "${rangeLabel} · ${state.stlListDateBasis==='approval'?'결제일':'정산일'} 기준")'>📤 엑셀로 받기</button>
+        <button class="btn-primary" onclick='openExport(${rows.length}, "정산 내역", "${rangeLabel} · ${state.stlListDateBasis==='approval'?'결제일':'정산일'} 기준")'>📥 엑셀 다운로드</button>
       </div>
     </div>
 
@@ -4232,7 +4232,7 @@ function renderStlDetail(main){
       </div>
       <div class="left">
         <button class="btn-ghost" onclick="setSection('stl-calendar')">🗓️ 정산 달력으로</button>
-        <button class="btn-primary" onclick='openExport(${stl.cnt}, "결제 내역", "영업일 ${fmtMD(stl.approvalDate)}(${stl.approvalDow}) · 정산일 ${fmtMD(stl.settleDate)}(${stl.settleDow})")'>📤 엑셀로 받기</button>
+        <button class="btn-primary" onclick='openExport(${stl.cnt}, "결제 내역", "영업일 ${fmtMD(stl.approvalDate)}(${stl.approvalDow}) · 정산일 ${fmtMD(stl.settleDate)}(${stl.settleDow})")'>📥 엑셀 다운로드</button>
       </div>
     </div>
 
@@ -5200,13 +5200,14 @@ function pickExportFormat(fmt){
 function renderExportModal(){
   const rowsCount = state.exportRowsCount;
   const source = state.exportSource;
-  const ext = state.exportFormat==='csv' ? 'CSV(.csv)' : '엑셀(.xlsx)';
+  // CSV 옵션 제거 — 엑셀로만 다운로드
+  state.exportFormat = 'xlsx';
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-head">
       <div>
-        <h3>📤 ${source}</h3>
-        <div class="modal-sub">조회 조건 기준 전체 <b style="color:var(--ink);">${fmt(rowsCount)}건</b> · 화면 표시 개수와 무관</div>
+        <h3>📥 엑셀 다운로드</h3>
+        <div class="modal-sub">${source} · 조회 조건 기준 전체 <b style="color:var(--ink);">${fmt(rowsCount)}건</b></div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
@@ -5215,22 +5216,23 @@ function renderExportModal(){
       <div style="padding:14px 16px;background:#fafcff;border:1px solid var(--blue-100);border-radius:10px;margin-bottom:18px;">
         <div style="font-size:11px;color:#1b64da;font-weight:700;margin-bottom:6px;">📅 지금 조회한 기간</div>
         <div style="font-size:14px;color:var(--ink);font-weight:700;line-height:1.4;">${state.exportDateRange}</div>
-        <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">이 기간 + 적용한 필터 기준으로 <b style="color:var(--ink-2);">전체 ${fmt(rowsCount)}건</b>을 ${ext} 파일로 받을 수 있어요</div>
+        <div style="font-size:11px;color:var(--ink-3);margin-top:6px;">이 기간 + 적용한 필터 기준으로 <b style="color:var(--ink-2);">전체 ${fmt(rowsCount)}건</b>을 엑셀(.xlsx) 파일로 받을 수 있어요</div>
       </div>
-    ` : ''}
-
-    ${exportFormatCards('pickExportFormat')}
+    ` : `
+      <div style="padding:12px 14px;background:#fafbfc;border:1px solid var(--line);border-radius:10px;margin-bottom:18px;font-size:12px;color:var(--ink-2);line-height:1.55;">
+        📊 적용한 필터 기준으로 <b style="color:var(--ink);">전체 ${fmt(rowsCount)}건</b>을 엑셀(.xlsx) 파일로 받을 수 있어요.
+      </div>
+    `}
 
     <div style="display:flex;gap:8px;margin-top:8px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
-      <button class="btn-primary" style="flex:2;" onclick='confirmExport(${rowsCount},${JSON.stringify(source)})'>⬇ 다운로드</button>
+      <button class="btn-primary" style="flex:2;" onclick='confirmExport(${rowsCount},${JSON.stringify(source)})'>📥 엑셀 다운로드</button>
     </div>
   `;
 }
 function confirmExport(cnt, src){
-  const label = state.exportFormat==='csv' ? 'CSV' : '엑셀';
   closeModal();
-  showToast(`<span class="ic">📥</span> ${src} ${fmt(cnt)}건을 ${label} 파일로 내려받았어요`, 'ok');
+  showToast(`<span class="ic">📥</span> ${src} ${fmt(cnt)}건을 엑셀 파일로 내려받았어요`, 'ok');
 }
 
 function openOrderDetail(o){
@@ -6231,32 +6233,26 @@ function applyMenuExcel(){
   renderApp();
 }
 
-// 등록 메뉴 내보내기 — 엑셀/CSV 택 1 (가져오기 양식과 동일한 컬럼이라 그대로 다시 올릴 수 있어요)
+// 등록 메뉴 엑셀 다운로드 (가져오기 양식과 동일한 컬럼이라 그대로 다시 올릴 수 있어요)
 function openMenuExport(){
-  if(!state.exportFormat) state.exportFormat = 'xlsx';
+  state.exportFormat = 'xlsx';
   renderMenuExportModal();
   document.getElementById('modal-bg').classList.add('on');
 }
-function pickMenuExportFormat(fmt){
-  state.exportFormat = fmt;
-  renderMenuExportModal();
-}
 function renderMenuExportModal(){
-  const ext = state.exportFormat==='csv' ? 'CSV(.csv)' : '엑셀(.xlsx)';
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <div class="modal-head">
       <div>
-        <h3>📥 메뉴 내려받기</h3>
-        <div class="modal-sub">등록된 메뉴 <b style="color:var(--ink);">${fmt(MENUS.length)}개</b>를 파일로 받을 수 있어요</div>
+        <h3>📥 엑셀 다운로드</h3>
+        <div class="modal-sub">등록된 메뉴 <b style="color:var(--ink);">${fmt(MENUS.length)}개</b>를 엑셀(.xlsx) 파일로 받을 수 있어요</div>
       </div>
       <button class="close" onclick="closeModal()">✕</button>
     </div>
-    ${exportFormatCards('pickMenuExportFormat')}
-    <div style="font-size:11px;color:var(--ink-3);margin-bottom:14px;background:#fafcff;border:1px solid var(--blue-100);border-radius:8px;padding:10px 12px;line-height:1.5;">💡 받은 파일은 <b style="color:var(--ink-2);">📊 엑셀로 한 번에 올리기</b> 양식과 컬럼이 같아, 수정해서 그대로 다시 올릴 수 있어요.</div>
+    <div style="font-size:12px;color:var(--ink-3);margin-bottom:14px;background:#fafcff;border:1px solid var(--blue-100);border-radius:8px;padding:12px 14px;line-height:1.55;">💡 받은 파일은 <b style="color:var(--ink-2);">📊 엑셀로 한 번에 올리기</b> 양식과 컬럼이 같아, 수정해서 그대로 다시 올릴 수 있어요.</div>
     <div style="display:flex;gap:8px;">
       <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
-      <button class="btn-primary" style="flex:2;" onclick="confirmMenuExport()">⬇ 다운로드</button>
+      <button class="btn-primary" style="flex:2;" onclick="confirmMenuExport()">📥 엑셀 다운로드</button>
     </div>
   `;
 }
@@ -6269,22 +6265,16 @@ function menuExportRows(){
   ]);
 }
 function confirmMenuExport(){
-  const isCsv = state.exportFormat==='csv';
   const rows = menuExportRows();
   const date = new Date().toISOString().slice(0,10);
-  if(isCsv){
-    const blob = new Blob([toCSV(MENU_EXCEL_COLUMNS, rows)], { type:'text/csv;charset=utf-8;' });
-    triggerDownload(blob, `qrorder-menu-${date}.csv`);
-  } else {
-    if(typeof XLSX==='undefined'){ alert('엑셀 라이브러리를 불러오는 중이에요. 잠시 후 다시 시도해 주세요.'); return; }
-    const ws = XLSX.utils.aoa_to_sheet([MENU_EXCEL_COLUMNS, ...rows]);
-    ws['!cols'] = MENU_EXCEL_COLUMNS.map(c=>({ wch: Math.max(c.length*2.2, 14) }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '메뉴');
-    XLSX.writeFile(wb, `qrorder-menu-${date}.xlsx`);
-  }
+  if(typeof XLSX==='undefined'){ alert('엑셀 라이브러리를 불러오는 중이에요. 잠시 후 다시 시도해 주세요.'); return; }
+  const ws = XLSX.utils.aoa_to_sheet([MENU_EXCEL_COLUMNS, ...rows]);
+  ws['!cols'] = MENU_EXCEL_COLUMNS.map(c=>({ wch: Math.max(c.length*2.2, 14) }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '메뉴');
+  XLSX.writeFile(wb, `qrorder-menu-${date}.xlsx`);
   closeModal();
-  showToast(`<span class="ic">📥</span> 메뉴 ${fmt(MENUS.length)}개를 ${isCsv?'CSV':'엑셀'} 파일로 내려받았어요`, 'ok');
+  showToast(`<span class="ic">📥</span> 메뉴 ${fmt(MENUS.length)}개를 엑셀 파일로 내려받았어요`, 'ok');
 }
 
 function importMenuJSON(ev){
@@ -7370,7 +7360,7 @@ function renderMenu(main){
             <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="state.menuSel.clear();renderApp()">선택 해제</button>
           ` : ''}
           ${MENUS.length>0?`
-            <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="openMenuExport()" title="등록된 메뉴를 엑셀 또는 CSV 파일로 내려받을 수 있어요">📥 엑셀·CSV 받기</button>
+            <button class="btn-ghost" style="padding:6px 10px;font-size:11px;" onclick="openMenuExport()" title="등록된 메뉴를 엑셀(.xlsx) 파일로 내려받을 수 있어요">📥 엑셀 다운로드</button>
           `:''}
         </span>
       </h3>

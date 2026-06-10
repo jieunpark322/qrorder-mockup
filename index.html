@@ -5498,16 +5498,17 @@ document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeModal(); })
    상품코드: M=메뉴 / O=옵션 / S=세트 (6자리)
    ============================================================ */
 // badges: ['hot','reco','new'] — 인기·추천·신메뉴 배너 (복수 선택 가능)
+// allergyText: 사장님이 직접 입력하는 알레르기 정보 (자유 텍스트)
 const MENUS = [
-  { id:1, code:'M00101', name:'아메리카노',         cat:'커피', catL2:'에스프레소', catL3:'',       price:4500, takeoutPrice:4000, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergens:[],                          badges:['hot'] },
-  { id:2, code:'M00102', name:'카페라떼',           cat:'커피', catL2:'밀크',       catL3:'',       price:5000, takeoutPrice:4500, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergens:['milk'],                    badges:['reco'] },
-  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피', catL2:'밀크',       catL3:'시그니처', price:5500, takeoutPrice:5000, status:'판매중', img:'🥤', opt:[1,2,3], desc:'',                     allergens:['milk','soy'],              badges:[] },
-  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피', catL2:'에스프레소', catL3:'아이스',   price:4500, takeoutPrice:4000, status:'판매중', img:'🧊', opt:[1,2,3], desc:'',                     allergens:[],                          badges:['hot','reco'] },
-  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료', catL2:'티',         catL3:'',       price:4800, takeoutPrice:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'',                     allergens:['peach'],                   badges:[] },
-  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료', catL2:'에이드',     catL3:'',       price:5200, takeoutPrice:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'',                     allergens:[],                          badges:['new'] },
-  { id:7, code:'M00301', name:'크로아상',           cat:'디저트', catL2:'빵',       catL3:'',       price:3800, takeoutPrice:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요',   allergens:['wheat','egg','milk'],     badges:['reco'] },
-  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트', catL2:'케이크',   catL3:'',       price:5500, takeoutPrice:null, status:'품절',   img:'🍰', opt:[],      desc:'',                     allergens:['egg','milk','wheat'],     badges:[] },
-  { id:9, code:'M00303', name:'마들렌',             cat:'디저트', catL2:'쿠키',     catL3:'',       price:2800, takeoutPrice:null, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴',         allergens:['egg','milk','wheat','peanut'], badges:['new'] },
+  { id:1, code:'M00101', name:'아메리카노',         cat:'커피', catL2:'에스프레소', catL3:'',       price:4500, takeoutPrice:4000, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergyText:'',                                                badges:['hot'] },
+  { id:2, code:'M00102', name:'카페라떼',           cat:'커피', catL2:'밀크',       catL3:'',       price:5000, takeoutPrice:4500, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergyText:'우유',                                            badges:['reco'] },
+  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피', catL2:'밀크',       catL3:'시그니처', price:5500, takeoutPrice:5000, status:'판매중', img:'🥤', opt:[1,2,3], desc:'',                     allergyText:'우유, 대두',                                       badges:[] },
+  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피', catL2:'에스프레소', catL3:'아이스',   price:4500, takeoutPrice:4000, status:'판매중', img:'🧊', opt:[1,2,3], desc:'',                     allergyText:'',                                                badges:['hot','reco'] },
+  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료', catL2:'티',         catL3:'',       price:4800, takeoutPrice:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'',                     allergyText:'복숭아',                                          badges:[] },
+  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료', catL2:'에이드',     catL3:'',       price:5200, takeoutPrice:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'',                     allergyText:'',                                                badges:['new'] },
+  { id:7, code:'M00301', name:'크로아상',           cat:'디저트', catL2:'빵',       catL3:'',       price:3800, takeoutPrice:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요',   allergyText:'밀, 달걀, 우유, 버터',                              badges:['reco'] },
+  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트', catL2:'케이크',   catL3:'',       price:5500, takeoutPrice:null, status:'품절',   img:'🍰', opt:[],      desc:'',                     allergyText:'달걀, 우유, 밀, 크림치즈',                          badges:[] },
+  { id:9, code:'M00303', name:'마들렌',             cat:'디저트', catL2:'쿠키',     catL3:'',       price:2800, takeoutPrice:null, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴',         allergyText:'달걀, 우유, 밀, 땅콩',                              badges:['new'] },
 ];
 
 // 배너 라벨 매핑 — 메뉴 카드 / 수정 모달 / 손님 화면 미리보기에서 공통 사용
@@ -5783,7 +5784,14 @@ function ensureMenuExtras(m){
   // 구조: { groupId: { itemIdx: maxQty } } — 예) {1: {0: 3, 1: 1}}는 옵션 그룹 1의 0번 항목 최대 3회, 1번 항목 1회
   if (typeof m.optMaxQty === 'undefined' || m.optMaxQty===null) m.optMaxQty = {};
   if (typeof m.badges === 'undefined') m.badges = [];
-  if (typeof m.allergens === 'undefined') m.allergens = [];
+  // 알레르기 정보 — 사장님 자유 입력 (텍스트). 옛 allergens 배열은 텍스트로 마이그레이션
+  if (typeof m.allergyText === 'undefined') {
+    if (Array.isArray(m.allergens) && m.allergens.length>0 && typeof ALLERGENS!=='undefined'){
+      m.allergyText = m.allergens.map(c=>ALLERGENS.find(a=>a.code===c)?.label||c).join(', ');
+    } else {
+      m.allergyText = '';
+    }
+  }
   if (!m.schedule) m.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!m.discount) m.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
 }
@@ -8887,7 +8895,7 @@ function openMenuDetailNewModal(){
     catL2:'', catL3:'', tag3:'',
     desc:'', img:'', status:'판매중', maxQty:null,
     badges: [],                              // 인기·추천·신메뉴 배너
-    allergens: [],                           // 알레르기 정보 (원산지에서 분리)
+    allergyText: '',                         // 알레르기 정보 (사장님 자유 입력)
   };
   renderMenuEditModal();
 }
@@ -8895,7 +8903,7 @@ function openMenuEditModal(id){
   const m = MENUS.find(x=>x.id===id);
   if(!m) return;
   ensureMenuExtras(m);
-  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, discountAmt:m.discountAmt||null, cat:m.cat, catL2:m.catL2||'', catL3:m.catL3||'', tag3:m.tag3||'', desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty, badges:[...(m.badges||[])], allergens:[...(m.allergens||[])], optMaxQty: JSON.parse(JSON.stringify(m.optMaxQty||{})) };
+  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, discountAmt:m.discountAmt||null, cat:m.cat, catL2:m.catL2||'', catL3:m.catL3||'', tag3:m.tag3||'', desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty, badges:[...(m.badges||[])], allergyText: m.allergyText||'', optMaxQty: JSON.parse(JSON.stringify(m.optMaxQty||{})) };
   renderMenuEditModal();
 }
 // 메뉴 수정 모달 — 배너 토글
@@ -8906,14 +8914,8 @@ function toggleMenuBadge(key){
   if(idx<0) state._menuEdit.badges.push(key); else state._menuEdit.badges.splice(idx,1);
   renderMenuEditModal();
 }
-// 메뉴 수정 모달 — 알레르기 토글 (메뉴 상세 안으로 이동)
-function toggleEditAllergen(code){
-  if(!state._menuEdit) return;
-  if(!state._menuEdit.allergens) state._menuEdit.allergens = [];
-  const idx = state._menuEdit.allergens.indexOf(code);
-  if(idx<0) state._menuEdit.allergens.push(code); else state._menuEdit.allergens.splice(idx,1);
-  renderMenuEditModal();
-}
+// 알레르기 정보는 사장님 자유 입력으로 변경 — 토글 함수 제거됨
+// (옛 toggleEditAllergen 사용처는 모두 textarea 입력으로 교체)
 // 메뉴 수정 모달 — 옵션 항목별 메뉴 한도 오버라이드
 function setMenuOptMaxQty(groupId, itemIdx, val){
   if(!state._menuEdit) return;
@@ -8961,15 +8963,10 @@ function renderMenuEditModal(){
         </div>
         <div style="font-size:11px;color:var(--ink-4);margin-bottom:18px;line-height:1.55;">💡 손님 메뉴판에 메뉴 이름 옆에 배너가 표시돼요. 여러 개 선택할 수 있어요.</div>
 
-        <!-- 알레르기 정보 — 원산지 페이지에서 분리, 메뉴 상세에 포함 -->
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">⚠️ 알레르기 정보 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">식품위생법 14종 · 해당 항목 선택</span></label>
-        <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
-          ${(typeof ALLERGENS!=='undefined'?ALLERGENS:[]).map(a=>{
-            const on = (f.allergens||[]).includes(a.code);
-            return `<span class="badge-toggle ${on?'on':''}" style="padding:6px 10px;font-size:12px;${on?'background:#fff5dd;color:#7a4d00;border-color:#fbbf24;':''}" onclick="toggleEditAllergen('${a.code}')">${a.icon} ${a.label}${on?' ✓':''}</span>`;
-          }).join('')}
-        </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-bottom:18px;line-height:1.55;">💡 알레르기 정보가 정확하지 않으면 손님에게 피해가 갈 수 있어요. 실제 식재료를 확인 후 정확하게 선택해 주세요. 선택한 항목은 손님 메뉴판에 아이콘으로 표시돼요.</div>
+        <!-- 알레르기 정보 — 사장님이 직접 입력하는 자유 텍스트 -->
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">⚠️ 알레르기 정보 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택 · 사장님이 직접 입력</span></label>
+        <textarea id="me-allergy" class="input" placeholder="예) 우유, 대두, 견과류&#10;예) 밀가루·달걀·우유 함유, 견과류 제조 시설" style="width:100%;min-height:64px;font-family:inherit;resize:vertical;padding:12px 14px;line-height:1.55;margin-bottom:6px;">${(f.allergyText||'').replace(/</g,'&lt;')}</textarea>
+        <div style="font-size:11px;color:var(--ink-4);margin-bottom:18px;line-height:1.55;">💡 알레르기 정보가 정확하지 않으면 손님에게 피해가 갈 수 있어요. <b>실제 식재료를 확인 후 정확하게 입력</b>해 주세요. 손님 메뉴판에 입력하신 그대로 표시돼요.</div>
 
         <!-- 가격 — 매장가 / 포장가 / 할인가 -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:6px;">
@@ -9204,7 +9201,11 @@ function saveMenuEdit(){
   const mqVal = document.getElementById('me-maxqty').value;
   m.maxQty = (mqVal==='' || Number(mqVal)<=0) ? null : Math.floor(Number(mqVal));
   m.badges = [...(f.badges||[])];     // 인기·추천·신메뉴 배너
-  m.allergens = [...(f.allergens||[])]; // 알레르기 정보 (메뉴 상세 안으로 이동)
+  // 알레르기 정보 — textarea 값으로 저장 (자유 입력)
+  const allergyEl = document.getElementById('me-allergy');
+  m.allergyText = allergyEl ? (allergyEl.value||'').trim() : (f.allergyText||'');
+  // 기존 allergens 배열 데이터는 더 이상 안 씀
+  delete m.allergens;
   m.optMaxQty = JSON.parse(JSON.stringify(f.optMaxQty||{})); // 옵션 항목별 메뉴 한도 오버라이드
   // 신규 등록이면 MENUS에 push
   if(f.isNew){ MENUS.push(m); }
@@ -9595,7 +9596,7 @@ function renderCustomerPreview(){
           ${renderOriginPreviewInner()}
           ${(()=>{
             const notice = (typeof STORE_ALLERGY!=='undefined'&&STORE_ALLERGY.notice)?STORE_ALLERGY.notice:'';
-            const menuAllergens = MENUS.filter(m=>m.status!=='숨김'&&(m.allergens||[]).length>0);
+            const menuAllergens = MENUS.filter(m=>{ ensureMenuExtras(m); return m.status!=='숨김' && (m.allergyText||'').trim(); });
             if(!notice&&menuAllergens.length===0) return '';
             return '<div class="qrp-origin">'
               +'<div class="qrp-otitle">⚠️ 알레르기 안내</div>'
@@ -9603,8 +9604,8 @@ function renderCustomerPreview(){
               +(menuAllergens.length>0
                 ? '<div style="margin-top:6px;font-size:10px;color:var(--ink-3);">'
                   + menuAllergens.map(m=>{
-                    const icons=(m.allergens||[]).map(c=>(typeof ALLERGENS!=='undefined'?ALLERGENS.find(a=>a.code===c):null)).filter(Boolean).map(a=>a.icon).join('');
-                    return `<div style="margin-top:3px;">${m.name} ${icons}</div>`;
+                    const txt = (m.allergyText||'').replace(/</g,'&lt;');
+                    return `<div style="margin-top:3px;"><b style="color:var(--ink-2);">${m.name}</b> · ${txt}</div>`;
                   }).join('')
                   +'</div>'
                 : '')
@@ -12133,18 +12134,7 @@ function renderOrigin(main){
     </div>
   `;
 }
-// 메뉴 알레르기 토글
-function toggleMenuAllergen(menuId, code, checked){
-  const m = MENUS.find(x=>x.id===menuId);
-  if(!m) return;
-  if(!m.allergens) m.allergens = [];
-  if(checked){ if(!m.allergens.includes(code)) m.allergens.push(code); }
-  else { m.allergens = m.allergens.filter(c=>c!==code); }
-  markUnsavedUI();
-  // 미리보기 아이콘만 즉시 갱신 (전체 리렌더 없이)
-  const icon = event.target.nextElementSibling;
-  if(icon){ icon.style.opacity = checked ? 1 : 0.15; }
-}
+// 옛 toggleMenuAllergen 제거 — 알레르기 정보는 메뉴 수정 모달의 textarea로 자유 입력
 // 원산지 미리보기 영역 내용 — 폰 미리보기 안에서 재사용
 function renderOriginPreviewInner(){
   const lines = STORE_ORIGIN.text.split('\n').map(l=>l.trim()).filter(l=>l);

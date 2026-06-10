@@ -7662,7 +7662,7 @@ function renderOption(main){
           ${c.items.length===0 ? `<div style="padding:14px 4px;text-align:center;color:var(--ink-3);font-size:12px;">옵션 항목을 추가해 주세요.</div>` : itemsHtml}
           <button class="ocr-item-add" onclick="state.optBulkCards[${ci}].items.push({name:'',price:0});renderApp()">+ 옵션 항목 추가</button>
         </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 <b style="color:var(--ink-3);">메뉴 정보 수정 → 옵션 적용 한도</b>에서 메뉴마다 따로 설정해 주세요.</div>
+        <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 <b style="color:var(--ink-3);">메뉴 정보 수정 → 옵션 최대 선택 개수</b>에서 메뉴마다 따로 설정해 주세요.</div>
       </div>
     `;
   }).join('');
@@ -7877,7 +7877,7 @@ function renderOptEditModal(){
           ${f.items.length===0 ? `<div style="padding:14px 4px;text-align:center;color:var(--ink-3);font-size:12px;">옵션 항목을 추가해 주세요.</div>` : itemsHtml}
           <button class="ocr-item-add" onclick="state._optEdit.items.push({name:'',price:0});renderOptEditModal()">+ 옵션 항목 추가</button>
         </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-top:8px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 메뉴 정보 수정의 <b style="color:var(--ink-3);">옵션 적용 한도</b>에서 메뉴마다 따로 설정해 주세요.</div>
+        <div style="font-size:11px;color:var(--ink-4);margin-top:8px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 메뉴 정보 수정의 <b style="color:var(--ink-3);">옵션 최대 선택 개수</b>에서 메뉴마다 따로 설정해 주세요.</div>
 
       </div>
       <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--line);">
@@ -9070,7 +9070,7 @@ function renderMenuEditModal(){
             </div>
           </div>
 
-          <!-- 옵션 적용 한도 -->
+          <!-- 옵션 최대 선택 개수 -->
           ${(()=>{
             const linkedGroups = (typeof OPT_GROUPS!=='undefined' ? OPT_GROUPS : []).filter(g=>g.links && g.links.includes(f.id));
             if(linkedGroups.length===0) return `
@@ -9116,7 +9116,7 @@ function renderMenuEditModal(){
             }).join('');
             return `
               <div style="margin-top:6px;">
-                <label class="me-lbl">🎚️ 옵션 적용 한도 <span class="me-lbl-sub">메뉴별 옵션 추가 횟수</span></label>
+                <label class="me-lbl">🎚️ 옵션 최대 선택 개수 <span class="me-lbl-sub">메뉴별 옵션 추가 횟수</span></label>
                 ${groupsHtml}
               </div>
             `;

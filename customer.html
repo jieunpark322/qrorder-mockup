@@ -650,9 +650,8 @@ function scrMenu(){
     ${closedBanner}
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
-    ${S.orderType==='dinein'?(S.serve==='self'
-      ? `<div class="kakao-note"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드릴게요.</span></div>`
-      : `<div class="notice blue">🪑 <span>준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div>`):''}
+    ${S.orderType==='dinein' && S.serve==='server'
+      ? `<div class="notice blue">🪑 <span>준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div>` : ''}
     <div id="menuResults">${menuResultsHtml()}</div>`;
   const content = S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab;
   const dx = S._tabAnim==='left' ? '-22px' : '22px';

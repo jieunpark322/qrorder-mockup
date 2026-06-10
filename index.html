@@ -7662,7 +7662,7 @@ function renderOption(main){
           ${c.items.length===0 ? `<div style="padding:14px 4px;text-align:center;color:var(--ink-3);font-size:12px;">옵션 항목을 추가해 주세요.</div>` : itemsHtml}
           <button class="ocr-item-add" onclick="state.optBulkCards[${ci}].items.push({name:'',price:0});renderApp()">+ 옵션 항목 추가</button>
         </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 <b style="color:var(--ink-3);">메뉴 정보 수정 → 옵션 최대 선택 개수</b>에서 메뉴마다 따로 설정해 주세요.</div>
+        <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 <b style="color:var(--ink-3);">메뉴 정보 수정 → 옵션 최대 선택 개수</b>에서, 또는 <b style="color:var(--ink-3);">옵션 그룹 수정 → 메뉴별 최대 선택 개수</b>에서 양쪽 어디서나 설정할 수 있어요.</div>
       </div>
     `;
   }).join('');
@@ -7877,7 +7877,57 @@ function renderOptEditModal(){
           ${f.items.length===0 ? `<div style="padding:14px 4px;text-align:center;color:var(--ink-3);font-size:12px;">옵션 항목을 추가해 주세요.</div>` : itemsHtml}
           <button class="ocr-item-add" onclick="state._optEdit.items.push({name:'',price:0});renderOptEditModal()">+ 옵션 항목 추가</button>
         </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-top:8px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 메뉴 정보 수정의 <b style="color:var(--ink-3);">옵션 최대 선택 개수</b>에서 메뉴마다 따로 설정해 주세요.</div>
+
+        <!-- 🎚️ 연결된 메뉴별 최대 선택 개수 — 양방향 편집 (메뉴 정보 수정 모달과 같은 데이터) -->
+        ${(()=>{
+          const linkedMenus = (f.links||[]).map(mid=>MENUS.find(m=>m.id===mid)).filter(Boolean);
+          if(linkedMenus.length===0) return `
+            <div style="margin-top:16px;padding:14px 16px;background:#fafbfc;border:1px dashed var(--line);border-radius:10px;font-size:12px;color:var(--ink-3);line-height:1.55;">
+              🔗 아직 이 옵션 그룹을 적용한 메뉴가 없어요. 메뉴 관리 → 메뉴판에서 메뉴에 옵션 그룹을 연결해 주세요.
+            </div>
+          `;
+          // 1개만 선택 모드는 항목별 횟수 의미 없음 (항상 1)
+          if(f.mode==='1개만'){
+            return `
+              <div style="margin-top:16px;padding:14px 16px;background:#fafbfc;border:1px solid var(--line-2);border-radius:10px;font-size:12px;color:var(--ink-3);line-height:1.55;">
+                🎚️ <b style="color:var(--ink-2);">메뉴별 최대 선택 개수</b> — <b>1개만 선택</b> 모드라 항목별로 1회씩 고정돼요. 여러 번 추가를 허용하려면 위 <b>선택 방식</b>을 <b>여러 개 선택</b>으로 바꿔 주세요.
+              </div>
+            `;
+          }
+          const menuCards = linkedMenus.map(m=>{
+            ensureMenuExtras(m);
+            const overrideKey = `${f.id}`;
+            const rows = f.items.map((it, ii)=>{
+              const cur = (m.optMaxQty && m.optMaxQty[overrideKey] && m.optMaxQty[overrideKey][ii] != null)
+                ? m.optMaxQty[overrideKey][ii] : 1;
+              return `
+                <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;padding:5px 0;border-top:1px dashed var(--line-2);">
+                  <span style="font-size:12px;color:var(--ink-2);">${it.name||'(이름 없음)'}${it.price>0?` <span style="color:var(--blue);font-weight:600;">+${fmt(it.price)}원</span>`:''}</span>
+                  <div style="display:flex;align-items:center;gap:3px;">
+                    <input class="input" type="number" min="1" max="10" value="${cur}" oninput="setOptGroupMenuMaxQty(${m.id},${f.id},${ii},this.value)" style="text-align:right;flex:1;padding:5px 8px;font-size:12px;" />
+                    <span style="font-size:11px;color:var(--ink-3);flex-shrink:0;">회</span>
+                  </div>
+                </div>
+              `;
+            }).join('');
+            return `
+              <div style="padding:10px 12px;background:#fff;border:1px solid var(--line-2);border-radius:6px;margin-bottom:4px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                  <span style="font-size:12px;font-weight:700;color:var(--ink);">🍽️ ${m.name}</span>
+                  <span style="font-size:11px;color:var(--ink-4);cursor:pointer;font-weight:600;" onclick="closeModal();openMenuEditModal(${m.id});">메뉴 정보 수정 →</span>
+                </div>
+                ${rows}
+              </div>
+            `;
+          }).join('');
+          return `
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);">
+              <label class="me-lbl">🎚️ 메뉴별 최대 선택 개수 <span class="me-lbl-sub">연결된 ${linkedMenus.length}개 메뉴 · 메뉴 정보 수정과 같은 데이터</span></label>
+              ${menuCards}
+              <div style="font-size:11px;color:var(--ink-4);margin-top:8px;line-height:1.55;">💡 같은 옵션 그룹이라도 메뉴마다 다르게 정할 수 있어요. (예: 샷 추가 — 아메리카노 3회, 디카페인 라떼 1회, 키즈 음료 0회)</div>
+            </div>
+          `;
+        })()}
 
       </div>
       <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--line);">
@@ -8925,6 +8975,17 @@ function setMenuOptMaxQty(groupId, itemIdx, val){
   if(!state._menuEdit.optMaxQty[key]) state._menuEdit.optMaxQty[key] = {};
   state._menuEdit.optMaxQty[key][itemIdx] = Math.max(1, Math.min(10, Number(val)||1));
   // 라이브 갱신 없이 (스피너 값만 갱신)
+}
+// 옵션 그룹 수정 모달에서 메뉴별 한도 입력 — 메뉴 정보 수정과 같은 데이터(MENUS.optMaxQty) 즉시 반영
+function setOptGroupMenuMaxQty(menuId, groupId, itemIdx, val){
+  const m = MENUS.find(x=>x.id===menuId); if(!m) return;
+  ensureMenuExtras(m);
+  if(!m.optMaxQty) m.optMaxQty = {};
+  const key = String(groupId);
+  if(!m.optMaxQty[key]) m.optMaxQty[key] = {};
+  m.optMaxQty[key][itemIdx] = Math.max(1, Math.min(10, Number(val)||1));
+  markUnsavedUI();
+  // 라이브 갱신 없이 (스피너 값만 갱신) — 모달 다시 그리면 포커스 잃음
 }
 function renderMenuEditModal(){
   const f = state._menuEdit;

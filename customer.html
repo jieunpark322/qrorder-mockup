@@ -493,7 +493,7 @@ function render(){
   renderDemo();
   const r = { menu:scrMenu, checkout:scrCheckout, terms:scrTerms, processing:scrProcessing, error:scrError, done:scrDone }[S.screen];
   $('screen').innerHTML = r();
-  if(!(S.screen==='menu' && S._keepScroll)) window.scrollTo(0,0);
+  if(!S._keepScroll) window.scrollTo(0,0);
   S._tabAnim=null;
   renderCartBar();
   setupScrollSpy();
@@ -1030,16 +1030,29 @@ function csDel(i){
   S._keepScroll=true; renderCartBar(); S._keepScroll=false;
 }
 function goToCheckout(){
+  if(!S.cart.length) return;
   closeCartSheet();
   S.screen='checkout';
   render();
+}
+/* 결제 화면 주문내용 수량·삭제 (화면 튀지 않게 keepScroll) */
+function coChgQty(i,d){
+  S.cart[i].qty+=d;
+  if(S.cart[i].qty<=0) S.cart.splice(i,1);
+  if(!S.cart.length){ S.screen='menu'; render(); return; }
+  S._keepScroll=true; render(); S._keepScroll=false;
+}
+function coDel(i){
+  S.cart.splice(i,1);
+  if(!S.cart.length){ S.screen='menu'; render(); return; }
+  S._keepScroll=true; render(); S._keepScroll=false;
 }
 
 /* --- 장바구니 바 --- */
 function renderCartBar(){
   if(S.screen!=='menu' || S.tab!=='menu' || S.cart.length===0 || !S.businessOpen){ $('cartbar').innerHTML=''; return; }
-  $('cartbar').innerHTML = `<div class="cartbar"><button class="cartbtn" onclick="openCartSheet()">
-      <span class="cnt">${cartCount()}</span> 장바구니 보기 <span class="amt">${won(cartTotal())}원 ›</span></button></div>`;
+  $('cartbar').innerHTML = `<div class="cartbar"><button class="cartbtn" onclick="goToCheckout()">
+      <span class="cnt">${cartCount()}</span> 주문하기 <span class="amt">${won(cartTotal())}원 ›</span></button></div>`;
 }
 
 /* --- 결제 화면 --- */
@@ -1050,8 +1063,19 @@ function scrCheckout(){
   const notify = (S.orderType!=='dinein') || S.serve==='self';
   return `<div class="topbar"><button class="back" onclick="S.screen='menu';render()">‹</button>
       <div><div class="ttl">주문 확인 · 결제</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
-    <div class="sec"><div class="sec-h">📋 주문 내용</div>
-      ${S.cart.map(c=>`<div class="rowline"><span style="flex:1;">${c.name} ${c.optText?`<span style="color:var(--ink4);font-size:11.5px;">· ${c.optText}</span>`:''} ×${c.qty}</span><span style="font-weight:700;color:var(--ink);">${won(c.unit*c.qty)}원</span></div>`).join('')}</div>
+    <div class="sec"><div class="sec-h">📋 주문 내용 <span class="opt-pick" style="font-weight:700;">${cartCount()}개</span></div>
+      ${S.cart.map((c,i)=>`<div class="citem">
+        ${imgBox('ci-img', c.img, c.photo, false)}
+        <div style="flex:1;min-width:0;">
+          <div class="ci-name">${c.name}</div>
+          ${c.optText?`<div class="ci-opt">${c.optText}</div>`:''}
+          <div class="ci-bot">
+            <span class="mini-step"><button onclick="coChgQty(${i},-1)">−</button><span class="n">${c.qty}</span><button onclick="coChgQty(${i},1)">+</button></span>
+            <span class="cs-price-grp"><span class="ci-price">${won(c.unit*c.qty)}원</span><button class="cs-del-x" onclick="coDel(${i})" title="삭제" aria-label="삭제">×</button></span>
+          </div>
+        </div>
+      </div>`).join('')}
+      <button class="ghostbtn" onclick="S.screen='menu';render()">+ 메뉴 더 담기</button></div>
     ${S.orderType==='dinein' && S.serve==='server'?`<div class="sec"><div class="sec-h">🍽️ 받는 방법</div><div class="info-pill">🍳 <span><b>${STORE.table} 테이블</b> 주문 · 준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div></div>`:''}
     ${S.orderType==='takeout'?`<div class="sec"><div class="sec-h">🥡 포장 안내</div><div class="info-pill amber">⏱️ <span>결제 후 <b>약 15~25분</b> 뒤 준비돼요. 준비되면 카카오 알림톡으로 알려드려요.</span></div></div>`:''}
     ${needTime?`<div class="sec"><div class="sec-h">📅 수령 시간 <span class="req">필수</span></div>

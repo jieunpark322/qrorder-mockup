@@ -1072,8 +1072,10 @@ function scrCheckout(){
           <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div></div>`}
     ${notify?`<div class="sec"><div class="sec-h">📨 주문 알림</div>
       <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드릴게요.</span></div>
-      <div class="field"><label>카카오 알림톡 받을 연락처 (끝 4자리)</label>
-        <input id="phoneInput" inputmode="numeric" maxlength="4" placeholder="1234" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div></div>`:''}
+      ${S.authType==='kakao'
+        ? `<div class="info-pill"><span style="font-size:15px;">🟡</span> <span><b>카카오 계정</b>으로 자동 발송돼요. 연락처를 따로 입력하지 않아도 돼요.</span></div>`
+        : `<div class="field"><label>알림톡 받을 휴대폰 번호 <span class="req">필수</span></label>
+            <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div>`}</div>`:''}
     <div class="sec"><div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>
       <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':'결제 금액'}</span><span style="color:var(--blue);">${won(cartTotal())}원</span></div></div>
     <button class="primarybtn" onclick="goToTerms()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(cartTotal())}원 결제하기`}</button><div style="height:20px;"></div>`;
@@ -1104,7 +1106,10 @@ function getTermsConfig(){
 function goToTerms(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
   const notify = (S.orderType!=='dinein') || S.serve==='self';
-  if(notify && (!S.phone || S.phone.length<4)){ toast('카카오 알림톡 받을 연락처 끝 4자리를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }
+  if(notify && S.authType!=='kakao'){
+    const digits=(S.phone||'').replace(/\D/g,'');
+    if(digits.length<10){ toast('알림톡 받을 휴대폰 번호를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }
+  }
   const terms = getTermsConfig();
   if(!terms.length){ placeOrder(); return; }
   S.termsChecked = {};

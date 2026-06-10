@@ -674,7 +674,12 @@ function setActiveChip(id,center){
   const tabs=$('cattabs'); if(!tabs) return;
   let activeEl=null;
   tabs.querySelectorAll('.cattab').forEach(b=>{ const on=b.getAttribute('data-sec')===id; b.classList.toggle('on',on); if(on) activeEl=b; });
-  if(center&&activeEl&&activeEl.scrollIntoView) activeEl.scrollIntoView({inline:'center',block:'nearest'});
+  // 가로 탭 컨테이너만 스크롤(세로 페이지 스크롤은 건드리지 않음)
+  if(center&&activeEl){
+    const cRect=tabs.getBoundingClientRect(), aRect=activeEl.getBoundingClientRect();
+    const target=tabs.scrollLeft + (aRect.left-cRect.left) - tabs.clientWidth/2 + aRect.width/2;
+    tabs.scrollTo({left:Math.max(0,target), behavior:'smooth'});
+  }
 }
 function setupScrollSpy(){
   window.onscroll=()=>{

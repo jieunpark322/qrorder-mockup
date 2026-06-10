@@ -8,7 +8,7 @@ IMG_MAP = {
     '01-menu-badges.html':       ('01-menu-edit.png',           '메뉴 정보 수정 모달 — 섹션 1(기본 정보)의 메뉴 배너 토글 영역'),
     '02-option-modes.html':      ('02-option-bulk.png',         '옵션 그룹 → + 새 옵션 그룹 추가 펼침 — 선택 방식 select + 최대 선택 개수 input'),
     '03-option-edit-modal.html': ('03-option-edit.png',         '옵션 그룹 수정 모달 — ✏️ 수정 버튼으로 진입'),
-    '04-option-max-select.html': ('03-option-edit.png',         '옵션 그룹 수정 모달의 「🎚️ 메뉴별 최대 선택 개수」 섹션 — 메뉴 측·옵션 측 양방향 편집'),
+    '04-option-max-select.html': ('03-option-edit.png',         '옵션 그룹 수정 모달의 「🎚️ 메뉴별 최대 선택 개수」 섹션 — 연결된 메뉴 카드별로 항목 횟수 입력'),
     '05-sold-out-unified.html':  ('05-stock.png',               '오늘의 준비량 페이지 — 「오늘 품절 처리」 탭 단일 토글'),
     '06-holiday-schedule.html':  ('06-schedule.png',            '카테고리 판매 시간 모달 — 🇰🇷 법정 공휴일 처리 3옵션'),
     '07-allergy-text.html':      ('07-menu-edit-allergy.png',   '메뉴 정보 수정 모달 — 섹션 5(알레르기 정보) 자유 텍스트 입력'),

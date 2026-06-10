@@ -750,6 +750,11 @@
   .menu-card-main{flex:1;min-width:0;}
   .menu-card-name{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:2px;line-height:1.3;}
   .menu-card-desc{font-size:11px;color:var(--ink-3);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .menu-card-badges{display:flex;gap:4px;margin:3px 0 2px;flex-wrap:wrap;}
+  .menu-badge{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;line-height:1.4;}
+  .badge-toggle{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border:2px solid var(--line);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;transition:all .12s;user-select:none;color:var(--ink-3);}
+  .badge-toggle:hover{border-color:var(--ink-4);}
+  .badge-toggle.on{border-width:2px;}
   .menu-card-meta{display:flex;align-items:center;gap:12px;flex-shrink:0;}
   .menu-card-cat{font-size:11px;color:var(--blue);background:var(--blue-50);padding:3px 9px;border-radius:8px;font-weight:700;}
   .menu-card-price{font-size:15px;font-weight:800;color:var(--ink);min-width:80px;text-align:right;}
@@ -5492,32 +5497,43 @@ document.addEventListener('keydown', e=>{ if (e.key==='Escape') closeModal(); })
    메뉴관리 데이터 — 단품 메뉴 · 옵션 그룹 · 카테고리 · 세트 메뉴
    상품코드: M=메뉴 / O=옵션 / S=세트 (6자리)
    ============================================================ */
+// badges: ['hot','reco','new'] — 인기·추천·신메뉴 배너 (복수 선택 가능)
 const MENUS = [
-  { id:1, code:'M00101', name:'아메리카노',         cat:'커피', catL2:'에스프레소', catL3:'',       price:4500, takeoutPrice:4000, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergens:[] },
-  { id:2, code:'M00102', name:'카페라떼',           cat:'커피', catL2:'밀크',       catL3:'',       price:5000, takeoutPrice:4500, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergens:['milk'] },
-  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피', catL2:'밀크',       catL3:'시그니처', price:5500, takeoutPrice:5000, status:'판매중', img:'🥤', opt:[1,2,3], desc:'',                     allergens:['milk','soy'] },
-  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피', catL2:'에스프레소', catL3:'아이스',   price:4500, takeoutPrice:4000, status:'판매중', img:'🧊', opt:[1,2,3], desc:'',                     allergens:[] },
-  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료', catL2:'티',         catL3:'',       price:4800, takeoutPrice:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'',                     allergens:['peach'] },
-  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료', catL2:'에이드',     catL3:'',       price:5200, takeoutPrice:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'',                     allergens:[] },
-  { id:7, code:'M00301', name:'크로아상',           cat:'디저트', catL2:'빵',       catL3:'',       price:3800, takeoutPrice:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요',   allergens:['wheat','egg','milk'] },
-  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트', catL2:'케이크',   catL3:'',       price:5500, takeoutPrice:null, status:'품절',   img:'🍰', opt:[],      desc:'',                     allergens:['egg','milk','wheat'] },
-  { id:9, code:'M00303', name:'마들렌',             cat:'디저트', catL2:'쿠키',     catL3:'',       price:2800, takeoutPrice:null, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴',         allergens:['egg','milk','wheat','peanut'] },
+  { id:1, code:'M00101', name:'아메리카노',         cat:'커피', catL2:'에스프레소', catL3:'',       price:4500, takeoutPrice:4000, status:'판매중', img:'☕', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergens:[],                          badges:['hot'] },
+  { id:2, code:'M00102', name:'카페라떼',           cat:'커피', catL2:'밀크',       catL3:'',       price:5000, takeoutPrice:4500, status:'판매중', img:'🥛', opt:[1,2,3], desc:'에티오피아 원두 100%',   allergens:['milk'],                    badges:['reco'] },
+  { id:3, code:'M00103', name:'바닐라라떼',         cat:'커피', catL2:'밀크',       catL3:'시그니처', price:5500, takeoutPrice:5000, status:'판매중', img:'🥤', opt:[1,2,3], desc:'',                     allergens:['milk','soy'],              badges:[] },
+  { id:4, code:'M00104', name:'아이스 아메리카노', cat:'커피', catL2:'에스프레소', catL3:'아이스',   price:4500, takeoutPrice:4000, status:'판매중', img:'🧊', opt:[1,2,3], desc:'',                     allergens:[],                          badges:['hot','reco'] },
+  { id:5, code:'M00201', name:'복숭아 아이스티',   cat:'음료', catL2:'티',         catL3:'',       price:4800, takeoutPrice:4300, status:'판매중', img:'🍑', opt:[2,3],   desc:'',                     allergens:['peach'],                   badges:[] },
+  { id:6, code:'M00202', name:'레몬에이드',         cat:'음료', catL2:'에이드',     catL3:'',       price:5200, takeoutPrice:4700, status:'판매중', img:'🍋', opt:[2,3],   desc:'',                     allergens:[],                          badges:['new'] },
+  { id:7, code:'M00301', name:'크로아상',           cat:'디저트', catL2:'빵',       catL3:'',       price:3800, takeoutPrice:null, status:'판매중', img:'🥐', opt:[],      desc:'매일 매장에서 구워요',   allergens:['wheat','egg','milk'],     badges:['reco'] },
+  { id:8, code:'M00302', name:'치즈케이크',         cat:'디저트', catL2:'케이크',   catL3:'',       price:5500, takeoutPrice:null, status:'품절',   img:'🍰', opt:[],      desc:'',                     allergens:['egg','milk','wheat'],     badges:[] },
+  { id:9, code:'M00303', name:'마들렌',             cat:'디저트', catL2:'쿠키',     catL3:'',       price:2800, takeoutPrice:null, status:'숨김',   img:'🍪', opt:[],      desc:'시즌 한정 메뉴',         allergens:['egg','milk','wheat','peanut'], badges:['new'] },
 ];
 
+// 배너 라벨 매핑 — 메뉴 카드 / 수정 모달 / 손님 화면 미리보기에서 공통 사용
+const MENU_BADGES = [
+  { key:'hot',  label:'인기',   ico:'🔥', color:'#f04452', bg:'#ffeaec' },
+  { key:'reco', label:'추천',   ico:'⭐', color:'#f59e0b', bg:'#fff5dd' },
+  { key:'new',  label:'신메뉴', ico:'🆕', color:'#3182f6', bg:'#e8f3ff' },
+];
+
+// mode — '1개만' (단일) | '여러 개' (다중)
+// maxSelect — 여러 개 선택 시 최대 개수 (1개만 모드일 땐 항상 1)
+// 각 item.maxQty — 손님이 한 항목을 몇 번까지 추가할 수 있는지 (샷 추가 1~3회 등)
 const OPT_GROUPS = [
-  { id:1, code:'O00101', name:'샷 추가',    mode:'중복 선택',     required:false, items:[
-    { name:'샷 1번 추가',   price:600 },
-    { name:'샷 2번 추가',   price:1200 },
-    { name:'디카페인 변경', price:500 },
+  { id:1, code:'O00101', name:'샷 추가',    mode:'여러 개', maxSelect:3, required:false, items:[
+    { name:'에스프레소 샷', price:600, maxQty:3 },
+    { name:'디카페인 변경', price:500, maxQty:1 },
+    { name:'바닐라 시럽',   price:500, maxQty:2 },
   ], links:[1,2,3,4] },
-  { id:2, code:'O00102', name:'사이즈',     mode:'1개 선택', required:true,  items:[
-    { name:'Regular', price:0 },
-    { name:'Large',   price:800 },
+  { id:2, code:'O00102', name:'사이즈',     mode:'1개만',  maxSelect:1, required:true,  items:[
+    { name:'Regular', price:0,   maxQty:1 },
+    { name:'Large',   price:800, maxQty:1 },
   ], links:[1,2,3,4,5,6] },
-  { id:3, code:'O00103', name:'얼음·온도',  mode:'1개 선택', required:true,  items:[
-    { name:'얼음 보통', price:0 },
-    { name:'얼음 적게', price:0 },
-    { name:'따뜻하게',  price:0 },
+  { id:3, code:'O00103', name:'얼음·온도',  mode:'1개만',  maxSelect:1, required:true,  items:[
+    { name:'얼음 보통', price:0, maxQty:1 },
+    { name:'얼음 적게', price:0, maxQty:1 },
+    { name:'따뜻하게',  price:0, maxQty:1 },
   ], links:[1,2,3,4,5,6] },
 ];
 
@@ -5755,13 +5771,18 @@ function ensureMenuExtras(m){
   if (typeof m.stock === 'undefined')  m.stock  = null;   // null = 무제한
   if (typeof m.sold === 'undefined')   m.sold   = 0;
   if (typeof m.manualSoldOut === 'undefined') m.manualSoldOut = false;
-  if (typeof m.soldOutKind === 'undefined') m.soldOutKind = 'temp'; // (과거 일시/완전 구분 — 현재 단일 '품절'로 통합, 표시 미사용)
+  // soldOutKind 필드는 더 이상 사용 안 함 — 품절 단일 상태로 통합됨
   if (typeof m.takeoutPrice === 'undefined') m.takeoutPrice = null;  // null = 매장가 동일 적용
   // 분류 태그 — 사장님 내부 검색·구분용 자유 키워드 (손님 화면에는 안 노출)
   if (typeof m.catL2 === 'undefined') m.catL2 = '';
   if (typeof m.catL3 === 'undefined') m.catL3 = '';
   if (typeof m.tag3  === 'undefined') m.tag3  = '';
   if (typeof m.maxQty === 'undefined') m.maxQty = null;  // null = 제한 없음 (1회 주문 최대 수량)
+  // 옵션 항목별 추가 횟수 — 메뉴 측에서 옵션별로 따로 설정 (옵션 그룹의 기본값을 덮어씀)
+  // 구조: { groupId: { itemIdx: maxQty } } — 예) {1: {0: 3, 1: 1}}는 옵션 그룹 1의 0번 항목 최대 3회, 1번 항목 1회
+  if (typeof m.optMaxQty === 'undefined' || m.optMaxQty===null) m.optMaxQty = {};
+  if (typeof m.badges === 'undefined') m.badges = [];
+  if (typeof m.allergens === 'undefined') m.allergens = [];
   if (!m.schedule) m.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!m.discount) m.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
 }
@@ -6589,8 +6610,7 @@ function renderStock(main){
   const otherMenus = MENUS.filter(m=>!MENU_STOCK.items.some(it=>it.menuId===m.id) && m.status!=='숨김');
   otherMenus.forEach(m=>ensureMenuExtras(m));
   const manualOutCnt = otherMenus.filter(m=>m.manualSoldOut).length;
-  const fullOutCnt = otherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='full').length;
-  const tempOutCnt = otherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='temp').length;
+  // 일시/종일 구분 제거 — '품절' 단일 상태로 통합
 
   // 분류 필터 선택 목록 (전체 메뉴 기준)
   const stockAllCats  = [...new Set(MENUS.map(m=>m.cat).filter(x=>x&&x.trim()))];
@@ -6622,8 +6642,6 @@ function renderStock(main){
   const displayLowCnt = displayItems.filter(it=>it.remaining>0 && it.remaining<=it.lowAlert).length;
   const displayOutCnt = displayItems.filter(it=>it.remaining===0).length;
   const displayManualOutCnt = displayOtherMenus.filter(m=>m.manualSoldOut).length;
-  const displayFullOutCnt   = displayOtherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='full').length;
-  const displayTempOutCnt   = displayOtherMenus.filter(m=>m.manualSoldOut && m.soldOutKind==='temp').length;
 
   // 옵션 데이터 — 옵션도 수량 관리·품절 처리 가능
   const allOptItems = OPT_GROUPS.flatMap(g => g.items.map((it, idx) => {
@@ -6636,8 +6654,6 @@ function renderStock(main){
   const optLowCnt = optStockItems.filter(it=>it.remaining>0 && it.remaining<=it.lowAlert).length;
   const optOutCnt = optStockItems.filter(it=>it.remaining===0).length;
   const optManualOutCnt = otherOptItems.filter(o=>o.item.manualSoldOut).length;
-  const optFullOutCnt   = otherOptItems.filter(o=>o.item.manualSoldOut && o.item.soldOutKind==='full').length;
-  const optTempOutCnt   = otherOptItems.filter(o=>o.item.manualSoldOut && o.item.soldOutKind==='temp').length;
 
   // 필터 바 HTML (string 조합 — 중첩 방지)
   let _sfb = '';
@@ -7091,6 +7107,10 @@ function renderMenuCardGrid(rows){
                 const bg    = isOut?'#fee2e2':isLow?'#fef3c7':'#dcfce7';
                 return ` <span onclick="event.stopPropagation();setSection('stock')" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:${bg};color:${color};margin-left:6px;vertical-align:middle;cursor:pointer;" title="오늘의 준비량 페이지로 이동">📦 ${st.remaining}/${st.prepared}${st.unit}${isOut?' · 완료':isLow?' · 곧 품절':''}</span>`;
               })()}</div>
+              ${(r.badges&&r.badges.length>0)?`<div class="menu-card-badges">${r.badges.map(b=>{
+                const def = MENU_BADGES.find(x=>x.key===b); if(!def) return '';
+                return `<span class="menu-badge" style="background:${def.bg};color:${def.color};">${def.ico} ${def.label}</span>`;
+              }).join('')}</div>`:''}
               <div class="menu-card-desc">${r.desc||'<span style="color:var(--ink-4);">설명 없음</span>'}</div>
             </div>
             <div class="menu-card-meta">
@@ -7152,7 +7172,7 @@ function menuNavTabs(){
     { key:'option',   ic:'🧩', label:'옵션 선택지',  cnt: OPT_GROUPS.length },
     { key:'category', ic:'🗂️', label:'카테고리',     cnt: CAT_MENU.length },
     { key:'set',      ic:'🎁', label:'세트',         cnt: SETS.length },
-    { key:'origin',   ic:'🌿', label:'원산지 · 알레르기 정보' },
+    { key:'origin',   ic:'🌿', label:'원산지 표시' },
   ];
   return `
     <div class="mnav">
@@ -7570,12 +7590,17 @@ function renderOption(main){
   const h = mmHeaderHTML('option');
 
   const cardsHtml = state.optBulkCards.map((c, ci) => {
+    const isMulti = c.mode==='여러 개';
     const itemsHtml = c.items.map((it, ii) => `
-      <div class="ocr-item">
-        <input class="input" placeholder="옵션 이름 (예: 샷 1번 추가)" value="${it.name||''}" oninput="state.optBulkCards[${ci}].items[${ii}].name=this.value" />
+      <div class="ocr-item" style="grid-template-columns: 1fr 130px 110px 28px;">
+        <input class="input" placeholder="옵션 이름 (예: 샷 추가)" value="${it.name||''}" oninput="state.optBulkCards[${ci}].items[${ii}].name=this.value" />
         <div style="display:flex;gap:4px;align-items:center;">
           <input class="input" type="number" placeholder="추가 금액" value="${it.price||''}" oninput="state.optBulkCards[${ci}].items[${ii}].price=Number(this.value)||0" style="text-align:right;flex:1;" />
           <span style="font-size:12px;color:var(--ink-3);flex-shrink:0;">원</span>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center;" title="손님이 이 항목을 최대 몇 번까지 추가할 수 있는지">
+          <input class="input" type="number" min="1" max="10" placeholder="1" value="${it.maxQty||1}" oninput="state.optBulkCards[${ci}].items[${ii}].maxQty=Math.max(1,Math.min(10,Number(this.value)||1))" style="text-align:right;flex:1;" />
+          <span style="font-size:12px;color:var(--ink-3);flex-shrink:0;">회</span>
         </div>
         <button class="x-btn" onclick="state.optBulkCards[${ci}].items.splice(${ii},1);renderApp()" title="항목 삭제">✕</button>
       </div>
@@ -7607,16 +7632,32 @@ function renderOption(main){
           </div>
           <div>
             <label>선택 방식</label>
-            <select class="input" onchange="state.optBulkCards[${ci}].mode=this.value">
-              <option ${(c.mode||'1개 선택')==='1개 선택'?'selected':''}>1개 선택</option>
-              <option ${c.mode==='중복 선택'?'selected':''}>중복 선택</option>
+            <select class="input" onchange="state.optBulkCards[${ci}].mode=this.value;if(this.value==='1개만'){state.optBulkCards[${ci}].maxSelect=1;}renderApp()">
+              <option ${(c.mode||'1개만')==='1개만'?'selected':''}>1개만 선택</option>
+              <option ${c.mode==='여러 개'?'selected':''}>여러 개 선택</option>
             </select>
           </div>
+          ${isMulti ? `
+          <div>
+            <label>최대 선택 개수 <span style="color:var(--ink-4);font-weight:400;">손님이 고를 수 있는 항목 수</span></label>
+            <div style="display:flex;gap:4px;align-items:center;">
+              <input class="input" type="number" min="2" max="20" value="${c.maxSelect||2}" oninput="state.optBulkCards[${ci}].maxSelect=Math.max(2,Math.min(20,Number(this.value)||2))" style="width:100px;text-align:right;" />
+              <span style="font-size:12px;color:var(--ink-3);">개까지</span>
+            </div>
+          </div>
+          ` : ''}
         </div>
         <div class="ocr-items">
+          <div style="display:grid;grid-template-columns: 1fr 130px 110px 28px;gap:8px;padding:0 4px 4px;font-size:11px;color:var(--ink-3);font-weight:700;">
+            <span>옵션 항목 이름</span>
+            <span style="text-align:right;">추가 금액</span>
+            <span style="text-align:right;" title="메뉴별로 다르게 덮어쓸 수 있어요">기본 추가 횟수</span>
+            <span></span>
+          </div>
           ${c.items.length===0 ? `<div style="padding:14px 4px;text-align:center;color:var(--ink-3);font-size:12px;">옵션 항목을 추가해 주세요.</div>` : itemsHtml}
-          <button class="ocr-item-add" onclick="state.optBulkCards[${ci}].items.push({name:'',price:0});renderApp()">+ 옵션 항목 추가</button>
+          <button class="ocr-item-add" onclick="state.optBulkCards[${ci}].items.push({name:'',price:0,maxQty:1});renderApp()">+ 옵션 항목 추가</button>
         </div>
+        <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 <b>기본 추가 횟수</b>는 시스템 한도(기본값)예요. 메뉴마다 다르게 적용하려면 <b style="color:var(--ink-3);">메뉴 정보 수정 → 옵션 적용 한도</b>에서 메뉴별로 따로 설정해 주세요.<br/>예) 샷 추가 기본 3회 → 아메리카노는 3회, 디카페인 라떼는 1회로 메뉴 측에서 덮어쓰기.</div>
       </div>
     `;
   }).join('');
@@ -7687,13 +7728,15 @@ function renderOption(main){
           ${OPT_GROUPS.length===0 ? `<tr class="empty-row"><td colspan="8">위에서 일괄 등록하거나 ☕ 샘플을 불러와 첫 그룹을 만들어 주세요.</td></tr>` : OPT_GROUPS.map((g, idx)=>{
             const items = g.items.map(it=>{
               const priceTxt = it.price>0 ? ` <span style="color:var(--blue);font-weight:600;">+${fmt(it.price)}원</span>` : it.price<0 ? ` <span style="color:var(--red);font-weight:600;">${fmt(it.price)}원</span>` : '';
-              return `<div style="padding:3px 0;font-size:12px;color:var(--ink-2);">${it.name}${priceTxt}</div>`;
+              const qtyTxt = (it.maxQty&&it.maxQty>1) ? ` <span style="font-size:10px;font-weight:700;color:#7a4d00;background:#fff5dd;padding:1px 6px;border-radius:5px;">최대 ${it.maxQty}회</span>` : '';
+              return `<div style="padding:3px 0;font-size:12px;color:var(--ink-2);">${it.name}${priceTxt}${qtyTxt}</div>`;
             }).join('');
             const linkChips = g.links.map(mid=>{
               const m = MENUS.find(x=>x.id===mid);
               return m ? `<span class="chip" style="font-size:11px;padding:3px 8px;cursor:default;margin:1px;">${m.name}</span>` : '';
             }).join('');
             const isSel = state.optSel.has(g.id);
+            const modeTxt = g.mode==='여러 개' ? `여러 개 (최대 ${g.maxSelect||2}개)` : '1개만';
             return `
               <tr ${dragRowAttrs('OPT_GROUPS', idx)}${isSel?` style="background:var(--blue-50);"`:''}>
                 ${selCheckTd(state.optSel, g.id)}
@@ -7702,11 +7745,16 @@ function renderOption(main){
                 <td><b>${g.name}</b></td>
                 <td>
                   <span class="pill ${g.required?'pending':'hold'}">${g.required?'필수':'선택'}</span>
-                  <div style="font-size:11px;color:var(--ink-3);margin-top:4px;">${g.mode}</div>
+                  <div style="font-size:11px;color:var(--ink-3);margin-top:4px;">${modeTxt}</div>
                 </td>
                 <td>${items}</td>
                 <td><div style="display:flex;flex-wrap:wrap;gap:2px;">${linkChips || `<span style="color:var(--ink-4);font-size:12px;">메뉴를 연결해 주세요</span>`}</div></td>
-                <td><button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);" onclick="deleteOpt(${g.id})">✕</button></td>
+                <td>
+                  <div style="display:flex;gap:4px;justify-content:flex-end;">
+                    <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--blue);" onclick="editOpt(${g.id})" title="수정">✏️ 수정</button>
+                    <button class="btn-ghost" style="padding:6px 10px;font-size:11px;color:var(--red);" onclick="deleteOpt(${g.id})" title="삭제">✕</button>
+                  </div>
+                </td>
               </tr>
             `;
           }).join('')}
@@ -7717,7 +7765,7 @@ function renderOption(main){
 }
 
 function addOptBulkCard(){
-  state.optBulkCards.push({ code:'', name:'', mode:'1개 선택', required:false, items:[{name:'',price:0}] });
+  state.optBulkCards.push({ code:'', name:'', mode:'1개만', maxSelect:1, required:false, items:[{name:'',price:0,maxQty:1}] });
   renderApp();
 }
 function saveOptBulk(){
@@ -7725,10 +7773,12 @@ function saveOptBulk(){
   if (cards.length===0){ alert('그룹명과 옵션 항목을 입력해 주세요.'); return; }
   let nextId = (OPT_GROUPS.reduce((m,g)=>Math.max(m,g.id),0))+1;
   cards.forEach(c=>{
+    const mode = c.mode || '1개만';
+    const maxSelect = mode==='1개만' ? 1 : Math.max(2, Number(c.maxSelect)||2);
     OPT_GROUPS.push({
       id: nextId++, code: c.code || genCode('O'),
-      name: c.name, mode: c.mode||'1개 선택', required: !!c.required,
-      items: c.items.filter(it=>it.name).map(it=>({name:it.name, price:it.price||0})),
+      name: c.name, mode, maxSelect, required: !!c.required,
+      items: c.items.filter(it=>it.name).map(it=>({name:it.name, price:it.price||0, maxQty:Math.max(1,Number(it.maxQty)||1)})),
       links: [],
     });
   });
@@ -7745,6 +7795,119 @@ function deleteOpt(id){
   MENUS.forEach(m=>{ m.opt = m.opt.filter(x=>x!==id); });
   renderApp();
   showToast(`<span class="ic">🗑️</span> '${g?.name||'옵션 그룹'}'을(를) 삭제했어요`, 'ok');
+}
+
+// 옵션 그룹 수정 — 기존 그룹을 모달로 편집
+function editOpt(id){
+  const g = OPT_GROUPS.find(x=>x.id===id);
+  if (!g) return;
+  state._optEdit = {
+    id: g.id, code: g.code, name: g.name,
+    mode: g.mode || '1개만',
+    maxSelect: g.maxSelect || (g.mode==='여러 개'?2:1),
+    required: !!g.required,
+    items: g.items.map(it=>({name:it.name, price:it.price||0, maxQty:it.maxQty||1})),
+    links: [...(g.links||[])],
+  };
+  renderOptEditModal();
+}
+function renderOptEditModal(){
+  const f = state._optEdit;
+  const isMulti = f.mode==='여러 개';
+  const modal = document.getElementById('modal');
+  const itemsHtml = f.items.map((it, ii)=>`
+    <div class="ocr-item" style="grid-template-columns: 1fr 130px 110px 28px;">
+      <input class="input" placeholder="옵션 이름" value="${(it.name||'').replace(/"/g,'&quot;')}" oninput="state._optEdit.items[${ii}].name=this.value" />
+      <div style="display:flex;gap:4px;align-items:center;">
+        <input class="input" type="number" placeholder="추가 금액" value="${it.price||''}" oninput="state._optEdit.items[${ii}].price=Number(this.value)||0" style="text-align:right;flex:1;" />
+        <span style="font-size:12px;color:var(--ink-3);flex-shrink:0;">원</span>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;" title="손님이 이 항목을 최대 몇 번까지 추가할 수 있는지">
+        <input class="input" type="number" min="1" max="10" value="${it.maxQty||1}" oninput="state._optEdit.items[${ii}].maxQty=Math.max(1,Math.min(10,Number(this.value)||1))" style="text-align:right;flex:1;" />
+        <span style="font-size:12px;color:var(--ink-3);flex-shrink:0;">회</span>
+      </div>
+      <button class="x-btn" onclick="state._optEdit.items.splice(${ii},1);renderOptEditModal()" title="항목 삭제">✕</button>
+    </div>
+  `).join('');
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:680px;">
+      <div class="modal-head"><b>✏️ 옵션 그룹 수정</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
+      <div class="modal-body" style="padding:20px;max-height:75vh;overflow-y:auto;">
+
+        <div class="ocr-grid" style="margin-bottom:14px;">
+          <div>
+            <label>상품코드</label>
+            <input class="input" style="font-family:ui-monospace,monospace;letter-spacing:.04em;width:100%;" maxlength="6" value="${f.code||''}" oninput="state._optEdit.code=this.value.toUpperCase()" />
+          </div>
+          <div>
+            <label>옵션 그룹명 *</label>
+            <input class="input" placeholder="예) 샷 추가, 사이즈" value="${(f.name||'').replace(/"/g,'&quot;')}" oninput="state._optEdit.name=this.value" style="width:100%;" />
+          </div>
+          <div>
+            <label>선택 필수</label>
+            <select class="input" onchange="state._optEdit.required=(this.value==='true')" style="width:100%;">
+              <option value="false" ${!f.required?'selected':''}>선택 (건너뛰기 가능)</option>
+              <option value="true"  ${f.required?'selected':''}>필수 (반드시 선택)</option>
+            </select>
+          </div>
+          <div>
+            <label>선택 방식</label>
+            <select class="input" onchange="state._optEdit.mode=this.value;if(this.value==='1개만'){state._optEdit.maxSelect=1;}else if(!state._optEdit.maxSelect||state._optEdit.maxSelect<2){state._optEdit.maxSelect=2;}renderOptEditModal()" style="width:100%;">
+              <option ${f.mode==='1개만'?'selected':''}>1개만 선택</option>
+              <option ${f.mode==='여러 개'?'selected':''}>여러 개 선택</option>
+            </select>
+          </div>
+          ${isMulti ? `
+          <div style="grid-column:span 2;">
+            <label>최대 선택 개수 <span style="color:var(--ink-4);font-weight:400;">손님이 고를 수 있는 항목 수</span></label>
+            <div style="display:flex;gap:4px;align-items:center;">
+              <input class="input" type="number" min="2" max="20" value="${f.maxSelect||2}" oninput="state._optEdit.maxSelect=Math.max(2,Math.min(20,Number(this.value)||2))" style="width:120px;text-align:right;" />
+              <span style="font-size:12px;color:var(--ink-3);">개까지</span>
+            </div>
+          </div>
+          ` : ''}
+        </div>
+
+        <div class="ocr-items">
+          <div style="display:grid;grid-template-columns: 1fr 130px 110px 28px;gap:8px;padding:0 4px 4px;font-size:11px;color:var(--ink-3);font-weight:700;">
+            <span>옵션 항목 이름</span>
+            <span style="text-align:right;">추가 금액</span>
+            <span style="text-align:right;" title="메뉴별로 다르게 덮어쓸 수 있어요">기본 추가 횟수</span>
+            <span></span>
+          </div>
+          ${f.items.length===0 ? `<div style="padding:14px 4px;text-align:center;color:var(--ink-3);font-size:12px;">옵션 항목을 추가해 주세요.</div>` : itemsHtml}
+          <button class="ocr-item-add" onclick="state._optEdit.items.push({name:'',price:0,maxQty:1});renderOptEditModal()">+ 옵션 항목 추가</button>
+        </div>
+        <div style="font-size:11px;color:var(--ink-4);margin-top:8px;line-height:1.55;">💡 <b>기본 추가 횟수</b>는 시스템 한도(기본값)예요. 메뉴마다 다르게 적용하려면 메뉴 정보 수정의 <b style="color:var(--ink-3);">옵션 적용 한도</b>에서 메뉴별로 따로 설정해 주세요.</div>
+
+      </div>
+      <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--line);">
+        <button class="btn-ghost" onclick="closeModal()">취소</button>
+        <button class="btn-save-cta" onclick="saveOptEdit()">저장</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('on');
+}
+function saveOptEdit(){
+  const f = state._optEdit;
+  if(!f) return;
+  const g = OPT_GROUPS.find(x=>x.id===f.id);
+  if(!g) return;
+  const name = (f.name||'').trim();
+  if(!name){ alert('옵션 그룹명을 입력해 주세요.'); return; }
+  const items = f.items.filter(it=>(it.name||'').trim());
+  if(items.length===0){ alert('옵션 항목을 1개 이상 입력해 주세요.'); return; }
+  g.code = (f.code||'').trim() || g.code;
+  g.name = name;
+  g.mode = f.mode || '1개만';
+  g.maxSelect = g.mode==='1개만' ? 1 : Math.max(2, Number(f.maxSelect)||2);
+  g.required = !!f.required;
+  g.items = items.map(it=>({ name: it.name.trim(), price: Number(it.price)||0, maxQty: Math.max(1, Number(it.maxQty)||1) }));
+  state._optEdit = null;
+  closeModal();
+  renderApp();
+  showToast(`<span class="ic">✅</span> '${name}' 옵션 그룹을 저장했어요`, 'ok');
 }
 
 /* ============================================================
@@ -8477,9 +8640,10 @@ function openScheduleModal(kind, id){
   const list = kind==='menu' ? MENUS : kind==='set' ? SETS : CAT_MENU;
   const item = list.find(x=>x.id===id); if (!item) return;
   if (kind==='menu') ensureMenuExtras(item); else if (kind==='set') ensureSetExtras(item);
-  if (!item.schedule) item.schedule = { enabled:false, days:[0,1,2,3,4,5,6], start:'09:00', end:'22:00' };
+  if (!item.schedule) item.schedule = { enabled:false, days:[0,1,2,3,4,5,6], start:'09:00', end:'22:00', holiday:'include' };
   state._schTarget = { kind, id };
   state._schDraft = JSON.parse(JSON.stringify(item.schedule));
+  if(typeof state._schDraft.holiday === 'undefined') state._schDraft.holiday = 'include';
 
   renderScheduleModal();
   document.getElementById('modal-bg').classList.add('on');
@@ -8514,6 +8678,14 @@ function renderScheduleModal(){
       <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
         ${SCH_PRESETS.filter(p=>p.days).map(p=>`<span class="chip" onclick="applySchPreset('days', ${JSON.stringify(p.days)})">${p.label}</span>`).join('')}
       </div>
+
+      <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:8px;">🇰🇷 법정 공휴일 처리</label>
+      <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+        <span class="chip ${d.holiday==='include'?'on':''}" onclick="state._schDraft.holiday='include';renderScheduleModal()">설정한 요일대로 노출</span>
+        <span class="chip ${d.holiday==='exclude'?'on':''}" onclick="state._schDraft.holiday='exclude';renderScheduleModal()">공휴일엔 노출 안 함</span>
+        <span class="chip ${d.holiday==='only'?'on':''}" onclick="state._schDraft.holiday='only';renderScheduleModal()">공휴일에만 노출</span>
+      </div>
+      <div style="font-size:11px;color:var(--ink-4);margin-bottom:14px;line-height:1.55;">💡 한국천문연구원 공휴일 데이터를 기준으로 자동 적용돼요. (설날·추석·어린이날·삼일절 등)</div>
 
       <label style="font-size:12px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:8px;">시간</label>
       <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px;">
@@ -8724,6 +8896,8 @@ function openMenuDetailNewModal(){
     cat: (CAT_MENU[0]?.name)||'미분류',
     catL2:'', catL3:'', tag3:'',
     desc:'', img:'', status:'판매중', maxQty:null,
+    badges: [],                              // 인기·추천·신메뉴 배너
+    allergens: [],                           // 알레르기 정보 (원산지에서 분리)
   };
   renderMenuEditModal();
 }
@@ -8731,8 +8905,33 @@ function openMenuEditModal(id){
   const m = MENUS.find(x=>x.id===id);
   if(!m) return;
   ensureMenuExtras(m);
-  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, discountAmt:m.discountAmt||null, cat:m.cat, catL2:m.catL2||'', catL3:m.catL3||'', tag3:m.tag3||'', desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty };
+  state._menuEdit = { id:m.id, name:m.name, price:m.price, takeoutPrice:m.takeoutPrice, discountAmt:m.discountAmt||null, cat:m.cat, catL2:m.catL2||'', catL3:m.catL3||'', tag3:m.tag3||'', desc:m.desc||'', img:m.img||'🍽️', status:m.status, maxQty:m.maxQty, badges:[...(m.badges||[])], allergens:[...(m.allergens||[])], optMaxQty: JSON.parse(JSON.stringify(m.optMaxQty||{})) };
   renderMenuEditModal();
+}
+// 메뉴 수정 모달 — 배너 토글
+function toggleMenuBadge(key){
+  if(!state._menuEdit) return;
+  if(!state._menuEdit.badges) state._menuEdit.badges = [];
+  const idx = state._menuEdit.badges.indexOf(key);
+  if(idx<0) state._menuEdit.badges.push(key); else state._menuEdit.badges.splice(idx,1);
+  renderMenuEditModal();
+}
+// 메뉴 수정 모달 — 알레르기 토글 (메뉴 상세 안으로 이동)
+function toggleEditAllergen(code){
+  if(!state._menuEdit) return;
+  if(!state._menuEdit.allergens) state._menuEdit.allergens = [];
+  const idx = state._menuEdit.allergens.indexOf(code);
+  if(idx<0) state._menuEdit.allergens.push(code); else state._menuEdit.allergens.splice(idx,1);
+  renderMenuEditModal();
+}
+// 메뉴 수정 모달 — 옵션 항목별 메뉴 한도 오버라이드
+function setMenuOptMaxQty(groupId, itemIdx, val){
+  if(!state._menuEdit) return;
+  if(!state._menuEdit.optMaxQty) state._menuEdit.optMaxQty = {};
+  const key = String(groupId);
+  if(!state._menuEdit.optMaxQty[key]) state._menuEdit.optMaxQty[key] = {};
+  state._menuEdit.optMaxQty[key][itemIdx] = Math.max(1, Math.min(10, Number(val)||1));
+  // 라이브 갱신 없이 (스피너 값만 갱신)
 }
 function renderMenuEditModal(){
   const f = state._menuEdit;
@@ -8761,6 +8960,26 @@ function renderMenuEditModal(){
         <!-- 메뉴 이름 -->
         <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">메뉴 이름 <span style="color:var(--red);">*</span></label>
         <input id="me-name" class="input" value="${f.name.replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:16px;" />
+
+        <!-- 메뉴 배너 (인기·추천·신메뉴) — 손님 메뉴판에 표시 -->
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">메뉴 배너 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택 · 복수 선택 가능</span></label>
+        <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          ${MENU_BADGES.map(b=>{
+            const on = (f.badges||[]).includes(b.key);
+            return `<span class="badge-toggle ${on?'on':''}" style="${on?`background:${b.bg};color:${b.color};border-color:${b.color};`:''}" onclick="toggleMenuBadge('${b.key}')">${b.ico} ${b.label}${on?' ✓':''}</span>`;
+          }).join('')}
+        </div>
+        <div style="font-size:11px;color:var(--ink-4);margin-bottom:18px;line-height:1.55;">💡 손님 메뉴판에 메뉴 이름 옆에 배너가 표시돼요. 여러 개 선택할 수 있어요.</div>
+
+        <!-- 알레르기 정보 — 원산지 페이지에서 분리, 메뉴 상세에 포함 -->
+        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">⚠️ 알레르기 정보 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">식품위생법 14종 · 해당 항목 선택</span></label>
+        <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+          ${(typeof ALLERGENS!=='undefined'?ALLERGENS:[]).map(a=>{
+            const on = (f.allergens||[]).includes(a.code);
+            return `<span class="badge-toggle ${on?'on':''}" style="padding:6px 10px;font-size:12px;${on?'background:#fff5dd;color:#7a4d00;border-color:#fbbf24;':''}" onclick="toggleEditAllergen('${a.code}')">${a.icon} ${a.label}${on?' ✓':''}</span>`;
+          }).join('')}
+        </div>
+        <div style="font-size:11px;color:var(--ink-4);margin-bottom:18px;line-height:1.55;">💡 알레르기 정보가 정확하지 않으면 손님에게 피해가 갈 수 있어요. 실제 식재료를 확인 후 정확하게 선택해 주세요. 선택한 항목은 손님 메뉴판에 아이콘으로 표시돼요.</div>
 
         <!-- 가격 — 매장가 / 포장가 / 할인가 -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:6px;">
@@ -8839,6 +9058,63 @@ function renderMenuEditModal(){
           ${f.maxQty!=null?`<button class="btn-ghost" style="padding:8px 12px;font-size:11px;color:var(--red);" onclick="document.getElementById('me-maxqty').value='';">✕ 제한 해제</button>`:''}
         </div>
         <div style="font-size:10px;color:var(--ink-4);margin-bottom:14px;line-height:1.5;">손님이 한 번에 담을 수 있는 최대 수량이에요. 비워 두면 제한 없이 주문할 수 있어요. (예: 인기 메뉴·이벤트 메뉴는 5개로 제한)</div>
+
+        <!-- 옵션 적용 한도 — 메뉴별로 옵션 항목 추가 횟수 오버라이드 -->
+        ${(()=>{
+          const linkedGroups = (typeof OPT_GROUPS!=='undefined' ? OPT_GROUPS : []).filter(g=>g.links && g.links.includes(f.id));
+          if(linkedGroups.length===0) return `
+            <div style="padding:12px 14px;background:#f6f3ff;border:1px dashed #c4a5ff;border-radius:10px;font-size:11px;color:#6b3eaa;line-height:1.55;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+              <span>🧩 이 메뉴에는 아직 옵션 그룹이 연결돼 있지 않아요.</span>
+              <button class="btn-ghost" style="padding:5px 10px;font-size:11px;font-weight:700;flex-shrink:0;color:#6b3eaa;border-color:#c4a5ff;" onclick="closeModal();setSection('option');">옵션 그룹 →</button>
+            </div>
+          `;
+          if(!f.optMaxQty) f.optMaxQty = {};
+          const groupsHtml = linkedGroups.map(g=>{
+            const isMulti = g.mode==='여러 개';
+            // 1개만 선택은 항목별 횟수 의미 없음 (항상 1)
+            if(!isMulti){
+              return `
+                <div style="padding:10px 12px;background:#fafbfc;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:13px;font-weight:700;">🧩 ${g.name}</span>
+                    <span style="font-size:11px;color:var(--ink-3);">1개만 선택 · 항목별 1회 고정</span>
+                  </div>
+                </div>
+              `;
+            }
+            const itemsRows = g.items.map((it, ii)=>{
+              const overrideKey = `${g.id}`;
+              const cur = (f.optMaxQty[overrideKey] && f.optMaxQty[overrideKey][ii] != null)
+                ? f.optMaxQty[overrideKey][ii] : (it.maxQty||1);
+              const base = it.maxQty||1;
+              const isOverride = (cur !== base);
+              return `
+                <div style="display:grid;grid-template-columns:1fr 140px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line-2);">
+                  <span style="font-size:12px;color:var(--ink-2);">${it.name}${it.price>0?` <span style="color:var(--blue);font-weight:600;">+${fmt(it.price)}원</span>`:''}</span>
+                  <div style="display:flex;align-items:center;gap:4px;">
+                    <input class="input" type="number" min="1" max="10" value="${cur}" oninput="setMenuOptMaxQty(${g.id},${ii},this.value)" style="text-align:right;flex:1;padding:6px 10px;font-size:12px;${isOverride?'border-color:var(--blue);background:var(--blue-50);':''}" title="기본값 ${base}회" />
+                    <span style="font-size:11px;color:var(--ink-3);flex-shrink:0;">회</span>
+                    <span style="font-size:10px;color:${isOverride?'var(--blue)':'var(--ink-4)'};font-weight:600;flex-shrink:0;width:40px;">${isOverride?'덮어씀':'기본'}</span>
+                  </div>
+                </div>
+              `;
+            }).join('');
+            return `
+              <div style="padding:12px 14px;background:#fafbfc;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                  <span style="font-size:13px;font-weight:700;">🧩 ${g.name}</span>
+                  <span style="font-size:11px;color:var(--ink-3);">여러 개 선택 (최대 ${g.maxSelect||2}개)</span>
+                </div>
+                ${itemsRows}
+              </div>
+            `;
+          }).join('');
+          return `
+            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">🎚️ 옵션 적용 한도 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">메뉴별로 옵션 항목 추가 횟수를 다르게 설정</span></label>
+            ${groupsHtml}
+            <div style="font-size:11px;color:var(--ink-4);margin-bottom:14px;line-height:1.55;">💡 옵션 그룹에서 정한 <b>기본 추가 횟수</b>를 이 메뉴에서는 다르게 적용할 수 있어요. 예) 샷 추가 기본 3회 → 디카페인 라떼는 1회로 제한.</div>
+          `;
+        })()}
 
         ${(()=>{
           const st = getMenuStock(f.id);
@@ -8939,6 +9215,9 @@ function saveMenuEdit(){
   m.img = f.img;
   const mqVal = document.getElementById('me-maxqty').value;
   m.maxQty = (mqVal==='' || Number(mqVal)<=0) ? null : Math.floor(Number(mqVal));
+  m.badges = [...(f.badges||[])];     // 인기·추천·신메뉴 배너
+  m.allergens = [...(f.allergens||[])]; // 알레르기 정보 (메뉴 상세 안으로 이동)
+  m.optMaxQty = JSON.parse(JSON.stringify(f.optMaxQty||{})); // 옵션 항목별 메뉴 한도 오버라이드
   // 신규 등록이면 MENUS에 push
   if(f.isNew){ MENUS.push(m); }
   closeModal();
@@ -8958,39 +9237,34 @@ function quickToggleSoldOut(id){
   showToast(`<span class="ic">${m.manualSoldOut?'⛔':'✅'}</span> '${m.name}'을(를) ${m.manualSoldOut?'품절로 바꿨어요':'판매 중으로 되돌렸어요'}`, 'ok');
 }
 // 오늘 품절 처리 — 품절 / 판매 재개
+// 품절 토글 — 일시/종일 구분 없이 '품절' 단일 상태로 통합
 function setSoldOut(id, mode){
   const m = MENUS.find(x=>x.id===id);
   if(!m) return;
   ensureMenuExtras(m);
-  if(mode==='on'){
-    m.manualSoldOut = false;
-  }else{
-    m.manualSoldOut = true;
-    m.soldOutKind = mode; // 'full' | 'temp'
-  }
+  m.manualSoldOut = (mode !== 'on');
   state._flashMenuId = m.id;
   renderApp();
   flashSavedMenu(m.id);
-  const msg = mode==='on'
-    ? `<span class="ic">✅</span> '${m.name}'을(를) 판매 중으로 되돌렸어요`
-    : `<span class="ic">⛔</span> '${m.name}'을(를) 품절로 바꿨어요`;
+  const msg = m.manualSoldOut
+    ? `<span class="ic">⛔</span> '${m.name}'을(를) 품절로 바꿨어요`
+    : `<span class="ic">✅</span> '${m.name}'을(를) 판매 중으로 되돌렸어요`;
   showToast(msg, 'ok');
 }
-// 옵션 품절 / 옵션 수량 ----------------------------------------------------
+// 옵션 품절 / 옵션 수량 — 동일하게 통합
 function ensureOptExtras(it){
   if(!it) return;
   if(typeof it.manualSoldOut === 'undefined') it.manualSoldOut = false;
-  if(typeof it.soldOutKind   === 'undefined') it.soldOutKind   = 'temp';
 }
 function setOptSoldOut(gid, idx, mode){
   const g = OPT_GROUPS.find(x=>x.id===gid); if(!g) return;
   const it = g.items[idx]; if(!it) return;
   ensureOptExtras(it);
-  if(mode==='on'){ it.manualSoldOut = false; }
-  else { it.manualSoldOut = true; it.soldOutKind = mode; }
+  it.manualSoldOut = (mode !== 'on');
   renderApp();
-  const msg = mode==='on' ? `<span class="ic">✅</span> 옵션 '${it.name}'을(를) 사용 가능으로 되돌렸어요`
-    : `<span class="ic">⛔</span> 옵션 '${it.name}'을(를) 품절로 바꿨어요`;
+  const msg = it.manualSoldOut
+    ? `<span class="ic">⛔</span> 옵션 '${it.name}'을(를) 품절로 바꿨어요`
+    : `<span class="ic">✅</span> 옵션 '${it.name}'을(를) 사용 가능으로 되돌렸어요`;
   showToast(msg, 'ok');
 }
 function clearAllOptSoldOut(){
@@ -11824,61 +12098,18 @@ function submitInquiry(){
    원산지 · 알레르기 정보 페이지
    ============================================================ */
 function renderOrigin(main){
-  const tab = state.originTab || 'origin';
   const lines = STORE_ORIGIN.text.split('\n').filter(l=>l.trim()).length;
 
-  // 알레르기 탭: 메뉴별 체크 표
-  const allergyTable = (()=>{
-    const visibleMenus = MENUS.filter(m=>m.status!=='숨김');
-    const cols = ALLERGENS.slice(0,8); // 주요 8종 표시 (나머지는 기타로)
-    const rows = visibleMenus.map(m=>{
-      const als = m.allergens||[];
-      const cells = cols.map(a=>{
-        const has = als.includes(a.code);
-        return `<td style="text-align:center;padding:8px 6px;">
-          <label style="cursor:pointer;user-select:none;">
-            <input type="checkbox" ${has?'checked':''} onchange="toggleMenuAllergen(${m.id},'${a.code}',this.checked)" style="display:none;" />
-            <span style="font-size:18px;opacity:${has?1:0.15};" title="${has?a.label+' 포함':'없음'}">${a.icon}</span>
-          </label>
-        </td>`;
-      }).join('');
-      const extra = als.filter(c=>!cols.find(a=>a.code===c));
-      const extraLabel = extra.map(c=>ALLERGENS.find(a=>a.code===c)?.label||c).join(', ');
-      return `<tr style="border-bottom:1px solid var(--line-2);">
-        <td style="padding:8px 12px;font-weight:600;">${m.img||'🍽️'} ${m.name}</td>
-        ${cells}
-        <td style="padding:8px 10px;font-size:11px;color:var(--ink-3);">${extraLabel||'−'}</td>
-      </tr>`;
-    }).join('');
-    const headers = cols.map(a=>`<th style="text-align:center;padding:8px 6px;font-size:11px;color:var(--ink-3);"><div style="font-size:16px;">${a.icon}</div>${a.label}</th>`).join('');
-    return `<div style="overflow-x:auto;">
-      <table class="t" style="min-width:700px;">
-        <thead><tr>
-          <th style="min-width:130px;">메뉴</th>
-          ${headers}
-          <th style="min-width:90px;font-size:11px;color:var(--ink-3);">기타</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-  })();
-
   main.innerHTML = `
-    <div class="crumb">메뉴 관리 › 원산지 · 알레르기</div>
+    <div class="crumb">메뉴 관리 › 원산지 표시</div>
     ${menuNavTabs()}
     <div class="toolbar">
       <div>
-        <h2>원산지 · 알레르기 정보</h2>
+        <h2>원산지 표시</h2>
         <div class="page-sub">법적 의무 표시 항목이에요. QR 메뉴판 하단에 자동으로 노출돼요.</div>
       </div>
     </div>
 
-    <div class="tabs">
-      <div class="t ${tab==='origin'?'on':''}" onclick="state.originTab='origin';renderApp()">🌿 원산지 표시</div>
-      <div class="t ${tab==='allergy'?'on':''}" onclick="state.originTab='allergy';renderApp()">⚠️ 알레르기 정보</div>
-    </div>
-
-    ${tab==='origin' ? `
     <div class="panel" style="background:var(--blue-50);border:1px solid var(--blue-100);padding:14px 18px;margin-bottom:6px;">
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <span style="font-size:16px;flex-shrink:0;">ℹ️</span>
@@ -11898,43 +12129,20 @@ function renderOrigin(main){
         💡 <b style="color:var(--ink-2);">한 줄에 하나씩</b> 적어 주세요. 줄 바꿈도 그대로 메뉴판에 반영돼요.
       </div>
     </div>
-    <div style="padding:10px 14px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:10px;font-size:12px;color:#1b64da;margin-bottom:6px;">
-      💡 원산지 정보가 손님 화면에 어떻게 보이는지 확인하려면 화면 우측 하단 <b>👁️ 손님 화면 미리보기</b> 버튼을 눌러 주세요.
-    </div>
-    ` : `
-    <div class="panel" style="background:#fff8ed;border:1px solid #fed7aa;padding:14px 18px;margin-bottom:6px;">
+
+    <div class="panel" style="background:#f6f3ff;border:1px solid #e3d8ff;padding:14px 18px;margin-bottom:6px;">
       <div style="display:flex;gap:10px;align-items:flex-start;">
         <span style="font-size:16px;flex-shrink:0;">⚠️</span>
-        <div style="font-size:13px;color:#9a3412;line-height:1.65;">
-          <b>식품 알레르기 14종</b>은 식품위생법에 따라 표시 의무가 있어요. 알레르기 정보가 정확하지 않으면 손님에게 피해가 갈 수 있어요. <b>실제 식재료를 확인 후 정확하게 입력</b>해 주세요.
+        <div style="font-size:13px;color:#6b3eaa;line-height:1.65;">
+          <b>알레르기 정보는 각 메뉴 상세 안에서 관리</b>해요. 메뉴 관리 → 메뉴판에서 메뉴를 클릭한 뒤 <b>알레르기 정보</b> 항목에서 14종 중 해당 항목을 체크해 주세요.
+          <button class="btn-ghost" style="padding:6px 12px;font-size:12px;margin-top:8px;color:#6b3eaa;border-color:#c4a5ff;" onclick="setSection('menu')">📖 메뉴판으로 가기</button>
         </div>
       </div>
     </div>
 
-    <div class="panel">
-      <h3>공통 알레르기 안내문 <span class="h-sub">메뉴판 하단에 노출돼요</span>
-        <span class="h-act"><span style="font-size:11px;color:var(--ink-4);">최종 수정 ${STORE_ALLERGY.updatedAt}</span></span>
-      </h3>
-      <textarea id="allergy-notice" class="input" style="width:100%;min-height:80px;font-size:13px;line-height:1.7;font-family:inherit;resize:vertical;padding:12px 14px;"
-        oninput="STORE_ALLERGY.notice=this.value">${STORE_ALLERGY.notice}</textarea>
-      <div style="font-size:11px;color:var(--ink-4);margin-top:6px;">예: "알레르기 성분에 관한 자세한 문의는 직원에게 말씀해 주세요."</div>
-    </div>
-
-    <div class="panel">
-      <h3>메뉴별 알레르기 정보
-        <span class="h-sub">해당하는 항목을 체크해 주세요 (아이콘 클릭으로 토글)</span>
-      </h3>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
-        ${ALLERGENS.map(a=>`<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--bg-2);border:1px solid var(--line);">${a.icon} ${a.label}</span>`).join('')}
-      </div>
-      ${allergyTable}
-      <div style="margin-top:12px;font-size:12px;color:var(--ink-4);">💡 아이콘이 선명하면 해당 알레르기 성분을 포함해요. 흐리면 미포함이에요. 클릭해서 토글할 수 있어요.</div>
-    </div>
-
     <div style="padding:10px 14px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:10px;font-size:12px;color:#1b64da;margin-bottom:6px;">
-      💡 알레르기 정보가 손님 화면에 어떻게 보이는지 확인하려면 화면 우측 하단 <b>👁️ 손님 화면 미리보기</b> 버튼을 눌러 주세요.
+      💡 원산지 정보가 손님 화면에 어떻게 보이는지 확인하려면 화면 우측 하단 <b>👁️ 손님 화면 미리보기</b> 버튼을 눌러 주세요.
     </div>
-    `}
   `;
 }
 // 메뉴 알레르기 토글

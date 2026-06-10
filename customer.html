@@ -113,30 +113,33 @@
   .kakao-note b{color:#1c1714;}
 
   .catsec-h{padding:18px 18px 8px;font-size:16.5px;font-weight:800;}
-  .mcard{display:flex;gap:14px;padding:16px 16px;background:#fff;cursor:pointer;border-bottom:1px solid var(--line2);width:100%;border:none;font-family:inherit;text-align:left;align-items:center;}
+  .mcard{display:flex;gap:14px;padding:15px 16px;background:#fff;cursor:pointer;border-bottom:1px solid var(--line2);width:100%;border:none;font-family:inherit;text-align:left;align-items:center;position:relative;}
   .mcard:active{background:var(--bg);}
   .mcard.out .mname,.mcard.out .mprice{color:var(--ink3);}
   .mcard.closed-mode .mplus{background:var(--line2);color:var(--ink4);}
+  .mcard.hh-active{background:#fffef7;}
   /* 품절 이미지 오버레이 (dimming + 대각선 글자) */
   .soldout{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:2;}
   .soldout span{color:#fff;font-weight:800;letter-spacing:1px;white-space:nowrap;transform:rotate(-30deg);text-shadow:0 1px 4px rgba(0,0,0,.5);}
   .mimg .soldout span{font-size:15px;}
   .sheet-img .soldout span{font-size:42px;}
-  .mimg{font-size:38px;width:96px;height:68px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:13px;flex-shrink:0;position:relative;overflow:hidden;}
+  .mimg{font-size:38px;width:88px;height:64px;display:flex;align-items:center;justify-content:center;background:var(--line2);border-radius:12px;flex-shrink:0;position:relative;overflow:hidden;}
   .mimg img,.ci-img img,.sheet-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
   .minfo{flex:1;min-width:0;}
-  .mname{font-size:18px;font-weight:800;display:flex;align-items:center;flex-wrap:wrap;gap:5px;line-height:1.35;}
-  .badge-out{font-size:11px;font-weight:800;color:var(--red);background:#fff0f0;padding:2px 7px;border-radius:6px;}
-  /* 메뉴 배너 (인기·추천·신메뉴) */
-  .mbadge{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;vertical-align:middle;white-space:nowrap;}
-  .mbadge.hot{background:#fff0e6;color:#e8590c;border:1px solid #ffc9a3;}
-  .mbadge.reco{background:#fff9db;color:#e67700;border:1px solid #ffe08a;}
-  .mbadge.new{background:#e7f5ff;color:#1971c2;border:1px solid #a5d8ff;}
-  .mdesc{font-size:13.5px;color:var(--ink3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .mallerg{font-size:12px;margin-top:4px;}
-  .mprice{font-size:18px;font-weight:800;margin-top:7px;}
-  .mprice .was{font-size:12.5px;color:var(--ink4);font-weight:500;}
-  .mplus{flex-shrink:0;align-self:center;width:38px;height:38px;border-radius:50%;background:var(--blue-50);color:var(--blue);font-size:26px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .mname{font-size:16.5px;font-weight:800;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .badge-out{display:inline-flex;align-items:center;font-size:10px;font-weight:700;color:var(--red);background:#fff0f0;padding:1px 6px;border-radius:5px;margin-left:5px;vertical-align:middle;}
+  /* 메뉴 배지 — 1개 · 아주 작게 */
+  .mbadge{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;vertical-align:middle;white-space:nowrap;}
+  .mbadge.hot{background:rgba(232,89,12,.1);color:#c9410a;}
+  .mbadge.reco{background:rgba(230,119,0,.1);color:#d97706;}
+  .mbadge.new{background:rgba(25,113,194,.1);color:#1971c2;}
+  .mbadge.happy{background:rgba(255,212,59,.22);color:#7a5900;}
+  .mbadge-row{display:block;margin-top:3px;}
+  .mdesc{font-size:13px;color:var(--ink3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mprice{font-size:16.5px;font-weight:800;margin-top:5px;display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;}
+  .mprice .ori{font-size:12px;color:var(--ink4);font-weight:500;text-decoration:line-through;}
+  .mprice .stk{font-size:11.5px;font-weight:600;color:var(--amber);}
+  .mplus{flex-shrink:0;align-self:center;width:36px;height:36px;border-radius:50%;background:var(--blue-50);color:var(--blue);font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;}
 
   /* 장바구니 바 + 담기 애니메이션 */
   .cartbar{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(100% - 28px);max-width:412px;z-index:40;}
@@ -307,12 +310,9 @@
   .st-row:first-of-type{border-top:none;}
   .st-k{flex-shrink:0;width:106px;color:var(--ink3);font-weight:700;}
   .st-v{color:var(--ink);flex:1;line-height:1.65;}
-  /* 재고 임박 배지 (INF) */
-  .stock-pill{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:800;color:var(--amber);background:#fff4e6;border:1px solid #ffd8a8;padding:3px 9px;border-radius:20px;}
-  /* 할인 배지 */
-  .disc-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;background:#fff0f0;color:var(--red);border:1px solid #ffc9c9;vertical-align:middle;white-space:nowrap;margin-left:4px;}
-  .happy-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;background:#fff3bf;color:#664d00;border:1px solid #ffd43b;vertical-align:middle;white-space:nowrap;margin-left:4px;}
-  .mbadge.happy{background:#fff3bf;color:#664d00;border:1px solid #ffd43b;}
+  /* 상세 시트 할인 배지 (시트 전용) */
+  .disc-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(224,49,49,.1);color:var(--red);vertical-align:middle;white-space:nowrap;margin-left:4px;}
+  .happy-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(255,212,59,.22);color:#7a5900;vertical-align:middle;white-space:nowrap;margin-left:4px;}
   /* 해피아워 배너 */
   .happy-banner{margin:12px 14px 0;display:flex;gap:9px;align-items:center;background:linear-gradient(135deg,#fff3bf,#fff9db);border:1.5px solid #ffd43b;border-radius:11px;padding:13px 15px;font-size:14px;font-weight:700;color:#5c3d02;}
   .happy-banner .htime{font-size:12px;font-weight:600;color:#92400e;margin-top:2px;}
@@ -825,29 +825,38 @@ function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt
 function menuCard(m){
   const out = isOut(m);
   const closed = !S.businessOpen;
-  const showTakeout = S.orderType!=='dinein' && m.takeout!=null && m.takeout!==m.price;
   const baseP = priceOf(m);
   const fixedD = m.discount || 0;
   const hhD = happyHourDisc(m);
   const effP = baseP - fixedD - hhD;
   const anyDisc = fixedD > 0 || hhD > 0;
+  const showTakeout = S.orderType!=='dinein' && m.takeout!=null && m.takeout!==m.price;
+
+  // 배지: 우선순위 1개만 (해피아워 > hot > reco > new)
+  const badgeKey = hhD ? 'happy' : ((m.badges||[])[0] || null);
+  const badgeHtml = badgeKey === 'happy'
+    ? '<span class="mbadge happy">🎉 해피아워</span>'
+    : (badgeKey && BADGE[badgeKey] ? `<span class="mbadge ${badgeKey}">${BADGE[badgeKey].e} ${BADGE[badgeKey].l}</span>` : '');
+
+  // 가격: 취소선 원가 + 최종가만 (배지 없이)
+  const priceHtml = anyDisc
+    ? `<span class="ori">${won(baseP)}원</span>${won(effP)}원`
+    : showTakeout
+      ? `${won(effP)}원<span class="ori">${won(m.price)}원</span>`
+      : `${won(effP)}원`;
+
   const clickHandler = closed
     ? `onclick="toast('지금은 영업 시간이 아니에요')"`
     : `onclick="openSheet(${m.id})"`;
+
   return `
-    <button class="mcard ${out?'out':''} ${closed&&!out?'closed-mode':''}" ${clickHandler}>
+    <button class="mcard ${out?'out':''} ${closed&&!out?'closed-mode':''} ${hhD?'hh-active':''}" ${clickHandler}>
       ${imgBox('mimg', m.img, PHOTO[m.id], out)}
       <span class="minfo">
-        <span class="mname">${m.name} ${badgesHtml(m)} ${hhD?'<span class="mbadge happy">🎉 해피아워</span>':''} ${out?'<span class="badge-out">품절</span>':''}</span>
-        ${m.desc?`<span class="mdesc" style="display:block;">${m.desc}</span>`:''}
-        ${lowStock(m)?`<span class="stock-pill" style="margin-top:5px;">⚡ 잔여 ${m.stock}개</span>`:''}
-        <span class="mprice" style="display:block;">
-          ${anyDisc?`<span style="text-decoration:line-through;color:var(--ink4);font-size:14px;font-weight:500;">${won(baseP)}원</span> `:''}
-          ${won(effP)}원
-          ${fixedD?`<span class="disc-badge">🏷 ${won(fixedD)}원 할인</span>`:''}
-          ${hhD?`<span class="happy-badge">🎉 ${won(hhD)}원 할인</span>`:''}
-          ${showTakeout&&!anyDisc?` <span class="was">매장 ${won(m.price)}원</span>`:''}
-        </span>
+        <span class="mname">${m.name}${out?'<span class="badge-out">품절</span>':''}</span>
+        ${m.desc?`<span class="mdesc">${m.desc}</span>`:''}
+        ${badgeHtml?`<span class="mbadge-row">${badgeHtml}</span>`:''}
+        <span class="mprice">${priceHtml}${lowStock(m)?`<span class="stk">· 잔여 ${m.stock}개</span>`:''}</span>
       </span>
       ${(out||closed)?'':`<span class="mplus" onclick="event.stopPropagation();${(m.opt||[]).length?`openSheet(${m.id})`:`quickAdd(${m.id})`}">+</span>`}
     </button>`;

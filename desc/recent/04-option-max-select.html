@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>04 · 옵션 최대 선택 개수 (양방향) — QR오더 점주 관리자</title>
+<title>04 · 옵션 최대 선택 개수 (옵션 그룹에서 메뉴별 설정) — QR오더 점주 관리자</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="board.css">
@@ -12,26 +12,25 @@
 <div class="brd">
   <a class="brd-back" href="index.html">← 목록으로</a>
   <header class="brd-head">
-    <div class="brd-cat">메뉴 관리 · 메뉴 / 옵션 그룹</div>
-    <h1 class="brd-title">04 · 옵션 최대 선택 개수 (양방향)</h1>
-    <p class="brd-sub">메뉴×옵션 그룹×항목 조합으로 「손님이 이 항목을 몇 번까지 추가할 수 있는지」를 설정. <b>메뉴 측·옵션 측 어디서나 편집</b> 가능하고 동일 데이터를 공유. (예: 「샷 추가」 — 아메리카노 3회, 디카페인 라떼 1회, 키즈 음료 0회)</p>
+    <div class="brd-cat">메뉴 관리 · 옵션 그룹</div>
+    <h1 class="brd-title">04 · 옵션 최대 선택 개수 (옵션 그룹에서 메뉴별 설정)</h1>
+    <p class="brd-sub">옵션 그룹 수정 모달의 <b>「🎚️ 메뉴별 최대 선택 개수」</b> 섹션에서 — 연결된 메뉴 카드별로 각 옵션 항목을 손님이 몇 번까지 추가할 수 있는지 설정. <b>옵션 그룹 쪽에서 단독 관리</b>(메뉴 정보 수정 모달에서는 읽기 전용 요약만).</p>
     <div class="brd-meta">
       <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">📍 라이브 보기</a>
-      <span class="meta-key">진입 경로 A — <b>메뉴 관리 → 메뉴판 → 메뉴 클릭 → 판매 설정 → 🎚️ 옵션 최대 선택 개수</b></span>
-      <span class="meta-key">진입 경로 B — <b>메뉴 관리 → 옵션 그룹 → ✏️ 수정 → 🎚️ 메뉴별 최대 선택 개수</b></span>
+      <span class="meta-key">진입 경로 — <b>메뉴 관리 → 옵션 그룹 → ✏️ 수정 → 🎚️ 메뉴별 최대 선택 개수</b></span>
     </div>
   </header>
 
-  <section class="brd-cap"><img src="img/03-option-edit.png" alt="화면 캡처" loading="lazy" /><div class="brd-cap-cap"><b>📷 화면 캡처</b> · 옵션 그룹 수정 모달의 「🎚️ 메뉴별 최대 선택 개수」 섹션 — 메뉴 측·옵션 측 양방향 편집</div></section>
+  <section class="brd-cap"><img src="img/03-option-edit.png" alt="화면 캡처" loading="lazy" /><div class="brd-cap-cap"><b>📷 화면 캡처</b> · 옵션 그룹 수정 모달의 「🎚️ 메뉴별 최대 선택 개수」 섹션 — 연결된 메뉴 카드별로 옵션 항목 횟수 입력</div></section>
 
   <div class="brd-diff">
     <div class="brd-diff-card before">
       <div class="brd-diff-label">변경 전</div>
-      <div class="brd-diff-body">옵션 항목은 그룹 단위로만 정의됨. 메뉴별로 「샷 추가는 아메리카노에서만 3회까지」처럼 <b>메뉴마다 다른 한도</b>를 줄 수 없었음.</div>
+      <div class="brd-diff-body">옵션 항목은 그룹 단위로만 정의돼서, 「샷 추가는 아메리카노에서만 3회까지」처럼 <b>메뉴마다 다른 한도</b>를 줄 수 없었음.</div>
     </div>
     <div class="brd-diff-card after">
       <div class="brd-diff-label">변경 후</div>
-      <div class="brd-diff-body">메뉴 측·옵션 측 두 곳에서 <b>같은 데이터를 편집</b>. 옵션 그룹은 항목 정의(이름·금액)만 담당, 「몇 번 추가 가능한지」는 메뉴 측 데이터로 분리.</div>
+      <div class="brd-diff-body">옵션 그룹 수정 모달 안에서 <b>연결된 메뉴마다</b> 각 항목 횟수 설정. 메뉴 정보 수정 모달은 읽기 전용 요약만 노출(편집 불가) — 옵션 그룹 쪽이 단일 진실 공급원.</div>
     </div>
   </div>
 
@@ -41,44 +40,45 @@
     <div class="brd-pin">
       <div class="brd-pin-head">
         <div class="brd-pin-no">1</div>
-        <div class="brd-pin-ttl">메뉴 측 진입 — 🎚️ 옵션 최대 선택 개수</div>
-        <div class="brd-pin-where">메뉴 수정 모달 · 섹션 4 (판매 설정)</div>
+        <div class="brd-pin-ttl">메뉴 카드 + 옵션 항목 횟수 input</div>
+        <div class="brd-pin-where">옵션 그룹 수정 모달 · 「🎚️ 메뉴별 최대 선택 개수」 섹션</div>
       </div>
       <div class="brd-pin-grid">
         <div class="brd-pin-col purp">
           <div class="brd-pin-cat">🎯 기능·목적</div>
           <ul>
-            <li>현재 메뉴에 <b>연결된 옵션 그룹들</b>의 각 항목 한도를 한눈에 설정</li>
-            <li>이 메뉴만의 한도를 정의 (다른 메뉴에 영향 없음)</li>
-            <li>옵션 그룹이 없으면 보라색 안내 카드 + 「옵션 그룹 →」 진입 버튼</li>
+            <li>옵션 그룹이 연결된 모든 메뉴를 한 화면에서 일괄 관리</li>
+            <li>옵션 1개를 여러 메뉴에 적용했을 때 메뉴마다 다른 한도 부여</li>
+            <li>「샷 추가」 — 아메리카노 3회 / 디카페인 라떼 1회 / 키즈 음료 0회 같은 조합</li>
           </ul>
         </div>
         <div class="brd-pin-col beha">
           <div class="brd-pin-cat">⚙️ 동작·상태값</div>
           <ul>
-            <li>연결된 옵션 그룹별로 카드 표시 (그룹명 · 모드 · 항목 리스트)</li>
-            <li>각 항목 옆에 input type=number (min=1, max=10) — <code>[N] 회까지</code></li>
-            <li>입력 변경 시 <code>setMenuOptMaxQty(groupId, itemIdx, val)</code> 호출 → <code>state._menuEdit.optMaxQty</code> 갱신</li>
-            <li>모달 저장 시 <code>m.optMaxQty</code>로 영구 반영</li>
-            <li><b>1개만 선택 모드</b>는 항목별 1회 고정 (입력 없이 안내 메시지만)</li>
+            <li>옵션 그룹의 <code>links[]</code> 에 있는 모든 메뉴를 카드로 나열</li>
+            <li>각 메뉴 카드 — 메뉴명 + 옵션 항목별 횟수 input</li>
+            <li>입력 변경 시 즉시 저장 (저장 버튼 불필요) — 옵션 그룹 모달 저장과 별개</li>
+            <li>각 메뉴 카드에 「메뉴 정보 수정 →」 진입 링크</li>
+            <li><b>1개만 선택 모드는 안내 메시지만</b> (항목별 1회 고정)</li>
           </ul>
         </div>
         <div class="brd-pin-col data">
           <div class="brd-pin-cat">🔌 데이터·연동</div>
           <ul>
-            <li><code>MENUS[id].optMaxQty: { [groupId]: { [itemIdx]: number } }</code></li>
-            <li>예) <code>{ '1': {'0':3,'1':1,'2':2} }</code> = 옵션 그룹1의 0번 항목 3회, 1번 1회, 2번 2회</li>
-            <li>옵션 그룹 정의: <code>OPT_GROUPS[id].items[itemIdx]</code> (이름·금액만, 횟수 없음)</li>
+            <li>저장 위치: <code>MENUS[menuId].optMaxQty[groupId][itemIdx]</code></li>
+            <li>구조: <code>{ groupId: { itemIdx: maxQty } }</code> · 키는 문자열</li>
+            <li>입력 함수: <code>setOptGroupMenuMaxQty(menuId, groupId, itemIdx, val)</code></li>
+            <li><code>markUnsavedUI()</code> 호출로 상단 저장 알림 표시</li>
             <li>기본값: 데이터 없으면 1회로 표시</li>
           </ul>
         </div>
         <div class="brd-pin-col exc">
           <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
           <ul>
-            <li>연결 옵션 그룹 0개 → "🧩 옵션 그룹이 연결돼 있지 않아요." + 옵션 페이지 진입 버튼</li>
-            <li>1개만 모드 — "1개만 선택 · 항목별 1회 고정" 회색 라벨</li>
-            <li>입력 범위 벗어남 → <code>Math.max(1, Math.min(10, ...))</code> 자동 보정</li>
-            <li>안내: "메뉴마다 옵션 한도를 다르게 정할 수 있어요. 예) 샷 추가 — 아메리카노 3회, 디카페인 라떼 1회, 키즈 음료 0회"</li>
+            <li>연결 메뉴 0개 — <i>"🔗 아직 이 옵션 그룹을 적용한 메뉴가 없어요."</i> 안내</li>
+            <li>1개만 모드 — <i>"🎚️ 메뉴별 최대 선택 개수 — 1개만 선택 모드라 항목별로 1회씩 고정돼요."</i></li>
+            <li>입력 범위 1~10 → 벗어나면 <code>Math.max(1, Math.min(10, ...))</code> 자동 보정</li>
+            <li>안내: <i>"같은 옵션 그룹이라도 메뉴마다 다르게 정할 수 있어요. 예) 샷 추가 — 아메리카노 3회, 디카페인 라떼 1회, 키즈 음료 0회"</i></li>
           </ul>
         </div>
       </div>
@@ -87,87 +87,44 @@
     <div class="brd-pin">
       <div class="brd-pin-head">
         <div class="brd-pin-no">2</div>
-        <div class="brd-pin-ttl">옵션 측 진입 — 🎚️ 메뉴별 최대 선택 개수</div>
-        <div class="brd-pin-where">옵션 그룹 수정 모달 · 본문 하단</div>
+        <div class="brd-pin-ttl">메뉴 수정 모달 — 읽기 전용 요약</div>
+        <div class="brd-pin-where">메뉴 수정 모달 · 섹션 4(판매 설정) 안 「🎚️ 연결된 옵션 그룹」</div>
       </div>
       <div class="brd-pin-grid">
         <div class="brd-pin-col purp">
           <div class="brd-pin-cat">🎯 기능·목적</div>
           <ul>
-            <li>현재 옵션 그룹이 연결된 <b>모든 메뉴</b>의 항목 한도를 한 화면에서 일괄 관리</li>
-            <li>옵션 1개를 N개 메뉴에 적용했을 때 한꺼번에 조정 (탭 전환 없이)</li>
-            <li>각 메뉴 카드에 「메뉴 정보 수정 →」 링크로 메뉴 모달로 빠르게 전환</li>
+            <li>이 메뉴에 어떤 옵션 그룹이 연결돼 있고 항목별 횟수가 얼마인지 한눈에 확인</li>
+            <li>편집은 옵션 그룹 쪽으로 유도 (단일 진실 공급원 유지)</li>
+            <li>잘못된 양방향 수정으로 인한 데이터 충돌 방지</li>
           </ul>
         </div>
         <div class="brd-pin-col beha">
           <div class="brd-pin-cat">⚙️ 동작·상태값</div>
           <ul>
-            <li>옵션 그룹의 <code>links[]</code>에 있는 모든 메뉴를 카드로 나열</li>
-            <li>각 메뉴 카드 — 메뉴명 + 옵션 항목별 횟수 input</li>
-            <li>입력 변경 시 <code>setOptGroupMenuMaxQty(menuId, groupId, itemIdx, val)</code> → <code>MENUS[menuId].optMaxQty</code> <b>즉시 반영</b> (저장 버튼 불필요)</li>
-            <li>1개만 모드면 카드 대신 안내 박스만</li>
+            <li>섹션 라벨: <code>🎚️ 연결된 옵션 그룹 (읽기 전용 · 수정은 옵션 그룹 쪽에서)</code></li>
+            <li>옵션 그룹별 카드 — 그룹명 + 모드 + 항목별 횟수 1줄 요약 (예: <code>에스프레소 샷 3회 · 디카페인 변경 1회</code>)</li>
+            <li>1개만 선택 모드 — 항목 요약 대신 "1개만 선택" 표시</li>
+            <li>입력 칸 없음 — 텍스트만</li>
+            <li>하단 안내 + 「옵션 그룹 →」 진입 버튼</li>
           </ul>
         </div>
         <div class="brd-pin-col data">
           <div class="brd-pin-cat">🔌 데이터·연동</div>
           <ul>
-            <li>대상 데이터: 메뉴 측과 <b>완전 동일</b> — <code>MENUS[menuId].optMaxQty[groupId][itemIdx]</code></li>
-            <li>입력 함수: <code>setOptGroupMenuMaxQty(menuId, groupId, itemIdx, val)</code></li>
-            <li><code>ensureMenuExtras(m)</code> 호출로 옛 메뉴 데이터 자동 초기화</li>
-            <li><code>markUnsavedUI()</code> 호출로 상단 저장 알림 표시</li>
+            <li>읽기 대상: <code>MENUS[id].optMaxQty[groupId][itemIdx]</code></li>
+            <li>표시 형식: <code>${item.name} ${qty}회</code> 을 점(·) 구분자로 연결</li>
+            <li>편집 함수 없음 (setMenuOptMaxQty 미사용)</li>
+            <li>옵션 그룹 진입 — <code>closeModal();setSection('option');</code></li>
           </ul>
         </div>
         <div class="brd-pin-col exc">
           <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
           <ul>
-            <li>연결 메뉴 0개 — "🔗 아직 이 옵션 그룹을 적용한 메뉴가 없어요." 안내</li>
-            <li>1개만 모드 — "🎚️ 메뉴별 최대 선택 개수 — 1개만 선택 모드라 항목별로 1회씩 고정돼요."</li>
-            <li>「메뉴 정보 수정 →」 클릭 — 옵션 모달 닫고 메뉴 모달 열기</li>
-            <li>안내: "같은 옵션 그룹이라도 메뉴마다 다르게 정할 수 있어요."</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="brd-pin">
-      <div class="brd-pin-head">
-        <div class="brd-pin-no">3</div>
-        <div class="brd-pin-ttl">양방향 데이터 일관성</div>
-        <div class="brd-pin-where">메뉴 측 입력 ↔ 옵션 측 입력 동기화</div>
-      </div>
-      <div class="brd-pin-grid">
-        <div class="brd-pin-col purp">
-          <div class="brd-pin-cat">🎯 기능·목적</div>
-          <ul>
-            <li>옵션 측에서 바꿔도 → 메뉴 측 표시값 자동 동일</li>
-            <li>메뉴 측에서 바꿔도 → 옵션 측 표시값 자동 동일</li>
-            <li>한 데이터 = 한 진실 원칙 (Single Source of Truth)</li>
-          </ul>
-        </div>
-        <div class="brd-pin-col beha">
-          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
-          <ul>
-            <li>옵션 측: <code>MENUS[menuId].optMaxQty</code> <b>즉시 갱신</b> (저장 버튼 없음)</li>
-            <li>메뉴 측: <code>state._menuEdit.optMaxQty</code> 임시 → <b>저장 시</b> <code>MENUS</code> 반영</li>
-            <li>모달을 새로 열 때마다 <code>ensureMenuExtras</code>로 최신 데이터 로드</li>
-          </ul>
-        </div>
-        <div class="brd-pin-col data">
-          <div class="brd-pin-cat">🔌 데이터·연동</div>
-          <ul>
-            <li>저장 위치 (단일): <code>MENUS[menuId].optMaxQty</code></li>
-            <li>읽기 위치: 메뉴 모달·옵션 모달·손님 화면 모두 같은 필드 참조</li>
-            <li>구조: <code>{ groupId: { itemIdx: maxQty } }</code></li>
-            <li>키는 항상 문자열 (<code>String(groupId)</code>)</li>
-          </ul>
-        </div>
-        <div class="brd-pin-col exc">
-          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
-          <ul>
-            <li>메뉴 모달에서 옵션 측을 통해 값이 바뀌어도 — 메뉴 모달 다시 열면 동일 값 표시</li>
-            <li>옵션 측 변경은 즉시 반영 — 메뉴 모달에서 「변경하지 않음」 의도 없음 가정</li>
-            <li>메뉴 모달은 「취소」 시 변경 사항 폐기 (옵션 측에서 바꾼 값은 이미 저장됨)</li>
-            <li>안내: "메뉴 정보 수정과 같은 데이터" 명시</li>
+            <li>옵션 그룹 미연결 — 보라색 안내 + 옵션 그룹 페이지 진입</li>
+            <li>안내: <i>"💡 옵션 항목 추가 횟수는 옵션 그룹 → 메뉴별 최대 선택 개수에서 설정해 주세요."</i></li>
+            <li>옵션 그룹에서 값을 바꾸면 다음에 이 메뉴 모달을 열 때 갱신된 요약이 보임</li>
+            <li>「옵션 그룹 →」 클릭 시 메뉴 모달 자동 닫힘</li>
           </ul>
         </div>
       </div>
@@ -175,7 +132,7 @@
   </section>
 
   <div class="brd-note">
-    <b>설계 결정</b> — 옵션 측은 <b>즉시 저장</b>(메뉴 측 데이터 직접 수정)으로 가는 게 「양방향 편집」의 본래 의도에 부합해요. 두 곳에서 「저장」 버튼이 따로 있으면 같은 값을 두 번 저장해야 하는 혼란이 생깁니다. 메뉴 모달의 「취소」는 메뉴 자체 속성(이름·가격 등)에만 적용되고, 옵션 측에서 이미 즉시 저장된 한도는 유지돼요.
+    <b>설계 원칙</b> — 옵션 항목 추가 횟수는 「옵션 그룹 ↔ 메뉴」 다대다 관계 위에 얹히는 보조 데이터예요. 양쪽에서 편집 가능하면 어디서 바꾼 값이 진실인지 혼란이 생기니, <b>옵션 그룹 쪽을 단일 입력처</b>로 고정하고 메뉴 쪽은 읽기 전용 요약만 노출합니다. 같은 옵션 그룹을 여러 메뉴에 적용했을 때 메뉴마다 한도를 다르게 주는 일은 옵션 모달에서 한 화면에 묶어 일괄로 처리하는 편이 효율적이에요.
   </div>
 </div>
 </body>

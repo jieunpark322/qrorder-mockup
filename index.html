@@ -7662,7 +7662,7 @@ function renderOption(main){
           ${c.items.length===0 ? `<div style="padding:14px 4px;text-align:center;color:var(--ink-3);font-size:12px;">옵션 항목을 추가해 주세요.</div>` : itemsHtml}
           <button class="ocr-item-add" onclick="state.optBulkCards[${ci}].items.push({name:'',price:0});renderApp()">+ 옵션 항목 추가</button>
         </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 <b style="color:var(--ink-3);">메뉴 정보 수정 → 옵션 최대 선택 개수</b>에서, 또는 <b style="color:var(--ink-3);">옵션 그룹 수정 → 메뉴별 최대 선택 개수</b>에서 양쪽 어디서나 설정할 수 있어요.</div>
+        <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 등록 후 <b style="color:var(--ink-3);">옵션 그룹 ✏️ 수정 → 메뉴별 최대 선택 개수</b>에서 메뉴마다 설정해 주세요.</div>
       </div>
     `;
   }).join('');
@@ -9131,7 +9131,7 @@ function renderMenuEditModal(){
             </div>
           </div>
 
-          <!-- 옵션 최대 선택 개수 -->
+          <!-- 옵션 최대 선택 개수 — 읽기 전용 요약 (편집은 옵션 그룹 쪽에서) -->
           ${(()=>{
             const linkedGroups = (typeof OPT_GROUPS!=='undefined' ? OPT_GROUPS : []).filter(g=>g.links && g.links.includes(f.id));
             if(linkedGroups.length===0) return `
@@ -9140,45 +9140,35 @@ function renderMenuEditModal(){
                 <button class="btn-ghost" style="padding:4px 10px;font-size:11px;font-weight:700;flex-shrink:0;color:#6b3eaa;border-color:#c4a5ff;" onclick="closeModal();setSection('option');">옵션 그룹 →</button>
               </div>
             `;
-            if(!f.optMaxQty) f.optMaxQty = {};
-            const groupsHtml = linkedGroups.map(g=>{
+            const summaryHtml = linkedGroups.map(g=>{
               const isMulti = g.mode==='여러 개';
               if(!isMulti){
-                return `
-                  <div style="padding:8px 10px;background:#fff;border:1px solid var(--line-2);border-radius:6px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
-                    <span style="font-size:12px;font-weight:600;">🧩 ${g.name}</span>
-                    <span style="font-size:11px;color:var(--ink-3);">1개만 선택 · 항목별 1회 고정</span>
-                  </div>
-                `;
+                return `<div style="padding:6px 10px;background:#fff;border:1px solid var(--line-2);border-radius:6px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:12px;font-weight:600;">🧩 ${g.name}</span>
+                  <span style="font-size:11px;color:var(--ink-3);">1개만 선택</span>
+                </div>`;
               }
-              const itemsRows = g.items.map((it, ii)=>{
-                const overrideKey = `${g.id}`;
-                const cur = (f.optMaxQty[overrideKey] && f.optMaxQty[overrideKey][ii] != null)
-                  ? f.optMaxQty[overrideKey][ii] : 1;
-                return `
-                  <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;padding:5px 0;border-top:1px dashed var(--line-2);">
-                    <span style="font-size:12px;color:var(--ink-2);">${it.name}${it.price>0?` <span style="color:var(--blue);font-weight:600;">+${fmt(it.price)}원</span>`:''}</span>
-                    <div style="display:flex;align-items:center;gap:3px;">
-                      <input class="input" type="number" min="1" max="10" value="${cur}" oninput="setMenuOptMaxQty(${g.id},${ii},this.value)" style="text-align:right;flex:1;padding:5px 8px;font-size:12px;" />
-                      <span style="font-size:11px;color:var(--ink-3);flex-shrink:0;">회</span>
-                    </div>
-                  </div>
-                `;
-              }).join('');
-              return `
-                <div style="padding:10px 12px;background:#fff;border:1px solid var(--line-2);border-radius:6px;margin-bottom:4px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-                    <span style="font-size:12px;font-weight:600;">🧩 ${g.name}</span>
-                    <span style="font-size:11px;color:var(--ink-3);">최대 ${g.maxSelect||2}개 선택</span>
-                  </div>
-                  ${itemsRows}
+              const itemsText = g.items.map((it, ii)=>{
+                const cur = (f.optMaxQty && f.optMaxQty[`${g.id}`] && f.optMaxQty[`${g.id}`][ii] != null)
+                  ? f.optMaxQty[`${g.id}`][ii] : 1;
+                return `${it.name} ${cur}회`;
+              }).join(' · ');
+              return `<div style="padding:8px 10px;background:#fff;border:1px solid var(--line-2);border-radius:6px;margin-bottom:4px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                  <span style="font-size:12px;font-weight:600;">🧩 ${g.name}</span>
+                  <span style="font-size:11px;color:var(--ink-3);">최대 ${g.maxSelect||2}개 선택</span>
                 </div>
-              `;
+                <div style="font-size:11px;color:var(--ink-3);line-height:1.55;">${itemsText}</div>
+              </div>`;
             }).join('');
             return `
               <div style="margin-top:6px;">
-                <label class="me-lbl">🎚️ 옵션 최대 선택 개수 <span class="me-lbl-sub">메뉴별 옵션 추가 횟수</span></label>
-                ${groupsHtml}
+                <label class="me-lbl">🎚️ 연결된 옵션 그룹 <span class="me-lbl-sub">읽기 전용 · 수정은 옵션 그룹 쪽에서</span></label>
+                ${summaryHtml}
+                <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                  <span>💡 옵션 항목 추가 횟수는 <b style="color:var(--ink-3);">옵션 그룹 → 메뉴별 최대 선택 개수</b>에서 설정해 주세요.</span>
+                  <button class="btn-ghost" style="padding:4px 10px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="closeModal();setSection('option');">옵션 그룹 →</button>
+                </div>
               </div>
             `;
           })()}

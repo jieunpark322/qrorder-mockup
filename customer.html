@@ -1052,7 +1052,7 @@ function scrCheckout(){
       <div><div class="ttl">주문 확인 · 결제</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
     <div class="sec"><div class="sec-h">📋 주문 내용</div>
       ${S.cart.map(c=>`<div class="rowline"><span style="flex:1;">${c.name} ${c.optText?`<span style="color:var(--ink4);font-size:11.5px;">· ${c.optText}</span>`:''} ×${c.qty}</span><span style="font-weight:700;color:var(--ink);">${won(c.unit*c.qty)}원</span></div>`).join('')}</div>
-    ${S.orderType==='dinein'?`<div class="sec"><div class="sec-h">🍽️ 받는 방법</div>${S.serve==='self'?`<div class="info-pill">🚶 <span><b>${STORE.table} 테이블</b> 주문 · <b>손님 셀프 수령</b> — 준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>`:`<div class="info-pill">🍳 <span><b>${STORE.table} 테이블</b> 주문 · 준비되면 <b>직원이 자리로 가져다 드려요</b>. 카카오 알림톡은 보내지 않아요.</span></div>`}</div>`:''}
+    ${S.orderType==='dinein' && S.serve==='server'?`<div class="sec"><div class="sec-h">🍽️ 받는 방법</div><div class="info-pill">🍳 <span><b>${STORE.table} 테이블</b> 주문 · 준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div></div>`:''}
     ${S.orderType==='takeout'?`<div class="sec"><div class="sec-h">🥡 포장 안내</div><div class="info-pill amber">⏱️ <span>결제 후 <b>약 15~25분</b> 뒤 준비돼요. 준비되면 카카오 알림톡으로 알려드려요.</span></div></div>`:''}
     ${needTime?`<div class="sec"><div class="sec-h">📅 수령 시간 <span class="req">필수</span></div>
       <select class="timesel" onchange="S.pickup=this.value">

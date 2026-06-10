@@ -842,7 +842,7 @@ function sheetGroupsHtml(m){
   }).join('');
 }
 function sheetDynHtml(m){
-  return (sheetGroupsHtml(m) || '<div style="margin-top:16px;font-size:13px;color:var(--ink3);">옵션 없이 바로 담을 수 있어요.</div>')
+  return sheetGroupsHtml(m)
     + `<div class="qtyrow"><span class="lbl">수량</span>
         <span class="stepper"><button onclick="sheetQty(-1)">−</button><span class="n">${S.sheet.qty}</span><button onclick="sheetQty(1)">+</button></span></div>`;
 }

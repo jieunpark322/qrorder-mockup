@@ -311,6 +311,11 @@
   .stock-pill{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:800;color:var(--amber);background:#fff4e6;border:1px solid #ffd8a8;padding:3px 9px;border-radius:20px;}
   /* 할인 배지 */
   .disc-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;background:#fff0f0;color:var(--red);border:1px solid #ffc9c9;vertical-align:middle;white-space:nowrap;margin-left:4px;}
+  .happy-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;background:#fff3bf;color:#664d00;border:1px solid #ffd43b;vertical-align:middle;white-space:nowrap;margin-left:4px;}
+  .mbadge.happy{background:#fff3bf;color:#664d00;border:1px solid #ffd43b;}
+  /* 해피아워 배너 */
+  .happy-banner{margin:12px 14px 0;display:flex;gap:9px;align-items:center;background:linear-gradient(135deg,#fff3bf,#fff9db);border:1.5px solid #ffd43b;border-radius:11px;padding:13px 15px;font-size:14px;font-weight:700;color:#5c3d02;}
+  .happy-banner .htime{font-size:12px;font-weight:600;color:#92400e;margin-top:2px;}
   /* 결제 진행/접수 처리 화면 (STA) */
   .proc{text-align:center;padding:90px 28px 40px;min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .spinner{width:54px;height:54px;border:5px solid var(--blue-50);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px;}
@@ -364,6 +369,7 @@ const STORE = {
     { d:'일',    t:'10:00 ~ 21:00', note:'' },
   ],
   lastOrder:'21:30',
+  happyHour:{ start:'14:00', end:'17:00', discount:1000 },
   holidays:['1/1 신정','5/5 어린이날'],
   reviewOn:true,
   logo:'☕',
@@ -403,12 +409,12 @@ const OPTS = {
 };
 const MENU = [
   // 커피
-  { id:1,  name:'아메리카노',        cat:'커피',         price:4500, takeout:4000, status:'판매중', img:'☕', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:[], badges:['hot'], discount:500 },
-  { id:4,  name:'아이스 아메리카노', cat:'커피',         price:4500, takeout:4000, status:'판매중', img:'🧊', opt:[2,3,1], desc:'', allerg:[] },
-  { id:2,  name:'카페라떼',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'🥛', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:['milk'] },
-  { id:3,  name:'바닐라라떼',        cat:'커피',         price:5500, takeout:5000, status:'판매중', img:'🥤', opt:[2,3,1], desc:'부드러운 바닐라 시그니처', allerg:['milk','soy'], badges:['reco'], discount:1000 },
-  { id:10, name:'콜드브루',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'🧋', opt:[2,3],   desc:'12시간 저온 추출', allerg:[], badges:['hot','reco'] },
-  { id:11, name:'카푸치노',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'☕', opt:[2,3,1], desc:'풍성한 우유 거품', allerg:['milk'] },
+  { id:1,  name:'아메리카노',        cat:'커피',         price:4500, takeout:4000, status:'판매중', img:'☕', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:[], badges:['hot'], discount:500, happyHour:true, maxQty:5 },
+  { id:4,  name:'아이스 아메리카노', cat:'커피',         price:4500, takeout:4000, status:'판매중', img:'🧊', opt:[2,3,1], desc:'', allerg:[], happyHour:true, maxQty:5 },
+  { id:2,  name:'카페라떼',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'🥛', opt:[2,3,1], desc:'에티오피아 원두 100%', allerg:['milk'], happyHour:true },
+  { id:3,  name:'바닐라라떼',        cat:'커피',         price:5500, takeout:5000, status:'판매중', img:'🥤', opt:[2,3,1], desc:'부드러운 바닐라 시그니처', allerg:['milk','soy'], badges:['reco'], discount:1000, happyHour:true },
+  { id:10, name:'콜드브루',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'🧋', opt:[2,3],   desc:'12시간 저온 추출', allerg:[], badges:['hot','reco'], happyHour:true, maxQty:3 },
+  { id:11, name:'카푸치노',          cat:'커피',         price:5000, takeout:4500, status:'판매중', img:'☕', opt:[2,3,1], desc:'풍성한 우유 거품', allerg:['milk'], happyHour:true },
   // 논커피
   { id:12, name:'초코라떼',          cat:'논커피',       price:5500, takeout:5000, status:'판매중', img:'🍫', opt:[2,3],   desc:'진한 다크초코', allerg:['milk'] },
   { id:13, name:'녹차라떼',          cat:'논커피',       price:5500, takeout:5000, status:'판매중', img:'🍵', opt:[2,3],   desc:'제주산 녹차', allerg:['milk'] },
@@ -511,10 +517,12 @@ const S = {
   authType:'kakao',      // 'kakao' | 'anon' — 약관 분기용
   termsChecked:{},       // { termId: true/false }
   isHoliday:false,       // 공휴일 시뮬레이션 (스케줄 6번)
+  happyHour:false,       // 해피아워 시뮬레이션
 };
 const won = n => n.toLocaleString('ko-KR');
 const priceOf = m => (S.orderType==='dinein') ? m.price : (m.takeout!=null ? m.takeout : m.price);
-const effectivePrice = m => priceOf(m) - (m.discount || 0);
+const happyHourDisc = m => (m.happyHour && S.happyHour) ? (STORE.happyHour.discount||0) : 0;
+const effectivePrice = m => priceOf(m) - (m.discount || 0) - happyHourDisc(m);
 const isOut = m => m.status==='품절' || m.stock===0;
 const lowStock = m => m.stock!=null && m.stock>0 && m.stock<=3;
 const badgesHtml = m => (m.badges||[]).map(k=>BADGE[k]?`<span class="mbadge ${k}">${BADGE[k].e} ${BADGE[k].l}</span>`:'').join('');
@@ -592,10 +600,14 @@ function renderDemo(){
   html += `<span class="ds-div">공휴일 ›</span>`
     + `<button class="ds-chip ${!S.isHoliday?'on':''}" onclick="setHoliday(false)">📅 평일</button>`
     + `<button class="ds-chip ${S.isHoliday?'on':''}" onclick="setHoliday(true)">🎌 공휴일</button>`;
+  html += `<span class="ds-div">해피아워 ›</span>`
+    + `<button class="ds-chip ${!S.happyHour?'on':''}" onclick="setHappyHour(false)">⏰ 일반</button>`
+    + `<button class="ds-chip ${S.happyHour?'on':''}" onclick="setHappyHour(true)">🎉 해피아워</button>`;
   $('demobar').innerHTML = html;
 }
 function setErrSim(v){ S.errSim=v; renderDemo(); }
 function setHoliday(v){ S.isHoliday=v; render(); }
+function setHappyHour(v){ S.happyHour=v; render(); }
 function setServe(v){ S.serve=v; if(v==='self') S.payTiming='prepay'; render(); }
 function setPayTiming(v){ if(v==='postpay' && S.serve!=='server'){ toast('셀프 수령은 선불만 가능해요'); return; } S.payTiming=v; render(); }
 function switchMode(m){
@@ -690,6 +702,7 @@ function scrMenu(){
       </div>
     </div>`:''}
     ${closedBanner}
+    ${S.happyHour?`<div class="happy-banner">🎉 <div><div>해피아워 진행 중 · 커피 음료 <b>${won(STORE.happyHour.discount)}원 추가 할인</b></div><div class="htime">${STORE.happyHour.start} ~ ${STORE.happyHour.end}</div></div></div>`:''}
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
     ${S.orderType==='dinein' && S.serve==='server'
@@ -814,8 +827,10 @@ function menuCard(m){
   const closed = !S.businessOpen;
   const showTakeout = S.orderType!=='dinein' && m.takeout!=null && m.takeout!==m.price;
   const baseP = priceOf(m);
-  const effP = effectivePrice(m);
-  const hasDisc = !!m.discount;
+  const fixedD = m.discount || 0;
+  const hhD = happyHourDisc(m);
+  const effP = baseP - fixedD - hhD;
+  const anyDisc = fixedD > 0 || hhD > 0;
   const clickHandler = closed
     ? `onclick="toast('지금은 영업 시간이 아니에요')"`
     : `onclick="openSheet(${m.id})"`;
@@ -823,14 +838,15 @@ function menuCard(m){
     <button class="mcard ${out?'out':''} ${closed&&!out?'closed-mode':''}" ${clickHandler}>
       ${imgBox('mimg', m.img, PHOTO[m.id], out)}
       <span class="minfo">
-        <span class="mname">${m.name} ${badgesHtml(m)} ${out?'<span class="badge-out">품절</span>':''}</span>
+        <span class="mname">${m.name} ${badgesHtml(m)} ${hhD?'<span class="mbadge happy">🎉 해피아워</span>':''} ${out?'<span class="badge-out">품절</span>':''}</span>
         ${m.desc?`<span class="mdesc" style="display:block;">${m.desc}</span>`:''}
         ${lowStock(m)?`<span class="stock-pill" style="margin-top:5px;">⚡ 잔여 ${m.stock}개</span>`:''}
         <span class="mprice" style="display:block;">
-          ${hasDisc?`<span style="text-decoration:line-through;color:var(--ink4);font-size:14px;font-weight:500;">${won(baseP)}원</span> `:''}
+          ${anyDisc?`<span style="text-decoration:line-through;color:var(--ink4);font-size:14px;font-weight:500;">${won(baseP)}원</span> `:''}
           ${won(effP)}원
-          ${hasDisc?`<span class="disc-badge">🏷 ${won(m.discount)}원 할인</span>`:''}
-          ${showTakeout&&!hasDisc?` <span class="was">매장 ${won(m.price)}원</span>`:''}
+          ${fixedD?`<span class="disc-badge">🏷 ${won(fixedD)}원 할인</span>`:''}
+          ${hhD?`<span class="happy-badge">🎉 ${won(hhD)}원 할인</span>`:''}
+          ${showTakeout&&!anyDisc?` <span class="was">매장 ${won(m.price)}원</span>`:''}
         </span>
       </span>
       ${(out||closed)?'':`<span class="mplus" onclick="event.stopPropagation();${(m.opt||[]).length?`openSheet(${m.id})`:`quickAdd(${m.id})`}">+</span>`}
@@ -894,7 +910,11 @@ function optQty(gid,idx,d){                                                     
   }
   updateSheet();
 }
-function sheetQty(d){ S.sheet.qty=Math.max(1,S.sheet.qty+d); updateSheet(); }
+function sheetQty(d){
+  const m=MENU.find(x=>x.id===S.sheet.id);
+  const maxQ=m&&m.maxQty?m.maxQty:Infinity;
+  S.sheet.qty=Math.max(1,Math.min(maxQ,S.sheet.qty+d)); updateSheet();
+}
 function sheetGroupsHtml(m){
   return (m.opt||[]).map(gid=>{ const g=OPTS[gid]; const sel=S.sheet.sel[gid]||{};
     const tag = g.required ? '<span class="req">필수</span>'
@@ -917,9 +937,16 @@ function sheetGroupsHtml(m){
   }).join('');
 }
 function sheetDynHtml(m){
+  const maxQ = m.maxQty || Infinity;
+  const atMax = S.sheet.qty >= maxQ;
   return sheetGroupsHtml(m)
-    + `<div class="qtyrow"><span class="lbl">수량</span>
-        <span class="stepper"><button onclick="sheetQty(-1)">−</button><span class="n">${S.sheet.qty}</span><button onclick="sheetQty(1)">+</button></span></div>`;
+    + `<div class="qtyrow"><span class="lbl">수량${m.maxQty?`<span style="font-size:12px;color:var(--ink3);font-weight:600;margin-left:6px;">최대 ${m.maxQty}개</span>`:''}</span>
+        <span class="stepper">
+          <button onclick="sheetQty(-1)">−</button>
+          <span class="n">${S.sheet.qty}</span>
+          <button onclick="sheetQty(1)" ${atMax?'disabled style="opacity:.35;cursor:not-allowed;"':''}>+</button>
+        </span></div>
+      ${atMax?`<div style="font-size:12.5px;color:var(--ink3);text-align:right;margin-top:4px;">최대 주문 수량이에요</div>`:''}`;
 }
 function updateSheet(){
   const m=MENU.find(x=>x.id===S.sheet.id);
@@ -936,14 +963,18 @@ function renderSheet(){
         <div class="sheet-name">${m.name} ${badgesHtml(m)}</div>
         ${m.desc?`<div class="sheet-desc">${m.desc}</div>`:''}
         <div class="sheet-base">
-          ${(()=>{ const baseP=priceOf(m); const effP=effectivePrice(m); const hasDisc=!!m.discount;
+          ${(()=>{
+            const baseP=priceOf(m); const fixedD=m.discount||0; const hhD=happyHourDisc(m);
+            const effP=baseP-fixedD-hhD; const anyDisc=fixedD>0||hhD>0;
             const isTakeout=S.orderType!=='dinein'&&m.takeout!=null&&m.takeout!==m.price;
-            return (hasDisc?`<span style="text-decoration:line-through;color:var(--ink4);font-size:14px;font-weight:500;">${won(baseP)}원</span> `:'')
+            return (anyDisc?`<span style="text-decoration:line-through;color:var(--ink4);font-size:14px;font-weight:500;">${won(baseP)}원</span> `:'')
               + won(effP)+'원'
-              + (hasDisc?`<span class="disc-badge">🏷 ${won(m.discount)}원 할인</span>`:'')
+              + (fixedD?`<span class="disc-badge">🏷 ${won(fixedD)}원 할인</span>`:'')
+              + (hhD?`<span class="happy-badge">🎉 해피아워 ${won(hhD)}원 할인</span>`:'')
               + (isTakeout?`<div style="font-size:12.5px;color:var(--ink3);font-weight:600;margin-top:4px;">포장가 · 매장가 <span style="text-decoration:line-through;">${won(m.price)}원</span></div>`:'');
           })()}
         </div>
+        ${m.happyHour&&S.happyHour?`<div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#664d00;background:#fff9db;border:1px solid #ffd43b;border-radius:9px;padding:9px 12px;margin-top:10px;">🎉 해피아워 적용 중 · ${STORE.happyHour.start}~${STORE.happyHour.end}</div>`:''}
         ${lowStock(m)?`<div class="stock-pill" style="margin-top:10px;">⚡ 잔여 ${m.stock}개 · 서둘러 주세요</div>`:''}
         ${allergyTextOf(m)?`<div class="allergy"><span class="al-h">⚠️ 알레르기 정보</span><span class="al-list" style="white-space:pre-line;">${escapeHtml(allergyTextOf(m))}</span></div>`:''}
         ${out?'':`<div id="sheetDyn">${sheetDynHtml(m)}</div>`}
@@ -1091,7 +1122,9 @@ function closeCartSheet(){
   syncScrollLock();
 }
 function renderCartSheet(){
-  const items = S.cart.map((c,i)=>`
+  const items = S.cart.map((c,i)=>{
+    const mi=MENU.find(x=>x.id===c.id); const maxQ=mi&&mi.maxQty?mi.maxQty:Infinity;
+    return `
     <div class="cs-item">
       ${imgBox('cs-img', c.img, c.photo, false)}
       <div style="flex:1;min-width:0;">
@@ -1101,7 +1134,7 @@ function renderCartSheet(){
           <span class="mini-step">
             <button onclick="csChgQty(${i},-1)">−</button>
             <span class="n">${c.qty}</span>
-            <button onclick="csChgQty(${i},1)">+</button>
+            <button onclick="csChgQty(${i},1)" ${c.qty>=maxQ?'disabled style="opacity:.35;cursor:not-allowed;"':''}>+</button>
           </span>
           <span class="cs-price-grp">
             <span class="cs-price">${won(c.unit*c.qty)}원</span>
@@ -1109,7 +1142,8 @@ function renderCartSheet(){
           </span>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   $('cartsheet').innerHTML = `<div class="sheet" style="max-height:80vh;">
     <div class="cart-sheet-handle"></div>
     <div class="cart-sheet-hdr">
@@ -1172,17 +1206,17 @@ function scrCheckout(){
   return `<div class="topbar"><button class="back" onclick="S.screen='menu';render()">‹</button>
       <div><div class="ttl">주문 확인 · 결제</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
     <div class="sec"><div class="sec-h">📋 주문 내용 <span class="opt-pick" style="font-weight:700;">${cartCount()}개</span></div>
-      ${S.cart.map((c,i)=>`<div class="citem">
+      ${S.cart.map((c,i)=>{ const mi=MENU.find(x=>x.id===c.id); const maxQ=mi&&mi.maxQty?mi.maxQty:Infinity; return `<div class="citem">
         ${imgBox('ci-img', c.img, c.photo, false)}
         <div style="flex:1;min-width:0;">
           <div class="ci-name">${c.name}</div>
           ${c.optText?`<div class="ci-opt">${c.optText}</div>`:''}
           <div class="ci-bot">
-            <span class="mini-step"><button onclick="coChgQty(${i},-1)">−</button><span class="n">${c.qty}</span><button onclick="coChgQty(${i},1)">+</button></span>
+            <span class="mini-step"><button onclick="coChgQty(${i},-1)">−</button><span class="n">${c.qty}</span><button onclick="coChgQty(${i},1)" ${c.qty>=maxQ?'disabled style="opacity:.35;cursor:not-allowed;"':''}>+</button></span>
             <span class="cs-price-grp"><span class="ci-price">${won(c.unit*c.qty)}원</span><button class="cs-del-x" onclick="coDel(${i})" title="삭제" aria-label="삭제">×</button></span>
           </div>
         </div>
-      </div>`).join('')}
+      </div>`; }).join('')}
       <button class="ghostbtn" onclick="S.screen='menu';render()">+ 메뉴 더 담기</button></div>
     ${S.orderType==='dinein' && S.serve==='server'?`<div class="sec"><div class="sec-h">🍽️ 받는 방법</div><div class="info-pill">🍳 <span><b>${STORE.table} 테이블</b> 주문 · 준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div></div>`:''}
     ${S.orderType==='takeout'?`<div class="sec"><div class="sec-h">🥡 포장 안내</div><div class="info-pill amber">⏱️ <span>결제 후 <b>약 15~25분</b> 뒤 준비돼요. 준비되면 카카오 알림톡으로 알려드려요.</span></div></div>`:''}

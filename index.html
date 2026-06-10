@@ -5310,7 +5310,7 @@ function openOrderDetail(o){
       ${cardLine}
     </div>
     <div style="margin-top:14px;display:flex;gap:8px;">
-      <button class="btn-ghost" style="flex:1;" onclick="closeModal()">🖨️ 영수증 출력</button>
+      <button class="btn-ghost" style="flex:1;" onclick="closeModal()">🧾 영수증 확인</button>
       ${within && o.status==='완료' ? `
         <button class="btn-danger" style="flex:1;" onclick="alert('취소 확인 사항: 손님 카드로 환불 영업일 3~5일 소요')">취소</button>
       ` : !within ? `

@@ -1011,10 +1011,6 @@ function renderCartSheet(){
     </div>
     <div class="cart-sheet-body">${items.length?items:'<div style="padding:24px 0;text-align:center;color:var(--ink3);font-size:14px;">담은 메뉴가 없어요</div>'}</div>
     <div class="cart-sheet-footer">
-      <div class="cart-sheet-tot">
-        <span class="lbl">합계</span>
-        <span class="val">${won(cartTotal())}원</span>
-      </div>
       <button class="addbtn" onclick="goToCheckout()" ${!S.cart.length?'disabled style="opacity:.4;cursor:not-allowed;"':''}>
         주문하기 · ${won(cartTotal())}원
       </button>

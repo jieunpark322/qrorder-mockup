@@ -5519,21 +5519,22 @@ const MENU_BADGES = [
 
 // mode — '1개만' (단일) | '여러 개' (다중)
 // maxSelect — 여러 개 선택 시 최대 개수 (1개만 모드일 땐 항상 1)
-// 각 item.maxQty — 손님이 한 항목을 몇 번까지 추가할 수 있는지 (샷 추가 1~3회 등)
+// 옵션 그룹은 항목 정의(이름·금액)만 담당. 손님이 항목을 몇 번까지 추가할 수 있는지는
+// 메뉴 측에서 m.optMaxQty로 설정 (메뉴마다 다르게)
 const OPT_GROUPS = [
   { id:1, code:'O00101', name:'샷 추가',    mode:'여러 개', maxSelect:3, required:false, items:[
-    { name:'에스프레소 샷', price:600, maxQty:3 },
-    { name:'디카페인 변경', price:500, maxQty:1 },
-    { name:'바닐라 시럽',   price:500, maxQty:2 },
+    { name:'에스프레소 샷', price:600 },
+    { name:'디카페인 변경', price:500 },
+    { name:'바닐라 시럽',   price:500 },
   ], links:[1,2,3,4] },
   { id:2, code:'O00102', name:'사이즈',     mode:'1개만',  maxSelect:1, required:true,  items:[
-    { name:'Regular', price:0,   maxQty:1 },
-    { name:'Large',   price:800, maxQty:1 },
+    { name:'Regular', price:0   },
+    { name:'Large',   price:800 },
   ], links:[1,2,3,4,5,6] },
   { id:3, code:'O00103', name:'얼음·온도',  mode:'1개만',  maxSelect:1, required:true,  items:[
-    { name:'얼음 보통', price:0, maxQty:1 },
-    { name:'얼음 적게', price:0, maxQty:1 },
-    { name:'따뜻하게',  price:0, maxQty:1 },
+    { name:'얼음 보통', price:0 },
+    { name:'얼음 적게', price:0 },
+    { name:'따뜻하게',  price:0 },
   ], links:[1,2,3,4,5,6] },
 ];
 
@@ -7592,15 +7593,11 @@ function renderOption(main){
   const cardsHtml = state.optBulkCards.map((c, ci) => {
     const isMulti = c.mode==='여러 개';
     const itemsHtml = c.items.map((it, ii) => `
-      <div class="ocr-item" style="grid-template-columns: 1fr 130px 110px 28px;">
+      <div class="ocr-item" style="grid-template-columns: 1fr 160px 28px;">
         <input class="input" placeholder="옵션 이름 (예: 샷 추가)" value="${it.name||''}" oninput="state.optBulkCards[${ci}].items[${ii}].name=this.value" />
         <div style="display:flex;gap:4px;align-items:center;">
           <input class="input" type="number" placeholder="추가 금액" value="${it.price||''}" oninput="state.optBulkCards[${ci}].items[${ii}].price=Number(this.value)||0" style="text-align:right;flex:1;" />
           <span style="font-size:12px;color:var(--ink-3);flex-shrink:0;">원</span>
-        </div>
-        <div style="display:flex;gap:4px;align-items:center;" title="손님이 이 항목을 최대 몇 번까지 추가할 수 있는지">
-          <input class="input" type="number" min="1" max="10" placeholder="1" value="${it.maxQty||1}" oninput="state.optBulkCards[${ci}].items[${ii}].maxQty=Math.max(1,Math.min(10,Number(this.value)||1))" style="text-align:right;flex:1;" />
-          <span style="font-size:12px;color:var(--ink-3);flex-shrink:0;">회</span>
         </div>
         <button class="x-btn" onclick="state.optBulkCards[${ci}].items.splice(${ii},1);renderApp()" title="항목 삭제">✕</button>
       </div>
@@ -7648,16 +7645,15 @@ function renderOption(main){
           ` : ''}
         </div>
         <div class="ocr-items">
-          <div style="display:grid;grid-template-columns: 1fr 130px 110px 28px;gap:8px;padding:0 4px 4px;font-size:11px;color:var(--ink-3);font-weight:700;">
+          <div style="display:grid;grid-template-columns: 1fr 160px 28px;gap:8px;padding:0 4px 4px;font-size:11px;color:var(--ink-3);font-weight:700;">
             <span>옵션 항목 이름</span>
             <span style="text-align:right;">추가 금액</span>
-            <span style="text-align:right;" title="메뉴별로 다르게 덮어쓸 수 있어요">기본 추가 횟수</span>
             <span></span>
           </div>
           ${c.items.length===0 ? `<div style="padding:14px 4px;text-align:center;color:var(--ink-3);font-size:12px;">옵션 항목을 추가해 주세요.</div>` : itemsHtml}
-          <button class="ocr-item-add" onclick="state.optBulkCards[${ci}].items.push({name:'',price:0,maxQty:1});renderApp()">+ 옵션 항목 추가</button>
+          <button class="ocr-item-add" onclick="state.optBulkCards[${ci}].items.push({name:'',price:0});renderApp()">+ 옵션 항목 추가</button>
         </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 <b>기본 추가 횟수</b>는 시스템 한도(기본값)예요. 메뉴마다 다르게 적용하려면 <b style="color:var(--ink-3);">메뉴 정보 수정 → 옵션 적용 한도</b>에서 메뉴별로 따로 설정해 주세요.<br/>예) 샷 추가 기본 3회 → 아메리카노는 3회, 디카페인 라떼는 1회로 메뉴 측에서 덮어쓰기.</div>
+        <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 <b style="color:var(--ink-3);">메뉴 정보 수정 → 옵션 적용 한도</b>에서 메뉴마다 따로 설정해 주세요.</div>
       </div>
     `;
   }).join('');
@@ -7728,8 +7724,7 @@ function renderOption(main){
           ${OPT_GROUPS.length===0 ? `<tr class="empty-row"><td colspan="8">위에서 일괄 등록하거나 ☕ 샘플을 불러와 첫 그룹을 만들어 주세요.</td></tr>` : OPT_GROUPS.map((g, idx)=>{
             const items = g.items.map(it=>{
               const priceTxt = it.price>0 ? ` <span style="color:var(--blue);font-weight:600;">+${fmt(it.price)}원</span>` : it.price<0 ? ` <span style="color:var(--red);font-weight:600;">${fmt(it.price)}원</span>` : '';
-              const qtyTxt = (it.maxQty&&it.maxQty>1) ? ` <span style="font-size:10px;font-weight:700;color:#7a4d00;background:#fff5dd;padding:1px 6px;border-radius:5px;">최대 ${it.maxQty}회</span>` : '';
-              return `<div style="padding:3px 0;font-size:12px;color:var(--ink-2);">${it.name}${priceTxt}${qtyTxt}</div>`;
+              return `<div style="padding:3px 0;font-size:12px;color:var(--ink-2);">${it.name}${priceTxt}</div>`;
             }).join('');
             const linkChips = g.links.map(mid=>{
               const m = MENUS.find(x=>x.id===mid);
@@ -7765,7 +7760,7 @@ function renderOption(main){
 }
 
 function addOptBulkCard(){
-  state.optBulkCards.push({ code:'', name:'', mode:'1개만', maxSelect:1, required:false, items:[{name:'',price:0,maxQty:1}] });
+  state.optBulkCards.push({ code:'', name:'', mode:'1개만', maxSelect:1, required:false, items:[{name:'',price:0}] });
   renderApp();
 }
 function saveOptBulk(){
@@ -7778,7 +7773,7 @@ function saveOptBulk(){
     OPT_GROUPS.push({
       id: nextId++, code: c.code || genCode('O'),
       name: c.name, mode, maxSelect, required: !!c.required,
-      items: c.items.filter(it=>it.name).map(it=>({name:it.name, price:it.price||0, maxQty:Math.max(1,Number(it.maxQty)||1)})),
+      items: c.items.filter(it=>it.name).map(it=>({name:it.name, price:it.price||0})),
       links: [],
     });
   });
@@ -7806,7 +7801,7 @@ function editOpt(id){
     mode: g.mode || '1개만',
     maxSelect: g.maxSelect || (g.mode==='여러 개'?2:1),
     required: !!g.required,
-    items: g.items.map(it=>({name:it.name, price:it.price||0, maxQty:it.maxQty||1})),
+    items: g.items.map(it=>({name:it.name, price:it.price||0})),
     links: [...(g.links||[])],
   };
   renderOptEditModal();
@@ -7816,15 +7811,11 @@ function renderOptEditModal(){
   const isMulti = f.mode==='여러 개';
   const modal = document.getElementById('modal');
   const itemsHtml = f.items.map((it, ii)=>`
-    <div class="ocr-item" style="grid-template-columns: 1fr 130px 110px 28px;">
+    <div class="ocr-item" style="grid-template-columns: 1fr 160px 28px;">
       <input class="input" placeholder="옵션 이름" value="${(it.name||'').replace(/"/g,'&quot;')}" oninput="state._optEdit.items[${ii}].name=this.value" />
       <div style="display:flex;gap:4px;align-items:center;">
         <input class="input" type="number" placeholder="추가 금액" value="${it.price||''}" oninput="state._optEdit.items[${ii}].price=Number(this.value)||0" style="text-align:right;flex:1;" />
         <span style="font-size:12px;color:var(--ink-3);flex-shrink:0;">원</span>
-      </div>
-      <div style="display:flex;gap:4px;align-items:center;" title="손님이 이 항목을 최대 몇 번까지 추가할 수 있는지">
-        <input class="input" type="number" min="1" max="10" value="${it.maxQty||1}" oninput="state._optEdit.items[${ii}].maxQty=Math.max(1,Math.min(10,Number(this.value)||1))" style="text-align:right;flex:1;" />
-        <span style="font-size:12px;color:var(--ink-3);flex-shrink:0;">회</span>
       </div>
       <button class="x-btn" onclick="state._optEdit.items.splice(${ii},1);renderOptEditModal()" title="항목 삭제">✕</button>
     </div>
@@ -7869,16 +7860,15 @@ function renderOptEditModal(){
         </div>
 
         <div class="ocr-items">
-          <div style="display:grid;grid-template-columns: 1fr 130px 110px 28px;gap:8px;padding:0 4px 4px;font-size:11px;color:var(--ink-3);font-weight:700;">
+          <div style="display:grid;grid-template-columns: 1fr 160px 28px;gap:8px;padding:0 4px 4px;font-size:11px;color:var(--ink-3);font-weight:700;">
             <span>옵션 항목 이름</span>
             <span style="text-align:right;">추가 금액</span>
-            <span style="text-align:right;" title="메뉴별로 다르게 덮어쓸 수 있어요">기본 추가 횟수</span>
             <span></span>
           </div>
           ${f.items.length===0 ? `<div style="padding:14px 4px;text-align:center;color:var(--ink-3);font-size:12px;">옵션 항목을 추가해 주세요.</div>` : itemsHtml}
-          <button class="ocr-item-add" onclick="state._optEdit.items.push({name:'',price:0,maxQty:1});renderOptEditModal()">+ 옵션 항목 추가</button>
+          <button class="ocr-item-add" onclick="state._optEdit.items.push({name:'',price:0});renderOptEditModal()">+ 옵션 항목 추가</button>
         </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-top:8px;line-height:1.55;">💡 <b>기본 추가 횟수</b>는 시스템 한도(기본값)예요. 메뉴마다 다르게 적용하려면 메뉴 정보 수정의 <b style="color:var(--ink-3);">옵션 적용 한도</b>에서 메뉴별로 따로 설정해 주세요.</div>
+        <div style="font-size:11px;color:var(--ink-4);margin-top:8px;line-height:1.55;">💡 옵션 그룹은 <b>항목 이름·금액 정의만</b> 담당해요. 손님이 이 항목을 몇 번까지 추가할 수 있는지는 메뉴 정보 수정의 <b style="color:var(--ink-3);">옵션 적용 한도</b>에서 메뉴마다 따로 설정해 주세요.</div>
 
       </div>
       <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--line);">
@@ -7903,7 +7893,7 @@ function saveOptEdit(){
   g.mode = f.mode || '1개만';
   g.maxSelect = g.mode==='1개만' ? 1 : Math.max(2, Number(f.maxSelect)||2);
   g.required = !!f.required;
-  g.items = items.map(it=>({ name: it.name.trim(), price: Number(it.price)||0, maxQty: Math.max(1, Number(it.maxQty)||1) }));
+  g.items = items.map(it=>({ name: it.name.trim(), price: Number(it.price)||0 }));
   state._optEdit = null;
   closeModal();
   renderApp();
@@ -9084,17 +9074,15 @@ function renderMenuEditModal(){
             }
             const itemsRows = g.items.map((it, ii)=>{
               const overrideKey = `${g.id}`;
+              // 기본 1회, 메뉴 측에서 설정한 값이 있으면 그 값
               const cur = (f.optMaxQty[overrideKey] && f.optMaxQty[overrideKey][ii] != null)
-                ? f.optMaxQty[overrideKey][ii] : (it.maxQty||1);
-              const base = it.maxQty||1;
-              const isOverride = (cur !== base);
+                ? f.optMaxQty[overrideKey][ii] : 1;
               return `
-                <div style="display:grid;grid-template-columns:1fr 140px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line-2);">
+                <div style="display:grid;grid-template-columns:1fr 130px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line-2);">
                   <span style="font-size:12px;color:var(--ink-2);">${it.name}${it.price>0?` <span style="color:var(--blue);font-weight:600;">+${fmt(it.price)}원</span>`:''}</span>
                   <div style="display:flex;align-items:center;gap:4px;">
-                    <input class="input" type="number" min="1" max="10" value="${cur}" oninput="setMenuOptMaxQty(${g.id},${ii},this.value)" style="text-align:right;flex:1;padding:6px 10px;font-size:12px;${isOverride?'border-color:var(--blue);background:var(--blue-50);':''}" title="기본값 ${base}회" />
-                    <span style="font-size:11px;color:var(--ink-3);flex-shrink:0;">회</span>
-                    <span style="font-size:10px;color:${isOverride?'var(--blue)':'var(--ink-4)'};font-weight:600;flex-shrink:0;width:40px;">${isOverride?'덮어씀':'기본'}</span>
+                    <input class="input" type="number" min="1" max="10" value="${cur}" oninput="setMenuOptMaxQty(${g.id},${ii},this.value)" style="text-align:right;flex:1;padding:6px 10px;font-size:12px;" title="이 메뉴에서 손님이 최대 몇 번 추가할 수 있는지" />
+                    <span style="font-size:11px;color:var(--ink-3);flex-shrink:0;">회까지</span>
                   </div>
                 </div>
               `;
@@ -9110,9 +9098,9 @@ function renderMenuEditModal(){
             `;
           }).join('');
           return `
-            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">🎚️ 옵션 적용 한도 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">메뉴별로 옵션 항목 추가 횟수를 다르게 설정</span></label>
+            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">🎚️ 옵션 적용 한도 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">이 메뉴에서 옵션 항목을 손님이 몇 번까지 추가할 수 있는지</span></label>
             ${groupsHtml}
-            <div style="font-size:11px;color:var(--ink-4);margin-bottom:14px;line-height:1.55;">💡 옵션 그룹에서 정한 <b>기본 추가 횟수</b>를 이 메뉴에서는 다르게 적용할 수 있어요. 예) 샷 추가 기본 3회 → 디카페인 라떼는 1회로 제한.</div>
+            <div style="font-size:11px;color:var(--ink-4);margin-bottom:14px;line-height:1.55;">💡 메뉴마다 옵션 한도를 다르게 정할 수 있어요. 예) 샷 추가 — 아메리카노는 3회, 디카페인 라떼는 1회, 키즈 음료는 0회.</div>
           `;
         })()}
 

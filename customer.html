@@ -962,7 +962,7 @@ function addSet(){
 /* --- 주문 내역 (차수별 · 내림차순) --- */
 function histRoundCard(r){
   return `<div class="hist-card">
-    <div class="hist-head"><span class="hist-round">${r.round}차 주문</span><span class="hist-meta">${r.time} · ${r.status}</span></div>
+    <div class="hist-head"><span class="hist-round">${r.round}차 주문</span></div>
     ${r.items.map(it=>`<div class="hist-line"><span style="flex:1;">${it.n}${it.o?` <span class="hist-opt">· ${it.o}</span>`:''} ×${it.q}</span><span style="font-weight:700;color:var(--ink);white-space:nowrap;">${won(it.p)}원</span></div>`).join('')}
     <div class="hist-tot"><span>합계</span><span>${won(r.total)}원</span></div>
   </div>`;

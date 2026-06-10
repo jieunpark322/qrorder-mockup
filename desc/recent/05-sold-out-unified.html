@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>05 · 품절 처리 통합 — QR오더 점주 관리자</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="board.css">
+</head>
+<body>
+<div class="brd">
+  <a class="brd-back" href="index.html">← 목록으로</a>
+  <header class="brd-head">
+    <div class="brd-cat">메뉴 관리 · 오늘의 준비량</div>
+    <h1 class="brd-title">05 · 품절 처리 통합 (일시/종일 구분 제거)</h1>
+    <p class="brd-sub">옛 「일시 품절·종일 품절」 구분을 단일 「품절」로 통합. 사장님은 토글 하나만 누르면 바로 품절·해제 가능.</p>
+    <div class="brd-meta">
+      <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">📍 라이브 보기</a>
+      <span class="meta-key">진입 경로 — <b>메뉴 카드의 「품절」 액션 버튼 / 오늘의 준비량 페이지</b></span>
+    </div>
+  </header>
+
+  <section class="brd-cap">
+    <div class="brd-cap-hint">
+      📷 <b>화면 캡처 자리</b> — 메뉴 카드의 액션 영역 (수정/품절/✕) / 오늘의 준비량 페이지의 「오늘 품절 처리」 탭.
+    </div>
+  </section>
+
+  <div class="brd-diff">
+    <div class="brd-diff-card before">
+      <div class="brd-diff-label">변경 전</div>
+      <div class="brd-diff-body"><b>일시 품절</b>(잠시 멈춤) vs <b>종일 품절</b>(오늘 끝까지) 2종 구분. 사장님이 어떤 걸 골라야 하는지 매번 판단 필요. 데이터 모델에 <code>soldOutKind: 'temp'|'full'</code> 필드 존재.</div>
+    </div>
+    <div class="brd-diff-card after">
+      <div class="brd-diff-label">변경 후</div>
+      <div class="brd-diff-body"><b>「품절」 단일 상태</b>로 통합. 한 번 누르면 품절·다시 누르면 판매 재개. <code>soldOutKind</code> 필드 폐기. 카운트·필터·표 모두 단일화.</div>
+    </div>
+  </div>
+
+  <section class="brd-pins">
+    <h2 class="brd-pins-head">주요 요소</h2>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">1</div>
+        <div class="brd-pin-ttl">메뉴 카드 품절 토글</div>
+        <div class="brd-pin-where">메뉴판 페이지 · 각 메뉴 카드 액션 영역</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>한 번 클릭으로 메뉴를 품절 상태로 전환 (즉시 손님 화면에 반영)</li>
+            <li>다시 클릭하면 품절 해제 (판매 재개)</li>
+            <li>「일시 vs 종일」 판단 부담 제거</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>버튼 라벨: 판매 중일 때 <code>품절</code> / 품절 상태일 때 <code>품절 해제</code></li>
+            <li>품절 상태 — 빨간 배경(<code>#fee2e2</code>) + 빨간 글씨</li>
+            <li>클릭 — <code>quickToggleSoldOut(id)</code> → <code>setSoldOut(id, mode)</code></li>
+            <li>품절 시 메뉴 카드 전체에 <code>.sold-out</code> 클래스 (회색·반투명)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li><code>MENUS[id].manualSoldOut: boolean</code> (단일 필드)</li>
+            <li><code>setSoldOut(id, mode)</code> — <code>mode==='on'</code>이면 false, 그 외 true</li>
+            <li><code>effectiveStatus(m)</code> — manualSoldOut true면 <code>{kind:'manual-out', label:'품절'}</code></li>
+            <li>옛 <code>soldOutKind</code> 필드는 무시 (마이그레이션 불필요)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>품절 토스트: <code>⛔ '${m.name}'을(를) 품절로 바꿨어요</code></li>
+            <li>해제 토스트: <code>✅ '${m.name}'을(를) 판매 중으로 되돌렸어요</code></li>
+            <li>자동 품절(수량 0)과 수동 품절은 별개로 동작 (자동은 준비량 페이지에서)</li>
+            <li>품절 상태는 영업일 마감 후 자동 해제되지 <b>않음</b> — 사장님이 직접 해제</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">2</div>
+        <div class="brd-pin-ttl">오늘의 준비량 · 품절 처리 탭</div>
+        <div class="brd-pin-where">메뉴 관리 → 오늘의 준비량 → 「오늘 품절 처리」 탭</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>메뉴 카드를 일일이 찾지 않고 한 화면에서 품절·해제 일괄 관리</li>
+            <li>품절 메뉴 수 · 분류 필터 적용 가능</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>탭 진입 — <code>state.stockTab='soldout'</code></li>
+            <li>탭 라벨 카운트: <code>오늘 품절 처리 N</code> (수동 품절된 메뉴 수)</li>
+            <li>각 메뉴 행 — 「↺ 판매 재개」 또는 「품절」 단일 버튼</li>
+            <li>필터: 카테고리·대/중/소분류 적용 가능</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li><code>manualOutCnt = otherMenus.filter(m=>m.manualSoldOut).length</code></li>
+            <li>옛 카운트(<code>tempOutCnt</code>·<code>fullOutCnt</code>·<code>displayTempOutCnt</code> 등) 모두 제거</li>
+            <li>옵션 측 동일 — <code>setOptSoldOut(gid, idx, mode)</code> 단일 토글</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>버튼: <code>↺ 판매 재개</code> / <code>품절</code></li>
+            <li>품절 상태인 메뉴는 손님 메뉴판에서 회색 + "품절" 배지</li>
+            <li>수량 관리(준비량 자동 차감)는 별개 탭 — 자동 품절은 자동, 수동 품절은 수동</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="brd-note">
+    <b>마이그레이션 안내</b> — 옛 데이터에 <code>m.soldOutKind</code> 값이 있어도 코드에서는 더 이상 참조하지 않아요. 데이터를 굳이 지울 필요는 없지만, 백엔드 마이그레이션 시 함께 제거하는 게 깔끔합니다.
+  </div>
+</div>
+</body>
+</html>

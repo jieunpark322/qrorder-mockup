@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>08 · 메뉴 수정 모달 재정렬 + 사진 4:3 — QR오더 점주 관리자</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="board.css">
+</head>
+<body>
+<div class="brd">
+  <a class="brd-back" href="index.html">← 목록으로</a>
+  <header class="brd-head">
+    <div class="brd-cat">메뉴 관리 · 메뉴 정보</div>
+    <h1 class="brd-title">08 · 메뉴 수정 모달 재정렬 + 사진 4:3</h1>
+    <p class="brd-sub">시각 복잡도가 높던 메뉴 수정 모달을 <b>5개 섹션 카드</b>로 그룹화하고, 사진을 <b>4:3 비율</b>로 키워서 직관적으로 정리.</p>
+    <div class="brd-meta">
+      <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">📍 라이브 보기</a>
+      <span class="meta-key">진입 경로 — <b>메뉴 관리 → 메뉴판 → 메뉴 클릭 / + 새 메뉴 등록</b></span>
+    </div>
+  </header>
+
+  <section class="brd-cap">
+    <div class="brd-cap-hint">
+      📷 <b>화면 캡처 자리</b> — 재정렬된 메뉴 수정 모달 전체. 5개 섹션이 흰 카드로 분리된 모습 + 좌측 파란 막대 헤더.
+    </div>
+  </section>
+
+  <div class="brd-diff">
+    <div class="brd-diff-card before">
+      <div class="brd-diff-label">변경 전</div>
+      <div class="brd-diff-body">사진(80x80 정사각) + 모든 필드가 시각 구분 없이 쭉 나열. 노란색 강조 「메뉴 분류 태그」 박스가 본문 가운데에 크게 노출되어 시선 분산. 가격·상태·설명·수량 순서가 산만.</div>
+    </div>
+    <div class="brd-diff-card after">
+      <div class="brd-diff-label">변경 후</div>
+      <div class="brd-diff-body">5개 섹션 카드(기본 정보 / 가격 / 분류 / 판매 설정 / 알레르기 정보)로 그룹화. 사진 <b>4:3</b>(160x120)으로 키움. 노란 분류 태그는 접기 → 「설정됨」 배지. 모달 너비 600px로 살짝 키움.</div>
+    </div>
+  </div>
+
+  <section class="brd-pins">
+    <h2 class="brd-pins-head">주요 요소</h2>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">1</div>
+        <div class="brd-pin-ttl">5개 섹션 그룹</div>
+        <div class="brd-pin-where">모달 본문 전체 구조</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>관련 필드를 그룹으로 묶어서 한눈에 영역 파악</li>
+            <li>등록·수정 시 사장님이 정신적 부담 적게 진행 가능</li>
+            <li>섹션별로 시각적 휴식 — 회색 배경(<code>#fafbfc</code>) 위 흰 카드 떠 있는 형태</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>섹션 순서: ① 기본 정보 → ② 가격 → ③ 분류 → ④ 판매 설정 → ⑤ 알레르기 정보</li>
+            <li>각 섹션 헤더 — <b>좌측 파란 막대 + 굵은 텍스트</b> (예: ⚙️ 판매 설정)</li>
+            <li>섹션마다 흰 배경 카드 + 1px 회색 테두리 + 라운드</li>
+            <li>섹션 안에 라벨·입력 묶음 표시</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>CSS: <code>.me-sec</code> · <code>.me-sec-head</code> · <code>.me-lbl</code> · <code>.me-lbl-sub</code></li>
+            <li>모달 본문 배경: <code>#fafbfc</code> (외곽 차분)</li>
+            <li>카드 배경: <code>#fff</code></li>
+            <li>모달 너비: <code>max-width:600px</code>, max-height:76vh</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>섹션 5(알레르기) 헤더에 라벨 인라인 추가 — "선택 · 사장님 자유 입력"</li>
+            <li>섹션 4(판매 설정) 안에 옵션 한도 섹션과 준비량 안내 박스 포함</li>
+            <li>섹션 1(기본 정보) — 사진/이름/배너/설명 한 그룹</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">2</div>
+        <div class="brd-pin-ttl">메뉴 사진 4:3 비율</div>
+        <div class="brd-pin-where">섹션 1 (기본 정보) · 좌측 사진 박스</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>실제 메뉴 사진은 보통 4:3 비율로 촬영됨 → UI도 동일 비율</li>
+            <li>사장님이 사진을 어떻게 잘려 노출되는지 직관적으로 확인</li>
+            <li>1:1 정사각으로 강제 변형되던 옛 UX 개선</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>사진 박스: <code>width:160px; aspect-ratio:4/3</code> → 160×120</li>
+            <li>점선 테두리(미업로드) → 파란 테두리(업로드 후)</li>
+            <li>호버 시 테두리 파란색</li>
+            <li>내부 img — <code>object-fit:cover</code>로 4:3 비율 유지 자동 크롭</li>
+            <li>업로드 안내: <code>JPG·PNG · 4:3 비율 · 5MB 이하</code></li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>CSS: <code>.me-photo</code> 클래스</li>
+            <li>img 강제 cover — <code>.me-photo img { width:100% !important; height:100% !important; object-fit:cover !important; }</code></li>
+            <li>메뉴 카드 그리드 사진도 4:3 (68×51) 동일 적용</li>
+            <li>저장 데이터: <code>m.img</code> (base64 data: URL 또는 이모지)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>사진 미업로드 — 📷 아이콘 + "4:3 사진" 안내 텍스트</li>
+            <li>이모지(이전 데이터) — 이모지도 cover 처리되지만 자연스럽게 보임</li>
+            <li>업로드 — 클릭으로 파일 선택 + 「📷 사진 변경」/「✕ 사진 제거」 버튼</li>
+            <li>5MB 초과 사진은 알림 없이 그대로 저장(검증은 백엔드)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">3</div>
+        <div class="brd-pin-ttl">분류 태그 접기/펼치기</div>
+        <div class="brd-pin-where">섹션 3 (분류) · 카테고리 select 아래</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>내부 검색·구분용인 「대분류·중분류·소분류」 태그를 기본 숨김</li>
+            <li>대부분 사장님은 카테고리만 쓰고 태그는 안 씀 → 시각 복잡도 감소</li>
+            <li>이미 설정된 경우 「설정됨」 노란 배지로 인지</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>기본 닫힘 — <code>state._menuEditTagsOpen = false</code></li>
+            <li>헤더 클릭 시 펼침/접기 토글 → 모달 재렌더</li>
+            <li>접힌 상태에서도 <code>catL2/catL3/tag3</code> hidden input으로 값 보존 (저장 OK)</li>
+            <li>설정값 존재 시 "설정됨" 노란 배지 표시</li>
+            <li>화살표 — <code>▼ 펼치기</code> / <code>▲ 접기</code></li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>UI 상태: <code>state._menuEditTagsOpen: boolean</code></li>
+            <li>저장 필드: <code>m.catL2</code> · <code>m.catL3</code> · <code>m.tag3</code> (string, default '')</li>
+            <li>datalist로 기존 입력값 자동 완성</li>
+            <li>접힌 상태에서도 input의 value 유지 → 저장 시 정상 반영</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>헤더 라벨: <code>🏷️ 메뉴 분류 태그 (사장님 내부 검색·구분용 · 손님엔 안 보임)</code></li>
+            <li>설정 안 됨 — 배지 없음, 안 펼치고 그대로 저장 가능</li>
+            <li>잘못 설정한 값도 input은 유지 (사장님 의도 존중)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="brd-note info">
+    <b>5개 섹션 상세 내용</b><br/>
+    ① 기본 정보 — 사진(4:3) · 메뉴 이름 · 메뉴 배너 · 설명<br/>
+    ② 가격 — 매장 판매가 · 포장가 · 할인 금액<br/>
+    ③ 분류 — 카테고리(필수) · 메뉴 분류 태그(접기)<br/>
+    ④ 판매 설정 — 판매 상태 · 1회 주문 최대 수량 · 옵션 최대 선택 개수 · 오늘 준비량 안내<br/>
+    ⑤ 알레르기 정보 — 자유 텍스트 textarea
+  </div>
+</div>
+</body>
+</html>

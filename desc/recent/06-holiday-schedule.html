@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>06 · 카테고리 판매 시간 — 법정 공휴일 처리 — QR오더 점주 관리자</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="board.css">
+</head>
+<body>
+<div class="brd">
+  <a class="brd-back" href="index.html">← 목록으로</a>
+  <header class="brd-head">
+    <div class="brd-cat">메뉴 관리 · 판매 스케줄</div>
+    <h1 class="brd-title">06 · 카테고리 판매 시간 — 법정 공휴일 처리</h1>
+    <p class="brd-sub">판매 시간 설정에서 요일·시간 외에 <b>법정 공휴일</b>을 별도 옵션으로 처리. (설정한 요일대로 / 공휴일엔 노출 안 함 / 공휴일에만 노출 — 3가지)</p>
+    <div class="brd-meta">
+      <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">📍 라이브 보기</a>
+      <span class="meta-key">진입 경로 — <b>메뉴 관리 → 카테고리 / 메뉴 / 세트 → 판매 시간 🕒</b></span>
+    </div>
+  </header>
+
+  <section class="brd-cap">
+    <div class="brd-cap-hint">
+      📷 <b>화면 캡처 자리</b> — 판매 시간 모달의 「🇰🇷 법정 공휴일 처리」 섹션 (요일/시간 영역 아래에 노출).
+    </div>
+  </section>
+
+  <div class="brd-diff">
+    <div class="brd-diff-card before">
+      <div class="brd-diff-label">변경 전</div>
+      <div class="brd-diff-body">판매 시간은 <b>요일(월~일)</b>과 <b>시작·종료 시각</b>만 지정. 공휴일을 별도로 처리할 수 없음. (예: 평일 메뉴를 공휴일에도 그대로 노출 vs 공휴일엔 다른 메뉴만 노출 — 구분 불가)</div>
+    </div>
+    <div class="brd-diff-card after">
+      <div class="brd-diff-label">변경 후</div>
+      <div class="brd-diff-body">판매 시간 모달에 <b>「🇰🇷 법정 공휴일 처리」</b> 섹션 추가. 한국천문연구원 공휴일 데이터를 기준으로 3가지 옵션 중 선택.</div>
+    </div>
+  </div>
+
+  <section class="brd-pins">
+    <h2 class="brd-pins-head">주요 요소</h2>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">1</div>
+        <div class="brd-pin-ttl">법정 공휴일 3가지 옵션 칩</div>
+        <div class="brd-pin-where">판매 시간 모달 · 요일/시간 영역 아래</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>요일 설정과 별개로 <b>공휴일에 어떻게 동작할지</b> 지정</li>
+            <li>매장이 공휴일에 평일 메뉴 그대로 갈지, 다른 메뉴로 갈지 자유롭게 설정</li>
+            <li>국가 지정 공휴일 + 임시 공휴일 모두 자동 인식</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>3가지 칩 — <code>설정한 요일대로 노출</code> / <code>공휴일엔 노출 안 함</code> / <code>공휴일에만 노출</code></li>
+            <li>클릭 시 <code>state._schDraft.holiday</code> 갱신 + 모달 재렌더</li>
+            <li>저장 시 <code>schedule.holiday</code> 필드로 영구 저장</li>
+            <li>기본값: <code>'include'</code> (설정한 요일대로 — 공휴일 영향 없음)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li><code>schedule.holiday: 'include' | 'exclude' | 'only'</code></li>
+            <li>적용 대상: 메뉴 (<code>m.schedule</code>) · 카테고리 (<code>c.schedule</code>) · 세트 (<code>s.schedule</code>)</li>
+            <li><code>openScheduleModal</code> — 기존 schedule에 holiday 필드 없으면 <code>'include'</code> 자동 부여</li>
+            <li>한국천문연구원 공휴일 데이터 API 연동 (구현 시점 결정)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>안내: "한국천문연구원 공휴일 데이터를 기준으로 자동 적용돼요. (설날·추석·어린이날·삼일절 등)"</li>
+            <li>임시 공휴일(대통령선거·국가추념일 등)도 데이터 들어오는 즉시 자동 반영</li>
+            <li>대체공휴일도 동일 처리 (캘린더 데이터에 포함)</li>
+            <li>공휴일 처리 옵션은 「판매 시간 제한」이 켜져 있을 때만 의미 있음 — 꺼져 있으면 항상 노출</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="brd-note">
+    <b>옵션 의미 정리</b><br/>
+    • <b>설정한 요일대로 노출</b> (기본) — 공휴일이라도 위에서 정한 요일·시간 기준 그대로. 예: 평일 메뉴를 광복절(8/15 금요일)에도 노출.<br/>
+    • <b>공휴일엔 노출 안 함</b> — 공휴일에는 요일 설정과 무관하게 메뉴 숨김. 예: 직장인 점심 메뉴를 공휴일엔 안 팔기.<br/>
+    • <b>공휴일에만 노출</b> — 공휴일에만 메뉴 표시. 예: 공휴일 이벤트 메뉴.
+  </div>
+</div>
+</body>
+</html>

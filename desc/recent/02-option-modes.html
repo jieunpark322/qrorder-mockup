@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>02 · 옵션 그룹 모드 + 최대 선택 개수 — QR오더 점주 관리자</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="board.css">
+</head>
+<body>
+<div class="brd">
+  <a class="brd-back" href="index.html">← 목록으로</a>
+  <header class="brd-head">
+    <div class="brd-cat">메뉴 관리 · 옵션 그룹</div>
+    <h1 class="brd-title">02 · 옵션 그룹 모드 + 최대 선택 개수</h1>
+    <p class="brd-sub">옵션 그룹의 선택 방식을 「1개만 / 여러 개」로 구분하고, 여러 개 모드일 때 그룹 자체의 <b>최대 선택 항목 수</b>를 지정. (예: 「샷 추가」 항목은 최대 3개까지 동시에 고를 수 있게)</p>
+    <div class="brd-meta">
+      <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">📍 라이브 보기</a>
+      <span class="meta-key">진입 경로 — <b>메뉴 관리 → 옵션 그룹 → + 새 옵션 그룹 추가 (또는 ✏️ 수정)</b></span>
+    </div>
+  </header>
+
+  <section class="brd-cap">
+    <div class="brd-cap-hint">
+      📷 <b>화면 캡처 자리</b> — 「옵션 그룹 → + 새 옵션 그룹 추가 펼치기」 화면. 선택 방식 select가 「여러 개」일 때 <b>최대 선택 개수</b> input이 나타나는 모습.
+    </div>
+  </section>
+
+  <div class="brd-diff">
+    <div class="brd-diff-card before">
+      <div class="brd-diff-label">변경 전</div>
+      <div class="brd-diff-body">선택 방식이 <code>1개 선택</code> / <code>중복 선택</code> 2종이고, 중복 선택은 <b>몇 개까지</b> 제한할 수 없었음. 손님이 한 그룹에서 무제한으로 항목을 골라 담을 수 있어 가격·재료 통제가 어려움.</div>
+    </div>
+    <div class="brd-diff-card after">
+      <div class="brd-diff-label">변경 후</div>
+      <div class="brd-diff-body">선택 방식을 <code>1개만</code> / <code>여러 개</code>로 정리. <code>여러 개</code>일 때만 <b>최대 N개까지</b> input이 표시돼서 그룹 단위 한도를 직접 지정.</div>
+    </div>
+  </div>
+
+  <section class="brd-pins">
+    <h2 class="brd-pins-head">주요 요소</h2>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">1</div>
+        <div class="brd-pin-ttl">선택 방식 select (1개만 / 여러 개)</div>
+        <div class="brd-pin-where">옵션 그룹 등록 카드 + 수정 모달</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>옵션 그룹의 손님 선택 방식을 단순 2가지로 정의</li>
+            <li><b>1개만</b> — 라디오처럼 단일 선택 (예: 사이즈 Regular/Large 중 하나)</li>
+            <li><b>여러 개</b> — 체크박스처럼 복수 선택 (예: 토핑 여러 개)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>select 변경 시 <code>onchange</code>에서 <code>c.mode</code> 갱신</li>
+            <li><b>여러 개 → 1개만</b> 변경 시 <code>maxSelect</code> 자동으로 1로 리셋 + 입력 칸 숨김</li>
+            <li><b>1개만 → 여러 개</b> 변경 시 <code>maxSelect=2</code>로 자동 초기화 (최소값)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li><code>OPT_GROUPS[id].mode: '1개만' | '여러 개'</code></li>
+            <li><code>OPT_GROUPS[id].required: boolean</code> (선택 vs 필수)</li>
+            <li>옛 값 <code>'1개 선택'</code> · <code>'중복 선택'</code>은 자동 마이그레이션 안 함 — 저장 시 새 값으로 덮어씀</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>선택 방식 select 라벨: "선택 방식" / 옵션: <code>1개만 선택</code>, <code>여러 개 선택</code></li>
+            <li>필수 select 라벨: "선택 필수" / 옵션: <code>선택 (건너뛰기 가능)</code>, <code>필수 (반드시 선택)</code></li>
+            <li>옵션 그룹 목록 표에 모드 표기: <code>1개만</code> / <code>여러 개 (최대 3개)</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">2</div>
+        <div class="brd-pin-ttl">최대 선택 개수 input (여러 개 모드 한정)</div>
+        <div class="brd-pin-where">선택 방식 = 「여러 개」일 때만 노출</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>그룹 단위에서 손님이 <b>최대 몇 개 항목까지</b> 동시에 선택할 수 있는지 제한</li>
+            <li>예) 토핑 그룹에 5개 항목이 있어도 「최대 3개」로 제한 → 손님은 3개까지만 체크 가능</li>
+            <li><b>옵션 항목별 추가 횟수</b>(메뉴 측 한도)와 별개 — 그룹 자체의 한도</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>input type=number, <code>min=2, max=20</code></li>
+            <li>표기: "최대 선택 개수 [N] 개까지"</li>
+            <li>여러 개 모드일 때만 화면에 표시, 1개만 모드면 input 숨김 + 값 자동 1</li>
+            <li>잘못된 값 입력 시: <code>Math.max(2, Math.min(20, Number||2))</code> 자동 보정</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li><code>OPT_GROUPS[id].maxSelect: number</code> (1개만=1, 여러 개=2~20)</li>
+            <li>등록 카드 입력: <code>state.optBulkCards[ci].maxSelect</code></li>
+            <li>수정 모달: <code>state._optEdit.maxSelect</code></li>
+            <li>저장: <code>saveOptBulk</code> / <code>saveOptEdit</code> — 모드 검증 후 보정값 저장</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>모드 = 1개만이면 「최대 선택 개수」 영역 자체가 사라짐</li>
+            <li>등록 목록 표 라벨: <code>여러 개 (최대 3개)</code></li>
+            <li>설명: "손님이 고를 수 있는 항목 수"</li>
+            <li>저장 시 maxSelect가 항목 수보다 크면 알림 없이 그대로 저장 (사장님 의도 존중)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="brd-note info">
+    <b>관련 보드 →</b> 옵션 그룹의 <b>각 항목당 손님이 몇 번 추가할 수 있는지</b>는 <a href="04-option-max-select.html">04 · 옵션 최대 선택 개수 (양방향)</a>에서 메뉴 측에서 설정해요.
+  </div>
+</div>
+</body>
+</html>

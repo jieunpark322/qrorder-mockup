@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>07 · 알레르기 정보 자유 텍스트 — QR오더 점주 관리자</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="board.css">
+</head>
+<body>
+<div class="brd">
+  <a class="brd-back" href="index.html">← 목록으로</a>
+  <header class="brd-head">
+    <div class="brd-cat">메뉴 관리 · 메뉴 정보</div>
+    <h1 class="brd-title">07 · 알레르기 정보 자유 텍스트 입력</h1>
+    <p class="brd-sub">기존 14종 토글(우유·달걀·밀·…)을 폐기하고, <b>사장님이 직접 입력하는 textarea</b>로 변경. 원산지 페이지에서 분리해 메뉴 상세 안으로 이동.</p>
+    <div class="brd-meta">
+      <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">📍 라이브 보기</a>
+      <span class="meta-key">진입 경로 — <b>메뉴 관리 → 메뉴판 → 메뉴 클릭 → ⚠️ 알레르기 정보 (섹션 5)</b></span>
+    </div>
+  </header>
+
+  <section class="brd-cap">
+    <div class="brd-cap-hint">
+      📷 <b>화면 캡처 자리</b> — 메뉴 수정 모달의 알레르기 섹션 (textarea + 안내문) / 손님 메뉴판 미리보기의 알레르기 안내 영역.
+    </div>
+  </section>
+
+  <div class="brd-diff">
+    <div class="brd-diff-card before">
+      <div class="brd-diff-label">변경 전</div>
+      <div class="brd-diff-body">메뉴 관리 → 원산지·알레르기 페이지의 「⚠️ 알레르기 정보」 탭에 14종 항목별 체크 표. 사장님이 매번 14개 항목을 클릭. 손님 화면에는 아이콘으로 표시.</div>
+    </div>
+    <div class="brd-diff-card after">
+      <div class="brd-diff-label">변경 후</div>
+      <div class="brd-diff-body">메뉴 수정 모달 안 <b>「⚠️ 알레르기 정보」</b> 섹션의 textarea 한 칸. 사장님이 자유롭게 입력 (예: "우유, 대두, 견과류"). 손님 화면에 입력 텍스트 그대로 노출. 원산지 페이지는 「원산지 표시」 단일 페이지로 단순화.</div>
+    </div>
+  </div>
+
+  <section class="brd-pins">
+    <h2 class="brd-pins-head">주요 요소</h2>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">1</div>
+        <div class="brd-pin-ttl">알레르기 정보 textarea</div>
+        <div class="brd-pin-where">메뉴 수정 모달 · 섹션 5 (알레르기 정보)</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>14종 토글 학습 부담 제거 — 사장님이 평소 부르는 말로 자유 입력</li>
+            <li>"견과류 제조 시설", "글루텐 함유 가능" 같은 <b>14종 외 문구</b>도 자유롭게</li>
+            <li>법적 의무 표시 책임은 사장님 (정확한 입력 안내)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>textarea (min-height 60px, resize:vertical)</li>
+            <li>placeholder: <code>예) 우유, 대두, 견과류 / 밀가루·달걀·우유 함유, 견과류 제조 시설</code></li>
+            <li>저장 시 <code>m.allergyText</code>로 trim 후 저장</li>
+            <li>줄바꿈 지원 (손님 화면도 줄바꿈 유지)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li><code>MENUS[id].allergyText: string</code> (default <code>''</code>)</li>
+            <li>옛 <code>m.allergens: string[]</code> (코드 배열) — <code>ensureMenuExtras(m)</code>가 자동 변환 (예: <code>['milk','soy']</code> → <code>'우유, 대두'</code>)</li>
+            <li>변환 시 <code>ALLERGENS</code> 매핑 사용 (<code>{code, label, icon}</code>)</li>
+            <li>저장: <code>document.getElementById('me-allergy').value.trim()</code></li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>빈 값 가능 (선택 입력)</li>
+            <li>안내: <i>"알레르기 정보가 정확하지 않으면 손님에게 피해가 갈 수 있어요. 실제 식재료를 확인 후 정확하게 입력해 주세요. 손님 메뉴판에 입력하신 그대로 표시돼요."</i></li>
+            <li>HTML 입력 차단 — <code>.replace(/&lt;/g,'&amp;lt;')</code>로 이스케이프 표시</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">2</div>
+        <div class="brd-pin-ttl">손님 메뉴판 미리보기 표시</div>
+        <div class="brd-pin-where">손님 화면 미리보기 · 알레르기 안내 영역</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>메뉴별 알레르기 정보를 메뉴판 하단에 통합 노출</li>
+            <li>아이콘이 아닌 텍스트라 가독성·정확성 향상</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>표시 영역: 메뉴판 하단 「⚠️ 알레르기 안내」 카드</li>
+            <li>1줄 형식 — <code>아메리카노 · 우유, 대두</code></li>
+            <li>알레르기 텍스트가 비어있는 메뉴는 안 보임</li>
+            <li>공통 안내문(<code>STORE_ALLERGY.notice</code>)도 함께 노출</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>필터: <code>MENUS.filter(m => m.status!=='숨김' && m.allergyText)</code></li>
+            <li>각 메뉴 — <code>${m.name} · ${m.allergyText}</code> 출력</li>
+            <li><code>STORE_ALLERGY.notice</code> — 매장 공통 안내문 (예: "알레르기 문의는 직원에게...")</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>알레르기 입력된 메뉴 0개 + 공통 안내문도 빈값이면 안내 영역 자체가 안 보임</li>
+            <li>HTML 이스케이프 적용 — <code>&lt;</code>는 표시</li>
+            <li>긴 텍스트는 1줄로 줄바꿈 처리</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">3</div>
+        <div class="brd-pin-ttl">원산지 페이지 단순화</div>
+        <div class="brd-pin-where">메뉴 관리 → 원산지 표시 (옛 「원산지·알레르기」)</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>원산지와 알레르기를 한 페이지에 묶지 않고 분리</li>
+            <li>원산지는 매장 전체 공통 textarea만, 알레르기는 메뉴 상세로</li>
+            <li>사이드바 진입 라벨도 단순화 — "원산지 표시"</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>옛 「알레르기 정보」 탭 제거 (탭 자체와 콘텐츠 삭제)</li>
+            <li>제목 「원산지·알레르기 정보」 → 「원산지 표시」</li>
+            <li>알레르기 안내 카드 추가 — "메뉴 상세에서 관리" 안내 + 「📖 메뉴판으로 가기」 버튼</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>원산지: <code>STORE_ORIGIN.text</code> (변경 없음)</li>
+            <li>매장 알레르기 안내문: <code>STORE_ALLERGY.notice</code> (메뉴판 하단에서 사용)</li>
+            <li>메뉴 알레르기는 <code>MENUS[].allergyText</code>로 이동</li>
+            <li>옛 <code>toggleMenuAllergen</code> 함수 삭제</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>옛 14종 토글 데이터(<code>m.allergens</code>)는 자동 마이그레이션 (코드→한글 라벨)</li>
+            <li>안내 카드: <i>"알레르기 정보는 각 메뉴 상세 안에서 관리해요. 메뉴 관리 → 메뉴판에서 메뉴를 클릭한 뒤 알레르기 정보 항목에서…"</i></li>
+            <li>메뉴 탭 라벨도 「🌿 원산지 표시」로 단순화</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

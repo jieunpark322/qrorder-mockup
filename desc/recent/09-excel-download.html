@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>09 · 엑셀 다운로드 버튼 통일 — QR오더 점주 관리자</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="board.css">
+</head>
+<body>
+<div class="brd">
+  <a class="brd-back" href="index.html">← 목록으로</a>
+  <header class="brd-head">
+    <div class="brd-cat">공통 · 데이터 내려받기</div>
+    <h1 class="brd-title">09 · 엑셀 다운로드 버튼 통일</h1>
+    <p class="brd-sub">화면마다 다른 라벨(📤 내보내기 · 📤 엑셀로 받기 · 📥 엑셀·CSV 받기)을 <b>「📥 엑셀 다운로드」</b> 하나로 통일. CSV 옵션 제거.</p>
+    <div class="brd-meta">
+      <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">📍 라이브 보기</a>
+      <span class="meta-key">적용 화면 — <b>매출 한눈에 보기 / 매출 상세 / 주문 내역 / 정산 내역 / 결제 내역 / 메뉴판 등 전 화면</b></span>
+    </div>
+  </header>
+
+  <section class="brd-cap">
+    <div class="brd-cap-hint">
+      📷 <b>화면 캡처 자리</b> — 각 화면의 통일된 「📥 엑셀 다운로드」 버튼 + 클릭 시 열리는 모달(조회 기간 + 건수 + 확인 버튼).
+    </div>
+  </section>
+
+  <div class="brd-diff">
+    <div class="brd-diff-card before">
+      <div class="brd-diff-label">변경 전</div>
+      <div class="brd-diff-body">버튼 라벨이 화면마다 제각각 — 「📤 내보내기」 / 「📤 엑셀로 받기」 / 「📥 엑셀·CSV 받기」. 클릭하면 엑셀 vs CSV 형식 선택 카드 2개 노출. 사장님이 매번 선택 부담.</div>
+    </div>
+    <div class="brd-diff-card after">
+      <div class="brd-diff-label">변경 후</div>
+      <div class="brd-diff-body">전 화면 <b>「📥 엑셀 다운로드」</b> 단일 라벨. CSV 옵션 제거. 모달에서 조회 기간·건수만 확인 후 한 번에 다운로드.</div>
+    </div>
+  </div>
+
+  <section class="brd-pins">
+    <h2 class="brd-pins-head">주요 요소</h2>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">1</div>
+        <div class="brd-pin-ttl">통일된 📥 엑셀 다운로드 버튼</div>
+        <div class="brd-pin-where">매출·정산·주문·메뉴 화면 우측 상단 툴바</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>화면마다 다른 라벨을 통일해 사장님 학습 부담 제거</li>
+            <li>「내보내기」「받기」 같은 추상적 단어 대신 직접적 「엑셀 다운로드」 사용</li>
+            <li>📥 아이콘으로 "받기 = 내려받기" 시각화</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>버튼 — <code>btn-primary</code> 스타일 (파란 배경)</li>
+            <li>클릭 시 <code>openExport(rowsCount, source, dateRange)</code> 호출</li>
+            <li>각 화면 자체 다운로드 — <code>openMenuExport()</code> 메뉴 다운로드는 별도</li>
+            <li>옛 라벨 모두 일괄 변경 — <code>replace_all</code>로 「📤 내보내기」 → 「📥 엑셀 다운로드」, 「📤 엑셀로 받기」 → 「📥 엑셀 다운로드」</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>호출 — <code>openExport(rowsCount, source, dateRange)</code></li>
+            <li>모달 상태 — <code>state.exportRowsCount/exportSource/exportDateRange</code></li>
+            <li>형식 — <code>state.exportFormat = 'xlsx'</code> 고정</li>
+            <li>적용 화면: 매출 한눈에 보기 · 매출 상세 · 주문 내역 · 정산 내역 · 결제 내역 · 메뉴판 등</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>title: 없음 (라벨이 충분히 명확)</li>
+            <li>호버 시 색만 조금 진해짐 (<code>#1e6cd9</code>)</li>
+            <li>안내문도 통일 — <code>엑셀 다운로드는 조회된 N건 전체</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">2</div>
+        <div class="brd-pin-ttl">단순화된 다운로드 모달</div>
+        <div class="brd-pin-where">버튼 클릭 후 열리는 모달</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>형식 선택 단계 제거 — 1 step으로 단순화</li>
+            <li>다운로드 직전에 조회 기간·건수 확인 (실수 방지)</li>
+            <li>모달 그대로 누르면 엑셀 다운로드</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>헤더: <code>📥 엑셀 다운로드</code> — sub: <code>${source} · 조회 조건 기준 전체 N건</code></li>
+            <li>본문 1 — 파란 카드 「📅 지금 조회한 기간」 (dateRange 있으면)</li>
+            <li>본문 2 — 회색 카드 「📊 적용한 필터 기준으로 전체 N건을 엑셀(.xlsx) 파일로…」 (dateRange 없으면)</li>
+            <li>버튼: <code>[취소]</code> <code>[📥 엑셀 다운로드]</code></li>
+            <li>확인 — <code>confirmExport(cnt, src)</code> → 토스트 + 모달 닫기</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>형식 선택 카드(<code>exportFormatCards</code>) 호출 제거</li>
+            <li><code>state.exportFormat = 'xlsx'</code> 강제 설정</li>
+            <li>CSV 변환 함수(<code>toCSV</code>)는 유지하되 사용 안 함 (코드 폐기 X)</li>
+            <li>XLSX 라이브러리(SheetJS) 로딩 필수</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>0건 — 모달은 열리지만 안내 카드에 "전체 0건" 표시 (다운로드 가능)</li>
+            <li>XLSX 라이브러리 미로드 — <code>alert('엑셀 라이브러리를 불러오는 중이에요...')</code></li>
+            <li>완료 토스트 — <code>📥 [source] N건을 엑셀 파일로 내려받았어요</code></li>
+            <li>모달 외 클릭 시 자동 닫힘</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">3</div>
+        <div class="brd-pin-ttl">메뉴 내려받기 — 같은 패턴 적용</div>
+        <div class="brd-pin-where">메뉴 관리 → 메뉴판 → 📥 엑셀 다운로드</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>등록된 메뉴 전체를 엑셀로 내려받기 (가져오기 양식과 동일 컬럼)</li>
+            <li>수정 후 그대로 재업로드 가능 (왕복 워크플로)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>버튼 라벨 — 「📥 엑셀·CSV 받기」 → 「📥 엑셀 다운로드」</li>
+            <li>모달 — 옛 형식 선택 카드 제거</li>
+            <li>다운로드 함수: <code>confirmMenuExport()</code> → SheetJS로 .xlsx 생성</li>
+            <li>파일명: <code>qrorder-menu-YYYY-MM-DD.xlsx</code></li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>대상: <code>MENUS</code> 전체</li>
+            <li>컬럼: <code>MENU_EXCEL_COLUMNS</code> (가져오기 양식과 동일)</li>
+            <li>워크시트: <code>XLSX.utils.aoa_to_sheet</code> + 컬럼 너비 조정</li>
+            <li>저장: <code>XLSX.writeFile(wb, filename)</code></li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>안내: <i>"받은 파일은 📊 엑셀로 한 번에 올리기 양식과 컬럼이 같아, 수정해서 그대로 다시 올릴 수 있어요."</i></li>
+            <li>title: "등록된 메뉴를 엑셀(.xlsx) 파일로 내려받을 수 있어요"</li>
+            <li>완료 토스트: <code>📥 메뉴 N개를 엑셀 파일로 내려받았어요</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="brd-note">
+    <b>일괄 변경 흔적</b><br/>
+    • <code>📤 내보내기</code> → <code>📥 엑셀 다운로드</code> (replace_all)<br/>
+    • <code>📤 엑셀로 받기</code> → <code>📥 엑셀 다운로드</code> (replace_all)<br/>
+    • <code>📥 엑셀·CSV 받기</code> → <code>📥 엑셀 다운로드</code> (메뉴판)<br/>
+    • <code>exportFormatCards</code> 호출 — <code>renderExportModal</code>·<code>renderMenuExportModal</code>에서 모두 제거<br/>
+    • <code>toCSV</code> · <code>triggerDownload</code> 함수는 유지 (다른 곳에서 미사용이지만 향후 필요 시 사용)
+  </div>
+</div>
+</body>
+</html>

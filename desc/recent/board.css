@@ -1,0 +1,108 @@
+/* QR오더 점주 관리자 — 최근 변경 디스크립션 보드 공용 스타일
+   ---------------------------------------------------------------
+   Figma(html.to.design) 임포트를 전제로 깔끔한 색·폰트·간격만 사용. */
+
+:root{
+  --blue:#3182f6; --blue-50:#e8f3ff; --blue-100:#cfe4ff;
+  --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1; --ink-4:#b0b8c1;
+  --line:#e5e8eb; --line-2:#f2f4f6;
+  --bg:#f9fafb; --bg-2:#f2f4f6;
+  --red:#f04452; --red-50:#ffeaec;
+  --green:#1eb18d; --green-50:#e3f6f0;
+  --amber:#f59e0b; --amber-50:#fff5dd;
+  --purple:#8b5cf6; --purple-50:#f6f3ff;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:#fafbfc;color:var(--ink);font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6;}
+a{color:var(--blue);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ============ 보드 외곽 ============ */
+.brd{max-width:1200px;margin:0 auto;padding:32px 24px 80px;}
+.brd-head{margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--line);}
+.brd-cat{display:inline-block;font-size:11px;font-weight:800;color:var(--blue);background:var(--blue-50);padding:5px 10px;border-radius:6px;letter-spacing:.02em;margin-bottom:10px;}
+.brd-title{font-size:26px;margin:0 0 8px;letter-spacing:-.02em;font-weight:800;}
+.brd-sub{font-size:14px;color:var(--ink-2);margin:0 0 12px;line-height:1.55;}
+.brd-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-3);align-items:center;}
+.brd-meta a{color:var(--blue);font-weight:700;}
+.brd-meta .meta-key{color:var(--ink-2);font-weight:600;}
+.brd-meta .meta-key b{color:var(--ink);font-weight:700;}
+.brd-back{display:inline-block;margin-bottom:14px;font-size:13px;color:var(--ink-3);}
+.brd-back:hover{color:var(--blue);}
+
+/* ============ 화면 캡처 자리 ============ */
+.brd-cap{margin-bottom:24px;padding:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.brd-cap-hint{padding:60px 24px;text-align:center;background:repeating-linear-gradient(45deg,#fafbfc,#fafbfc 14px,#f3f4f6 14px,#f3f4f6 28px);color:var(--ink-3);font-size:13px;line-height:1.7;}
+.brd-cap-hint b{color:var(--ink-2);}
+.brd-cap img{display:block;width:100%;height:auto;}
+
+/* ============ 변경 전후 비교 ============ */
+.brd-diff{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
+.brd-diff-card{padding:16px 18px;border-radius:12px;border:1px solid var(--line);background:#fff;}
+.brd-diff-card.before{background:#fafbfc;}
+.brd-diff-card.after{background:#fafcff;border-color:var(--blue-100);}
+.brd-diff-label{font-size:11px;font-weight:800;letter-spacing:.04em;margin-bottom:8px;}
+.brd-diff-card.before .brd-diff-label{color:var(--ink-3);}
+.brd-diff-card.after  .brd-diff-label{color:var(--blue);}
+.brd-diff-body{font-size:13px;color:var(--ink-2);line-height:1.65;}
+.brd-diff-body b{color:var(--ink);}
+@media (max-width:760px){.brd-diff{grid-template-columns:1fr;}}
+
+/* ============ 핀 카드 (4분류) ============ */
+.brd-pins{margin-bottom:24px;}
+.brd-pins-head{font-size:16px;font-weight:800;color:var(--ink);margin:0 0 14px;display:flex;align-items:center;gap:8px;}
+.brd-pins-head::before{content:"";display:block;width:4px;height:18px;background:var(--blue);border-radius:2px;}
+
+.brd-pin{background:#fff;border:1px solid var(--line);border-radius:14px;padding:0;margin-bottom:14px;overflow:hidden;}
+.brd-pin-head{padding:14px 20px;background:#fafbfc;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;}
+.brd-pin-no{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
+.brd-pin-ttl{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.01em;}
+.brd-pin-where{margin-left:auto;font-size:11px;color:var(--ink-3);background:#fff;padding:4px 10px;border-radius:6px;border:1px solid var(--line-2);}
+
+/* 슬랙·팀 공유용 — '데이터·연동' 컬럼은 숨김 (기능·동작·예외 3컬럼만 노출) */
+.brd-pin-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;}
+.brd-pin-col{padding:16px 20px;border-right:1px solid var(--line-2);}
+.brd-pin-col:last-child{border-right:0;}
+.brd-pin-col.data{display:none;}
+.brd-pin-cat{font-size:11px;font-weight:800;color:var(--ink-3);margin-bottom:10px;letter-spacing:.02em;display:flex;align-items:center;gap:5px;}
+.brd-pin-col.purp .brd-pin-cat{color:#6b3eaa;}
+.brd-pin-col.beha .brd-pin-cat{color:#0d8062;}
+.brd-pin-col.data .brd-pin-cat{color:#1b64da;}
+.brd-pin-col.exc  .brd-pin-cat{color:#a25e00;}
+.brd-pin-col ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2);line-height:1.7;}
+.brd-pin-col li{margin-bottom:4px;}
+.brd-pin-col li b{color:var(--ink);font-weight:700;}
+.brd-pin-col li code{background:var(--bg-2);padding:1px 6px;border-radius:4px;font-family:ui-monospace,'SF Mono',monospace;font-size:11.5px;color:var(--ink);}
+
+@media (max-width:980px){
+  .brd-pin-grid{grid-template-columns:1fr;}
+  .brd-pin-col{border-right:0;border-bottom:1px solid var(--line-2);}
+  .brd-pin-col:last-child{border-bottom:0;}
+}
+
+/* ============ 안내 박스 ============ */
+.brd-note{padding:14px 18px;background:var(--purple-50);border:1px solid #e3d8ff;border-radius:10px;font-size:13px;color:#5c2eaa;line-height:1.7;margin-bottom:20px;}
+.brd-note b{color:#3e1c7a;}
+.brd-note.amber{background:#fff8ed;border-color:#fed7aa;color:#9a3412;}
+.brd-note.amber b{color:#7c2d12;}
+.brd-note.info{background:var(--blue-50);border-color:var(--blue-100);color:#1b64da;}
+.brd-note.info b{color:#0a4ca8;}
+
+/* ============ 목록 페이지 ============ */
+.idx-head{margin-bottom:32px;}
+.idx-title{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:0 0 8px;}
+.idx-sub{font-size:15px;color:var(--ink-2);margin:0 0 16px;line-height:1.6;}
+.idx-live{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--blue);color:#fff;border-radius:8px;font-size:13px;font-weight:700;}
+.idx-live:hover{background:#1e6cd9;text-decoration:none;color:#fff;}
+
+.idx-group{margin-bottom:24px;}
+.idx-group-head{font-size:13px;font-weight:800;color:var(--ink-3);letter-spacing:.04em;margin:0 0 10px;padding-bottom:8px;border-bottom:2px solid var(--line);}
+
+.idx-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+@media (max-width:760px){.idx-grid{grid-template-columns:1fr;}}
+.idx-card{display:block;padding:18px 20px;background:#fff;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--ink);transition:all .12s;}
+.idx-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(49,130,246,.08);transform:translateY(-1px);text-decoration:none;}
+.idx-card-no{font-size:11px;color:var(--ink-4);font-weight:700;margin-bottom:4px;letter-spacing:.04em;}
+.idx-card-ttl{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px;letter-spacing:-.01em;line-height:1.4;}
+.idx-card-desc{font-size:12px;color:var(--ink-3);line-height:1.55;}
+.idx-card-where{margin-top:8px;font-size:11px;color:var(--blue);font-weight:600;}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01 · 메뉴 배너 (인기·추천·신메뉴) — QR오더 점주 관리자</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="board.css">
+</head>
+<body>
+<div class="brd">
+  <a class="brd-back" href="index.html">← 목록으로</a>
+  <header class="brd-head">
+    <div class="brd-cat">메뉴 관리</div>
+    <h1 class="brd-title">01 · 메뉴 배너 (인기·추천·신메뉴)</h1>
+    <p class="brd-sub">메뉴마다 손님 메뉴판에 노출할 배너(🔥 인기 / ⭐ 추천 / 🆕 신메뉴)를 토글로 켜고 끄는 기능. 복수 선택 가능.</p>
+    <div class="brd-meta">
+      <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">📍 라이브 보기</a>
+      <span class="meta-key">진입 경로 — <b>메뉴 관리 → 메뉴판 → 메뉴 카드 클릭</b></span>
+      <span class="meta-key">관련 파일 — <code>index.html</code></span>
+    </div>
+  </header>
+
+  <section class="brd-cap">
+    <div class="brd-cap-hint">
+      📷 <b>화면 캡처 자리</b> — 라이브에서 「메뉴 관리 → 메뉴판 → 아메리카노 카드 클릭」 후 캡처해서 이 자리에 붙여 주세요.<br/>
+      이 보드를 Figma(html.to.design)로 임포트한 뒤 캡처 이미지를 같은 자리에 배치하면 됩니다.
+    </div>
+  </section>
+
+  <div class="brd-diff">
+    <div class="brd-diff-card before">
+      <div class="brd-diff-label">변경 전</div>
+      <div class="brd-diff-body">메뉴마다 인기·추천·신메뉴를 표시하는 기능이 <b>없었음</b>. 매장에서 자체적으로 메뉴명에 (인기), (추천) 같은 문구를 직접 적거나, 카테고리로 분리하는 방식.</div>
+    </div>
+    <div class="brd-diff-card after">
+      <div class="brd-diff-label">변경 후</div>
+      <div class="brd-diff-body">메뉴 정보 수정 모달의 <b>「메뉴 배너」</b> 영역에서 3종 배너를 토글로 ON/OFF. 복수 선택 가능. 손님 메뉴판 카드의 <b>메뉴명 옆에 배지</b>로 노출.</div>
+    </div>
+  </div>
+
+  <section class="brd-pins">
+    <h2 class="brd-pins-head">주요 요소</h2>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">1</div>
+        <div class="brd-pin-ttl">메뉴 배너 토글 (3종)</div>
+        <div class="brd-pin-where">메뉴 수정 모달 · 섹션 1 (기본 정보)</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>인기/추천/신메뉴 <b>3종 배너</b>를 메뉴마다 선택해서 손님 메뉴판에 노출</li>
+            <li>매장이 강조하고 싶은 메뉴를 시각적으로 어필 (객단가·신규 메뉴 인지 향상)</li>
+            <li>여러 배너 <b>동시 선택 가능</b> (예: 아이스 아메리카노 — 인기 + 추천)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>3개 칩 형태로 노출: <code>🔥 인기</code> · <code>⭐ 추천</code> · <code>🆕 신메뉴</code></li>
+            <li><b>클릭 시 토글</b> — 켜지면 색 채워짐 + ✓ 표시, 꺼지면 회색 테두리</li>
+            <li>모달 저장 시 <code>m.badges</code> 배열에 키 저장. 신규 메뉴 등록 시 기본 <code>[]</code></li>
+            <li>메뉴 카드 그리드에서 <b>메뉴명 아래 작은 배지로 노출</b> (배너 칠과 동일 색)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li><code>MENUS[id].badges: string[]</code> — 예) <code>['hot','reco']</code></li>
+            <li>키 정의: <code>MENU_BADGES = [{key:'hot',label:'인기',ico:'🔥',color,bg}, ...]</code></li>
+            <li>저장: <code>saveMenuEdit</code>에서 <code>m.badges = [...f.badges]</code></li>
+            <li>토글 함수: <code>toggleMenuBadge(key)</code> → <code>state._menuEdit.badges</code> 갱신 → 모달 재렌더</li>
+            <li>손님 메뉴판 미리보기에도 동일 배지 노출 (메뉴 카드 우측 상단)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>모든 배너 OFF면 메뉴명 옆에 <b>아무 표시 안 함</b></li>
+            <li>안내 문구: <i>"손님 메뉴판에 메뉴 이름 옆에 배너가 표시돼요. 여러 개 선택할 수 있어요."</i></li>
+            <li>품절·숨김 상태와 무관하게 배너 설정은 유지 (다시 판매 시 자동 복원)</li>
+            <li>옛 데이터(<code>badges</code> 필드 없음)는 <code>ensureMenuExtras</code>가 빈 배열로 초기화</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="brd-note info">
+    <b>Figma 임포트 팁</b> — 이 보드를 html.to.design으로 임포트하면 4분류 카드와 배너 칩이 독립 레이어로 분리돼요. 라이브 캡처 이미지를 위 캡처 자리에 직접 배치하면 핀 표시(1, 2, ...)를 따로 그릴 수 있어요.
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>03 · 옵션 그룹 수정 버튼 + 수정 모달 — QR오더 점주 관리자</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="board.css">
+</head>
+<body>
+<div class="brd">
+  <a class="brd-back" href="index.html">← 목록으로</a>
+  <header class="brd-head">
+    <div class="brd-cat">메뉴 관리 · 옵션 그룹</div>
+    <h1 class="brd-title">03 · 옵션 그룹 수정 버튼 + 수정 모달</h1>
+    <p class="brd-sub">등록된 옵션 그룹을 사장님이 <b>직접 수정</b>할 수 있는 진입점. 기존엔 삭제 버튼만 있어서 항목 1개 바꾸려면 삭제 후 재등록이 필요했음.</p>
+    <div class="brd-meta">
+      <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">📍 라이브 보기</a>
+      <span class="meta-key">진입 경로 — <b>메뉴 관리 → 옵션 그룹 → 등록된 옵션 그룹 표의 ✏️ 수정 클릭</b></span>
+    </div>
+  </header>
+
+  <section class="brd-cap">
+    <div class="brd-cap-hint">
+      📷 <b>화면 캡처 자리</b> — (1) 옵션 그룹 표의 액션 컬럼에 「✏️ 수정 · ✕」 두 버튼 / (2) ✏️ 수정 클릭 후 열린 수정 모달.
+    </div>
+  </section>
+
+  <div class="brd-diff">
+    <div class="brd-diff-card before">
+      <div class="brd-diff-label">변경 전</div>
+      <div class="brd-diff-body">등록된 옵션 그룹 표 액션 컬럼에 <b>✕ 삭제 버튼만</b> 있었음. 항목 가격을 바꾸거나 새 항목을 추가하려면 그룹을 삭제하고 다시 등록 필요.</div>
+    </div>
+    <div class="brd-diff-card after">
+      <div class="brd-diff-label">변경 후</div>
+      <div class="brd-diff-body"><b>✏️ 수정</b> 버튼 추가. 클릭 시 전용 모달에서 그룹 정보(코드·이름·모드·필수·최대 선택 개수·항목 목록)를 그대로 편집. 저장 시 <code>OPT_GROUPS</code> 즉시 갱신.</div>
+    </div>
+  </div>
+
+  <section class="brd-pins">
+    <h2 class="brd-pins-head">주요 요소</h2>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">1</div>
+        <div class="brd-pin-ttl">✏️ 수정 버튼</div>
+        <div class="brd-pin-where">옵션 그룹 페이지 · 등록된 옵션 그룹 표 · 액션 컬럼</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>등록된 옵션 그룹 1건의 정보를 그대로 불러와 수정 모달 진입</li>
+            <li>삭제 후 재등록 없이 가격·이름·항목 손쉽게 변경</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>표의 <b>액션 컬럼</b>에 <code>[✏️ 수정] [✕]</code> 가로 배치</li>
+            <li>클릭 → <code>editOpt(id)</code> 호출 → <code>state._optEdit</code>에 그룹 복사 → <code>renderOptEditModal()</code></li>
+            <li>모달 닫기·취소·저장 후 자동 표 갱신</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>대상: <code>OPT_GROUPS[id]</code> (해당 그룹 1건)</li>
+            <li>임시 상태: <code>state._optEdit = {id, code, name, mode, maxSelect, required, items[], links[]}</code></li>
+            <li>편집 영역과 분리 — 취소 시 원본 그대로 유지</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>버튼 라벨: <code>✏️ 수정</code> (파란색) / <code>✕</code> (빨간색)</li>
+            <li>title 속성: "수정" / "삭제"</li>
+            <li>일괄 선택 모드에서도 동작 (개별 행의 수정 버튼)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="brd-pin">
+      <div class="brd-pin-head">
+        <div class="brd-pin-no">2</div>
+        <div class="brd-pin-ttl">옵션 그룹 수정 모달</div>
+        <div class="brd-pin-where">전용 모달 (등록 카드 UI를 한 그룹 편집에 맞게 단순화)</div>
+      </div>
+      <div class="brd-pin-grid">
+        <div class="brd-pin-col purp">
+          <div class="brd-pin-cat">🎯 기능·목적</div>
+          <ul>
+            <li>옵션 그룹의 모든 속성을 한 화면에서 편집</li>
+            <li>코드·이름·필수 여부·선택 방식·최대 선택 개수·항목(이름+가격) 변경</li>
+            <li><b>연결된 메뉴별 최대 선택 개수</b>도 같이 편집 (양방향)</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col beha">
+          <div class="brd-pin-cat">⚙️ 동작·상태값</div>
+          <ul>
+            <li>모달 헤더: "✏️ 옵션 그룹 수정"</li>
+            <li>입력 변경 시 <code>state._optEdit</code> 실시간 갱신 (저장 전까지 원본 보존)</li>
+            <li>여러 개 모드일 때만 「최대 선택 개수」 input 노출</li>
+            <li>「+ 옵션 항목 추가」 버튼으로 항목 행 추가</li>
+            <li>저장 — <code>saveOptEdit()</code> → 검증 후 <code>OPT_GROUPS[id]</code> 직접 덮어쓰기</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col data">
+          <div class="brd-pin-cat">🔌 데이터·연동</div>
+          <ul>
+            <li>임시: <code>state._optEdit = {...OPT_GROUPS[id]}</code></li>
+            <li>항목 구조: <code>items: [{name, price}]</code></li>
+            <li>저장: 검증 통과 시 <code>g.code/name/mode/maxSelect/required/items</code> 일괄 갱신</li>
+            <li>닫기 시 <code>state._optEdit = null</code> 정리</li>
+          </ul>
+        </div>
+        <div class="brd-pin-col exc">
+          <div class="brd-pin-cat">⚠️ 예외·UX 문구</div>
+          <ul>
+            <li>그룹명 빈값 → <code>alert('옵션 그룹명을 입력해 주세요.')</code></li>
+            <li>유효 항목 0개 → <code>alert('옵션 항목을 1개 이상 입력해 주세요.')</code></li>
+            <li>1개만 모드는 <code>maxSelect</code> 자동 1, 여러 개는 최소 2</li>
+            <li>저장 성공 토스트: <code>'${name}' 옵션 그룹을 저장했어요</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="brd-note info">
+    <b>관련 보드 →</b> 수정 모달 안의 <b>「메뉴별 최대 선택 개수」</b> 섹션은 <a href="04-option-max-select.html">04 · 옵션 최대 선택 개수 (양방향)</a>에서 상세히 다룹니다.
+  </div>
+</div>
+</body>
+</html>

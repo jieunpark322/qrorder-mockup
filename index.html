@@ -746,13 +746,24 @@
   .menu-card:hover{border-color:var(--blue-100);background:#f7faff;}
   .menu-card.sel{border-color:var(--blue);background:var(--blue-50);}
   .menu-card.sold-out{opacity:.55;}
-  .menu-card-img{width:52px;height:52px;background:var(--bg-2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}
+  .menu-card-img{width:68px;height:51px;background:var(--bg-2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;overflow:hidden;}
+  .menu-card-img img{width:100% !important;height:100% !important;object-fit:cover !important;display:block;border-radius:0 !important;}
   .menu-card-main{flex:1;min-width:0;}
   .menu-card-name{font-size:14px;font-weight:800;color:var(--ink);margin-bottom:2px;line-height:1.3;}
   .menu-card-desc{font-size:11px;color:var(--ink-3);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .menu-card-badges{display:flex;gap:4px;margin:3px 0 2px;flex-wrap:wrap;}
   .menu-badge{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;line-height:1.4;}
   .badge-toggle{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border:2px solid var(--line);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;transition:all .12s;user-select:none;color:var(--ink-3);}
+
+  /* 메뉴 정보 수정 모달 — 섹션 그룹 + 라벨 + 사진(4:3) 공통 스타일 */
+  .me-sec{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;}
+  .me-sec-head{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:6px;letter-spacing:-.01em;}
+  .me-sec-head::before{content:"";display:block;width:3px;height:14px;background:var(--blue);border-radius:2px;flex-shrink:0;}
+  .me-lbl{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px;}
+  .me-lbl-sub{color:var(--ink-4);font-weight:400;font-size:11px;margin-left:2px;}
+  .me-photo{width:160px;aspect-ratio:4/3;border-radius:10px;background:var(--bg-2);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px dashed var(--line);overflow:hidden;transition:border-color .12s;flex-shrink:0;}
+  .me-photo:hover{border-color:var(--blue);}
+  .me-photo img{width:100% !important;height:100% !important;object-fit:cover !important;display:block;border-radius:0 !important;}
   .badge-toggle:hover{border-color:var(--ink-4);}
   .badge-toggle.on{border-width:2px;}
   .menu-card-meta{display:flex;align-items:center;gap:12px;flex-shrink:0;}
@@ -8927,202 +8938,223 @@ function setMenuOptMaxQty(groupId, itemIdx, val){
 }
 function renderMenuEditModal(){
   const f = state._menuEdit;
+  if(typeof state._menuEditTagsOpen==='undefined') state._menuEditTagsOpen = false;
+  const tagsOpen = state._menuEditTagsOpen;
+  const hasTags = !!(f.catL2 || f.catL3 || f.tag3);
   const modal = document.getElementById('modal');
   modal.innerHTML = `
-    <div class="modal-box" style="max-width:560px;">
+    <div class="modal-box" style="max-width:600px;">
       <div class="modal-head"><b>${f.isNew?'📝 메뉴 등록':'메뉴 정보 수정'}</b><button onclick="closeModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-3);">✕</button></div>
-      <div class="modal-body" style="padding:20px;max-height:74vh;overflow-y:auto;">
+      <div class="modal-body" style="padding:20px;max-height:76vh;overflow-y:auto;background:#fafbfc;">
 
-        <!-- 사진 첨부 -->
-        <div style="display:flex;gap:14px;align-items:center;margin-bottom:18px;">
-          <div onclick="document.getElementById('me-img-file').click()" style="width:80px;height:80px;border-radius:14px;background:var(--bg-2);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px dashed ${f.img?'var(--blue-100)':'var(--line)'};overflow:hidden;transition:border-color .12s;" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='${f.img?'var(--blue-100)':'var(--line)'}'">
-            ${f.img ? menuImgHtml(f.img, 80, 12) : `<span style="font-size:30px;color:var(--ink-4);">📷</span>`}
-          </div>
-          <input type="file" id="me-img-file" accept="image/*" style="display:none;" onchange="onMenuEditImgUpload(event)" />
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:3px;">메뉴 사진</div>
-            <div style="font-size:11px;color:var(--ink-4);line-height:1.5;margin-bottom:8px;">실제 메뉴 사진을 올려 주세요. (JPG·PNG, 5MB 이하)<br/>사진을 안 올리면 손님 화면에 사진 영역이 표시되지 않아요.</div>
-            <div style="display:flex;gap:6px;">
-              <button class="btn-ghost" style="padding:6px 12px;font-size:11px;font-weight:700;" onclick="document.getElementById('me-img-file').click()">${f.img?'📷 사진 변경':'📷 사진 첨부'}</button>
-              ${f.img?`<button class="btn-ghost" style="padding:6px 12px;font-size:11px;color:var(--red);" onclick="state._menuEdit.img='';renderMenuEditModal()">✕ 사진 제거</button>`:''}
+        <!-- ============ 섹션 1: 기본 정보 (사진 + 이름 + 배너 + 설명) ============ -->
+        <div class="me-sec">
+          <div class="me-sec-head">기본 정보</div>
+
+          <!-- 사진(4:3) + 이름·배너 -->
+          <div style="display:flex;gap:14px;margin-bottom:14px;">
+            <div onclick="document.getElementById('me-img-file').click()" class="me-photo" style="border-color:${f.img?'var(--blue-100)':'var(--line)'};">
+              ${f.img ? menuImgHtml(f.img, 160, 10) : `<div style="text-align:center;color:var(--ink-4);"><div style="font-size:26px;">📷</div><div style="font-size:10px;margin-top:4px;">4:3 사진</div></div>`}
+            </div>
+            <input type="file" id="me-img-file" accept="image/*" style="display:none;" onchange="onMenuEditImgUpload(event)" />
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+              <div>
+                <label class="me-lbl">메뉴 이름 <span style="color:var(--red);">*</span></label>
+                <input id="me-name" class="input" value="${f.name.replace(/"/g,'&quot;')}" style="width:100%;" />
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn-ghost" style="padding:5px 10px;font-size:11px;font-weight:700;" onclick="document.getElementById('me-img-file').click()">${f.img?'📷 사진 변경':'📷 사진 첨부'}</button>
+                ${f.img?`<button class="btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--red);" onclick="state._menuEdit.img='';renderMenuEditModal()">✕ 사진 제거</button>`:''}
+                <span style="font-size:10px;color:var(--ink-4);align-self:center;">JPG·PNG · 4:3 비율 · 5MB 이하</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- 메뉴 이름 -->
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">메뉴 이름 <span style="color:var(--red);">*</span></label>
-        <input id="me-name" class="input" value="${f.name.replace(/"/g,'&quot;')}" style="width:100%;margin-bottom:16px;" />
-
-        <!-- 메뉴 배너 (인기·추천·신메뉴) — 손님 메뉴판에 표시 -->
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">메뉴 배너 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택 · 복수 선택 가능</span></label>
-        <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
-          ${MENU_BADGES.map(b=>{
-            const on = (f.badges||[]).includes(b.key);
-            return `<span class="badge-toggle ${on?'on':''}" style="${on?`background:${b.bg};color:${b.color};border-color:${b.color};`:''}" onclick="toggleMenuBadge('${b.key}')">${b.ico} ${b.label}${on?' ✓':''}</span>`;
-          }).join('')}
-        </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-bottom:18px;line-height:1.55;">💡 손님 메뉴판에 메뉴 이름 옆에 배너가 표시돼요. 여러 개 선택할 수 있어요.</div>
-
-        <!-- 알레르기 정보 — 사장님이 직접 입력하는 자유 텍스트 -->
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">⚠️ 알레르기 정보 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택 · 사장님이 직접 입력</span></label>
-        <textarea id="me-allergy" class="input" placeholder="예) 우유, 대두, 견과류&#10;예) 밀가루·달걀·우유 함유, 견과류 제조 시설" style="width:100%;min-height:64px;font-family:inherit;resize:vertical;padding:12px 14px;line-height:1.55;margin-bottom:6px;">${(f.allergyText||'').replace(/</g,'&lt;')}</textarea>
-        <div style="font-size:11px;color:var(--ink-4);margin-bottom:18px;line-height:1.55;">💡 알레르기 정보가 정확하지 않으면 손님에게 피해가 갈 수 있어요. <b>실제 식재료를 확인 후 정확하게 입력</b>해 주세요. 손님 메뉴판에 입력하신 그대로 표시돼요.</div>
-
-        <!-- 가격 — 매장가 / 포장가 / 할인가 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:6px;">
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">매장 판매가 <span style="color:var(--red);">*</span></label>
-            <input id="me-price" class="input" type="number" value="${f.price}" style="width:100%;" />
-            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">기본 정가</div>
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">포장가 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
-            <input id="me-takeout" class="input" type="number" value="${f.takeoutPrice!=null?f.takeoutPrice:''}" placeholder="비워 두면 매장가" style="width:100%;color:#15803d;" />
-            <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">포장하기 가격</div>
-          </div>
-          <div>
-            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">할인 금액 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
-            <div style="display:flex;align-items:center;gap:4px;">
-              <span style="font-size:13px;font-weight:800;color:var(--red);">−</span>
-              <input id="me-discount" class="input" type="number" min="0" value="${f.discountAmt!=null?f.discountAmt:''}" placeholder="0" style="flex:1;color:var(--red);" oninput="(()=>{const p=Number(document.getElementById('me-price').value)||0;const d=Number(this.value)||0;const el=document.getElementById('me-discount-result');if(el)el.textContent=d>0?'→ 실제 '+(p-d).toLocaleString()+'원':'';})()"/>
+          <!-- 메뉴 배너 -->
+          <div style="margin-bottom:12px;">
+            <label class="me-lbl">메뉴 배너 <span class="me-lbl-sub">손님 메뉴판에 노출 · 복수 선택</span></label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              ${MENU_BADGES.map(b=>{
+                const on = (f.badges||[]).includes(b.key);
+                return `<span class="badge-toggle ${on?'on':''}" style="padding:6px 12px;font-size:12px;${on?`background:${b.bg};color:${b.color};border-color:${b.color};`:''}" onclick="toggleMenuBadge('${b.key}')">${b.ico} ${b.label}${on?' ✓':''}</span>`;
+              }).join('')}
             </div>
-            <div id="me-discount-result" style="font-size:10px;color:var(--red);font-weight:700;margin-top:3px;">${(f.discountAmt&&f.discountAmt>0)?'→ 실제 '+(f.price-f.discountAmt).toLocaleString()+'원':''}</div>
+          </div>
+
+          <!-- 설명 -->
+          <div>
+            <label class="me-lbl">설명 <span class="me-lbl-sub">선택 · 손님 화면 작은 글씨</span></label>
+            <textarea id="me-desc" class="input" placeholder="예) 에티오피아 원두 100%, 진하게 내린 한 잔" style="width:100%;min-height:60px;font-family:inherit;resize:vertical;padding:10px 12px;line-height:1.55;">${(f.desc||'').replace(/</g,'&lt;')}</textarea>
           </div>
         </div>
-        <div style="font-size:11px;color:var(--ink-4);margin-bottom:16px;line-height:1.5;">💡 <b>할인 금액</b>을 입력하면 매장 판매가에서 해당 금액만큼 차감돼 손님에게 노출돼요. 포장가도 별도로 입력하지 않은 경우 할인가 기준으로 적용돼요.</div>
 
-        <!-- 카테고리 (손님 메뉴판 노출용) -->
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">카테고리 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">손님 메뉴판에 보이는 분류 · 필수</span></label>
-        <div style="display:flex;gap:6px;margin-bottom:6px;">
-          <select id="me-cat" class="input" style="flex:1;min-width:0;">
-            ${CAT_MENU.map(c=>`<option ${f.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
-          </select>
-          <button class="btn-ghost" style="padding:0 14px;font-size:13px;font-weight:800;flex-shrink:0;" onclick="addNewCatL1()" title="새 카테고리 추가">+ 새 카테고리</button>
-        </div>
-        <div style="font-size:10px;color:var(--ink-4);margin-bottom:18px;">💡 카테고리 자체 관리(이름 변경·순서·노출 여부)는 <b style="color:var(--ink-3);cursor:pointer;" onclick="closeModal();setSection('category');">메뉴 관리 → 카테고리</b>에서 따로 할 수 있어요.</div>
-
-        <!-- 메뉴 분류 태그 (사장님 내부용 검색·구분) -->
-        <div style="padding:14px 16px;background:#fef9e7;border:1px dashed #fde047;border-radius:10px;margin-bottom:16px;">
-          <label style="display:block;font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px;">🏷️ 메뉴 분류 태그 <span style="color:#a16207;font-weight:400;font-size:11px;">선택 · 카테고리와 별개</span></label>
-          <div style="font-size:11px;color:#a16207;line-height:1.55;margin-bottom:10px;">사장님이 메뉴를 <b>내부에서 검색·구분</b>하실 때 쓰는 자유 키워드예요. 손님 화면에는 안 보여요. (예: '시그니처', '신메뉴', '추천', '비건')</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <!-- ============ 섹션 2: 가격 ============ -->
+        <div class="me-sec">
+          <div class="me-sec-head">가격</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
             <div>
-              <input id="me-catL2" class="input" list="me-catL2-list" placeholder="예: 에스프레소" value="${(f.catL2||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
-              <datalist id="me-catL2-list">${[...new Set(MENUS.map(m=>m.catL2).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
-              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;font-weight:700;">대분류</div>
+              <label class="me-lbl">매장 판매가 <span style="color:var(--red);">*</span></label>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <input id="me-price" class="input" type="number" value="${f.price}" style="flex:1;" />
+                <span style="font-size:12px;color:var(--ink-3);">원</span>
+              </div>
             </div>
             <div>
-              <input id="me-catL3" class="input" list="me-catL3-list" placeholder="예: 시그니처" value="${(f.catL3||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
-              <datalist id="me-catL3-list">${[...new Set(MENUS.map(m=>m.catL3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
-              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;font-weight:700;">중분류</div>
+              <label class="me-lbl">포장가 <span class="me-lbl-sub">선택</span></label>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <input id="me-takeout" class="input" type="number" value="${f.takeoutPrice!=null?f.takeoutPrice:''}" placeholder="매장가" style="flex:1;color:#15803d;" />
+                <span style="font-size:12px;color:var(--ink-3);">원</span>
+              </div>
             </div>
             <div>
-              <input id="me-tag3" class="input" list="me-tag3-list" placeholder="예: 추천" value="${(f.tag3||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
-              <datalist id="me-tag3-list">${[...new Set(MENUS.map(m=>m.tag3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
-              <div style="font-size:10px;color:#a16207;margin-top:3px;text-align:center;font-weight:700;">소분류</div>
+              <label class="me-lbl">할인 금액 <span class="me-lbl-sub">선택</span></label>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <span style="font-size:13px;font-weight:800;color:var(--red);">−</span>
+                <input id="me-discount" class="input" type="number" min="0" value="${f.discountAmt!=null?f.discountAmt:''}" placeholder="0" style="flex:1;color:var(--red);" oninput="(()=>{const p=Number(document.getElementById('me-price').value)||0;const d=Number(this.value)||0;const el=document.getElementById('me-discount-result');if(el)el.textContent=d>0?'→ 실제 '+(p-d).toLocaleString()+'원':'';})()"/>
+                <span style="font-size:12px;color:var(--ink-3);">원</span>
+              </div>
+              <div id="me-discount-result" style="font-size:10px;color:var(--red);font-weight:700;margin-top:3px;">${(f.discountAmt&&f.discountAmt>0)?'→ 실제 '+(f.price-f.discountAmt).toLocaleString()+'원':''}</div>
             </div>
+          </div>
+          <div style="font-size:11px;color:var(--ink-4);margin-top:8px;line-height:1.55;">💡 포장가는 비우면 매장가와 같아요. 할인 금액을 입력하면 손님 화면에 차감된 가격이 노출돼요.</div>
+        </div>
+
+        <!-- ============ 섹션 3: 분류 ============ -->
+        <div class="me-sec">
+          <div class="me-sec-head">분류</div>
+          <label class="me-lbl">카테고리 <span class="me-lbl-sub">손님 메뉴판에 보이는 분류 · 필수</span></label>
+          <div style="display:flex;gap:6px;">
+            <select id="me-cat" class="input" style="flex:1;min-width:0;">
+              ${CAT_MENU.map(c=>`<option ${f.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
+            </select>
+            <button class="btn-ghost" style="padding:0 14px;font-size:13px;font-weight:800;flex-shrink:0;" onclick="addNewCatL1()" title="새 카테고리 추가">+ 새 카테고리</button>
+          </div>
+          <div style="font-size:10px;color:var(--ink-4);margin-top:4px;">카테고리 관리(이름·순서·노출)는 <b style="color:var(--ink-3);cursor:pointer;" onclick="closeModal();setSection('category');">메뉴 관리 → 카테고리</b>에서.</div>
+
+          <!-- 분류 태그(내부용) — 접기 -->
+          <div style="margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;">
+            <div onclick="state._menuEditTagsOpen=!state._menuEditTagsOpen;renderMenuEditModal()" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;">
+              <span style="font-size:12px;font-weight:700;color:var(--ink-3);">🏷️ 메뉴 분류 태그 <span style="font-weight:400;font-size:11px;color:var(--ink-4);">사장님 내부 검색·구분용 · 손님엔 안 보임</span>${hasTags?`<span style="margin-left:6px;font-size:10px;background:#fef9e7;color:#854d0e;padding:1px 6px;border-radius:4px;font-weight:700;">설정됨</span>`:''}</span>
+              <span style="font-size:12px;color:var(--ink-3);">${tagsOpen?'▲ 접기':'▼ 펼치기'}</span>
+            </div>
+            ${tagsOpen ? `
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;">
+                <div>
+                  <input id="me-catL2" class="input" list="me-catL2-list" placeholder="예: 에스프레소" value="${(f.catL2||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
+                  <datalist id="me-catL2-list">${[...new Set(MENUS.map(m=>m.catL2).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
+                  <div style="font-size:10px;color:var(--ink-3);margin-top:3px;text-align:center;">대분류</div>
+                </div>
+                <div>
+                  <input id="me-catL3" class="input" list="me-catL3-list" placeholder="예: 시그니처" value="${(f.catL3||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
+                  <datalist id="me-catL3-list">${[...new Set(MENUS.map(m=>m.catL3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
+                  <div style="font-size:10px;color:var(--ink-3);margin-top:3px;text-align:center;">중분류</div>
+                </div>
+                <div>
+                  <input id="me-tag3" class="input" list="me-tag3-list" placeholder="예: 추천" value="${(f.tag3||'').replace(/"/g,'&quot;')}" style="width:100%;background:#fff;" />
+                  <datalist id="me-tag3-list">${[...new Set(MENUS.map(m=>m.tag3).filter(x=>x))].map(v=>`<option value="${v}">`).join('')}</datalist>
+                  <div style="font-size:10px;color:var(--ink-3);margin-top:3px;text-align:center;">소분류</div>
+                </div>
+              </div>
+            ` : `<input id="me-catL2" type="hidden" value="${(f.catL2||'').replace(/"/g,'&quot;')}" /><input id="me-catL3" type="hidden" value="${(f.catL3||'').replace(/"/g,'&quot;')}" /><input id="me-tag3" type="hidden" value="${(f.tag3||'').replace(/"/g,'&quot;')}" />`}
           </div>
         </div>
 
-        <!-- 판매 상태 -->
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">판매 상태</label>
-        <select id="me-status" class="input" style="width:100%;margin-bottom:6px;">
-          <option ${f.status==='판매중'?'selected':''}>판매중</option>
-          <option ${f.status==='품절'?'selected':''}>품절</option>
-          <option ${f.status==='숨김'?'selected':''}>숨김</option>
-        </select>
-        <div style="font-size:10px;color:var(--ink-4);margin-bottom:16px;line-height:1.5;">💡 한정 수량 메뉴의 자동 품절은 <b style="color:var(--ink-3);cursor:pointer;" onclick="closeModal();setSection('stock');">오늘의 준비량</b>에서도 관리할 수 있어요.</div>
-
-        <!-- 설명 -->
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">설명 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
-        <textarea id="me-desc" class="input" placeholder="메뉴를 설명해 주세요. 손님 화면에 작은 글씨로 표시돼요." style="width:100%;min-height:80px;font-family:inherit;resize:vertical;padding:12px 14px;line-height:1.55;margin-bottom:14px;">${(f.desc||'').replace(/</g,'&lt;')}</textarea>
-
-        <!-- 1회 주문 최대 수량 -->
-        <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">1회 주문 최대 수량 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">선택</span></label>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
-          <input id="me-maxqty" class="input" type="number" min="1" value="${f.maxQty!=null?f.maxQty:''}" placeholder="제한 없음" style="flex:1;" />
-          <span style="font-size:13px;font-weight:700;color:var(--ink-2);">개</span>
-          ${f.maxQty!=null?`<button class="btn-ghost" style="padding:8px 12px;font-size:11px;color:var(--red);" onclick="document.getElementById('me-maxqty').value='';">✕ 제한 해제</button>`:''}
-        </div>
-        <div style="font-size:10px;color:var(--ink-4);margin-bottom:14px;line-height:1.5;">손님이 한 번에 담을 수 있는 최대 수량이에요. 비워 두면 제한 없이 주문할 수 있어요. (예: 인기 메뉴·이벤트 메뉴는 5개로 제한)</div>
-
-        <!-- 옵션 적용 한도 — 메뉴별로 옵션 항목 추가 횟수 오버라이드 -->
-        ${(()=>{
-          const linkedGroups = (typeof OPT_GROUPS!=='undefined' ? OPT_GROUPS : []).filter(g=>g.links && g.links.includes(f.id));
-          if(linkedGroups.length===0) return `
-            <div style="padding:12px 14px;background:#f6f3ff;border:1px dashed #c4a5ff;border-radius:10px;font-size:11px;color:#6b3eaa;line-height:1.55;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
-              <span>🧩 이 메뉴에는 아직 옵션 그룹이 연결돼 있지 않아요.</span>
-              <button class="btn-ghost" style="padding:5px 10px;font-size:11px;font-weight:700;flex-shrink:0;color:#6b3eaa;border-color:#c4a5ff;" onclick="closeModal();setSection('option');">옵션 그룹 →</button>
+        <!-- ============ 섹션 4: 판매 설정 ============ -->
+        <div class="me-sec">
+          <div class="me-sec-head">판매 설정</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+              <label class="me-lbl">판매 상태</label>
+              <select id="me-status" class="input" style="width:100%;">
+                <option ${f.status==='판매중'?'selected':''}>판매중</option>
+                <option ${f.status==='품절'?'selected':''}>품절</option>
+                <option ${f.status==='숨김'?'selected':''}>숨김</option>
+              </select>
             </div>
-          `;
-          if(!f.optMaxQty) f.optMaxQty = {};
-          const groupsHtml = linkedGroups.map(g=>{
-            const isMulti = g.mode==='여러 개';
-            // 1개만 선택은 항목별 횟수 의미 없음 (항상 1)
-            if(!isMulti){
-              return `
-                <div style="padding:10px 12px;background:#fafbfc;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <span style="font-size:13px;font-weight:700;">🧩 ${g.name}</span>
+            <div>
+              <label class="me-lbl">1회 주문 최대 수량 <span class="me-lbl-sub">선택</span></label>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <input id="me-maxqty" class="input" type="number" min="1" value="${f.maxQty!=null?f.maxQty:''}" placeholder="제한 없음" style="flex:1;" />
+                <span style="font-size:12px;color:var(--ink-3);">개</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 옵션 적용 한도 -->
+          ${(()=>{
+            const linkedGroups = (typeof OPT_GROUPS!=='undefined' ? OPT_GROUPS : []).filter(g=>g.links && g.links.includes(f.id));
+            if(linkedGroups.length===0) return `
+              <div style="margin-top:6px;padding:10px 12px;background:#f6f3ff;border:1px dashed #c4a5ff;border-radius:8px;font-size:11px;color:#6b3eaa;line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                <span>🧩 옵션 그룹이 연결돼 있지 않아요.</span>
+                <button class="btn-ghost" style="padding:4px 10px;font-size:11px;font-weight:700;flex-shrink:0;color:#6b3eaa;border-color:#c4a5ff;" onclick="closeModal();setSection('option');">옵션 그룹 →</button>
+              </div>
+            `;
+            if(!f.optMaxQty) f.optMaxQty = {};
+            const groupsHtml = linkedGroups.map(g=>{
+              const isMulti = g.mode==='여러 개';
+              if(!isMulti){
+                return `
+                  <div style="padding:8px 10px;background:#fff;border:1px solid var(--line-2);border-radius:6px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:12px;font-weight:600;">🧩 ${g.name}</span>
                     <span style="font-size:11px;color:var(--ink-3);">1개만 선택 · 항목별 1회 고정</span>
                   </div>
-                </div>
-              `;
-            }
-            const itemsRows = g.items.map((it, ii)=>{
-              const overrideKey = `${g.id}`;
-              // 기본 1회, 메뉴 측에서 설정한 값이 있으면 그 값
-              const cur = (f.optMaxQty[overrideKey] && f.optMaxQty[overrideKey][ii] != null)
-                ? f.optMaxQty[overrideKey][ii] : 1;
-              return `
-                <div style="display:grid;grid-template-columns:1fr 130px;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line-2);">
-                  <span style="font-size:12px;color:var(--ink-2);">${it.name}${it.price>0?` <span style="color:var(--blue);font-weight:600;">+${fmt(it.price)}원</span>`:''}</span>
-                  <div style="display:flex;align-items:center;gap:4px;">
-                    <input class="input" type="number" min="1" max="10" value="${cur}" oninput="setMenuOptMaxQty(${g.id},${ii},this.value)" style="text-align:right;flex:1;padding:6px 10px;font-size:12px;" title="이 메뉴에서 손님이 최대 몇 번 추가할 수 있는지" />
-                    <span style="font-size:11px;color:var(--ink-3);flex-shrink:0;">회까지</span>
+                `;
+              }
+              const itemsRows = g.items.map((it, ii)=>{
+                const overrideKey = `${g.id}`;
+                const cur = (f.optMaxQty[overrideKey] && f.optMaxQty[overrideKey][ii] != null)
+                  ? f.optMaxQty[overrideKey][ii] : 1;
+                return `
+                  <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;padding:5px 0;border-top:1px dashed var(--line-2);">
+                    <span style="font-size:12px;color:var(--ink-2);">${it.name}${it.price>0?` <span style="color:var(--blue);font-weight:600;">+${fmt(it.price)}원</span>`:''}</span>
+                    <div style="display:flex;align-items:center;gap:3px;">
+                      <input class="input" type="number" min="1" max="10" value="${cur}" oninput="setMenuOptMaxQty(${g.id},${ii},this.value)" style="text-align:right;flex:1;padding:5px 8px;font-size:12px;" />
+                      <span style="font-size:11px;color:var(--ink-3);flex-shrink:0;">회</span>
+                    </div>
                   </div>
+                `;
+              }).join('');
+              return `
+                <div style="padding:10px 12px;background:#fff;border:1px solid var(--line-2);border-radius:6px;margin-bottom:4px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                    <span style="font-size:12px;font-weight:600;">🧩 ${g.name}</span>
+                    <span style="font-size:11px;color:var(--ink-3);">최대 ${g.maxSelect||2}개 선택</span>
+                  </div>
+                  ${itemsRows}
                 </div>
               `;
             }).join('');
             return `
-              <div style="padding:12px 14px;background:#fafbfc;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                  <span style="font-size:13px;font-weight:700;">🧩 ${g.name}</span>
-                  <span style="font-size:11px;color:var(--ink-3);">여러 개 선택 (최대 ${g.maxSelect||2}개)</span>
-                </div>
-                ${itemsRows}
+              <div style="margin-top:6px;">
+                <label class="me-lbl">🎚️ 옵션 적용 한도 <span class="me-lbl-sub">메뉴별 옵션 추가 횟수</span></label>
+                ${groupsHtml}
               </div>
             `;
-          }).join('');
-          return `
-            <label style="display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:6px;">🎚️ 옵션 적용 한도 <span style="color:var(--ink-4);font-weight:400;font-size:11px;">이 메뉴에서 옵션 항목을 손님이 몇 번까지 추가할 수 있는지</span></label>
-            ${groupsHtml}
-            <div style="font-size:11px;color:var(--ink-4);margin-bottom:14px;line-height:1.55;">💡 메뉴마다 옵션 한도를 다르게 정할 수 있어요. 예) 샷 추가 — 아메리카노는 3회, 디카페인 라떼는 1회, 키즈 음료는 0회.</div>
-          `;
-        })()}
+          })()}
 
-        ${(()=>{
-          const st = getMenuStock(f.id);
-          if(!st) return `<div style="padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
-            <span>📦 이 메뉴는 오늘의 준비량 관리를 안 하고 있어요.</span>
-            <button class="btn-ghost" style="padding:5px 10px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="closeModal();setSection('stock');">수량 관리 →</button>
-          </div>`;
-          const isOut = st.remaining===0;
-          const isLow = !isOut && st.remaining<=st.lowAlert;
-          const color = isOut?'#b91c1c':isLow?'#d97706':'#15803d';
-          const bg    = isOut?'#fef2f2':isLow?'#fffbeb':'#f0fdf4';
-          return `<div style="padding:12px 14px;background:${bg};border-radius:10px;font-size:12px;color:var(--ink-2);line-height:1.55;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
-            <span>📦 <b style="color:${color};">오늘 ${st.remaining}/${st.prepared}${st.unit}</b> 남았어요${isOut?' · 오늘 판매 완료':isLow?' · 곧 품절':''}</span>
-            <button class="btn-ghost" style="padding:5px 10px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="closeModal();setSection('stock');">준비량 변경 →</button>
-          </div>`;
-        })()}
-
-        <!-- 안내 -->
-        <div style="padding:10px 14px;background:var(--bg-2);border-radius:8px;font-size:11px;color:var(--ink-3);line-height:1.55;margin-bottom:18px;">
-          💡 옵션 그룹·판매 시간·해피아워 같은 부가 설정은 표 우측 <b style="color:var(--ink-2);">추가 설정 ▼</b> 버튼에서 변경할 수 있어요.
+          ${(()=>{
+            const st = getMenuStock(f.id);
+            if(!st) return '';
+            const isOut = st.remaining===0;
+            const isLow = !isOut && st.remaining<=st.lowAlert;
+            const color = isOut?'#b91c1c':isLow?'#d97706':'#15803d';
+            const bg    = isOut?'#fef2f2':isLow?'#fffbeb':'#f0fdf4';
+            return `<div style="margin-top:8px;padding:10px 12px;background:${bg};border-radius:8px;font-size:11px;color:var(--ink-2);line-height:1.55;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+              <span>📦 <b style="color:${color};">오늘 ${st.remaining}/${st.prepared}${st.unit}</b> 남았어요${isOut?' · 판매 완료':isLow?' · 곧 품절':''}</span>
+              <button class="btn-ghost" style="padding:4px 10px;font-size:11px;font-weight:700;flex-shrink:0;" onclick="closeModal();setSection('stock');">준비량 →</button>
+            </div>`;
+          })()}
         </div>
 
-        <div style="display:flex;gap:8px;">
+        <!-- ============ 섹션 5: 알레르기 정보 ============ -->
+        <div class="me-sec">
+          <div class="me-sec-head">⚠️ 알레르기 정보 <span style="font-weight:400;font-size:11px;color:var(--ink-4);margin-left:4px;">선택 · 사장님 자유 입력</span></div>
+          <textarea id="me-allergy" class="input" placeholder="예) 우유, 대두, 견과류&#10;예) 밀가루·달걀·우유 함유, 견과류 제조 시설" style="width:100%;min-height:60px;font-family:inherit;resize:vertical;padding:10px 12px;line-height:1.55;">${(f.allergyText||'').replace(/</g,'&lt;')}</textarea>
+          <div style="font-size:11px;color:var(--ink-4);margin-top:6px;line-height:1.55;">💡 알레르기 정보가 정확하지 않으면 손님에게 피해가 갈 수 있어요. 실제 식재료를 확인 후 정확하게 입력해 주세요. 손님 메뉴판에 입력하신 그대로 표시돼요.</div>
+        </div>
+
+        <!-- 저장/취소 -->
+        <div style="display:flex;gap:8px;margin-top:8px;">
           <button class="btn-ghost" style="flex:1;" onclick="closeModal()">취소</button>
           <button class="btn-save-cta" style="flex:2;" onclick="saveMenuEdit()">저장</button>
         </div>

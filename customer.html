@@ -136,11 +136,11 @@
   .fab-stack{position:fixed;right:16px;bottom:22px;z-index:39;display:flex;flex-direction:column;align-items:flex-end;gap:11px;transition:bottom .22s ease;}
   .fab-stack.lifted{bottom:92px;}
   @media(min-width:480px){.fab-stack{right:calc(50% - 220px + 16px);}}
-  .staff-fab{display:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:58px;height:58px;border-radius:50%;background:var(--blue);color:#fff;border:none;box-shadow:0 6px 18px rgba(22,49,91,.4);cursor:pointer;font-family:inherit;padding:0;}
+  .staff-fab{display:none;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:66px;height:66px;border-radius:50%;background:var(--blue);color:#fff;border:none;box-shadow:0 6px 18px rgba(22,49,91,.4);cursor:pointer;font-family:inherit;padding:0;}
   .staff-fab.show{display:flex;}
   .staff-fab:active{transform:scale(.95);}
-  .staff-fab .fi{font-size:19px;line-height:1;}
-  .staff-fab .ft{font-size:10px;font-weight:800;line-height:1;letter-spacing:-.02em;}
+  .staff-fab .fi{font-size:28px;line-height:1;}
+  .staff-fab .ft{font-size:12px;font-weight:800;line-height:1.05;letter-spacing:-.03em;white-space:nowrap;}
 
   .topbar{position:sticky;top:0;z-index:20;background:var(--blue);color:#fff;display:flex;align-items:center;gap:10px;padding:15px 16px;}
   .topbar .back{font-size:23px;background:none;border:none;cursor:pointer;color:#fff;padding:2px 4px;margin-left:-4px;}
@@ -639,7 +639,7 @@ function scrMenu(){
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
     ${S.orderType==='dinein'?(S.serve==='self'
-      ? `<div class="kakao-note"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드릴게요. <span style="font-weight:600;">(셀프 수령)</span></span></div>`
+      ? `<div class="kakao-note"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드릴게요.</span></div>`
       : `<div class="notice blue">🪑 <span>준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div>`):''}
     <div id="menuResults">${menuResultsHtml()}</div>`;
   const content = S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab;
@@ -928,9 +928,9 @@ function renderCallSheet(){
 }
 function sendCalls(){
   if(!S.callSel.length) return;
-  const items=S.callSel.map(i=>STAFF_CALL_MSGS[i]);
+  const n=S.callSel.length;
   closeSheet();
-  toast(`직원을 호출했어요 · ${items.join(', ')}`);
+  toast(n>1?`직원을 호출했어요 (${n}건)`:'직원을 호출했어요');
 }
 
 /* --- 장바구니 팝업 시트 --- */

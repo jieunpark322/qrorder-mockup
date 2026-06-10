@@ -238,6 +238,8 @@
   .pchip{font-size:15px;font-weight:700;padding:12px 16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;color:var(--ink2);font-family:inherit;display:flex;align-items:center;gap:6px;}
   .pchip.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);font-weight:800;}
   .timechip{min-width:78px;justify-content:center;}
+  .timesel{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:15px 13px;font-size:16.5px;font-weight:600;font-family:inherit;color:var(--ink);background:#fff;}
+  .timesel:focus{outline:none;border-color:var(--blue);}
   .field{margin-top:14px;}
   .field label{display:block;font-size:13.5px;font-weight:700;color:var(--ink2);margin-bottom:7px;}
   .field input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:15px 15px;font-size:16.5px;font-family:inherit;}
@@ -302,6 +304,11 @@
   .errbox p{font-size:14.5px;color:var(--ink2);line-height:1.65;}
   .errbox .code{display:inline-block;margin-top:18px;font-size:11px;color:var(--ink4);background:var(--bg);padding:6px 12px;border-radius:8px;font-family:monospace;}
   .err-link{display:block;width:100%;text-align:center;margin-top:14px;background:none;border:none;color:var(--ink3);font-size:13.5px;text-decoration:underline;cursor:pointer;font-family:inherit;}
+  /* 포장·예약 호출 번호 */
+  .callno-box{margin:18px 16px 0;padding:20px 16px;background:#fff;border:2px dashed var(--blue);border-radius:16px;text-align:center;}
+  .callno-box .cn-label{font-size:13px;color:var(--ink3);font-weight:700;margin-bottom:6px;}
+  .callno-box .cn-num{font-size:42px;font-weight:800;color:var(--blue);letter-spacing:3px;line-height:1.1;}
+  .callno-box .cn-note{font-size:12.5px;color:var(--ink3);margin-top:9px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -340,6 +347,8 @@ const STORE = {
   reviewOn:true,
   logo:'☕',
   table:'T03',
+  // 호출 번호 규칙 (사장님이 사장님 사이트에서 직접 설계 · 카카오 연락처와 무관)
+  callConfig:{ prefix:'A', digits:3 },
   // 매장 대표 이미지 (최대 3장 · 자동 전환)
   covers:[
     'https://loremflickr.com/640/360/coffeeshop?lock=70',
@@ -469,6 +478,7 @@ const S = {
   businessOpen:true,     // 영업시간 시뮬레이션
   errSim:'none', procStep:null, errType:null,   // 결제 처리상태/에러 시뮬레이션
   searchOpen:false, activeCat:null,             // 검색창 토글 / 현재 보이는 카테고리
+  callNo:null,                                  // 포장/예약 호출 번호 (사장님 규칙)
   authType:'kakao',      // 'kakao' | 'anon' — 약관 분기용
   termsChecked:{},       // { termId: true/false }
 };
@@ -818,18 +828,31 @@ function syncScrollLock(){
 }
 function sheetUnit(){ const m=MENU.find(x=>x.id===S.sheet.id); let p=priceOf(m);
   (m.opt||[]).forEach(gid=>{ const g=OPTS[gid]; (S.sheet.sel[gid]||[]).forEach(i=>p+=g.items[i].p); }); return p; }
+// 옵션 토글·수량 변경 시엔 전체 시트를 다시 그리지 않고(이미지 깜빡임 방지) 바뀐 부분만 갱신
 function toggleOpt(gid,idx){ const g=OPTS[gid]; const cur=S.sheet.sel[gid]||[];
   if(g.multi){ S.sheet.sel[gid]=cur.includes(idx)?cur.filter(x=>x!==idx):[...cur,idx]; } else { S.sheet.sel[gid]=[idx]; }
-  renderSheet(); }
-function sheetQty(d){ S.sheet.qty=Math.max(1,S.sheet.qty+d); renderSheet(); }
-function renderSheet(){
-  const m=MENU.find(x=>x.id===S.sheet.id);
-  const groups=(m.opt||[]).map(gid=>{ const g=OPTS[gid]; const cur=S.sheet.sel[gid]||[];
+  updateSheet(); }
+function sheetQty(d){ S.sheet.qty=Math.max(1,S.sheet.qty+d); updateSheet(); }
+function sheetGroupsHtml(m){
+  return (m.opt||[]).map(gid=>{ const g=OPTS[gid]; const cur=S.sheet.sel[gid]||[];
     return `<div class="optg"><div class="optg-h">${g.name} ${g.required?'<span class="req">필수</span>':'<span class="opt-pick">선택 · 중복 가능</span>'}</div>
       ${g.items.map((it,i)=>`<div class="optrow ${g.multi?'multi':''} ${cur.includes(i)?'sel':''}" onclick="toggleOpt(${gid},${i})">
         <span class="optck">${cur.includes(i)?(g.multi?'✓':'●'):''}</span><span class="opt-nm">${it.n}</span>
         <span class="opt-pr">${it.p>0?'+'+won(it.p)+'원':'무료'}</span></div>`).join('')}</div>`;
   }).join('');
+}
+function sheetDynHtml(m){
+  return (sheetGroupsHtml(m) || '<div style="margin-top:16px;font-size:13px;color:var(--ink3);">옵션 없이 바로 담을 수 있어요.</div>')
+    + `<div class="qtyrow"><span class="lbl">수량</span>
+        <span class="stepper"><button onclick="sheetQty(-1)">−</button><span class="n">${S.sheet.qty}</span><button onclick="sheetQty(1)">+</button></span></div>`;
+}
+function updateSheet(){
+  const m=MENU.find(x=>x.id===S.sheet.id);
+  const dyn=$('sheetDyn'); if(dyn) dyn.innerHTML=sheetDynHtml(m);
+  const btn=$('sheetAddBtn'); if(btn) btn.textContent=`담기 · ${won(sheetUnit()*S.sheet.qty)}원`;
+}
+function renderSheet(){
+  const m=MENU.find(x=>x.id===S.sheet.id);
   const out = isOut(m);
   $('sheet').innerHTML = `<div class="sheet">
       ${imgBox('sheet-img', m.img, PHOTO[m.id], out)}
@@ -839,13 +862,11 @@ function renderSheet(){
         <div class="sheet-base">${won(priceOf(m))}원${S.orderType!=='dinein'&&m.takeout!=null&&m.takeout!==m.price?` <span style="font-size:11px;color:var(--ink4);font-weight:600;">(포장가)</span>`:''}</div>
         ${lowStock(m)?`<div class="stock-pill" style="margin-top:10px;">⚡ 잔여 ${m.stock}개 · 서둘러 주세요</div>`:''}
         ${(m.allerg||[]).length?`<div class="allergy"><span class="al-h">⚠️ 알레르기 유발 성분</span><span class="al-list">${m.allerg.map(a=>(ALLERGEN_ICON[a]||'')+' '+(ALLERGEN_NAME[a]||a)).join(' · ')}</span></div>`:''}
-        ${out?'':(groups || '<div style="margin-top:16px;font-size:13px;color:var(--ink3);">옵션 없이 바로 담을 수 있어요.</div>')}
-        ${out?'':`<div class="qtyrow"><span class="lbl">수량</span>
-          <span class="stepper"><button onclick="sheetQty(-1)">−</button><span class="n">${S.sheet.qty}</span><button onclick="sheetQty(1)">+</button></span></div>`}
+        ${out?'':`<div id="sheetDyn">${sheetDynHtml(m)}</div>`}
       </div>
       <div class="sheet-foot">${out
         ? `<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">지금은 담을 수 없어요</button>`
-        : `<button class="addbtn" onclick="addToCart()">담기 · ${won(sheetUnit()*S.sheet.qty)}원</button>`}</div>
+        : `<button class="addbtn" id="sheetAddBtn" onclick="addToCart()">담기 · ${won(sheetUnit()*S.sheet.qty)}원</button>`}</div>
     </div>`;
 }
 function addToCart(){
@@ -888,21 +909,28 @@ function setsSection(){
 function openSet(id){ const s=SETS.find(x=>x.id===id); const sel={}; s.slots.forEach((sl,i)=>sel[i]=0);
   S.setSheet={ id, sel, qty:1 }; renderSetSheet(); $('sheetbg').classList.add('on'); syncScrollLock(); }
 function setUnit(){ const s=SETS.find(x=>x.id===S.setSheet.id); let p=s.base; s.slots.forEach((sl,i)=>p+=sl.cands[S.setSheet.sel[i]].x); return p; }
-function setPick(i,ci){ S.setSheet.sel[i]=ci; renderSetSheet(); }
-function setQtyF(d){ S.setSheet.qty=Math.max(1,S.setSheet.qty+d); renderSetSheet(); }
-function renderSetSheet(){
-  const s=SETS.find(x=>x.id===S.setSheet.id);
+function setPick(i,ci){ S.setSheet.sel[i]=ci; updateSetSheet(); }
+function setQtyF(d){ S.setSheet.qty=Math.max(1,S.setSheet.qty+d); updateSetSheet(); }
+function setDynHtml(s){
   const slots=s.slots.map((sl,i)=>`<div class="optg"><div class="optg-h">${sl.name} 선택 <span class="req">필수</span></div>
     ${sl.cands.map((c,ci)=>`<div class="optrow ${S.setSheet.sel[i]===ci?'sel':''}" onclick="setPick(${i},${ci})">
       <span class="optck">${S.setSheet.sel[i]===ci?'●':''}</span><span class="opt-nm">${c.n}</span>
       <span class="opt-pr">${c.x>0?'+'+won(c.x)+'원':(c.x<0?won(c.x)+'원':'무료')}</span></div>`).join('')}</div>`).join('');
+  return slots + `<div class="qtyrow"><span class="lbl">수량</span>
+        <span class="stepper"><button onclick="setQtyF(-1)">−</button><span class="n">${S.setSheet.qty}</span><button onclick="setQtyF(1)">+</button></span></div>`;
+}
+function updateSetSheet(){
+  const s=SETS.find(x=>x.id===S.setSheet.id);
+  const dyn=$('setDyn'); if(dyn) dyn.innerHTML=setDynHtml(s);
+  const btn=$('setAddBtn'); if(btn) btn.textContent=`담기 · ${won(setUnit()*S.setSheet.qty)}원`;
+}
+function renderSetSheet(){
+  const s=SETS.find(x=>x.id===S.setSheet.id);
   $('sheet').innerHTML=`<div class="sheet"><div class="sheet-img">${pic(s.img, PHOTO['set'+s.id])}</div>
     <div class="sheet-body"><div class="sheet-name">[세트] ${s.name}</div><div class="sheet-desc">${s.desc}</div>
       <div class="sheet-base">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:600;">세트 기본가</span></div>
-      ${slots}
-      <div class="qtyrow"><span class="lbl">수량</span>
-        <span class="stepper"><button onclick="setQtyF(-1)">−</button><span class="n">${S.setSheet.qty}</span><button onclick="setQtyF(1)">+</button></span></div></div>
-    <div class="sheet-foot"><button class="addbtn" onclick="addSet()">담기 · ${won(setUnit()*S.setSheet.qty)}원</button></div></div>`;
+      <div id="setDyn">${setDynHtml(s)}</div></div>
+    <div class="sheet-foot"><button class="addbtn" id="setAddBtn" onclick="addSet()">담기 · ${won(setUnit()*S.setSheet.qty)}원</button></div></div>`;
 }
 function addSet(){
   const s=SETS.find(x=>x.id===S.setSheet.id);
@@ -1032,7 +1060,10 @@ function scrCheckout(){
     ${S.orderType==='dinein'?`<div class="sec"><div class="sec-h">🍽️ 받는 방법</div>${S.serve==='self'?`<div class="info-pill">🚶 <span><b>${STORE.table} 테이블</b> 주문 · <b>손님 셀프 수령</b> — 준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>`:`<div class="info-pill">🍳 <span><b>${STORE.table} 테이블</b> 주문 · 준비되면 <b>직원이 자리로 가져다 드려요</b>. 카카오 알림톡은 보내지 않아요.</span></div>`}</div>`:''}
     ${S.orderType==='takeout'?`<div class="sec"><div class="sec-h">🥡 포장 안내</div><div class="info-pill amber">⏱️ <span>결제 후 <b>약 15~25분</b> 뒤 준비돼요. 준비되면 카카오 알림톡으로 알려드려요.</span></div></div>`:''}
     ${needTime?`<div class="sec"><div class="sec-h">📅 수령 시간 <span class="req">필수</span></div>
-      <div class="chips">${timeSlots().map(t=>`<button class="pchip timechip ${S.pickup===t?'on':''}" onclick="S.pickup='${t}';render()">${t}</button>`).join('')}</div>
+      <select class="timesel" onchange="S.pickup=this.value">
+        <option value="" ${!S.pickup?'selected':''}>시간을 선택해 주세요</option>
+        ${timeSlots().map(t=>`<option value="${t}" ${S.pickup===t?'selected':''}>오늘 ${t}</option>`).join('')}
+      </select>
       <div class="info-pill amber" style="margin-top:12px;">📨 <span>주문하면 <b>사장님이 수락</b>해야 확정돼요.</span></div></div>`:''}
     ${isPostpay
       ? `<div class="sec"><div class="sec-h">🧾 결제 <span class="opt-pick" style="font-weight:600;">후불 · 나갈 때 결제</span></div>
@@ -1153,10 +1184,17 @@ function placeOrder(){
     setTimeout(finishOrder, 1300);
   }
 }
+function genCallNo(){
+  const c=STORE.callConfig||{prefix:'',digits:3};
+  const n=String(Math.floor(Math.random()*Math.pow(10,c.digits))).padStart(c.digits,'0');
+  return (c.prefix?c.prefix+'-':'')+n;
+}
 function finishOrder(){
   if(S.screen!=='processing') return;
   if(S.errSim!=='none'){ S.errType=S.errSim; S.screen='error'; render(); return; }
-  S.orderNo='#20260515-'+String(50+Math.floor((cartTotal()%900))).padStart(4,'0'); S.screen='done'; render();
+  S.orderNo='#20260515-'+String(50+Math.floor((cartTotal()%900))).padStart(4,'0');
+  S.callNo = (S.orderType!=='dinein') ? genCallNo() : null;   // 포장·예약만 호출 번호 발급
+  S.screen='done'; render();
 }
 function scrProcessing(){
   const isPay = S.procStep==='pay';
@@ -1221,8 +1259,15 @@ function scrDone(){
     statusHtml=`<div class="status-line"><span class="dot" style="background:var(--amber);"></span> <b>사장님 수락 대기 중</b> — 수락하면 확정 알림이 와요</div>
       <div class="status-line"><span class="dot"></span> 결제 완료 · 수령 예정 <b>오늘 ${S.pickup}</b></div>`;
   }
+  const callNoCard = (S.orderType!=='dinein' && S.callNo)
+    ? `<div class="callno-box">
+        <div class="cn-label">내 호출 번호</div>
+        <div class="cn-num">${S.callNo}</div>
+        <div class="cn-note">준비되면 이 번호로 불러드려요${S.orderType==='takeout'?' · 픽업대에서 확인하세요':''}</div>
+      </div>` : '';
   return `<div class="done"><div class="dlogo">${STORE.logo}</div><div class="ck">✓</div>
       <h2>${head}</h2><div class="ordno">주문번호 ${S.orderNo}</div></div>
+    ${callNoCard}
     <div class="done-card"><div style="font-size:13px;font-weight:800;margin-bottom:6px;">${ot.emoji} ${ot.name} · ${STORE.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div>
       ${statusHtml}${extra}
       <div style="border-top:1px solid var(--line2);margin-top:14px;padding-top:13px;">
@@ -1230,7 +1275,7 @@ function scrDone(){
         <div class="rowline tot" style="font-size:15px;"><span>${(S.orderType==='dinein'&&S.payTiming==='postpay')?'결제 예정 · 나갈 때':'결제 금액 · '+S.pay}</span><span>${won(cartTotal())}원</span></div></div></div>
     <button class="primarybtn" onclick="resetOrder()">새 주문하기</button><div style="height:24px;"></div>`;
 }
-function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.cat='전체'; S.screen='menu'; render(); }
+function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.screen='menu'; render(); }
 
 /* --- 리뷰 / 매장정보 --- */
 function stars(r){ return '★★★★★'.slice(0,r)+'☆☆☆☆☆'.slice(0,5-r); }

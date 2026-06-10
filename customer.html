@@ -77,7 +77,8 @@
   .maintab{flex:1;padding:15px 0;font-size:16px;font-weight:700;color:var(--ink3);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:inherit;}
   .maintab.on{color:var(--ink);border-bottom-color:var(--ink);font-weight:800;}
   .cattabs-wrap{position:sticky;top:54px;z-index:15;background:#fff;border-bottom:1px solid var(--line);}
-  .cattabs-wrap::after{content:'';position:absolute;top:0;right:0;bottom:1px;width:42px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff 72%);pointer-events:none;}
+  .cattabs-wrap::after{content:'';position:absolute;top:0;right:0;bottom:1px;width:42px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff 72%);pointer-events:none;opacity:1;transition:opacity .2s;}
+  .cattabs-wrap.at-end::after{opacity:0;}
   .cattabs{display:flex;gap:7px;padding:12px 14px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;}
   .cattabs::-webkit-scrollbar{display:none;}
   .cattab{flex-shrink:0;font-size:15px;font-weight:700;color:var(--ink3);padding:9px 16px;border-radius:20px;background:var(--bg);border:none;cursor:pointer;font-family:inherit;white-space:nowrap;}
@@ -488,6 +489,7 @@ function render(){
   setupScrollSpy();
   ensureCover();
   syncFabs();
+  updateCatFade();
   _lastActiveSec=null;
 }
 
@@ -623,7 +625,7 @@ function scrMenu(){
   const secs=[{label:'세트',id:'sec-0'}, ...CATS.map((c,i)=>({label:c,id:'sec-'+(i+1)}))];
   const menuTab = `
     <div class="cattabs-wrap">
-      <div class="cattabs" id="cattabs">
+      <div class="cattabs" id="cattabs" onscroll="updateCatFade()">
         <button class="cattab-ic ${S.searchOpen?'on':''}" onclick="toggleSearch()" aria-label="메뉴 검색">🔍</button>
         ${secs.map(s=>`<button class="cattab" data-sec="${s.id}" onclick="scrollToSec('${s.id}')">${s.label}</button>`).join('')}
       </div>
@@ -680,6 +682,12 @@ function setActiveChip(id,center){
     const target=tabs.scrollLeft + (aRect.left-cRect.left) - tabs.clientWidth/2 + aRect.width/2;
     tabs.scrollTo({left:Math.max(0,target), behavior:'smooth'});
   }
+}
+function updateCatFade(){
+  const tabs=$('cattabs'), wrap=document.querySelector('.cattabs-wrap');
+  if(!tabs||!wrap) return;
+  const atEnd = tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 2;
+  wrap.classList.toggle('at-end', atEnd);
 }
 function setupScrollSpy(){
   window.onscroll=()=>{

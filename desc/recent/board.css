@@ -17,9 +17,17 @@ html,body{margin:0;padding:0;background:#fafbfc;color:var(--ink);font-family:'Pr
 a{color:var(--blue);text-decoration:none;}
 a:hover{text-decoration:underline;}
 
-/* ============ 보드 외곽 ============ */
-.brd{max-width:1200px;margin:0 auto;padding:32px 24px 80px;}
-.brd-head{margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--line);}
+/* ============ 보드 외곽 — 좌(이미지) / 우(카드) 분할 ============ */
+.brd{max-width:1600px;margin:0 auto;padding:32px 24px 80px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start;}
+.brd-back, .brd-head, .brd-foot { grid-column: 1 / -1; }
+.brd-cap { grid-column: 1 / 2; position: sticky; top: 20px; align-self: start; }
+.brd-diff, .brd-pins, .brd-note { grid-column: 2 / 3; }
+@media (max-width:1100px){
+  .brd{grid-template-columns:1fr;}
+  .brd-cap, .brd-diff, .brd-pins, .brd-note{grid-column:1 / -1;}
+  .brd-cap{position:static;}
+}
+.brd-head{margin-bottom:0;padding-bottom:18px;border-bottom:1px solid var(--line);}
 .brd-cat{display:inline-block;font-size:11px;font-weight:800;color:var(--blue);background:var(--blue-50);padding:5px 10px;border-radius:6px;letter-spacing:.02em;margin-bottom:10px;}
 .brd-title{font-size:26px;margin:0 0 8px;letter-spacing:-.02em;font-weight:800;}
 .brd-sub{font-size:14px;color:var(--ink-2);margin:0 0 12px;line-height:1.55;}
@@ -31,10 +39,12 @@ a:hover{text-decoration:underline;}
 .brd-back:hover{color:var(--blue);}
 
 /* ============ 화면 캡처 자리 ============ */
-.brd-cap{margin-bottom:24px;padding:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.brd-cap{margin-bottom:0;padding:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.04);}
 .brd-cap-hint{padding:60px 24px;text-align:center;background:repeating-linear-gradient(45deg,#fafbfc,#fafbfc 14px,#f3f4f6 14px,#f3f4f6 28px);color:var(--ink-3);font-size:13px;line-height:1.7;}
 .brd-cap-hint b{color:var(--ink-2);}
 .brd-cap img{display:block;width:100%;height:auto;}
+.brd-cap-cap{padding:10px 14px;font-size:11px;color:var(--ink-3);background:#fafbfc;border-top:1px solid var(--line-2);}
+.brd-cap-cap b{color:var(--ink-2);}
 
 /* ============ 변경 전후 비교 ============ */
 .brd-diff{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}

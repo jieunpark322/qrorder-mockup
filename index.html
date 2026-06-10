@@ -12953,13 +12953,31 @@ function renderFAQ(host){
    ============================================================ */
 renderApp();
 
-/* 캡처 진입점: ?cap=<섹션키> 가 있을 때만 작동. description.html 화면 이미지 생성용 (평상시 영향 없음) */
+/* 캡처 진입점: ?cap=<섹션키>[-액션][-id] — description.html / desc/recent 캡처 생성용 (평상시 영향 없음)
+   예) ?cap=menu                       → 메뉴판 페이지
+       ?cap=menu-edit-1                → 메뉴판 + 메뉴 수정 모달(아메리카노 id=1)
+       ?cap=option-bulk                → 옵션 그룹 + 새 옵션 추가 펼침
+       ?cap=option-edit-1              → 옵션 그룹 + 옵션 수정 모달(샷 추가 id=1)
+       ?cap=schedule-cat-1             → 카테고리 + 판매 시간 모달
+       ?cap=export-overview            → 매출 한눈에 보기 + 엑셀 다운로드 모달
+*/
 (function(){
   var m = /[?&]cap=([\w-]+)/.exec(location.search || '');
   if(!m) return;
+  var raw = m[1];
+  var parts = raw.split('-');
+  var section = parts[0];
+  var sub = parts[1] || '';
+  var ext = parts[2] || '';
+  // 섹션 키 매핑
+  var sectionKey = section;
+  if (section === 'menu' && (sub === 'edit' || sub === 'list')) sectionKey = 'menu';
+  else if (section === 'option' && (sub === 'edit' || sub === 'bulk' || sub === 'list')) sectionKey = 'option';
+  else if (section === 'schedule') sectionKey = (sub === 'cat') ? 'category' : (sub === 'menu' ? 'menu' : 'set');
+  else if (section === 'export') sectionKey = sub || 'overview';
   function go(){
     try{
-      if(typeof setSection==='function') setSection(m[1]);
+      if(typeof setSection==='function') setSection(sectionKey);
       document.querySelectorAll('.grp-items.closed').forEach(function(g){ g.classList.remove('closed'); });
       document.querySelectorAll('.grp .arr:not(.open)').forEach(function(a){ a.classList.add('open'); });
       var dh=document.querySelector('.doc-head'); if(dh) dh.style.display='none';
@@ -12969,7 +12987,18 @@ renderApp();
       document.documentElement.setAttribute('data-cap','ready');
     }catch(e){}
   }
+  function openModal(){
+    try{
+      var id = ext ? Number(ext) : null;
+      if (section === 'menu' && sub === 'edit' && id && typeof openMenuEditModal==='function') openMenuEditModal(id);
+      else if (section === 'option' && sub === 'edit' && id && typeof editOpt==='function') editOpt(id);
+      else if (section === 'option' && sub === 'bulk' && typeof addOptBulkCard==='function') { if(typeof state!=='undefined'){ state.optBulkOpen = true; } addOptBulkCard(); }
+      else if (section === 'schedule' && sub && id && typeof openScheduleModal==='function') openScheduleModal(sub === 'cat' ? 'category' : sub, id);
+      else if (section === 'export' && typeof openExport==='function') openExport(15, '매출 한눈에 보기', '2026년 5월 15일 (금)');
+    }catch(e){}
+  }
   go(); setTimeout(go,250); setTimeout(go,700);
+  setTimeout(openModal, 800); setTimeout(openModal, 1400);
 })();
 </script>
 

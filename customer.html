@@ -1505,7 +1505,7 @@ function scrCheckout(){
               <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678"
                 value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" />
             </div>
-            <button class="primarybtn" onclick="goToTermsFromNotif()">다음 · 약관 동의</button>
+            <button class="primarybtn" onclick="goToTermsFromNotif()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
           ` : ''}
 
           ${notifRequired ? '' : `

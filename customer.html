@@ -699,24 +699,22 @@ function setBusiness(v){
 
 /* --- 영업 종료 모달 --- */
 function showClosedAlert(){
-  let el = $('closedModal');
-  if(!el){
-    el = document.createElement('div');
-    el.id = 'closedModal';
-    el.style.cssText='position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;';
-    el.innerHTML = `<div style="width:100%;max-width:440px;background:#fff;border-radius:22px 22px 0 0;padding:32px 24px 28px;text-align:center;">
-      <div style="font-size:48px;margin-bottom:14px;">🔕</div>
-      <h3 style="margin:0 0 10px;font-size:19px;font-weight:800;color:var(--ink);">지금은 주문을 받지 않아요</h3>
-      <p style="margin:0 0 24px;font-size:14px;color:var(--ink3);line-height:1.65;">현재 영업 시간이 아니에요.<br>메뉴 확인은 가능해요.</p>
-      <div style="font-size:12.5px;color:var(--ink3);background:var(--bg);border-radius:10px;padding:11px 14px;margin-bottom:20px;text-align:left;line-height:1.7;">
-        🕐 <b>영업 시간</b><br>
-        평일 09:00 ~ 22:00 &nbsp;·&nbsp; 주말 10:00 ~ 21:00<br>
-        라스트 오더 ${STORE.lastOrder}
-      </div>
-      <button onclick="closeClosedAlert()" style="width:100%;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:15px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">메뉴 구경하기</button>
-    </div>`;
-    document.body.appendChild(el);
-  }
+  if($('closedModal')) return;
+  const el = document.createElement('div');
+  el.id = 'closedModal';
+  el.style.cssText='position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;';
+  el.innerHTML = `<div style="width:100%;max-width:440px;background:#fff;border-radius:22px 22px 0 0;padding:32px 24px 36px;text-align:center;">
+    <div style="width:52px;height:52px;border-radius:50%;background:#fff0f0;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 18px;">🔕</div>
+    <div style="font-size:20px;font-weight:800;color:var(--ink);margin-bottom:8px;">지금은 주문이 안 돼요</div>
+    <div style="font-size:14px;color:var(--ink3);line-height:1.7;margin-bottom:22px;">영업 시간이 아니에요.<br>메뉴는 자유롭게 둘러볼 수 있어요.</div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink2);background:var(--bg);border-radius:12px;padding:14px 16px;margin-bottom:24px;text-align:left;line-height:1.8;">
+      <div><span style="color:var(--ink3);font-weight:600;">평일</span>&nbsp; 09:00 – 22:00</div>
+      <div><span style="color:var(--ink3);font-weight:600;">주말</span>&nbsp; 10:00 – 21:00</div>
+      <div><span style="color:var(--ink3);font-weight:600;">라스트 오더</span>&nbsp; ${STORE.lastOrder}</div>
+    </div>
+    <button onclick="closeClosedAlert()" style="width:100%;background:var(--blue);color:#fff;border:none;border-radius:13px;padding:15px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">메뉴 보기</button>
+  </div>`;
+  document.body.appendChild(el);
   syncScrollLock();
 }
 function closeClosedAlert(){
@@ -759,7 +757,7 @@ function brandHero(){
 /* --- 메뉴판 --- */
 function scrMenu(){
   const closedBanner = !S.businessOpen
-    ? `<div class="closed-banner">🔕 지금은 영업 시간이 아니에요. 메뉴 확인만 가능해요.</div>` : '';
+    ? `<div class="closed-banner">🔕 지금은 주문이 안 돼요 — 메뉴만 볼 수 있어요.</div>` : '';
   const sv=(S.search||'').replace(/"/g,'&quot;');
   const secs=[{label:'세트',id:'sec-0'}, ...CATS.map((c,i)=>({label:c,id:'sec-'+(i+1)}))];
   const menuTab = `
@@ -1669,6 +1667,7 @@ function storeInfoSection(){
 
 render();
 resetSessionTimer();
+if(!S.businessOpen) showClosedAlert();
 </script>
 </body>
 </html>

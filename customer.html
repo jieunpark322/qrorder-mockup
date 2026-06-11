@@ -1622,7 +1622,7 @@ function scrNotif(){
 function goToNotif(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
   if(S.orderType==='dinein' && S.serve==='self' && S.callMethod==='verbal'){
-    S.notifChoice='skip'; S.notifSheet=false; placeOrder(); return;
+    S.notifChoice='skip'; S.notifSheet=false; S.authType='anon'; S.phone=''; placeOrder(); return;
   }
   S.notifChoice = null;
   S.notifSheet = true;

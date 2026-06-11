@@ -953,7 +953,7 @@ function menuCard(m){
     <button class="mcard ${out?'out':''} ${closed&&!out?'closed-mode':''} ${hhD?'hh-active':''}" ${clickHandler}>
       ${menuImgBox(m)}
       <span class="minfo">
-        ${(m.badges||[]).filter(k=>BADGE[k]).length?`<span style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:3px;">${(m.badges||[]).filter(k=>BADGE[k]).map(k=>`<span class="img-badge ${k}">${BADGE[k].e} ${BADGE[k].l}</span>`).join('')}</span>`:''}
+        ${!out && (m.badges||[]).filter(k=>BADGE[k]).length?`<span style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:3px;">${(m.badges||[]).filter(k=>BADGE[k]).map(k=>`<span class="img-badge ${k}">${BADGE[k].e} ${BADGE[k].l}</span>`).join('')}</span>`:''}
         <span class="mname">${nameDisplay}${out?'<span class="badge-out">품절</span>':''}</span>
         <span class="mprice">${priceHtml}${lowStock(m)?`<span class="stk">· 잔여 ${m.stock}개</span>`:''}</span>
       </span>

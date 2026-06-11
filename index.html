@@ -5599,7 +5599,7 @@ const CAT_MENU = [
 // 각 세트는 N개의 자리로 구성. 자리마다 후보 메뉴 1..N, 손님이 한 가지 선택.
 // 가장 싼 조합 = basePrice. 가장 비싼 조합 = basePrice + 각 자리 최댓값 합.
 const SETS = [
-  { id:1, code:'S00101', name:'모닝 세트', basePrice:7000, desc:'음료 + 브레드 · 오전 11시까지', enabled:true, status:'판매중',
+  { id:1, code:'S00101', name:'모닝 세트', basePrice:7000, desc:'음료 + 브레드 · 오전 11시까지', enabled:true, status:'판매중', cat:'커피',
     slots:[
       { id:101, name:'음료 선택', selectionType:'single', candidates:[
         { code:'M00101', name:'아메리카노', extraPrice:0, isDefault:true },
@@ -5610,7 +5610,7 @@ const SETS = [
       ]},
     ]
   },
-  { id:2, code:'S00102', name:'오후의 휴식', basePrice:8500, desc:'음료 + 디저트', enabled:true, status:'판매중',
+  { id:2, code:'S00102', name:'오후의 휴식', basePrice:8500, desc:'음료 + 디저트', enabled:true, status:'판매중', cat:'디저트',
     slots:[
       { id:201, name:'음료 선택', selectionType:'single', candidates:[
         { code:'M00103', name:'바닐라라떼', extraPrice:0, isDefault:true },
@@ -5746,7 +5746,8 @@ state.catForm = {                  // 카테고리 입력 폼
   pickedMenus:[],                  // 카테고리에 담을 메뉴 id
 };
 state.setForm = {                  // 세트 입력 폼 — 자리(slot) + 후보 메뉴 모델
-  name:'', basePrice:0, desc:'', status:'판매중',
+  _editingId: null,
+  name:'', basePrice:0, desc:'', status:'판매중', cat:'',
   slots:[],                        // [{ id, name, selectionType:'single', candidates:[{code,name,extraPrice,isDefault}] }]
 };
 state._setPickerOpen = null;        // 자리별 후보 선택 모달 — 열려 있는 자리 id
@@ -5872,6 +5873,7 @@ function ensureSetExtras(s){
   if (!s.schedule) s.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!s.discount) s.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
   if (!s.status || !['판매중','품절','숨김'].includes(s.status)) s.status = '판매중';
+  if (!s.cat) s.cat = (CAT_MENU[0] && CAT_MENU[0].name) || '커피';
 }
 function ensureCatExtras(c){
   if (typeof c.displayMode === 'undefined') c.displayMode = 'grid'; // 'grid' | 'list'
@@ -7243,19 +7245,28 @@ function menuNavTabs(){
    메뉴 — 일괄 등록 표 + 단품 메뉴 목록
    ============================================================ */
 function renderMenu(main){
-  let rows = MENUS;
-  // 분류 태그 드롭다운 목록 — 대/중/소분류 각각
+  // 단품(MENUS) + 세트(SETS) 통합 노출 — 세트엔 _isSet:true 표식
+  MENUS.forEach(ensureMenuExtras);
+  SETS.forEach(ensureSetExtras);
+  const setEntries = SETS.map(s=>Object.assign({}, s, { _isSet:true, _src:s, price:s.basePrice||0 }));
+  let rows = [...MENUS, ...setEntries];
+  // 분류 태그 드롭다운 목록 — 대/중/소분류 각각 (단품만)
   const allL2Tags   = [...new Set(MENUS.map(m=>{ ensureMenuExtras(m); return m.catL2; }).filter(x=>x&&x.trim()))];
   const allL3Tags   = [...new Set(MENUS.map(m=>{ ensureMenuExtras(m); return m.catL3; }).filter(x=>x&&x.trim()))];
   const allTag3s    = [...new Set(MENUS.map(m=>{ ensureMenuExtras(m); return m.tag3;  }).filter(x=>x&&x.trim()))];
   if (state.menuCatFilter !== 'all')    rows = rows.filter(r=>r.cat===state.menuCatFilter);
   if (state.menuStatusFilter !== 'all') rows = rows.filter(r=>r.status===state.menuStatusFilter);
-  if (state.menuL2Filter !== 'all')     rows = rows.filter(r=>{ ensureMenuExtras(r); return r.catL2===state.menuL2Filter; });
-  if (state.menuL3Filter !== 'all')     rows = rows.filter(r=>{ ensureMenuExtras(r); return r.catL3===state.menuL3Filter; });
-  if (state.menuTag3Filter !== 'all')   rows = rows.filter(r=>{ ensureMenuExtras(r); return r.tag3 ===state.menuTag3Filter; });
+  // 분류 태그 필터가 켜져 있으면 세트는 자동 제외 (세트엔 분류 태그가 없음)
+  if (state.menuL2Filter !== 'all')     rows = rows.filter(r=>!r._isSet && (ensureMenuExtras(r), r.catL2===state.menuL2Filter));
+  if (state.menuL3Filter !== 'all')     rows = rows.filter(r=>!r._isSet && (ensureMenuExtras(r), r.catL3===state.menuL3Filter));
+  if (state.menuTag3Filter !== 'all')   rows = rows.filter(r=>!r._isSet && (ensureMenuExtras(r), r.tag3 ===state.menuTag3Filter));
   if (state.menuSearch){
     const q = state.menuSearch.toLowerCase();
-    rows = rows.filter(r=>{ ensureMenuExtras(r); return (r.name+' '+r.code+' '+(r.catL2||'')+' '+(r.catL3||'')+' '+(r.tag3||'')).toLowerCase().includes(q); });
+    rows = rows.filter(r=>{
+      if(r._isSet) return (r.name+' '+r.code+' '+(r.desc||'')).toLowerCase().includes(q);
+      ensureMenuExtras(r);
+      return (r.name+' '+r.code+' '+(r.catL2||'')+' '+(r.catL3||'')+' '+(r.tag3||'')).toLowerCase().includes(q);
+    });
   }
 
   // 정렬
@@ -7263,12 +7274,23 @@ function renderMenu(main){
   const cmp = (a,b)=>{
     let av, bv;
     switch(sort.key){
-      case 'order':   av=MENUS.indexOf(a); bv=MENUS.indexOf(b); break;
+      case 'order':
+        // 카테고리 순서 → 단품 우선 → 자기 배열 내 인덱스
+        av = (a._isSet?1:0)*1e6 + (a._isSet?SETS.indexOf(a._src):MENUS.indexOf(a));
+        bv = (b._isSet?1:0)*1e6 + (b._isSet?SETS.indexOf(b._src):MENUS.indexOf(b));
+        break;
       case 'name':    av=a.name||''; bv=b.name||''; break;
       case 'cat':     av=a.cat||''; bv=b.cat||''; break;
-      case 'price':   av=a.price||0; bv=b.price||0; break;
-      case 'takeoutPrice': av=a.takeoutPrice!=null?a.takeoutPrice:a.price; bv=b.takeoutPrice!=null?b.takeoutPrice:b.price; break;
-      case 'stock':   { const sa=getMenuStock(a.id), sb=getMenuStock(b.id); av=sa?sa.remaining:Infinity; bv=sb?sb.remaining:Infinity; break; }
+      case 'price':   av=a._isSet?(a.basePrice||0):(a.price||0); bv=b._isSet?(b.basePrice||0):(b.price||0); break;
+      case 'takeoutPrice':
+        av=a._isSet?Infinity:(a.takeoutPrice!=null?a.takeoutPrice:a.price);
+        bv=b._isSet?Infinity:(b.takeoutPrice!=null?b.takeoutPrice:b.price);
+        break;
+      case 'stock':   {
+        if(a._isSet||b._isSet){ av=a._isSet?Infinity:0; bv=b._isSet?Infinity:0; break; }
+        const sa=getMenuStock(a.id), sb=getMenuStock(b.id);
+        av=sa?sa.remaining:Infinity; bv=sb?sb.remaining:Infinity; break;
+      }
       case 'status':  av=a.status||''; bv=b.status||''; break;
       default: av=0; bv=0;
     }
@@ -7338,7 +7360,10 @@ function renderMenu(main){
         <span class="ttl">📝 메뉴 등록 <span style="font-size:11px;font-weight:500;color:var(--ink-3);margin-left:4px;">한 개씩 정식으로</span></span>
         <span class="sub">사진·분류·옵션·포장가까지 메뉴 한 개의 모든 정보를 입력해 바로 등록해요.</span>
       </div>
-      <button class="btn-primary" style="padding:9px 18px;font-size:13px;font-weight:800;flex-shrink:0;" onclick="openMenuDetailNewModal()" title="메뉴 한 개의 모든 정보(사진·분류·옵션·포장가 등)를 자세히 입력해요">+ 메뉴 등록</button>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn-primary" style="padding:9px 18px;font-size:13px;font-weight:800;" onclick="openMenuDetailNewModal()" title="메뉴 한 개의 모든 정보(사진·분류·옵션·포장가 등)를 자세히 입력해요">+ 메뉴 등록</button>
+        <button class="btn-ghost" style="padding:9px 18px;font-size:13px;font-weight:800;color:#9a3412;border-color:#fed7aa;background:#fff7ed;" onclick="clearSetForm();setSection('set')" title="단품 메뉴를 묶어 세트로 등록해요. 등록 후 메뉴판에 함께 노출돼요">🎁 + 세트 등록</button>
+      </div>
     </div>
 
     <div class="bulk-collapse">
@@ -7411,7 +7436,7 @@ function renderMenu(main){
         <div class="row">
           <span class="field-label">카테고리</span>
           <span class="chip ${state.menuFilterDraft.cat==='all'?'on':''}" onclick="state.menuFilterDraft.cat='all';renderApp()">전체</span>
-          ${CAT_MENU.map(c=>`<span class="chip ${state.menuFilterDraft.cat===c.name?'on':''}" onclick="state.menuFilterDraft.cat='${c.name}';renderApp()">${c.name} <span style="color:${state.menuFilterDraft.cat===c.name?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${MENUS.filter(m=>m.cat===c.name).length}</span></span>`).join('')}
+          ${CAT_MENU.map(c=>{ const mc=MENUS.filter(m=>m.cat===c.name).length; const sc=SETS.filter(s=>s.cat===c.name).length; const total=mc+sc; return `<span class="chip ${state.menuFilterDraft.cat===c.name?'on':''}" onclick="state.menuFilterDraft.cat='${c.name}';renderApp()">${c.name} <span style="color:${state.menuFilterDraft.cat===c.name?'#cfe4ff':'var(--ink-3)'};font-size:11px;">${total}${sc?` <span style="font-size:9px;color:#9a3412;">🎁${sc}</span>`:''}</span></span>`; }).join('')}
         </div>
         <div class="row">
           <span class="field-label">판매 상태</span>
@@ -7463,7 +7488,46 @@ function renderMenu(main){
           </tr>
         </thead>
         <tbody>
-          ${pagedRows.length===0 ? `<tr class="empty-row"><td colspan="13">${MENUS.length===0?'위 <b>✏️ 새 메뉴 입력</b>을 펼쳐 첫 메뉴를 등록해 주세요. 또는 <b>📤 엑셀로 한 번에 올리기</b>로 여러 개를 한 번에 올릴 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : pagedRows.map(r=>{
+          ${pagedRows.length===0 ? `<tr class="empty-row"><td colspan="13">${MENUS.length===0&&SETS.length===0?'위 <b>✏️ 새 메뉴 입력</b>을 펼쳐 첫 메뉴를 등록해 주세요. 또는 <b>📤 엑셀로 한 번에 올리기</b>로 여러 개를 한 번에 올릴 수 있어요.':'카테고리·판매 상태·검색어를 다시 살펴봐 주세요.'}</td></tr>` : pagedRows.map(r=>{
+            if(r._isSet){
+              const s = r._src;
+              const setIdx = SETS.indexOf(s);
+              const pr = setPriceRange(s);
+              const slotsCnt = (s.slots||[]).length;
+              const stPill = s.status==='판매중'?'<span class="pill done">판매중</span>':s.status==='품절'?'<span class="pill partial">품절</span>':'<span class="pill hold">숨김</span>';
+              const schTxt = scheduleLabel(s.schedule);
+              const dcTxt = discountLabel(s.discount);
+              const priceCell = `<b style="color:var(--blue);">${fmt(pr.min)}</b>${pr.min!==pr.max?`<span style="color:var(--ink-3);font-size:11px;"> ~ ${fmt(pr.max)}</span>`:''}<span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span>${s.discount&&s.discount.enabled?`<div style="font-size:10px;color:var(--blue);font-weight:700;margin-top:2px;">🔥 ${dcTxt}</div>`:''}`;
+              const isSel = state.setSel.has(s.id);
+              return `
+              <tr ${dragRowAttrs('SETS', setIdx)} style="${isSel?'background:var(--blue-50);':'background:#fffaf0;'}cursor:pointer;" onclick="editSet(${s.id})" title="행을 클릭하면 세트를 수정할 수 있어요">
+                <td onclick="event.stopPropagation()">${selCheckTd(state.setSel, s.id).replace(/^<td[^>]*>/,'').replace(/<\/td>$/,'')}</td>
+                ${dragHandleTd('SETS', setIdx)}
+                <td><div style="width:36px;height:36px;border-radius:8px;background:#fff7ed;display:inline-flex;align-items:center;justify-content:center;font-size:18px;">🎁</div></td>
+                <td style="font-family:ui-monospace,'SF Mono',monospace;color:var(--ink-2);font-size:11px;">${s.code}</td>
+                <td><span style="display:inline-block;font-size:10px;font-weight:800;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:1px 6px;border-radius:8px;vertical-align:middle;margin-right:6px;">🎁 세트</span><b>${s.name}</b>${s.desc?`<div style="font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400;">${s.desc}</div>`:''}<div style="font-size:10px;color:var(--ink-4);margin-top:2px;">구성 ${slotsCnt}개</div></td>
+                <td><div style="font-size:12px;color:var(--ink-2);font-weight:700;">${s.cat||'미지정'}</div></td>
+                <td class="num">${priceCell}</td>
+                <td class="num"><span style="color:var(--ink-4);font-size:11px;">—</span></td>
+                <td><span style="color:var(--ink-4);font-size:11px;">—</span></td>
+                <td><span style="font-size:11px;color:${s.schedule&&s.schedule.enabled?'var(--blue)':'var(--ink-3)'};font-weight:${s.schedule&&s.schedule.enabled?700:400};">${s.schedule&&s.schedule.enabled?'🕒 ':''}${schTxt}</span></td>
+                <td><span style="color:var(--ink-4);font-size:11px;">세트 구성 메뉴 ${slotsCnt}개</span></td>
+                <td><span onclick="event.stopPropagation();cycleSetStatus(${s.id})" style="cursor:pointer;" title="클릭해서 판매중 → 품절 → 숨김 순으로 바꿔요">${stPill}</span></td>
+                <td onclick="event.stopPropagation()">
+                  <div class="row-actions-wrap">
+                    <button class="btn-ghost" style="padding:6px 10px;font-size:11px;font-weight:700;" onclick="state.menuActionOpen=state.menuActionOpen==='set-${s.id}'?null:'set-${s.id}';renderApp()">추가 설정 ${state.menuActionOpen==='set-'+s.id?'▲':'▼'}</button>
+                    ${state.menuActionOpen==='set-'+s.id ? `
+                      <div class="row-actions-pop">
+                        <button onclick="state.menuActionOpen=null;editSet(${s.id})"><span class="ic-em">✏️</span>세트 정보·구성 수정</button>
+                        <button onclick="state.menuActionOpen=null;openScheduleModal('set',${s.id})"><span class="ic-em">🕒</span>판매 시간</button>
+                        <button onclick="state.menuActionOpen=null;openDiscountModal('set',${s.id})"><span class="ic-em">🔥</span>해피아워 할인</button>
+                        <button class="danger" onclick="state.menuActionOpen=null;deleteSet(${s.id})"><span class="ic-em">✕</span>삭제</button>
+                      </div>
+                    ` : ''}
+                  </div>
+                </td>
+              </tr>`;
+            }
             ensureMenuExtras(r);
             const idx = MENUS.indexOf(r); // 전체 배열 기준 인덱스
             const opts = r.opt.map(oid=>{
@@ -8243,8 +8307,8 @@ function renderSet(main){
 
     <div class="panel">
       <h3>
-        <span>세트 메뉴 구성</span>
-        <span class="h-sub">구성 단위로 손님이 고를 후보를 정해요 (예: 음료 1개 + 브레드 1개)</span>
+        <span>${f._editingId?'✏️ 세트 메뉴 수정':'세트 메뉴 구성'}</span>
+        <span class="h-sub">${f._editingId?`'${(f.name||'').replace(/</g,'&lt;')}' 세트를 수정 중이에요`:'구성 단위로 손님이 고를 후보를 정해요 (예: 음료 1개 + 브레드 1개)'}</span>
       </h3>
 
       <div class="form-grid" style="margin-bottom:14px;">
@@ -8253,9 +8317,24 @@ function renderSet(main){
           <input class="input" placeholder="예) 모닝 세트" value="${(f.name||'').replace(/"/g,'&quot;')}" oninput="state.setForm.name=this.value" />
         </div>
         <div class="form-row">
+          <label>카테고리 *</label>
+          <select class="input" onchange="state.setForm.cat=this.value">
+            ${CAT_MENU.map(c=>`<option value="${c.name.replace(/"/g,'&quot;')}" ${f.cat===c.name?'selected':''}>${c.name}</option>`).join('')}
+          </select>
+          <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">손님 메뉴판에서 이 카테고리 안에 함께 노출돼요</div>
+        </div>
+        <div class="form-row">
           <label>세트 기본 가격 *</label>
           <input class="input" type="number" placeholder="예) 7000" value="${f.basePrice||''}" oninput="state.setForm.basePrice=Number(this.value)||0" onchange="renderApp()" />
           <div style="font-size:10px;color:var(--ink-4);margin-top:3px;">각 구성의 기본 메뉴를 골랐을 때 가격이에요</div>
+        </div>
+        <div class="form-row">
+          <label>판매 상태</label>
+          <select class="input" onchange="state.setForm.status=this.value">
+            <option ${f.status==='판매중'?'selected':''}>판매중</option>
+            <option ${f.status==='품절'?'selected':''}>품절</option>
+            <option ${f.status==='숨김'?'selected':''}>숨김</option>
+          </select>
         </div>
       </div>
       <div class="form-row" style="margin-bottom:14px;">
@@ -8284,9 +8363,9 @@ function renderSet(main){
       ` : ''}
 
       <div class="bulk-actions" style="margin-top:14px;">
-        <button class="btn-ghost" onclick="clearSetForm()">입력 초기화</button>
+        <button class="btn-ghost" onclick="clearSetForm()">${f._editingId?'수정 취소':'입력 초기화'}</button>
         <div class="right">
-          <button class="btn-save-cta" onclick="saveSet()">저장</button>
+          <button class="btn-save-cta" onclick="saveSet()">${f._editingId?'수정 저장':'저장'}</button>
         </div>
       </div>
 
@@ -8342,6 +8421,7 @@ function renderSet(main){
                 <td><span style="font-size:11px;color:${s.schedule&&s.schedule.enabled?'var(--blue)':'var(--ink-3)'};font-weight:${s.schedule&&s.schedule.enabled?700:400};">${s.schedule&&s.schedule.enabled?'🕒 ':''}${schTxt}</span></td>
                 <td><span onclick="cycleSetStatus(${s.id})" style="cursor:pointer;" title="클릭해서 판매중 → 품절 → 숨김 순으로 바꿔요">${stPill}</span></td>
                 <td>
+                  <button class="btn-ghost" style="padding:6px 9px;font-size:11px;color:var(--blue);font-weight:700;" onclick="editSet(${s.id})" title="수정">✏️ 수정</button>
                   <button class="btn-ghost" style="padding:6px 7px;font-size:11px;" onclick="openScheduleModal('set',${s.id})" title="판매 시간">🕒</button>
                   <button class="btn-ghost" style="padding:6px 7px;font-size:11px;" onclick="openDiscountModal('set',${s.id})" title="해피아워">🔥</button>
                   <button class="btn-ghost" style="padding:6px 7px;font-size:11px;color:var(--red);" onclick="deleteSet(${s.id})" title="삭제">✕</button>
@@ -8421,31 +8501,62 @@ function setDefaultCandidate(si, ci){
   renderApp();
 }
 function clearSetForm(){
-  state.setForm = { name:'', basePrice:0, desc:'', status:'판매중', slots:[] };
+  state.setForm = { _editingId:null, name:'', basePrice:0, desc:'', status:'판매중', cat:'', slots:[] };
   renderApp();
+}
+function editSet(id){
+  const s = SETS.find(x=>x.id===id);
+  if(!s){ alert('세트를 찾을 수 없어요.'); return; }
+  ensureSetExtras(s);
+  state.setForm = {
+    _editingId: id,
+    name: s.name||'', basePrice: s.basePrice||0, desc: s.desc||'',
+    status: s.status||'판매중', cat: s.cat||'',
+    slots: (s.slots||[]).map(sl=>({
+      id: sl.id, name: sl.name, selectionType: sl.selectionType||'single',
+      candidates: (sl.candidates||[]).map(c=>({ code:c.code, name:c.name, extraPrice:Number(c.extraPrice)||0, isDefault:!!c.isDefault })),
+    })),
+  };
+  setSection('set');
+  setTimeout(()=>{ const el = document.querySelector('.panel h3'); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); }, 50);
 }
 function saveSet(){
   const f = state.setForm;
   if (!f.name){ alert('세트명을 입력해 주세요.'); return; }
+  if (!f.cat){ alert('카테고리를 선택해 주세요.'); return; }
   if (!(f.basePrice>0)){ alert('세트 기본 가격을 입력해 주세요.'); return; }
   if (f.slots.length===0){ alert('구성을 1개 이상 추가해 주세요.'); return; }
   for(const sl of f.slots){
     if(!sl.name){ alert('모든 구성에 이름을 적어 주세요.'); return; }
     if(sl.candidates.length===0){ alert(`'${sl.name}' 구성에 후보 메뉴를 1개 이상 추가해 주세요.`); return; }
   }
-  const nextId = (SETS.reduce((m,s)=>Math.max(m,s.id),0))+1;
-  SETS.push({
-    id: nextId, code: genCode('S'),
-    name: f.name, basePrice: f.basePrice, desc: f.desc||'',
-    enabled: true, status: f.status || '판매중',
-    slots: f.slots.map(sl=>({
+  if (f._editingId){
+    const s = SETS.find(x=>x.id===f._editingId);
+    if(!s){ alert('수정할 세트를 찾을 수 없어요.'); return; }
+    s.name = f.name; s.basePrice = f.basePrice; s.desc = f.desc||'';
+    s.status = f.status||'판매중'; s.cat = f.cat;
+    s.slots = f.slots.map(sl=>({
       id: sl.id, name: sl.name, selectionType: sl.selectionType||'single',
       candidates: sl.candidates.map(c=>({ code:c.code, name:c.name, extraPrice:Number(c.extraPrice)||0, isDefault:!!c.isDefault })),
-    })),
-  });
-  const savedName = f.name;
-  clearSetForm();
-  showToast(`<span class="ic">✅</span> '${savedName}' 세트를 등록했어요`, 'ok');
+    }));
+    const savedName = f.name;
+    clearSetForm();
+    showToast(`<span class="ic">✏️</span> '${savedName}' 세트를 수정했어요`, 'ok');
+  } else {
+    const nextId = (SETS.reduce((m,s)=>Math.max(m,s.id),0))+1;
+    SETS.push({
+      id: nextId, code: genCode('S'),
+      name: f.name, basePrice: f.basePrice, desc: f.desc||'',
+      enabled: true, status: f.status || '판매중', cat: f.cat,
+      slots: f.slots.map(sl=>({
+        id: sl.id, name: sl.name, selectionType: sl.selectionType||'single',
+        candidates: sl.candidates.map(c=>({ code:c.code, name:c.name, extraPrice:Number(c.extraPrice)||0, isDefault:!!c.isDefault })),
+      })),
+    });
+    const savedName = f.name;
+    clearSetForm();
+    showToast(`<span class="ic">✅</span> '${savedName}' 세트를 등록했어요`, 'ok');
+  }
 }
 function cycleSetStatus(id){
   const s = SETS.find(x=>x.id===id); if(!s) return;

@@ -132,13 +132,15 @@
   .mbadge{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;vertical-align:middle;white-space:nowrap;}
   .mbadge.happy{background:rgba(255,212,59,.22);color:#7a5900;}
   /* 이미지 왼쪽 상단 오버레이 배지 */
-  .img-badge{position:absolute;top:5px;left:5px;z-index:3;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px;line-height:1.5;white-space:nowrap;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
+  .img-badges{position:absolute;top:5px;left:5px;z-index:3;display:flex;flex-direction:column;gap:3px;}
+  .img-badge{display:inline-flex;align-items:center;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px;line-height:1.5;white-space:nowrap;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
   .img-badge.hot{background:rgba(232,89,12,.88);color:#fff;}
   .img-badge.reco{background:rgba(245,159,0,.92);color:#fff;}
   .img-badge.new{background:rgba(25,113,194,.88);color:#fff;}
   .mdesc{font-size:13px;color:var(--ink3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .mprice{font-size:16.5px;font-weight:800;margin-top:5px;display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;}
   .mprice .ori{font-size:12px;color:var(--ink4);font-weight:500;text-decoration:line-through;}
+  .mprice .disc{color:var(--red);}
   .mprice .stk{font-size:11.5px;font-weight:600;color:var(--amber);}
   .mplus{flex-shrink:0;align-self:center;width:36px;height:36px;border-radius:50%;background:var(--blue-50);color:var(--blue);font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;}
 
@@ -826,9 +828,9 @@ function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt
 function menuImgBox(m){
   const photo = PHOTO[m.id];
   const out = isOut(m);
-  const bk = (m.badges||[])[0];
-  const badge = bk && BADGE[bk] ? `<span class="img-badge ${bk}">${BADGE[bk].e} ${BADGE[bk].l}</span>` : '';
-  return `<span class="mimg">${pic(m.img, photo)}${out?soldoutOverlay():''}${badge}</span>`;
+  const badges = (m.badges||[]).filter(k=>BADGE[k]).map(k=>`<span class="img-badge ${k}">${BADGE[k].e} ${BADGE[k].l}</span>`).join('');
+  const badgesWrap = badges ? `<span class="img-badges">${badges}</span>` : '';
+  return `<span class="mimg">${pic(m.img, photo)}${out?soldoutOverlay():''}${badgesWrap}</span>`;
 }
 function menuCard(m){
   const out = isOut(m);
@@ -842,7 +844,7 @@ function menuCard(m){
 
   // 가격: 취소선 원가 + 최종가만
   const priceHtml = anyDisc
-    ? `<span class="ori">${won(baseP)}원</span>${won(effP)}원`
+    ? `<span class="ori">${won(baseP)}원</span><span class="disc">${won(effP)}원</span>`
     : showTakeout
       ? `${won(effP)}원<span class="ori">${won(m.price)}원</span>`
       : `${won(effP)}원`;

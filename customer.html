@@ -319,6 +319,17 @@
   /* 해피아워 배너 */
   .happy-banner{margin:12px 14px 0;display:flex;gap:9px;align-items:center;background:linear-gradient(135deg,#fff3bf,#fff9db);border:1.5px solid #ffd43b;border-radius:11px;padding:13px 15px;font-size:14px;font-weight:700;color:#5c3d02;}
   .happy-banner .htime{font-size:12px;font-weight:600;color:#92400e;margin-top:2px;}
+  /* 공동 주문 */
+  .group-bar{display:flex;align-items:center;gap:9px;margin:10px 14px 0;background:var(--blue-50);border:1px solid #d6deec;border-radius:11px;padding:11px 14px;font-size:13px;color:var(--blue-d);font-weight:600;}
+  .gavatar{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid #fff;flex-shrink:0;}
+  .gavatar.me{background:var(--green);}
+  .gavatar.peer{background:#7048e8;}
+  .cs-owner{font-size:11.5px;font-weight:800;padding:10px 0 2px;display:flex;align-items:center;gap:5px;color:var(--ink3);}
+  .cs-owner+.cs-item{border-top:none;}
+  .cs-owner.me{color:var(--green);}
+  .pay-split{display:flex;gap:8px;margin-bottom:10px;}
+  .pay-split button{flex:1;padding:11px 8px;border:1.5px solid var(--line);border-radius:11px;font-size:13.5px;font-weight:700;background:#fff;color:var(--ink2);cursor:pointer;font-family:inherit;line-height:1.4;text-align:center;}
+  .pay-split button.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);}
   /* 결제 진행/접수 처리 화면 (STA) */
   .proc{text-align:center;padding:90px 28px 40px;min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .spinner{width:54px;height:54px;border:5px solid var(--blue-50);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px;}
@@ -501,6 +512,14 @@ const PHOTO = {
   set1:'https://loremflickr.com/360/240/coffee?lock=51',
   set2:'https://loremflickr.com/360/240/cake?lock=52',
 };
+// 함께 주문 시뮬레이션 — 같은 테이블 동석자 가상 데이터
+const GUEST_CARTS = [
+  { id:'g2', name:'손님 2', cart:[
+    { key:'g2-2', id:2, name:'카페라떼', img:'🥛', qty:1, unit:5000, optText:'Regular · 얼음 보통' },
+    { key:'g2-7', id:7, name:'크로아상', img:'🥐', qty:2, unit:3800, optText:'' },
+  ]},
+];
+
 function pic(emoji, photo){ return emoji + (photo?`<img src="${photo}" loading="lazy" onerror="this.remove()" alt="">`:''); }
 /* 이미지 박스 — 사진이 없으면 영역 자체를 렌더하지 않음(공란). 품절이면 dimming + 대각선 '품절' 오버레이 */
 function soldoutOverlay(){ return '<span class="soldout"><span>품절</span></span>'; }
@@ -521,6 +540,8 @@ const S = {
   termsChecked:{},       // { termId: true/false }
   isHoliday:false,       // 공휴일 시뮬레이션 (스케줄 6번)
   happyHour:false,       // 해피아워 시뮬레이션
+  groupMode:false,       // 공동 주문 시뮬레이션 (먹고가기 전용)
+  payGroup:false,        // 함께 결제 여부
 };
 const won = n => n.toLocaleString('ko-KR');
 const priceOf = m => (S.orderType==='dinein') ? m.price : (m.takeout!=null ? m.takeout : m.price);
@@ -606,11 +627,62 @@ function renderDemo(){
   html += `<span class="ds-div">해피아워 ›</span>`
     + `<button class="ds-chip ${!S.happyHour?'on':''}" onclick="setHappyHour(false)">⏰ 일반</button>`
     + `<button class="ds-chip ${S.happyHour?'on':''}" onclick="setHappyHour(true)">🎉 해피아워</button>`;
+  if(S.orderType==='dinein'){
+    html += `<span class="ds-div">함께 주문 ›</span>`
+      + `<button class="ds-chip ${!S.groupMode?'on':''}" onclick="setGroupMode(false)">👤 혼자</button>`
+      + `<button class="ds-chip ${S.groupMode?'on':''}" onclick="setGroupMode(true)">👥 함께 (2명)</button>`;
+  }
   $('demobar').innerHTML = html;
 }
 function setErrSim(v){ S.errSim=v; renderDemo(); }
 function setHoliday(v){ S.isHoliday=v; render(); }
 function setHappyHour(v){ S.happyHour=v; render(); }
+
+/* --- 공동 주문 --- */
+function guestTotal(){ return GUEST_CARTS.reduce((s,g)=>s+g.cart.reduce((ss,c)=>ss+c.unit*c.qty,0),0); }
+
+function setGroupMode(v){
+  if(v && !S.groupMode){ showGroupJoinSheet(); return; }
+  S.groupMode=v; if(!v) S.payGroup=false;
+  render();
+}
+function confirmGroupJoin(){
+  S.groupMode=true; closeSheet(); render();
+  setTimeout(()=>toast('손님 2가 카페라떼를 담았어요 ☕'),500);
+  setTimeout(()=>toast('손님 2가 크로아상 2개를 담았어요 🥐'),1900);
+}
+function showGroupJoinSheet(){
+  const g=GUEST_CARTS[0];
+  $('sheet').innerHTML=`<div class="sheet">
+    <div class="sheet-body" style="padding-top:28px;text-align:center;">
+      <div style="font-size:44px;margin-bottom:12px;">👥</div>
+      <div class="sheet-name" style="text-align:center;">${STORE.table} 테이블에<br>이미 주문 중인 손님이 있어요</div>
+      <div class="sheet-desc" style="text-align:center;margin-top:8px;">${g.name}가 메뉴를 담고 있어요.<br>함께 주문하면 서로의 장바구니를 볼 수 있어요.</div>
+      <div style="background:var(--bg);border-radius:12px;padding:14px 16px;margin-top:16px;text-align:left;">
+        ${g.cart.map(c=>`<div class="hist-line"><span style="flex:1;">${c.name}${c.optText?` <span style="font-size:12px;color:var(--ink4);">· ${c.optText}</span>`:''} ×${c.qty}</span><span style="color:var(--ink2);font-weight:700;">${won(c.unit*c.qty)}원</span></div>`).join('')}
+        <div class="hist-tot" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line2);">
+          <span>${g.name} 소계</span><span>${won(g.cart.reduce((s,c)=>s+c.unit*c.qty,0))}원</span>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-foot" style="display:flex;gap:9px;">
+      <button class="addbtn" style="background:var(--bg);color:var(--ink2);box-shadow:none;flex:1;" onclick="closeSheet()">개별로 주문</button>
+      <button class="addbtn" style="flex:1.5;" onclick="confirmGroupJoin()">👥 함께 주문하기</button>
+    </div>
+  </div>`;
+  $('sheetbg').classList.add('on'); syncScrollLock();
+}
+function groupParticipantBar(){
+  if(!S.groupMode || S.orderType!=='dinein') return '';
+  return `<div class="group-bar">
+    <span style="display:flex;margin-right:2px;">
+      <span class="gavatar me">나</span>
+      ${GUEST_CARTS.map(g=>`<span class="gavatar peer" style="margin-left:-6px;">${g.name.slice(-1)}</span>`).join('')}
+    </span>
+    <span style="flex:1;"><b>${1+GUEST_CARTS.length}명</b>이 함께 주문 중이에요 · ${STORE.table} 테이블</span>
+    <button onclick="openCartSheet()" style="font-size:12px;font-weight:800;color:var(--blue-d);background:none;border:none;cursor:pointer;padding:0;font-family:inherit;">장바구니 보기 ›</button>
+  </div>`;
+}
 function setServe(v){ S.serve=v; if(v==='self') S.payTiming='prepay'; render(); }
 function setPayTiming(v){ if(v==='postpay' && S.serve!=='server'){ toast('셀프 수령은 선불만 가능해요'); return; } S.payTiming=v; render(); }
 function switchMode(m){
@@ -704,6 +776,7 @@ function scrMenu(){
         <button class="clr" style="display:flex;" onclick="toggleSearch()">✕</button>
       </div>
     </div>`:''}
+    ${groupParticipantBar()}
     ${closedBanner}
     ${S.happyHour?`<div class="happy-banner">🎉 <div><div>해피아워 진행 중 · 커피 음료 <b>${won(STORE.happyHour.discount)}원 추가 할인</b></div><div class="htime">${STORE.happyHour.start} ~ ${STORE.happyHour.end}</div></div></div>`:''}
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
@@ -1160,16 +1233,57 @@ function renderCartSheet(){
       </div>
     </div>`;
   }).join('');
+  const showGroup = S.groupMode && S.orderType==='dinein';
+  const guestSections = showGroup ? GUEST_CARTS.map(g=>{
+    const gItems = g.cart.map(c=>`
+    <div class="cs-item">
+      <span style="font-size:26px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${c.img}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="cs-name">${c.name}</div>
+        ${c.optText?`<div class="cs-opt">${c.optText}</div>`:''}
+        <div class="ci-bot" style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+          <span class="cs-opt">× ${c.qty}</span>
+          <span class="ci-price">${won(c.unit*c.qty)}원</span>
+        </div>
+      </div>
+    </div>`).join('');
+    return `<div class="cs-owner">${g.name}</div>${gItems}`;
+  }).join('') : '';
+
+  const myLabel = showGroup ? `<div class="cs-owner me">나</div>` : '';
+  const groupTotal = showGroup ? guestTotal() : 0;
+  const totalAmt = cartTotal() + groupTotal;
+
+  const paySplitHtml = showGroup ? `
+    <div style="padding:0 16px 8px;">
+      <div style="font-size:12.5px;color:var(--ink3);margin-bottom:8px;">결제 방식</div>
+      <div class="pay-split">
+        <button class="${!S.payGroup?'on':''}" onclick="S.payGroup=false;renderCartSheet()">개별 결제</button>
+        <button class="${S.payGroup?'on':''}" onclick="S.payGroup=true;renderCartSheet()">함께 결제</button>
+      </div>
+    </div>` : '';
+
+  const totalLabel = showGroup && S.payGroup ? `전체 합계` : `내 합계`;
+  const totalAmt2 = showGroup && S.payGroup ? totalAmt : cartTotal();
+
   $('cartsheet').innerHTML = `<div class="sheet" style="max-height:80vh;">
     <div class="cart-sheet-handle"></div>
     <div class="cart-sheet-hdr">
       <span class="ttl">🛒 장바구니</span>
       <span class="cnt-badge">${cartCount()}개</span>
     </div>
-    <div class="cart-sheet-body">${items.length?items:'<div style="padding:24px 0;text-align:center;color:var(--ink3);font-size:14px;">담은 메뉴가 없어요</div>'}</div>
+    <div class="cart-sheet-body">
+      ${myLabel}
+      ${items.length?items:'<div style="padding:24px 0;text-align:center;color:var(--ink3);font-size:14px;">담은 메뉴가 없어요</div>'}
+      ${guestSections}
+    </div>
+    ${paySplitHtml}
     <div class="cart-sheet-footer">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 4px;font-size:13px;color:var(--ink2);">
+        <span>${totalLabel}</span><span style="font-weight:700;">${won(totalAmt2)}원</span>
+      </div>
       <button class="addbtn" onclick="goToCheckout()" ${!S.cart.length?'disabled style="opacity:.4;cursor:not-allowed;"':''}>
-        주문하기 · ${won(cartTotal())}원
+        주문하기 · ${won(S.groupMode&&S.payGroup?totalAmt2:cartTotal())}원
       </button>
     </div>
   </div>`;
@@ -1253,9 +1367,32 @@ function scrCheckout(){
         ? ''
         : `<div class="field"><label>알림톡 받을 휴대폰 번호 <span class="req">필수</span></label>
             <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div>`}</div>`:''}
-    <div class="sec"><div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>
-      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':'결제 금액'}</span><span style="color:var(--blue);">${won(cartTotal())}원</span></div></div>
-    <button class="primarybtn" onclick="goToTerms()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(cartTotal())}원 결제하기`}</button><div style="height:20px;"></div>`;
+    ${S.groupMode && S.orderType==='dinein' ? `
+    <div class="sec">
+      <div class="sec-h">👥 함께 주문 현황</div>
+      ${GUEST_CARTS.map(g=>`
+        <div class="cs-owner" style="margin-top:6px;">${g.name}</div>
+        ${g.cart.map(c=>`<div class="citem" style="opacity:.75;">
+          <span style="font-size:22px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${c.img}</span>
+          <div style="flex:1;min-width:0;">
+            <div class="ci-name">${c.name}</div>
+            ${c.optText?`<div class="ci-opt">${c.optText}</div>`:''}
+            <div class="ci-bot" style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+              <span class="cs-opt">× ${c.qty}</span><span class="ci-price">${won(c.unit*c.qty)}원</span>
+            </div>
+          </div>
+        </div>`).join('')}
+      `).join('')}
+      <div class="rowline" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
+        <span style="color:var(--ink3);">손님 2 소계</span><span>${won(guestTotal())}원</span>
+      </div>
+    </div>` : ''}
+    <div class="sec">
+      <div class="rowline"><span>내 상품 금액</span><span>${won(cartTotal())}원</span></div>
+      ${S.groupMode && S.payGroup && S.orderType==='dinein' ? `<div class="rowline"><span>손님 2 금액</span><span>${won(guestTotal())}원</span></div>` : ''}
+      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':(S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액')}</span><span style="color:var(--blue);">${won((S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal())}원</span></div>
+    </div>
+    <button class="primarybtn" onclick="goToTerms()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won((S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal())}원 결제하기`}</button><div style="height:20px;"></div>`;
 }
 
 /* --- 약관 동의 화면 --- */

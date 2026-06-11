@@ -5599,7 +5599,7 @@ const CAT_MENU = [
 // 각 세트는 N개의 자리로 구성. 자리마다 후보 메뉴 1..N, 손님이 한 가지 선택.
 // 가장 싼 조합 = basePrice. 가장 비싼 조합 = basePrice + 각 자리 최댓값 합.
 const SETS = [
-  { id:1, code:'S00101', name:'모닝 세트', basePrice:7000, desc:'음료 + 브레드 · 오전 11시까지', enabled:true,
+  { id:1, code:'S00101', name:'모닝 세트', basePrice:7000, desc:'음료 + 브레드 · 오전 11시까지', enabled:true, status:'판매중',
     slots:[
       { id:101, name:'음료 선택', selectionType:'single', candidates:[
         { code:'M00101', name:'아메리카노', extraPrice:0, isDefault:true },
@@ -5610,7 +5610,7 @@ const SETS = [
       ]},
     ]
   },
-  { id:2, code:'S00102', name:'오후의 휴식', basePrice:8500, desc:'음료 + 디저트', enabled:true,
+  { id:2, code:'S00102', name:'오후의 휴식', basePrice:8500, desc:'음료 + 디저트', enabled:true, status:'판매중',
     slots:[
       { id:201, name:'음료 선택', selectionType:'single', candidates:[
         { code:'M00103', name:'바닐라라떼', extraPrice:0, isDefault:true },
@@ -5746,7 +5746,7 @@ state.catForm = {                  // 카테고리 입력 폼
   pickedMenus:[],                  // 카테고리에 담을 메뉴 id
 };
 state.setForm = {                  // 세트 입력 폼 — 자리(slot) + 후보 메뉴 모델
-  name:'', basePrice:0, desc:'',
+  name:'', basePrice:0, desc:'', status:'판매중',
   slots:[],                        // [{ id, name, selectionType:'single', candidates:[{code,name,extraPrice,isDefault}] }]
 };
 state._setPickerOpen = null;        // 자리별 후보 선택 모달 — 열려 있는 자리 id
@@ -5871,6 +5871,7 @@ function getMenuStock(menuId){
 function ensureSetExtras(s){
   if (!s.schedule) s.schedule = { enabled:false, days:[1,2,3,4,5,6,0], start:'09:00', end:'22:00' };
   if (!s.discount) s.discount = { enabled:false, days:[1,2,3,4,5], start:'14:00', end:'17:00', rate:20 };
+  if (!s.status || !['판매중','품절','숨김'].includes(s.status)) s.status = '판매중';
 }
 function ensureCatExtras(c){
   if (typeof c.displayMode === 'undefined') c.displayMode = 'grid'; // 'grid' | 'list'
@@ -8314,11 +8315,12 @@ function renderSet(main){
             <th>구성 항목</th>
             <th class="num" style="width:160px;">가격</th>
             <th style="width:120px;">판매 시간</th>
+            <th style="width:90px;">판매 상태</th>
             <th style="width:130px;"></th>
           </tr>
         </thead>
         <tbody>
-          ${SETS.length===0 ? `<tr class="empty-row"><td colspan="8">위에서 첫 세트를 만들어 주세요.</td></tr>` : SETS.map((s, idx)=>{
+          ${SETS.length===0 ? `<tr class="empty-row"><td colspan="9">위에서 첫 세트를 만들어 주세요.</td></tr>` : SETS.map((s, idx)=>{
             ensureSetExtras(s);
             const r2 = setPriceRange(s);
             const slotList = (s.slots||[]).map(sl=>{
@@ -8328,6 +8330,7 @@ function renderSet(main){
             const schTxt = scheduleLabel(s.schedule);
             const dcTxt = discountLabel(s.discount);
             const isSel = state.setSel.has(s.id);
+            const stPill = s.status==='판매중'?'<span class="pill done">판매중</span>':s.status==='품절'?'<span class="pill partial">품절</span>':'<span class="pill hold">숨김</span>';
             return `
               <tr ${dragRowAttrs('SETS', idx)}${isSel?` style="background:var(--blue-50);"`:''}>
                 ${selCheckTd(state.setSel, s.id)}
@@ -8337,6 +8340,7 @@ function renderSet(main){
                 <td>${slotList||'<span style="color:var(--ink-4);font-size:11px;">구성 없음</span>'}</td>
                 <td class="num"><b style="color:var(--blue);">${fmt(r2.min)}</b>${r2.min!==r2.max?`<span style="color:var(--ink-3);font-size:11px;"> ~ ${fmt(r2.max)}</span>`:''}<span style="color:var(--ink-3);font-size:11px;margin-left:1px;">원</span></td>
                 <td><span style="font-size:11px;color:${s.schedule&&s.schedule.enabled?'var(--blue)':'var(--ink-3)'};font-weight:${s.schedule&&s.schedule.enabled?700:400};">${s.schedule&&s.schedule.enabled?'🕒 ':''}${schTxt}</span></td>
+                <td><span onclick="cycleSetStatus(${s.id})" style="cursor:pointer;" title="클릭해서 판매중 → 품절 → 숨김 순으로 바꿔요">${stPill}</span></td>
                 <td>
                   <button class="btn-ghost" style="padding:6px 7px;font-size:11px;" onclick="openScheduleModal('set',${s.id})" title="판매 시간">🕒</button>
                   <button class="btn-ghost" style="padding:6px 7px;font-size:11px;" onclick="openDiscountModal('set',${s.id})" title="해피아워">🔥</button>
@@ -8417,7 +8421,7 @@ function setDefaultCandidate(si, ci){
   renderApp();
 }
 function clearSetForm(){
-  state.setForm = { name:'', basePrice:0, desc:'', slots:[] };
+  state.setForm = { name:'', basePrice:0, desc:'', status:'판매중', slots:[] };
   renderApp();
 }
 function saveSet(){
@@ -8433,7 +8437,7 @@ function saveSet(){
   SETS.push({
     id: nextId, code: genCode('S'),
     name: f.name, basePrice: f.basePrice, desc: f.desc||'',
-    enabled: true,
+    enabled: true, status: f.status || '판매중',
     slots: f.slots.map(sl=>({
       id: sl.id, name: sl.name, selectionType: sl.selectionType||'single',
       candidates: sl.candidates.map(c=>({ code:c.code, name:c.name, extraPrice:Number(c.extraPrice)||0, isDefault:!!c.isDefault })),
@@ -8442,6 +8446,15 @@ function saveSet(){
   const savedName = f.name;
   clearSetForm();
   showToast(`<span class="ic">✅</span> '${savedName}' 세트를 등록했어요`, 'ok');
+}
+function cycleSetStatus(id){
+  const s = SETS.find(x=>x.id===id); if(!s) return;
+  ensureSetExtras(s);
+  const order = ['판매중','품절','숨김'];
+  s.status = order[(order.indexOf(s.status)+1) % order.length];
+  renderApp();
+  const ico = s.status==='판매중'?'✅':s.status==='품절'?'⛔':'🙈';
+  showToast(`<span class="ic">${ico}</span> '${s.name}' — ${s.status}으로 바꿨어요`, 'ok');
 }
 function deleteSet(id){
   const s = SETS.find(x=>x.id===id);

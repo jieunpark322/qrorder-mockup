@@ -628,7 +628,7 @@ function renderDemo(){
   if(S.orderType==='dinein'){
     html += `<span class="ds-div">사장님 설정 ›</span>`
       + `<button class="ds-chip ${S.serve==='self'?'on':''}" onclick="setServe('self')">🚶 셀프 수령</button>`
-      + `<button class="ds-chip ${S.serve==='server'?'on':''}" onclick="setServe('server')">🍳 직접 서빙</button>`
+      + `<button class="ds-chip ${S.serve==='server'?'on':''}" onclick="setServe('server')">🍳 서빙 매장</button>`
       + `<button class="ds-chip ${S.payTiming==='prepay'?'on':''}" onclick="setPayTiming('prepay')">💳 선불</button>`
       + `<button class="ds-chip ${S.payTiming==='postpay'?'on':''} ${S.serve==='self'?'dis':''}" onclick="setPayTiming('postpay')"${S.serve==='self'?' title="셀프 수령은 선불만 가능해요"':''}>🧾 후불</button>`
       + (S.serve==='self' ? `<span class="ds-div">호출 방식 ›</span>`
@@ -807,8 +807,6 @@ function scrMenu(){
     ${S.happyHour?`<div class="happy-banner">🎉 <div><div>해피아워 진행 중 · 커피 음료 <b>${won(STORE.happyHour.discount)}원 추가 할인</b></div><div class="htime">${STORE.happyHour.start} ~ ${STORE.happyHour.end}</div></div></div>`:''}
     ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
     ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
-    ${S.orderType==='dinein' && S.serve==='server'
-      ? `<div class="notice blue">🪑 <span>준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div>` : ''}
     <div id="menuResults">${menuResultsHtml()}</div>`;
   const content = S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab;
   const dx = S._tabAnim==='left' ? '-22px' : '22px';
@@ -1710,7 +1708,7 @@ function scrDone(){
         : `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>호명으로 불러드려요</b></div>
            <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 셀프 수령</div>`
       : `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>직원이 자리로 가져다 드려요</b></div>
-         <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 직접 서빙</div>`;
+         <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 서빙 매장</div>`;
     const payLine = S.payTiming==='postpay'
       ? `<div class="status-line"><span class="dot" style="background:var(--line);"></span> 🧾 나갈 때 카운터에서 결제해 주세요</div>` : '';
     statusHtml = acceptLine + serveLine + payLine;

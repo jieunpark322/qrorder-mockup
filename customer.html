@@ -385,6 +385,7 @@ const STORE = {
   lastOrder:'21:30',
   happyHour:{ start:'14:00', end:'17:00', discount:1000 },
   holidays:['1/1 신정','5/5 어린이날'],
+  couponEnabled:true,    // 쿠폰 기능 on/off (사장님 설정)
   reviewOn:true,
   logo:'☕',
   table:'T03',
@@ -557,6 +558,7 @@ const S = {
   couponId:null,         // 선택된 쿠폰 id (null = 쿠폰 안 씀)
   couponCode:'',         // 쿠폰번호 입력 값
   notifChoice:null,      // 알림 수단: null | 'kakao' | 'phone' | 'skip'
+  notifSheet:false,      // 알림 바텀시트 표시 여부
 };
 const won = n => n.toLocaleString('ko-KR');
 const priceOf = m => (S.orderType==='dinein') ? m.price : (m.takeout!=null ? m.takeout : m.price);
@@ -647,6 +649,9 @@ function renderDemo(){
   html += `<span class="ds-div">해피아워 ›</span>`
     + `<button class="ds-chip ${!S.happyHour?'on':''}" onclick="setHappyHour(false)">⏰ 일반</button>`
     + `<button class="ds-chip ${S.happyHour?'on':''}" onclick="setHappyHour(true)">🎉 해피아워</button>`;
+  html += `<span class="ds-div">쿠폰 ›</span>`
+    + `<button class="ds-chip ${STORE.couponEnabled?'on':''}" onclick="STORE.couponEnabled=true;render()">🎟️ 쿠폰 켜기</button>`
+    + `<button class="ds-chip ${!STORE.couponEnabled?'on':''}" onclick="STORE.couponEnabled=false;S.couponId=null;render()">🚫 쿠폰 끄기</button>`;
   if(S.orderType==='dinein'){
     html += `<span class="ds-div">함께 주문 ›</span>`
       + `<button class="ds-chip ${!S.groupMode?'on':''}" onclick="setGroupMode(false)">👤 혼자</button>`
@@ -1383,8 +1388,8 @@ function scrCheckout(){
   const isPostpay = S.orderType==='dinein' && S.payTiming==='postpay';
   const finalTotal = (()=>{ const base=(S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal(); return base-couponDiscount(); })();
 
-  // 쿠폰 섹션 빌더
-  const couponSec = !isPostpay ? (()=>{
+  // 쿠폰 섹션 빌더 (매장에서 쿠폰 기능 꺼놓은 경우 미노출)
+  const couponSec = (!isPostpay && STORE.couponEnabled) ? (()=>{
     const couponRows = COUPONS.map(cp=>{
       const base = cartTotal();
       const applicable = base >= (cp.minOrder||0) && cp.channels.includes(S.orderType);
@@ -1471,7 +1476,46 @@ function scrCheckout(){
       ${couponDiscount()>0 ? `<div class="rowline" style="color:var(--blue);"><span>🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>` : ''}
       <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':(S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액')}</span><span style="color:var(--blue);">${won(finalTotal)}원</span></div>
     </div>
-    <button class="primarybtn" onclick="goToNotif()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>`;
+    <button class="primarybtn" onclick="goToNotif()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
+
+    ${(()=>{
+      if(!S.notifSheet) return '';
+      const notifRequired = S.orderType !== 'dinein' ||
+        (S.serve === 'self' && S.callMethod === 'alimtalk');
+      const showPhone = S.notifChoice === 'phone';
+      return `
+        <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;" onclick="S.notifSheet=false;S.notifChoice=null;render()"></div>
+        <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:20px 20px 40px;z-index:201;box-sizing:border-box;">
+          <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 22px;"></div>
+          <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;">주문 현황을 어떻게 받으시겠어요?</p>
+          <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'6px':'20px'};">메뉴가 준비되면 알려드려요.</p>
+          ${notifRequired ? `<p style="font-size:12px;color:var(--red);margin-bottom:16px;">이 매장은 알림을 통해 수령을 안내해요. 알림 수단을 선택해야 주문이 가능해요.</p>` : ''}
+
+          <button onclick="S.notifChoice='kakao';goToTermsFromNotif()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#FEE500;border:none;border-radius:14px;padding:17px;font-size:16px;font-weight:800;color:#191919;cursor:pointer;margin-bottom:12px;font-family:inherit;">
+            🟡 카카오톡으로 1초 만에 알림 받기
+          </button>
+
+          <button onclick="S.notifChoice='phone';S.authType='anon';render()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:1.5px solid var(--line);border-radius:14px;padding:15px;font-size:14px;font-weight:600;color:var(--ink3);cursor:pointer;margin-bottom:${showPhone?'12px':'0'};font-family:inherit;">
+            ⚪ 직접 전화번호 입력하기
+          </button>
+
+          ${showPhone ? `
+            <div class="field" style="margin-bottom:12px;">
+              <label>휴대폰 번호</label>
+              <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678"
+                value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" />
+            </div>
+            <button class="primarybtn" onclick="goToTermsFromNotif()">다음 · 약관 동의</button>
+          ` : ''}
+
+          ${notifRequired ? '' : `
+            <button onclick="S.notifChoice='skip';goToTermsFromNotif()" style="background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;width:100%;padding:14px 8px 0;font-family:inherit;text-decoration:underline;">
+              알림 없이 주문하기
+            </button>
+          `}
+        </div>`;
+    })()}
+    `;
 }
 
 /* --- 약관 동의 화면 --- */
@@ -1552,7 +1596,7 @@ function scrNotif(){
 function goToNotif(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
   S.notifChoice = null;
-  S.screen = 'notif';
+  S.notifSheet = true;
   render();
 }
 
@@ -1623,7 +1667,7 @@ function scrTerms(){
 
   const allOn = terms.every(t=>S.termsChecked[t.id]);
 
-  return `<div class="topbar"><button class="back" onclick="S.screen='notif';render()">‹</button>
+  return `<div class="topbar"><button class="back" onclick="S.screen='checkout';S.notifSheet=true;render()">‹</button>
       <div><div class="ttl">약관 동의</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
     <div style="padding:16px 0 0;">
       <div class="terms-all" onclick="_toggleAll()">

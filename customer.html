@@ -1444,9 +1444,9 @@ function scrCheckout(){
       <div class="info-pill amber" style="margin-top:12px;">📨 <span>주문하면 <b>사장님이 수락</b>해야 확정돼요.</span></div></div>`:''}
 
     ${(()=>{
-      // 알림톡 필수 케이스: 셀프수령+알림톡 호출 or 포장 or 예약 (비회원만)
-      const needPhone = S.authType!=='kakao_friend' &&
-        (S.orderType!=='dinein' || (S.serve==='self' && S.callMethod==='alimtalk'));
+      // 알림톡 필수 케이스: 포장은 authType 무관 무조건 필수 / 예약·셀프+알림톡은 비카카오친구만
+      const needPhone = S.orderType==='takeout' ||
+        (S.authType!=='kakao_friend' && (S.orderType==='preorder' || (S.serve==='self' && S.callMethod==='alimtalk')));
       if(!needPhone) return '';
       return `<div class="sec"><div class="sec-h">📨 주문 알림 <span class="req">필수</span></div>
         <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>
@@ -1507,8 +1507,8 @@ function getTermsConfig(){
 
 function goToTerms(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
-  const needPhone = S.authType!=='kakao' &&
-    (S.orderType!=='dinein' || (S.serve==='self' && S.callMethod==='alimtalk'));
+  const needPhone = S.orderType==='takeout' ||
+    (S.authType!=='kakao_friend' && (S.orderType==='preorder' || (S.serve==='self' && S.callMethod==='alimtalk')));
   if(needPhone){
     const digits=(S.phone||'').replace(/\D/g,'');
     if(digits.length<10){ toast('알림톡 받을 휴대폰 번호를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }

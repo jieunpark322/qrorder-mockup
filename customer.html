@@ -1387,6 +1387,21 @@ function timeSlots(){ const out=[]; for(let h=12;h<=20;h++){ out.push(h+':00',h+
 function scrCheckout(){
   const ot=ORDER_TYPES[S.orderType]; const needTime=S.orderType==='preorder';
   const isPostpay = S.orderType==='dinein' && S.payTiming==='postpay';
+  // 약관 인라인 초기화
+  const terms = getTermsConfig();
+  terms.forEach(t=>{ if(!(t.id in S.termsChecked)) S.termsChecked[t.id]=false; });
+  ['tos','privacy','age','location'].forEach(k=>{ if(!terms.find(t=>t.id===k)) delete S.termsChecked[k]; });
+  window._toggleTerm = id=>{ S.termsChecked[id]=!S.termsChecked[id]; render(); };
+  window._toggleAllCheckout = ()=>{ const allOn=terms.every(t=>S.termsChecked[t.id]); terms.forEach(t=>S.termsChecked[t.id]=!allOn); render(); };
+  const reqAllChecked = !terms.length || terms.filter(t=>t.required).every(t=>S.termsChecked[t.id]);
+  const hasOptional = terms.some(t=>!t.required);
+  const allTermsOn = terms.length>0 && terms.every(t=>S.termsChecked[t.id]);
+  const termsRows = terms.map(t=>{
+    const checked=S.termsChecked[t.id];
+    const badge=t.pending?`<span class="term-q">확인중</span>`:t.required?`<span class="term-req">필수</span>`:`<span class="term-opt">선택</span>`;
+    const link=t.link?`<button class="term-link" onclick="event.stopPropagation();toast('약관 보기 (준비 중)')">보기</button>`:'';
+    return `<div class="term-row" onclick="_toggleTerm('${t.id}')"><span class="term-ck ${checked?'checked':''}">${checked?'✓':''}</span><span class="term-label">${badge}${t.label}${link}</span></div>`;
+  }).join('');
   const finalTotal = (()=>{ const base=(S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal(); return base-couponDiscount(); })();
 
   // 쿠폰 섹션 빌더 (매장에서 쿠폰 기능 꺼놓은 경우 미노출)
@@ -1477,71 +1492,84 @@ function scrCheckout(){
       ${couponDiscount()>0 ? `<div class="rowline" style="color:var(--blue);"><span>🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>` : ''}
       <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':(S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액')}</span><span style="color:var(--blue);">${won(finalTotal)}원</span></div>
     </div>
-    <button class="primarybtn" onclick="goToNotif()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
+
+    ${terms.length ? `
+      <div style="padding:0 16px 4px;">
+        <div style="border-top:1px solid var(--line2);padding-top:12px;">
+          <div onclick="_toggleAllCheckout()" style="display:flex;align-items:center;gap:10px;padding:6px 0 8px;cursor:pointer;">
+            <span class="term-all-ck ${allTermsOn?'checked':''}">${allTermsOn?'✓':''}</span>
+            <span style="font-size:14px;font-weight:700;color:var(--ink);">전체 동의하기</span>
+          </div>
+          ${termsRows}
+          ${hasOptional?`<p style="font-size:11px;color:var(--ink4);padding-top:6px;line-height:1.5;">선택 항목에 동의하지 않아도 주문할 수 있어요.</p>`:''}
+        </div>
+      </div>` : ''}
+
+    <button class="primarybtn" ${reqAllChecked?`onclick="goToNotif()"`:' disabled'}>${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
 
     ${(()=>{
       if(!S.notifSheet) return '';
-      const notifRequired = S.orderType !== 'dinein' ||
-        (S.serve === 'self' && S.callMethod === 'alimtalk');
+      const notifRequired = S.orderType !== 'dinein' || (S.serve === 'self' && S.callMethod === 'alimtalk');
       const showPhone = S.notifChoice === 'phone';
+      const showMarketing = showPhone || (S.notifChoice==='kakao' && S.authType!=='kakao_friend');
+      const mktChecked = S.termsChecked.marketing || false;
+      const canPay = S.notifChoice==='kakao' || S.notifChoice==='skip' || (showPhone && (S.phone||'').replace(/\D/g,'').length>=10);
       return `
         <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;" onclick="S.notifSheet=false;S.notifChoice=null;render()"></div>
         <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:20px 20px 40px;z-index:201;box-sizing:border-box;">
-          <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 22px;"></div>
-          <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;">주문 현황을 어떻게 받으시겠어요?</p>
-          <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'6px':'20px'};">메뉴가 준비되면 알려드려요.</p>
-          ${notifRequired ? `<p style="font-size:12px;color:var(--red);margin-bottom:16px;">이 매장은 알림을 통해 수령을 안내해요. 알림 수단을 선택해야 주문이 가능해요.</p>` : ''}
+          <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 20px;"></div>
+          <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;">어떻게 알림을 받으시겠어요?</p>
+          <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'4px':'18px'};">메뉴가 준비되면 알려드려요.</p>
+          ${notifRequired?`<p style="font-size:12px;color:var(--red);margin-bottom:14px;">알림 수단을 선택해야 주문할 수 있어요.</p>`:''}
 
-          <button onclick="S.notifChoice='kakao';goToTermsFromNotif()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#FEE500;border:none;border-radius:14px;padding:17px;font-size:16px;font-weight:800;color:#191919;cursor:pointer;margin-bottom:12px;font-family:inherit;">
-            🟡 카카오톡으로 1초 만에 알림 받기
+          <button onclick="S.notifChoice='kakao';render()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:${S.notifChoice==='kakao'?'#FEE500':'#FFFBE6'};border:2px solid ${S.notifChoice==='kakao'?'#E6C000':'#FFE066'};border-radius:14px;padding:16px;font-size:15px;font-weight:800;color:#191919;cursor:pointer;margin-bottom:10px;font-family:inherit;">
+            🟡 카카오톡으로 바로 알림 받기
           </button>
 
-          <button onclick="S.notifChoice='phone';S.authType='anon';render()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:1.5px solid var(--line);border-radius:14px;padding:15px;font-size:14px;font-weight:600;color:var(--ink3);cursor:pointer;margin-bottom:${showPhone?'12px':'0'};font-family:inherit;">
-            ⚪ 직접 전화번호 입력하기
+          <button onclick="S.notifChoice='phone';S.authType='anon';render()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:${S.notifChoice==='phone'?'var(--blue-50)':'transparent'};border:${S.notifChoice==='phone'?'2px solid var(--blue)':'1.5px solid var(--line)'};border-radius:14px;padding:15px;font-size:14px;font-weight:600;color:${S.notifChoice==='phone'?'var(--blue)':'var(--ink3)'};cursor:pointer;margin-bottom:${showPhone?'12px':'0'};font-family:inherit;">
+            📱 전화번호로 알림 받기
           </button>
 
-          ${showPhone ? `
-            <div class="field" style="margin-bottom:12px;">
+          ${showPhone?`
+            <div class="field" style="margin-bottom:10px;">
               <label>휴대폰 번호</label>
-              <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678"
-                value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" />
-            </div>
-            <button class="primarybtn" onclick="goToTermsFromNotif()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
-          ` : ''}
+              <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'');render()" />
+            </div>`:''}
 
-          ${notifRequired ? '' : `
-            <button onclick="S.notifChoice='skip';goToTermsFromNotif()" style="background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;width:100%;padding:14px 8px 0;font-family:inherit;text-decoration:underline;">
+          ${showMarketing?`
+            <div class="term-row" onclick="S.termsChecked.marketing=!S.termsChecked.marketing;render()" style="margin:4px 0 14px;">
+              <span class="term-ck ${mktChecked?'checked':''}">${mktChecked?'✓':''}</span>
+              <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
+            </div>`:`<div style="height:16px;"></div>`}
+
+          <button ${canPay?`onclick="goToTermsFromNotif()"`:' disabled'} class="primarybtn">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
+
+          ${notifRequired?'':`
+            <button onclick="S.notifChoice='skip';goToTermsFromNotif()" style="background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;width:100%;padding:12px 8px 0;font-family:inherit;text-decoration:underline;">
               알림 없이 주문하기
-            </button>
-          `}
+            </button>`}
         </div>`;
     })()}
     `;
 }
 
-/* --- 약관 동의 화면 --- */
+/* --- 약관 동의 (결제 화면 인라인) --- */
 function getTermsConfig(){
   const isKakao = S.authType === 'kakao_friend' || S.authType === 'kakao_nofriend';
   const isPrepay = S.payTiming === 'prepay' || S.orderType !== 'dinein';
   const isPostpay = !isPrepay;
-  // 번호를 제공한 경우(phone 선택 or 포장/예약 kakao친구X) → 마케팅 선택 동의 노출
-  // kakao_friend는 채널 추가 자체가 수신 동의이므로 제외
-  const hasPhone = S.notifChoice === 'phone' || (S.authType === 'kakao_friend' && false);
-  const showMarketing = hasPhone || (S.notifChoice === 'kakao' && S.authType !== 'kakao_friend');
   const terms = [];
   if(isPrepay){
-    terms.push({ id:'tos',      label:'이용약관 동의', required:true,  link:true });
-    terms.push({ id:'privacy',  label:'개인정보 수집·이용 동의 (개인정보 처리방침 포함)', required:true, link:true });
+    terms.push({ id:'tos',      label:'이용약관 동의',           required:true,  link:true });
+    terms.push({ id:'privacy',  label:'개인정보 수집·이용 동의', required:true,  link:true });
   }
   if(isPostpay){
-    terms.push({ id:'location', label:'위치정보 수집·이용 동의 (위치정보 처리방침 포함)', required:false, link:true, pending:true });
+    terms.push({ id:'location', label:'위치정보 수집·이용 동의', required:false, link:true, pending:true });
   }
   if(!isKakao && isPrepay){
-    terms.push({ id:'age',      label:'만 14세 이상임을 확인합니다', required:true,  link:false });
+    terms.push({ id:'age', label:'만 14세 이상임을 확인합니다', required:true, link:false });
   }
-  if(showMarketing && isPrepay){
-    terms.push({ id:'marketing', label:'쿠폰·이벤트 알림 수신 동의', required:false, link:false });
-  }
+  // 마케팅 동의는 알림 수단 시트에서 인라인 처리
   return terms;
 }
 
@@ -1603,7 +1631,7 @@ function goToNotif(){
 
 function goToTermsFromNotif(){
   if(S.notifChoice === 'kakao'){
-    // 목업: 시뮬레이터 authType 유지 (실제 환경에서는 카카오 OAuth 트리거)
+    // 목업: 시뮬레이터 authType 유지
   } else if(S.notifChoice === 'phone'){
     S.authType = 'anon';
     const digits = (S.phone||'').replace(/\D/g,'');
@@ -1614,11 +1642,11 @@ function goToTermsFromNotif(){
       return;
     }
   } else {
-    // skip
     S.authType = 'anon';
     S.phone = '';
   }
-  goToTerms();
+  S.notifSheet = false;
+  placeOrder();
 }
 
 function goToTerms(){
@@ -1721,7 +1749,6 @@ function scrProcessing(){
     <p>${isPay
       ? `<b>${S.pay}</b>로 결제를 진행하고 있어요.<br>잠시만 기다려 주세요.`
       : `결제가 완료됐어요.<br>매장에 주문을 전달하고 있어요.`}</p>
-    <div class="code">STATUS: ${isPay?'PAYMENT_IN_PROGRESS':'ORDER_SUBMITTING'}</div>
   </div>`;
 }
 const ERR_CASES = {
@@ -1756,7 +1783,7 @@ function backToCheckout(){ S.screen='checkout'; S.errType=null; render(); }
 /* --- 완료 --- */
 function scrDone(){
   const ot=ORDER_TYPES[S.orderType]; let head, statusHtml, extra='';
-  if(S.orderType==='dinein'){ head='주문이 들어갔어요!';
+  if(S.orderType==='dinein'){ head='주문을 받았어요';
     const acceptLine = S.payTiming==='postpay'
       ? `<div class="status-line"><span class="dot"></span> 주문 접수 · 주방으로 전달됐어요</div>`
       : `<div class="status-line"><span class="dot"></span> 결제 완료 · 주방으로 전달됐어요</div>`;
@@ -1771,11 +1798,11 @@ function scrDone(){
     const payLine = S.payTiming==='postpay'
       ? `<div class="status-line"><span class="dot" style="background:var(--line);"></span> 🧾 나갈 때 카운터에서 결제해 주세요</div>` : '';
     statusHtml = acceptLine + serveLine + payLine;
-  } else if(S.orderType==='takeout'){ head='포장 주문 완료!';
+  } else if(S.orderType==='takeout'){ head='포장 주문을 받았어요';
     statusHtml=`<div class="status-line"><span class="dot"></span> 결제 완료 · 포장 준비를 시작했어요</div>
       <div class="status-line"><span class="dot" style="background:var(--amber);"></span> 약 <b>15~25분</b> 뒤 준비 완료 · 카카오 알림톡 발송</div>`;
     extra=`<div style="text-align:center;"><div class="qrbox"></div><div style="font-size:12px;color:var(--ink3);font-weight:700;margin-top:8px;">픽업 시 이 QR을 보여주세요</div></div>`;
-  } else { head='포장 예약 신청 완료!';
+  } else { head='예약 요청을 보냈어요';
     statusHtml=`<div class="status-line"><span class="dot" style="background:var(--amber);"></span> <b>사장님 수락 대기 중</b>. 수락하면 확정 알림이 와요</div>
       <div class="status-line"><span class="dot"></span> 결제 완료 · 수령 예정 <b>오늘 ${S.pickup}</b></div>`;
   }

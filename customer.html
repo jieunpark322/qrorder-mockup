@@ -1537,15 +1537,11 @@ function scrCheckout(){
               <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'');render();const _pi=document.getElementById('phoneInput');if(_pi){_pi.focus();_pi.setSelectionRange(_pi.value.length,_pi.value.length);}"  />
             </div>`:''}
 
-          ${showMarketing?(mktChecked?`
-            <div class="term-row" style="margin:4px 0 14px;opacity:.6;cursor:default;">
-              <span class="term-ck checked">✓</span>
-              <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의 · 이미 동의하셨어요</span>
-            </div>`:`
+          ${showMarketing?`
             <div class="term-row" onclick="S.termsChecked.marketing=!S.termsChecked.marketing;render()" style="margin:4px 0 14px;">
-              <span class="term-ck">${''}</span>
+              <span class="term-ck ${mktChecked?'checked':''}">${mktChecked?'✓':''}</span>
               <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
-            </div>`):`<div style="height:4px;"></div>`}
+            </div>`:`<div style="height:4px;"></div>`}
 
           <button onclick="tryNotifPay()" class="primarybtn">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
 
@@ -1772,14 +1768,7 @@ function scrDone(){
     ${kakaoChannelCta}
     <button class="primarybtn" onclick="resetOrder()">새 주문하기</button><div style="height:24px;"></div>`;
 }
-function resetOrder(){
-  const mkt = S.termsChecked.marketing;
-  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null;
-  S.cat='전체'; S.couponId=null; S.couponCode='';
-  S.notifChoice=null; S.notifSheet=false;
-  S.termsChecked = mkt ? {marketing:true} : {};
-  S.screen='menu'; render();
-}
+function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.screen='menu'; render(); }
 
 /* --- 세션 만료 --- */
 function scrSession(){

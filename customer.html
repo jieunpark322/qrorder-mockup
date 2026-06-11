@@ -750,7 +750,7 @@ function brandHero(){
           </div>
           ${STORE.intro?`<div class="bintro" style="margin-top:6px;">${STORE.intro}</div>`:''}
         </div>
-        <button class="histbtn" onclick="openHistory()">🧾 주문내역${ORDER_HISTORY.length?` <span class="hist-cnt">${ORDER_HISTORY.length}</span>`:''}</button>
+        ${ORDER_HISTORY.length?`<button class="histbtn" onclick="openHistory()">🧾 주문내역 <span class="hist-cnt">${ORDER_HISTORY.length}</span></button>`:''}
       </div>
     </div>`;
 }

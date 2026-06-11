@@ -130,11 +130,12 @@
   .badge-out{display:inline-flex;align-items:center;font-size:10px;font-weight:700;color:var(--red);background:#fff0f0;padding:1px 6px;border-radius:5px;margin-left:5px;vertical-align:middle;}
   /* 메뉴 배지 — 1개 · 아주 작게 */
   .mbadge{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;vertical-align:middle;white-space:nowrap;}
-  .mbadge.hot{background:rgba(232,89,12,.1);color:#c9410a;}
-  .mbadge.reco{background:rgba(230,119,0,.1);color:#d97706;}
-  .mbadge.new{background:rgba(25,113,194,.1);color:#1971c2;}
   .mbadge.happy{background:rgba(255,212,59,.22);color:#7a5900;}
-  .mbadge-row{display:block;margin-top:3px;}
+  /* 이미지 왼쪽 상단 오버레이 배지 */
+  .img-badge{position:absolute;top:5px;left:5px;z-index:3;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px;line-height:1.5;white-space:nowrap;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
+  .img-badge.hot{background:rgba(232,89,12,.88);color:#fff;}
+  .img-badge.reco{background:rgba(245,159,0,.92);color:#fff;}
+  .img-badge.new{background:rgba(25,113,194,.88);color:#fff;}
   .mdesc{font-size:13px;color:var(--ink3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .mprice{font-size:16.5px;font-weight:800;margin-top:5px;display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;}
   .mprice .ori{font-size:12px;color:var(--ink4);font-weight:500;text-decoration:line-through;}
@@ -822,6 +823,13 @@ function originSection(){
   </div>`;
 }
 function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function menuImgBox(m){
+  const photo = PHOTO[m.id];
+  const out = isOut(m);
+  const bk = (m.badges||[])[0];
+  const badge = bk && BADGE[bk] ? `<span class="img-badge ${bk}">${BADGE[bk].e} ${BADGE[bk].l}</span>` : '';
+  return `<span class="mimg">${pic(m.img, photo)}${out?soldoutOverlay():''}${badge}</span>`;
+}
 function menuCard(m){
   const out = isOut(m);
   const closed = !S.businessOpen;
@@ -832,18 +840,15 @@ function menuCard(m){
   const anyDisc = fixedD > 0 || hhD > 0;
   const showTakeout = S.orderType!=='dinein' && m.takeout!=null && m.takeout!==m.price;
 
-  // 배지: 우선순위 1개만 (해피아워 > hot > reco > new)
-  const badgeKey = hhD ? 'happy' : ((m.badges||[])[0] || null);
-  const badgeHtml = badgeKey === 'happy'
-    ? '<span class="mbadge happy">🎉 해피아워</span>'
-    : (badgeKey && BADGE[badgeKey] ? `<span class="mbadge ${badgeKey}">${BADGE[badgeKey].e} ${BADGE[badgeKey].l}</span>` : '');
-
-  // 가격: 취소선 원가 + 최종가만 (배지 없이)
+  // 가격: 취소선 원가 + 최종가만
   const priceHtml = anyDisc
     ? `<span class="ori">${won(baseP)}원</span>${won(effP)}원`
     : showTakeout
       ? `${won(effP)}원<span class="ori">${won(m.price)}원</span>`
       : `${won(effP)}원`;
+
+  // 해피아워 텍스트 배지 (이미지 배지와 별개 · 이미지 없는 경우 대비)
+  const hhBadge = hhD ? '<span class="mbadge happy">🎉 해피아워</span>' : '';
 
   const clickHandler = closed
     ? `onclick="toast('지금은 영업 시간이 아니에요')"`
@@ -851,11 +856,11 @@ function menuCard(m){
 
   return `
     <button class="mcard ${out?'out':''} ${closed&&!out?'closed-mode':''} ${hhD?'hh-active':''}" ${clickHandler}>
-      ${imgBox('mimg', m.img, PHOTO[m.id], out)}
+      ${menuImgBox(m)}
       <span class="minfo">
         <span class="mname">${m.name}${out?'<span class="badge-out">품절</span>':''}</span>
         ${m.desc?`<span class="mdesc">${m.desc}</span>`:''}
-        ${badgeHtml?`<span class="mbadge-row">${badgeHtml}</span>`:''}
+        ${hhBadge?`<span style="display:block;margin-top:3px;">${hhBadge}</span>`:''}
         <span class="mprice">${priceHtml}${lowStock(m)?`<span class="stk">· 잔여 ${m.stock}개</span>`:''}</span>
       </span>
       ${(out||closed)?'':`<span class="mplus" onclick="event.stopPropagation();${(m.opt||[]).length?`openSheet(${m.id})`:`quickAdd(${m.id})`}">+</span>`}

@@ -1518,7 +1518,7 @@ function scrCheckout(){
         <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;" onclick="S.notifSheet=false;S.notifChoice=null;render()"></div>
         <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:20px 20px 40px;z-index:201;box-sizing:border-box;">
           <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 20px;"></div>
-          <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;">카카오 알림톡으로 알려드려요.</p>
+          <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;">${S.serve==='server'?'영수증을 카카오 알림톡으로 발송해 드려요.':'카카오 알림톡으로 알려드려요.'}</p>
           <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'4px':'16px'};">연락처를 어떻게 등록할까요?</p>
           ${notifRequired?`<p style="font-size:12px;color:var(--red);margin-bottom:12px;">알림 수단을 선택해야 주문할 수 있어요.</p>`:''}
 
@@ -1600,6 +1600,9 @@ function goToNotif(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
   if(S.orderType==='dinein' && S.serve==='self' && S.callMethod==='verbal'){
     S.notifChoice='skip'; S.notifSheet=false; S.authType='anon'; S.phone=''; placeOrder(); return;
+  }
+  if(S.orderType==='dinein' && S.serve==='server' && S.payTiming==='postpay'){
+    S.notifChoice='skip'; S.notifSheet=false; placeOrder(); return;
   }
   S.notifChoice = null;
   S.notifSheet = true;

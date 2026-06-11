@@ -1820,34 +1820,16 @@ function scrDone(){
   // 알림 안내 메시지
   const notifyNote = (()=>{
     if(noAlimtalkCase){
-      // 서빙형·호명 → 준비 알림 없음
       if(isFriend) return `<div class="kakao-note"><span class="kic">🧾</span><span>영수증은 <b>카카오 알림톡</b>으로 발송돼요.</span></div>`;
-      return `<div class="kakao-note" style="background:var(--bg);"><span class="kic">🧾</span><span>영수증이 필요하시면 아래에 연락처를 입력해 주세요.</span></div>`;
+      return '';
     }
-    // 알림톡 발송 케이스 (셀프+알림톡, 포장, 예약)
     if(isFriend) return `<div class="kakao-note"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>`;
     return S.phone
       ? `<div class="kakao-note" style="background:var(--bg);"><span class="kic">💬</span><span><b>${S.phone}</b>으로 알림톡을 발송할게요.</span></div>`
       : `<div class="kakao-note" style="background:#fff3cd;border:1px solid #ffd43b;"><span class="kic">💬</span><span>연락처를 입력하면 준비 알림을 받을 수 있어요.</span></div>`;
   })();
 
-  // 연락처 수집: 서빙형·호명 + 비회원(anon) + 전화번호 미입력
-  const needReceiptInput = S.authType==='anon' && !S.phone && noAlimtalkCase;
-  const doneMarketingChecked = S.termsChecked.marketing || false;
-  const receiptInput = needReceiptInput ? `
-    <div style="padding:16px;border-top:1px solid var(--line2);">
-      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px;">📱 연락처 남기기 <span style="font-size:11px;color:var(--ink4);font-weight:500;">(선택)</span></div>
-      <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;">전자영수증과 쿠폰·이벤트 알림을 카카오 알림톡으로 받을 수 있어요.</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <input id="donePhoneInput" inputmode="numeric" maxlength="13" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')">
-        <button onclick="submitDonePhone()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">확인</button>
-      </div>
-      <div class="term-row" onclick="S.termsChecked.marketing=!S.termsChecked.marketing;document.querySelector('.done-mkt-ck').className='term-ck'+(S.termsChecked.marketing?' checked':'');document.querySelector('.done-mkt-ck').textContent=S.termsChecked.marketing?'✓':'';">
-        <span class="term-ck done-mkt-ck ${doneMarketingChecked?'checked':''}">${doneMarketingChecked?'✓':''}</span>
-        <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
-      </div>
-      <div id="donePhoneSent" style="font-size:12px;color:var(--green);margin-top:6px;font-weight:700;"></div>
-    </div>` : '';
+  const receiptInput = '';
 
   // 카카오 채널 추가 CTA: 카카오 친구 X에게만 노출 (마케팅 동의 대체)
   const kakaoChannelCta = S.authType==='kakao_nofriend' ? `

@@ -543,6 +543,7 @@ function imgBox(cls, emoji, photo, soldout){
 const S = {
   screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pay:'카드', phone:'', orderNo:null,
   serve:'self', payTiming:'prepay', tab:'menu', search:'', callSel:[],
+  callMethod:'alimtalk', // 셀프수령 호출 방식: 'alimtalk' | 'verbal' (호명)
   businessOpen:true,     // 영업시간 시뮬레이션
   errSim:'none', procStep:null, errType:null,   // 결제 처리상태/에러 시뮬레이션
   searchOpen:false, activeCat:null,             // 검색창 토글 / 현재 보이는 카테고리
@@ -623,7 +624,11 @@ function renderDemo(){
       + `<button class="ds-chip ${S.serve==='self'?'on':''}" onclick="setServe('self')">🚶 셀프 수령</button>`
       + `<button class="ds-chip ${S.serve==='server'?'on':''}" onclick="setServe('server')">🍳 직접 서빙</button>`
       + `<button class="ds-chip ${S.payTiming==='prepay'?'on':''}" onclick="setPayTiming('prepay')">💳 선불</button>`
-      + `<button class="ds-chip ${S.payTiming==='postpay'?'on':''} ${S.serve==='self'?'dis':''}" onclick="setPayTiming('postpay')"${S.serve==='self'?' title="셀프 수령은 선불만 가능해요"':''}>🧾 후불</button>`;
+      + `<button class="ds-chip ${S.payTiming==='postpay'?'on':''} ${S.serve==='self'?'dis':''}" onclick="setPayTiming('postpay')"${S.serve==='self'?' title="셀프 수령은 선불만 가능해요"':''}>🧾 후불</button>`
+      + (S.serve==='self' ? `<span class="ds-div">호출 방식 ›</span>`
+        + `<button class="ds-chip ${S.callMethod==='alimtalk'?'on':''}" onclick="S.callMethod='alimtalk';render()">💬 카카오 알림톡</button>`
+        + `<button class="ds-chip ${S.callMethod==='verbal'?'on':''}" onclick="S.callMethod='verbal';render()">📣 호명</button>`
+        : '');
   }
   html += `<span class="ds-div">영업 상태 ›</span>`
     + `<button class="ds-chip ${S.businessOpen?'on':''}" onclick="setBusiness(true)">🟢 영업 중</button>`
@@ -1630,10 +1635,13 @@ function scrDone(){
       ? `<div class="status-line"><span class="dot"></span> 주문 접수 · 주방으로 전달됐어요</div>`
       : `<div class="status-line"><span class="dot"></span> 결제 완료 · 주방으로 전달됐어요</div>`;
     const serveLine = S.serve==='self'
-      ? `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>카카오 알림톡</b>으로 알려드려요</div>
-         <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 셀프 수령</div>`
+      ? S.callMethod==='alimtalk'
+        ? `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>카카오 알림톡</b>으로 알려드려요</div>
+           <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 셀프 수령</div>`
+        : `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>호명으로 불러드려요</b></div>
+           <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 셀프 수령</div>`
       : `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>직원이 자리로 가져다 드려요</b></div>
-         <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 직접 서빙 (카카오 알림톡 없음)</div>`;
+         <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 직접 서빙</div>`;
     const payLine = S.payTiming==='postpay'
       ? `<div class="status-line"><span class="dot" style="background:var(--line);"></span> 🧾 나갈 때 카운터에서 결제해 주세요</div>` : '';
     statusHtml = acceptLine + serveLine + payLine;
@@ -1654,11 +1662,15 @@ function scrDone(){
 
   // 알림 안내 메시지
   const notifyNote = (()=>{
-    if(S.orderType==='dinein' && S.serve==='server'){
+    // 직접서빙 또는 호명 수령 → 알림톡 없음
+    const noAlimtalk = (S.orderType==='dinein') &&
+      (S.serve==='server' || S.callMethod==='verbal');
+    if(noAlimtalk){
       return S.authType==='kakao'
-        ? `<div class="kakao-note"><span class="kic">💬</span><span>영수증은 <b>카카오 알림톡</b>으로 발송돼요.</span></div>`
+        ? `<div class="kakao-note"><span class="kic">🧾</span><span>영수증은 <b>카카오 알림톡</b>으로 발송돼요.</span></div>`
         : `<div class="kakao-note" style="background:var(--bg);"><span class="kic">🧾</span><span>영수증이 필요하시면 아래에 연락처를 입력해 주세요.</span></div>`;
     }
+    // 알림톡 발송 케이스 (포장/예약, 또는 셀프수령+알림톡)
     return S.authType==='kakao'
       ? `<div class="kakao-note"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>`
       : S.phone
@@ -1667,10 +1679,15 @@ function scrDone(){
   })();
 
   // 영수증/알림 연락처 입력 (비카카오 사용자 대상, 선택)
-  const receiptInput = S.authType!=='kakao' ? `
+  // 호명 + 카카오 = 영수증은 카카오로 자동 발송되므로 입력창 불필요
+  const needReceiptInput = S.authType!=='kakao';
+  const receiptLabel = (S.orderType==='dinein' && (S.serve==='server' || S.callMethod==='verbal'))
+    ? '영수증 받기'
+    : '알림 · 영수증 받기';
+  const receiptInput = needReceiptInput ? `
     <div style="padding:16px;border-top:1px solid var(--line2);">
-      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px;">📨 알림 · 영수증 받기 <span style="font-size:11px;color:var(--ink4);font-weight:500;">(선택)</span></div>
-      <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;">연락처를 입력하면 준비 알림과 전자영수증을 카카오 알림톡으로 받을 수 있어요.<br><span style="color:var(--ink4);">영수증 발송 목적으로만 사용돼요.</span></div>
+      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px;">📨 ${receiptLabel} <span style="font-size:11px;color:var(--ink4);font-weight:500;">(선택)</span></div>
+      <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;">연락처를 입력하면 전자영수증을 카카오 알림톡으로 받을 수 있어요.<br><span style="color:var(--ink4);">영수증 발송 목적으로만 사용돼요.</span></div>
       <div style="display:flex;gap:8px;">
         <input id="donePhoneInput" inputmode="numeric" maxlength="13" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'');document.getElementById('donePhoneSent').textContent=''">
         <button onclick="submitDonePhone()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">확인</button>

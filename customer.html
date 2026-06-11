@@ -1515,17 +1515,18 @@ function scrCheckout(){
         <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;" onclick="S.notifSheet=false;S.notifChoice=null;render()"></div>
         <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:20px 20px 40px;z-index:201;box-sizing:border-box;">
           <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 20px;"></div>
-          <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;">어떻게 알림을 받으시겠어요?</p>
-          <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'4px':'18px'};">메뉴가 준비되면 알려드려요.</p>
-          ${notifRequired?`<p style="font-size:12px;color:var(--red);margin-bottom:14px;">알림 수단을 선택해야 주문할 수 있어요.</p>`:''}
+          <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;">카카오 알림톡으로 알려드려요.</p>
+          <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'4px':'16px'};">연락처를 어떻게 등록할까요?</p>
+          ${notifRequired?`<p style="font-size:12px;color:var(--red);margin-bottom:12px;">알림 수단을 선택해야 주문할 수 있어요.</p>`:''}
 
-          <button onclick="S.notifChoice='kakao';render()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:${S.notifChoice==='kakao'?'#FEE500':'#FFFBE6'};border:2px solid ${S.notifChoice==='kakao'?'#E6C000':'#FFE066'};border-radius:14px;padding:16px;font-size:15px;font-weight:800;color:#191919;cursor:pointer;margin-bottom:10px;font-family:inherit;">
-            🟡 카카오톡으로 바로 알림 받기
-          </button>
-
-          <button onclick="S.notifChoice='phone';S.authType='anon';render()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:${S.notifChoice==='phone'?'var(--blue-50)':'transparent'};border:${S.notifChoice==='phone'?'2px solid var(--blue)':'1.5px solid var(--line)'};border-radius:14px;padding:15px;font-size:14px;font-weight:600;color:${S.notifChoice==='phone'?'var(--blue)':'var(--ink3)'};cursor:pointer;margin-bottom:${showPhone?'12px':'0'};font-family:inherit;">
-            📱 전화번호로 알림 받기
-          </button>
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <button onclick="S.notifChoice='kakao';render()" style="flex:1;padding:13px 8px;border-radius:12px;border:2px solid ${S.notifChoice==='kakao'?'#E6C000':'var(--line)'};background:${S.notifChoice==='kakao'?'#FEE500':'#fff'};font-size:14px;font-weight:700;color:#191919;cursor:pointer;font-family:inherit;line-height:1.4;text-align:center;">
+              🟡 카카오톡 연동
+            </button>
+            <button onclick="S.notifChoice='phone';S.authType='anon';render()" style="flex:1;padding:13px 8px;border-radius:12px;border:2px solid ${S.notifChoice==='phone'?'var(--blue)':'var(--line)'};background:${S.notifChoice==='phone'?'var(--blue-50)':'#fff'};font-size:14px;font-weight:700;color:${S.notifChoice==='phone'?'var(--blue-d)':'var(--ink2)'};cursor:pointer;font-family:inherit;line-height:1.4;text-align:center;">
+              📱 휴대폰번호<br>직접 입력
+            </button>
+          </div>
 
           ${showPhone?`
             <div class="field" style="margin-bottom:10px;">
@@ -1537,7 +1538,7 @@ function scrCheckout(){
             <div class="term-row" onclick="S.termsChecked.marketing=!S.termsChecked.marketing;render()" style="margin:4px 0 14px;">
               <span class="term-ck ${mktChecked?'checked':''}">${mktChecked?'✓':''}</span>
               <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
-            </div>`:`<div style="height:16px;"></div>`}
+            </div>`:`<div style="height:4px;"></div>`}
 
           <button ${canPay?`onclick="goToTermsFromNotif()"`:' disabled'} class="primarybtn">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
 

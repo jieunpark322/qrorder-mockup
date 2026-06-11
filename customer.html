@@ -943,8 +943,10 @@ function menuCard(m){
       ? `${won(effP)}원<span class="ori">${won(m.price)}원</span>`
       : `${won(effP)}원`;
 
-  // 해피아워 텍스트 배지 (이미지 배지와 별개 · 이미지 없는 경우 대비)
-  const hhBadge = hhD ? '<span class="mbadge happy">🎉 해피아워</span>' : '';
+  // 해피아워 활성 시 메뉴명 자체를 앰버 박스로 강조
+  const nameDisplay = hhD
+    ? `<span style="display:inline-block;background:#FFF9DB;border:1.5px solid #FFD43B;border-radius:7px;padding:1px 8px 1px 6px;color:#5C4000;font-weight:700;">🎉 ${m.name}</span>`
+    : m.name;
 
   const clickHandler = closed
     ? `onclick="toast('지금은 영업 시간이 아니에요')"`
@@ -955,8 +957,7 @@ function menuCard(m){
       ${menuImgBox(m)}
       <span class="minfo">
         ${(m.badges||[]).filter(k=>BADGE[k]).length?`<span style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:3px;">${(m.badges||[]).filter(k=>BADGE[k]).map(k=>`<span class="img-badge ${k}">${BADGE[k].e} ${BADGE[k].l}</span>`).join('')}</span>`:''}
-        <span class="mname">${m.name}${out?'<span class="badge-out">품절</span>':''}</span>
-        ${hhBadge?`<span style="display:block;margin-top:3px;">${hhBadge}</span>`:''}
+        <span class="mname">${nameDisplay}${out?'<span class="badge-out">품절</span>':''}</span>
         <span class="mprice">${priceHtml}${lowStock(m)?`<span class="stk">· 잔여 ${m.stock}개</span>`:''}</span>
       </span>
       ${(out||closed)?'':`<span class="mplus" onclick="event.stopPropagation();${(m.opt||[]).length?`openSheet(${m.id})`:`quickAdd(${m.id})`}">+</span>`}

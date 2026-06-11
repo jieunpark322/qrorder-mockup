@@ -844,7 +844,7 @@ function setCard(s){
     <button class="mcard ${!S.businessOpen?'closed-mode':''}" style="${isOut?'opacity:.55;':''}" onclick="${clickable?`openSet(${s.id})`:`toast('${isOut?'품절된 세트예요':'지금은 영업 시간이 아니에요'}')`}">
       <span class="mimg">${pic(s.img, PHOTO['set'+s.id])}</span>
       <span class="minfo">
-        <span class="mname"><span style="display:inline-block;font-size:9px;font-weight:800;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:1px 5px;border-radius:6px;vertical-align:middle;margin-right:4px;">🎁 세트</span>${s.name} ${isOut?'<span style="color:var(--red);font-size:10px;font-weight:700;background:#fef2f2;padding:1px 6px;border-radius:4px;margin-left:2px;">품절</span>':''}</span>
+        <span class="mname">${s.name} ${isOut?'<span style="color:var(--red);font-size:10px;font-weight:700;background:#fef2f2;padding:1px 6px;border-radius:4px;margin-left:2px;">품절</span>':''}</span>
         <span class="mdesc" style="display:block;">${s.desc}</span>
         <span class="mprice" style="display:block;">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:500;">구성 선택</span></span>
       </span>

@@ -388,7 +388,6 @@ const STORE = {
   lastOrder:'21:30',
   happyHour:{ start:'14:00', end:'17:00', discount:1000 },
   holidays:['1/1 신정','5/5 어린이날'],
-  couponEnabled:true,    // 쿠폰 기능 on/off (사장님 설정)
   reviewOn:true,
   logo:'☕',
   table:'T03',
@@ -652,9 +651,6 @@ function renderDemo(){
   html += `<span class="ds-div">해피아워 ›</span>`
     + `<button class="ds-chip ${!S.happyHour?'on':''}" onclick="setHappyHour(false)">⏰ 일반</button>`
     + `<button class="ds-chip ${S.happyHour?'on':''}" onclick="setHappyHour(true)">🎉 해피아워</button>`;
-  html += `<span class="ds-div">쿠폰 ›</span>`
-    + `<button class="ds-chip ${STORE.couponEnabled?'on':''}" onclick="STORE.couponEnabled=true;render()">🎟️ 쿠폰 켜기</button>`
-    + `<button class="ds-chip ${!STORE.couponEnabled?'on':''}" onclick="STORE.couponEnabled=false;S.couponId=null;render()">🚫 쿠폰 끄기</button>`;
   if(S.orderType==='dinein'){
     html += `<span class="ds-div">함께 주문 ›</span>`
       + `<button class="ds-chip ${!S.groupMode?'on':''}" onclick="setGroupMode(false)">👤 혼자</button>`
@@ -1404,8 +1400,8 @@ function scrCheckout(){
   }).join('');
   const finalTotal = (()=>{ const base=(S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal(); return base-couponDiscount(); })();
 
-  // 쿠폰 섹션 빌더 (매장에서 쿠폰 기능 꺼놓은 경우 미노출)
-  const couponSec = (!isPostpay && STORE.couponEnabled) ? (()=>{
+  // 쿠폰 섹션 빌더
+  const couponSec = (!isPostpay) ? (()=>{
     const couponRows = COUPONS.map(cp=>{
       const base = cartTotal();
       const applicable = base >= (cp.minOrder||0) && cp.channels.includes(S.orderType);
@@ -1420,12 +1416,14 @@ function scrCheckout(){
         <span style="font-size:15px;font-weight:800;color:var(--blue);white-space:nowrap;">${applicable?'-'+won(d)+'원':'사용 불가'}</span>
       </label>`;
     }).join('');
+    const emptyCoupons = !COUPONS.length;
     return `<div class="sec"><div class="sec-h">🎟️ 쿠폰 할인</div>
-      ${couponRows}
-      <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${!S.couponId?'var(--blue)':'var(--line)'};background:${!S.couponId?'var(--blue-50)':'#fff'};cursor:pointer;margin-bottom:12px;">
+      ${emptyCoupons
+        ? `<div style="padding:10px 2px 14px;font-size:13px;color:var(--ink3);">보유한 쿠폰이 없어요.</div>`
+        : couponRows + `<label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${!S.couponId?'var(--blue)':'var(--line)'};background:${!S.couponId?'var(--blue-50)':'#fff'};cursor:pointer;margin-bottom:12px;">
         <input type="radio" name="coupon" style="accent-color:var(--blue);" ${!S.couponId?'checked':''} onchange="S.couponId=null;render()">
         <span style="font-size:14px;font-weight:700;color:var(--ink3);">쿠폰 사용 안 함</span>
-      </label>
+      </label>`}
       <div style="display:flex;gap:8px;">
         <input id="couponCodeInput" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="쿠폰번호 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()">
         <button onclick="applyCode()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">적용</button>

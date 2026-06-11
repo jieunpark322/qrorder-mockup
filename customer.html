@@ -133,10 +133,10 @@
   .mbadge.happy{background:rgba(255,212,59,.22);color:#7a5900;}
   /* 이미지 왼쪽 상단 오버레이 배지 */
   .img-badges{position:absolute;top:5px;left:5px;z-index:3;display:flex;flex-direction:column;gap:3px;}
-  .img-badge{display:inline-flex;align-items:center;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px;line-height:1.5;white-space:nowrap;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
-  .img-badge.hot{background:rgba(232,89,12,.88);color:#fff;}
-  .img-badge.reco{background:rgba(245,159,0,.92);color:#fff;}
-  .img-badge.new{background:rgba(25,113,194,.88);color:#fff;}
+  .img-badge{display:inline-flex;align-items:center;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px;line-height:1.5;white-space:nowrap;}
+  .img-badge.hot{background:#e8590c;color:#fff;}
+  .img-badge.reco{background:#f59f00;color:#fff;}
+  .img-badge.new{background:#1971c2;color:#fff;}
   .mdesc{font-size:13px;color:var(--ink3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .mprice{font-size:16.5px;font-weight:800;margin-top:5px;display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;}
   .mprice .ori{font-size:12px;color:var(--ink4);font-weight:500;text-decoration:line-through;}
@@ -899,9 +899,7 @@ function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt
 function menuImgBox(m){
   const photo = PHOTO[m.id];
   const out = isOut(m);
-  const badges = (m.badges||[]).filter(k=>BADGE[k]).map(k=>`<span class="img-badge ${k}">${BADGE[k].e} ${BADGE[k].l}</span>`).join('');
-  const badgesWrap = badges ? `<span class="img-badges">${badges}</span>` : '';
-  return `<span class="mimg">${pic(m.img, photo)}${out?soldoutOverlay():''}${badgesWrap}</span>`;
+  return `<span class="mimg">${pic(m.img, photo)}${out?soldoutOverlay():''}</span>`;
 }
 function menuCard(m){
   const out = isOut(m);
@@ -931,6 +929,7 @@ function menuCard(m){
     <button class="mcard ${out?'out':''} ${closed&&!out?'closed-mode':''} ${hhD?'hh-active':''}" ${clickHandler}>
       ${menuImgBox(m)}
       <span class="minfo">
+        ${(m.badges||[]).filter(k=>BADGE[k]).length?`<span style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:3px;">${(m.badges||[]).filter(k=>BADGE[k]).map(k=>`<span class="img-badge ${k}">${BADGE[k].e} ${BADGE[k].l}</span>`).join('')}</span>`:''}
         <span class="mname">${m.name}${out?'<span class="badge-out">품절</span>':''}</span>
         ${m.desc?`<span class="mdesc">${m.desc}</span>`:''}
         ${hhBadge?`<span style="display:block;margin-top:3px;">${hhBadge}</span>`:''}

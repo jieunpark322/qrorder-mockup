@@ -1158,10 +1158,16 @@ function openHistory(){
   const body = rounds.length
     ? rounds.map(histRoundCard).join('')
     : `<div style="padding:36px 0;text-align:center;color:var(--ink3);font-size:14px;">아직 주문 내역이 없어요</div>`;
+  const grandTotal = ORDER_HISTORY.reduce((s,r)=>s+r.total,0);
+  const totalSummary = rounds.length
+    ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--blue-50);border-radius:12px;margin-top:16px;border:1px solid #c5d8f5;">
+        <span style="font-size:14px;font-weight:700;color:var(--blue-d);">전체 합계 · ${rounds.length}차 주문</span>
+        <span style="font-size:17px;font-weight:800;color:var(--blue);">${won(grandTotal)}원</span>
+      </div>` : '';
   $('sheet').innerHTML=`<div class="sheet"><div class="sheet-body">
       <div class="sheet-name">🧾 주문 내역</div>
       <div class="sheet-desc">${S.orderType==='dinein'?STORE.table+' 테이블 · ':''}오늘 주문${rounds.length?` · 총 ${rounds.length}차`:''}</div>
-      ${body}</div>
+      ${body}${totalSummary}</div>
     <div class="sheet-foot"><button class="addbtn" style="background:var(--bg);color:var(--ink2);box-shadow:none;" onclick="closeSheet()">닫기</button></div></div>`;
   $('sheetbg').classList.add('on'); syncScrollLock();
 }

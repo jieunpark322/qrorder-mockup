@@ -757,7 +757,7 @@ function brandHero(){
 /* --- 메뉴판 --- */
 function scrMenu(){
   const closedBanner = !S.businessOpen
-    ? `<div class="closed-banner">🔕 지금은 주문이 안 돼요 — 메뉴만 볼 수 있어요.</div>` : '';
+    ? `<div class="closed-banner">🔕 지금은 주문이 안 돼요. 메뉴만 볼 수 있어요.</div>` : '';
   const sv=(S.search||'').replace(/"/g,'&quot;');
   const secs=CATS.map((c,i)=>({label:c,id:'sec-'+(i+1)}));
   const menuTab = `
@@ -1066,7 +1066,7 @@ function renderSheet(){
         ${out?'':`<div id="sheetDyn">${sheetDynHtml(m)}</div>`}
       </div>
       <div class="sheet-foot">${(out || !S.businessOpen)
-        ? `<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">${out?'지금은 담을 수 없어요':'영업 종료 — 주문이 불가해요'}</button>`
+        ? `<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">${out?'지금은 담을 수 없어요':'영업 종료. 주문이 불가해요'}</button>`
         : `<button class="addbtn" id="sheetAddBtn" onclick="addToCart()">담기 · ${won(sheetUnit()*S.sheet.qty)}원</button>`}</div>
     </div>`;
 }
@@ -1136,7 +1136,7 @@ function renderSetSheet(){
     <div class="sheet-body"><div class="sheet-name">[세트] ${s.name}</div><div class="sheet-desc">${s.desc}</div>
       <div class="sheet-base">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:600;">세트 기본가</span></div>
       <div id="setDyn">${setDynHtml(s)}</div></div>
-    <div class="sheet-foot">${!S.businessOpen?`<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">영업 종료 — 주문이 불가해요</button>`:`<button class="addbtn" id="setAddBtn" onclick="addSet()">담기 · ${won(setUnit()*S.setSheet.qty)}원</button>`}</div></div>`;
+    <div class="sheet-foot">${!S.businessOpen?`<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">영업 종료. 주문이 불가해요</button>`:`<button class="addbtn" id="setAddBtn" onclick="addSet()">담기 · ${won(setUnit()*S.setSheet.qty)}원</button>`}</div></div>`;
 }
 function addSet(){
   const s=SETS.find(x=>x.id===S.setSheet.id);
@@ -1585,9 +1585,9 @@ function scrDone(){
       ? `<div class="status-line"><span class="dot"></span> 주문 접수 · 주방으로 전달됐어요</div>`
       : `<div class="status-line"><span class="dot"></span> 결제 완료 · 주방으로 전달됐어요</div>`;
     const serveLine = S.serve==='self'
-      ? `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중 — 준비되면 <b>카카오 알림톡</b>으로 알려드려요</div>
+      ? `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>카카오 알림톡</b>으로 알려드려요</div>
          <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 셀프 수령</div>`
-      : `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중 — 준비되면 <b>직원이 자리로 가져다 드려요</b></div>
+      : `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>직원이 자리로 가져다 드려요</b></div>
          <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 직접 서빙 (카카오 알림톡 없음)</div>`;
     const payLine = S.payTiming==='postpay'
       ? `<div class="status-line"><span class="dot" style="background:var(--line);"></span> 🧾 나갈 때 카운터에서 결제해 주세요</div>` : '';
@@ -1597,7 +1597,7 @@ function scrDone(){
       <div class="status-line"><span class="dot" style="background:var(--amber);"></span> 약 <b>15~25분</b> 뒤 준비 완료 · 카카오 알림톡 발송</div>`;
     extra=`<div style="text-align:center;"><div class="qrbox"></div><div style="font-size:12px;color:var(--ink3);font-weight:700;margin-top:8px;">픽업 시 이 QR을 보여주세요</div></div>`;
   } else { head='포장 예약 신청 완료!';
-    statusHtml=`<div class="status-line"><span class="dot" style="background:var(--amber);"></span> <b>사장님 수락 대기 중</b> — 수락하면 확정 알림이 와요</div>
+    statusHtml=`<div class="status-line"><span class="dot" style="background:var(--amber);"></span> <b>사장님 수락 대기 중</b>. 수락하면 확정 알림이 와요</div>
       <div class="status-line"><span class="dot"></span> 결제 완료 · 수령 예정 <b>오늘 ${S.pickup}</b></div>`;
   }
   const callNoCard = (S.orderType!=='dinein' && S.callNo)

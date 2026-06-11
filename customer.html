@@ -552,6 +552,7 @@ const S = {
   searchOpen:false, activeCat:null,             // 검색창 토글 / 현재 보이는 카테고리
   callNo:null,                                  // 포장/예약 호출 번호 (사장님 규칙)
   authType:'kakao', // 'kakao' | 'anon'
+  tableActive:true,        // POS 테이블 점유 여부 (false = 테이블 클리어됨)
   termsChecked:{},       // { termId: true/false }
   isHoliday:false,       // 공휴일 시뮬레이션 (스케줄 6번)
   happyHour:false,       // 해피아워 시뮬레이션
@@ -641,6 +642,9 @@ function renderDemo(){
   html += `<span class="ds-div">로그인 ›</span>`
     + `<button class="ds-chip ${S.authType==='kakao'?'on':''}" onclick="S.authType='kakao';render()">🟡 카카오 로그인</button>`
     + `<button class="ds-chip ${S.authType==='anon'?'on':''}" onclick="S.authType='anon';render()">👤 비회원</button>`;
+  html += `<span class="ds-div">POS 테이블 ›</span>`
+    + `<button class="ds-chip ${S.tableActive?'on':''}" onclick="S.tableActive=true;render()">🟢 점유 중</button>`
+    + `<button class="ds-chip ${!S.tableActive?'on':''}" onclick="S.tableActive=false;render()">⬜ 클리어됨</button>`;
   html += `<span class="ds-div">결제 시 에러 ›</span>`
     + [['none','✅ 정상'],['payfail','💳 결제실패'],['pos','🔌 POS끊김'],['network','🌐 네트워크']]
         .map(([k,l])=>`<button class="ds-chip ${S.errSim===k?'on':''}" onclick="setErrSim('${k}')">${l}</button>`).join('');
@@ -1759,7 +1763,12 @@ function scrDone(){
     </div>
     <button class="primarybtn" onclick="resetOrder()">새 주문하기</button><div style="height:24px;"></div>`;
 }
-function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.screen='menu'; render(); }
+function resetOrder(){
+  const keepAuth = S.tableActive; // 테이블 점유 중이면 로그인 상태 유지
+  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={};
+  if(!keepAuth){ S.authType='anon'; S.notifChoice=null; }
+  S.screen='menu'; render();
+}
 
 /* --- 세션 만료 --- */
 function scrSession(){

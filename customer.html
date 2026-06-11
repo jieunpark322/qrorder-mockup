@@ -558,7 +558,7 @@ const $ = id => document.getElementById(id);
 
 function render(){
   renderDemo();
-  const r = { menu:scrMenu, checkout:scrCheckout, terms:scrTerms, processing:scrProcessing, error:scrError, done:scrDone }[S.screen];
+  const r = { menu:scrMenu, checkout:scrCheckout, terms:scrTerms, processing:scrProcessing, error:scrError, done:scrDone, session:scrSession }[S.screen];
   $('screen').innerHTML = r();
   if(!S._keepScroll) window.scrollTo(0,0);
   S._tabAnim=null;
@@ -1600,6 +1600,31 @@ function scrDone(){
 }
 function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.screen='menu'; render(); }
 
+/* --- 세션 만료 --- */
+function scrSession(){
+  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:32px 24px;text-align:center;">
+    <div style="font-size:56px;margin-bottom:24px;">⏱️</div>
+    <div style="font-size:22px;font-weight:800;color:var(--blue);line-height:1.4;margin-bottom:12px;">접속 시간이 다 되었어요.</div>
+    <div style="font-size:15px;color:var(--ink3);line-height:1.6;">안전한 이용을 위해<br>QR코드를 다시 한 번 스캔해 주세요.</div>
+  </div>`;
+}
+
+let _sessionTimer = null;
+const SESSION_TIMEOUT = 20 * 60 * 1000; // 20분
+
+function resetSessionTimer(){
+  if(S.screen==='session') return;
+  clearTimeout(_sessionTimer);
+  _sessionTimer = setTimeout(()=>{
+    S.screen='session';
+    render();
+  }, SESSION_TIMEOUT);
+}
+
+['touchstart','touchend','click','scroll','keydown','input'].forEach(ev=>{
+  document.addEventListener(ev, resetSessionTimer, {passive:true});
+});
+
 /* --- 리뷰 / 매장정보 --- */
 function stars(r){ return '★★★★★'.slice(0,r)+'☆☆☆☆☆'.slice(0,5-r); }
 function avgRating(){ return (REVIEWS.reduce((s,v)=>s+v.r,0)/REVIEWS.length).toFixed(1); }
@@ -1630,6 +1655,7 @@ function storeInfoSection(){
 }
 
 render();
+resetSessionTimer();
 </script>
 </body>
 </html>

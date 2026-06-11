@@ -1450,7 +1450,7 @@ function scrCheckout(){
       if(!needPhone) return '';
       return `<div class="sec"><div class="sec-h">📨 주문 알림 <span class="req">필수</span></div>
         <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>
-        <div class="field"><label>알림톡 받을 휴대폰 번호</label>
+        <div class="field"><label>카카오 알림톡 받을 휴대폰 번호</label>
           <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div>
       </div>`;
     })()}
@@ -1511,7 +1511,7 @@ function goToTerms(){
     (S.authType!=='kakao_friend' && (S.orderType==='preorder' || (S.serve==='self' && S.callMethod==='alimtalk')));
   if(needPhone){
     const digits=(S.phone||'').replace(/\D/g,'');
-    if(digits.length<10){ toast('알림톡 받을 휴대폰 번호를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }
+    if(digits.length<10){ toast('카카오 알림톡 받을 휴대폰 번호를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }
   }
   const terms = getTermsConfig();
   if(!terms.length){ placeOrder(); return; }

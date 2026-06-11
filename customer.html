@@ -1374,11 +1374,40 @@ function timeSlots(){ const out=[]; for(let h=12;h<=20;h++){ out.push(h+':00',h+
 function scrCheckout(){
   const ot=ORDER_TYPES[S.orderType]; const needTime=S.orderType==='preorder';
   const isPostpay = S.orderType==='dinein' && S.payTiming==='postpay';
-  const notify = (S.orderType!=='dinein') || S.serve==='self';
-  // dinein+서빙+비회원 → 전자영수증 선택 입력 (알림 목적 아님)
-  const receiptOptional = S.orderType==='dinein' && S.serve==='server' && S.authType!=='kakao';
+  const finalTotal = (()=>{ const base=(S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal(); return base-couponDiscount(); })();
+
+  // 쿠폰 섹션 빌더
+  const couponSec = !isPostpay ? (()=>{
+    const couponRows = COUPONS.map(cp=>{
+      const base = cartTotal();
+      const applicable = base >= (cp.minOrder||0) && cp.channels.includes(S.orderType);
+      const d = applicable ? (cp.type==='amount' ? cp.value : Math.min(Math.floor(base*cp.value/100), cp.maxDisc||Infinity)) : 0;
+      const sel = S.couponId===cp.id;
+      return `<label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${sel?'var(--blue)':'var(--line)'};background:${sel?'var(--blue-50)':'#fff'};cursor:${applicable?'pointer':'not-allowed'};opacity:${applicable?1:.45};margin-bottom:8px;">
+        <input type="radio" name="coupon" style="margin-top:2px;accent-color:var(--blue);" ${sel?'checked':''} ${!applicable?'disabled':''} onchange="S.couponId='${cp.id}';render()">
+        <span style="flex:1;min-width:0;">
+          <span style="display:block;font-size:14px;font-weight:800;color:var(--ink);">${cp.name}</span>
+          <span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;">${cp.desc}</span>
+        </span>
+        <span style="font-size:15px;font-weight:800;color:var(--blue);white-space:nowrap;">${applicable?'-'+won(d)+'원':'사용 불가'}</span>
+      </label>`;
+    }).join('');
+    return `<div class="sec"><div class="sec-h">🎟️ 쿠폰 할인</div>
+      ${couponRows}
+      <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${!S.couponId?'var(--blue)':'var(--line)'};background:${!S.couponId?'var(--blue-50)':'#fff'};cursor:pointer;margin-bottom:12px;">
+        <input type="radio" name="coupon" style="accent-color:var(--blue);" ${!S.couponId?'checked':''} onchange="S.couponId=null;render()">
+        <span style="font-size:14px;font-weight:700;color:var(--ink3);">쿠폰 사용 안 함</span>
+      </label>
+      <div style="display:flex;gap:8px;">
+        <input id="couponCodeInput" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="쿠폰번호 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()">
+        <button onclick="applyCode()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">적용</button>
+      </div>
+    </div>`;
+  })() : '';
+
   return `<div class="topbar"><button class="back" onclick="S.screen='menu';render()">‹</button>
       <div><div class="ttl">주문 확인 · 결제</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
+
     <div class="sec"><div class="sec-h">📋 주문 내용 <span class="opt-pick" style="font-weight:700;">${cartCount()}개</span></div>
       ${S.cart.map((c,i)=>{ const mi=MENU.find(x=>x.id===c.id); const maxQ=mi&&mi.maxQty?mi.maxQty:Infinity; return `<div class="citem">
         ${imgBox('ci-img', c.img, c.photo, false)}
@@ -1392,58 +1421,22 @@ function scrCheckout(){
         </div>
       </div>`; }).join('')}
       <button class="ghostbtn" onclick="S.screen='menu';render()">+ 메뉴 더 담기</button></div>
-    ${S.orderType==='dinein' && S.serve==='server'?`<div class="sec"><div class="sec-h">🍽️ 받는 방법</div><div class="info-pill">🍳 <span><b>${STORE.table} 테이블</b> 주문 · 준비되면 <b>직원이 자리로 가져다 드려요</b>.</span></div></div>`:''}
-    ${S.orderType==='takeout'?`<div class="sec"><div class="sec-h">🥡 포장 안내</div><div class="info-pill amber">⏱️ <span>결제 후 <b>약 15~25분</b> 뒤 준비돼요. 준비되면 카카오 알림톡으로 알려드려요.</span></div></div>`:''}
+
+    ${couponSec}
+
+    ${isPostpay
+      ? `<div class="sec"><div class="sec-h">🧾 결제 <span class="opt-pick" style="font-weight:600;">후불 · 나갈 때 결제</span></div>
+          <div class="info-pill amber">🧾 <span>지금은 주문만 넣고, <b>나갈 때 카운터에서 결제</b>해요.</span></div></div>`
+      : `<div class="sec"><div class="sec-h">💳 결제 수단 <span class="opt-pick" style="font-weight:600;">선불 · 주문 시 바로 결제</span></div>
+          <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div></div>`}
+
     ${needTime?`<div class="sec"><div class="sec-h">📅 수령 시간 <span class="req">필수</span></div>
       <select class="timesel" onchange="S.pickup=this.value">
         <option value="" ${!S.pickup?'selected':''}>시간을 선택해 주세요</option>
         ${timeSlots().map(t=>`<option value="${t}" ${S.pickup===t?'selected':''}>오늘 ${t}</option>`).join('')}
       </select>
       <div class="info-pill amber" style="margin-top:12px;">📨 <span>주문하면 <b>사장님이 수락</b>해야 확정돼요.</span></div></div>`:''}
-    ${isPostpay
-      ? `<div class="sec"><div class="sec-h">🧾 결제 <span class="opt-pick" style="font-weight:600;">후불 · 나갈 때 결제</span></div>
-          <div class="info-pill amber">🧾 <span>지금은 주문만 넣고, <b>나갈 때 카운터에서 결제</b>해요.</span></div></div>`
-      : `<div class="sec"><div class="sec-h">💳 결제 수단 <span class="opt-pick" style="font-weight:600;">선불 · 주문 시 바로 결제</span></div>
-          <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div></div>`}
-    ${!isPostpay ? (()=>{
-      const disc = couponDiscount();
-      const selCp = COUPONS.find(c=>c.id===S.couponId);
-      const couponRows = COUPONS.map(cp=>{
-        const base = cartTotal();
-        const applicable = base >= (cp.minOrder||0) && cp.channels.includes(S.orderType);
-        const d = applicable ? (cp.type==='amount' ? cp.value : Math.min(Math.floor(base*cp.value/100), cp.maxDisc||Infinity)) : 0;
-        const sel = S.couponId===cp.id;
-        return `<label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${sel?'var(--blue)':'var(--line)'};background:${sel?'var(--blue-50)':'#fff'};cursor:${applicable?'pointer':'not-allowed'};opacity:${applicable?1:.45};margin-bottom:8px;">
-          <input type="radio" name="coupon" style="margin-top:2px;accent-color:var(--blue);" ${sel?'checked':''} ${!applicable?'disabled':''} onchange="S.couponId='${cp.id}';render()">
-          <span style="flex:1;min-width:0;">
-            <span style="display:block;font-size:14px;font-weight:800;color:var(--ink);">${cp.name}</span>
-            <span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;">${cp.desc}</span>
-          </span>
-          <span style="font-size:15px;font-weight:800;color:var(--blue);white-space:nowrap;">${applicable?'-'+won(d)+'원':'사용 불가'}</span>
-        </label>`;
-      }).join('');
-      return `<div class="sec"><div class="sec-h">🎟️ 쿠폰 할인</div>
-        ${couponRows}
-        <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${!S.couponId?'var(--blue)':'var(--line)'};background:${!S.couponId?'var(--blue-50)':'#fff'};cursor:pointer;margin-bottom:12px;">
-          <input type="radio" name="coupon" style="accent-color:var(--blue);" ${!S.couponId?'checked':''} onchange="S.couponId=null;render()">
-          <span style="font-size:14px;font-weight:700;color:var(--ink3);">쿠폰 사용 안 함</span>
-        </label>
-        <div style="display:flex;gap:8px;">
-          <input id="couponCodeInput" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="쿠폰번호 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()">
-          <button onclick="applyCode()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">적용</button>
-        </div>
-      </div>`;
-    })() : ''}
-    ${notify?`<div class="sec"><div class="sec-h">📨 주문 알림</div>
-      <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드릴게요.</span></div>
-      ${S.authType==='kakao'
-        ? ''
-        : `<div class="field"><label>알림톡 받을 휴대폰 번호 <span class="req">필수</span></label>
-            <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div>`}</div>`
-    : receiptOptional?`<div class="sec"><div class="sec-h">🧾 전자영수증</div>
-      <div class="field"><label style="color:var(--ink3);font-weight:600;">전자영수증이 필요하시면 연락처를 입력해 주세요 <span style="font-size:11px;color:var(--ink4);">(선택)</span></label>
-        <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div></div>`
-    :''}
+
     ${S.groupMode && S.orderType==='dinein' ? `
     <div class="sec">
       <div class="sec-h">👥 함께 주문 현황</div>
@@ -1464,13 +1457,14 @@ function scrCheckout(){
         <span style="color:var(--ink3);">손님 2 소계</span><span>${won(guestTotal())}원</span>
       </div>
     </div>` : ''}
+
     <div class="sec">
       <div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>
       ${S.groupMode && S.payGroup && S.orderType==='dinein' ? `<div class="rowline"><span>손님 2 금액</span><span>${won(guestTotal())}원</span></div>` : ''}
       ${couponDiscount()>0 ? `<div class="rowline" style="color:var(--blue);"><span>🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>` : ''}
-      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':(S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액')}</span><span style="color:var(--blue);">${won(((S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal())-couponDiscount())}원</span></div>
+      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':(S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액')}</span><span style="color:var(--blue);">${won(finalTotal)}원</span></div>
     </div>
-    <button class="primarybtn" onclick="goToTerms()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(((S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal())-couponDiscount())}원 결제하기`}</button><div style="height:20px;"></div>`;
+    <button class="primarybtn" onclick="goToTerms()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>`;
 }
 
 /* --- 약관 동의 화면 --- */
@@ -1497,12 +1491,6 @@ function getTermsConfig(){
 
 function goToTerms(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
-  const notify = (S.orderType!=='dinein') || S.serve==='self';
-  // 필수 검증: notify 케이스 + 비회원만 (dinein+서빙+비회원은 선택이라 검증 안 함)
-  if(notify && S.authType!=='kakao'){
-    const digits=(S.phone||'').replace(/\D/g,'');
-    if(digits.length<10){ toast('알림톡 받을 휴대폰 번호를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }
-  }
   const terms = getTermsConfig();
   if(!terms.length){ placeOrder(); return; }
   S.termsChecked = {};
@@ -1667,17 +1655,56 @@ function scrDone(){
         <div class="cn-num">${S.callNo}</div>
         <div class="cn-note">준비되면 이 번호로 불러드려요${S.orderType==='takeout'?' · 픽업대에서 확인하세요':''}</div>
       </div>` : '';
+
+  // 알림 안내 메시지
+  const notifyNote = (()=>{
+    if(S.orderType==='dinein' && S.serve==='server'){
+      return S.authType==='kakao'
+        ? `<div class="kakao-note"><span class="kic">💬</span><span>영수증은 <b>카카오 알림톡</b>으로 발송돼요.</span></div>`
+        : `<div class="kakao-note" style="background:var(--bg);"><span class="kic">🧾</span><span>영수증이 필요하시면 아래에 연락처를 입력해 주세요.</span></div>`;
+    }
+    return S.authType==='kakao'
+      ? `<div class="kakao-note"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>`
+      : S.phone
+        ? `<div class="kakao-note" style="background:var(--bg);"><span class="kic">💬</span><span><b>${S.phone}</b>으로 알림톡을 발송할게요.</span></div>`
+        : `<div class="kakao-note" style="background:#fff3cd;border:1px solid #ffd43b;"><span class="kic">💬</span><span>연락처를 입력하면 준비 알림을 받을 수 있어요.</span></div>`;
+  })();
+
+  // 영수증/알림 연락처 입력 (비카카오 사용자 대상, 선택)
+  const receiptInput = S.authType!=='kakao' ? `
+    <div style="padding:16px;border-top:1px solid var(--line2);">
+      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px;">📨 알림 · 영수증 받기 <span style="font-size:11px;color:var(--ink4);font-weight:500;">(선택)</span></div>
+      <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;">연락처를 입력하면 준비 알림과 전자영수증을 카카오 알림톡으로 받을 수 있어요.<br><span style="color:var(--ink4);">영수증 발송 목적으로만 사용돼요.</span></div>
+      <div style="display:flex;gap:8px;">
+        <input id="donePhoneInput" inputmode="numeric" maxlength="13" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'');document.getElementById('donePhoneSent').textContent=''">
+        <button onclick="submitDonePhone()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">확인</button>
+      </div>
+      <div id="donePhoneSent" style="font-size:12px;color:var(--green);margin-top:6px;font-weight:700;"></div>
+    </div>` : '';
+
   return `<div class="done"><div class="dlogo">${STORE.logo}</div><div class="ck">✓</div>
       <h2>${head}</h2><div class="ordno">주문번호 ${S.orderNo}</div></div>
     ${callNoCard}
-    <div class="done-card"><div style="font-size:13px;font-weight:800;margin-bottom:6px;">${ot.emoji} ${ot.name} · ${STORE.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div>
+    <div class="done-card">
+      <div style="font-size:13px;font-weight:800;margin-bottom:6px;">${ot.emoji} ${ot.name} · ${STORE.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div>
       ${statusHtml}${extra}
+      ${notifyNote}
       <div style="border-top:1px solid var(--line2);margin-top:14px;padding-top:13px;">
         ${S.cart.map(c=>`<div class="rowline" style="padding:3px 0;"><span style="flex:1;">${c.name} ×${c.qty}</span><span style="color:var(--ink);font-weight:700;">${won(c.unit*c.qty)}원</span></div>`).join('')}
-        <div class="rowline tot" style="font-size:15px;"><span>${(S.orderType==='dinein'&&S.payTiming==='postpay')?'결제 예정 · 나갈 때':'결제 금액 · '+S.pay}</span><span>${won(cartTotal())}원</span></div></div></div>
+        ${couponDiscount()>0?`<div class="rowline" style="padding:3px 0;color:var(--blue);"><span style="flex:1;">🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>`:''}
+        <div class="rowline tot" style="font-size:15px;"><span>${(S.orderType==='dinein'&&S.payTiming==='postpay')?'결제 예정 · 나갈 때':'결제 금액 · '+S.pay}</span><span>${won(cartTotal()-couponDiscount())}원</span></div>
+      </div>
+      ${receiptInput}
+    </div>
     <button class="primarybtn" onclick="resetOrder()">새 주문하기</button><div style="height:24px;"></div>`;
 }
-function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.screen='menu'; render(); }
+function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.screen='menu'; render(); }
+function submitDonePhone(){
+  const digits=(S.phone||'').replace(/\D/g,'');
+  if(digits.length<10){ toast('올바른 휴대폰 번호를 입력해 주세요'); return; }
+  const el=$('donePhoneSent');
+  if(el) el.textContent='✓ 입력됐어요. 알림과 영수증을 발송할게요.';
+}
 
 /* --- 세션 만료 --- */
 function scrSession(){

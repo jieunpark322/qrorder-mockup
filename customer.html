@@ -1340,6 +1340,8 @@ function scrCheckout(){
   const ot=ORDER_TYPES[S.orderType]; const needTime=S.orderType==='preorder';
   const isPostpay = S.orderType==='dinein' && S.payTiming==='postpay';
   const notify = (S.orderType!=='dinein') || S.serve==='self';
+  // dinein+서빙+비회원 → 전자영수증 선택 입력 (알림 목적 아님)
+  const receiptOptional = S.orderType==='dinein' && S.serve==='server' && S.authType!=='kakao';
   return `<div class="topbar"><button class="back" onclick="S.screen='menu';render()">‹</button>
       <div><div class="ttl">주문 확인 · 결제</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
     <div class="sec"><div class="sec-h">📋 주문 내용 <span class="opt-pick" style="font-weight:700;">${cartCount()}개</span></div>
@@ -1373,7 +1375,11 @@ function scrCheckout(){
       ${S.authType==='kakao'
         ? ''
         : `<div class="field"><label>알림톡 받을 휴대폰 번호 <span class="req">필수</span></label>
-            <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div>`}</div>`:''}
+            <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div>`}</div>`
+    : receiptOptional?`<div class="sec"><div class="sec-h">🧾 전자영수증</div>
+      <div class="field"><label style="color:var(--ink3);font-weight:600;">전자영수증이 필요하시면 연락처를 입력해 주세요 <span style="font-size:11px;color:var(--ink4);">(선택)</span></label>
+        <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div></div>`
+    :''}
     ${S.groupMode && S.orderType==='dinein' ? `
     <div class="sec">
       <div class="sec-h">👥 함께 주문 현황</div>
@@ -1427,6 +1433,7 @@ function getTermsConfig(){
 function goToTerms(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
   const notify = (S.orderType!=='dinein') || S.serve==='self';
+  // 필수 검증: notify 케이스 + 비회원만 (dinein+서빙+비회원은 선택이라 검증 안 함)
   if(notify && S.authType!=='kakao'){
     const digits=(S.phone||'').replace(/\D/g,'');
     if(digits.length<10){ toast('알림톡 받을 휴대폰 번호를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }

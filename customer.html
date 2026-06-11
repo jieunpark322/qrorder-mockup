@@ -1732,7 +1732,7 @@ function scrDone(){
   // 알림 안내 메시지
   const notifyNote = (()=>{
     if(noAlimtalkCase){
-      if(isFriend) return `<div class="kakao-note"><span class="kic">🧾</span><span>영수증은 <b>카카오 알림톡</b>으로 발송돼요.</span></div>`;
+      if(isFriend || S.notifChoice==='kakao') return `<div class="kakao-note"><span class="kic">🧾</span><span>영수증은 <b>카카오 알림톡</b>으로 발송돼요.</span></div>`;
       return '';
     }
     if(isFriend || S.notifChoice==='kakao') return `<div class="kakao-note"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>`;
@@ -1769,12 +1769,6 @@ function scrDone(){
     <button class="primarybtn" onclick="resetOrder()">새 주문하기</button><div style="height:24px;"></div>`;
 }
 function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.screen='menu'; render(); }
-function submitDonePhone(){
-  const digits=(S.phone||'').replace(/\D/g,'');
-  if(digits.length<10){ toast('올바른 휴대폰 번호를 입력해 주세요'); return; }
-  const el=$('donePhoneSent');
-  if(el) el.textContent='✓ 입력됐어요. 알림과 영수증을 발송할게요.';
-}
 
 /* --- 세션 만료 --- */
 function scrSession(){

@@ -1442,6 +1442,18 @@ function scrCheckout(){
       </select>
       <div class="info-pill amber" style="margin-top:12px;">📨 <span>주문하면 <b>사장님이 수락</b>해야 확정돼요.</span></div></div>`:''}
 
+    ${(()=>{
+      // 알림톡 필수 케이스: 셀프수령+알림톡 호출 or 포장 or 예약 (비회원만)
+      const needPhone = S.authType!=='kakao' &&
+        (S.orderType!=='dinein' || (S.serve==='self' && S.callMethod==='alimtalk'));
+      if(!needPhone) return '';
+      return `<div class="sec"><div class="sec-h">📨 주문 알림 <span class="req">필수</span></div>
+        <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>
+        <div class="field"><label>알림톡 받을 휴대폰 번호</label>
+          <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div>
+      </div>`;
+    })()}
+
     ${S.groupMode && S.orderType==='dinein' ? `
     <div class="sec">
       <div class="sec-h">👥 함께 주문 현황</div>
@@ -1496,6 +1508,12 @@ function getTermsConfig(){
 
 function goToTerms(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
+  const needPhone = S.authType!=='kakao' &&
+    (S.orderType!=='dinein' || (S.serve==='self' && S.callMethod==='alimtalk'));
+  if(needPhone){
+    const digits=(S.phone||'').replace(/\D/g,'');
+    if(digits.length<10){ toast('알림톡 받을 휴대폰 번호를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }
+  }
   const terms = getTermsConfig();
   if(!terms.length){ placeOrder(); return; }
   S.termsChecked = {};
@@ -1679,8 +1697,9 @@ function scrDone(){
   })();
 
   // 영수증/알림 연락처 입력 (비카카오 사용자 대상, 선택)
-  // 호명 + 카카오 = 영수증은 카카오로 자동 발송되므로 입력창 불필요
-  const needReceiptInput = S.authType!=='kakao';
+  // 완료 화면 연락처 입력: 서빙형 또는 호명(알림톡 없는 케이스) + 비회원만
+  const noAlimtalkCase = S.orderType==='dinein' && (S.serve==='server' || S.callMethod==='verbal');
+  const needReceiptInput = S.authType!=='kakao' && noAlimtalkCase;
   const receiptLabel = (S.orderType==='dinein' && (S.serve==='server' || S.callMethod==='verbal'))
     ? '영수증 받기'
     : '알림 · 영수증 받기';

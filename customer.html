@@ -748,7 +748,7 @@ function brandHero(){
         <div class="binfo">
           <div class="bstore">${STORE.name}</div>
           <div class="bstatus ${S.businessOpen?'open':'closed'}">
-            <span class="sdot"></span>${S.businessOpen?'영업 중 · 지금 주문할 수 있어요':'영업 종료 · 메뉴만 확인할 수 있어요'}
+            <span class="sdot"></span>${S.businessOpen?'영업 중':'오늘 영업 종료'}
           </div>
         </div>
         <button class="histbtn" onclick="openHistory()">🧾 주문내역${ORDER_HISTORY.length?` <span class="hist-cnt">${ORDER_HISTORY.length}</span>`:''}</button>
@@ -1165,8 +1165,11 @@ function openHistory(){
         <span style="font-size:17px;font-weight:800;color:var(--blue);">${won(grandTotal)}원</span>
       </div>` : '';
   $('sheet').innerHTML=`<div class="sheet"><div class="sheet-body">
-      <div class="sheet-name">🧾 주문 내역</div>
-      <div class="sheet-desc">${S.orderType==='dinein'?STORE.table+' 테이블 · ':''}오늘 주문${rounds.length?` · 총 ${rounds.length}차`:''}</div>
+      <div class="sheet-name">주문 내역</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+        ${S.orderType==='dinein'?`<span style="display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;background:var(--blue-50);color:var(--blue-d);border:1px solid #c5d8f5;border-radius:8px;padding:4px 10px;">🪑 ${STORE.table}</span>`:''}
+        ${rounds.length?`<span style="display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:700;background:var(--bg);color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:4px 10px;">📋 ${rounds.length}차 주문</span>`:''}
+      </div>
       ${body}${totalSummary}</div>
     <div class="sheet-foot"><button class="addbtn" style="background:var(--bg);color:var(--ink2);box-shadow:none;" onclick="closeSheet()">닫기</button></div></div>`;
   $('sheetbg').classList.add('on'); syncScrollLock();

@@ -1066,8 +1066,8 @@ function renderSheet(){
         ${allergyTextOf(m)?`<div class="allergy"><span class="al-h">⚠️ 알레르기 정보</span><span class="al-list" style="white-space:pre-line;">${escapeHtml(allergyTextOf(m))}</span></div>`:''}
         ${out?'':`<div id="sheetDyn">${sheetDynHtml(m)}</div>`}
       </div>
-      <div class="sheet-foot">${out
-        ? `<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">지금은 담을 수 없어요</button>`
+      <div class="sheet-foot">${(out || !S.businessOpen)
+        ? `<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">${out?'지금은 담을 수 없어요':'영업 종료 — 주문이 불가해요'}</button>`
         : `<button class="addbtn" id="sheetAddBtn" onclick="addToCart()">담기 · ${won(sheetUnit()*S.sheet.qty)}원</button>`}</div>
     </div>`;
 }
@@ -1132,7 +1132,7 @@ function renderSetSheet(){
     <div class="sheet-body"><div class="sheet-name">[세트] ${s.name}</div><div class="sheet-desc">${s.desc}</div>
       <div class="sheet-base">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:600;">세트 기본가</span></div>
       <div id="setDyn">${setDynHtml(s)}</div></div>
-    <div class="sheet-foot"><button class="addbtn" id="setAddBtn" onclick="addSet()">담기 · ${won(setUnit()*S.setSheet.qty)}원</button></div></div>`;
+    <div class="sheet-foot">${!S.businessOpen?`<button class="addbtn" disabled style="background:var(--line);color:var(--ink3);cursor:not-allowed;box-shadow:none;">영업 종료 — 주문이 불가해요</button>`:`<button class="addbtn" id="setAddBtn" onclick="addSet()">담기 · ${won(setUnit()*S.setSheet.qty)}원</button>`}</div></div>`;
 }
 function addSet(){
   const s=SETS.find(x=>x.id===S.setSheet.id);

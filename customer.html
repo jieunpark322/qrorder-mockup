@@ -1602,15 +1602,19 @@ function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S
 
 /* --- 세션 만료 --- */
 function scrSession(){
-  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:32px 24px;text-align:center;">
-    <div style="font-size:56px;margin-bottom:24px;">⏱️</div>
-    <div style="font-size:22px;font-weight:800;color:var(--blue);line-height:1.4;margin-bottom:12px;">접속 시간이 다 되었어요.</div>
-    <div style="font-size:15px;color:var(--ink3);line-height:1.6;">안전한 이용을 위해<br>QR코드를 다시 한 번 스캔해 주세요.</div>
+  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100svh;padding:40px 32px;text-align:center;background:var(--bg);">
+    <div style="width:80px;height:80px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:28px;box-shadow:0 8px 24px rgba(22,49,91,.18);">⏱️</div>
+    <div style="font-size:22px;font-weight:800;color:var(--blue);line-height:1.4;letter-spacing:-.3px;margin-bottom:10px;">접속 시간이 다 되었어요.</div>
+    <div style="font-size:14px;color:var(--ink3);line-height:1.8;word-break:keep-all;">안전한 이용을 위해<br>QR코드를 다시 한 번 스캔해 주세요.</div>
+    <div style="margin-top:40px;padding:18px 24px;border-radius:16px;background:var(--card);border:1px solid var(--line2);display:flex;align-items:center;gap:12px;max-width:280px;width:100%;">
+      <div style="font-size:28px;">📷</div>
+      <div style="text-align:left;"><div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:2px;">테이블 QR 스캔</div><div style="font-size:12px;color:var(--ink3);line-height:1.5;">테이블 위 QR코드를 카메라로<br>촬영해 주세요.</div></div>
+    </div>
   </div>`;
 }
 
 let _sessionTimer = null;
-const SESSION_TIMEOUT = 20 * 60 * 1000; // 20분
+const SESSION_TIMEOUT = 5 * 60 * 1000; // 5분
 
 function resetSessionTimer(){
   if(S.screen==='session') return;

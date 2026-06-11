@@ -845,7 +845,6 @@ function setCard(s){
       <span class="mimg">${pic(s.img, PHOTO['set'+s.id])}</span>
       <span class="minfo">
         <span class="mname">${s.name} ${isOut?'<span style="color:var(--red);font-size:10px;font-weight:700;background:#fef2f2;padding:1px 6px;border-radius:4px;margin-left:2px;">품절</span>':''}</span>
-        <span class="mdesc" style="display:block;">${s.desc}</span>
         <span class="mprice" style="display:block;">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:500;">구성 선택</span></span>
       </span>
       ${clickable?'<span class="mplus">+</span>':''}
@@ -931,7 +930,6 @@ function menuCard(m){
       <span class="minfo">
         ${(m.badges||[]).filter(k=>BADGE[k]).length?`<span style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:3px;">${(m.badges||[]).filter(k=>BADGE[k]).map(k=>`<span class="img-badge ${k}">${BADGE[k].e} ${BADGE[k].l}</span>`).join('')}</span>`:''}
         <span class="mname">${m.name}${out?'<span class="badge-out">품절</span>':''}</span>
-        ${m.desc?`<span class="mdesc">${m.desc}</span>`:''}
         ${hhBadge?`<span style="display:block;margin-top:3px;">${hhBadge}</span>`:''}
         <span class="mprice">${priceHtml}${lowStock(m)?`<span class="stk">· 잔여 ${m.stock}개</span>`:''}</span>
       </span>
@@ -1105,7 +1103,6 @@ function setsSection(){
       <span class="mimg">${pic(s.img, PHOTO['set'+s.id])}</span>
       <span class="minfo">
         <span class="mname">${s.name} ${isOut?'<span style="color:var(--red);font-size:10px;font-weight:700;background:#fef2f2;padding:1px 6px;border-radius:4px;margin-left:2px;">품절</span>':''}</span>
-        <span class="mdesc" style="display:block;">${s.desc}</span>
         <span class="mprice" style="display:block;">${won(s.base)}원~ <span style="font-size:11px;color:var(--ink4);font-weight:500;">구성 선택</span></span>
       </span>
       ${clickable?'<span class="mplus">+</span>':''}

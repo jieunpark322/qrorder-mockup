@@ -548,7 +548,7 @@ const S = {
   errSim:'none', procStep:null, errType:null,   // 결제 처리상태/에러 시뮬레이션
   searchOpen:false, activeCat:null,             // 검색창 토글 / 현재 보이는 카테고리
   callNo:null,                                  // 포장/예약 호출 번호 (사장님 규칙)
-  authType:'kakao',      // 'kakao' | 'anon' — 약관 분기용
+  authType:'kakao_friend', // 'kakao_friend' | 'kakao_nofriend' | 'anon'
   termsChecked:{},       // { termId: true/false }
   isHoliday:false,       // 공휴일 시뮬레이션 (스케줄 6번)
   happyHour:false,       // 해피아워 시뮬레이션
@@ -634,7 +634,8 @@ function renderDemo(){
     + `<button class="ds-chip ${S.businessOpen?'on':''}" onclick="setBusiness(true)">🟢 영업 중</button>`
     + `<button class="ds-chip ${!S.businessOpen?'on':''}" onclick="setBusiness(false)">🔴 영업 종료</button>`;
   html += `<span class="ds-div">로그인 ›</span>`
-    + `<button class="ds-chip ${S.authType==='kakao'?'on':''}" onclick="S.authType='kakao';render()">🟡 카카오</button>`
+    + `<button class="ds-chip ${S.authType==='kakao_friend'?'on':''}" onclick="S.authType='kakao_friend';render()">🟡 카카오 친구 O</button>`
+    + `<button class="ds-chip ${S.authType==='kakao_nofriend'?'on':''}" onclick="S.authType='kakao_nofriend';render()">🟡 카카오 친구 X</button>`
     + `<button class="ds-chip ${S.authType==='anon'?'on':''}" onclick="S.authType='anon';render()">👤 비회원</button>`;
   html += `<span class="ds-div">결제 시 에러 ›</span>`
     + [['none','✅ 정상'],['payfail','💳 결제실패'],['pos','🔌 POS끊김'],['network','🌐 네트워크']]
@@ -1444,7 +1445,7 @@ function scrCheckout(){
 
     ${(()=>{
       // 알림톡 필수 케이스: 셀프수령+알림톡 호출 or 포장 or 예약 (비회원만)
-      const needPhone = S.authType!=='kakao' &&
+      const needPhone = S.authType!=='kakao_friend' &&
         (S.orderType!=='dinein' || (S.serve==='self' && S.callMethod==='alimtalk'));
       if(!needPhone) return '';
       return `<div class="sec"><div class="sec-h">📨 주문 알림 <span class="req">필수</span></div>
@@ -1486,7 +1487,7 @@ function scrCheckout(){
 
 /* --- 약관 동의 화면 --- */
 function getTermsConfig(){
-  const isKakao = S.authType === 'kakao';
+  const isKakao = S.authType === 'kakao_friend' || S.authType === 'kakao_nofriend';
   const isPrepay = S.payTiming === 'prepay' || S.orderType !== 'dinein';
   const isPostpay = !isPrepay;
   const terms = [];
@@ -1500,9 +1501,7 @@ function getTermsConfig(){
   if(!isKakao && isPrepay){
     terms.push({ id:'age',      label:'만 14세 이상임을 확인합니다', required:true,  link:false });
   }
-  if(isKakao || isPrepay){
-    terms.push({ id:'marketing',label:`이 매장의 쿠폰·이벤트 알림 수신 동의`, required:false, link:false });
-  }
+  // 마케팅 동의는 약관에서 제거 → 완료 화면에서 카카오 채널 추가로 대체
   return terms;
 }
 
@@ -1678,40 +1677,43 @@ function scrDone(){
         <div class="cn-note">준비되면 이 번호로 불러드려요${S.orderType==='takeout'?' · 픽업대에서 확인하세요':''}</div>
       </div>` : '';
 
+  const isFriend = S.authType === 'kakao_friend';
+  const isKakaoAny = S.authType === 'kakao_friend' || S.authType === 'kakao_nofriend';
+  const noAlimtalkCase = S.orderType==='dinein' && (S.serve==='server' || S.callMethod==='verbal');
+
   // 알림 안내 메시지
   const notifyNote = (()=>{
-    // 직접서빙 또는 호명 수령 → 알림톡 없음
-    const noAlimtalk = (S.orderType==='dinein') &&
-      (S.serve==='server' || S.callMethod==='verbal');
-    if(noAlimtalk){
-      return S.authType==='kakao'
-        ? `<div class="kakao-note"><span class="kic">🧾</span><span>영수증은 <b>카카오 알림톡</b>으로 발송돼요.</span></div>`
-        : `<div class="kakao-note" style="background:var(--bg);"><span class="kic">🧾</span><span>영수증이 필요하시면 아래에 연락처를 입력해 주세요.</span></div>`;
+    if(noAlimtalkCase){
+      // 서빙형·호명 → 준비 알림 없음
+      if(isFriend) return `<div class="kakao-note"><span class="kic">🧾</span><span>영수증은 <b>카카오 알림톡</b>으로 발송돼요.</span></div>`;
+      return `<div class="kakao-note" style="background:var(--bg);"><span class="kic">🧾</span><span>영수증이 필요하시면 아래에 연락처를 입력해 주세요.</span></div>`;
     }
-    // 알림톡 발송 케이스 (포장/예약, 또는 셀프수령+알림톡)
-    return S.authType==='kakao'
-      ? `<div class="kakao-note"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>`
-      : S.phone
-        ? `<div class="kakao-note" style="background:var(--bg);"><span class="kic">💬</span><span><b>${S.phone}</b>으로 알림톡을 발송할게요.</span></div>`
-        : `<div class="kakao-note" style="background:#fff3cd;border:1px solid #ffd43b;"><span class="kic">💬</span><span>연락처를 입력하면 준비 알림을 받을 수 있어요.</span></div>`;
+    // 알림톡 발송 케이스 (셀프+알림톡, 포장, 예약)
+    if(isFriend) return `<div class="kakao-note"><span class="kic">💬</span><span>준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>`;
+    return S.phone
+      ? `<div class="kakao-note" style="background:var(--bg);"><span class="kic">💬</span><span><b>${S.phone}</b>으로 알림톡을 발송할게요.</span></div>`
+      : `<div class="kakao-note" style="background:#fff3cd;border:1px solid #ffd43b;"><span class="kic">💬</span><span>연락처를 입력하면 준비 알림을 받을 수 있어요.</span></div>`;
   })();
 
-  // 영수증/알림 연락처 입력 (비카카오 사용자 대상, 선택)
-  // 완료 화면 연락처 입력: 서빙형 또는 호명(알림톡 없는 케이스) + 비회원만
-  const noAlimtalkCase = S.orderType==='dinein' && (S.serve==='server' || S.callMethod==='verbal');
-  const needReceiptInput = S.authType!=='kakao' && noAlimtalkCase;
-  const receiptLabel = (S.orderType==='dinein' && (S.serve==='server' || S.callMethod==='verbal'))
-    ? '영수증 받기'
-    : '알림 · 영수증 받기';
+  // 영수증 선택 입력: 서빙형·호명 + 카카오 친구 X 또는 비회원
+  const needReceiptInput = !isFriend && noAlimtalkCase;
   const receiptInput = needReceiptInput ? `
     <div style="padding:16px;border-top:1px solid var(--line2);">
-      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px;">📨 ${receiptLabel} <span style="font-size:11px;color:var(--ink4);font-weight:500;">(선택)</span></div>
+      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px;">🧾 전자영수증 받기 <span style="font-size:11px;color:var(--ink4);font-weight:500;">(선택)</span></div>
       <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;">연락처를 입력하면 전자영수증을 카카오 알림톡으로 받을 수 있어요.<br><span style="color:var(--ink4);">영수증 발송 목적으로만 사용돼요.</span></div>
       <div style="display:flex;gap:8px;">
         <input id="donePhoneInput" inputmode="numeric" maxlength="13" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'');document.getElementById('donePhoneSent').textContent=''">
         <button onclick="submitDonePhone()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">확인</button>
       </div>
       <div id="donePhoneSent" style="font-size:12px;color:var(--green);margin-top:6px;font-weight:700;"></div>
+    </div>` : '';
+
+  // 카카오 채널 추가 CTA: 카카오 친구 X에게만 노출 (마케팅 동의 대체)
+  const kakaoChannelCta = S.authType==='kakao_nofriend' ? `
+    <div style="margin:0 16px 16px;background:var(--blue-50);border:1px solid #c5d8f5;border-radius:12px;padding:14px;">
+      <div style="font-size:13px;font-weight:800;color:var(--blue-d);margin-bottom:4px;">💬 이 매장 소식 받기</div>
+      <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;">카카오 채널을 추가하면 쿠폰·이벤트 알림을 받을 수 있어요.</div>
+      <button onclick="toast('카카오 채널 추가 (목업)')" style="width:100%;background:#FEE500;color:#191919;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">🟡 카카오 채널 추가</button>
     </div>` : '';
 
   return `<div class="done"><div class="dlogo">${STORE.logo}</div><div class="ck">✓</div>
@@ -1728,6 +1730,7 @@ function scrDone(){
       </div>
       ${receiptInput}
     </div>
+    ${kakaoChannelCta}
     <button class="primarybtn" onclick="resetOrder()">새 주문하기</button><div style="height:24px;"></div>`;
 }
 function resetOrder(){ S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.screen='menu'; render(); }

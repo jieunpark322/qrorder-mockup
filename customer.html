@@ -334,6 +334,9 @@
   .proc{text-align:center;padding:90px 28px 40px;min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .spinner{width:54px;height:54px;border:5px solid var(--blue-50);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:24px;}
   @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+  .term-shake{animation:shake .5s ease;}
+  input.term-shake{border-color:var(--red)!important;}
   .proc h2{font-size:22px;font-weight:800;margin:0 0 10px;}
   .proc p{font-size:14.5px;color:var(--ink2);line-height:1.65;}
   .proc .code{margin-top:20px;font-size:11px;color:var(--ink4);background:var(--bg);padding:6px 12px;border-radius:8px;font-family:monospace;}
@@ -1502,7 +1505,7 @@ function scrCheckout(){
         </div>
       </div>` : ''}
 
-    <button class="primarybtn" ${reqAllChecked?`onclick="goToNotif()"`:' disabled'}>${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
+    <button class="primarybtn" onclick="${reqAllChecked?`goToNotif()`:`highlightTerms()`}">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
 
     ${(()=>{
       if(!S.notifSheet) return '';
@@ -1540,7 +1543,7 @@ function scrCheckout(){
               <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
             </div>`:`<div style="height:4px;"></div>`}
 
-          <button ${canPay?`onclick="goToTermsFromNotif()"`:' disabled'} class="primarybtn">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
+          <button onclick="tryNotifPay()" class="primarybtn">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
 
           ${notifRequired?'':`
             <button onclick="S.notifChoice='skip';goToTermsFromNotif()" style="background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;width:100%;padding:12px 8px 0;font-family:inherit;text-decoration:underline;">
@@ -1620,6 +1623,29 @@ function scrNotif(){
     <div style="height:20px;"></div>`;
 }
 
+function highlightTerms(){
+  const terms = getTermsConfig();
+  const uncheck = terms.filter(t=>t.required && !S.termsChecked[t.id]);
+  if(!uncheck.length) return;
+  toast('필수 약관에 동의해 주세요');
+  // 미체크 항목 shake 효과
+  const rows = document.querySelectorAll('.term-row');
+  rows.forEach(row=>{
+    const badge = row.querySelector('.term-req');
+    if(badge){ row.classList.add('term-shake'); setTimeout(()=>row.classList.remove('term-shake'),600); }
+  });
+  // 약관 섹션으로 스크롤
+  const first = document.querySelector('.term-row');
+  if(first) first.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function tryNotifPay(){
+  if(S.notifChoice===null){ toast('연락처 등록 방법을 선택해 주세요'); return; }
+  if(S.notifChoice==='phone'){
+    const digits=(S.phone||'').replace(/\D/g,'');
+    if(digits.length<10){ toast('휴대폰 번호를 입력해 주세요'); const el=document.getElementById('phoneInput'); if(el){el.focus();el.classList.add('term-shake');setTimeout(()=>el.classList.remove('term-shake'),600);} return; }
+  }
+  goToTermsFromNotif();
+}
 function goToNotif(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
   if(S.orderType==='dinein' && S.serve==='self' && S.callMethod==='verbal'){

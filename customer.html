@@ -1484,7 +1484,7 @@ function getTermsConfig(){
     terms.push({ id:'age',      label:'만 14세 이상임을 확인합니다', required:true,  link:false });
   }
   if(isKakao || isPrepay){
-    terms.push({ id:'marketing',label:`이 가게의 쿠폰·이벤트 알림 수신 동의`, required:false, link:false });
+    terms.push({ id:'marketing',label:`이 매장의 쿠폰·이벤트 알림 수신 동의`, required:false, link:false });
   }
   return terms;
 }
@@ -1547,10 +1547,6 @@ function scrTerms(){
       <div style="background:#fff;margin:8px 0 0;">
         ${rows}
       </div>
-      ${!S.authType==='kakao'&&!terms.find(t=>t.id==='marketing')?'':`
-      <div class="notice blue" style="margin:10px 14px 0;">
-        ℹ️ <span>선택 항목에 동의하지 않아도 주문은 가능해요.</span>
-      </div>`}
     </div>
     <div class="sec" style="margin-top:11px;">
       <div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>

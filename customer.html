@@ -1509,7 +1509,7 @@ function scrCheckout(){
       if(!S.notifSheet) return '';
       const notifRequired = S.orderType !== 'dinein' || (S.serve === 'self' && S.callMethod === 'alimtalk');
       const showPhone = S.notifChoice === 'phone';
-      const showMarketing = showPhone || (S.notifChoice==='kakao' && S.authType!=='kakao_friend');
+      const showMarketing = showPhone || S.notifChoice==='kakao';
       const mktChecked = S.termsChecked.marketing || false;
       const canPay = S.notifChoice==='kakao' || S.notifChoice==='skip' || (showPhone && (S.phone||'').replace(/\D/g,'').length>=10);
       return `

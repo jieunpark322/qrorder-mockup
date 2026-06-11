@@ -556,6 +556,7 @@ const S = {
   payGroup:false,        // 함께 결제 여부
   couponId:null,         // 선택된 쿠폰 id (null = 쿠폰 안 씀)
   couponCode:'',         // 쿠폰번호 입력 값
+  notifChoice:null,      // 알림 수단: null | 'kakao' | 'phone' | 'skip'
 };
 const won = n => n.toLocaleString('ko-KR');
 const priceOf = m => (S.orderType==='dinein') ? m.price : (m.takeout!=null ? m.takeout : m.price);
@@ -572,7 +573,7 @@ const $ = id => document.getElementById(id);
 
 function render(){
   renderDemo();
-  const r = { menu:scrMenu, checkout:scrCheckout, terms:scrTerms, processing:scrProcessing, error:scrError, done:scrDone, session:scrSession }[S.screen];
+  const r = { menu:scrMenu, checkout:scrCheckout, notif:scrNotif, terms:scrTerms, processing:scrProcessing, error:scrError, done:scrDone, session:scrSession }[S.screen];
   $('screen').innerHTML = r();
   if(!S._keepScroll) window.scrollTo(0,0);
   S._tabAnim=null;
@@ -1443,18 +1444,6 @@ function scrCheckout(){
       </select>
       <div class="info-pill amber" style="margin-top:12px;">📨 <span>주문하면 <b>사장님이 수락</b>해야 확정돼요.</span></div></div>`:''}
 
-    ${(()=>{
-      // 알림톡 필수 케이스: 포장은 authType 무관 무조건 필수 / 예약·셀프+알림톡은 비카카오친구만
-      const needPhone = S.orderType==='takeout' ||
-        (S.authType!=='kakao_friend' && (S.orderType==='preorder' || (S.serve==='self' && S.callMethod==='alimtalk')));
-      if(!needPhone) return '';
-      return `<div class="sec"><div class="sec-h">📨 주문 알림 <span class="req">필수</span></div>
-        <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드려요.</span></div>
-        <div class="field"><label>카카오 알림톡 받을 휴대폰 번호</label>
-          <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" /></div>
-      </div>`;
-    })()}
-
     ${S.groupMode && S.orderType==='dinein' ? `
     <div class="sec">
       <div class="sec-h">👥 함께 주문 현황</div>
@@ -1482,7 +1471,7 @@ function scrCheckout(){
       ${couponDiscount()>0 ? `<div class="rowline" style="color:var(--blue);"><span>🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>` : ''}
       <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':(S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액')}</span><span style="color:var(--blue);">${won(finalTotal)}원</span></div>
     </div>
-    <button class="primarybtn" onclick="goToTerms()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>`;
+    <button class="primarybtn" onclick="goToNotif()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>`;
 }
 
 /* --- 약관 동의 화면 --- */
@@ -1490,8 +1479,10 @@ function getTermsConfig(){
   const isKakao = S.authType === 'kakao_friend' || S.authType === 'kakao_nofriend';
   const isPrepay = S.payTiming === 'prepay' || S.orderType !== 'dinein';
   const isPostpay = !isPrepay;
-  const needPhone = S.orderType==='takeout' ||
-    (S.authType!=='kakao_friend' && (S.orderType==='preorder' || (S.serve==='self' && S.callMethod==='alimtalk')));
+  // 번호를 제공한 경우(phone 선택 or 포장/예약 kakao친구X) → 마케팅 선택 동의 노출
+  // kakao_friend는 채널 추가 자체가 수신 동의이므로 제외
+  const hasPhone = S.notifChoice === 'phone' || (S.authType === 'kakao_friend' && false);
+  const showMarketing = hasPhone || (S.notifChoice === 'kakao' && S.authType !== 'kakao_friend');
   const terms = [];
   if(isPrepay){
     terms.push({ id:'tos',      label:'이용약관 동의', required:true,  link:true });
@@ -1503,22 +1494,84 @@ function getTermsConfig(){
   if(!isKakao && isPrepay){
     terms.push({ id:'age',      label:'만 14세 이상임을 확인합니다', required:true,  link:false });
   }
-  // 번호 수집 케이스(비카카오친구)에서만 마케팅 선택 동의 노출
-  // kakao_friend는 채널 추가 자체가 수신 동의이므로 제외
-  if(needPhone && S.authType !== 'kakao_friend'){
+  if(showMarketing && isPrepay){
     terms.push({ id:'marketing', label:'쿠폰·이벤트 알림 수신 동의', required:false, link:false });
   }
   return terms;
 }
 
-function goToTerms(){
+/* --- 알림 수단 선택 화면 --- */
+function scrNotif(){
+  const ot = ORDER_TYPES[S.orderType];
+  const isPostpay = S.orderType==='dinein' && S.payTiming==='postpay';
+  const showPhone = S.notifChoice === 'phone';
+
+  return `<div class="topbar"><button class="back" onclick="S.screen='checkout';render()">‹</button>
+      <div><div class="ttl">알림 받기</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
+    <div style="padding:28px 20px 0;">
+      <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;">주문 현황을 어떻게 받으시겠어요?</p>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:28px;">메뉴가 준비되면 알려드려요.</p>
+
+      <button onclick="S.notifChoice='kakao';goToTermsFromNotif()" style="
+        width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+        background:#FEE500;border:none;border-radius:14px;padding:17px;
+        font-size:16px;font-weight:800;color:#191919;cursor:pointer;margin-bottom:14px;font-family:inherit;">
+        🟡 카카오톡으로 1초 만에 알림 받기
+      </button>
+
+      <button onclick="S.notifChoice='phone';S.authType='anon';render()" style="
+        width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+        background:transparent;border:1.5px solid var(--line);border-radius:14px;padding:15px;
+        font-size:14px;font-weight:600;color:var(--ink3);cursor:pointer;margin-bottom:${showPhone?'14px':'0'};font-family:inherit;">
+        ⚪ 직접 전화번호 입력하기
+      </button>
+
+      ${showPhone ? `
+        <div class="field" style="margin-bottom:12px;">
+          <label>휴대폰 번호</label>
+          <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678"
+            value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" autofocus />
+        </div>
+        <button class="primarybtn" onclick="goToTermsFromNotif()">다음 · 약관 동의</button>
+      ` : ''}
+
+      <button onclick="S.notifChoice='skip';goToTermsFromNotif()" style="
+        background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;
+        width:100%;padding:14px 8px 8px;font-family:inherit;text-decoration:underline;">
+        알림 없이 주문하기
+      </button>
+    </div>
+    <div style="height:20px;"></div>`;
+}
+
+function goToNotif(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
-  const needPhone = S.orderType==='takeout' ||
-    (S.authType!=='kakao_friend' && (S.orderType==='preorder' || (S.serve==='self' && S.callMethod==='alimtalk')));
-  if(needPhone){
-    const digits=(S.phone||'').replace(/\D/g,'');
-    if(digits.length<10){ toast('카카오 알림톡 받을 휴대폰 번호를 입력해 주세요'); $('phoneInput')&&$('phoneInput').focus(); return; }
+  S.notifChoice = null;
+  S.screen = 'notif';
+  render();
+}
+
+function goToTermsFromNotif(){
+  if(S.notifChoice === 'kakao'){
+    // 목업: 시뮬레이터 authType 유지 (실제 환경에서는 카카오 OAuth 트리거)
+  } else if(S.notifChoice === 'phone'){
+    S.authType = 'anon';
+    const digits = (S.phone||'').replace(/\D/g,'');
+    if(digits.length < 10){
+      toast('휴대폰 번호를 입력해 주세요');
+      const el = document.getElementById('phoneInput');
+      if(el) el.focus();
+      return;
+    }
+  } else {
+    // skip
+    S.authType = 'anon';
+    S.phone = '';
   }
+  goToTerms();
+}
+
+function goToTerms(){
   const terms = getTermsConfig();
   if(!terms.length){ placeOrder(); return; }
   S.termsChecked = {};
@@ -1565,7 +1618,7 @@ function scrTerms(){
 
   const allOn = terms.every(t=>S.termsChecked[t.id]);
 
-  return `<div class="topbar"><button class="back" onclick="S.screen='checkout';render()">‹</button>
+  return `<div class="topbar"><button class="back" onclick="S.screen='notif';render()">‹</button>
       <div><div class="ttl">약관 동의</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
     <div style="padding:16px 0 0;">
       <div class="terms-all" onclick="_toggleAll()">

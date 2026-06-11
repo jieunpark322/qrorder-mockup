@@ -4727,17 +4727,27 @@ function saveCurrentPage(){
 function initUnsavedGuards(){
   const main = document.getElementById('main');
   if(main){
-    // 검색·필터·페이지네이션·정렬 UI는 데이터 변경이 아님 — 저장 유도 제외
-    // (.menu-panel-filters 컨테이너 / .filter-select / .pagination / [data-no-save] 안의 변경)
+    // 검색·필터·뷰 전환·페이지네이션은 데이터 변경이 아님 — 저장 유도에서 제외
+    // 데이터 편집(이름·가격·메모·시간·텍스트 등)만 트래킹
+    const FILTER_SELECTORS = [
+      '.toolbar',              // 페이지 상단 툴바 (필터 chip · 다운로드 버튼 영역)
+      '.search-wrap',          // 주문 내역 등 검색 영역 (검색·카드번호·금액·기간·상태)
+      '.period-strip',         // 매출 한눈에/상세 보기 기간 선택 영역
+      '.basis-combo',          // 매출 집계 기준 카드 (일/주/월/기간 + 날짜 네비)
+      '.tabs',                 // 페이지 내 탭 전환 (매출 상세 5탭 / 고객지원 등)
+      '.sup-tabs',             // 고객 지원 탭 (자주 묻는 질문 / 서비스 문의)
+      '.stk-tabs',             // 오늘의 준비량 탭 (qty / soldout)
+      '.menu-panel-filters',   // 메뉴/옵션/세트 페이지 필터 영역
+      '.pagination',           // 페이지 이동
+      '.crumb',                // 브레드크럼
+      '[data-no-save]',        // 향후 추가될 검색·필터 영역에 명시적으로 붙이는 속성
+    ];
     const isFilterEvent = (e) => {
       const t = e.target;
       if(!t || !t.closest) return false;
-      return !!(
-        t.closest('.menu-panel-filters') ||
-        t.closest('.pagination') ||
-        t.closest('[data-no-save]') ||
-        (t.classList && t.classList.contains('filter-select'))
-      );
+      if(FILTER_SELECTORS.some(sel => t.closest(sel))) return true;
+      if(t.classList && (t.classList.contains('filter-select') || t.classList.contains('sortable-th'))) return true;
+      return false;
     };
     const onEdit = (e)=>{
       if(isFilterEvent(e)) return;

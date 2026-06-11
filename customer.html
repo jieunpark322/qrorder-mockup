@@ -578,7 +578,7 @@ const $ = id => document.getElementById(id);
 
 function render(){
   renderDemo();
-  const r = { menu:scrMenu, checkout:scrCheckout, notif:scrNotif, terms:scrTerms, processing:scrProcessing, error:scrError, done:scrDone, session:scrSession }[S.screen];
+  const r = { menu:scrMenu, checkout:scrCheckout, processing:scrProcessing, error:scrError, done:scrDone, session:scrSession }[S.screen];
   $('screen').innerHTML = r();
   if(!S._keepScroll) window.scrollTo(0,0);
   S._tabAnim=null;
@@ -1575,53 +1575,6 @@ function getTermsConfig(){
 }
 
 /* --- 알림 수단 선택 화면 --- */
-function scrNotif(){
-  const ot = ORDER_TYPES[S.orderType];
-  const showPhone = S.notifChoice === 'phone';
-  // 알림이 필수인 케이스: 포장·예약·셀프수령+알림톡 방식
-  const notifRequired = S.orderType !== 'dinein' ||
-    (S.serve === 'self' && S.callMethod === 'alimtalk');
-
-  return `<div class="topbar"><button class="back" onclick="S.screen='checkout';render()">‹</button>
-      <div><div class="ttl">알림 받기</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
-    <div style="padding:28px 20px 0;">
-      <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;">주문 현황을 어떻게 받으시겠어요?</p>
-      <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'6px':'28px'};">메뉴가 준비되면 알려드려요.</p>
-      ${notifRequired ? `<p style="font-size:12px;color:var(--red);margin-bottom:22px;">이 매장은 알림을 통해 수령을 안내해요. 알림 수단을 선택해야 주문이 가능해요.</p>` : ''}
-
-      <button onclick="S.notifChoice='kakao';goToTermsFromNotif()" style="
-        width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
-        background:#FEE500;border:none;border-radius:14px;padding:17px;
-        font-size:16px;font-weight:800;color:#191919;cursor:pointer;margin-bottom:14px;font-family:inherit;">
-        🟡 카카오톡으로 1초 만에 알림 받기
-      </button>
-
-      <button onclick="S.notifChoice='phone';S.authType='anon';render()" style="
-        width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
-        background:transparent;border:1.5px solid var(--line);border-radius:14px;padding:15px;
-        font-size:14px;font-weight:600;color:var(--ink3);cursor:pointer;margin-bottom:${showPhone?'14px':'0'};font-family:inherit;">
-        ⚪ 직접 전화번호 입력하기
-      </button>
-
-      ${showPhone ? `
-        <div class="field" style="margin-bottom:12px;">
-          <label>휴대폰 번호</label>
-          <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678"
-            value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'')" autofocus />
-        </div>
-        <button class="primarybtn" onclick="goToTermsFromNotif()">다음 · 약관 동의</button>
-      ` : ''}
-
-      ${notifRequired ? '' : `
-        <button onclick="S.notifChoice='skip';goToTermsFromNotif()" style="
-          background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;
-          width:100%;padding:14px 8px 8px;font-family:inherit;text-decoration:underline;">
-          알림 없이 주문하기
-        </button>
-      `}
-    </div>
-    <div style="height:20px;"></div>`;
-}
 
 function highlightTerms(){
   const terms = getTermsConfig();
@@ -1676,71 +1629,6 @@ function goToTermsFromNotif(){
   placeOrder();
 }
 
-function goToTerms(){
-  const terms = getTermsConfig();
-  if(!terms.length){ placeOrder(); return; }
-  S.termsChecked = {};
-  terms.forEach(t=>S.termsChecked[t.id]=false);
-  S.screen='terms'; render();
-}
-
-function scrTerms(){
-  const ot=ORDER_TYPES[S.orderType];
-  const isPostpay = S.orderType==='dinein' && S.payTiming==='postpay';
-  const terms = getTermsConfig();
-  const requiredIds = terms.filter(t=>t.required).map(t=>t.id);
-  const allChecked = terms.every(t=>S.termsChecked[t.id]);
-  const reqAllChecked = requiredIds.every(id=>S.termsChecked[id]);
-
-  function toggleTerm(id){ S.termsChecked[id]=!S.termsChecked[id]; $('screen').innerHTML = scrTerms(); }
-  function toggleAll(){
-    const next = !allChecked;
-    terms.forEach(t=>S.termsChecked[t.id]=next);
-    $('screen').innerHTML = scrTerms();
-  }
-
-  // expose to global for inline onclick
-  window._toggleTerm = function(id){ S.termsChecked[id]=!S.termsChecked[id]; $('screen').innerHTML = scrTerms(); };
-  window._toggleAll  = function(){
-    const next = !terms.every(t=>S.termsChecked[t.id]);
-    terms.forEach(t=>S.termsChecked[t.id]=next);
-    $('screen').innerHTML = scrTerms();
-  };
-
-  const rows = terms.map(t=>{
-    const checked = S.termsChecked[t.id];
-    const badge = t.pending
-      ? `<span class="term-q">❓확인중</span>`
-      : t.required
-        ? `<span class="term-req">필수</span>`
-        : `<span class="term-opt">선택</span>`;
-    const link = t.link ? `<button class="term-link" onclick="event.stopPropagation();toast('약관 내용 보기 (준비 중)')">보기</button>` : '';
-    return `<div class="term-row" onclick="_toggleTerm('${t.id}')">
-      <span class="term-ck ${checked?'checked':''}">${checked?'✓':''}</span>
-      <span class="term-label">${badge}${t.label}${link}</span>
-    </div>`;
-  }).join('');
-
-  const allOn = terms.every(t=>S.termsChecked[t.id]);
-
-  return `<div class="topbar"><button class="back" onclick="S.screen='checkout';S.notifSheet=true;render()">‹</button>
-      <div><div class="ttl">약관 동의</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
-    <div style="padding:16px 0 0;">
-      <div class="terms-all" onclick="_toggleAll()">
-        <span class="term-all-ck ${allOn?'checked':''}">${allOn?'✓':''}</span>
-        <span class="lbl">전체 동의하기</span>
-      </div>
-      <div style="background:#fff;margin:8px 0 0;">
-        ${rows}
-      </div>
-    </div>
-    <div class="sec" style="margin-top:11px;">
-      <div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>
-      <div class="rowline tot"><span>${isPostpay?'주문 금액':'결제 금액'}</span><span style="color:var(--blue);">${won(cartTotal())}원</span></div>
-    </div>
-    <button class="primarybtn" ${reqAllChecked?`onclick="placeOrder()"`:' disabled'}>${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(cartTotal())}원 결제하기`}</button>
-    <div style="height:20px;"></div>`;
-}
 
 /* --- 결제 진행 → 주문 접수 (STA_001·STA_002) → 완료 / 에러 분기 --- */
 function placeOrder(){

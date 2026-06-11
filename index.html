@@ -5749,8 +5749,6 @@ function mmHeaderHTML(activeKey){
           <div class="mm-more">
             <div class="mm-more-section">데이터 관리</div>
             <button onclick="state.mmMoreOpen=false;openMenuExcelModal()"><span class="ic-em">📊</span>엑셀로 한 번에 올리기</button>
-            <div class="mm-more-section danger-section">⚠️ 위험한 작업</div>
-            <button class="danger" onclick="state.mmMoreOpen=false;resetMenuAll()"><span class="ic-em">🗑️</span>등록된 메뉴 모두 지우기</button>
           </div>
         ` : ''}
         <input type="file" id="mm-json-file" accept=".json" style="display:none" onchange="importMenuJSON(event)" />
@@ -6686,38 +6684,30 @@ function renderStock(main){
   const optOutCnt = optStockItems.filter(it=>it.remaining===0).length;
   const optManualOutCnt = otherOptItems.filter(o=>o.item.manualSoldOut).length;
 
-  // 필터 바 HTML (string 조합 — 중첩 방지)
+  // 필터 바 HTML — 대/중/소분류 셀렉트는 값 유무와 관계없이 항상 노출 (검색 UX 일관성)
   let _sfb = '';
-  if (stockAllCats.length>0 || hasStockTags) {
-    _sfb += '<div class="menu-panel-filters" style="margin-bottom:14px;">';
-    if (stockAllCats.length>0) {
-      _sfb += '<div class="row"><span class="field-label">카테고리</span>';
-      _sfb += `<span class="chip ${state.stockCatFilter==='all'?'on':''}" onclick="state.stockCatFilter='all';renderApp()">전체</span>`;
-      stockAllCats.forEach(c => { _sfb += `<span class="chip ${state.stockCatFilter===c?'on':''}" onclick="state.stockCatFilter='${c.replace(/'/g,"\\'")}';renderApp()">${c}</span>`; });
-      _sfb += '</div>';
-    }
-    if (hasStockTags) {
-      _sfb += '<div class="row"><span class="field-label">분류 태그</span>';
-      if (stockAllL2.length>0) {
-        _sfb += `<select class="filter-select${state.stockL2Filter!=='all'?' active':''}" onchange="state.stockL2Filter=this.value;renderApp()"><option value="all">대분류 전체</option>`;
-        stockAllL2.forEach(t => { _sfb += `<option value="${t.replace(/"/g,'&quot;')}"${state.stockL2Filter===t?' selected':''}>${t}</option>`; });
-        _sfb += '</select>';
-      }
-      if (stockAllL3.length>0) {
-        _sfb += `<select class="filter-select${state.stockL3Filter!=='all'?' active':''}" onchange="state.stockL3Filter=this.value;renderApp()"><option value="all">중분류 전체</option>`;
-        stockAllL3.forEach(t => { _sfb += `<option value="${t.replace(/"/g,'&quot;')}"${state.stockL3Filter===t?' selected':''}>${t}</option>`; });
-        _sfb += '</select>';
-      }
-      if (stockAllTag3.length>0) {
-        _sfb += `<select class="filter-select${state.stockTag3Filter!=='all'?' active':''}" onchange="state.stockTag3Filter=this.value;renderApp()"><option value="all">소분류 전체</option>`;
-        stockAllTag3.forEach(t => { _sfb += `<option value="${t.replace(/"/g,'&quot;')}"${state.stockTag3Filter===t?' selected':''}>${t}</option>`; });
-        _sfb += '</select>';
-      }
-      if (stockFilterActive) _sfb += `<span onclick="state.stockCatFilter='all';state.stockL2Filter='all';state.stockL3Filter='all';state.stockTag3Filter='all';renderApp()" style="font-size:12px;color:var(--blue);cursor:pointer;font-weight:700;">✕ 초기화</span>`;
-      _sfb += '</div>';
-    }
+  _sfb += '<div class="menu-panel-filters" style="margin-bottom:14px;">';
+  if (stockAllCats.length>0) {
+    _sfb += '<div class="row"><span class="field-label">카테고리</span>';
+    _sfb += `<span class="chip ${state.stockCatFilter==='all'?'on':''}" onclick="state.stockCatFilter='all';renderApp()">전체</span>`;
+    stockAllCats.forEach(c => { _sfb += `<span class="chip ${state.stockCatFilter===c?'on':''}" onclick="state.stockCatFilter='${c.replace(/'/g,"\\'")}';renderApp()">${c}</span>`; });
     _sfb += '</div>';
   }
+  // 분류 태그 — 대/중/소 3종 항상 노출 (값 없으면 '항목 없음' 안내 옵션)
+  _sfb += '<div class="row"><span class="field-label">분류 태그</span>';
+  const _selOpts = (cur, all, label) => {
+    let html = `<select class="filter-select${cur!=='all'?' active':''}" onchange="state.${label==='대분류'?'stockL2Filter':label==='중분류'?'stockL3Filter':'stockTag3Filter'}=this.value;renderApp()"><option value="all">${label} 전체</option>`;
+    if (all.length===0) html += `<option value="all" disabled>(등록된 ${label} 없음)</option>`;
+    all.forEach(t => { html += `<option value="${t.replace(/"/g,'&quot;')}"${cur===t?' selected':''}>${t}</option>`; });
+    html += '</select>';
+    return html;
+  };
+  _sfb += _selOpts(state.stockL2Filter, stockAllL2, '대분류');
+  _sfb += _selOpts(state.stockL3Filter, stockAllL3, '중분류');
+  _sfb += _selOpts(state.stockTag3Filter, stockAllTag3, '소분류');
+  if (stockFilterActive) _sfb += `<span onclick="state.stockCatFilter='all';state.stockL2Filter='all';state.stockL3Filter='all';state.stockTag3Filter='all';renderApp()" style="font-size:12px;color:var(--blue);cursor:pointer;font-weight:700;">✕ 초기화</span>`;
+  _sfb += '</div>';
+  _sfb += '</div>';
   const stockFilterBarHtml = _sfb;
 
   main.innerHTML = `

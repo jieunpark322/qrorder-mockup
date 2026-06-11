@@ -1490,6 +1490,8 @@ function getTermsConfig(){
   const isKakao = S.authType === 'kakao_friend' || S.authType === 'kakao_nofriend';
   const isPrepay = S.payTiming === 'prepay' || S.orderType !== 'dinein';
   const isPostpay = !isPrepay;
+  const needPhone = S.orderType==='takeout' ||
+    (S.authType!=='kakao_friend' && (S.orderType==='preorder' || (S.serve==='self' && S.callMethod==='alimtalk')));
   const terms = [];
   if(isPrepay){
     terms.push({ id:'tos',      label:'이용약관 동의', required:true,  link:true });
@@ -1501,7 +1503,11 @@ function getTermsConfig(){
   if(!isKakao && isPrepay){
     terms.push({ id:'age',      label:'만 14세 이상임을 확인합니다', required:true,  link:false });
   }
-  // 마케팅 동의는 약관에서 제거 → 완료 화면에서 카카오 채널 추가로 대체
+  // 번호 수집 케이스(비카카오친구)에서만 마케팅 선택 동의 노출
+  // kakao_friend는 채널 추가 자체가 수신 동의이므로 제외
+  if(needPhone && S.authType !== 'kakao_friend'){
+    terms.push({ id:'marketing', label:'쿠폰·이벤트 알림 수신 동의', required:false, link:false });
+  }
   return terms;
 }
 

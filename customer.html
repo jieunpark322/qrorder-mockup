@@ -475,6 +475,17 @@ const SETS = [
     { name:'디저트', cands:[{n:'크로아상',x:0}] },
   ]},
 ];
+// 목 쿠폰 데이터 — 실서비스에서는 서버에서 수신
+const COUPONS = [
+  { id:'CP001', name:'첫 방문 감사 쿠폰', type:'amount', value:2000, minOrder:10000, desc:'1만원 이상 결제 시 2,000원 할인', channels:['dinein','takeout','preorder'] },
+  { id:'CP002', name:'음료 10% 할인', type:'rate', value:10, maxDisc:3000, minOrder:0, desc:'최대 3,000원 할인', channels:['dinein','takeout','preorder'] },
+];
+// 쿠폰번호 코드 목록 (입력형 검증용 — 목 데이터)
+const COUPON_CODES = {
+  'HELLO2026': { couponId:'CP001' },
+  'SOFT10': { couponId:'CP002' },
+};
+
 const REVIEWS = [
   {c:'홍**',d:'2026-05-15',r:5,b:'분위기가 너무 좋고 커피도 맛있어요. 또 올게요!',reply:''},
   {c:'김**',d:'2026-05-14',r:4,b:'크로아상이 정말 신선하네요. 다만 카운터 줄이 좀…',reply:''},
@@ -542,6 +553,8 @@ const S = {
   happyHour:false,       // 해피아워 시뮬레이션
   groupMode:false,       // 공동 주문 시뮬레이션 (먹고가기 전용)
   payGroup:false,        // 함께 결제 여부
+  couponId:null,         // 선택된 쿠폰 id (null = 쿠폰 안 씀)
+  couponCode:'',         // 쿠폰번호 입력 값
 };
 const won = n => n.toLocaleString('ko-KR');
 const priceOf = m => (S.orderType==='dinein') ? m.price : (m.takeout!=null ? m.takeout : m.price);
@@ -1208,6 +1221,26 @@ function sendCalls(){
 /* --- 장바구니 팝업 시트 --- */
 function cartCount(){ return S.cart.reduce((s,c)=>s+c.qty,0); }
 function cartTotal(){ return S.cart.reduce((s,c)=>s+c.unit*c.qty,0); }
+function couponDiscount(){
+  if(!S.couponId) return 0;
+  const cp = COUPONS.find(c=>c.id===S.couponId);
+  if(!cp) return 0;
+  const base = cartTotal();
+  if(base < (cp.minOrder||0)) return 0;
+  if(cp.type==='amount') return Math.min(cp.value, base);
+  if(cp.type==='rate') return Math.min(Math.floor(base*cp.value/100), cp.maxDisc||Infinity, base);
+  return 0;
+}
+function applyCode(){
+  const code = (S.couponCode||'').trim().toUpperCase();
+  if(!code){ toast('쿠폰번호를 입력해 주세요'); return; }
+  const entry = COUPON_CODES[code];
+  if(!entry){ toast('유효하지 않은 쿠폰번호예요'); return; }
+  S.couponId = entry.couponId;
+  S.couponCode = '';
+  render();
+  toast('쿠폰이 적용됐어요 🎉');
+}
 
 function openCartSheet(){
   if(!S.cart.length) return;
@@ -1372,6 +1405,35 @@ function scrCheckout(){
           <div class="info-pill amber">🧾 <span>지금은 주문만 넣고, <b>나갈 때 카운터에서 결제</b>해요.</span></div></div>`
       : `<div class="sec"><div class="sec-h">💳 결제 수단 <span class="opt-pick" style="font-weight:600;">선불 · 주문 시 바로 결제</span></div>
           <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div></div>`}
+    ${!isPostpay ? (()=>{
+      const disc = couponDiscount();
+      const selCp = COUPONS.find(c=>c.id===S.couponId);
+      const couponRows = COUPONS.map(cp=>{
+        const base = cartTotal();
+        const applicable = base >= (cp.minOrder||0) && cp.channels.includes(S.orderType);
+        const d = applicable ? (cp.type==='amount' ? cp.value : Math.min(Math.floor(base*cp.value/100), cp.maxDisc||Infinity)) : 0;
+        const sel = S.couponId===cp.id;
+        return `<label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${sel?'var(--blue)':'var(--line)'};background:${sel?'var(--blue-50)':'#fff'};cursor:${applicable?'pointer':'not-allowed'};opacity:${applicable?1:.45};margin-bottom:8px;">
+          <input type="radio" name="coupon" style="margin-top:2px;accent-color:var(--blue);" ${sel?'checked':''} ${!applicable?'disabled':''} onchange="S.couponId='${cp.id}';render()">
+          <span style="flex:1;min-width:0;">
+            <span style="display:block;font-size:14px;font-weight:800;color:var(--ink);">${cp.name}</span>
+            <span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;">${cp.desc}</span>
+          </span>
+          <span style="font-size:15px;font-weight:800;color:var(--blue);white-space:nowrap;">${applicable?'-'+won(d)+'원':'사용 불가'}</span>
+        </label>`;
+      }).join('');
+      return `<div class="sec"><div class="sec-h">🎟️ 쿠폰 할인</div>
+        ${couponRows}
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${!S.couponId?'var(--blue)':'var(--line)'};background:${!S.couponId?'var(--blue-50)':'#fff'};cursor:pointer;margin-bottom:12px;">
+          <input type="radio" name="coupon" style="accent-color:var(--blue);" ${!S.couponId?'checked':''} onchange="S.couponId=null;render()">
+          <span style="font-size:14px;font-weight:700;color:var(--ink3);">쿠폰 사용 안 함</span>
+        </label>
+        <div style="display:flex;gap:8px;">
+          <input id="couponCodeInput" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="쿠폰번호 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()">
+          <button onclick="applyCode()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">적용</button>
+        </div>
+      </div>`;
+    })() : ''}
     ${notify?`<div class="sec"><div class="sec-h">📨 주문 알림</div>
       <div class="kakao-note" style="margin:0 0 12px;"><span class="kic">💬</span><span>메뉴가 준비되면 <b>카카오 알림톡</b>으로 알려드릴게요.</span></div>
       ${S.authType==='kakao'
@@ -1403,11 +1465,12 @@ function scrCheckout(){
       </div>
     </div>` : ''}
     <div class="sec">
-      <div class="rowline"><span>내 상품 금액</span><span>${won(cartTotal())}원</span></div>
+      <div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>
       ${S.groupMode && S.payGroup && S.orderType==='dinein' ? `<div class="rowline"><span>손님 2 금액</span><span>${won(guestTotal())}원</span></div>` : ''}
-      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':(S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액')}</span><span style="color:var(--blue);">${won((S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal())}원</span></div>
+      ${couponDiscount()>0 ? `<div class="rowline" style="color:var(--blue);"><span>🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>` : ''}
+      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':(S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액')}</span><span style="color:var(--blue);">${won(((S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal())-couponDiscount())}원</span></div>
     </div>
-    <button class="primarybtn" onclick="goToTerms()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won((S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal())}원 결제하기`}</button><div style="height:20px;"></div>`;
+    <button class="primarybtn" onclick="goToTerms()">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(((S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal())-couponDiscount())}원 결제하기`}</button><div style="height:20px;"></div>`;
 }
 
 /* --- 약관 동의 화면 --- */

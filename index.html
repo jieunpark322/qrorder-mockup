@@ -4727,10 +4727,30 @@ function saveCurrentPage(){
 function initUnsavedGuards(){
   const main = document.getElementById('main');
   if(main){
-    const onEdit = (e)=>{ const t=e.target; if(t && t.matches && t.matches('input,textarea,select')) markUnsavedUI(); };
+    // 검색·필터·페이지네이션·정렬 UI는 데이터 변경이 아님 — 저장 유도 제외
+    // (.menu-panel-filters 컨테이너 / .filter-select / .pagination / [data-no-save] 안의 변경)
+    const isFilterEvent = (e) => {
+      const t = e.target;
+      if(!t || !t.closest) return false;
+      return !!(
+        t.closest('.menu-panel-filters') ||
+        t.closest('.pagination') ||
+        t.closest('[data-no-save]') ||
+        (t.classList && t.classList.contains('filter-select'))
+      );
+    };
+    const onEdit = (e)=>{
+      if(isFilterEvent(e)) return;
+      const t=e.target;
+      if(t && t.matches && t.matches('input,textarea,select')) markUnsavedUI();
+    };
     main.addEventListener('input', onEdit);
     main.addEventListener('change', onEdit);
-    main.addEventListener('click', (e)=>{ const t = e.target.closest && e.target.closest('.toggle-switch,.chip,.seg .b'); if(t) markUnsavedUI(); });
+    main.addEventListener('click', (e)=>{
+      if(isFilterEvent(e)) return;
+      const t = e.target.closest && e.target.closest('.toggle-switch,.chip,.seg .b');
+      if(t) markUnsavedUI();
+    });
   }
   // 실제 탭/창 닫기·새로고침 — 브라우저는 커스텀 팝업을 못 띄우므로 기본 경고로 보호
   window.addEventListener('beforeunload', (e)=>{ if(getUnsavedDiscard()){ e.preventDefault(); e.returnValue=''; } });

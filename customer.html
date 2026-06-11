@@ -1503,14 +1503,17 @@ function getTermsConfig(){
 /* --- 알림 수단 선택 화면 --- */
 function scrNotif(){
   const ot = ORDER_TYPES[S.orderType];
-  const isPostpay = S.orderType==='dinein' && S.payTiming==='postpay';
   const showPhone = S.notifChoice === 'phone';
+  // 알림이 필수인 케이스: 포장·예약·셀프수령+알림톡 방식
+  const notifRequired = S.orderType !== 'dinein' ||
+    (S.serve === 'self' && S.callMethod === 'alimtalk');
 
   return `<div class="topbar"><button class="back" onclick="S.screen='checkout';render()">‹</button>
       <div><div class="ttl">알림 받기</div><div class="sub">${ot.emoji} ${ot.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div></div></div>
     <div style="padding:28px 20px 0;">
       <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;">주문 현황을 어떻게 받으시겠어요?</p>
-      <p style="font-size:13px;color:var(--ink3);margin-bottom:28px;">메뉴가 준비되면 알려드려요.</p>
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'6px':'28px'};">메뉴가 준비되면 알려드려요.</p>
+      ${notifRequired ? `<p style="font-size:12px;color:var(--red);margin-bottom:22px;">이 매장은 알림을 통해 수령을 안내해요. 알림 수단을 선택해야 주문이 가능해요.</p>` : ''}
 
       <button onclick="S.notifChoice='kakao';goToTermsFromNotif()" style="
         width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
@@ -1535,11 +1538,13 @@ function scrNotif(){
         <button class="primarybtn" onclick="goToTermsFromNotif()">다음 · 약관 동의</button>
       ` : ''}
 
-      <button onclick="S.notifChoice='skip';goToTermsFromNotif()" style="
-        background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;
-        width:100%;padding:14px 8px 8px;font-family:inherit;text-decoration:underline;">
-        알림 없이 주문하기
-      </button>
+      ${notifRequired ? '' : `
+        <button onclick="S.notifChoice='skip';goToTermsFromNotif()" style="
+          background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;
+          width:100%;padding:14px 8px 8px;font-family:inherit;text-decoration:underline;">
+          알림 없이 주문하기
+        </button>
+      `}
     </div>
     <div style="height:20px;"></div>`;
 }

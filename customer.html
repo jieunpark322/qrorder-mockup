@@ -1928,9 +1928,35 @@ function storeInfoSection(){
   </div>`;
 }
 
+/* ── 기획 주석 보드용 URL 파라미터 초기화 ── */
+(()=>{
+  const _q=new URLSearchParams(location.search), _g=k=>_q.has(k)?_q.get(k):null;
+  if(_g('screen'))      S.screen      = _g('screen');
+  if(_g('orderType'))   S.orderType   = _g('orderType');
+  if(_g('serve'))       S.serve       = _g('serve');
+  if(_g('payTiming'))   S.payTiming   = _g('payTiming');
+  if(_g('callMethod'))  S.callMethod  = _g('callMethod');
+  if(_g('notifSheet'))  S.notifSheet  = _g('notifSheet')==='1';
+  if(_g('notifChoice')) S.notifChoice = _g('notifChoice');
+  if(_g('phone'))       S.phone       = _g('phone');
+  if(_g('marketing'))   S.termsChecked.marketing = _g('marketing')==='1';
+  if(_g('biz'))         S.businessOpen = _g('biz')!=='0';
+  if(_g('errSim'))      S.errSim      = _g('errSim');
+  if(_g('errType'))     S.errType     = _g('errType');
+  if(_g('couponId'))    S.couponId    = _g('couponId')||null;
+  if(_g('orderStatus')) S.orderStatus = _g('orderStatus');
+  if(_g('orderNo'))     S.orderNo     = _g('orderNo');
+  if(_g('procStep'))    S.procStep    = parseInt(_g('procStep'));
+  if(_g('demoCart'))    S.cart=[
+    {key:'1|Large·얼음보통',id:1,name:'아메리카노',img:'☕',unit:5300,qty:1,optText:'Large · 얼음 보통'},
+    {key:'3|Regular·따뜻하게',id:3,name:'바닐라라떼',img:'🥤',unit:5500,qty:2,optText:'Regular · 따뜻하게'}
+  ];
+  window._initSheetId = _g('sheetId')?parseInt(_g('sheetId')):null;
+})();
+
 render();
-resetSessionTimer();
-if(!S.businessOpen) showClosedAlert();
+if(window._initSheetId) try{ openSheet(window._initSheetId); }catch(e){}
+if(window.self===window.top){ resetSessionTimer(); if(!S.businessOpen) showClosedAlert(); }
 </script>
 </body>
 </html>

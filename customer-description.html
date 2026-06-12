@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR오더 손님 화면 · 기획 주석 보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink-1:#111827; --ink-2:#374151; --ink-3:#6B7280; --ink-4:#9CA3AF;
+  --line:#E5E7EB; --bg:#F9FAFB; --white:#FFFFFF;
+  --blue:#2563EB; --blue-bg:#EFF6FF;
+  --green:#059669; --green-bg:#ECFDF5;
+  --purple:#7C3AED; --purple-bg:#F5F3FF;
+  --amber:#D97706; --amber-bg:#FFFBEB;
+  --phone-w:165px; --phone-h:314px;
+  --scale:0.44; --iframe-w:375px; --iframe-h:714px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Pretendard',-apple-system,sans-serif;
+  background:var(--bg);color:var(--ink-1);
+  display:flex;min-height:100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:196px;flex-shrink:0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  background:var(--white);border-right:1px solid var(--line);
+  padding:20px 0;
+}
+.sidebar-logo{
+  font-size:13px;font-weight:700;color:var(--ink-1);
+  padding:0 16px 4px;
+}
+.sidebar-logo span{font-weight:400;color:var(--ink-3);}
+.sidebar-divider{height:1px;background:var(--line);margin:12px 0;}
+.sidebar-label{
+  font-size:10px;font-weight:700;color:var(--ink-4);
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:0 16px 8px;
+}
+.sidebar-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px;font-size:13px;color:var(--ink-2);
+  text-decoration:none;cursor:pointer;
+}
+.sidebar-item:hover{background:var(--bg);}
+.sidebar-item.active{color:var(--blue);font-weight:600;background:var(--blue-bg);}
+.snum{
+  width:20px;height:20px;border-radius:4px;
+  background:var(--line);font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:var(--ink-3);
+}
+.sidebar-item.active .snum{background:var(--blue);color:white;}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:32px 32px 80px;}
+.page-header{margin-bottom:36px;}
+.page-header h1{font-size:22px;font-weight:700;margin-bottom:4px;}
+.page-header p{font-size:13px;color:var(--ink-3);}
+
+/* ── BOARD ── */
+.board{
+  background:var(--white);border:1px solid var(--line);
+  border-radius:12px;margin-bottom:28px;overflow:hidden;
+}
+.board-header{
+  padding:14px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;
+}
+.board-num{
+  width:28px;height:28px;background:var(--ink-2);color:white;
+  border-radius:6px;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.board-title{font-size:15px;font-weight:700;}
+.board-sub{font-size:12px;color:var(--ink-3);margin-left:2px;}
+.board-body{
+  display:grid;grid-template-columns:1fr 360px;
+}
+
+/* ── STAGE (phones) ── */
+.stage-area{
+  padding:20px;border-right:1px solid var(--line);
+  overflow-x:auto;
+}
+.phones-row{display:flex;gap:14px;align-items:flex-start;}
+.phone-col{
+  display:flex;flex-direction:column;align-items:center;
+  gap:7px;flex-shrink:0;
+}
+.variant-label{
+  font-size:10px;font-weight:600;color:var(--ink-3);
+  text-align:center;max-width:var(--phone-w);line-height:1.3;
+  background:var(--line);padding:3px 8px;border-radius:4px;
+  white-space:pre-line;
+}
+.phone-chrome{
+  width:var(--phone-w);height:var(--phone-h);
+  border:2px solid var(--ink-2);border-radius:14px;
+  overflow:hidden;background:white;flex-shrink:0;
+}
+.phone-chrome iframe{
+  width:var(--iframe-w);height:var(--iframe-h);
+  transform:scale(var(--scale));transform-origin:top left;
+  border:none;pointer-events:none;
+}
+
+/* ── CARDS ── */
+.cards-area{
+  padding:14px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:9px;
+}
+.card{border-radius:8px;padding:10px 12px;border:1px solid transparent;}
+.card.purpose  {background:var(--blue-bg);  border-color:#BFDBFE;}
+.card.behavior {background:var(--green-bg); border-color:#A7F3D0;}
+.card.data     {background:var(--purple-bg);border-color:#DDD6FE;}
+.card.exception{background:var(--amber-bg); border-color:#FDE68A;}
+.card-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.pin-b{
+  width:18px;height:18px;border-radius:50%;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.purpose  .pin-b{background:var(--blue);  color:white;}
+.behavior .pin-b{background:var(--green); color:white;}
+.data     .pin-b{background:var(--purple);color:white;}
+.exception .pin-b{background:var(--amber);color:white;}
+.cat-tag{
+  font-size:9px;font-weight:700;letter-spacing:.05em;
+  padding:1px 5px;border-radius:3px;
+}
+.purpose  .cat-tag{color:var(--blue);  background:#DBEAFE;}
+.behavior .cat-tag{color:var(--green); background:#D1FAE5;}
+.data     .cat-tag{color:var(--purple);background:#EDE9FE;}
+.exception .cat-tag{color:var(--amber);background:#FEF3C7;}
+.card-title{font-size:12px;font-weight:600;color:var(--ink-1);margin-bottom:4px;}
+.card-body{list-style:none;display:flex;flex-direction:column;gap:2px;}
+.card-body li{
+  font-size:11px;color:var(--ink-2);
+  padding-left:8px;position:relative;line-height:1.5;
+}
+.card-body li::before{content:'·';position:absolute;left:0;}
+.purpose  .card-body li::before{color:var(--blue);}
+.behavior .card-body li::before{color:var(--green);}
+.data     .card-body li::before{color:var(--purple);}
+.exception .card-body li::before{color:var(--amber);}
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">QR오더 <span>손님 화면</span></div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-label">화면 목록</div>
+</nav>
+
+<main class="main" id="main">
+  <div class="page-header">
+    <h1>QR오더 손님 화면 · 기획 주석 보드</h1>
+    <p>customer.html 전체 화면 · 주문 유형별 케이스 분기 · 핵심 기능 설계 명세</p>
+  </div>
+  <div id="boards"></div>
+</main>
+
+<script>
+const SCREENS = [
+  {
+    id:'b1', num:'01', title:'메뉴 화면',
+    sub:'QR 스캔 후 첫 진입 · 주문 유형별 화면 분기',
+    variants:[
+      {label:'내점 · 선결제', url:'customer.html?orderType=dinein&serve=server&payTiming=prepay'},
+      {label:'내점 · 후불', url:'customer.html?orderType=dinein&serve=server&payTiming=postpay'},
+      {label:'포장', url:'customer.html?orderType=takeout'},
+      {label:'예약 픽업', url:'customer.html?orderType=preorder'},
+      {label:'영업시간 외', url:'customer.html?biz=0'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'주문 유형 칩 (상단 고정)',
+       items:['QR 파라미터로 결정된 주문 유형(내점·포장·예약)을 상단 칩 형태로 고정 표시','내점/포장/예약 3종 중 하나만 활성화 상태']},
+      {n:2, cat:'behavior',  title:'카테고리 탭 & 메뉴 목록',
+       items:['탭 클릭 시 해당 카테고리 섹션으로 스크롤','스크롤 위치에 따라 탭 자동 활성화 (IntersectionObserver)','메뉴 카드 클릭 시 메뉴 상세 시트 오픈']},
+      {n:3, cat:'exception', title:'품절 메뉴 / 영업시간 외',
+       items:['품절 메뉴: 카드 dimming + "품절" 배지, 탭·담기 불가','영업시간 외: 전체 메뉴 비활성, "준비중" 배너 오버레이']},
+      {n:4, cat:'data',      title:'장바구니 바 (하단 고정)',
+       items:['cart[] 배열 변경 시 수량·합계 즉시 갱신','0개이면 바 미표시, 1개 이상이면 슬라이드 업 표시']},
+    ],
+  },
+  {
+    id:'b2', num:'02', title:'메뉴 상세 시트',
+    sub:'메뉴 카드 클릭 시 올라오는 바텀 시트',
+    variants:[
+      {label:'기본 음료 (id=1)', url:'customer.html?sheetId=1'},
+      {label:'다중 옵션 메뉴 (id=2)', url:'customer.html?sheetId=2'},
+      {label:'장바구니 있는 상태', url:'customer.html?demoCart=1&sheetId=1'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'메뉴 기본 정보 영역',
+       items:['이모지 이미지·이름·단가·설명 상단 표시','S.sheet = {id, sel:{}, qty:1} 초기화 후 시트 오픈']},
+      {n:2, cat:'behavior',  title:'옵션 그룹 (필수/선택)',
+       items:['필수 옵션 미선택 시 담기 버튼 비활성화','선택 옵션은 복수 가능, sel 객체에 {그룹명: 선택값} 저장','옵션 없는 메뉴는 그룹 섹션 미표시']},
+      {n:3, cat:'data',      title:'수량 스테퍼 & 담기 버튼',
+       items:['S.sheet.qty 최솟값 1 (감소 불가 제한)','담기 버튼에 개수·소계 실시간 반영 ("2개 담기 · ₩10,600")']},
+      {n:4, cat:'exception', title:'동일 메뉴 재담기',
+       items:['동일 key(id + 옵션 조합) 재담기 시 qty 누적 처리','품절 메뉴는 시트 진입 자체 차단 (카드 클릭 불가)']},
+    ],
+  },
+  {
+    id:'b3', num:'03', title:'결제 화면',
+    sub:'장바구니 확인 · 쿠폰 · 결제수단 · 약관 동의',
+    variants:[
+      {label:'내점 · 선결제', url:'customer.html?screen=checkout&demoCart=1&orderType=dinein&serve=server&payTiming=prepay'},
+      {label:'내점 · 후불', url:'customer.html?screen=checkout&demoCart=1&orderType=dinein&serve=server&payTiming=postpay'},
+      {label:'포장', url:'customer.html?screen=checkout&demoCart=1&orderType=takeout'},
+      {label:'예약 픽업', url:'customer.html?screen=checkout&demoCart=1&orderType=preorder'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'주문 내역 섹션',
+       items:['cart[] 메뉴·수량·소계 목록 표시','수량 변경·삭제 가능, 변경 즉시 합계 재산출']},
+      {n:2, cat:'exception', title:'쿠폰 섹션 (선불만 노출)',
+       items:['후불(dinein+postpay)이면 쿠폰 섹션 전체 미노출','한 번에 1장 적용, 선택 시 합계에서 즉시 차감']},
+      {n:3, cat:'behavior',  title:'결제 수단 선택',
+       items:['카드·간편결제 중 선택 (선불 전용)','후불이면 결제수단 UI 숨김 → "현장 결제" 안내 텍스트만 표시']},
+      {n:4, cat:'data',      title:'약관 동의 (선불만 노출)',
+       items:['필수 약관 미동의 시 결제 불가','마케팅 수신 선택 동의 포함 (카카오 채널 추가)','후불이면 약관 섹션 전체 미노출']},
+      {n:5, cat:'exception', title:'결제하기 버튼 3가지 분기',
+       items:['선불: 알림 수단 시트 오픈 → 수단 선택 후 결제 진행','후불: 시트 없이 바로 placeOrder() 직접 호출','예약: 수령 시간(시+분) 미선택 시 버튼 비활성화']},
+    ],
+  },
+  {
+    id:'b4', num:'04', title:'알림 수단 시트',
+    sub:'선불 결제 전 주문 완료 알림 수신 방법 선택',
+    variants:[
+      {label:'초기 (선택 전)', url:'customer.html?screen=checkout&demoCart=1&payTiming=prepay&notifSheet=1'},
+      {label:'카카오 알림톡 선택', url:'customer.html?screen=checkout&demoCart=1&payTiming=prepay&notifSheet=1&callMethod=alimtalk'},
+      {label:'전화번호 입력 완료', url:'customer.html?screen=checkout&demoCart=1&payTiming=prepay&notifSheet=1&callMethod=alimtalk&phone=01012345678'},
+      {label:'직접 구두 확인', url:'customer.html?screen=checkout&demoCart=1&payTiming=prepay&notifSheet=1&callMethod=verbal'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'알림 수단 2종 선택 버튼',
+       items:['카카오 알림톡 / 직접 구두 확인 중 하나 선택','선택 즉시 callMethod 상태 업데이트, 하위 영역 Expand']},
+      {n:2, cat:'data',      title:'전화번호 입력 필드',
+       items:['callMethod=alimtalk 선택 시에만 표시','숫자 자동 포맷 (010-XXXX-XXXX)','phone 입력 완료 시 확인 버튼 활성화']},
+      {n:3, cat:'behavior',  title:'마케팅 수신 동의 (선택)',
+       items:['알림톡 선택 시 카카오 채널 추가 동의 체크박스 표시','비필수 — 미체크 시에도 주문 진행 가능']},
+      {n:4, cat:'exception', title:'확인 버튼 활성화 조건',
+       items:['alimtalk: phone 유효 입력 완료 시 활성화','verbal: 선택 즉시 활성화 (전화번호 불필요)','시트 외부 터치로 닫기 → 주문 미진행 (결제 화면 복귀)']},
+    ],
+  },
+  {
+    id:'b5', num:'05', title:'결제 처리 중',
+    sub:'결제 API 호출 중 로딩 · 화면 잠금 상태',
+    variants:[
+      {label:'처리 중 (1단계)', url:'customer.html?screen=processing&procStep=1'},
+      {label:'처리 중 (2단계)', url:'customer.html?screen=processing&procStep=2'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'진행 단계 인디케이터',
+       items:['결제 처리 단계(1→2→3) 시각화','procStep 값에 따라 단계 표시 업데이트']},
+      {n:2, cat:'exception', title:'화면 잠금 & 타임아웃',
+       items:['처리 중 뒤로가기 차단 (history.pushState 활용)','5초 이상 응답 없으면 자동으로 에러 화면 전환','결제 실패 확정 시 S.screen=error 로 자동 라우팅']},
+    ],
+  },
+  {
+    id:'b6', num:'06', title:'주문 완료',
+    sub:'결제 성공 후 주문 상태 · 영수증 확인',
+    variants:[
+      {label:'내점 · 선결제', url:'customer.html?screen=done&orderType=dinein&payTiming=prepay&orderNo=2042&demoCart=1'},
+      {label:'내점 · 후불', url:'customer.html?screen=done&orderType=dinein&payTiming=postpay&orderNo=2043&demoCart=1'},
+      {label:'포장', url:'customer.html?screen=done&orderType=takeout&orderNo=2044&demoCart=1'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'주문번호 & 유형별 안내 메시지',
+       items:['서버로부터 받은 orderNo 표시','orderType·payTiming에 따라 다음 행동 안내 문구 분기 (기다리기 / 카운터 이동 등)']},
+      {n:2, cat:'data',      title:'주문 내역 (영수증 역할)',
+       items:['완료 시점 cart[] 스냅샷 — 이후 변경 없음','메뉴·옵션·수량·금액 표시, 스크롤로 전체 확인']},
+      {n:3, cat:'exception', title:'후불 결제 안내',
+       items:['후불이면 합계 영역에 "현장 결제 예정" 안내 노출','결제 완료 처리는 카운터에서 수동 진행 (앱 미처리)']},
+      {n:4, cat:'behavior',  title:'새 주문 시작',
+       items:['newOrder() 호출 → cart·쿠폰·전화번호 초기화','메뉴 화면으로 복귀, 주문 유형은 QR 원본값 유지']},
+    ],
+  },
+  {
+    id:'b7', num:'07', title:'에러 화면',
+    sub:'결제 실패 · 네트워크 오류 · 처리 타임아웃',
+    variants:[
+      {label:'결제 실패', url:'customer.html?screen=error&errType=payment_failed'},
+      {label:'네트워크 오류', url:'customer.html?screen=error&errType=network'},
+      {label:'주문 처리 실패', url:'customer.html?screen=error&errType=order_failed'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'에러 유형별 메시지',
+       items:['errType에 따라 오류 원인 안내 문구 분기','결제 실패 / 네트워크 오류 / 처리 실패 3종']},
+      {n:2, cat:'behavior',  title:'재시도 동선',
+       items:['결제 실패: backToCheckout() → 결제 화면 복귀','네트워크 오류: location.reload() 새로고침','처리 실패: 처음부터 재시도 유도']},
+      {n:3, cat:'exception', title:'직원 도움 안내',
+       items:['자동 해결 불가 시 직원 호출 또는 카운터 이동 안내','알 수 없는 errType: "알 수 없는 오류" fallback 메시지']},
+    ],
+  },
+  {
+    id:'b8', num:'08', title:'세션 만료',
+    sub:'QR 유효 시간(5분) 초과 시 접속 차단 화면',
+    variants:[
+      {label:'세션 만료', url:'customer.html?screen=expired'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'세션 만료 안내',
+       items:['타이머(5분) 종료 시 자동으로 S.screen=expired 전환','QR 재스캔으로만 새 세션 시작 가능']},
+      {n:2, cat:'exception', title:'기획 보드 iframe 예외',
+       items:['window.self !== window.top 조건으로 타이머·Alert 미동작 처리','description 보드 내 iframe에서는 세션 타이머 비활성화']},
+    ],
+  },
+];
+
+const CAT_META = {
+  purpose:  {icon:'🎯', label:'목적',   cls:'purpose'},
+  behavior: {icon:'⚙️', label:'동작',   cls:'behavior'},
+  data:     {icon:'🗄️', label:'데이터', cls:'data'},
+  exception:{icon:'⚠️', label:'예외',   cls:'exception'},
+};
+
+function buildBoard(s) {
+  const phones = s.variants.map(v=>`
+    <div class="phone-col">
+      <div class="variant-label">${v.label}</div>
+      <div class="phone-chrome">
+        <iframe src="${v.url}" loading="lazy" title="${v.label}"></iframe>
+      </div>
+    </div>`).join('');
+
+  const cards = s.pins.map(p=>{
+    const m = CAT_META[p.cat]||CAT_META.purpose;
+    return `
+    <div class="card ${m.cls}">
+      <div class="card-head">
+        <span class="pin-b">${p.n}</span>
+        <span class="cat-tag">${m.icon} ${m.label}</span>
+      </div>
+      <div class="card-title">${p.title}</div>
+      <ul class="card-body">${p.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="board" id="${s.id}">
+    <div class="board-header">
+      <span class="board-num">${s.num}</span>
+      <span class="board-title">${s.title}</span>
+      <span class="board-sub">· ${s.sub}</span>
+    </div>
+    <div class="board-body">
+      <div class="stage-area"><div class="phones-row">${phones}</div></div>
+      <div class="cards-area">${cards}</div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('boards').innerHTML = SCREENS.map(buildBoard).join('');
+
+document.getElementById('sidebar').innerHTML +=
+  SCREENS.map(s=>`
+    <a class="sidebar-item" href="#${s.id}">
+      <span class="snum">${s.num}</span>${s.title}
+    </a>`).join('');
+
+const main = document.getElementById('main');
+const sideItems = ()=>document.querySelectorAll('.sidebar-item');
+main.addEventListener('scroll',()=>{
+  let cur='';
+  document.querySelectorAll('.board').forEach(b=>{
+    if(b.offsetTop - 60 <= main.scrollTop) cur = b.id;
+  });
+  sideItems().forEach(i=>i.classList.toggle('active', i.getAttribute('href')==='#'+cur));
+});
+</script>
+</body>
+</html>

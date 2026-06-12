@@ -1786,12 +1786,11 @@ function scrDone(){
     ${buildProgressBar()}
     ${callNoCard}
     <div class="done-card">
-      <div style="font-size:13px;font-weight:800;margin-bottom:6px;">${ot.emoji} ${ot.name} · ${STORE.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div>
       ${receiptNote}${extraNote}
-      <div style="border-top:1px solid var(--line2);margin-top:14px;padding-top:13px;">
+      <div style="${(receiptNote||extraNote)?'border-top:1px solid var(--line2);margin-top:14px;padding-top:13px;':''}">
         ${S.cart.map(c=>`<div class="rowline" style="padding:3px 0;"><span style="flex:1;">${c.name} ×${c.qty}</span><span style="color:var(--ink);font-weight:700;">${won(c.unit*c.qty)}원</span></div>`).join('')}
         ${couponDiscount()>0?`<div class="rowline" style="padding:3px 0;color:var(--blue);"><span style="flex:1;">🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>`:''}
-        <div class="rowline tot" style="font-size:15px;"><span>${(S.orderType==='dinein'&&S.payTiming==='postpay')?'결제 예정 · 나갈 때':'결제 금액 · '+S.pay}</span><span>${won(cartTotal()-couponDiscount())}원</span></div>
+        <div class="rowline tot" style="font-size:15px;"><span>${(S.orderType==='dinein'&&S.payTiming==='postpay')?'결제 예정':'결제 금액'}</span><span>${won(cartTotal()-couponDiscount())}원</span></div>
       </div>
     </div>
     <button class="primarybtn" onclick="resetOrder()">새 주문하기</button><div style="height:24px;"></div>`;

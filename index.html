@@ -1241,7 +1241,7 @@ const visCHANNEL = () => (typeof ORDER_CHANNELS!=='undefined' && ORDER_CHANNELS.
 // 주문 (오늘 5/15 일부)
 // 주문 데이터 — date(결제일) 필드 추가. 1년 초과 거래는 카드번호 전체 마스킹
 const ORDERS = [
-  // 저녁 후결제 주문 — 17:00~21:00 시간대 (후결제 정책)
+  // 저녁 후불 주문 — 17:00~21:00 시간대 (후불 정책)
   { id:'#20260515-0052', date:'2026-05-15', time:'20:05', channel:'테이블 3', ch:'매장', menu:'아메리카노',           issuer:null, amt:4500, status:'취소', stl:'제외',           cancelDate:'2026-05-15', cancelTime:'20:08',
     items:[{name:'아메리카노', qty:1, price:4500, options:['HOT']}] },
   { id:'#20260515-0051', date:'2026-05-15', time:'19:14', channel:'테이블 5', ch:'매장', menu:'카페라떼 외 1건',      issuer:'KB',   amt:11000, status:'완료', stl:'정산예정 5/20', card:'4141209876',
@@ -1683,7 +1683,7 @@ function paySub(o){
   return o.paySub || '';
 }
 // 결제수단 라벨 — 1depth만 (표·요약용). 2depth는 paySub()으로 별도 노출.
-// 주문별 결제 방식 — 포장은 항상 선불, 매장은 저녁(17~21시)만 후결제
+// 주문별 결제 방식 — 포장은 항상 선불, 매장은 저녁(17~21시)만 후불
 function orderPayType(o){
   if (!o || o.ch === '포장' || o.ch === '포장 예약') return '선불';
   if (!o.issuer) return '후불'; // 결제 정보 없음 = 주문 취소(후불)
@@ -12372,10 +12372,10 @@ function ot_currentPolicy(){
   const now = new Date();
   const hhmm = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   if(ch.payment==='prepay')  return { label:'선불', scope:'고정 정책' };
-  if(ch.payment==='postpay') return { label:'후결제', scope:'고정 정책' };
+  if(ch.payment==='postpay') return { label:'후불', scope:'고정 정책' };
   const cur = ch.schedule.find(s=>hhmm>=s.start && hhmm<=s.end);
-  if(cur) return { label: cur.policy==='prepay'?'선불':'후결제', scope:`${cur.name} 시간대` };
-  return { label: ch.defaultPolicy==='prepay'?'선불':'후결제', scope:'미정 시간대 기본값' };
+  if(cur) return { label: cur.policy==='prepay'?'선불':'후불', scope:`${cur.name} 시간대` };
+  return { label: ch.defaultPolicy==='prepay'?'선불':'후불', scope:'미정 시간대 기본값' };
 }
 // 액션 핸들러
 function setOrderMode(m){ ORDER_CHANNELS.mode = m; renderApp(); }
@@ -12652,7 +12652,7 @@ function renderOrderType(main){
                     <select class="input" style="width:108px;" onchange="updateOrderSlot(${i},'start',this.value)">${timeOptions10(s.start)}</select>
                     <span style="color:var(--ink-4);">~</span>
                     <select class="input" style="width:108px;" onchange="updateOrderSlot(${i},'end',this.value)">${timeOptions10(s.end)}</select>
-                    <span class="pmt" style="margin-left:auto;" onclick="toggleOrderSlotPolicy(${i})">${s.policy==='prepay'?'선불':'후결제'}</span>
+                    <span class="pmt" style="margin-left:auto;" onclick="toggleOrderSlotPolicy(${i})">${s.policy==='prepay'?'선불':'후불'}</span>
                     <span class="x" onclick="removeOrderSlot(${i})">×</span>
                   </div>
                 `).join('')}
@@ -12660,7 +12660,7 @@ function renderOrderType(main){
                 <div class="ot-row" style="margin-top:10px;">
                   <span class="lbl">미정 시간대 기본값</span>
                   <div class="ot-opt ${ch.defaultPolicy==='prepay'?'sel':''}" onclick="setOrderDefaultPolicy('prepay')">선불</div>
-                  <div class="ot-opt ${ch.defaultPolicy==='postpay'?'sel':''}" onclick="setOrderDefaultPolicy('postpay')">후결제</div>
+                  <div class="ot-opt ${ch.defaultPolicy==='postpay'?'sel':''}" onclick="setOrderDefaultPolicy('postpay')">후불</div>
                 </div>
               </div>
             ` : ''}

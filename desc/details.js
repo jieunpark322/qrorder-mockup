@@ -1052,7 +1052,7 @@ window.DETAILS = {
    ],
    "behavior": [
     "헤더에 현재 시각을 표기: \"💳 지금 받는 결제 방식 · {HH:MM} 기준\" (예: \"19:48 기준\"). <code>hhmm</code>은 렌더 시점 현재 시각.",
-    "<b>먹고가기 카드</b>: <code>ot_currentPolicy()</code> 결과로 결제 라벨(선불=💳 / 후결제=🧾)과 적용 범위(scope)를 표시. payment=prepay→\"선불·고정 정책\", postpay→\"후결제·고정 정책\", scheduled→현재 시각이 속한 슬롯명+\"시간대\"(예 \"점심 시간대\")이며 끝에 \"· 시간대별 자동\" 부기.",
+    "<b>먹고가기 카드</b>: <code>ot_currentPolicy()</code> 결과로 결제 라벨(선불=💳 / 후불=🧾)과 적용 범위(scope)를 표시. payment=prepay→\"선불·고정 정책\", postpay→\"후불·고정 정책\", scheduled→현재 시각이 속한 슬롯명+\"시간대\"(예 \"점심 시간대\")이며 끝에 \"· 시간대별 자동\" 부기.",
     "scheduled인데 현재 시각이 어떤 슬롯에도 속하지 않으면 <code>defaultPolicy</code>를 적용하고 scope를 \"미정 시간대 기본값\"으로 표시.",
     "<b>포장하기 카드</b>: 항상 \"💳 선불\" + \"포장하기는 항상 선불 · 고정\" (포장은 결제 정책 고정).",
     "노출 카드 수는 <code>mode</code>에 따름: both면 두 카드(2단 그리드 <code>.two</code>), dine_in이면 먹고가기 카드만, takeout이면 포장하기 카드만.",
@@ -1106,7 +1106,7 @@ window.DETAILS = {
     "<b>먹고가기 · 서빙 방식</b>: 🔒 잠금(본사 설정 항목, 시스템 자동 결정). 값에 따라 \"🍳 직원이 서빙\"(테이블별 QR) 또는 \"🚶 손님 셀프 수령\"(공용 QR). 사장님은 변경 불가, 사유 표시.",
     "<b>먹고가기 · 호출 방식</b>(셀프 모드일 때만 노출): 복수 선택 칩 [🎙️ 호명][💬 카카오 알림톡][📺 전광판], 최소 1개. 클릭 <code>toggleOrderNotif(k)</code>로 ON/OFF. 전광판은 미연결 상태라 비활성(\"📺 전광판 · 미연결\"), 클릭 시 <code>alertDisplayNotConnected()</code>. 선택 1개 이상이면 보조 \"손님 식별자: 휴대폰 끝 4자리\".",
     "<b>먹고가기 · 결제 방식 세그먼트</b>: [💳 선불 · 주문할 때 바로][🧾 후불 · 나갈 때][⏰ 시간대별 · 자동 전환], <code>setOrderPayment(k)</code>로 단일 선택. 선택값에 따라 흐름 예시(<code>otPayExample</code>)가 바뀌어요.",
-    "<b>시간대별 슬롯</b>(payment=scheduled일 때): 슬롯마다 [이름 입력][시작 select(10분 단위)][~][종료 select][선불/후결제 pill 토글 <code>toggleOrderSlotPolicy(i)</code>][× 삭제]. [+ 시간대 추가](<code>addOrderSlot()</code>, 기본 14:30~17:00·선불). 추가로 \"미정 시간대 기본값\" [선불][후결제] 선택(<code>setOrderDefaultPolicy</code>).",
+    "<b>시간대별 슬롯</b>(payment=scheduled일 때): 슬롯마다 [이름 입력][시작 select(10분 단위)][~][종료 select][선불/후불 pill 토글 <code>toggleOrderSlotPolicy(i)</code>][× 삭제]. [+ 시간대 추가](<code>addOrderSlot()</code>, 기본 14:30~17:00·선불). 추가로 \"미정 시간대 기본값\" [선불][후불] 선택(<code>setOrderDefaultPolicy</code>).",
     "<b>포장하기 패널</b>: 결제 시점 \"💳 선불\"(고정, \"포장하기는 주문 즉시 결제해요\"); 포장가 안내(메뉴 관리에서 메뉴별 입력, 비우면 매장가 적용); 대기 시간 안내 [min 분]~[max 분] number 입력(<code>updateOrderWaitMin/Max</code>) → \"손님 화면에 'N분 ~ M분'으로 표시돼요\"; <b>포장 예약 토글</b>(<code>toggleOrderField('reservation')</code>) ON 시 \"손님이 수령 시간 선택, 사장님 수락 후 접수\", 안내 \"손님이 수령 시간을 선택하면 사장님이 수락해야 확정돼요. (영업 종료 30분 전 자동 마감)\".",
     "<b>제품 정의(코드보다 우선)</b>: 선불/후불 라벨은 손님 결제 시점 안내일 뿐이고, 주문 취소 vs 결제 취소는 <b><code>Payment.status='paid'</code> 여부</b>로 갈려요. paid면 환불 발생(결제 취소), 아니면 주문 취소 — 후불이라도 결제 완료 후 손님이 돌아와 환불하면 결제 취소예요 — STATES §1·§2·§3."
    ],

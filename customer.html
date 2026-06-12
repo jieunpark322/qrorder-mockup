@@ -1760,7 +1760,7 @@ function scrDone(){
   } else if(S.orderType==='takeout'){ head='포장 주문을 받았어요';
     statusHtml=`<div class="status-line"><span class="dot"></span> 결제 완료 · 포장 준비를 시작했어요</div>
       <div class="status-line"><span class="dot" style="background:var(--amber);"></span> 약 <b>15~25분</b> 뒤 준비 완료 · 카카오 알림톡 발송</div>`;
-    extra=`<div style="text-align:center;"><div class="qrbox"></div><div style="font-size:12px;color:var(--ink3);font-weight:700;margin-top:8px;">픽업 시 이 QR을 보여주세요</div></div>`;
+    extra='';
   } else { head='예약 요청을 보냈어요';
     statusHtml=`<div class="status-line"><span class="dot" style="background:var(--amber);"></span> <b>사장님 수락 대기 중</b>. 수락하면 확정 알림이 와요</div>
       <div class="status-line"><span class="dot"></span> 결제 완료 · 수령 예정 <b>오늘 ${S.pickup}</b></div>`;

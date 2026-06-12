@@ -570,7 +570,7 @@ function imgBox(cls, emoji, photo, soldout){
 
 /* ===== 상태 ===== */
 const S = {
-  screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pickupH:'', pickupM:'', pay:'카드', phone:'', orderNo:null,
+  screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pickupH:'', pickupM:'', pay:'카드', phone:'', email:'', orderNo:null,
   serve:'self', payTiming:'prepay', tab:'menu', search:'', callSel:[],
   callMethod:'alimtalk', // 셀프수령 호출 방식: 'alimtalk' | 'verbal' (호명)
   businessOpen:true,     // 영업시간 시뮬레이션
@@ -1575,9 +1575,12 @@ function scrCheckout(){
       if(!S.notifSheet) return '';
       const notifRequired = S.orderType !== 'dinein' || (S.serve === 'self' && S.callMethod === 'alimtalk');
       const showPhone = S.notifChoice === 'phone';
+      const showEmail = S.notifChoice === 'email';
       const showMarketing = showPhone || S.notifChoice==='kakao';
       const mktChecked = S.termsChecked.marketing || false;
-      const canPay = S.notifChoice==='kakao' || S.notifChoice==='skip' || (showPhone && (S.phone||'').replace(/\D/g,'').length>=10);
+      const emailValid = showEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.email||'');
+      const canPay = S.notifChoice==='kakao' || S.notifChoice==='skip'
+        || (showPhone && (S.phone||'').replace(/\D/g,'').length>=10) || emailValid;
       return `
         <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;" onclick="S.notifSheet=false;S.notifChoice=null;render()"></div>
         <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:20px 20px 40px;z-index:201;box-sizing:border-box;">
@@ -1595,10 +1598,22 @@ function scrCheckout(){
             </button>
           </div>
 
+          <div style="text-align:center;margin:-4px 0 10px;">
+            <button onclick="S.notifChoice=S.notifChoice==='email'?null:'email';render()" style="background:none;border:1.5px solid ${S.notifChoice==='email'?'var(--blue)':'var(--line)'};border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:${S.notifChoice==='email'?'var(--blue-d)':'var(--ink3)'};cursor:pointer;font-family:inherit;">
+              ✉️ 이메일로 받기 <span style="font-weight:400;font-size:11px;">(휴대폰 번호가 없는 경우)</span>
+            </button>
+          </div>
+
           ${showPhone?`
             <div class="field" style="margin-bottom:10px;">
               <label>휴대폰 번호</label>
               <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'');render();const _pi=document.getElementById('phoneInput');if(_pi){_pi.focus();_pi.setSelectionRange(_pi.value.length,_pi.value.length);}"  />
+            </div>`:''}
+
+          ${showEmail?`
+            <div class="field" style="margin-bottom:10px;">
+              <label>이메일 주소</label>
+              <input id="emailInput" type="email" inputmode="email" placeholder="example@email.com" value="${S.email||''}" oninput="S.email=this.value;render();const _ei=document.getElementById('emailInput');if(_ei){_ei.focus();_ei.setSelectionRange(_ei.value.length,_ei.value.length);}" />
             </div>`:''}
 
           ${showMarketing?`
@@ -1685,6 +1700,9 @@ function tryNotifPay(){
     const digits=(S.phone||'').replace(/\D/g,'');
     if(digits.length<10){ toast('휴대폰 번호를 입력해 주세요'); const el=document.getElementById('phoneInput'); if(el){el.focus();el.classList.add('term-shake');setTimeout(()=>el.classList.remove('term-shake'),600);} return; }
   }
+  if(S.notifChoice==='email'){
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((S.email||'').trim())){ toast('이메일 주소를 입력해 주세요'); const el=document.getElementById('emailInput'); if(el){el.focus();el.classList.add('term-shake');setTimeout(()=>el.classList.remove('term-shake'),600);} return; }
+  }
   goToTermsFromNotif();
 }
 function goToNotif(){
@@ -1700,6 +1718,7 @@ function goToNotif(){
   S.notifChoice = null;
   S.notifSheet = true;
   S.phone = '';
+  S.email = '';
   S.termsChecked.marketing = false;
   render();
 }
@@ -1713,6 +1732,14 @@ function goToTermsFromNotif(){
     if(digits.length < 10){
       toast('휴대폰 번호를 입력해 주세요');
       const el = document.getElementById('phoneInput');
+      if(el) el.focus();
+      return;
+    }
+  } else if(S.notifChoice === 'email'){
+    const em = (S.email||'').trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){
+      toast('이메일 주소를 입력해 주세요');
+      const el = document.getElementById('emailInput');
       if(el) el.focus();
       return;
     }
@@ -1815,7 +1842,8 @@ function scrDone(){
   const isKakao = S.authType==='kakao';
 
   // 알림 수단 라벨
-  const nl = (isKakao || S.notifChoice==='kakao' || S.notifChoice==='phone') ? '카카오 알림톡' : null;
+  const nl = (isKakao || S.notifChoice==='kakao' || S.notifChoice==='phone') ? '카카오 알림톡'
+    : S.notifChoice==='email' ? `이메일 (${S.email||''})` : null;
 
   // 타이틀 · 부가 안내
   let head, extraNote='';
@@ -1865,7 +1893,7 @@ function scrDone(){
 }
 function resetOrder(){
   const keepAuth = S.tableActive;
-  S.cart=[]; S.sheet=null; S.pickup=null; S.pickupH=''; S.pickupM=''; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received';
+  S.cart=[]; S.sheet=null; S.pickup=null; S.pickupH=''; S.pickupM=''; S.pay='카드'; S.phone=''; S.email=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received';
   if(!keepAuth){ S.authType='anon'; S.notifChoice=null; }
   S.screen='menu'; render();
 }
@@ -1939,6 +1967,7 @@ function storeInfoSection(){
   if(_g('notifSheet'))  S.notifSheet  = _g('notifSheet')==='1';
   if(_g('notifChoice')) S.notifChoice = _g('notifChoice');
   if(_g('phone'))       S.phone       = _g('phone');
+  if(_g('email'))       S.email       = _g('email');
   if(_g('marketing'))   S.termsChecked.marketing = _g('marketing')==='1';
   if(_g('biz'))         S.businessOpen = _g('biz')!=='0';
   if(_g('errSim'))      S.errSim      = _g('errSim');

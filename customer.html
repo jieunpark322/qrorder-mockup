@@ -1623,8 +1623,10 @@ function tryNotifPay(){
 }
 function goToNotif(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
+  // 카카오 로그인 상태 → 알림 수단 이미 확정, 시트 생략
+  if(S.authType==='kakao'){ S.notifChoice='kakao'; S.notifSheet=false; placeOrder(); return; }
   if(S.orderType==='dinein' && S.serve==='self' && S.callMethod==='verbal'){
-    S.notifChoice='skip'; S.notifSheet=false; S.authType='anon'; S.phone=''; placeOrder(); return;
+    S.notifChoice='skip'; S.notifSheet=false; S.phone=''; placeOrder(); return;
   }
   if(S.orderType==='dinein' && S.serve==='server' && S.payTiming==='postpay'){
     S.notifChoice='skip'; S.notifSheet=false; placeOrder(); return;

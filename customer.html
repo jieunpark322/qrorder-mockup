@@ -1741,29 +1741,16 @@ function buildProgressBar(){
   return h+'</div></div>';
 }
 function scrDone(){
-  const ot=ORDER_TYPES[S.orderType]; let head, statusHtml, extra='';
-  if(S.orderType==='dinein'){ head='주문을 받았어요';
-    const acceptLine = S.payTiming==='postpay'
-      ? `<div class="status-line"><span class="dot"></span> 주문 접수 · 주방으로 전달됐어요</div>`
-      : `<div class="status-line"><span class="dot"></span> 결제 완료 · 주방으로 전달됐어요</div>`;
-    const serveLine = S.serve==='self'
-      ? S.callMethod==='alimtalk'
-        ? `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>카카오 알림톡</b>으로 알려드려요</div>
-           <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 셀프 수령</div>`
-        : `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>호명으로 불러드려요</b></div>
-           <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 셀프 수령</div>`
-      : `<div class="status-line"><span class="dot" style="background:var(--amber);"></span> 조리 중. 준비되면 <b>직원이 자리로 가져다 드려요</b></div>
-         <div class="status-line"><span class="dot" style="background:var(--line);"></span> ${STORE.table} 테이블 · 서빙 매장</div>`;
-    const payLine = S.payTiming==='postpay'
-      ? `<div class="status-line"><span class="dot" style="background:var(--line);"></span> 🧾 나갈 때 카운터에서 결제해 주세요</div>` : '';
-    statusHtml = acceptLine + serveLine + payLine;
-  } else if(S.orderType==='takeout'){ head='포장 주문을 받았어요';
-    statusHtml=`<div class="status-line"><span class="dot"></span> 결제 완료 · 포장 준비를 시작했어요</div>
-      <div class="status-line"><span class="dot" style="background:var(--amber);"></span> 약 <b>15~25분</b> 뒤 준비 완료 · 카카오 알림톡 발송</div>`;
-    extra='';
-  } else { head='예약 요청을 보냈어요';
-    statusHtml=`<div class="status-line"><span class="dot" style="background:var(--amber);"></span> <b>사장님 수락 대기 중</b>. 수락하면 확정 알림이 와요</div>
-      <div class="status-line"><span class="dot"></span> 결제 완료 · 수령 예정 <b>오늘 ${S.pickup}</b></div>`;
+  const ot=ORDER_TYPES[S.orderType]; let head, extraNote='';
+  if(S.orderType==='dinein'){
+    head = S.payTiming==='postpay' ? '주문을 받았어요' : '주문을 받았어요';
+    if(S.payTiming==='postpay')
+      extraNote=`<div class="info-pill amber" style="margin-top:10px;">🧾 <span>나갈 때 카운터에서 결제해 주세요.</span></div>`;
+  } else if(S.orderType==='takeout'){
+    head='포장 주문을 받았어요';
+  } else {
+    head='예약 요청을 보냈어요';
+    if(S.pickup) extraNote=`<div class="info-pill amber" style="margin-top:10px;">📅 <span>수령 예정 <b>오늘 ${S.pickup}</b> · 사장님 수락 후 확정</span></div>`;
   }
   const isDineinSelf = S.orderType==='dinein' && S.serve==='self';
   const callNoLabel = isDineinSelf ? '주문 번호' : '호출 번호';
@@ -1801,7 +1788,7 @@ function scrDone(){
     ${callNoCard}
     <div class="done-card">
       <div style="font-size:13px;font-weight:800;margin-bottom:6px;">${ot.emoji} ${ot.name} · ${STORE.name}${S.orderType==='dinein'?' · '+STORE.table:''}</div>
-      ${statusHtml}${extra}
+      ${extraNote}
       ${notifyNote}
       <div style="border-top:1px solid var(--line2);margin-top:14px;padding-top:13px;">
         ${S.cart.map(c=>`<div class="rowline" style="padding:3px 0;"><span style="flex:1;">${c.name} ×${c.qty}</span><span style="color:var(--ink);font-weight:700;">${won(c.unit*c.qty)}원</span></div>`).join('')}

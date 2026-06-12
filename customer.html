@@ -1436,7 +1436,8 @@ function scrCheckout(){
   const finalTotal = (()=>{ const base=(S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal(); return base-couponDiscount(); })();
 
   // 쿠폰 섹션 빌더
-  const couponSec = (!isPostpay) ? (()=>{
+  const hasPhone = (S.phone||'').replace(/\D/g,'').length >= 10;
+  const couponSec = (!isPostpay && hasPhone && S.termsChecked.marketing) ? (()=>{
     const couponRows = COUPONS.map(cp=>{
       const base = cartTotal();
       const applicable = base >= (cp.minOrder||0) && cp.channels.includes(S.orderType);

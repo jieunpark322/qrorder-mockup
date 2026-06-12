@@ -1648,7 +1648,7 @@ function finishOrder(){
   if(S.screen!=='processing') return;
   if(S.errSim!=='none'){ S.errType=S.errSim; S.screen='error'; render(); return; }
   S.orderNo='#20260515-'+String(50+Math.floor((cartTotal()%900))).padStart(4,'0');
-  S.callNo = (S.orderType!=='dinein') ? genCallNo() : null;   // 포장·예약만 호출 번호 발급
+  S.callNo = (S.orderType!=='dinein' || S.serve==='self') ? genCallNo() : null;   // 서빙 매장 제외 전 케이스 발급
   // 주문 내역에 차수 누적
   const nextRound=ORDER_HISTORY.reduce((m,r)=>Math.max(m,r.round),0)+1;
   ORDER_HISTORY.push({ round:nextRound, time:'방금', status:'주문 접수',
@@ -1720,11 +1720,16 @@ function scrDone(){
     statusHtml=`<div class="status-line"><span class="dot" style="background:var(--amber);"></span> <b>사장님 수락 대기 중</b>. 수락하면 확정 알림이 와요</div>
       <div class="status-line"><span class="dot"></span> 결제 완료 · 수령 예정 <b>오늘 ${S.pickup}</b></div>`;
   }
-  const callNoCard = (S.orderType!=='dinein' && S.callNo)
+  const isDineinSelf = S.orderType==='dinein' && S.serve==='self';
+  const callNoLabel = isDineinSelf ? '주문 번호' : '호출 번호';
+  const callNoNote = isDineinSelf
+    ? '준비되면 알림으로 알려드려요'
+    : `준비되면 이 번호로 불러드려요${S.orderType==='takeout'?' · 픽업대에서 확인하세요':''}`;
+  const callNoCard = S.callNo
     ? `<div class="callno-box">
-        <div class="cn-label">내 호출 번호</div>
+        <div class="cn-label">${callNoLabel}</div>
         <div class="cn-num">${S.callNo}</div>
-        <div class="cn-note">준비되면 이 번호로 불러드려요${S.orderType==='takeout'?' · 픽업대에서 확인하세요':''}</div>
+        <div class="cn-note">${callNoNote}</div>
       </div>` : '';
 
   const isKakao = S.authType === 'kakao';

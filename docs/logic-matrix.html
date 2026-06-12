@@ -528,6 +528,22 @@ window.addEventListener('scroll',()=>{
   secs.forEach(s=>{ if(s.getBoundingClientRect().top<=80) cur=s.id; });
   links.forEach(l=>l.classList.toggle('active', l.getAttribute('href')==='#'+cur));
 });
+
+/* ── Figma 단면 추출 ──
+   링크에 #섹션 또는 ?only=섹션 이 있으면 해당 섹션만 남기고 나머지 제거.
+   (Figma HTML 임포터가 해시 스크롤을 무시하고 전체를 가져오는 문제 해결)
+   사용 가능: sim · matrix · flow · comp · edge */
+(function(){
+  var sec=(location.hash||'').replace(/^#/,'') || new URLSearchParams(location.search).get('only');
+  if(!sec) return;
+  var keep=document.getElementById(sec);
+  if(!keep) return;
+  document.querySelectorAll('section').forEach(function(s){ if(s.id!==sec) s.remove(); });
+  var nav=document.querySelector('.nav'); if(nav) nav.remove();
+  var top=document.querySelector('.topbar'); if(top) top.remove();
+  var w=document.querySelector('.wrap'); if(w){ w.style.paddingTop='20px'; w.style.paddingBottom='28px'; }
+  keep.style.marginTop='0';
+})();
 </script>
 </body>
 </html>

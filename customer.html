@@ -367,23 +367,6 @@
   .callno-box .cn-num{font-size:42px;font-weight:800;color:var(--blue);letter-spacing:3px;line-height:1.1;}
   .callno-box .cn-note{font-size:12.5px;color:var(--ink3);margin-top:9px;line-height:1.5;}
 
-  /* 1/N 분할 결제 화면 */
-  .split-summary{margin:16px 16px 0;background:#fff;border-radius:14px;padding:16px 18px;}
-  .split-summary .ss-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink2);padding:4px 0;}
-  .split-summary .ss-row.total{font-size:16px;font-weight:800;color:var(--ink);border-top:1.5px solid var(--line);margin-top:8px;padding-top:12px;}
-  .split-progress{margin:14px 16px 0;}
-  .split-progress .sp-bar-bg{background:var(--line2);border-radius:6px;height:8px;overflow:hidden;margin:8px 0 6px;}
-  .split-progress .sp-bar-fill{background:var(--blue);height:100%;border-radius:6px;transition:width .4s ease;}
-  .split-progress .sp-labels{display:flex;justify-content:space-between;font-size:13px;}
-  .split-payer{background:#fff;border-radius:14px;margin:10px 16px 0;padding:16px;}
-  .split-payer.done{background:#f0faf8;border:1.5px solid var(--green);}
-  .split-payer.running{background:var(--bg);border:1.5px solid var(--line);}
-  .sp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-  .sp-name{font-size:15px;font-weight:800;}
-  .sp-amt{font-size:15px;font-weight:800;}
-  .sp-done-label{font-size:13px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:5px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .mini-spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -600,10 +583,6 @@ const S = {
   happyHour:false,       // 해피아워 시뮬레이션
   groupMode:false,       // 공동 주문 시뮬레이션 (먹고가기 전용)
   payGroup:false,        // 함께 결제 여부
-  useSplit:false,        // 1/N 분할 결제 선택 여부 (그룹 모드 선택 옵션)
-  splitPaid:{},          // { me:bool, g2:bool } 각자 결제 완료 여부
-  splitPaySel:{},        // { me:'카드', g2:'카카오페이' } 각자 선택 결제수단
-  splitPending:null,     // 현재 결제 처리 중인 참가자 id
   couponId:null,         // 선택된 쿠폰 id (null = 쿠폰 안 씀)
   couponCode:'',         // 쿠폰번호 입력 값
   notifChoice:null,      // 알림 수단: null | 'kakao' | 'phone' | 'skip'
@@ -626,7 +605,7 @@ function render(){
   const prevScreen = S.screen;
   const savedY = window.scrollY;
   renderDemo();
-  const r = { menu:scrMenu, checkout:scrCheckout, processing:scrProcessing, error:scrError, done:scrDone, splitpay:scrSplitPay, session:scrSession }[S.screen];
+  const r = { menu:scrMenu, checkout:scrCheckout, processing:scrProcessing, error:scrError, done:scrDone, session:scrSession }[S.screen];
   $('screen').innerHTML = r();
   if(!S._keepScroll) {
     if(S.screen !== prevScreen) window.scrollTo(0,0);
@@ -1454,13 +1433,7 @@ function scrCheckout(){
     const link=t.link?`<button class="term-link" onclick="event.stopPropagation();toast('약관 보기 (준비 중)')">보기</button>`:'';
     return `<div class="term-row" onclick="_toggleTerm('${t.id}')"><span class="term-ck ${checked?'checked':''}">${checked?'✓':''}</span><span class="term-label">${badge}${t.label}${link}</span></div>`;
   }).join('');
-  const isSplitMode = S.groupMode && S.useSplit && S.orderType==='dinein';
-  const splitN = 1 + GUEST_CARTS.length;
-  const finalTotal = (()=>{
-    const base = (S.groupMode&&(S.payGroup||S.useSplit)&&S.orderType==='dinein') ? cartTotal()+guestTotal() : cartTotal();
-    const total = base - couponDiscount();
-    return isSplitMode ? Math.ceil(total / splitN) : total;
-  })();
+  const finalTotal = (()=>{ const base=(S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal(); return base-couponDiscount(); })();
 
   // 쿠폰 섹션 빌더
   const couponSec = (!isPostpay) ? (()=>{
@@ -1555,7 +1528,7 @@ function scrCheckout(){
       <div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>
       ${S.groupMode && S.payGroup && S.orderType==='dinein' ? `<div class="rowline"><span>손님 2 금액</span><span>${won(guestTotal())}원</span></div>` : ''}
       ${couponDiscount()>0 ? `<div class="rowline" style="color:var(--blue);"><span>🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>` : ''}
-      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':isSplitMode?`1인 결제 금액 (${splitN}명 분할)`:S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액'}</span><span style="color:var(--blue);">${won(finalTotal)}원</span></div>
+      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액'}</span><span style="color:var(--blue);">${won(finalTotal)}원</span></div>
     </div>
 
     ${terms.length ? `
@@ -1569,17 +1542,7 @@ function scrCheckout(){
         </div>
       </div>` : ''}
 
-    ${S.groupMode && S.orderType==='dinein' && !isPostpay ? `
-    <div style="margin:0 16px 4px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;padding:14px 16px;border:1.5px solid ${S.useSplit?'var(--blue)':'var(--line)'};" onclick="S.useSplit=!S.useSplit;render()">
-      <div>
-        <div style="font-size:14px;font-weight:800;color:var(--ink);">1/N 분할 결제</div>
-        <div style="font-size:12px;color:var(--ink3);margin-top:2px;">${1+GUEST_CARTS.length}명이 각자 결제해요</div>
-      </div>
-      <div style="width:44px;height:26px;border-radius:13px;background:${S.useSplit?'var(--blue)':'var(--line)'};position:relative;transition:.2s;flex-shrink:0;">
-        <div style="position:absolute;top:3px;${S.useSplit?'right:3px':'left:3px'};width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2);"></div>
-      </div>
-    </div>` : ''}
-    <button class="primarybtn" onclick="${reqAllChecked?(S.groupMode&&S.orderType==='dinein'&&S.useSplit?'goToSplitPay()':'goToNotif()'):'highlightTerms()'}">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:S.groupMode&&S.orderType==='dinein'&&S.useSplit?`1/N 분할 결제 · ${won(finalTotal)}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
+    <button class="primarybtn" onclick="${reqAllChecked?'goToNotif()':'highlightTerms()'}">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
 
     ${(()=>{
       if(!S.notifSheet) return '';
@@ -1846,80 +1809,9 @@ function scrDone(){
 }
 function resetOrder(){
   const keepAuth = S.tableActive;
-  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received'; S.useSplit=false; S.splitPaid={}; S.splitPaySel={}; S.splitPending=null;
+  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received';
   if(!keepAuth){ S.authType='anon'; S.notifChoice=null; }
   S.screen='menu'; render();
-}
-
-/* --- 1/N 분할 결제 --- */
-function goToSplitPay(){
-  // 참가자별 결제수단 초기값
-  const ids = ['me', ...GUEST_CARTS.map(g=>g.id)];
-  ids.forEach(id=>{ if(!(id in S.splitPaid)) S.splitPaid[id]=false; if(!(id in S.splitPaySel)) S.splitPaySel[id]=S.pay||'카드'; });
-  S.screen='splitpay'; render();
-}
-function paySplit(who){
-  if(S.splitPending || S.splitPaid[who]) return;
-  S.splitPending=who; render();
-  setTimeout(()=>{
-    S.splitPaid[who]=true; S.splitPending=null;
-    const ids=['me',...GUEST_CARTS.map(g=>g.id)];
-    if(ids.every(id=>S.splitPaid[id])){
-      render();
-      setTimeout(()=>{ S.procStep='submit'; S.screen='processing'; render(); setTimeout(finishOrder,1300); },400);
-    } else { render(); }
-  },1500);
-}
-function scrSplitPay(){
-  const ids=['me',...GUEST_CARTS.map(g=>g.id)];
-  ids.forEach(id=>{ if(!(id in S.splitPaid)) S.splitPaid[id]=false; if(!(id in S.splitPaySel)) S.splitPaySel[id]=S.pay||'카드'; });
-  const n=ids.length;
-  const total=cartTotal()+guestTotal()-couponDiscount();
-  const per=Math.ceil(total/n);
-  const paidCount=ids.filter(id=>S.splitPaid[id]).length;
-  const remaining=Math.max(total-paidCount*per,0);
-  const allPaid=paidCount===n;
-  const pct=Math.round(paidCount/n*100);
-
-  const payers=[{id:'me',name:'나'},...GUEST_CARTS.map(g=>({id:g.id,name:g.name}))];
-  const payerCards=payers.map(p=>{
-    const paid=S.splitPaid[p.id], pending=S.splitPending===p.id;
-    if(paid) return `<div class="split-payer done">
-      <div class="sp-head"><span class="sp-name">${p.name}</span><span class="sp-amt" style="color:var(--green);">${won(per)}원</span></div>
-      <div class="sp-done-label">✓ 결제 완료 <span style="font-weight:600;color:var(--ink3);">· ${S.splitPaySel[p.id]}</span></div>
-    </div>`;
-    if(pending) return `<div class="split-payer running">
-      <div class="sp-head"><span class="sp-name">${p.name}</span><span class="sp-amt">${won(per)}원</span></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;"><div class="mini-spin"></div><span style="font-size:13px;color:var(--ink3);">결제 처리 중...</span></div>
-    </div>`;
-    return `<div class="split-payer">
-      <div class="sp-head"><span class="sp-name">${p.name}</span><span class="sp-amt">${won(per)}원</span></div>
-      <div class="chips" style="margin:10px 0 10px;">
-        ${PAY_METHODS.map(pm=>`<button class="pchip ${S.splitPaySel[p.id]===pm.k?'on':''}" onclick="S.splitPaySel['${p.id}']='${pm.k}';render()">${pm.e} ${pm.k}</button>`).join('')}
-      </div>
-      <button class="primarybtn" style="margin:0;padding:14px;" onclick="paySplit('${p.id}')">${won(per)}원 결제하기</button>
-    </div>`;
-  }).join('');
-
-  return `<div class="topbar"><button class="back" onclick="S.screen='checkout';render()">‹</button>
-    <div><div class="ttl">1/N 분할 결제</div><div class="sub">${STORE.table} 테이블 · ${n}명</div></div>
-  </div>
-  <div class="scroll">
-    <div class="split-summary">
-      <div class="ss-row"><span>전체 금액</span><span>${won(total)}원</span></div>
-      <div class="ss-row"><span>1인 금액</span><span>${won(per)}원</span></div>
-      <div class="ss-row total"><span>잔여 금액</span><span style="color:${allPaid?'var(--green)':'var(--red)'};">${won(remaining)}원</span></div>
-    </div>
-    <div class="split-progress">
-      <div class="sp-bar-bg"><div class="sp-bar-fill" style="width:${pct}%;"></div></div>
-      <div class="sp-labels">
-        <span style="color:var(--blue-d);font-weight:700;">${paidCount}/${n}명 완료</span>
-        <span style="color:var(--ink3);">${allPaid?'전체 완료 · 주문 접수 중...':'각자 결제 후 주문이 접수돼요'}</span>
-      </div>
-    </div>
-    ${payerCards}
-    <div style="height:24px;"></div>
-  </div>`;
 }
 
 /* --- 세션 만료 --- */

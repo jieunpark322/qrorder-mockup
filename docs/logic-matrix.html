@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR오더 손님 화면 · 분기 로직 명세서</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink-1:#111827;--ink-2:#374151;--ink-3:#6B7280;--ink-4:#9CA3AF;
+  --line:#E5E7EB;--line-2:#F1F5F9;--bg:#F9FAFB;--white:#fff;
+  --blue:#2563EB;--blue-bg:#EFF6FF;--blue-d:#1D4ED8;
+  --green:#059669;--green-bg:#ECFDF5;
+  --purple:#7C3AED;--purple-bg:#F5F3FF;
+  --amber:#D97706;--amber-bg:#FFFBEB;
+  --red:#DC2626;--red-bg:#FEF2F2;
+  --teal:#0891B2;--teal-bg:#ECFEFF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);color:var(--ink-1);line-height:1.6;}
+
+/* layout */
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 100px;}
+.topbar{background:#0F172A;color:#fff;padding:26px 0;margin-bottom:8px;}
+.topbar .wrap{padding-bottom:0;}
+.topbar h1{font-size:24px;font-weight:800;letter-spacing:-.02em;}
+.topbar p{font-size:13px;color:#94A3B8;margin-top:4px;}
+.topbar .meta{font-size:11px;color:#64748B;margin-top:10px;}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+.nav .wrap{display:flex;gap:4px;padding-top:0;padding-bottom:0;flex-wrap:wrap;}
+.nav a{padding:13px 14px;font-size:13px;font-weight:600;color:var(--ink-3);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap;}
+.nav a:hover{color:var(--ink-1);}
+.nav a.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+/* section */
+section{margin-top:40px;scroll-margin-top:60px;}
+.sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+.sec-num{font-size:12px;font-weight:800;color:var(--blue);background:var(--blue-bg);padding:3px 9px;border-radius:6px;}
+.sec-head h2{font-size:20px;font-weight:800;letter-spacing:-.01em;}
+.sec-desc{font-size:13.5px;color:var(--ink-3);margin-bottom:20px;max-width:760px;}
+
+.card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:18px;}
+.card-t{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* stat band */
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;}
+.stat{flex:1;min-width:150px;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+.stat .n{font-size:30px;font-weight:800;letter-spacing:-.03em;}
+.stat .l{font-size:12.5px;color:var(--ink-3);margin-top:2px;}
+.stat.raw .n{color:var(--ink-4);}
+.stat.valid .n{color:var(--blue);}
+.stat.core .n{color:var(--green);}
+.stat .arrow{font-size:24px;color:var(--line);align-self:center;}
+
+/* ── SIMULATOR ── */
+.sim{background:var(--white);border:1px solid var(--line);border-radius:16px;overflow:hidden;}
+.sim-body{display:grid;grid-template-columns:1fr 1fr;}
+@media(max-width:880px){.sim-body{grid-template-columns:1fr;}}
+.sim-controls{padding:22px;border-right:1px solid var(--line);}
+@media(max-width:880px){.sim-controls{border-right:none;border-bottom:1px solid var(--line);}}
+.axis{margin-bottom:18px;}
+.axis:last-child{margin-bottom:0;}
+.axis-lbl{font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.axis-lbl .hint{font-weight:400;color:var(--ink-4);font-size:11px;}
+.opts{display:flex;gap:7px;flex-wrap:wrap;}
+.opt{padding:9px 14px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:all .12s;}
+.opt:hover{border-color:var(--ink-4);}
+.opt.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d);}
+.opt.dis{opacity:.4;cursor:not-allowed;background:var(--bg);}
+.opt.na{opacity:.45;border-style:dashed;cursor:not-allowed;}
+
+/* verdict */
+.sim-result{padding:22px;background:var(--bg);}
+.verdict{border-radius:12px;padding:16px 18px;margin-bottom:16px;}
+.verdict.ok{background:var(--green-bg);border:1px solid #A7F3D0;}
+.verdict.no{background:var(--red-bg);border:1px solid #FECACA;}
+.verdict .vt{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.verdict.ok .vt{color:var(--green);}
+.verdict.no .vt{color:var(--red);}
+.verdict .vr{font-size:13px;color:var(--ink-2);margin-top:6px;}
+.verdict .vr b{color:var(--red);}
+
+.flowbox{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.flowstep{display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line-2);}
+.flowstep:last-child{border-bottom:none;}
+.flowstep .fi{width:26px;height:26px;border-radius:7px;background:var(--blue);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.flowstep.skip .fi{background:var(--ink-4);}
+.flowstep .fc{flex:1;min-width:0;}
+.flowstep .fc .ft{font-size:13px;font-weight:700;color:var(--ink-1);}
+.flowstep .fc .fd{font-size:12px;color:var(--ink-3);margin-top:2px;}
+.flowstep.skip .fc .ft{color:var(--ink-4);text-decoration:line-through;}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:middle;}
+.tag.req{background:#FEE2E2;color:var(--red);}
+.tag.opt{background:#E0E7FF;color:var(--blue-d);}
+.tag.skip{background:var(--line);color:var(--ink-3);}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:680px;}
+th{background:var(--bg);font-weight:700;color:var(--ink-2);text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);font-size:11.5px;white-space:nowrap;}
+td{padding:11px 13px;border-bottom:1px solid var(--line-2);color:var(--ink-2);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+td .pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--line);}
+.ok-cell{color:var(--green);font-weight:700;}
+.no-cell{color:var(--red);font-weight:700;}
+.na-cell{color:var(--ink-4);font-weight:600;}
+tr.blocked td{background:#FEF2F255;}
+
+/* flow swimlane */
+.lane{display:flex;gap:0;overflow-x:auto;padding-bottom:6px;}
+.lane-stage{flex:1;min-width:210px;}
+.lane-stage .ls-head{background:var(--ink-1);color:#fff;padding:10px 14px;border-radius:10px 10px 0 0;font-size:13px;font-weight:700;text-align:center;}
+.lane-stage .ls-body{border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;padding:12px;background:#fff;min-height:100%;}
+.lane-arrow{align-self:flex-start;margin-top:34px;color:var(--ink-4);font-size:20px;padding:0 4px;flex-shrink:0;}
+.switch{border-left:3px solid var(--purple);background:var(--purple-bg);border-radius:0 8px 8px 0;padding:8px 10px;margin-bottom:8px;}
+.switch:last-child{margin-bottom:0;}
+.switch .sw-cond{font-size:11px;font-weight:800;color:var(--purple);}
+.switch .sw-act{font-size:11.5px;color:var(--ink-2);margin-top:2px;}
+.happy{background:var(--green-bg);border-left-color:var(--green);}
+.happy .sw-cond{color:var(--green);}
+
+/* component spec */
+.comp{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.comp-head{background:var(--bg);padding:13px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+.comp-head .ci{width:30px;height:30px;border-radius:8px;background:var(--teal-bg);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.comp-head .cn{font-size:14.5px;font-weight:800;}
+.comp-head .cl{font-size:11.5px;color:var(--ink-3);}
+.comp-body{padding:6px 18px 14px;}
+.cond{display:flex;gap:14px;padding:13px 0;border-bottom:1px dashed var(--line);}
+.cond:last-child{border-bottom:none;}
+.cond .cc{flex-shrink:0;width:130px;}
+.cond .cc .cond-tag{font-size:11px;font-weight:800;color:var(--blue-d);background:var(--blue-bg);padding:3px 9px;border-radius:6px;display:inline-block;}
+.cond .cd{flex:1;font-size:12.5px;color:var(--ink-2);}
+.cond .cd .state{font-family:ui-monospace,monospace;font-size:11px;color:var(--purple);background:var(--purple-bg);padding:1px 6px;border-radius:4px;}
+
+/* edge cases */
+.edge{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.edge-head{padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;background:#fff;}
+.edge-head .ei{font-size:18px;}
+.edge-head .et{font-size:14.5px;font-weight:700;flex:1;}
+.edge-head .ex{color:var(--ink-4);transition:transform .2s;font-size:13px;}
+.edge.open .edge-head .ex{transform:rotate(180deg);}
+.edge-body{display:none;padding:0 18px 18px;}
+.edge.open .edge-body{display:block;}
+.edge-row{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line-2);}
+.edge-row .er-k{flex-shrink:0;width:160px;font-size:12.5px;font-weight:700;color:var(--ink-2);}
+.edge-row .er-v{flex:1;font-size:12.5px;color:var(--ink-3);}
+.edge-row .er-v .rule{color:var(--green);font-weight:700;}
+.badge{display:inline-block;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;margin-right:6px;}
+.badge.must{background:#FEE2E2;color:var(--red);}
+.badge.rec{background:#DBEAFE;color:var(--blue-d);}
+
+.note{font-size:12px;color:var(--ink-4);margin-top:10px;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-3);margin-top:12px;}
+.legend span{display:flex;align-items:center;gap:5px;}
+.dot{width:10px;height:10px;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <h1>QR오더 손님 화면 · 분기 로직 명세서</h1>
+    <p>96가지 조합을 어떻게 걸러내고, 각 상태가 어떤 화면·프로세스로 흐르는지 정리한 설계 기준 문서</p>
+    <div class="meta">customer.html 기준 · 디자이너(컴포넌트 분기)·개발자(조건문/DB 설계) 공용 · 2026-06-12</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="#sim" class="active">조합 시뮬레이터</a>
+    <a href="#matrix">1 · 분기 매트릭스</a>
+    <a href="#flow">2 · 코어 유저 플로우</a>
+    <a href="#comp">3 · 컴포넌트 명세</a>
+    <a href="#edge">4 · 예외 상황 가이드</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ════ 시뮬레이터 ════ -->
+  <section id="sim">
+    <div class="sec-head"><span class="sec-num">▶</span><h2>조합 시뮬레이터</h2></div>
+    <p class="sec-desc">5개 축을 직접 눌러 조합을 만들면, <b>가능 여부·차단 사유·실제 화면 흐름</b>을 즉시 계산해 보여줍니다. 화면을 하나씩 눌러볼 필요 없이 모든 경우의 수를 여기서 확인할 수 있어요.</p>
+
+    <div class="stats">
+      <div class="stat raw"><div class="n">96</div><div class="l">산술적 전체 조합<br>(3×2×2×2×2×2)</div></div>
+      <div class="arrow">→</div>
+      <div class="stat valid"><div class="n">20</div><div class="l">실제 가능 조합<br>(로그인·함께주문 포함)</div></div>
+      <div class="arrow">→</div>
+      <div class="stat core"><div class="n">6</div><div class="l">핵심 해피 패스<br>(로그인·함께는 변형)</div></div>
+    </div>
+
+    <div class="sim">
+      <div class="sim-body">
+        <div class="sim-controls" id="controls"></div>
+        <div class="sim-result" id="result"></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--blue)"></span>선택됨</span>
+      <span><span class="dot" style="background:var(--bg);border:1.5px solid var(--line)"></span>선택 가능</span>
+      <span><span class="dot" style="background:var(--bg);border:1.5px dashed var(--line)"></span>해당 없음(N/A)</span>
+      <span><span class="dot" style="background:var(--bg);opacity:.4"></span>차단됨</span>
+    </div>
+  </section>
+
+  <!-- ════ 1. 매트릭스 ════ -->
+  <section id="matrix">
+    <div class="sec-head"><span class="sec-num">1</span><h2>분기 매트릭스</h2></div>
+    <p class="sec-desc">비즈니스 로직상 존재할 수 없는 조합을 먼저 쳐내는 표입니다. 개발자가 <b>조건문(if-else)·DB 제약</b>을 설계할 때, 디자이너가 <b>UI에서 선택을 차단할 지점</b>을 잡을 때의 기준점입니다.</p>
+
+    <div class="card">
+      <div class="card-t">🚫 차단 규칙 — 만들어지면 안 되는 조합</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:30%">조합</th><th style="width:14%">판정</th><th>사유 · 처리 방식</th></tr></thead>
+          <tbody>
+            <tr class="blocked"><td>포장·예약 + <b>테이블 서빙</b></td><td class="no-cell">❌ 불가</td><td>포장·예약은 카운터 수령/픽업만 존재. 서빙 개념 없음 → 유형 선택 시 서빙 축 자체를 숨김</td></tr>
+            <tr class="blocked"><td><b>셀프 수령</b> + 후불</td><td class="no-cell">❌ 불가</td><td>미수령 리스크로 셀프는 선불 강제. <span class="state">setPayTiming('postpay')</span> 차단 + toast 안내</td></tr>
+            <tr class="blocked"><td>포장·예약 + <b>후불</b></td><td class="no-cell">❌ 불가</td><td>현장 결제 대상이 아님. 항상 선불 → 후불 버튼 미노출</td></tr>
+            <tr class="blocked"><td>포장·예약·매장 + <b>함께 주문</b></td><td class="no-cell">❌ 불가</td><td>함께 주문은 같은 테이블 전제 → <b>매장 식사에서만</b> 활성화</td></tr>
+            <tr><td>테이블 서빙 + 호출 방식(카톡/전광판)</td><td class="na-cell">➖ 무의미</td><td>직원이 자리로 가져다줌 → 대기번호·호명 불필요. 호출 축 N/A, <span class="state">callNo=null</span></td></tr>
+            <tr><td>포장·예약 + 전광판 호명 단독</td><td class="na-cell">➖ 흡수</td><td>대기번호(전광판)는 항상 발급되고 알림(카톡/폰/이메일)은 별도 필수 → "호명 vs 카톡" 선택지 자체가 없음</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">※ 호출 방식을 손님이 직접 고르는 건 <b>매장 식사 + 셀프 수령</b>일 때뿐입니다. 나머지는 유형이 자동 결정합니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-t">✅ 유효 조합 매트릭스 — 6개 핵심 구성</div>
+      <p style="font-size:12.5px;color:var(--ink-3);margin:-6px 0 14px;">로그인 상태(2)·함께 주문(매장식사 ×2)은 아래 6개 위에 얹히는 <b>변형</b>이라 별도 행으로 펼치지 않았습니다. 6 × 변형 = 실질 20개 조합.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th>#</th><th>주문</th><th>서빙</th><th>결제</th><th>호출/알림</th><th>대기번호</th><th>완료 후 안내</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>1</td><td><span class="pill">🍽️ 매장</span></td><td>셀프 수령</td><td class="ok-cell">선불</td><td>카카오 알림톡 <span class="tag req">필수</span></td><td class="ok-cell">발급</td><td>준비되면 알림 → 직접 수령</td></tr>
+            <tr><td>2</td><td><span class="pill">🍽️ 매장</span></td><td>셀프 수령</td><td class="ok-cell">선불</td><td>전광판 호명 <span class="tag skip">시트 생략</span></td><td class="ok-cell">발급</td><td>전광판/호명으로 수령 (연락처 불필요)</td></tr>
+            <tr><td>3</td><td><span class="pill">🍽️ 매장</span></td><td>테이블 서빙</td><td class="ok-cell">선불</td><td>영수증 카톡 <span class="tag opt">선택</span></td><td class="na-cell">없음</td><td>자리로 서빙</td></tr>
+            <tr><td>4</td><td><span class="pill">🍽️ 매장</span></td><td>테이블 서빙</td><td class="ok-cell">후불</td><td>알림 시트 생략 <span class="tag skip">생략</span></td><td class="na-cell">없음</td><td>자리로 서빙 → <b>나갈 때 카운터 결제</b></td></tr>
+            <tr><td>5</td><td><span class="pill">🥡 포장</span></td><td class="na-cell">— (카운터)</td><td class="ok-cell">선불</td><td>카톡/폰/이메일 <span class="tag req">필수</span></td><td class="ok-cell">발급</td><td>준비되면 알림 → 카운터 픽업</td></tr>
+            <tr><td>6</td><td><span class="pill">📅 예약</span></td><td class="na-cell">— (픽업)</td><td class="ok-cell">선불</td><td>카톡/폰/이메일 <span class="tag req">필수</span></td><td class="ok-cell">발급</td><td>사장님 수락 대기 → 지정 시간 픽업</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-t">🔁 변형 축 — 위 6개에 공통으로 얹힘</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:18%">변형 축</th><th style="width:22%">값</th><th>화면·로직 영향</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="2">로그인 상태</td><td><span class="pill">🟡 카카오 로그인 유지</span></td><td>이전 주문 내역 표시 · 연락처 보유 → <b>알림 수단 시트 전체 생략</b>, 카톡으로 알림</td></tr>
+            <tr><td><span class="pill">👤 비회원</span></td><td>알림 수단 시트 노출 (필수/선택은 구성에 따름) → 카톡 로그인·휴대폰·이메일 중 선택</td></tr>
+            <tr><td rowspan="2">함께 주문<br><span style="font-size:11px;color:var(--ink-4)">(매장 식사 전용)</span></td><td><span class="pill">👤 혼자</span></td><td>내 장바구니만 · 단독 결제</td></tr>
+            <tr><td><span class="pill">👥 함께</span></td><td>참여자별 장바구니 실시간 표시 · 개별/함께 결제 선택 · 총액 합산</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ 2. 코어 유저 플로우 ════ -->
+  <section id="flow">
+    <div class="sec-head"><span class="sec-num">2</span><h2>상태 기반 코어 유저 플로우</h2></div>
+    <p class="sec-desc">96개 플로우를 다 그리지 않고, <b class="" style="color:var(--green)">초록 = 기본 성공 경로(해피 패스)</b> 하나를 따라가며 각 단계에서 <b style="color:var(--purple)">보라 = 변수에 따라 UI 블록이 전환되는 지점</b>만 표시했습니다. 개발자의 라우팅·아키텍처 이해용입니다.</p>
+
+    <div class="card">
+      <div class="lane">
+        <div class="lane-stage">
+          <div class="ls-head">① 진입 (QR 스캔)</div>
+          <div class="ls-body">
+            <div class="switch happy"><div class="sw-cond">해피 패스</div><div class="sw-act">메뉴 화면 진입 · 주문 유형 칩 고정</div></div>
+            <div class="switch"><div class="sw-cond">로그인 유지</div><div class="sw-act">상단에 이전 주문 내역 표시 · 연락처 보유</div></div>
+            <div class="switch"><div class="sw-cond">비회원</div><div class="sw-act">내역 없이 진입</div></div>
+            <div class="switch"><div class="sw-cond">영업시간 외</div><div class="sw-act">"준비중" 모달 · 메뉴 탐색만 허용</div></div>
+          </div>
+        </div>
+        <div class="lane-arrow">›</div>
+        <div class="lane-stage">
+          <div class="ls-head">② 메뉴 · 담기</div>
+          <div class="ls-body">
+            <div class="switch happy"><div class="sw-cond">해피 패스</div><div class="sw-act">메뉴 상세 시트 → 옵션·수량 → 담기</div></div>
+            <div class="switch"><div class="sw-cond">혼자</div><div class="sw-act">단독 장바구니</div></div>
+            <div class="switch"><div class="sw-cond">함께 주문</div><div class="sw-act">공동 장바구니 실시간 동기화 · 참여자 바 표시</div></div>
+            <div class="switch"><div class="sw-cond">품절</div><div class="sw-act">카드 비활성 · 담기 차단</div></div>
+          </div>
+        </div>
+        <div class="lane-arrow">›</div>
+        <div class="lane-stage">
+          <div class="ls-head">③ 결제 · 알림</div>
+          <div class="ls-body">
+            <div class="switch happy"><div class="sw-cond">해피 패스</div><div class="sw-act">결제 화면 → 결제하기</div></div>
+            <div class="switch"><div class="sw-cond">예약</div><div class="sw-act">수령 시간(시·분) 선택 필수</div></div>
+            <div class="switch"><div class="sw-cond">로그인 / 셀프+호명 / 서빙+후불</div><div class="sw-act">알림 시트 <b>생략</b> → 바로 처리</div></div>
+            <div class="switch"><div class="sw-cond">그 외 (비회원)</div><div class="sw-act">알림 시트 노출 → 카톡·폰·이메일 선택</div></div>
+            <div class="switch"><div class="sw-cond">선불</div><div class="sw-act">PG 결제 → 주문 전송</div></div>
+            <div class="switch"><div class="sw-cond">후불</div><div class="sw-act">결제수단 없이 주문만 전송</div></div>
+          </div>
+        </div>
+        <div class="lane-arrow">›</div>
+        <div class="lane-stage">
+          <div class="ls-head">④ 완료 · 대기</div>
+          <div class="ls-body">
+            <div class="switch happy"><div class="sw-cond">해피 패스</div><div class="sw-act">주문번호 · 진행 단계 표시</div></div>
+            <div class="switch"><div class="sw-cond">대기번호 발급 대상</div><div class="sw-act">전광판 번호 + 카톡/이메일 알림</div></div>
+            <div class="switch"><div class="sw-cond">테이블 서빙</div><div class="sw-act">번호 없음 · 자리로 서빙</div></div>
+            <div class="switch"><div class="sw-cond">후불</div><div class="sw-act">"나갈 때 카운터 결제" 안내</div></div>
+            <div class="switch"><div class="sw-cond">예약</div><div class="sw-act">"사장님 수락 대기" → 확정</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="note">진행 단계 라벨은 유형별로 다릅니다 — 포장: 접수·준비·픽업대기·픽업완료 / 예약: 접수·수락대기·준비·완료 / 매장 셀프: 접수·준비·수령대기·완료 / 매장 서빙: 접수·준비·서빙중·완료</p>
+    </div>
+  </section>
+
+  <!-- ════ 3. 컴포넌트 명세 ════ -->
+  <section id="comp">
+    <div class="sec-head"><span class="sec-num">3</span><h2>UI 컴포넌트 & 모듈 명세서</h2></div>
+    <p class="sec-desc">화면 전체를 따로 그리지 않고 <b>조건에 따라 변하는 컴포넌트 영역만</b> 정의합니다. 디자이너-프론트엔드 싱크용 — 한 화면 안에서 이 블록들이 상태값에 따라 교체됩니다.</p>
+
+    <div class="comp">
+      <div class="comp-head"><div class="ci">🛒</div><div><div class="cn">A. 장바구니 / 주문 내역 영역</div><div class="cl">메뉴·결제·완료 화면 공통</div></div></div>
+      <div class="comp-body">
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 A · 혼자</span></div><div class="cd">내가 담은 메뉴만 노출 · 합계 = 내 소계 · '주문하기' 버튼 활성화</div></div>
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 B · 함께</span></div><div class="cd">참여자별 담은 메뉴 실시간 노출 · 상단 참여자 바(N명) · <span class="state">개별 결제</span>=내 메뉴만, <span class="state">함께 결제</span>=전체 합산 / 누구나 결제 가능</div></div>
+      </div>
+    </div>
+
+    <div class="comp">
+      <div class="comp-head"><div class="ci">🔔</div><div><div class="cn">B. 알림 / 대기 수단 영역</div><div class="cl">결제 직전 바텀 시트</div></div></div>
+      <div class="comp-body">
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 A · 비회원+카톡필요</span></div><div class="cd">카톡 로그인 / 휴대폰 직접 입력 버튼 · <b>✉️ 이메일로 받기</b>(휴대폰 없는 외국인 대응) · 마케팅 동의 시 쿠폰 노출</div></div>
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 B · 전광판 호명</span></div><div class="cd">"대기번호 105번 · 전광판을 확인해주세요" 문구 · 연락처 입력 없음 → 시트 자체 생략</div></div>
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 C · 로그인 유지</span></div><div class="cd">시트 생략 · 카카오 연락처로 알림 자동 발송</div></div>
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 D · 서빙</span></div><div class="cd">"알림 없이 주문하기" 허용(선택) · 영수증 카톡 발송만 옵션 제공</div></div>
+      </div>
+    </div>
+
+    <div class="comp">
+      <div class="comp-head"><div class="ci">💳</div><div><div class="cn">C. 결제 영역</div><div class="cl">결제 화면 하단</div></div></div>
+      <div class="comp-body">
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 A · 선불</span></div><div class="cd">결제수단 선택(카드/페이) · 쿠폰 적용 · 약관 동의 · "○○원 결제하기" → PG 진행</div></div>
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 B · 후불</span></div><div class="cd">결제수단·쿠폰·약관 <b>전체 숨김</b> · "주문 넣기" → 전송만, 결제는 현장</div></div>
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 C · 예약</span></div><div class="cd">수령 시간 선택(시·분 드롭다운) 필수 · 미선택 시 버튼 비활성</div></div>
+      </div>
+    </div>
+
+    <div class="comp">
+      <div class="comp-head"><div class="ci">✅</div><div><div class="cn">D. 완료 안내 영역</div><div class="cl">주문 완료 화면 · 1개 화면 / 안내 블록만 교체</div></div></div>
+      <div class="comp-body">
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 A · 대기번호</span></div><div class="cd">"대기번호 105번" 카드 + 진행 단계 바 + 알림 수단 라벨(카톡/이메일)</div></div>
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 B · 서빙</span></div><div class="cd">번호 카드 없음 · "자리로 가져다 드릴게요"</div></div>
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 C · 후불</span></div><div class="cd">🧾 "나갈 때 카운터에서 결제해 주세요" 앰버 안내 추가</div></div>
+        <div class="cond"><div class="cc"><span class="cond-tag">조건 D · 예약</span></div><div class="cd">📅 "수령 예정 오늘 14:30 · 사장님 수락 후 확정" 안내</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ 4. 예외 상황 가이드 ════ -->
+  <section id="edge">
+    <div class="sec-head"><span class="sec-num">4</span><h2>예외 상황 가이드</h2></div>
+    <p class="sec-desc">주문·결제·네트워크·세션이 얽히는 지점의 처리 정책입니다. <span class="badge must">필수</span> 개발 전 확정 필요 · <span class="badge rec">권장</span> 기본 정책 제안. 헤더를 누르면 펼쳐집니다.</p>
+
+    <div class="edge open">
+      <div class="edge-head"><span class="ei">👥</span><span class="et">함께 주문 동기화</span><span class="ex">▼</span></div>
+      <div class="edge-body">
+        <div class="edge-row"><div class="er-k">동시 담기·수정</div><div class="er-v"><span class="badge rec">권장</span>실시간 소켓(WebSocket) 브로드캐스트로 공동 장바구니 갱신. <span class="rule">충돌 시 last-write-wins</span> + 항목별 누가 담았는지 표시</div></div>
+        <div class="edge-row"><div class="er-k">참여자 이탈</div><div class="er-v"><span class="badge must">필수</span>한 명이 페이지를 닫아도 다른 참여자 장바구니는 유지. 이탈자 항목은 "○○님 담음"으로 잔존, 결제 시 포함 여부 확인</div></div>
+        <div class="edge-row"><div class="er-k">방장 이탈 / 결제권</div><div class="er-v"><span class="badge must">필수</span>방장 개념 없이 <b>누구나 결제 가능</b>(현재 정책). 한 명이 함께 결제하면 전체 잠금 → 중복 결제 방지</div></div>
+      </div>
+    </div>
+
+    <div class="edge">
+      <div class="edge-head"><span class="ei">🔑</span><span class="et">로그인 / 테이블 세션</span><span class="ex">▼</span></div>
+      <div class="edge-body">
+        <div class="edge-row"><div class="er-k">재진입 (테이블 미초기화)</div><div class="er-v"><span class="badge must">필수</span>이전 카카오 로그인 이력 + 테이블 점유 중이면 <span class="rule">재인증 생략</span>, 연락처·내역 복원 (PRD §12 참조)</div></div>
+        <div class="edge-row"><div class="er-k">테이블 비우기 누락</div><div class="er-v"><span class="badge rec">권장</span>POS '테이블 비우기' 깜빡 대비 → <b>시간 기준 만료</b>(무활동 5분) + 손님측 "새 주문 시작" 수동 초기화 버튼 병행</div></div>
+        <div class="edge-row"><div class="er-k">세션 만료</div><div class="er-v">무활동 5분 → 'expired' 화면. QR 재스캔으로만 새 세션. 다른 기기 동일 URL은 <b>독립 세션</b>(공유 안 됨)</div></div>
+      </div>
+    </div>
+
+    <div class="edge">
+      <div class="edge-head"><span class="ei">⚠️</span><span class="et">결제 실패 / 중도 이탈</span><span class="ex">▼</span></div>
+      <div class="edge-body">
+        <div class="edge-row"><div class="er-k">PG 창 이탈·취소</div><div class="er-v"><span class="badge must">필수</span><b>장바구니 유지</b> → 결제 화면 복귀(<span class="state">backToCheckout()</span>). 주문은 PG 성공 콜백 전까지 미전송 → 테이블 점유는 유지</div></div>
+        <div class="edge-row"><div class="er-k">결제 실패 (PAYMENT_FAILED)</div><div class="er-v">에러 화면 → "다른 방법으로 결제" → 결제 화면 복귀. 카드 한도/잔액 안내</div></div>
+        <div class="edge-row"><div class="er-k">POS 끊김 (POS_OFFLINE)</div><div class="er-v">결제는 됐으나 주문 전송 실패 가능 → "다시 시도"(<span class="state">placeOrder()</span>). 서빙 매장은 직원 호출 버튼 추가</div></div>
+        <div class="edge-row"><div class="er-k">네트워크 오류</div><div class="er-v">"다시 시도" 재전송. 멱등키(idempotency key)로 <span class="rule">중복 주문 방지</span> 권장</div></div>
+        <div class="edge-row"><div class="er-k">점유 해제 타이밍</div><div class="er-v"><span class="badge rec">권장</span>선불 미완료 이탈 시 즉시 해제하지 않고 무활동 타이머에 위임 → 손님 복귀 시 이어서 결제 가능</div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ════════ 조합 시뮬레이터 — customer.html 실제 분기 규칙 인코딩 ════════ */
+const AXES = [
+  {key:'order', label:'주문 유형', opts:[
+    {v:'dinein', t:'🍽️ 매장 식사'},{v:'takeout', t:'🥡 포장'},{v:'preorder', t:'📅 예약'}]},
+  {key:'serve', label:'서빙 유형', hint:'매장 식사 전용', opts:[
+    {v:'self', t:'🚶 셀프 수령'},{v:'server', t:'🍳 테이블 서빙'}]},
+  {key:'pay', label:'결제 시점', opts:[
+    {v:'prepay', t:'💳 선불'},{v:'postpay', t:'🧾 후불'}]},
+  {key:'call', label:'호출 방식', hint:'매장+셀프 전용', opts:[
+    {v:'alimtalk', t:'💬 카카오 알림톡'},{v:'verbal', t:'📣 전광판 호명'}]},
+  {key:'login', label:'로그인 상태', opts:[
+    {v:'kakao', t:'🟡 로그인 유지'},{v:'anon', t:'👤 비회원'}]},
+  {key:'group', label:'함께 주문', hint:'매장 식사 전용', opts:[
+    {v:'solo', t:'👤 혼자'},{v:'group', t:'👥 함께'}]},
+];
+let S = {order:'dinein', serve:'self', pay:'prepay', call:'alimtalk', login:'anon', group:'solo'};
+
+/* 축별 N/A(해당없음) 여부 — 유형이 자동 결정하는 축 */
+function naState(){
+  return {
+    serve: S.order!=='dinein',                       // 포장·예약은 서빙 개념 없음
+    call:  !(S.order==='dinein' && S.serve==='self'),// 호출 선택은 매장+셀프만
+    group: S.order!=='dinein',                       // 함께 주문은 매장만
+  };
+}
+/* 옵션 비활성(차단) 여부 */
+function disabledOpt(axis, v){
+  if(axis==='pay' && v==='postpay'){
+    if(S.order!=='dinein') return true;              // 포장·예약 후불 불가
+    if(S.serve==='self')   return true;              // 셀프 후불 불가
+  }
+  return false;
+}
+/* 차단 사유 평가 */
+function evaluate(){
+  const blocks=[];
+  if(S.order!=='dinein' && S.serve==='server') blocks.push('포장·예약은 테이블 서빙이 없어요 (카운터 수령/픽업만).');
+  if(S.serve==='self' && S.pay==='postpay')    blocks.push('셀프 수령은 선불만 가능해요 (미수령 리스크).');
+  if(S.order!=='dinein' && S.pay==='postpay')  blocks.push('포장·예약은 선불 결제만 가능해요.');
+  if(S.order!=='dinein' && S.group==='group')  blocks.push('함께 주문은 매장 식사(같은 테이블)에서만 가능해요.');
+  return blocks;
+}
+/* 결과 플로우 계산 */
+function buildFlow(){
+  const isDinein=S.order==='dinein', isSelf=S.serve==='self';
+  const isPrepay = !(isDinein && S.pay==='postpay');
+  // 호출/알림 단계
+  let notif, notifTag, notifSkip=false;
+  if(S.login==='kakao'){ notif='카카오 로그인 연락처로 알림 발송 · 시트 생략'; notifTag='skip'; notifSkip=true; }
+  else if(isDinein && isSelf && S.call==='verbal'){ notif='전광판 호명 — 연락처 불필요 · 시트 생략'; notifTag='skip'; notifSkip=true; }
+  else if(isDinein && !isSelf && S.pay==='postpay'){ notif='서빙+후불 — 알림 시트 생략'; notifTag='skip'; notifSkip=true; }
+  else if(isDinein && !isSelf){ notif='알림 시트 노출 — 영수증 카톡 발송 (선택, "알림 없이 주문" 가능)'; notifTag='opt'; }
+  else { notif='알림 시트 노출 — 카톡 로그인 / 휴대폰 / 이메일 선택'; notifTag='req'; }
+  // 대기번호
+  const callNo = (S.order!=='dinein' || isSelf);
+  // 완료 안내
+  let done;
+  if(S.order==='takeout') done='카운터 픽업 · 접수→준비→픽업대기→픽업완료';
+  else if(S.order==='preorder') done='사장님 수락 대기 → 지정 시간 픽업 · 접수→수락대기→준비→완료';
+  else if(isSelf) done='준비되면 알림 → 직접 수령 · 접수→준비→수령대기→완료';
+  else done='자리로 서빙 · 접수→준비→서빙중→완료' + (S.pay==='postpay'?' · 🧾 나갈 때 카운터 결제':'');
+
+  const steps=[
+    {t:'① 진입', d: S.login==='kakao'?'이전 주문 내역 표시 · 연락처 보유':'비회원 진입'},
+    {t:'② 메뉴·담기', d: (isDinein && S.group==='group')?'공동 장바구니 실시간 동기화':'단독 장바구니'},
+    {t:'③ 알림 수단', d:notif, tag:notifTag, skip:notifSkip},
+    {t:'④ 결제', d: isPrepay?'PG 결제 → 주문 전송':'결제수단·약관 숨김 · 주문만 전송 (후불)'},
+    {t:'⑤ 완료', d:(callNo?'🔢 대기번호 발급(전광판) · ':'서빙(번호 없음) · ')+done},
+  ];
+  return steps;
+}
+
+function renderControls(){
+  const na=naState();
+  document.getElementById('controls').innerHTML = AXES.map(ax=>{
+    const isNa = na[ax.key];
+    return `<div class="axis">
+      <div class="axis-lbl">${ax.label}${ax.hint?`<span class="hint">${ax.hint}</span>`:''}</div>
+      <div class="opts">${ax.opts.map(o=>{
+        const dis=disabledOpt(ax.key,o.v);
+        const cls = isNa?'opt na' : dis?'opt dis' : (S[ax.key]===o.v?'opt on':'opt');
+        const click = (isNa||dis)?'' : `onclick="pick('${ax.key}','${o.v}')"`;
+        return `<button class="${cls}" ${click}>${o.t}</button>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('');
+}
+function renderResult(){
+  const blocks=evaluate();
+  const r=document.getElementById('result');
+  if(blocks.length){
+    r.innerHTML = `<div class="verdict no"><div class="vt">❌ 불가능한 조합</div>
+      <div class="vr">${blocks.map(b=>`• ${b}`).join('<br>')}</div></div>
+      <p class="note">→ UI에서 해당 선택을 차단하거나, 유형 선택 시 축 자체를 숨겨야 합니다.</p>`;
+    return;
+  }
+  const steps=buildFlow();
+  r.innerHTML = `<div class="verdict ok"><div class="vt">✅ 가능한 조합</div>
+      <div class="vr">아래 흐름으로 진행됩니다.</div></div>
+    <div class="flowbox">${steps.map((s,i)=>`
+      <div class="flowstep ${s.skip?'skip':''}">
+        <div class="fi">${i+1}</div>
+        <div class="fc"><div class="ft">${s.t}${s.tag?`<span class="tag ${s.tag}">${s.tag==='req'?'필수':s.tag==='opt'?'선택':'생략'}</span>`:''}</div>
+        <div class="fd">${s.d}</div></div>
+      </div>`).join('')}</div>`;
+}
+function pick(k,v){
+  S[k]=v;
+  // 셀프 전환 시 후불 자동 해제 (setServe 로직 반영)
+  if(k==='serve' && v==='self' && S.pay==='postpay') S.pay='prepay';
+  if(k==='order' && v!=='dinein'){ if(S.pay==='postpay') S.pay='prepay'; if(S.group==='group') S.group='solo'; }
+  renderControls(); renderResult();
+}
+renderControls(); renderResult();
+
+/* edge accordion */
+document.querySelectorAll('.edge-head').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('open')));
+
+/* nav scrollspy */
+const secs=[...document.querySelectorAll('section')];
+const links=[...document.querySelectorAll('.nav a')];
+window.addEventListener('scroll',()=>{
+  let cur=secs[0].id;
+  secs.forEach(s=>{ if(s.getBoundingClientRect().top<=80) cur=s.id; });
+  links.forEach(l=>l.classList.toggle('active', l.getAttribute('href')==='#'+cur));
+});
+</script>
+</body>
+</html>

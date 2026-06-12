@@ -1745,8 +1745,7 @@ function scrDone(){
   const isKakao = S.authType==='kakao';
 
   // 알림 수단 라벨
-  const nl = (isKakao || S.notifChoice==='kakao') ? '카카오 알림톡'
-           : S.phone ? S.phone : null;
+  const nl = (isKakao || S.notifChoice==='kakao' || S.notifChoice==='phone') ? '카카오 알림톡' : null;
 
   // 타이틀 · 부가 안내
   let head, extraNote='';

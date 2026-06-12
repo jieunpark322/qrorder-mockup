@@ -278,7 +278,7 @@
   <p>결제 버튼 클릭 → 조건에 따라 시트 표시 여부 결정:</p>
   <table>
     <tr><th>조건</th><th>동작</th></tr>
-    <tr><td>카카오 로그인 상태</td><td>시트 생략 → 바로 주문 처리</td></tr>
+    <tr><td>카카오 로그인 유지 상태<br><small>(이전 카톡 주문 이력 · 최초 접속엔 없음)</small></td><td>시트 생략 → 바로 주문 처리</td></tr>
     <tr><td>셀프수령 + 호명 방식</td><td>시트 생략 → 알림 없이 주문 처리</td></tr>
     <tr><td>서빙 + 후불</td><td>시트 생략 → 알림 없이 주문 처리</td></tr>
     <tr><td>그 외</td><td>알림 수단 시트 표시</td></tr>
@@ -288,6 +288,7 @@
   <ul>
     <li>🟡 <strong>카카오톡 로그인</strong>: 마케팅 동의 체크 시 보유 쿠폰 즉시 표시</li>
     <li>📱 <strong>휴대폰번호 직접 입력</strong>: 10자리 입력 + 마케팅 동의 시 보유 쿠폰 표시</li>
+    <li>✉️ <strong>이메일로 받기</strong>: 휴대폰 번호 없는 외국인 대응 — 이메일 형식 검증 (마케팅·쿠폰 미노출)</li>
     <li>알림 없이 주문하기 (알림 불필요 케이스에서만 노출)</li>
   </ul>
   <div class="note">알림 수단 시트 진입 시: <code>S.phone</code>과 <code>S.termsChecked.marketing</code> 초기화 → 매번 새로 입력.</div>

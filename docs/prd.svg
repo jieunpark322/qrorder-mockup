@@ -309,8 +309,8 @@
   <text x="56" y="1922" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#0369A1">✅ 재인증 생략 적용 조건</text>
   <text x="56" y="1942" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">• 동일 테이블 QR URL 재접속</text>
   <text x="56" y="1960" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">• 세션 유효 기간 내 (5분 타이머 미만료)</text>
-  <text x="56" y="1978" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">• 이전 주문에서 카카오 로그인 완료된 상태</text>
-  <text x="56" y="1996" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">  (S.callMethod='alimtalk', S.phone 값 존재)</text>
+  <text x="56" y="1978" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">• 이전 주문을 카카오 로그인으로 완료한 상태</text>
+  <text x="56" y="1996" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">  (authType=kakao · 최초 접속엔 없는 케이스)</text>
 
   <rect x="406" y="1902" width="380" height="108" rx="8" fill="#FFF1F2" stroke="#FECDD3" stroke-width="1"/>
   <text x="422" y="1922" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#BE123C">↩️ 재진입 시 동작</text>
@@ -320,7 +320,7 @@
   <text x="422" y="1996" font-family="-apple-system,sans-serif" font-size="10" fill="#9F1239">• 결제 진행 단계로 바로 진입 가능</text>
 
   <text x="40" y="2022" font-family="-apple-system,sans-serif" font-size="10" fill="#64748B">초기화 조건: 사장님 화면 테이블 초기화 · 5분 무활동 만료 · 다른 기기 동일 URL 접속 시(독립 세션, 공유 안 됨)</text>
-  <text x="40" y="2038" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">※ 모의 구현: sessionStorage 또는 URL 파라미터(callMethod=alimtalk&amp;phone=...)로 기인증 상태 시뮬레이션 가능</text>
+  <text x="40" y="2038" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">※ 모의 구현: URL 파라미터 authType=kakao 로 기인증(카카오 로그인 유지) 상태 시뮬레이션 가능</text>
 
   <!-- FOOTER -->
   <rect x="0" y="2058" width="840" height="50" fill="#1A202C"/>

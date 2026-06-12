@@ -10333,6 +10333,12 @@ const ORDER_CHANNELS = {
     { name:'저녁', start:'17:00', end:'21:00', policy:'postpay' },
   ],
   defaultPolicy: 'prepay',         // 미정 시간대 기본값
+  // 손님 주문 화면 옵션
+  requestNote: {                   // 결제 화면 요청사항 입력란
+    enabled: true,
+    placeholder: '요청사항을 입력해 주세요 (예: 얼음 적게, 빨대 빼주세요)',
+    maxLen: 100,
+  },
 };
 const ORDER_LABELS = {
   mode: { both:'먹고가기 + 포장하기', dine_in:'먹고가기만', takeout:'포장하기만' },
@@ -12706,8 +12712,46 @@ function renderOrderType(main){
     </div>
     ` : ''}
 
+    <!-- 손님 주문 옵션 — 결제 화면에 노출되는 부가 기능 -->
+    <div class="panel">
+      <h3>📝 손님 주문 옵션 <span class="h-sub">결제 화면에 보이는 부가 기능을 켜고 끌 수 있어요</span></h3>
+
+      <div class="ot-row" style="align-items:flex-start;">
+        <span class="lbl">요청사항 입력란</span>
+        <label class="toggle-switch ${ch.requestNote.enabled?'on':''}" onclick="toggleRequestNote()">
+          <span class="sw"></span>
+        </label>
+        <div style="font-size:12px;color:var(--ink-2);line-height:1.55;padding-top:2px;">
+          ${ch.requestNote.enabled
+            ? '결제 화면 「📝 요청사항」 칸을 통해 손님이 자유롭게 메모를 남길 수 있어요.'
+            : '결제 화면에 「📝 요청사항」 칸이 노출되지 않아요. 손님 메모는 받지 않게 돼요.'}
+        </div>
+      </div>
+
+      ${ch.requestNote.enabled ? `
+        <div style="margin-left:120px;margin-top:10px;display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <label style="font-size:11px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:5px;">입력칸 안내 문구 <span style="color:var(--ink-4);font-weight:500;">(손님이 칸을 누르기 전 보여요)</span></label>
+            <input class="input" style="width:100%;max-width:540px;" value="${(ch.requestNote.placeholder||'').replace(/"/g,'&quot;')}" oninput="ORDER_CHANNELS.requestNote.placeholder=this.value" placeholder="예) 요청사항을 입력해 주세요" />
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--ink-3);font-weight:700;display:block;margin-bottom:5px;">최대 글자 수</label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input class="input" type="number" min="20" max="500" value="${ch.requestNote.maxLen||100}" oninput="ORDER_CHANNELS.requestNote.maxLen=Math.max(20,Math.min(500,Number(this.value)||100))" style="width:120px;" />
+              <span style="font-size:12px;color:var(--ink-3);">자 까지</span>
+              <span style="font-size:11px;color:var(--ink-4);margin-left:6px;">20 ~ 500자 사이로 정할 수 있어요</span>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+    </div>
 
   `;
+}
+function toggleRequestNote(){
+  ORDER_CHANNELS.requestNote = ORDER_CHANNELS.requestNote || { enabled:true, placeholder:'요청사항을 입력해 주세요 (예: 얼음 적게, 빨대 빼주세요)', maxLen:100 };
+  ORDER_CHANNELS.requestNote.enabled = !ORDER_CHANNELS.requestNote.enabled;
+  renderApp();
 }
 
 /* ============================================================

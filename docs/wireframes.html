@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QR오더 손님 화면 와이어프레임</title>
+<style>
+  :root{--ink:#1a202c;--ink2:#4a5568;--ink3:#718096;--ink4:#a0aec0;--line:#e2e8f0;--bg:#f0f4f8;--card:#fff;--blue:#4a7fe0;--blue2:#eff6ff;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;}
+  .page{max-width:1200px;margin:0 auto;padding:48px 32px 80px;}
+  h1{font-size:26px;font-weight:900;margin-bottom:6px;}
+  .meta{font-size:12px;color:var(--ink3);margin-bottom:48px;}
+  h2{font-size:16px;font-weight:800;color:var(--ink2);margin:48px 0 20px;padding-bottom:8px;border-bottom:2px solid var(--line);letter-spacing:.3px;text-transform:uppercase;}
+
+  /* ── 플로우 다이어그램 ── */
+  .flow{background:var(--card);border-radius:16px;padding:28px 32px;margin-bottom:48px;border:1px solid var(--line);}
+  .flow-title{font-size:14px;font-weight:800;color:var(--ink3);margin-bottom:20px;letter-spacing:.4px;text-transform:uppercase;}
+  .flow-rows{display:flex;flex-direction:column;gap:12px;}
+  .flow-row{display:flex;align-items:center;gap:0;flex-wrap:wrap;}
+  .fn{background:var(--blue2);border:1.5px solid var(--blue);border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;color:var(--blue);white-space:nowrap;}
+  .fn.start{background:#f0fdf4;border-color:var(--green);color:#15803d;}
+  .fn.end{background:#fef2f2;border-color:var(--red);color:#b91c1c;}
+  .fn.proc{background:#fff7ed;border-color:var(--amber);color:#92400e;}
+  .fn.sheet{background:#fdf4ff;border-color:#a855f7;color:#7e22ce;}
+  .farr{color:var(--ink4);font-size:16px;padding:0 6px;font-weight:900;}
+  .flabel{font-size:10px;color:var(--ink3);padding:0 4px;white-space:nowrap;}
+  .flow-gap{height:1px;background:var(--line);margin:4px 0;}
+
+  /* ── 화면 그리드 ── */
+  .screens{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:32px;}
+
+  /* ── 폰 프레임 ── */
+  .phone-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .phone-label{font-size:13px;font-weight:800;color:var(--ink2);text-align:center;}
+  .phone-sub{font-size:11px;color:var(--ink3);text-align:center;margin-top:-8px;}
+  .phone{width:220px;min-height:400px;background:var(--card);border:2.5px solid #374151;border-radius:28px;overflow:hidden;position:relative;box-shadow:0 8px 24px rgba(0,0,0,.10);}
+  .phone-notch{height:20px;background:#374151;display:flex;align-items:center;justify-content:center;}
+  .phone-notch::after{content:'';width:48px;height:8px;background:#1f2937;border-radius:4px;}
+  .phone-body{padding:10px 10px 14px;}
+
+  /* ── 와이어프레임 요소 ── */
+  .wf-img{background:#e2e8f0;border-radius:8px;height:80px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink3);font-weight:600;margin-bottom:8px;}
+  .wf-img.tall{height:110px;}
+  .wf-img.sm{height:48px;}
+  .wf-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+  .wf-circle{width:32px;height:32px;border-radius:50%;background:#e2e8f0;flex-shrink:0;}
+  .wf-circle.sm{width:24px;height:24px;}
+  .wf-line{height:10px;background:#e2e8f0;border-radius:3px;flex:1;}
+  .wf-line.short{flex:none;width:48px;}
+  .wf-line.xs{height:7px;}
+  .wf-line.bold{height:13px;}
+  .wf-block{background:#e2e8f0;border-radius:6px;margin-bottom:6px;}
+  .wf-btn{background:#374151;border-radius:8px;height:36px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;margin-bottom:6px;}
+  .wf-btn.blue{background:var(--blue);}
+  .wf-btn.ghost{background:#f1f5f9;color:var(--ink2);}
+  .wf-btn.sm{height:28px;font-size:10px;}
+  .wf-sec{border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:8px;}
+  .wf-sec-h{font-size:10px;font-weight:800;color:var(--ink3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px;}
+  .wf-tag{display:inline-block;background:#e2e8f0;border-radius:4px;height:16px;width:36px;vertical-align:middle;}
+  .wf-tab-row{display:flex;gap:4px;margin-bottom:8px;}
+  .wf-tab{flex:1;height:28px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--ink3);}
+  .wf-tab.on{background:var(--blue);color:#fff;}
+  .wf-sep{height:1px;background:var(--line);margin:8px 0;}
+  .wf-badge{display:inline-block;background:var(--blue2);border:1px solid var(--blue);border-radius:10px;font-size:9px;color:var(--blue);font-weight:700;padding:2px 7px;margin-right:3px;}
+  .wf-radio{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink3);background:#fff;flex-shrink:0;}
+  .wf-radio.on{border-color:var(--blue);background:var(--blue);}
+  .wf-check{width:14px;height:14px;border-radius:3px;border:2px solid var(--ink3);background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;}
+  .wf-check.on{border-color:var(--blue);background:var(--blue);}
+  .wf-topbar{background:#f8fafc;border-bottom:1px solid var(--line);padding:6px 10px;display:flex;align-items:center;gap:6px;margin:-10px -10px 10px;}
+  .wf-topbar .back{width:20px;height:20px;background:#e2e8f0;border-radius:4px;}
+  .wf-spinner{width:36px;height:36px;border-radius:50%;border:3px solid #e2e8f0;border-top-color:var(--blue);margin:0 auto 10px;}
+  .wf-check-big{width:48px;height:48px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;margin:0 auto 8px;}
+  .wf-err-ic{width:48px;height:48px;border-radius:50%;background:#fff0f0;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 8px;}
+  .wf-progress{display:flex;align-items:center;gap:2px;margin:8px 0;}
+  .wf-pdot{width:16px;height:16px;border-radius:50%;background:#e2e8f0;font-size:8px;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-weight:700;flex-shrink:0;}
+  .wf-pdot.act{background:var(--blue);color:#fff;}
+  .wf-pdot.past{background:var(--green);color:#fff;}
+  .wf-pline{flex:1;height:2px;background:#e2e8f0;}
+  .wf-pline.filled{background:var(--green);}
+  .wf-sheet-bg{background:rgba(0,0,0,.18);border-radius:0 0 22px 22px;padding:0 0 6px;}
+  .wf-sheet-inner{background:#fff;border-radius:14px 14px 0 0;padding:10px 10px 6px;}
+  .wf-handle{width:28px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 8px;}
+  .wf-overlay{position:relative;}
+  .wf-overlay .overlay-dim{background:rgba(0,0,0,.12);border-radius:0 0 18px 18px;overflow:hidden;}
+  .wf-coupon-box{background:#fff8e6;border:1px solid #ffe3a3;border-radius:8px;padding:8px;margin-bottom:6px;}
+  .txt{font-size:10px;color:var(--ink2);font-weight:700;display:block;margin-bottom:3px;}
+  .txt.sm{font-size:9px;color:var(--ink3);font-weight:500;}
+  .txt.c{text-align:center;}
+  .txt.blue{color:var(--blue);}
+  .txt.amber{color:#92400e;}
+
+  /* 범례 */
+  .legend{display:flex;flex-wrap:wrap;gap:16px;font-size:11px;color:var(--ink2);margin-bottom:32px;}
+  .legend-item{display:flex;align-items:center;gap:6px;}
+  .legend-box{width:16px;height:16px;border-radius:3px;}
+
+  @media(max-width:700px){.page{padding:24px 12px 60px;} .screens{grid-template-columns:repeat(2,1fr);gap:20px;} .phone{width:100%;min-width:unset;} .flow{padding:16px;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>QR오더 손님 화면 와이어프레임</h1>
+  <div class="meta">🗓 2026-06-12 · customer.html 기준</div>
+
+  <!-- 흐름도 -->
+  <h2>화면 전환 플로우</h2>
+  <div class="flow">
+    <div class="flow-title">주문 흐름 (시나리오별)</div>
+    <div class="flow-rows">
+
+      <div class="flow-row">
+        <div class="fn start">QR 스캔 진입</div>
+        <span class="farr">→</span>
+        <div class="fn">메뉴 화면</div>
+        <span class="farr">→</span>
+        <div class="fn sheet">메뉴 상세 시트</div>
+        <span class="farr">→</span>
+        <span class="flabel">담기</span>
+        <span class="farr">→</span>
+        <div class="fn sheet">장바구니 시트</div>
+        <span class="farr">→</span>
+        <div class="fn">결제 화면</div>
+      </div>
+
+      <div class="flow-gap"></div>
+
+      <div class="flow-row">
+        <div class="fn">결제 화면</div>
+        <span class="farr">→</span>
+        <span class="flabel">결제하기</span>
+        <span class="farr">→</span>
+        <div class="fn sheet">알림 수단 시트</div>
+        <span class="farr">→</span>
+        <span class="flabel">확인</span>
+        <span class="farr">→</span>
+        <div class="fn proc">처리 중</div>
+        <span class="farr">→</span>
+        <div class="fn end">주문 완료</div>
+      </div>
+
+      <div class="flow-row" style="margin-left:240px;">
+        <div class="fn proc">처리 중</div>
+        <span class="farr">→</span>
+        <span class="flabel">에러</span>
+        <span class="farr">→</span>
+        <div class="fn end" style="background:#fef2f2;border-color:#ef4444;color:#b91c1c;">에러 화면</div>
+        <span class="farr">→</span>
+        <span class="flabel">재시도</span>
+        <span class="farr">→</span>
+        <div class="fn">결제 화면</div>
+      </div>
+
+      <div class="flow-gap"></div>
+
+      <div class="flow-row">
+        <div class="fn" style="background:#f0fdf4;border-color:#22c55e;color:#15803d;">카카오 로그인 상태</div>
+        <span class="farr">→</span>
+        <span class="flabel">결제하기</span>
+        <span class="farr">→</span>
+        <span class="flabel">알림 시트 생략</span>
+        <span class="farr">→</span>
+        <div class="fn proc">처리 중</div>
+        <span class="farr">→</span>
+        <div class="fn end">주문 완료</div>
+      </div>
+
+      <div class="flow-row">
+        <div class="fn" style="background:#fdf4ff;border-color:#a855f7;color:#7e22ce;">셀프 + 호명 / 서빙 + 후불</div>
+        <span class="farr">→</span>
+        <span class="flabel">결제하기</span>
+        <span class="farr">→</span>
+        <span class="flabel">알림 시트 생략</span>
+        <span class="farr">→</span>
+        <div class="fn proc">처리 중</div>
+      </div>
+
+      <div class="flow-gap"></div>
+
+      <div class="flow-row">
+        <div class="fn">메뉴 화면</div>
+        <span class="farr">→</span>
+        <span class="flabel">무활동 5분</span>
+        <span class="farr">→</span>
+        <div class="fn end">세션 만료</div>
+        <span class="farr">→</span>
+        <span class="flabel">QR 재스캔</span>
+        <span class="farr">→</span>
+        <div class="fn start">재진입</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 화면 와이어프레임 -->
+  <h2>화면별 와이어프레임</h2>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-box" style="background:#e2e8f0;border:1px solid #cbd5e1;"></div> 콘텐츠 블록 (이미지·텍스트 자리)</div>
+    <div class="legend-item"><div class="legend-box" style="background:#374151;"></div> 주요 버튼</div>
+    <div class="legend-item"><div class="legend-box" style="background:var(--blue);"></div> 액션 버튼</div>
+    <div class="legend-item"><div class="legend-box" style="background:#fff8e6;border:1px solid #ffe3a3;"></div> 쿠폰 영역</div>
+  </div>
+
+  <div class="screens">
+
+    <!-- ① 메뉴 화면 -->
+    <div class="phone-wrap">
+      <div class="phone-label">① 메뉴 화면</div>
+      <div class="phone-sub">기본 진입 화면</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-body">
+          <!-- 커버 -->
+          <div class="wf-img">커버 이미지 캐러셀</div>
+          <!-- 브랜드 -->
+          <div class="wf-row">
+            <div class="wf-circle"></div>
+            <div style="flex:1;">
+              <div class="wf-line bold" style="width:80px;margin-bottom:4px;"></div>
+              <div class="wf-line xs" style="width:55px;"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+              <div style="background:#fff8e6;border:1px solid #ffe3a3;border-radius:10px;padding:3px 8px;font-size:9px;color:#92400e;font-weight:700;">🎟️ 쿠폰 2장</div>
+              <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;padding:3px 8px;font-size:9px;color:var(--ink2);font-weight:700;">🧾 주문내역 1</div>
+            </div>
+          </div>
+          <div class="wf-sep"></div>
+          <!-- 탭 -->
+          <div class="wf-tab-row">
+            <div class="wf-tab on">메뉴</div>
+            <div class="wf-tab">리뷰</div>
+            <div class="wf-tab">매장정보</div>
+          </div>
+          <!-- 카테고리 탭 -->
+          <div class="wf-row" style="gap:4px;margin-bottom:8px;overflow:hidden;">
+            <div style="background:#374151;border-radius:14px;padding:3px 8px;font-size:9px;color:#fff;font-weight:700;white-space:nowrap;">커피</div>
+            <div style="background:#f1f5f9;border-radius:14px;padding:3px 8px;font-size:9px;color:var(--ink2);font-weight:700;white-space:nowrap;">논커피</div>
+            <div style="background:#f1f5f9;border-radius:14px;padding:3px 8px;font-size:9px;color:var(--ink2);font-weight:700;white-space:nowrap;">티·에이드</div>
+          </div>
+          <!-- 메뉴 카드 2개 -->
+          <div class="wf-sec" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:44px;height:44px;background:#e2e8f0;border-radius:8px;flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div class="wf-row" style="margin-bottom:3px;">
+                <div class="wf-line bold" style="width:64px;"></div>
+                <span class="wf-badge">🔥 인기</span>
+              </div>
+              <div class="wf-line xs" style="width:80px;"></div>
+            </div>
+            <div style="background:#374151;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">+</div>
+          </div>
+          <div class="wf-sec" style="display:flex;align-items:center;gap:8px;opacity:.6;">
+            <div style="width:44px;height:44px;background:#e2e8f0;border-radius:8px;flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div class="wf-line bold" style="width:56px;margin-bottom:3px;"></div>
+              <div class="wf-line xs" style="width:70px;"></div>
+            </div>
+            <div style="background:#374151;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">+</div>
+          </div>
+          <!-- 장바구니 바 -->
+          <div style="background:var(--blue);border-radius:10px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <span style="font-size:10px;color:#fff;font-weight:700;">2개</span>
+            <span style="font-size:10px;color:#fff;font-weight:700;">주문하기</span>
+            <span style="font-size:10px;color:#fff;font-weight:700;">12,500원 ›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② 메뉴 상세 시트 -->
+    <div class="phone-wrap">
+      <div class="phone-label">② 메뉴 상세 시트</div>
+      <div class="phone-sub">메뉴 카드 탭 시 하단 오버레이</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-body" style="padding:0;">
+          <!-- 배경 dim -->
+          <div style="height:90px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:10px;color:var(--ink3);">메뉴 화면 (뒤)</span>
+          </div>
+          <!-- 시트 -->
+          <div style="background:#fff;border-radius:16px 16px 0 0;padding:12px 12px 14px;">
+            <div class="wf-handle"></div>
+            <div class="wf-img" style="height:80px;">메뉴 대표 이미지</div>
+            <div class="wf-row" style="margin-bottom:4px;">
+              <div class="wf-line bold" style="width:80px;"></div>
+              <span class="wf-badge">⭐ 추천</span>
+            </div>
+            <div class="wf-line xs" style="width:110px;margin-bottom:8px;"></div>
+            <div class="wf-line bold" style="width:60px;margin-bottom:10px;"></div>
+            <!-- 옵션 -->
+            <div class="wf-sec">
+              <div class="wf-sec-h">사이즈 선택 <span style="background:#fef2f2;color:#b91c1c;font-size:9px;padding:1px 5px;border-radius:3px;">필수</span></div>
+              <div class="wf-row" style="margin-bottom:4px;"><div class="wf-radio on"></div><div class="wf-line" style="width:48px;flex:none;"></div><div class="wf-line short xs" style="margin-left:auto;"></div></div>
+              <div class="wf-row"><div class="wf-radio"></div><div class="wf-line" style="width:48px;flex:none;"></div><div class="wf-line short xs" style="margin-left:auto;"></div></div>
+            </div>
+            <!-- 수량 + 담기 -->
+            <div class="wf-row" style="margin-bottom:8px;">
+              <span style="font-size:10px;font-weight:700;color:var(--ink2);">수량</span>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+                <div style="width:20px;height:20px;background:#e2e8f0;border-radius:4px;"></div>
+                <div class="wf-line" style="width:16px;flex:none;"></div>
+                <div style="width:20px;height:20px;background:#e2e8f0;border-radius:4px;"></div>
+              </div>
+            </div>
+            <div class="wf-btn blue">담기 · 5,000원</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ 장바구니 시트 -->
+    <div class="phone-wrap">
+      <div class="phone-label">③ 장바구니 시트</div>
+      <div class="phone-sub">장바구니 바 / 장바구니 보기 버튼</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-body" style="padding:0;">
+          <div style="height:70px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:10px;color:var(--ink3);">메뉴 화면 (뒤)</span>
+          </div>
+          <div style="background:#fff;border-radius:16px 16px 0 0;padding:12px 12px 14px;">
+            <div class="wf-handle"></div>
+            <div class="wf-row" style="margin-bottom:10px;">
+              <span style="font-size:12px;font-weight:800;">🛒 장바구니</span>
+              <div style="margin-left:auto;background:#eff6ff;border:1px solid var(--blue);border-radius:10px;padding:2px 8px;font-size:9px;font-weight:700;color:var(--blue);">2개</div>
+            </div>
+            <!-- 내 항목 -->
+            <div style="font-size:9px;font-weight:800;color:var(--ink3);margin-bottom:6px;">나</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+              <div style="width:36px;height:36px;background:#e2e8f0;border-radius:6px;flex-shrink:0;"></div>
+              <div style="flex:1;"><div class="wf-line bold" style="width:64px;margin-bottom:3px;"></div><div class="wf-line xs" style="width:50px;"></div></div>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <div style="width:16px;height:16px;background:#e2e8f0;border-radius:3px;"></div>
+                <div class="wf-line" style="width:12px;flex:none;"></div>
+                <div style="width:16px;height:16px;background:#e2e8f0;border-radius:3px;"></div>
+              </div>
+            </div>
+            <!-- 게스트 항목 -->
+            <div style="font-size:9px;font-weight:800;color:var(--ink3);margin-bottom:6px;">손님 2</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;opacity:.7;">
+              <div style="width:36px;height:36px;font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">☕</div>
+              <div style="flex:1;"><div class="wf-line bold" style="width:56px;margin-bottom:3px;"></div><div class="wf-line xs" style="width:40px;"></div></div>
+              <div style="font-size:9px;font-weight:700;color:var(--ink2);">× 2</div>
+            </div>
+            <!-- 결제 방식 -->
+            <div style="display:flex;gap:6px;margin-bottom:10px;">
+              <div style="flex:1;background:#374151;border-radius:8px;padding:6px;text-align:center;font-size:10px;font-weight:700;color:#fff;">개별 결제</div>
+              <div style="flex:1;background:#f1f5f9;border-radius:8px;padding:6px;text-align:center;font-size:10px;font-weight:700;color:var(--ink2);">함께 결제</div>
+            </div>
+            <div class="wf-sep"></div>
+            <div class="wf-row" style="margin-bottom:8px;">
+              <span style="font-size:10px;color:var(--ink2);">내 합계</span>
+              <span style="margin-left:auto;font-size:11px;font-weight:800;">5,500원</span>
+            </div>
+            <div class="wf-btn blue">주문하기 · 5,500원</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ 결제 화면 -->
+    <div class="phone-wrap">
+      <div class="phone-label">④ 결제 화면</div>
+      <div class="phone-sub">주문 확인 · 쿠폰 · 약관</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-body">
+          <div class="wf-topbar">
+            <div class="back"></div>
+            <div class="wf-line" style="width:60px;flex:none;"></div>
+          </div>
+          <!-- 주문 내용 -->
+          <div class="wf-sec">
+            <div class="wf-sec-h">주문 내용</div>
+            <div class="wf-row" style="margin-bottom:5px;">
+              <div style="width:32px;height:32px;background:#e2e8f0;border-radius:6px;flex-shrink:0;"></div>
+              <div style="flex:1;padding-left:6px;"><div class="wf-line bold" style="width:60px;margin-bottom:3px;"></div><div class="wf-line xs" style="width:44px;"></div></div>
+              <div style="font-size:10px;font-weight:700;">5,500원</div>
+            </div>
+            <div class="wf-row">
+              <div style="width:32px;height:32px;background:#e2e8f0;border-radius:6px;flex-shrink:0;"></div>
+              <div style="flex:1;padding-left:6px;"><div class="wf-line bold" style="width:52px;margin-bottom:3px;"></div><div class="wf-line xs" style="width:38px;"></div></div>
+              <div style="font-size:10px;font-weight:700;">4,000원</div>
+            </div>
+          </div>
+          <!-- 결제 수단 -->
+          <div class="wf-sec">
+            <div class="wf-sec-h">결제 수단</div>
+            <div class="wf-row" style="gap:5px;">
+              <div style="background:var(--blue);border-radius:8px;padding:5px 10px;font-size:9px;color:#fff;font-weight:700;">💳 카드</div>
+              <div style="background:#f1f5f9;border-radius:8px;padding:5px 10px;font-size:9px;color:var(--ink2);font-weight:700;">🟡 카카오페이</div>
+              <div style="background:#f1f5f9;border-radius:8px;padding:5px 10px;font-size:9px;color:var(--ink2);font-weight:700;">🔵 토스페이</div>
+            </div>
+          </div>
+          <!-- 쿠폰 -->
+          <div class="wf-coupon-box">
+            <div class="wf-sec-h" style="color:#92400e;">🎟️ 쿠폰 할인</div>
+            <div class="wf-row" style="margin-bottom:4px;"><div class="wf-radio on"></div><div style="flex:1;padding-left:5px;"><div class="wf-line bold" style="width:70px;margin-bottom:2px;"></div><div class="wf-line xs" style="width:90px;"></div></div></div>
+            <div class="wf-row"><div class="wf-radio"></div><div style="flex:1;padding-left:5px;"><div class="wf-line bold" style="width:60px;margin-bottom:2px;"></div><div class="wf-line xs" style="width:80px;"></div></div></div>
+          </div>
+          <!-- 약관 -->
+          <div class="wf-sec">
+            <div class="wf-sec-h">약관 동의</div>
+            <div class="wf-row" style="margin-bottom:4px;"><div class="wf-check on">✓</div><div style="flex:1;padding-left:5px;"><div class="wf-line xs" style="width:100px;"></div></div></div>
+            <div class="wf-row"><div class="wf-check on">✓</div><div style="flex:1;padding-left:5px;"><div class="wf-line xs" style="width:80px;"></div></div></div>
+          </div>
+          <div class="wf-btn blue">9,500원 결제하기</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ 알림 수단 시트 -->
+    <div class="phone-wrap">
+      <div class="phone-label">⑤ 알림 수단 시트</div>
+      <div class="phone-sub">결제 버튼 탭 시 오버레이</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-body" style="padding:0;">
+          <!-- 결제 화면 뒤 -->
+          <div style="height:60px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:10px;color:var(--ink3);">결제 화면 (뒤)</span>
+          </div>
+          <div style="background:#fff;border-radius:16px 16px 0 0;padding:12px 12px 14px;">
+            <div class="wf-handle"></div>
+            <div class="wf-line bold" style="width:120px;margin-bottom:4px;"></div>
+            <div class="wf-line xs" style="width:90px;margin-bottom:12px;"></div>
+            <!-- 선택 버튼 2개 -->
+            <div style="display:flex;gap:6px;margin-bottom:10px;">
+              <div style="flex:1;border:2px solid #e6c000;background:#fee500;border-radius:10px;padding:8px 4px;text-align:center;font-size:9px;font-weight:700;color:#191919;line-height:1.5;">🟡 카카오톡<br>연동</div>
+              <div style="flex:1;border:2px solid var(--blue);background:var(--blue2);border-radius:10px;padding:8px 4px;text-align:center;font-size:9px;font-weight:700;color:var(--blue);line-height:1.5;">📱 휴대폰번호<br>직접 입력</div>
+            </div>
+            <!-- 전화번호 입력 -->
+            <div style="border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;font-size:10px;color:var(--ink3);margin-bottom:8px;">010-1234-5678</div>
+            <!-- 마케팅 동의 -->
+            <div class="wf-row" style="margin-bottom:10px;">
+              <div class="wf-check on">✓</div>
+              <div style="flex:1;padding-left:5px;font-size:9px;color:var(--ink2);">[선택] 쿠폰·이벤트 알림 수신 동의</div>
+            </div>
+            <!-- 쿠폰 즉시 표시 영역 -->
+            <div class="wf-coupon-box" style="margin-bottom:8px;">
+              <div style="font-size:9px;font-weight:800;color:#92400e;margin-bottom:6px;">🎟️ 사용 가능한 쿠폰 2장</div>
+              <div class="wf-row" style="margin-bottom:4px;">
+                <div style="width:16px;height:16px;border-radius:50%;background:#e6a817;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:900;flex-shrink:0;">✓</div>
+                <div style="flex:1;padding-left:5px;"><div class="wf-line bold" style="width:70px;margin-bottom:2px;"></div><div class="wf-line xs" style="width:90px;"></div></div>
+              </div>
+              <div class="wf-row">
+                <div style="width:16px;height:16px;border-radius:50%;border:2px solid #d1a050;background:transparent;flex-shrink:0;"></div>
+                <div style="flex:1;padding-left:5px;"><div class="wf-line bold" style="width:60px;margin-bottom:2px;"></div><div class="wf-line xs" style="width:80px;"></div></div>
+              </div>
+            </div>
+            <div class="wf-btn blue">7,500원 결제하기</div>
+            <div style="text-align:center;font-size:9px;color:var(--ink3);text-decoration:underline;margin-top:6px;">알림 없이 주문하기</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑥ 처리 중 -->
+    <div class="phone-wrap">
+      <div class="phone-label">⑥ 처리 중</div>
+      <div class="phone-sub">결제 처리 → 주문 접수 단계</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:340px;">
+          <div class="wf-spinner"></div>
+          <div class="wf-line bold" style="width:100px;margin-bottom:8px;"></div>
+          <div class="wf-line xs" style="width:130px;margin-bottom:4px;"></div>
+          <div class="wf-line xs" style="width:110px;"></div>
+          <div style="margin-top:16px;font-size:10px;color:var(--ink3);">Step 1: 결제 처리 중</div>
+          <div style="font-size:9px;color:var(--ink4);margin-top:4px;">↓ 1.5초</div>
+          <div style="margin-top:4px;font-size:10px;color:var(--ink3);">Step 2: 주문 접수 중</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑦ 주문 완료 -->
+    <div class="phone-wrap">
+      <div class="phone-label">⑦ 주문 완료</div>
+      <div class="phone-sub">주문 접수 확인</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-body">
+          <div style="text-align:center;padding:8px 0;">
+            <div class="wf-check-big">✓</div>
+            <div class="wf-line bold" style="width:90px;margin:0 auto 4px;"></div>
+            <div class="wf-line xs" style="width:120px;margin:0 auto 8px;"></div>
+          </div>
+          <!-- 진행 상태바 -->
+          <div class="wf-progress" style="margin-bottom:10px;">
+            <div class="wf-pdot past" style="font-size:9px;">✓</div>
+            <div class="wf-pline filled"></div>
+            <div class="wf-pdot act">2</div>
+            <div class="wf-pline"></div>
+            <div class="wf-pdot">3</div>
+            <div class="wf-pline"></div>
+            <div class="wf-pdot">4</div>
+          </div>
+          <!-- 호출 번호 -->
+          <div style="border:2px solid var(--line);border-radius:10px;padding:10px;text-align:center;margin-bottom:8px;">
+            <div style="font-size:9px;color:var(--ink3);margin-bottom:4px;">주문 번호</div>
+            <div style="font-size:24px;font-weight:900;color:var(--blue);">A-042</div>
+            <div style="font-size:9px;color:var(--ink3);">준비되면 알려드릴게요</div>
+          </div>
+          <!-- 주문 요약 -->
+          <div class="wf-sec">
+            <div class="wf-row" style="margin-bottom:4px;"><div class="wf-line xs" style="width:80px;"></div><div class="wf-line xs" style="width:40px;margin-left:auto;flex:none;"></div></div>
+            <div class="wf-row" style="margin-bottom:4px;"><div class="wf-line xs" style="width:70px;"></div><div class="wf-line xs" style="width:36px;margin-left:auto;flex:none;"></div></div>
+            <div class="wf-sep"></div>
+            <div class="wf-row"><div class="wf-line bold" style="width:52px;"></div><div class="wf-line bold" style="width:44px;margin-left:auto;flex:none;"></div></div>
+          </div>
+          <div class="wf-btn">새 주문하기</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑧ 에러 화면 -->
+    <div class="phone-wrap">
+      <div class="phone-label">⑧ 에러 화면</div>
+      <div class="phone-sub">결제 실패 / POS 오류 / 네트워크</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-body">
+          <div class="wf-topbar">
+            <div class="back"></div>
+            <div class="wf-line" style="width:60px;flex:none;"></div>
+          </div>
+          <div style="text-align:center;padding:12px 0;">
+            <div class="wf-err-ic">💳</div>
+            <div class="wf-line bold" style="width:100px;margin:0 auto 6px;"></div>
+            <div class="wf-line xs" style="width:130px;margin:0 auto 3px;"></div>
+            <div class="wf-line xs" style="width:110px;margin:0 auto 10px;"></div>
+            <div style="background:#f1f5f9;border-radius:6px;padding:4px 10px;display:inline-block;font-size:9px;color:var(--ink3);font-family:monospace;">CODE: PAYMENT_FAILED</div>
+          </div>
+          <div class="wf-btn blue" style="margin-top:12px;">다른 방법으로 결제</div>
+          <div class="wf-btn ghost" style="margin-top:6px;">🛎 직원 호출</div>
+          <div style="text-align:center;font-size:9px;color:var(--ink3);text-decoration:underline;margin-top:8px;">결제 화면으로 돌아가기</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑨ 세션 만료 -->
+    <div class="phone-wrap">
+      <div class="phone-label">⑨ 세션 만료</div>
+      <div class="phone-sub">무활동 5분 후 전환</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:340px;text-align:center;padding:20px 16px;">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:14px;">⏱️</div>
+          <div class="wf-line bold" style="width:110px;margin:0 auto 6px;"></div>
+          <div class="wf-line xs" style="width:130px;margin:0 auto 4px;"></div>
+          <div class="wf-line xs" style="width:100px;margin:0 auto 20px;"></div>
+          <div style="border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;width:100%;">
+            <span style="font-size:22px;">📷</span>
+            <div style="text-align:left;"><div class="wf-line bold" style="width:70px;margin-bottom:4px;"></div><div class="wf-line xs" style="width:90px;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <!-- 쿠폰 플로우 보조 다이어그램 -->
+  <h2 style="margin-top:60px;">쿠폰 표시 조건 분기</h2>
+  <div class="flow">
+    <div class="flow-rows">
+      <div class="flow-row">
+        <div class="fn start">결제 화면 진입</div>
+        <span class="farr">→</span>
+        <span class="flabel">후불?</span>
+        <span class="farr">→</span>
+        <div class="fn end" style="background:#f1f5f9;border-color:var(--ink3);color:var(--ink2);">쿠폰 섹션 없음</div>
+      </div>
+      <div class="flow-row" style="margin-left:120px;">
+        <span class="flabel">선불</span>
+        <span class="farr">↓</span>
+        <div class="fn">phone 10자리<br>+ 마케팅 동의?</div>
+        <span class="farr">→ Yes →</span>
+        <div class="fn sheet">보유 쿠폰 목록<br>+ 코드 입력</div>
+      </div>
+      <div class="flow-row" style="margin-left:260px;">
+        <span class="flabel">No</span>
+        <span class="farr">↓</span>
+        <div class="fn ghost" style="background:#f9fafb;border-color:var(--ink3);color:var(--ink2);">코드 입력만 노출</div>
+      </div>
+      <div class="flow-gap"></div>
+      <div class="flow-row">
+        <div class="fn start">알림 수단 시트</div>
+        <span class="farr">→</span>
+        <span class="flabel">카카오 선택 + 마케팅 동의</span>
+        <span class="farr">→</span>
+        <div class="fn sheet">쿠폰 즉시 표시</div>
+      </div>
+      <div class="flow-row">
+        <div class="fn start">알림 수단 시트</div>
+        <span class="farr">→</span>
+        <span class="flabel">전화번호 10자리 + 마케팅 동의</span>
+        <span class="farr">→</span>
+        <div class="fn sheet">쿠폰 즉시 표시</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

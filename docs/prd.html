@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QR오더 손님 화면 PRD</title>
+<style>
+  :root{--blue:#4a7fe0;--ink:#1a202c;--ink2:#4a5568;--ink3:#718096;--line:#e2e8f0;--bg:#f7fafc;--card:#fff;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px;}
+  .wrap{max-width:900px;margin:0 auto;padding:48px 32px 80px;}
+  h1{font-size:28px;font-weight:900;color:var(--ink);margin-bottom:6px;}
+  .meta{font-size:13px;color:var(--ink3);margin-bottom:40px;}
+  .meta span{margin-right:20px;}
+  h2{font-size:19px;font-weight:800;color:var(--ink);margin:44px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line);}
+  h3{font-size:15px;font-weight:800;color:var(--blue);margin:22px 0 8px;}
+  p{margin-bottom:10px;color:var(--ink2);}
+  ul,ol{padding-left:18px;margin-bottom:12px;color:var(--ink2);}
+  li{margin-bottom:4px;}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:6px;vertical-align:middle;}
+  .req{background:#fef9ec;color:#92400e;border:1px solid #fde68a;}
+  .opt{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;}
+  .cond{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:20px;}
+  th{background:#f1f5f9;font-weight:700;padding:10px 12px;text-align:left;border:1px solid var(--line);color:var(--ink);}
+  td{padding:9px 12px;border:1px solid var(--line);color:var(--ink2);vertical-align:top;}
+  tr:hover td{background:#f8fafc;}
+  .chip{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;margin:2px 3px 2px 0;}
+  .chip-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+  .chip-green{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;}
+  .chip-amber{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+  .chip-red{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;}
+  .chip-gray{background:#f9fafb;color:#374151;border:1px solid #e5e7eb;}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:16px;}
+  .box-title{font-weight:800;font-size:14px;margin-bottom:10px;color:var(--ink);}
+  .flow-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .flow-box{background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;color:#1d4ed8;white-space:nowrap;}
+  .flow-arr{color:var(--ink3);font-size:18px;font-weight:900;}
+  .flow-cond{font-size:11px;color:var(--ink3);white-space:nowrap;}
+  .note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;font-size:13px;color:#78350f;margin-bottom:12px;}
+  code{background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12.5px;font-family:monospace;}
+  .screen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:20px;}
+  .screen-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
+  .screen-card h4{font-size:14px;font-weight:800;margin-bottom:6px;color:var(--ink);}
+  .screen-card p{font-size:13px;margin:0;color:var(--ink2);}
+  @media(max-width:600px){.wrap{padding:24px 16px 60px;} .flow-row{gap:6px;} .screen-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>QR오더 손님 화면 PRD</h1>
+  <div class="meta">
+    <span>📄 Product Requirements Document</span>
+    <span>🗓 2026-06-12</span>
+    <span>⚙️ v1.0 (mockup 기준)</span>
+  </div>
+
+  <!-- 1. 개요 -->
+  <h2>1. 서비스 개요</h2>
+  <p>손님이 테이블 QR 또는 포장용 QR을 스캔하면 진입하는 <strong>모바일 웹 주문 화면</strong>이다. 별도 앱 설치 없이 브라우저에서 메뉴 탐색 → 옵션 선택 → 결제/주문까지 완결한다.</p>
+  <div class="box">
+    <div class="box-title">서비스 범위</div>
+    <ul>
+      <li>대상 사용자: 매장 방문 손님 (비회원 · 카카오 로그인)</li>
+      <li>플랫폼: 모바일 웹 (max-width 480px)</li>
+      <li>진입: QR 스캔 (테이블 고정 QR · 포장 QR · 포장예약 QR)</li>
+      <li>세션 유지 시간: 5분 무활동 시 세션 만료 → QR 재스캔 안내</li>
+    </ul>
+  </div>
+
+  <!-- 2. 주문 유형 -->
+  <h2>2. 주문 유형 (진입 QR에 따라 결정)</h2>
+  <table>
+    <tr><th>유형</th><th>코드</th><th>결제 방식</th><th>수령 방식</th><th>특이사항</th></tr>
+    <tr>
+      <td><strong>먹고가기</strong> 🍽️</td><td><code>dinein</code></td>
+      <td>선불 또는 후불 (사장님 설정)</td>
+      <td>셀프수령 또는 서빙 (사장님 설정)</td>
+      <td>공동 주문, 호출 방식 설정, 후불 시 약관 불필요</td>
+    </tr>
+    <tr>
+      <td><strong>포장하기</strong> 🥡</td><td><code>takeout</code></td>
+      <td>선불</td>
+      <td>카운터 직접 픽업</td>
+      <td>포장가 별도 적용 가능, 호출 번호 발급</td>
+    </tr>
+    <tr>
+      <td><strong>포장 예약</strong> 📅</td><td><code>preorder</code></td>
+      <td>선불</td>
+      <td>지정 시간 픽업</td>
+      <td>수령 시간 필수 선택(12:00~20:30 30분 단위), 사장님 수락 필요</td>
+    </tr>
+  </table>
+
+  <h3>2-1. 먹고가기 세부 설정 (사장님 설정)</h3>
+  <table>
+    <tr><th>항목</th><th>옵션</th><th>조건</th></tr>
+    <tr><td>수령 방식</td><td>셀프수령 / 서빙</td><td>셀프수령이면 선불 고정</td></tr>
+    <tr><td>결제 타이밍</td><td>선불 / 후불</td><td>서빙 매장에서만 후불 선택 가능</td></tr>
+    <tr><td>호출 방식</td><td>카카오 알림톡 / 호명</td><td>셀프수령 전용. 호명이면 알림 수단 시트 생략</td></tr>
+  </table>
+
+  <!-- 3. 인증 -->
+  <h2>3. 사용자 인증 방식</h2>
+  <table>
+    <tr><th>유형</th><th>코드</th><th>쿠폰 연동</th><th>알림 수단</th></tr>
+    <tr>
+      <td>카카오 로그인</td><td><code>kakao</code></td>
+      <td>마케팅 동의 시 계정 연동 쿠폰 표시</td>
+      <td>카카오 알림톡 자동 (알림 시트 생략)</td>
+    </tr>
+    <tr>
+      <td>비회원</td><td><code>anon</code></td>
+      <td>휴대폰번호 10자리 + 마케팅 동의 시 번호 연동 쿠폰 표시</td>
+      <td>알림 수단 선택 시트 표시</td>
+    </tr>
+  </table>
+  <div class="note">목업 기준: 카카오 자동 로그인 상태(<code>authType='kakao'</code>)이면 결제 버튼 누를 때 알림 시트를 건너뛰고 바로 주문 처리된다.</div>
+
+  <!-- 4. 화면 목록 -->
+  <h2>4. 화면 목록</h2>
+  <div class="screen-grid">
+    <div class="screen-card">
+      <h4>① 메뉴 화면 <code>menu</code></h4>
+      <p>브랜드 헤더, 카테고리 탭, 메뉴 카드, 장바구니 바, 직원 호출 FAB</p>
+    </div>
+    <div class="screen-card">
+      <h4>② 결제 화면 <code>checkout</code></h4>
+      <p>주문 내역 확인, 요청사항, 결제 수단, 쿠폰, 약관, 알림 수단 시트(오버레이)</p>
+    </div>
+    <div class="screen-card">
+      <h4>③ 처리 중 <code>processing</code></h4>
+      <p>결제 중 / 주문 접수 중 스피너 표시</p>
+    </div>
+    <div class="screen-card">
+      <h4>④ 에러 <code>error</code></h4>
+      <p>결제 실패 / POS 연결 끊김 / 네트워크 오류별 안내 및 재시도</p>
+    </div>
+    <div class="screen-card">
+      <h4>⑤ 주문 완료 <code>done</code></h4>
+      <p>주문번호, 호출번호, 진행 상태바, 새 주문 버튼</p>
+    </div>
+    <div class="screen-card">
+      <h4>⑥ 세션 만료 <code>session</code></h4>
+      <p>5분 무활동 시 노출. QR 재스캔 안내</p>
+    </div>
+  </div>
+
+  <!-- 5. 메뉴 화면 -->
+  <h2>5. 메뉴 화면 기능 명세</h2>
+
+  <h3>5-1. 브랜드 헤더</h3>
+  <ul>
+    <li>대표 이미지 캐러셀 (최대 3장, 3.5초 자동 전환)</li>
+    <li>주문 유형 뱃지 (먹고가기/포장/예약 + 테이블 번호)</li>
+    <li>매장명, 영업 상태 표시</li>
+    <li>주문 내역 버튼 (이전 주문 차수가 있을 때만 노출)</li>
+    <li>쿠폰 버튼 (전화번호 10자리 + 마케팅 동의 조건 충족 시 노출)</li>
+  </ul>
+
+  <h3>5-2. 탭 구성</h3>
+  <table>
+    <tr><th>탭</th><th>내용</th></tr>
+    <tr><td>메뉴</td><td>카테고리 탭 + 메뉴 카드 목록</td></tr>
+    <tr><td>리뷰</td><td>손님 리뷰 목록 + 평균 평점 (사장님 설정으로 on/off)</td></tr>
+    <tr><td>매장정보</td><td>영업시간, 원산지 정보, 공지사항</td></tr>
+  </table>
+
+  <h3>5-3. 메뉴 카드</h3>
+  <ul>
+    <li>카테고리별 섹션 분리, 카테고리 탭 클릭 시 해당 섹션으로 스크롤</li>
+    <li>스크롤 위치에 따라 카테고리 탭 자동 활성화 (스크롤 스파이)</li>
+    <li>메뉴 검색 (이름 · 설명 텍스트 검색)</li>
+    <li>배지: 🔥 인기 / ⭐ 추천 / 🆕 신메뉴</li>
+    <li>상태: 판매중 / 품절 (dimming + 오버레이) / 숨김 (노출 안 됨)</li>
+    <li>재고 부족 (3개 이하): "잔여 N개 · 서둘러 주세요" 표시</li>
+    <li>해피아워 할인 (사장님 설정 시간대 + 시뮬레이터 토글)</li>
+    <li>공휴일 표시 정책: 포함(기본) / 공휴일 숨김 / 공휴일만 노출</li>
+    <li>포장가: <code>dinein</code>이 아닐 때 <code>takeout</code> 가격 적용</li>
+  </ul>
+
+  <h3>5-4. 메뉴 상세 시트 (바텀 시트)</h3>
+  <ul>
+    <li>대표 이미지, 이름, 설명, 가격 (할인 표시)</li>
+    <li>알레르기 정보</li>
+    <li>옵션 선택: 단일 선택(라디오) / 복수 선택(체크박스)</li>
+    <li>수량 스테퍼 (최소 1, 최대 maxQty)</li>
+    <li>담기 버튼 (같은 옵션 조합이면 수량 누적)</li>
+  </ul>
+
+  <h3>5-5. 세트 메뉴</h3>
+  <ul>
+    <li>슬롯별 구성 선택 (각 슬롯은 필수 선택)</li>
+    <li>기본가 + 옵션별 추가 금액 합산</li>
+  </ul>
+
+  <h3>5-6. 공동 주문 (먹고가기 전용)</h3>
+  <ul>
+    <li>같은 테이블에 이미 주문 중인 손님이 있으면 합류 시트 노출</li>
+    <li>합류 시: 참여자 아바타 바 표시, 서로의 장바구니 확인 가능</li>
+    <li>장바구니 시트에서 <strong>개별 결제</strong> / <strong>함께 결제</strong> 선택</li>
+  </ul>
+
+  <h3>5-7. 직원 호출 (서빙 매장 · 영업 중 · 메뉴 탭에서만)</h3>
+  <ul>
+    <li>FAB 버튼으로 호출 시트 열기</li>
+    <li>사유 항목 복수 선택 후 호출 (최대 15항목, 3열 그리드)</li>
+    <li>기본 항목: 물, 물티슈, 수저/포크, 앞접시, 휴지, 빨대, 얼음, 추천 메뉴, 계산 도움, 아기 의자, 담요, 기타 문의</li>
+  </ul>
+
+  <h3>5-8. 장바구니 바 / 장바구니 시트</h3>
+  <ul>
+    <li>메뉴 탭 + 영업 중 + 담은 항목 있을 때 하단 고정 바 노출</li>
+    <li>장바구니 시트: 항목별 수량 조절·삭제, 공동 주문 시 참여자별 항목 표시</li>
+    <li>장바구니가 완전히 비워지면 자동으로 메뉴 화면으로 복귀</li>
+  </ul>
+
+  <!-- 6. 결제 화면 -->
+  <h2>6. 결제 화면 기능 명세</h2>
+
+  <h3>6-1. 주문 내용 확인</h3>
+  <ul>
+    <li>담은 메뉴 목록 (수량 조절·삭제 가능, 변경 시 스크롤 위치 유지)</li>
+    <li>공동 주문 + 함께 결제 시: 게스트 항목 포함하여 전체 합계 표시</li>
+  </ul>
+
+  <h3>6-2. 수령 시간 선택 (포장 예약 전용)</h3>
+  <ul>
+    <li>12:00 ~ 20:30 범위 30분 단위 타임슬롯 선택 (필수)</li>
+    <li>미선택 시 결제 버튼 비활성 → 토스트 안내</li>
+  </ul>
+
+  <h3>6-3. 결제 수단</h3>
+  <ul>
+    <li>카드, 카카오페이, 네이버페이, 토스페이</li>
+    <li>후불(postpay) 시 결제 수단 섹션 미노출</li>
+  </ul>
+
+  <h3>6-4. 쿠폰 섹션</h3>
+  <table>
+    <tr><th>조건</th><th>노출 내용</th></tr>
+    <tr>
+      <td>전화번호 10자리 + 마케팅 동의</td>
+      <td>보유 쿠폰 목록 (라디오 선택) + 쿠폰번호 코드 입력</td>
+    </tr>
+    <tr>
+      <td>그 외</td>
+      <td>쿠폰번호 코드 입력만 노출</td>
+    </tr>
+    <tr>
+      <td>후불(postpay)</td>
+      <td>쿠폰 섹션 전체 미노출</td>
+    </tr>
+  </table>
+  <ul>
+    <li>쿠폰 타입: <code>amount</code>(정액 할인) / <code>rate</code>(정률 할인, maxDisc 상한)</li>
+    <li>최소 주문 금액(<code>minOrder</code>) 미달 시 쿠폰 비활성</li>
+    <li>채널 필터: 쿠폰별 <code>channels</code> 배열로 주문 유형별 적용 여부 설정</li>
+  </ul>
+
+  <h3>6-5. 요청사항</h3>
+  <ul>
+    <li>사장님이 on/off 가능 (기본 on)</li>
+    <li>자유 입력 텍스트, 최대 200자</li>
+  </ul>
+
+  <h3>6-6. 약관 동의</h3>
+  <table>
+    <tr><th>약관</th><th>필수/선택</th><th>노출 조건</th></tr>
+    <tr><td>이용약관 동의</td><td>필수</td><td>선불 결제 시</td></tr>
+    <tr><td>개인정보 수집·이용 동의</td><td>필수</td><td>선불 결제 시</td></tr>
+    <tr><td>만 14세 이상 확인</td><td>필수</td><td>선불 + 비회원</td></tr>
+    <tr><td>쿠폰·이벤트 알림 수신 동의</td><td>선택</td><td>알림 수단 시트 인라인</td></tr>
+  </table>
+
+  <h3>6-7. 알림 수단 선택 시트 (바텀 오버레이)</h3>
+  <p>결제 버튼 클릭 → 조건에 따라 시트 표시 여부 결정:</p>
+  <table>
+    <tr><th>조건</th><th>동작</th></tr>
+    <tr><td>카카오 로그인 상태</td><td>시트 생략 → 바로 주문 처리</td></tr>
+    <tr><td>셀프수령 + 호명 방식</td><td>시트 생략 → 알림 없이 주문 처리</td></tr>
+    <tr><td>서빙 + 후불</td><td>시트 생략 → 알림 없이 주문 처리</td></tr>
+    <tr><td>그 외</td><td>알림 수단 시트 표시</td></tr>
+  </table>
+
+  <p style="margin-top:12px;"><strong>시트 내 선택지:</strong></p>
+  <ul>
+    <li>🟡 <strong>카카오톡 연동</strong>: 마케팅 동의 체크 시 보유 쿠폰 즉시 표시</li>
+    <li>📱 <strong>휴대폰번호 직접 입력</strong>: 10자리 입력 + 마케팅 동의 시 보유 쿠폰 표시</li>
+    <li>알림 없이 주문하기 (알림 불필요 케이스에서만 노출)</li>
+  </ul>
+  <div class="note">알림 수단 시트 진입 시: <code>S.phone</code>과 <code>S.termsChecked.marketing</code> 초기화 → 매번 새로 입력.</div>
+
+  <!-- 7. 처리·완료·에러 -->
+  <h2>7. 주문 처리 · 완료 · 에러 화면</h2>
+
+  <h3>7-1. 처리 중 화면</h3>
+  <ul>
+    <li>선불: "결제 처리 중" → (1.5초) → "주문 접수 중" → (1.3초) → 완료/에러</li>
+    <li>후불: "주문 접수 중" → (1.3초) → 완료/에러</li>
+  </ul>
+
+  <h3>7-2. 주문 완료 화면</h3>
+  <ul>
+    <li>주문번호 (형식: <code>#YYYYMMDD-XXXX</code>)</li>
+    <li>호출번호: 서빙 매장 제외 전 케이스 발급 (형식: 사장님 설정, 예 <code>A-001</code>)</li>
+    <li>4단계 진행 상태바 (주문 유형별 라벨 상이)</li>
+    <li>주문 내역 요약 (쿠폰 할인 표시 포함)</li>
+    <li>후불 시: "나갈 때 카운터에서 결제해 주세요" 안내 pill</li>
+    <li>포장예약 시: 수령 예정 시간 + "사장님 수락 후 확정" 안내</li>
+    <li>새 주문하기 버튼 → 장바구니/쿠폰 초기화, 메뉴 화면으로</li>
+  </ul>
+
+  <h3>7-3. 상태바 단계 (주문 유형별)</h3>
+  <table>
+    <tr><th>유형</th><th>1단계</th><th>2단계</th><th>3단계</th><th>4단계</th></tr>
+    <tr><td>포장하기</td><td>주문 접수</td><td>준비 중</td><td>픽업 대기</td><td>픽업 완료</td></tr>
+    <tr><td>포장 예약</td><td>주문 접수</td><td>수락 대기</td><td>준비 중</td><td>완료</td></tr>
+    <tr><td>먹고가기 (셀프)</td><td>주문 접수</td><td>준비 중</td><td>수령 대기</td><td>완료</td></tr>
+    <tr><td>먹고가기 (서빙)</td><td>주문 접수</td><td>준비 중</td><td>서빙 중</td><td>완료</td></tr>
+  </table>
+
+  <h3>7-4. 에러 화면 (3종)</h3>
+  <table>
+    <tr><th>에러 코드</th><th>제목</th><th>주요 동작</th></tr>
+    <tr><td><code>PAYMENT_FAILED</code></td><td>결제에 실패했어요</td><td>결제 화면으로 돌아가 다른 수단 선택</td></tr>
+    <tr><td><code>POS_OFFLINE</code></td><td>매장 시스템 연결 끊김</td><td>재시도 / 서빙 매장이면 직원 호출 버튼 추가 노출</td></tr>
+    <tr><td><code>NETWORK_ERROR</code></td><td>연결이 불안정해요</td><td>재시도</td></tr>
+  </table>
+
+  <!-- 8. 주문 내역 -->
+  <h2>8. 주문 내역</h2>
+  <ul>
+    <li>테이블 세션 내 차수별 주문 누적 기록</li>
+    <li>차수별 주문 시간, 항목, 합계 표시</li>
+    <li>헤더 "주문내역 N" 버튼으로 시트 열기 (이전 차수 있을 때만 노출)</li>
+  </ul>
+
+  <!-- 9. 세션 -->
+  <h2>9. 세션 관리</h2>
+  <ul>
+    <li>무활동 5분 후 자동으로 세션 만료 화면 전환</li>
+    <li>touchstart, click, scroll, keydown, input 이벤트로 타이머 리셋</li>
+    <li><code>tableActive</code> 상태로 POS 테이블 점유 여부 구분 (false = 테이블 클리어 → 비회원 auth 초기화)</li>
+  </ul>
+
+  <!-- 10. 영업 상태 -->
+  <h2>10. 영업 상태에 따른 분기</h2>
+  <table>
+    <tr><th>상태</th><th>메뉴 탐색</th><th>장바구니/주문</th><th>UI 변화</th></tr>
+    <tr><td>영업 중</td><td>가능</td><td>가능</td><td>정상</td></tr>
+    <tr><td>영업 종료</td><td>가능 (둘러보기)</td><td>불가</td><td>closed 배너, 담기 버튼 비활성, 장바구니 바 숨김, 영업시간 모달</td></tr>
+  </table>
+
+  <!-- 11. 비기능 -->
+  <h2>11. 비기능 요구사항</h2>
+  <ul>
+    <li>스크롤 위치 보존: 화면 유지 시 render() 호출로 스크롤 위치 초기화되지 않음</li>
+    <li>스크롤 잠금: 시트/모달 열림 시 body 스크롤 잠금, 닫힘 시 해제</li>
+    <li>접근성: aria-label, 색 대비, 터치 타깃 크기 고려</li>
+    <li>이미지 lazy loading, onerror 폴백 처리</li>
+    <li>결제 버튼 금액 실시간 반영 (쿠폰 선택·해제 즉시)</li>
+  </ul>
+
+</div>
+</body>
+</html>

@@ -1861,10 +1861,13 @@ function scrDone(){
   // 번호 카드 note — 알림 수단 포함
   const isDineinSelf = S.orderType==='dinein' && S.serve==='self';
   const callNoLabel = isDineinSelf ? '주문 번호' : '호출 번호';
-  const callNoNote = S.callMethod==='verbal' && isDineinSelf
-    ? '준비가 다 되면 알려드릴게요.'
-    : S.orderType==='takeout'
-      ? '주문하신 메뉴가 준비되면 카카오톡 알림을 보내드려요.'
+  // 준비 완료 알림 수단 — 손님이 시트에서 고른 방법(카톡/폰/이메일)에 맞춰 안내
+  const readyVia = (isKakao || S.notifChoice==='kakao' || S.notifChoice==='phone') ? '카카오 알림톡으로'
+    : S.notifChoice==='email' ? '이메일로' : null;
+  const callNoNote = (S.callMethod==='verbal' && isDineinSelf)
+    ? '준비가 다 되면 전광판과 호명으로 알려드릴게요.'
+    : (S.orderType==='takeout' || S.orderType==='preorder')
+      ? (readyVia ? `준비되면 ${readyVia} 알려드려요.` : '준비되면 알려드려요.')
       : '준비가 다 되면 알려드릴게요.';
   const callNoCard = S.callNo
     ? `<div class="callno-box">

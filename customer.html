@@ -63,6 +63,9 @@
   .histbtn{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:var(--blue-d);background:var(--blue-50);border:1px solid #c5d8f5;border-radius:20px;padding:8px 13px;cursor:pointer;font-family:inherit;white-space:nowrap;}
   .histbtn:active{transform:scale(.97);}
   .histbtn .hist-cnt{background:var(--blue);color:#fff;min-width:18px;height:18px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;}
+  .couponbtn{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#92400e;background:#fff8e6;border:1px solid #ffe3a3;border-radius:20px;padding:8px 13px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .couponbtn:active{transform:scale(.97);}
+  .couponbtn.empty{color:var(--ink3);background:var(--bg);border-color:var(--line);cursor:default;}
   .hist-card{border:1px solid var(--line);border-radius:13px;padding:14px;margin-top:14px;}
   .hist-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
   .hist-round{font-size:15px;font-weight:800;color:var(--blue-d);background:var(--blue-50);padding:4px 11px;border-radius:8px;}
@@ -812,7 +815,17 @@ function brandHero(){
           </div>
           ${STORE.intro?`<div class="bintro" style="margin-top:6px;">${STORE.intro}</div>`:''}
         </div>
-        ${ORDER_HISTORY.length?`<button class="histbtn" onclick="openHistory()">🧾 주문내역 <span class="hist-cnt">${ORDER_HISTORY.length}</span></button>`:''}
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          ${ORDER_HISTORY.length?`<button class="histbtn" onclick="openHistory()">🧾 주문내역 <span class="hist-cnt">${ORDER_HISTORY.length}</span></button>`:''}
+          ${(()=>{
+            const hp=(S.phone||'').replace(/\D/g,'').length>=10 && S.termsChecked.marketing;
+            if(!hp) return '';
+            const cnt=COUPONS.filter(cp=>cp.channels.includes(S.orderType)).length;
+            return cnt>0
+              ? `<button class="couponbtn" onclick="${S.cart.length?`S.screen='checkout';render()`:`toast('메뉴를 담으면 쿠폰을 쓸 수 있어요')`}">🎟️ 쿠폰 ${cnt}장</button>`
+              : `<button class="couponbtn empty" disabled>🎟️ 사용 가능한 쿠폰 없음</button>`;
+          })()}
+        </div>
       </div>
     </div>`;
 }

@@ -1272,7 +1272,8 @@ function applyCode(){
 }
 
 function openCartSheet(){
-  if(!S.cart.length) return;
+  const hasItems = S.cart.length || (S.groupMode && S.orderType==='dinein' && GUEST_CARTS.some(g=>g.cart.length));
+  if(!hasItems) return;
   renderCartSheet();
   $('cartsheetbg').classList.add('on'); syncScrollLock();
 }

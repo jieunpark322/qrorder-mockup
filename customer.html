@@ -826,8 +826,6 @@ function scrMenu(){
     ${groupParticipantBar()}
     ${closedBanner}
     ${S.happyHour?`<div class="happy-banner">🎉 <div><div>해피아워 진행 중 · 커피 음료 <b>${won(STORE.happyHour.discount)}원 추가 할인</b></div><div class="htime">${STORE.happyHour.start} ~ ${STORE.happyHour.end}</div></div></div>`:''}
-    ${S.orderType==='takeout'?`<div class="notice amber">🥡 <span>포장 주문은 <b>포장가</b>로 계산돼요. 메뉴별로 매장가와 다를 수 있어요.</span></div>`:''}
-    ${S.orderType==='preorder'?`<div class="notice blue">📅 <span>포장 예약은 다음 단계에서 <b>수령 시간</b>을 정하고, 사장님이 수락하면 확정돼요.</span></div>`:''}
     <div id="menuResults">${menuResultsHtml()}</div>`;
   const content = S.tab==='review' ? reviewsSection() : S.tab==='info' ? infoTab() : menuTab;
   const dx = S._tabAnim==='left' ? '-22px' : '22px';
@@ -1487,7 +1485,7 @@ function scrCheckout(){
         <option value="" ${!S.pickup?'selected':''}>시간을 선택해 주세요</option>
         ${timeSlots().map(t=>`<option value="${t}" ${S.pickup===t?'selected':''}>오늘 ${t}</option>`).join('')}
       </select>
-      <div class="info-pill amber" style="margin-top:12px;">📨 <span>주문하면 <b>사장님이 수락</b>해야 확정돼요.</span></div></div>`:''}
+    </div>`:''}
 
     ${S.groupMode && S.orderType==='dinein' ? `
     <div class="sec">
@@ -1525,7 +1523,6 @@ function scrCheckout(){
             <span style="font-size:14px;font-weight:700;color:var(--ink);">전체 동의하기</span>
           </div>
           ${termsRows}
-          ${hasOptional?`<p style="font-size:11px;color:var(--ink4);padding-top:6px;line-height:1.5;">선택 항목에 동의하지 않아도 주문할 수 있어요.</p>`:''}
         </div>
       </div>` : ''}
 

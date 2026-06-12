@@ -609,8 +609,8 @@ function render(){
 /* --- 플로팅 버튼(직원 호출 / 위로) 표시·위치 --- */
 function syncFabs(){
   const onMenu = S.screen==='menu' && S.tab==='menu';
-  // 직원 호출: 먹고가기 + 영업중 + 메뉴 화면에서만
-  const showStaff = onMenu && S.orderType==='dinein' && S.businessOpen;
+  // 직원 호출: 서빙 매장(dinein+server) + 영업중 + 메뉴 화면에서만
+  const showStaff = onMenu && S.orderType==='dinein' && S.serve==='server' && S.businessOpen;
   const fab=$('staffFab'); if(fab) fab.classList.toggle('show', showStaff);
   // 장바구니 바가 떠 있으면 플로팅 버튼을 위로 띄움
   const cartVisible = onMenu && S.cart.length>0 && S.businessOpen;

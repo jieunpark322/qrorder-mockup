@@ -616,7 +616,7 @@ const $ = id => document.getElementById(id);
 
 function render(){
   renderDemo();
-  const r = { menu:scrMenu, checkout:scrCheckout, processing:scrProcessing, error:scrError, done:scrDone, split:scrSplit, session:scrSession }[S.screen];
+  const r = { menu:scrMenu, checkout:scrCheckout, processing:scrProcessing, error:scrError, done:scrDone, split:scrSplit, splitdone:scrSplitDone, session:scrSession }[S.screen];
   $('screen').innerHTML = r();
   if(!S._keepScroll) window.scrollTo(0,0);
   S._tabAnim=null;
@@ -1705,12 +1705,14 @@ function finishOrder(){
   S.screen='done'; render();
 }
 function scrProcessing(){
-  const isPay = S.procStep==='pay';
+  const isPay = S.procStep==='pay' || S.procStep==='splitpay';
+  const isSplit = S.procStep==='splitpay' || S.procStep==='splitsubmit';
   return `<div class="proc">
     <div class="spinner"></div>
-    <h2>${isPay?'결제 처리 중이에요':'주문 접수 중이에요'}</h2>
+    <h2>${isPay?'결제 처리 중이에요':isSplit?'정산 처리 중이에요':'주문 접수 중이에요'}</h2>
     <p>${isPay
       ? `<b>${S.pay}</b>로 결제를 진행하고 있어요.<br>잠시만 기다려 주세요.`
+      : isSplit ? `결제가 완료됐어요.<br>정산을 마무리하고 있어요.`
       : `결제가 완료됐어요.<br>매장에 주문을 전달하고 있어요.`}</p>
   </div>`;
 }
@@ -1824,6 +1826,34 @@ function resetOrder(){
 }
 
 /* --- 1/N 정산 --- */
+function processSplitPayment(){
+  S.screen='processing'; S.procStep='splitpay'; render();
+  setTimeout(()=>{
+    if(S.screen!=='processing') return;
+    S.procStep='splitsubmit'; render();
+    setTimeout(()=>{ S.screen='splitdone'; render(); }, 1000);
+  }, 1500);
+}
+function scrSplitDone(){
+  const n = 1 + GUEST_CARTS.length;
+  const total = cartTotal() + guestTotal() - couponDiscount();
+  const perBase = Math.ceil(total / n);
+  const tipAmt = S.splitTip==='custom'
+    ? (parseInt((S.splitCustomTip||'').replace(/\D/g,''))||0)
+    : Math.round(perBase * S.splitTip / 100);
+  const perFinal = perBase + tipAmt;
+  return `<div class="done"><div class="ck" style="background:var(--green);">✓</div>
+      <h2>정산이 완료됐어요</h2>
+      <div class="ordno">1인 결제 금액 · ${won(perFinal)}원</div></div>
+    <div class="done-card">
+      <div class="split-row"><span style="color:var(--ink3);">정산 금액</span><span>${won(perBase)}원</span></div>
+      ${tipAmt>0?`<div class="split-row"><span style="color:var(--ink3);">팁</span><span>${won(tipAmt)}원</span></div>`:''}
+      <div class="split-row main"><span>결제 금액</span><span>${won(perFinal)}원</span></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line2);font-size:13px;color:var(--ink3);">💳 ${S.pay}</div>
+    </div>
+    <button class="primarybtn" onclick="S.screen='done';render()">확인</button>
+    <div style="height:24px;"></div>`;
+}
 function scrSplit(){
   const n = 1 + GUEST_CARTS.length;
   const total = cartTotal() + guestTotal() - couponDiscount();
@@ -1868,7 +1898,11 @@ function scrSplit(){
         ${customInput}
       </div>
       ${expectBlock}
-      <button class="primarybtn" onclick="toast('결제가 완료됐어요 ✅')">1/N 정산하기 · ${won(perFinal)}원</button>
+      <div class="tip-section" style="margin-top:18px;">
+        <div class="ts-h">결제 수단</div>
+        <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div>
+      </div>
+      <button class="primarybtn" onclick="processSplitPayment()">1/N 정산하기 · ${won(perFinal)}원</button>
       <div style="height:24px;"></div>
     </div>`;
 }

@@ -57,7 +57,7 @@
   <text x="56" y="448" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#1A202C">① 메뉴</text>
   <text x="180" y="448" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">QR 진입 시 기본 화면</text>
   <text x="440" y="448" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">카테고리 필터 · 메뉴 카드 · 장바구니 버튼</text>
-  <text x="700" y="448" font-family="-apple-system,sans-serif" font-size="9" fill="#7C3AED" font-family="monospace">'menu'</text>
+  <text x="700" y="448" font-family="monospace,sans-serif" font-size="9" fill="#7C3AED">'menu'</text>
 
   <line x1="40" y1="456" x2="800" y2="456" stroke="#F1F5F9" stroke-width="1"/>
   <text x="56" y="474" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#1A202C">② 결제</text>

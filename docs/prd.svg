@@ -104,7 +104,7 @@
 
   <rect x="406" y="632" width="380" height="128" rx="8" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
   <text x="422" y="652" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#1D4ED8">🔐 알림 수단 선택 (notifSheet)</text>
-  <text x="422" y="672" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 카카오톡 연동: 버튼 탭 → 즉시 결제 진행</text>
+  <text x="422" y="672" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 카카오톡 로그인: 버튼 탭 → 즉시 결제 진행</text>
   <text x="422" y="690" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 휴대폰 직접 입력: 10자리 + 마케팅 동의 필수</text>
   <text x="422" y="708" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 알림 없이 주문: dinein 셀프+구두호명 시 자동 건너뜀</text>
   <text x="422" y="726" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 카카오: 마케팅 동의 시 쿠폰 표시</text>
@@ -138,7 +138,7 @@
 
   <!-- flow boxes -->
   <rect x="40" y="998" width="140" height="34" rx="8" fill="#FEE500" stroke="#E6C000" stroke-width="1.5"/>
-  <text x="110" y="1013" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#191919">카카오 연동 선택</text>
+  <text x="110" y="1013" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#191919">카카오 로그인 선택</text>
   <text x="110" y="1026" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="8" fill="#191919">notifChoice = 'kakao'</text>
   <line x1="180" y1="1015" x2="200" y2="1015" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
   <defs><marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#94A3B8"/></marker></defs>
@@ -309,7 +309,7 @@
   <text x="56" y="1922" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#0369A1">✅ 재인증 생략 적용 조건</text>
   <text x="56" y="1942" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">• 동일 테이블 QR URL 재접속</text>
   <text x="56" y="1960" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">• 세션 유효 기간 내 (5분 타이머 미만료)</text>
-  <text x="56" y="1978" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">• 이전 주문에서 카카오 연동 완료된 상태</text>
+  <text x="56" y="1978" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">• 이전 주문에서 카카오 로그인 완료된 상태</text>
   <text x="56" y="1996" font-family="-apple-system,sans-serif" font-size="10" fill="#0C4A6E">  (S.callMethod='alimtalk', S.phone 값 존재)</text>
 
   <rect x="406" y="1902" width="380" height="108" rx="8" fill="#FFF1F2" stroke="#FECDD3" stroke-width="1"/>

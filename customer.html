@@ -1478,8 +1478,7 @@ function scrCheckout(){
     </div>
 
     ${isPostpay
-      ? `<div class="sec"><div class="sec-h">🧾 결제 <span class="opt-pick" style="font-weight:600;">후불 · 나갈 때 결제</span></div>
-          <div class="info-pill amber">🧾 <span>지금은 주문만 넣고, <b>나갈 때 카운터에서 결제</b>해요.</span></div></div>`
+      ? ``
       : `<div class="sec"><div class="sec-h">💳 결제 수단 <span class="opt-pick" style="font-weight:600;">선불 · 주문 시 바로 결제</span></div>
           <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div></div>`}
 

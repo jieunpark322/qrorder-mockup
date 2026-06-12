@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예외 상황 가이드 · QR오더 분기 로직</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink-1:#111827;--ink-2:#374151;--ink-3:#6B7280;--ink-4:#9CA3AF;
+  --line:#E5E7EB;--line-2:#F1F5F9;--bg:#F9FAFB;--white:#fff;
+  --blue:#2563EB;--blue-bg:#EFF6FF;--blue-d:#1D4ED8;
+  --green:#059669;
+  --purple:#7C3AED;--purple-bg:#F5F3FF;
+  --red:#DC2626;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);color:var(--ink-1);line-height:1.6;}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 24px 28px;}
+.sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+.sec-num{font-size:12px;font-weight:800;color:var(--blue);background:var(--blue-bg);padding:3px 9px;border-radius:6px;}
+.sec-head h2{font-size:20px;font-weight:800;letter-spacing:-.01em;}
+.sec-desc{font-size:13.5px;color:var(--ink-3);margin-bottom:20px;max-width:760px;}
+.badge{display:inline-block;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;margin-right:6px;}
+.badge.must{background:#FEE2E2;color:var(--red);}
+.badge.rec{background:#DBEAFE;color:var(--blue-d);}
+.edge{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.edge-head{padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;background:#fff;}
+.edge-head .ei{font-size:18px;}
+.edge-head .et{font-size:14.5px;font-weight:700;flex:1;}
+.edge-head .ex{color:var(--ink-4);transition:transform .2s;font-size:13px;}
+.edge.open .edge-head .ex{transform:rotate(180deg);}
+.edge-body{display:none;padding:0 18px 18px;background:#fff;}
+.edge.open .edge-body{display:block;}
+.edge-row{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line-2);}
+.edge-row .er-k{flex-shrink:0;width:160px;font-size:12.5px;font-weight:700;color:var(--ink-2);}
+.edge-row .er-v{flex:1;font-size:12.5px;color:var(--ink-3);}
+.edge-row .er-v .rule{color:var(--green);font-weight:700;}
+.state{font-family:ui-monospace,monospace;font-size:11px;color:var(--purple);background:var(--purple-bg);padding:1px 6px;border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="edge">
+    <div class="sec-head"><span class="sec-num">4</span><h2>예외 상황 가이드</h2></div>
+    <p class="sec-desc">주문·결제·네트워크·세션이 얽히는 지점의 처리 정책입니다. <span class="badge must">필수</span> 개발 전 확정 필요 · <span class="badge rec">권장</span> 기본 정책 제안. 헤더를 누르면 펼쳐집니다.</p>
+
+    <div class="edge open">
+      <div class="edge-head"><span class="ei">👥</span><span class="et">함께 주문 동기화</span><span class="ex">▼</span></div>
+      <div class="edge-body">
+        <div class="edge-row"><div class="er-k">동시 담기·수정</div><div class="er-v"><span class="badge rec">권장</span>실시간 소켓(WebSocket) 브로드캐스트로 공동 장바구니 갱신. <span class="rule">충돌 시 last-write-wins</span> + 항목별 누가 담았는지 표시</div></div>
+        <div class="edge-row"><div class="er-k">참여자 이탈</div><div class="er-v"><span class="badge must">필수</span>한 명이 페이지를 닫아도 다른 참여자 장바구니는 유지. 이탈자 항목은 "○○님 담음"으로 잔존, 결제 시 포함 여부 확인</div></div>
+        <div class="edge-row"><div class="er-k">방장 이탈 / 결제권</div><div class="er-v"><span class="badge must">필수</span>방장 개념 없이 <b>누구나 결제 가능</b>(현재 정책). 한 명이 함께 결제하면 전체 잠금 → 중복 결제 방지</div></div>
+      </div>
+    </div>
+
+    <div class="edge">
+      <div class="edge-head"><span class="ei">🔑</span><span class="et">로그인 / 테이블 세션</span><span class="ex">▼</span></div>
+      <div class="edge-body">
+        <div class="edge-row"><div class="er-k">재진입 (테이블 미초기화)</div><div class="er-v"><span class="badge must">필수</span>이전 카카오 로그인 이력 + 테이블 점유 중이면 <span class="rule">재인증 생략</span>, 연락처·내역 복원 (PRD §12 참조)</div></div>
+        <div class="edge-row"><div class="er-k">테이블 비우기 누락</div><div class="er-v"><span class="badge rec">권장</span>POS '테이블 비우기' 깜빡 대비 → <b>시간 기준 만료</b>(무활동 5분) + 손님측 "새 주문 시작" 수동 초기화 버튼 병행</div></div>
+        <div class="edge-row"><div class="er-k">세션 만료</div><div class="er-v">무활동 5분 → 'expired' 화면. QR 재스캔으로만 새 세션. 다른 기기 동일 URL은 <b>독립 세션</b>(공유 안 됨)</div></div>
+      </div>
+    </div>
+
+    <div class="edge">
+      <div class="edge-head"><span class="ei">⚠️</span><span class="et">결제 실패 / 중도 이탈</span><span class="ex">▼</span></div>
+      <div class="edge-body">
+        <div class="edge-row"><div class="er-k">PG 창 이탈·취소</div><div class="er-v"><span class="badge must">필수</span><b>장바구니 유지</b> → 결제 화면 복귀(<span class="state">backToCheckout()</span>). 주문은 PG 성공 콜백 전까지 미전송 → 테이블 점유는 유지</div></div>
+        <div class="edge-row"><div class="er-k">결제 실패 (PAYMENT_FAILED)</div><div class="er-v">에러 화면 → "다른 방법으로 결제" → 결제 화면 복귀. 카드 한도/잔액 안내</div></div>
+        <div class="edge-row"><div class="er-k">POS 끊김 (POS_OFFLINE)</div><div class="er-v">결제는 됐으나 주문 전송 실패 가능 → "다시 시도"(<span class="state">placeOrder()</span>). 서빙 매장은 직원 호출 버튼 추가</div></div>
+        <div class="edge-row"><div class="er-k">네트워크 오류</div><div class="er-v">"다시 시도" 재전송. 멱등키(idempotency key)로 <span class="rule">중복 주문 방지</span> 권장</div></div>
+        <div class="edge-row"><div class="er-k">점유 해제 타이밍</div><div class="er-v"><span class="badge rec">권장</span>선불 미완료 이탈 시 즉시 해제하지 않고 무활동 타이머에 위임 → 손님 복귀 시 이어서 결제 가능</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+document.querySelectorAll('.edge-head').forEach(function(h){
+  h.addEventListener('click',function(){ h.parentElement.classList.toggle('open'); });
+});
+</script>
+</body>
+</html>

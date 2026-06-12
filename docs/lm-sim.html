@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조합 시뮬레이터 · QR오더 분기 로직</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink-1:#111827;--ink-2:#374151;--ink-3:#6B7280;--ink-4:#9CA3AF;
+  --line:#E5E7EB;--line-2:#F1F5F9;--bg:#F9FAFB;--white:#fff;
+  --blue:#2563EB;--blue-bg:#EFF6FF;--blue-d:#1D4ED8;
+  --green:#059669;--green-bg:#ECFDF5;
+  --purple:#7C3AED;--purple-bg:#F5F3FF;
+  --amber:#D97706;--amber-bg:#FFFBEB;
+  --red:#DC2626;--red-bg:#FEF2F2;
+  --teal:#0891B2;--teal-bg:#ECFEFF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);color:var(--ink-1);line-height:1.6;}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 24px 28px;}
+section{scroll-margin-top:60px;}
+.sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+.sec-num{font-size:12px;font-weight:800;color:var(--blue);background:var(--blue-bg);padding:3px 9px;border-radius:6px;}
+.sec-head h2{font-size:20px;font-weight:800;letter-spacing:-.01em;}
+.sec-desc{font-size:13.5px;color:var(--ink-3);margin-bottom:20px;max-width:760px;}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;}
+.stat{flex:1;min-width:150px;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+.stat .n{font-size:30px;font-weight:800;letter-spacing:-.03em;}
+.stat .l{font-size:12.5px;color:var(--ink-3);margin-top:2px;}
+.stat.raw .n{color:var(--ink-4);}
+.stat.valid .n{color:var(--blue);}
+.stat.core .n{color:var(--green);}
+.stat .arrow{font-size:24px;color:var(--line);align-self:center;}
+.sim{background:var(--white);border:1px solid var(--line);border-radius:16px;overflow:hidden;}
+.sim-body{display:grid;grid-template-columns:1fr 1fr;}
+@media(max-width:880px){.sim-body{grid-template-columns:1fr;}}
+.sim-controls{padding:22px;border-right:1px solid var(--line);}
+@media(max-width:880px){.sim-controls{border-right:none;border-bottom:1px solid var(--line);}}
+.axis{margin-bottom:18px;}
+.axis:last-child{margin-bottom:0;}
+.axis-lbl{font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.axis-lbl .hint{font-weight:400;color:var(--ink-4);font-size:11px;}
+.opts{display:flex;gap:7px;flex-wrap:wrap;}
+.opt{padding:9px 14px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:all .12s;}
+.opt:hover{border-color:var(--ink-4);}
+.opt.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d);}
+.opt.dis{opacity:.4;cursor:not-allowed;background:var(--bg);}
+.opt.na{opacity:.45;border-style:dashed;cursor:not-allowed;}
+.sim-result{padding:22px;background:var(--bg);}
+.verdict{border-radius:12px;padding:16px 18px;margin-bottom:16px;}
+.verdict.ok{background:var(--green-bg);border:1px solid #A7F3D0;}
+.verdict.no{background:var(--red-bg);border:1px solid #FECACA;}
+.verdict .vt{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.verdict.ok .vt{color:var(--green);}
+.verdict.no .vt{color:var(--red);}
+.verdict .vr{font-size:13px;color:var(--ink-2);margin-top:6px;}
+.verdict .vr b{color:var(--red);}
+.flowbox{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.flowstep{display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line-2);}
+.flowstep:last-child{border-bottom:none;}
+.flowstep .fi{width:26px;height:26px;border-radius:7px;background:var(--blue);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.flowstep.skip .fi{background:var(--ink-4);}
+.flowstep .fc{flex:1;min-width:0;}
+.flowstep .fc .ft{font-size:13px;font-weight:700;color:var(--ink-1);}
+.flowstep .fc .fd{font-size:12px;color:var(--ink-3);margin-top:2px;}
+.flowstep.skip .fc .ft{color:var(--ink-4);text-decoration:line-through;}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:middle;}
+.tag.req{background:#FEE2E2;color:var(--red);}
+.tag.opt{background:#E0E7FF;color:var(--blue-d);}
+.tag.skip{background:var(--line);color:var(--ink-3);}
+.note{font-size:12px;color:var(--ink-4);margin-top:10px;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-3);margin-top:12px;}
+.legend span{display:flex;align-items:center;gap:5px;}
+.dot{width:10px;height:10px;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="sim">
+    <div class="sec-head"><span class="sec-num">▶</span><h2>조합 시뮬레이터</h2></div>
+    <p class="sec-desc">5개 축을 직접 눌러 조합을 만들면, <b>가능 여부·차단 사유·실제 화면 흐름</b>을 즉시 계산해 보여줍니다. 화면을 하나씩 눌러볼 필요 없이 모든 경우의 수를 여기서 확인할 수 있어요.</p>
+
+    <div class="stats">
+      <div class="stat raw"><div class="n">96</div><div class="l">산술적 전체 조합<br>(3×2×2×2×2×2)</div></div>
+      <div class="arrow">→</div>
+      <div class="stat valid"><div class="n">20</div><div class="l">실제 가능 조합<br>(로그인·함께주문 포함)</div></div>
+      <div class="arrow">→</div>
+      <div class="stat core"><div class="n">6</div><div class="l">핵심 해피 패스<br>(로그인·함께는 변형)</div></div>
+    </div>
+
+    <div class="sim">
+      <div class="sim-body">
+        <div class="sim-controls" id="controls"></div>
+        <div class="sim-result" id="result"></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--blue)"></span>선택됨</span>
+      <span><span class="dot" style="background:var(--bg);border:1.5px solid var(--line)"></span>선택 가능</span>
+      <span><span class="dot" style="background:var(--bg);border:1.5px dashed var(--line)"></span>해당 없음(N/A)</span>
+      <span><span class="dot" style="background:var(--bg);opacity:.4"></span>차단됨</span>
+    </div>
+    <p class="note">🟡 <b>카카오 로그인 유지</b> = 이전에 <b>카카오톡 로그인</b>으로 주문한 적이 있고 테이블이 아직 비워지지 않은 상태를 말합니다. <b>최초 접속에는 이 케이스가 없으며</b>, 휴대폰·이메일로만 주문했거나 한 번도 주문하지 않은 손님은 모두 <b>비회원</b>입니다.</p>
+  </section>
+</div>
+
+<script>
+const AXES = [
+  {key:'order', label:'주문 유형', opts:[
+    {v:'dinein', t:'🍽️ 매장 식사'},{v:'takeout', t:'🥡 포장'},{v:'preorder', t:'📅 예약'}]},
+  {key:'serve', label:'서빙 유형', hint:'매장 식사 전용', opts:[
+    {v:'self', t:'🚶 셀프 수령'},{v:'server', t:'🍳 테이블 서빙'}]},
+  {key:'pay', label:'결제 시점', opts:[
+    {v:'prepay', t:'💳 선불'},{v:'postpay', t:'🧾 후불'}]},
+  {key:'call', label:'호출 방식', hint:'매장+셀프 전용', opts:[
+    {v:'alimtalk', t:'💬 카카오 알림톡'},{v:'verbal', t:'📣 전광판 호명'}]},
+  {key:'login', label:'로그인 상태', hint:'카톡 주문 1회 후 유지', opts:[
+    {v:'kakao', t:'🟡 카카오 로그인 유지'},{v:'anon', t:'👤 비회원'}]},
+  {key:'group', label:'함께 주문', hint:'매장 식사 전용', opts:[
+    {v:'solo', t:'👤 혼자'},{v:'group', t:'👥 함께'}]},
+];
+let S = {order:'dinein', serve:'self', pay:'prepay', call:'alimtalk', login:'anon', group:'solo'};
+
+function naState(){
+  return {
+    serve: S.order!=='dinein',
+    call:  !(S.order==='dinein' && S.serve==='self'),
+    group: S.order!=='dinein',
+  };
+}
+function disabledOpt(axis, v){
+  if(axis==='pay' && v==='postpay'){
+    if(S.order!=='dinein') return true;
+    if(S.serve==='self')   return true;
+  }
+  return false;
+}
+function evaluate(){
+  const blocks=[];
+  if(S.order!=='dinein' && S.serve==='server') blocks.push('포장·예약은 테이블 서빙이 없어요 (카운터 수령/픽업만).');
+  if(S.serve==='self' && S.pay==='postpay')    blocks.push('셀프 수령은 선불만 가능해요 (미수령 리스크).');
+  if(S.order!=='dinein' && S.pay==='postpay')  blocks.push('포장·예약은 선불 결제만 가능해요.');
+  if(S.order!=='dinein' && S.group==='group')  blocks.push('함께 주문은 매장 식사(같은 테이블)에서만 가능해요.');
+  return blocks;
+}
+function buildFlow(){
+  const isDinein=S.order==='dinein', isSelf=S.serve==='self';
+  const isPrepay = !(isDinein && S.pay==='postpay');
+  let notif, notifTag, notifSkip=false;
+  if(S.login==='kakao'){ notif='카카오 로그인 연락처로 알림 발송 · 시트 생략'; notifTag='skip'; notifSkip=true; }
+  else if(isDinein && isSelf && S.call==='verbal'){ notif='전광판 호명 — 연락처 불필요 · 시트 생략'; notifTag='skip'; notifSkip=true; }
+  else if(isDinein && !isSelf && S.pay==='postpay'){ notif='서빙+후불 — 알림 시트 생략'; notifTag='skip'; notifSkip=true; }
+  else if(isDinein && !isSelf){ notif='알림 시트 노출 — 영수증 카톡 발송 (선택, "알림 없이 주문" 가능)'; notifTag='opt'; }
+  else { notif='알림 시트 노출 — 카톡 로그인 / 휴대폰 / 이메일 선택'; notifTag='req'; }
+  const callNo = (S.order!=='dinein' || isSelf);
+  let done;
+  if(S.order==='takeout') done='카운터 픽업 · 접수→준비→픽업대기→픽업완료';
+  else if(S.order==='preorder') done='사장님 수락 대기 → 지정 시간 픽업 · 접수→수락대기→준비→완료';
+  else if(isSelf) done='준비되면 알림 → 직접 수령 · 접수→준비→수령대기→완료';
+  else done='자리로 서빙 · 접수→준비→서빙중→완료' + (S.pay==='postpay'?' · 🧾 나갈 때 카운터 결제':'');
+
+  const steps=[
+    {t:'① 진입', d: S.login==='kakao'?'카카오 로그인 유지 — 이전 카톡 주문의 연락처·내역 보유':'비회원 — 최초 접속 또는 비회원 주문'},
+    {t:'② 메뉴·담기', d: (isDinein && S.group==='group')?'공동 장바구니 실시간 동기화':'단독 장바구니'},
+    {t:'③ 알림 수단', d:notif, tag:notifTag, skip:notifSkip},
+    {t:'④ 결제', d: isPrepay?'PG 결제 → 주문 전송':'결제수단·약관 숨김 · 주문만 전송 (후불)'},
+    {t:'⑤ 완료', d:(callNo?'🔢 대기번호 발급(전광판) · ':'서빙(번호 없음) · ')+done},
+  ];
+  return steps;
+}
+function renderControls(){
+  const na=naState();
+  document.getElementById('controls').innerHTML = AXES.map(ax=>{
+    const isNa = na[ax.key];
+    return `<div class="axis">
+      <div class="axis-lbl">${ax.label}${ax.hint?`<span class="hint">${ax.hint}</span>`:''}</div>
+      <div class="opts">${ax.opts.map(o=>{
+        const dis=disabledOpt(ax.key,o.v);
+        const cls = isNa?'opt na' : dis?'opt dis' : (S[ax.key]===o.v?'opt on':'opt');
+        const click = (isNa||dis)?'' : `onclick="pick('${ax.key}','${o.v}')"`;
+        return `<button class="${cls}" ${click}>${o.t}</button>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('');
+}
+function renderResult(){
+  const blocks=evaluate();
+  const r=document.getElementById('result');
+  if(blocks.length){
+    r.innerHTML = `<div class="verdict no"><div class="vt">❌ 불가능한 조합</div>
+      <div class="vr">${blocks.map(b=>`• ${b}`).join('<br>')}</div></div>
+      <p class="note">→ UI에서 해당 선택을 차단하거나, 유형 선택 시 축 자체를 숨겨야 합니다.</p>`;
+    return;
+  }
+  const steps=buildFlow();
+  r.innerHTML = `<div class="verdict ok"><div class="vt">✅ 가능한 조합</div>
+      <div class="vr">아래 흐름으로 진행됩니다.</div></div>
+    <div class="flowbox">${steps.map((s,i)=>`
+      <div class="flowstep ${s.skip?'skip':''}">
+        <div class="fi">${i+1}</div>
+        <div class="fc"><div class="ft">${s.t}${s.tag?`<span class="tag ${s.tag}">${s.tag==='req'?'필수':s.tag==='opt'?'선택':'생략'}</span>`:''}</div>
+        <div class="fd">${s.d}</div></div>
+      </div>`).join('')}</div>`;
+}
+function pick(k,v){
+  S[k]=v;
+  if(k==='serve' && v==='self' && S.pay==='postpay') S.pay='prepay';
+  if(k==='order' && v!=='dinein'){ if(S.pay==='postpay') S.pay='prepay'; if(S.group==='group') S.group='solo'; }
+  renderControls(); renderResult();
+}
+renderControls(); renderResult();
+</script>
+</body>
+</html>

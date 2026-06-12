@@ -570,7 +570,7 @@ function imgBox(cls, emoji, photo, soldout){
 
 /* ===== 상태 ===== */
 const S = {
-  screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pay:'카드', phone:'', orderNo:null,
+  screen:'menu', orderType:'dinein', cat:'전체', cart:[], sheet:null, pickup:null, pickupH:'', pickupM:'', pay:'카드', phone:'', orderNo:null,
   serve:'self', payTiming:'prepay', tab:'menu', search:'', callSel:[],
   callMethod:'alimtalk', // 셀프수령 호출 방식: 'alimtalk' | 'verbal' (호명)
   businessOpen:true,     // 영업시간 시뮬레이션
@@ -753,7 +753,7 @@ function setPayTiming(v){ if(v==='postpay' && S.serve!=='server'){ toast('셀프
 function switchMode(m){
   if(S.orderType===m && S.screen==='menu') return;
   if(S.cart.length && !confirm('진입 QR을 바꾸면 담은 메뉴가 비워져요. 바꿀까요?')){ renderDemo(); return; }
-  S.orderType=m; S.cart=[]; S.cat='전체'; S.pickup=null; S.screen='menu'; S.tab='menu'; render();
+  S.orderType=m; S.cart=[]; S.cat='전체'; S.pickup=null; S.pickupH=''; S.pickupM=''; S.screen='menu'; S.tab='menu'; render();
 }
 function setBusiness(v){
   S.businessOpen = v;
@@ -1427,7 +1427,7 @@ function renderCartBar(){
 }
 
 /* --- 결제 화면 --- */
-function timeSlots(){ const out=[]; for(let h=12;h<=20;h++){ out.push(h+':00',h+':30'); } return out; }
+function timeSlots(){ const out=[]; for(let h=12;h<=20;h++){ for(let m=0;m<60;m+=10){ out.push(h+':'+(m<10?'0':'')+m); } } return out; }
 function scrCheckout(){
   const ot=ORDER_TYPES[S.orderType]; const needTime=S.orderType==='preorder';
   const isPostpay = S.orderType==='dinein' && S.payTiming==='postpay';
@@ -1517,10 +1517,17 @@ function scrCheckout(){
           <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div></div>`}
 
     ${needTime?`<div class="sec"><div class="sec-h">📅 수령 시간 <span class="req">필수</span></div>
-      <select class="timesel" onchange="S.pickup=this.value">
-        <option value="" ${!S.pickup?'selected':''}>시간을 선택해 주세요</option>
-        ${timeSlots().map(t=>`<option value="${t}" ${S.pickup===t?'selected':''}>오늘 ${t}</option>`).join('')}
-      </select>
+      <div style="display:flex;gap:8px;">
+        <select class="timesel" style="flex:1;" onchange="S.pickupH=this.value;S.pickup=(S.pickupH&&S.pickupM)?S.pickupH+':'+S.pickupM:'';render()">
+          <option value="" ${!S.pickupH?'selected':''}>시</option>
+          ${Array.from({length:9},(_,i)=>i+12).map(h=>`<option value="${h}" ${S.pickupH==h?'selected':''}>${h}시</option>`).join('')}
+        </select>
+        <select class="timesel" style="flex:1;" onchange="S.pickupM=this.value;S.pickup=(S.pickupH&&S.pickupM)?S.pickupH+':'+S.pickupM:'';render()">
+          <option value="" ${!S.pickupM?'selected':''}>분</option>
+          ${['00','10','20','30','40','50'].map(m=>`<option value="${m}" ${S.pickupM===m?'selected':''}>${m}분</option>`).join('')}
+        </select>
+      </div>
+      ${S.pickup?`<div style="font-size:13px;color:var(--blue);margin-top:6px;font-weight:600;">📅 오늘 ${S.pickup} 수령</div>`:''}
     </div>`:''}
 
     ${S.groupMode && S.orderType==='dinein' ? `
@@ -1858,7 +1865,7 @@ function scrDone(){
 }
 function resetOrder(){
   const keepAuth = S.tableActive;
-  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received';
+  S.cart=[]; S.sheet=null; S.pickup=null; S.pickupH=''; S.pickupM=''; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received';
   if(!keepAuth){ S.authType='anon'; S.notifChoice=null; }
   S.screen='menu'; render();
 }

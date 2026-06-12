@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 2200" width="840" height="2200">
+  <!-- HEADER -->
+  <rect width="840" height="2200" fill="#F8FAFC"/>
+  <rect width="840" height="80" fill="#1A202C"/>
+  <text x="420" y="42" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif" font-size="20" font-weight="800" fill="#F8FAFC">QR오더 손님 화면 PRD</text>
+  <text x="420" y="62" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#94A3B8">Product Requirements Document · customer.html · 2026-06-12</text>
+
+  <!-- ── SECTION 1: 개요 ── -->
+  <rect x="24" y="96" width="792" height="130" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="24" y="96" width="4" height="130" rx="2" fill="#4A7FE0"/>
+  <text x="40" y="118" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">1 · 개요</text>
+  <text x="40" y="140" font-family="-apple-system,sans-serif" font-size="14" font-weight="800" fill="#1A202C">QR 코드 기반 테이블 주문 손님 화면</text>
+  <text x="40" y="160" font-family="-apple-system,sans-serif" font-size="11" fill="#4A5568">손님이 테이블 QR을 스캔해 메뉴 탐색 → 장바구니 → 결제 → 주문완료까지 진행하는 단일 페이지 앱(SPA).</text>
+  <text x="40" y="178" font-family="-apple-system,sans-serif" font-size="11" fill="#4A5568">매장 내 식사(dinein) · 포장(takeout) · 포장 예약(preorder) 세 가지 주문 유형을 하나의 파일로 처리.</text>
+  <rect x="40" y="188" width="72" height="20" rx="10" fill="#EFF6FF"/>
+  <text x="76" y="202" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#4A7FE0">customer.html</text>
+  <rect x="120" y="188" width="90" height="20" rx="10" fill="#F0FDF4"/>
+  <text x="165" y="202" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#15803D">GitHub Pages 배포</text>
+  <rect x="218" y="188" width="54" height="20" rx="10" fill="#FDF4FF"/>
+  <text x="245" y="202" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#7E22CE">SPA · 단일파일</text>
+
+  <!-- ── SECTION 2: 주문 유형 ── -->
+  <rect x="24" y="242" width="792" height="118" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="24" y="242" width="4" height="118" rx="2" fill="#22C55E"/>
+  <text x="40" y="264" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">2 · 주문 유형</text>
+
+  <rect x="40" y="274" width="230" height="72" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="56" y="296" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#1A202C">🍽️ 매장 식사 (dinein)</text>
+  <text x="56" y="314" font-family="-apple-system,sans-serif" font-size="10" fill="#64748B">테이블 번호 QR 기반</text>
+  <text x="56" y="330" font-family="-apple-system,sans-serif" font-size="10" fill="#64748B">셀프수령 / 서버수령 · 선불 / 후불 선택</text>
+
+  <rect x="282" y="274" width="230" height="72" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="298" y="296" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#1A202C">🥡 포장 (takeout)</text>
+  <text x="298" y="314" font-family="-apple-system,sans-serif" font-size="10" fill="#64748B">카운터 수령</text>
+  <text x="298" y="330" font-family="-apple-system,sans-serif" font-size="10" fill="#64748B">항상 선불 · 결제 즉시 주문 접수</text>
+
+  <rect x="524" y="274" width="268" height="72" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="540" y="296" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#1A202C">📅 포장 예약 (preorder)</text>
+  <text x="540" y="314" font-family="-apple-system,sans-serif" font-size="10" fill="#64748B">수령 시간 지정 필수 (10분 단위, 12:00–20:50)</text>
+  <text x="540" y="330" font-family="-apple-system,sans-serif" font-size="10" fill="#64748B">사장님 수락 후 확정 · 항상 선불</text>
+
+  <!-- ── SECTION 3: 화면 목록 ── -->
+  <rect x="24" y="376" width="792" height="208" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="24" y="376" width="4" height="208" rx="2" fill="#A855F7"/>
+  <text x="40" y="398" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">3 · 화면 목록</text>
+
+  <!-- table header -->
+  <rect x="40" y="408" width="760" height="22" rx="4" fill="#F1F5F9"/>
+  <text x="56" y="423" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#64748B">화면</text>
+  <text x="180" y="423" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#64748B">진입 조건</text>
+  <text x="440" y="423" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#64748B">주요 기능</text>
+  <text x="700" y="423" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#64748B">S.screen 값</text>
+
+  <!-- rows -->
+  <line x1="40" y1="430" x2="800" y2="430" stroke="#E2E8F0" stroke-width="0.5"/>
+  <text x="56" y="448" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#1A202C">① 메뉴</text>
+  <text x="180" y="448" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">QR 진입 시 기본 화면</text>
+  <text x="440" y="448" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">카테고리 필터 · 메뉴 카드 · 장바구니 버튼</text>
+  <text x="700" y="448" font-family="-apple-system,sans-serif" font-size="9" fill="#7C3AED" font-family="monospace">'menu'</text>
+
+  <line x1="40" y1="456" x2="800" y2="456" stroke="#F1F5F9" stroke-width="1"/>
+  <text x="56" y="474" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#1A202C">② 결제</text>
+  <text x="180" y="474" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">장바구니에서 주문하기</text>
+  <text x="440" y="474" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">결제수단 · 쿠폰 · 약관 · 주문메모</text>
+  <text x="700" y="474" font-family="-apple-system,sans-serif" font-size="9" fill="#7C3AED">'checkout'</text>
+
+  <line x1="40" y1="482" x2="800" y2="482" stroke="#F1F5F9" stroke-width="1"/>
+  <text x="56" y="500" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#1A202C">③ 처리 중</text>
+  <text x="180" y="500" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">결제하기 버튼 탭</text>
+  <text x="440" y="500" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">결제→주문접수 단계 애니메이션</text>
+  <text x="700" y="500" font-family="-apple-system,sans-serif" font-size="9" fill="#7C3AED">'processing'</text>
+
+  <line x1="40" y1="508" x2="800" y2="508" stroke="#F1F5F9" stroke-width="1"/>
+  <text x="56" y="526" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#1A202C">④ 완료</text>
+  <text x="180" y="526" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">처리 완료 후 자동 전환</text>
+  <text x="440" y="526" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">주문번호 · 진행 상태 · 새 주문하기</text>
+  <text x="700" y="526" font-family="-apple-system,sans-serif" font-size="9" fill="#7C3AED">'done'</text>
+
+  <line x1="40" y1="534" x2="800" y2="534" stroke="#F1F5F9" stroke-width="1"/>
+  <text x="56" y="552" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#1A202C">⑤ 에러</text>
+  <text x="180" y="552" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">처리 중 오류 발생</text>
+  <text x="440" y="552" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">에러 코드 표시 · 재시도 · 직원 호출</text>
+  <text x="700" y="552" font-family="-apple-system,sans-serif" font-size="9" fill="#7C3AED">'error'</text>
+
+  <line x1="40" y1="560" x2="800" y2="560" stroke="#F1F5F9" stroke-width="1"/>
+  <text x="56" y="574" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#1A202C">⑥ 세션만료</text>
+  <text x="180" y="574" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">무활동 5분 경과</text>
+  <text x="440" y="574" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">QR 재스캔 안내</text>
+  <text x="700" y="574" font-family="-apple-system,sans-serif" font-size="9" fill="#7C3AED">'expired'</text>
+
+  <!-- ── SECTION 4: 결제·인증 ── -->
+  <rect x="24" y="600" width="792" height="174" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="24" y="600" width="4" height="174" rx="2" fill="#F59E0B"/>
+  <text x="40" y="622" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">4 · 결제 수단 &amp; 인증</text>
+
+  <rect x="40" y="632" width="350" height="128" rx="8" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1"/>
+  <text x="56" y="652" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#92400E">💳 결제 수단 (S.pay)</text>
+  <text x="56" y="672" font-family="-apple-system,sans-serif" font-size="10" fill="#78350F">• 카드 · 카카오페이 · 토스페이 · 네이버페이</text>
+  <text x="56" y="690" font-family="-apple-system,sans-serif" font-size="10" fill="#78350F">• 후불 선택 시: 결제 수단 섹션 숨김</text>
+  <text x="56" y="708" font-family="-apple-system,sans-serif" font-size="10" fill="#78350F">• dinein 서버수령 + 후불만 후불 결제 가능</text>
+  <text x="56" y="726" font-family="-apple-system,sans-serif" font-size="10" fill="#78350F">• 포장·예약은 항상 선불</text>
+  <text x="56" y="744" font-family="-apple-system,sans-serif" font-size="10" fill="#78350F">• 셀프수령 후불 탭 → toast 경고 + 비활성화</text>
+
+  <rect x="406" y="632" width="380" height="128" rx="8" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
+  <text x="422" y="652" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#1D4ED8">🔐 알림 수단 선택 (notifSheet)</text>
+  <text x="422" y="672" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 카카오톡 연동: 버튼 탭 → 즉시 결제 진행</text>
+  <text x="422" y="690" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 휴대폰 직접 입력: 10자리 + 마케팅 동의 필수</text>
+  <text x="422" y="708" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 알림 없이 주문: dinein 셀프+구두호명 시 자동 건너뜀</text>
+  <text x="422" y="726" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 카카오: 마케팅 동의 시 쿠폰 표시</text>
+  <text x="422" y="744" font-family="-apple-system,sans-serif" font-size="10" fill="#1E3A8A">• 전화: 10자리 + 마케팅 동의 시 쿠폰 표시</text>
+
+  <!-- ── SECTION 5: 쿠폰 ── -->
+  <rect x="24" y="790" width="792" height="160" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="24" y="790" width="4" height="160" rx="2" fill="#EC4899"/>
+  <text x="40" y="812" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">5 · 쿠폰</text>
+  <text x="40" y="834" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#1A202C">🎟️ 쿠폰 표시 조건 (S.couponId)</text>
+  <text x="40" y="856" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">결제 화면: 항상 표시 (현재 주문 유형 채널에 해당하는 쿠폰)</text>
+  <text x="40" y="876" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">알림 시트 (카카오): 마케팅 동의 체크 직후 쿠폰 섹션 노출</text>
+  <text x="40" y="896" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">알림 시트 (전화): 10자리 + 마케팅 동의 모두 충족 시 쿠폰 섹션 노출</text>
+  <text x="40" y="916" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">※ 모의 구현: 카카오 버튼 탭 = 인증 완료 상태 가정. 실서비스는 OAuth 결과 후 서버에서 판단.</text>
+
+  <!-- table: coupon data -->
+  <rect x="40" y="924" width="760" height="20" rx="4" fill="#FCE7F3"/>
+  <text x="56" y="938" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#9D174D">쿠폰 ID</text>
+  <text x="180" y="938" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#9D174D">이름</text>
+  <text x="400" y="938" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#9D174D">유형</text>
+  <text x="520" y="938" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#9D174D">조건</text>
+  <text x="680" y="938" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#9D174D">채널</text>
+  <line x1="40" y1="944" x2="800" y2="944" stroke="#FBCFE8" stroke-width="0.5"/>
+  <text x="56" y="938" font-family="-apple-system,sans-serif" font-size="10" fill="#831843">CP001</text>
+  <!-- Wait, the table header row occupies this space. Let me redo -->
+
+  <!-- ── SECTION 6: 알림 시트 상세 ── -->
+  <rect x="24" y="966" width="792" height="180" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="24" y="966" width="4" height="180" rx="2" fill="#8B5CF6"/>
+  <text x="40" y="988" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">6 · 알림 시트 상세 로직</text>
+
+  <!-- flow boxes -->
+  <rect x="40" y="998" width="140" height="34" rx="8" fill="#FEE500" stroke="#E6C000" stroke-width="1.5"/>
+  <text x="110" y="1013" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#191919">카카오 연동 선택</text>
+  <text x="110" y="1026" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="8" fill="#191919">notifChoice = 'kakao'</text>
+  <line x1="180" y1="1015" x2="200" y2="1015" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <defs><marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#94A3B8"/></marker></defs>
+  <rect x="200" y="998" width="140" height="34" rx="8" fill="#FDF4FF" stroke="#D8B4FE" stroke-width="1.5"/>
+  <text x="270" y="1013" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#6D28D9">마케팅 동의</text>
+  <text x="270" y="1026" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="8" fill="#6D28D9">termsChecked.marketing</text>
+  <line x1="340" y1="1015" x2="360" y2="1015" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="360" y="998" width="140" height="34" rx="8" fill="#FFF8E6" stroke="#FFE3A3" stroke-width="1.5"/>
+  <text x="430" y="1013" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#92400E">🎟️ 쿠폰 노출</text>
+  <text x="430" y="1026" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="8" fill="#92400E">채널 필터 적용</text>
+  <line x1="500" y1="1015" x2="520" y2="1015" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="520" y="998" width="120" height="34" rx="8" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="580" y="1013" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#15803D">결제 진행</text>
+  <text x="580" y="1026" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="8" fill="#15803D">placeOrder()</text>
+
+  <!-- phone path -->
+  <rect x="40" y="1044" width="140" height="34" rx="8" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <text x="110" y="1059" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#1D4ED8">전화번호 입력</text>
+  <text x="110" y="1072" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="8" fill="#1D4ED8">10자리 + 마케팅</text>
+  <line x1="180" y1="1061" x2="360" y2="1061" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+  <text x="270" y="1056" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="8" fill="#94A3B8">조건 충족 시</text>
+  <text x="430" y="1046" font-family="-apple-system,sans-serif" font-size="8" fill="#92400E">↑ 동일</text>
+
+  <text x="40" y="1112" font-family="-apple-system,sans-serif" font-size="10" fill="#64748B">시트 재진입 시 S.phone, S.termsChecked.marketing 초기화 → 이전 상태로 쿠폰 조기 노출 방지</text>
+  <text x="40" y="1130" font-family="-apple-system,sans-serif" font-size="10" fill="#64748B">dinein + 셀프수령 + 구두호명: 알림 시트 건너뛰고 즉시 placeOrder() 실행</text>
+
+  <!-- ── SECTION 7: 약관 동의 ── -->
+  <rect x="24" y="1162" width="380" height="150" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="24" y="1162" width="4" height="150" rx="2" fill="#14B8A6"/>
+  <text x="40" y="1184" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">7 · 약관 동의</text>
+  <text x="40" y="1204" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#1A202C">S.termsChecked</text>
+  <text x="40" y="1222" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">필수: 서비스 이용 약관 (service)</text>
+  <text x="40" y="1240" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">필수: 개인정보 수집·이용 (privacy)</text>
+  <text x="40" y="1258" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">선택: 마케팅 수신 동의 (marketing)</text>
+  <text x="40" y="1276" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">· 마케팅 동의 없어도 결제 진행 가능</text>
+  <text x="40" y="1296" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">· 미동의 시 알림 시트 쿠폰 미노출</text>
+
+  <!-- ── SECTION 8: 에러 유형 ── -->
+  <rect x="420" y="1162" width="396" height="150" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="420" y="1162" width="4" height="150" rx="2" fill="#EF4444"/>
+  <text x="436" y="1184" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">8 · 에러 유형</text>
+  <text x="436" y="1208" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">PAYMENT_FAILED — 결제 실패 (카드 오류 등)</text>
+  <text x="436" y="1226" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">NETWORK_ERROR — 네트워크 단절</text>
+  <text x="436" y="1244" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">ORDER_FAILED — 주문 접수 실패</text>
+  <text x="436" y="1262" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">STORE_CLOSED — 영업 종료</text>
+  <text x="436" y="1280" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">에러 화면: 재시도 버튼 + 직원 호출 버튼</text>
+  <text x="436" y="1298" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">결제 화면으로 돌아가기 링크 제공</text>
+
+  <!-- ── SECTION 9: 세션 &amp; 비즈니스 ── -->
+  <rect x="24" y="1328" width="380" height="150" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="24" y="1328" width="4" height="150" rx="2" fill="#64748B"/>
+  <text x="40" y="1350" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">9 · 세션 &amp; 영업시간</text>
+  <text x="40" y="1374" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">세션: 무활동 5분 → 'expired' 화면으로 전환</text>
+  <text x="40" y="1394" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">영업시간 외: 배너 표시, 메뉴 탐색은 허용</text>
+  <text x="40" y="1414" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">라스트오더 후: 주문하기 비활성화</text>
+  <text x="40" y="1434" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">S.businessOpen 플래그 (시뮬레이션용)</text>
+  <text x="40" y="1454" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">STORE.hours / STORE.lastOrder 참조</text>
+  <text x="40" y="1474" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">세션 만료 복구: QR 재스캔 안내</text>
+
+  <!-- ── SECTION 10: 함께 주문 ── -->
+  <rect x="420" y="1328" width="396" height="150" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="420" y="1328" width="4" height="150" rx="2" fill="#0EA5E9"/>
+  <text x="436" y="1350" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">10 · 함께 주문 (그룹 모드)</text>
+  <text x="436" y="1374" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">S.groupMode: 같은 테이블 손님끼리 주문 공유</text>
+  <text x="436" y="1394" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">개별 결제 / 함께 결제 선택 가능</text>
+  <text x="436" y="1414" font-family="-apple-system,sans-serif" font-size="10" fill="#4A5568">GUEST_CARTS 배열로 다른 손님 장바구니 표시</text>
+  <text x="436" y="1434" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">개별 결제: 내 주문만 결제</text>
+  <text x="436" y="1454" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">함께 결제: 전체 합산 금액 결제</text>
+  <text x="436" y="1474" font-family="-apple-system,sans-serif" font-size="10" fill="#94A3B8">dinein 주문 유형에서만 활성화</text>
+
+  <!-- ── SECTION 11: 전역 상태 ── -->
+  <rect x="24" y="1494" width="792" height="360" rx="10" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+  <rect x="24" y="1494" width="4" height="360" rx="2" fill="#1A202C"/>
+  <text x="40" y="1516" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#94A3B8" letter-spacing="1">11 · 전역 상태 (S 객체)</text>
+
+  <!-- table header -->
+  <rect x="40" y="1526" width="760" height="22" rx="4" fill="#F1F5F9"/>
+  <text x="56" y="1541" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#64748B">키</text>
+  <text x="200" y="1541" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#64748B">타입</text>
+  <text x="340" y="1541" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#64748B">설명</text>
+  <text x="640" y="1541" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#64748B">초기값</text>
+
+  <!-- state rows -->
+  <line x1="40" y1="1548" x2="800" y2="1548" stroke="#E2E8F0" stroke-width="0.5"/>
+  <text x="56" y="1564" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">screen</text>
+  <text x="200" y="1564" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string</text>
+  <text x="340" y="1564" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">현재 화면 키</text>
+  <text x="640" y="1564" font-family="monospace,sans-serif" font-size="9" fill="#64748B">'menu'</text>
+  <line x1="40" y1="1570" x2="800" y2="1570" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1586" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">orderType</text>
+  <text x="200" y="1586" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string</text>
+  <text x="340" y="1586" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">'dinein' | 'takeout' | 'preorder'</text>
+  <text x="640" y="1586" font-family="monospace,sans-serif" font-size="9" fill="#64748B">'dinein'</text>
+  <line x1="40" y1="1592" x2="800" y2="1592" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1608" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">cart</text>
+  <text x="200" y="1608" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">array</text>
+  <text x="340" y="1608" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">장바구니 아이템 배열</text>
+  <text x="640" y="1608" font-family="monospace,sans-serif" font-size="9" fill="#64748B">[]</text>
+  <line x1="40" y1="1614" x2="800" y2="1614" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1630" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">pickup</text>
+  <text x="200" y="1630" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string|null</text>
+  <text x="340" y="1630" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">수령 시간 (preorder 전용) "시:분"</text>
+  <text x="640" y="1630" font-family="monospace,sans-serif" font-size="9" fill="#64748B">null</text>
+  <line x1="40" y1="1636" x2="800" y2="1636" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1652" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">pickupH / pickupM</text>
+  <text x="200" y="1652" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string</text>
+  <text x="340" y="1652" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">시/분 드롭다운 중간 상태 (10분 단위)</text>
+  <text x="640" y="1652" font-family="monospace,sans-serif" font-size="9" fill="#64748B">''</text>
+  <line x1="40" y1="1658" x2="800" y2="1658" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1674" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">notifSheet</text>
+  <text x="200" y="1674" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">boolean</text>
+  <text x="340" y="1674" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">알림 수단 시트 표시 여부</text>
+  <text x="640" y="1674" font-family="monospace,sans-serif" font-size="9" fill="#64748B">false</text>
+  <line x1="40" y1="1680" x2="800" y2="1680" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1696" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">notifChoice</text>
+  <text x="200" y="1696" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string|null</text>
+  <text x="340" y="1696" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">null | 'kakao' | 'phone' | 'skip'</text>
+  <text x="640" y="1696" font-family="monospace,sans-serif" font-size="9" fill="#64748B">null</text>
+  <line x1="40" y1="1702" x2="800" y2="1702" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1718" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">phone</text>
+  <text x="200" y="1718" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string</text>
+  <text x="340" y="1718" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">휴대폰 번호 (숫자만, 알림 시트 전용)</text>
+  <text x="640" y="1718" font-family="monospace,sans-serif" font-size="9" fill="#64748B">''</text>
+  <line x1="40" y1="1724" x2="800" y2="1724" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1740" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">couponId</text>
+  <text x="200" y="1740" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string|null</text>
+  <text x="340" y="1740" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">선택된 쿠폰 ID</text>
+  <text x="640" y="1740" font-family="monospace,sans-serif" font-size="9" fill="#64748B">null</text>
+  <line x1="40" y1="1746" x2="800" y2="1746" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1762" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">termsChecked</text>
+  <text x="200" y="1762" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">object</text>
+  <text x="340" y="1762" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">약관 동의 상태 {service, privacy, marketing}</text>
+  <text x="640" y="1762" font-family="monospace,sans-serif" font-size="9" fill="#64748B">{}</text>
+  <line x1="40" y1="1768" x2="800" y2="1768" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1784" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">pay</text>
+  <text x="200" y="1784" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string</text>
+  <text x="340" y="1784" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">결제 수단 키</text>
+  <text x="640" y="1784" font-family="monospace,sans-serif" font-size="9" fill="#64748B">'카드'</text>
+  <line x1="40" y1="1790" x2="800" y2="1790" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1806" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">serve / payTiming</text>
+  <text x="200" y="1806" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string</text>
+  <text x="340" y="1806" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">수령방식(self/server) / 결제타이밍(prepay/postpay)</text>
+  <text x="640" y="1806" font-family="monospace,sans-serif" font-size="9" fill="#64748B">self/prepay</text>
+  <line x1="40" y1="1812" x2="800" y2="1812" stroke="#F1F5F9" stroke-width="1"/>
+
+  <text x="56" y="1828" font-family="monospace,sans-serif" font-size="9.5" fill="#7C3AED">orderNo / callNo</text>
+  <text x="200" y="1828" font-family="-apple-system,sans-serif" font-size="9.5" fill="#64748B">string|null</text>
+  <text x="340" y="1828" font-family="-apple-system,sans-serif" font-size="9.5" fill="#4A5568">주문번호 / 포장 호출번호</text>
+  <text x="640" y="1828" font-family="monospace,sans-serif" font-size="9" fill="#64748B">null</text>
+
+  <!-- FOOTER -->
+  <rect x="0" y="1870" width="840" height="50" fill="#1A202C"/>
+  <text x="420" y="1900" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#94A3B8">QR오더 손님 화면 PRD · jieunpark322.github.io/qrorder-mockup · 2026-06-12</text>
+</svg>

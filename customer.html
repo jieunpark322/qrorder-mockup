@@ -622,10 +622,15 @@ const visibleMenu = () => MENU.filter(m=>m.status!=='숨김' && holidayVisible(m
 const $ = id => document.getElementById(id);
 
 function render(){
+  const prevScreen = S.screen;
+  const savedY = window.scrollY;
   renderDemo();
   const r = { menu:scrMenu, checkout:scrCheckout, processing:scrProcessing, error:scrError, done:scrDone, splitpay:scrSplitPay, session:scrSession }[S.screen];
   $('screen').innerHTML = r();
-  if(!S._keepScroll) window.scrollTo(0,0);
+  if(!S._keepScroll) {
+    if(S.screen !== prevScreen) window.scrollTo(0,0);
+    else window.scrollTo(0, savedY);
+  }
   S._tabAnim=null;
   renderCartBar();
   setupScrollSpy();

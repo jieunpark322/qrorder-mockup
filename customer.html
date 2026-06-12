@@ -1595,10 +1595,32 @@ function scrCheckout(){
             </div>`:''}
 
           ${showMarketing?`
-            <div class="term-row" onclick="S.termsChecked.marketing=!S.termsChecked.marketing;render()" style="margin:4px 0 14px;">
+            <div class="term-row" onclick="S.termsChecked.marketing=!S.termsChecked.marketing;render()" style="margin:4px 0 12px;">
               <span class="term-ck ${mktChecked?'checked':''}">${mktChecked?'✓':''}</span>
               <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
             </div>`:`<div style="height:4px;"></div>`}
+
+          ${(()=>{
+            if(!showPhone) return '';
+            const notifDigits = (S.phone||'').replace(/\D/g,'');
+            if(notifDigits.length < 10 || !mktChecked) return '';
+            const avail = COUPONS.filter(cp=>cp.channels.includes(S.orderType));
+            if(!avail.length) return `<div style="font-size:13px;color:var(--ink3);text-align:center;padding:6px 0 14px;">현재 사용 가능한 쿠폰이 없어요.</div>`;
+            return `<div style="background:#FFF8E6;border:1px solid #FFE3A3;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+              <p style="font-size:13px;font-weight:800;color:#92400e;margin:0 0 10px;">🎟️ 사용 가능한 쿠폰 ${avail.length}장</p>
+              ${avail.map(cp=>{
+                const sel=S.couponId===cp.id;
+                return `<div onclick="S.couponId=S.couponId==='${cp.id}'?null:'${cp.id}';render()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:${sel?'#fff':'transparent'};border:${sel?'2px solid #E6A817':'1.5px solid transparent'};margin-bottom:6px;cursor:pointer;">
+                  <span style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?'#E6A817':'#D1A050'};background:${sel?'#E6A817':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:#fff;font-weight:900;">${sel?'✓':''}</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:700;color:#78350f;">${cp.name}</div>
+                    <div style="font-size:12px;color:#92400e;margin-top:2px;">${cp.desc}</div>
+                  </div>
+                </div>`;
+              }).join('')}
+              ${S.couponId?`<button onclick="S.couponId=null;render()" style="background:none;border:none;font-size:12px;color:#92400e;cursor:pointer;font-family:inherit;padding:4px 0 2px;opacity:.7;text-decoration:underline;">쿠폰 사용 안 함</button>`:''}
+            </div>`;
+          })()}
 
           <button onclick="tryNotifPay()" class="primarybtn">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
 

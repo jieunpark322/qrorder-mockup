@@ -1681,6 +1681,8 @@ function finishOrder(){
   const nextRound=ORDER_HISTORY.reduce((m,r)=>Math.max(m,r.round),0)+1;
   ORDER_HISTORY.push({ round:nextRound, time:'방금', status:'주문 접수',
     items:S.cart.map(c=>({n:c.name,o:c.optText,q:c.qty,p:c.unit*c.qty})), total:cartTotal() });
+  // 예약은 수락 대기(received), 나머지는 자동 접수되어 즉시 준비 중
+  S.orderStatus = S.orderType==='preorder' ? 'received' : 'preparing';
   S.screen='done'; render();
 }
 function scrProcessing(){

@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1480" width="1100" height="1480">
+  <rect width="1100" height="1480" fill="#F0F4F8"/>
+
+  <!-- HEADER -->
+  <rect width="1100" height="72" fill="#1A202C"/>
+  <text x="550" y="38" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="800" fill="#F8FAFC">QR오더 손님 화면 · 주문 유형 × 결제 조합 스펙</text>
+  <text x="550" y="58" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#94A3B8">customer.html 기준 · 2026-06-12</text>
+
+  <!-- LEGEND -->
+  <rect x="24" y="82" width="1052" height="48" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="38" y="94" width="18" height="18" rx="4" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="47" y="107" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#15803D">✓</text>
+  <text x="62" y="108" font-family="sans-serif" font-size="10" fill="#4A5568">표시됨</text>
+  <rect x="118" y="94" width="18" height="18" rx="4" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5"/>
+  <text x="127" y="107" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#B91C1C">✕</text>
+  <text x="142" y="108" font-family="sans-serif" font-size="10" fill="#4A5568">없음/숨김</text>
+  <rect x="210" y="94" width="18" height="18" rx="4" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="219" y="108" text-anchor="middle" font-family="sans-serif" font-size="11">⚡</text>
+  <text x="234" y="108" font-family="sans-serif" font-size="10" fill="#4A5568">자동 건너뜀</text>
+  <rect x="330" y="95" width="26" height="13" rx="6" fill="#FEF2F2"/>
+  <text x="343" y="105" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#B91C1C">필수</text>
+  <text x="362" y="108" font-family="sans-serif" font-size="10" fill="#4A5568">필수 약관</text>
+  <rect x="430" y="95" width="26" height="13" rx="6" fill="#EFF6FF"/>
+  <text x="443" y="105" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#1D4ED8">선택</text>
+  <text x="462" y="108" font-family="sans-serif" font-size="10" fill="#4A5568">선택 약관</text>
+  <text x="540" y="108" font-family="sans-serif" font-size="10" fill="#94A3B8">※ 마케팅 동의(선택)는 알림 시트에서만 표시 · 후불 시 약관·결제수단·쿠폰·알림시트 모두 없음</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- MAIN TABLE                                     -->
+  <!-- x범위: 24 ~ 1076 (w=1052)                      -->
+  <!-- Col 0 조합:     x=24,  w=190, center=119       -->
+  <!-- Col 1 결제수단: x=214, w=108, center=268       -->
+  <!-- Col 2 약관:     x=322, w=152, center=398       -->
+  <!-- Col 3 알림시트: x=474, w=180, center=564       -->
+  <!-- Col 4 쿠폰:     x=654, w=152, center=730       -->
+  <!-- Col 5 주문상태: x=806, w=270, center=941       -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect x="24" y="146" width="1052" height="586" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1.5"/>
+
+  <!-- TABLE HEADER -->
+  <rect x="24" y="146" width="1052" height="36" rx="6" fill="#1E293B"/>
+  <rect x="24" y="163" width="1052" height="19" fill="#1E293B"/>
+  <text x="119"  y="169" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#94A3B8">주문 유형 / 설정</text>
+  <text x="268"  y="169" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#94A3B8">결제 수단</text>
+  <text x="398"  y="169" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#94A3B8">약관 구성</text>
+  <text x="564"  y="169" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#94A3B8">알림 시트</text>
+  <text x="730"  y="169" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#94A3B8">쿠폰</text>
+  <text x="941"  y="169" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#94A3B8">완료 후 주문 상태</text>
+
+  <!-- COLUMN DIVIDERS -->
+  <line x1="214" y1="182" x2="214" y2="732" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="322" y1="182" x2="322" y2="732" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="474" y1="182" x2="474" y2="732" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="654" y1="182" x2="654" y2="732" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="806" y1="182" x2="806" y2="732" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- ──────────────────────────────────────────── -->
+  <!-- ROW 1: 매장 식사 · 셀프수령 · 선불 · 알림톡  -->
+  <!-- y=182, h=104                                 -->
+  <!-- ──────────────────────────────────────────── -->
+  <rect x="25" y="182" width="1050" height="104" fill="#F8FAFC"/>
+  <line x1="24" y1="286" x2="1076" y2="286" stroke="#E2E8F0" stroke-width="1"/>
+
+  <rect x="32" y="190" width="58" height="15" rx="7" fill="#DBEAFE"/>
+  <text x="61" y="201" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#1D4ED8">매장 식사</text>
+  <text x="32" y="220" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">🚶 셀프수령 · 선불</text>
+  <text x="32" y="236" font-family="sans-serif" font-size="10" fill="#64748B">📱 알림톡 호출 방식</text>
+  <text x="32" y="252" font-family="sans-serif" font-size="9" fill="#94A3B8">dinein + self + prepay</text>
+  <text x="32" y="268" font-family="sans-serif" font-size="9" fill="#94A3B8">callMethod = alimtalk</text>
+
+  <rect x="222" y="190" width="16" height="16" rx="4" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="230" y="202" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#15803D">✓</text>
+  <text x="244" y="202" font-family="sans-serif" font-size="10" fill="#4A5568">표시</text>
+  <text x="222" y="222" font-family="sans-serif" font-size="9.5" fill="#4A5568">카드 · 카카오페이</text>
+  <text x="222" y="238" font-family="sans-serif" font-size="9.5" fill="#4A5568">토스페이 · 네이버</text>
+
+  <text x="330" y="200" font-family="sans-serif" font-size="10" fill="#4A5568">이용약관</text>
+  <rect x="398" y="192" width="26" height="13" rx="6" fill="#FEF2F2"/>
+  <text x="411" y="202" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#B91C1C">필수</text>
+  <text x="330" y="218" font-family="sans-serif" font-size="10" fill="#4A5568">개인정보 수집·이용</text>
+  <rect x="449" y="210" width="26" height="13" rx="6" fill="#FEF2F2"/>
+  <text x="462" y="220" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#B91C1C">필수</text>
+  <text x="330" y="236" font-family="sans-serif" font-size="10" fill="#4A5568">만 14세 이상 확인</text>
+  <rect x="449" y="228" width="26" height="13" rx="6" fill="#FEF2F2"/>
+  <text x="462" y="238" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#B91C1C">필수</text>
+
+  <text x="482" y="200" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">카카오 or 전화번호 선택</text>
+  <text x="482" y="218" font-family="sans-serif" font-size="9.5" fill="#4A5568">마케팅 동의 시 쿠폰 노출</text>
+  <text x="482" y="234" font-family="sans-serif" font-size="9.5" fill="#4A5568">카카오: 동의만 / 전화: 10자리+동의</text>
+  <text x="482" y="250" font-family="sans-serif" font-size="9" fill="#94A3B8">알림 없이 주문하기 가능</text>
+  <text x="482" y="266" font-family="sans-serif" font-size="9" fill="#94A3B8">→ notifChoice = 'skip'</text>
+
+  <text x="662" y="200" font-family="sans-serif" font-size="10" fill="#4A5568">결제화면: 코드 입력 상시</text>
+  <text x="662" y="218" font-family="sans-serif" font-size="9.5" fill="#4A5568">결제화면: 목록+코드</text>
+  <text x="662" y="234" font-family="sans-serif" font-size="9" fill="#94A3B8">(전화10자리+마케팅 동의)</text>
+  <text x="662" y="252" font-family="sans-serif" font-size="9.5" fill="#4A5568">알림시트: 목록+코드</text>
+  <text x="662" y="268" font-family="sans-serif" font-size="9" fill="#94A3B8">(마케팅 동의 조건)</text>
+
+  <text x="814" y="200" font-family="sans-serif" font-size="10" fill="#4A5568">주문접수 → 준비 중</text>
+  <text x="814" y="218" font-family="sans-serif" font-size="10" fill="#4A5568">→ 수령 대기 → 완료</text>
+  <text x="814" y="236" font-family="sans-serif" font-size="9" fill="#94A3B8">orderStatus: preparing</text>
+  <text x="814" y="254" font-family="sans-serif" font-size="9" fill="#94A3B8">steps: 주문접수·준비중</text>
+  <text x="814" y="270" font-family="sans-serif" font-size="9" fill="#94A3B8">·수령대기·완료</text>
+
+  <!-- ──────────────────────────────────────────────── -->
+  <!-- ROW 2: 매장 식사 · 셀프수령 · 선불 · 구두호명   -->
+  <!-- y=286, h=80                                      -->
+  <!-- ──────────────────────────────────────────────── -->
+  <rect x="25" y="286" width="1050" height="80" fill="white"/>
+  <line x1="24" y1="366" x2="1076" y2="366" stroke="#E2E8F0" stroke-width="1"/>
+
+  <rect x="32" y="294" width="58" height="15" rx="7" fill="#DBEAFE"/>
+  <text x="61" y="305" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#1D4ED8">매장 식사</text>
+  <text x="32" y="324" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">🚶 셀프수령 · 선불</text>
+  <text x="32" y="340" font-family="sans-serif" font-size="10" fill="#64748B">🗣️ 구두 호명 방식</text>
+  <text x="32" y="356" font-family="sans-serif" font-size="9" fill="#94A3B8">callMethod = verbal</text>
+
+  <rect x="222" y="294" width="16" height="16" rx="4" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="230" y="306" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#15803D">✓</text>
+  <text x="244" y="306" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+
+  <text x="330" y="304" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+  <text x="330" y="320" font-family="sans-serif" font-size="9" fill="#94A3B8">(3개 필수 약관)</text>
+
+  <rect x="480" y="294" width="16" height="16" rx="4" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="488" y="307" text-anchor="middle" font-family="sans-serif" font-size="11">⚡</text>
+  <text x="502" y="307" font-family="sans-serif" font-size="10" font-weight="700" fill="#92400E">알림 시트 건너뜀</text>
+  <text x="482" y="325" font-family="sans-serif" font-size="9.5" fill="#4A5568">placeOrder() 직행</text>
+  <text x="482" y="341" font-family="sans-serif" font-size="9" fill="#94A3B8">→ notifChoice = 'skip'</text>
+  <text x="482" y="357" font-family="sans-serif" font-size="9" fill="#94A3B8">이름 호명으로 수령 알림</text>
+
+  <rect x="660" y="294" width="16" height="16" rx="4" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5"/>
+  <text x="668" y="306" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#B91C1C">✕</text>
+  <text x="682" y="306" font-family="sans-serif" font-size="10" fill="#4A5568">알림시트 쿠폰 없음</text>
+  <text x="662" y="324" font-family="sans-serif" font-size="9.5" fill="#4A5568">결제화면: 코드 입력만</text>
+  <text x="662" y="340" font-family="sans-serif" font-size="9" fill="#94A3B8">(마케팅 동의 경로 없음)</text>
+
+  <text x="814" y="304" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+
+  <!-- ──────────────────────────────────────────── -->
+  <!-- ROW 3: 매장 식사 · 서버수령 · 선불           -->
+  <!-- y=366, h=80                                  -->
+  <!-- ──────────────────────────────────────────── -->
+  <rect x="25" y="366" width="1050" height="80" fill="#F8FAFC"/>
+  <line x1="24" y1="446" x2="1076" y2="446" stroke="#E2E8F0" stroke-width="1"/>
+
+  <rect x="32" y="374" width="58" height="15" rx="7" fill="#DBEAFE"/>
+  <text x="61" y="385" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#1D4ED8">매장 식사</text>
+  <text x="32" y="404" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">🛎 서버수령 · 선불</text>
+  <text x="32" y="420" font-family="sans-serif" font-size="9" fill="#94A3B8">dinein + server + prepay</text>
+
+  <rect x="222" y="374" width="16" height="16" rx="4" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="230" y="386" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#15803D">✓</text>
+  <text x="244" y="386" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+
+  <text x="330" y="384" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+  <text x="330" y="400" font-family="sans-serif" font-size="9" fill="#94A3B8">(3개 필수 약관)</text>
+
+  <text x="482" y="384" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">카카오 or 전화번호 선택</text>
+  <text x="482" y="402" font-family="sans-serif" font-size="9.5" fill="#4A5568">영수증·알림을 카카오로 발송</text>
+  <text x="482" y="418" font-family="sans-serif" font-size="9" fill="#94A3B8">"알림 없이 주문하기" 가능</text>
+
+  <text x="662" y="384" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+
+  <text x="814" y="384" font-family="sans-serif" font-size="10" fill="#4A5568">주문접수 → 준비 중 → 완료</text>
+  <text x="814" y="402" font-family="sans-serif" font-size="9" fill="#94A3B8">steps: 주문접수·준비중·완료</text>
+
+  <!-- ──────────────────────────────────────────── -->
+  <!-- ROW 4: 매장 식사 · 서버수령 · 후불 (특별행)  -->
+  <!-- y=446, h=100                                 -->
+  <!-- ──────────────────────────────────────────── -->
+  <rect x="25" y="446" width="1050" height="100" fill="#FFF7ED"/>
+  <rect x="24" y="446" width="4" height="100" rx="1" fill="#F59E0B"/>
+  <line x1="24" y1="546" x2="1076" y2="546" stroke="#FDE68A" stroke-width="1.5"/>
+
+  <rect x="32" y="454" width="58" height="15" rx="7" fill="#DBEAFE"/>
+  <text x="61" y="465" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#1D4ED8">매장 식사</text>
+  <rect x="32" y="474" width="44" height="15" rx="7" fill="#FEF9C3" stroke="#FDE047" stroke-width="1"/>
+  <text x="54" y="485" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#854D0E">후불</text>
+  <text x="82" y="485" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">🛎 서버수령</text>
+  <text x="32" y="502" font-family="sans-serif" font-size="9" fill="#94A3B8">dinein + server + postpay</text>
+  <text x="32" y="520" font-family="sans-serif" font-size="9" fill="#F59E0B">나갈 때 계산 방식</text>
+
+  <rect x="222" y="454" width="16" height="16" rx="4" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5"/>
+  <text x="230" y="466" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#B91C1C">✕</text>
+  <text x="244" y="466" font-family="sans-serif" font-size="10" fill="#92400E">숨김</text>
+  <text x="222" y="484" font-family="sans-serif" font-size="9" fill="#94A3B8">나갈 때 카운터</text>
+  <text x="222" y="500" font-family="sans-serif" font-size="9" fill="#94A3B8">결제 (별도 처리)</text>
+
+  <rect x="330" y="454" width="16" height="16" rx="4" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5"/>
+  <text x="338" y="466" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#B91C1C">✕</text>
+  <text x="352" y="466" font-family="sans-serif" font-size="10" fill="#92400E">약관 없음</text>
+  <text x="330" y="484" font-family="sans-serif" font-size="9" fill="#94A3B8">getTermsConfig()가</text>
+  <text x="330" y="500" font-family="sans-serif" font-size="9" fill="#94A3B8">빈 배열 반환</text>
+
+  <rect x="480" y="454" width="16" height="16" rx="4" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="488" y="467" text-anchor="middle" font-family="sans-serif" font-size="11">⚡</text>
+  <text x="502" y="467" font-family="sans-serif" font-size="10" font-weight="700" fill="#92400E">알림 시트 건너뜀</text>
+  <text x="482" y="485" font-family="sans-serif" font-size="9.5" fill="#4A5568">placeOrder() 직행</text>
+  <text x="482" y="501" font-family="sans-serif" font-size="9" fill="#94A3B8">→ notifChoice = 'skip'</text>
+  <text x="482" y="517" font-family="sans-serif" font-size="9" fill="#94A3B8">주문 버튼 = "주문 넣기"</text>
+
+  <rect x="660" y="454" width="16" height="16" rx="4" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5"/>
+  <text x="668" y="466" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#B91C1C">✕</text>
+  <text x="682" y="466" font-family="sans-serif" font-size="10" fill="#92400E">쿠폰 없음</text>
+  <text x="662" y="484" font-family="sans-serif" font-size="9" fill="#94A3B8">couponSec = '' (후불)</text>
+
+  <text x="814" y="466" font-family="sans-serif" font-size="10" fill="#4A5568">주문접수 → 준비 중 → 완료</text>
+  <text x="814" y="484" font-family="sans-serif" font-size="9" fill="#94A3B8">금액 표시: "주문 금액</text>
+  <text x="814" y="500" font-family="sans-serif" font-size="9" fill="#94A3B8">(나갈 때 결제)"</text>
+  <text x="814" y="518" font-family="sans-serif" font-size="9" fill="#94A3B8">orderStatus: received</text>
+
+  <!-- ──────────────────────────────────────────── -->
+  <!-- ROW 5: 포장 (takeout)                        -->
+  <!-- y=546, h=80                                  -->
+  <!-- ──────────────────────────────────────────── -->
+  <rect x="25" y="546" width="1050" height="80" fill="white"/>
+  <line x1="24" y1="626" x2="1076" y2="626" stroke="#E2E8F0" stroke-width="1"/>
+
+  <rect x="32" y="554" width="34" height="15" rx="7" fill="#D1FAE5"/>
+  <text x="49" y="565" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#065F46">포장</text>
+  <text x="32" y="584" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">🥡 포장 · 항상 선불</text>
+  <text x="32" y="600" font-family="sans-serif" font-size="9" fill="#94A3B8">takeout · prepay 고정</text>
+
+  <rect x="222" y="554" width="16" height="16" rx="4" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="230" y="566" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#15803D">✓</text>
+  <text x="244" y="566" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+
+  <text x="330" y="564" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+  <text x="330" y="580" font-family="sans-serif" font-size="9" fill="#94A3B8">(3개 필수 약관)</text>
+
+  <text x="482" y="564" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">카카오 or 전화번호 선택</text>
+  <text x="482" y="582" font-family="sans-serif" font-size="9.5" fill="#4A5568">Row 1 동일</text>
+
+  <text x="662" y="564" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+
+  <text x="814" y="564" font-family="sans-serif" font-size="10" fill="#4A5568">주문접수 → 준비 중</text>
+  <text x="814" y="582" font-family="sans-serif" font-size="10" fill="#4A5568">→ 수령 대기 → 완료</text>
+  <text x="814" y="600" font-family="sans-serif" font-size="9" fill="#94A3B8">orderStatus: preparing</text>
+
+  <!-- ──────────────────────────────────────────── -->
+  <!-- ROW 6: 포장 예약 (preorder)                  -->
+  <!-- y=626, h=106                                 -->
+  <!-- ──────────────────────────────────────────── -->
+  <rect x="25" y="626" width="1050" height="106" fill="#F8FAFC"/>
+  <rect x="24" y="626" width="4" height="106" rx="1" fill="#4A7FE0"/>
+  <line x1="24" y1="732" x2="1076" y2="732" stroke="#E2E8F0" stroke-width="1"/>
+
+  <rect x="32" y="634" width="58" height="15" rx="7" fill="#DBEAFE"/>
+  <text x="61" y="645" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#1D4ED8">포장 예약</text>
+  <text x="32" y="664" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">📅 포장 예약 · 항상 선불</text>
+  <text x="32" y="680" font-family="sans-serif" font-size="9" fill="#4A7FE0">수령 시간 선택 필수</text>
+  <text x="32" y="696" font-family="sans-serif" font-size="9" fill="#94A3B8">10분 단위 · 12:00~20:50</text>
+  <text x="32" y="712" font-family="sans-serif" font-size="9" fill="#94A3B8">preorder · prepay 고정</text>
+
+  <rect x="222" y="634" width="16" height="16" rx="4" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="230" y="646" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#15803D">✓</text>
+  <text x="244" y="646" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+
+  <text x="330" y="644" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+  <text x="330" y="660" font-family="sans-serif" font-size="9" fill="#94A3B8">(3개 필수 약관)</text>
+
+  <text x="482" y="644" font-family="sans-serif" font-size="10" font-weight="700" fill="#1A202C">카카오 or 전화번호 선택</text>
+  <text x="482" y="662" font-family="sans-serif" font-size="9.5" fill="#4A5568">Row 1 동일</text>
+
+  <text x="662" y="644" font-family="sans-serif" font-size="10" fill="#4A5568">Row 1 동일</text>
+
+  <text x="814" y="644" font-family="sans-serif" font-size="10" fill="#4A5568">주문접수 → 수락 대기</text>
+  <text x="814" y="662" font-family="sans-serif" font-size="10" fill="#4A5568">→ 준비 중 → 완료</text>
+  <rect x="812" y="672" width="78" height="14" rx="7" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1"/>
+  <text x="851" y="682" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#92400E">⚠️ 사장님 수락 필요</text>
+  <text x="814" y="700" font-family="sans-serif" font-size="9" fill="#94A3B8">steps: 주문접수·수락대기</text>
+  <text x="814" y="716" font-family="sans-serif" font-size="9" fill="#94A3B8">·준비중·완료</text>
+
+  <!-- TABLE BOTTOM BORDER -->
+  <rect x="24" y="732" width="1052" height="1" fill="#CBD5E1"/>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- EXCEPTIONS / SPECIAL CASES                      -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <rect x="24" y="752" width="1052" height="28" rx="6" fill="#1E293B"/>
+  <text x="40" y="771" font-family="sans-serif" font-size="11" font-weight="700" fill="#94A3B8" letter-spacing="0.5">예외 · 특이 사항</text>
+
+  <!-- EX 1 -->
+  <rect x="24" y="790" width="1052" height="60" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="24" y="790" width="4" height="60" rx="2" fill="#EF4444"/>
+  <text x="40" y="812" font-family="sans-serif" font-size="11" font-weight="700" fill="#1A202C">셀프수령은 후불 탭 불가</text>
+  <text x="40" y="832" font-family="sans-serif" font-size="10" fill="#64748B">셀프수령 상태에서 후불 탭 → toast("셀프 수령은 선불만 가능해요") + 함수 즉시 return. 버튼 시각적 비활성화(dis 클래스).</text>
+  <text x="40" y="842" font-family="sans-serif" font-size="9" fill="#94A3B8">setPayTiming() 내부: if(v==='postpay' &amp;&amp; S.serve!=='server') toast + return</text>
+
+  <!-- EX 2 -->
+  <rect x="24" y="860" width="1052" height="60" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="24" y="860" width="4" height="60" rx="2" fill="#F59E0B"/>
+  <text x="40" y="882" font-family="sans-serif" font-size="11" font-weight="700" fill="#1A202C">알림 시트 재진입 시 phone·marketing 초기화</text>
+  <text x="40" y="900" font-family="sans-serif" font-size="10" fill="#64748B">goToNotif() 호출 시 S.phone = '' 및 S.termsChecked.marketing = false 강제 초기화.</text>
+  <text x="40" y="912" font-family="sans-serif" font-size="9" fill="#94A3B8">목적: 이전 주문의 전화번호·동의 상태가 유입되어 쿠폰 섹션이 조기 노출되는 버그 방지</text>
+
+  <!-- EX 3 -->
+  <rect x="24" y="930" width="1052" height="60" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="24" y="930" width="4" height="60" rx="2" fill="#A855F7"/>
+  <text x="40" y="952" font-family="sans-serif" font-size="11" font-weight="700" fill="#1A202C">카카오 인증 = 모의 구현</text>
+  <text x="40" y="970" font-family="sans-serif" font-size="10" fill="#64748B">현재 모의: 카카오 버튼 탭 = 인증 완료 상태 가정 → 쿠폰 노출 + 결제 진행.</text>
+  <text x="40" y="982" font-family="sans-serif" font-size="9" fill="#94A3B8">실서비스: OAuth 결과(성공 여부, 마케팅 동의 여부)를 서버에서 받아 쿠폰 표시 여부 판단해야 함</text>
+
+  <!-- EX 4 -->
+  <rect x="24" y="1000" width="1052" height="60" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="24" y="1000" width="4" height="60" rx="2" fill="#EC4899"/>
+  <text x="40" y="1022" font-family="sans-serif" font-size="11" font-weight="700" fill="#1A202C">쿠폰 목록 표시 조건</text>
+  <text x="40" y="1040" font-family="sans-serif" font-size="10" fill="#64748B">카카오 선택: 마케팅 동의 체크만으로 쿠폰 목록 즉시 노출.</text>
+  <text x="40" y="1052" font-family="sans-serif" font-size="9" fill="#94A3B8">전화번호 선택: 숫자 10자리 이상 + 마케팅 동의 둘 다 충족해야 노출. 두 조건 중 하나 미충족 시 섹션 전체 숨김.</text>
+
+  <!-- EX 5 -->
+  <rect x="24" y="1070" width="1052" height="58" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="24" y="1070" width="4" height="58" rx="2" fill="#0EA5E9"/>
+  <text x="40" y="1092" font-family="sans-serif" font-size="11" font-weight="700" fill="#1A202C">포장 예약 수령 시간 미선택 시 주문 차단</text>
+  <text x="40" y="1110" font-family="sans-serif" font-size="10" fill="#64748B">goToNotif() 진입 시점에 S.pickup이 null이면 toast("수령 시간을 선택해 주세요") 후 return. 알림 시트 열지 않음.</text>
+  <text x="40" y="1120" font-family="sans-serif" font-size="9" fill="#94A3B8">시/분 드롭다운 모두 선택해야 S.pickup 세팅됨 (pickupH + ':' + pickupM)</text>
+
+  <!-- EX 6 -->
+  <rect x="24" y="1138" width="1052" height="58" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="24" y="1138" width="4" height="58" rx="2" fill="#64748B"/>
+  <text x="40" y="1160" font-family="sans-serif" font-size="11" font-weight="700" fill="#1A202C">세션 만료 (모든 주문 유형 공통)</text>
+  <text x="40" y="1178" font-family="sans-serif" font-size="10" fill="#64748B">무활동 5분 경과 → S.screen = 'expired'. 진행 중인 주문 상태 유지되지 않음. QR 재스캔으로 재시작 안내.</text>
+  <text x="40" y="1188" font-family="sans-serif" font-size="9" fill="#94A3B8">시뮬레이션: S.screen = 'expired'로 직접 전환</text>
+
+  <!-- EX 7 -->
+  <rect x="24" y="1206" width="1052" height="58" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="24" y="1206" width="4" height="58" rx="2" fill="#22C55E"/>
+  <text x="40" y="1228" font-family="sans-serif" font-size="11" font-weight="700" fill="#1A202C">영업시간 외 접근</text>
+  <text x="40" y="1246" font-family="sans-serif" font-size="10" fill="#64748B">S.businessOpen = false 시 상단 배너 표시. 메뉴 탐색·장바구니 담기는 가능. 주문하기(goToCheckout) 비활성화.</text>
+  <text x="40" y="1256" font-family="sans-serif" font-size="9" fill="#94A3B8">라스트오더 이후: STORE.lastOrder 기준, 주문 버튼 비활성화만 추가됨</text>
+
+  <!-- EX 8 -->
+  <rect x="24" y="1274" width="1052" height="58" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="24" y="1274" width="4" height="58" rx="2" fill="#14B8A6"/>
+  <text x="40" y="1296" font-family="sans-serif" font-size="11" font-weight="700" fill="#1A202C">주문 유형 변경 시 상태 초기화</text>
+  <text x="40" y="1314" font-family="sans-serif" font-size="10" fill="#64748B">setOrderMode() 호출 시: S.cart, S.pickup, S.pickupH, S.pickupM 초기화. 장바구니·수령시간 리셋됨.</text>
+  <text x="40" y="1324" font-family="sans-serif" font-size="9" fill="#94A3B8">쿠폰·결제수단·약관 동의는 유지됨 (checkout 재진입 시 재평가)</text>
+
+  <!-- FOOTER -->
+  <rect x="0" y="1396" width="1100" height="44" fill="#1A202C"/>
+  <text x="550" y="1422" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#94A3B8">QR오더 손님 화면 주문 유형 스펙 · customer.html 기준 · 2026-06-12</text>
+</svg>

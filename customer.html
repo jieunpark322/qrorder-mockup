@@ -1765,9 +1765,7 @@ function scrDone(){
   const callNoLabel = isDineinSelf ? '주문 번호' : '호출 번호';
   const callNoNote = S.callMethod==='verbal' && isDineinSelf
     ? '준비되면 직원이 호명으로 불러드려요'
-    : nl
-      ? `준비되면 ${nl}으로 알려드려요${S.orderType==='takeout'?' · 픽업대에서 확인하세요':''}`
-      : `준비되면 이 번호로 알려드려요${S.orderType==='takeout'?' · 픽업대에서 확인하세요':''}`;
+    : `준비가 다 되면 알려드릴게요.${S.orderType==='takeout'?' · 픽업대에서 확인하세요':''}`;
   const callNoCard = S.callNo
     ? `<div class="callno-box">
         <div class="cn-label">${callNoLabel}</div>

@@ -1601,9 +1601,14 @@ function scrCheckout(){
             </div>`:`<div style="height:4px;"></div>`}
 
           ${(()=>{
-            if(!showPhone) return '';
-            const notifDigits = (S.phone||'').replace(/\D/g,'');
-            if(notifDigits.length < 10 || !mktChecked) return '';
+            const isKakaoNotif = S.notifChoice === 'kakao';
+            if(!showPhone && !isKakaoNotif) return '';
+            if(showPhone){
+              const notifDigits = (S.phone||'').replace(/\D/g,'');
+              if(notifDigits.length < 10 || !mktChecked) return '';
+            } else {
+              if(!mktChecked) return '';
+            }
             const avail = COUPONS.filter(cp=>cp.channels.includes(S.orderType));
             if(!avail.length) return `<div style="font-size:13px;color:var(--ink3);text-align:center;padding:6px 0 14px;">현재 사용 가능한 쿠폰이 없어요.</div>`;
             return `<div style="background:#FFF8E6;border:1px solid #FFE3A3;border-radius:12px;padding:12px 14px;margin-bottom:14px;">

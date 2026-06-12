@@ -12550,8 +12550,8 @@ function renderOrderType(main){
   const dineIn  = ch.mode==='both' || ch.mode==='dine_in';
   const takeout = ch.mode==='both' || ch.mode==='takeout';
   const cp = ot_currentPolicy();
-  // 접힘 상태 — 최초 진입 시 기본값 (세부 닫힘 / 고급은 현재 시간대별 사용 중이면 자동 펼침)
-  if (state.otDetailOpen === undefined)   state.otDetailOpen   = false;
+  // 접힘 상태 — 최초 진입 시 기본값 (세부 열림 — 기본 주문 흐름이 보여야 함 / 고급은 현재 시간대별 사용 중이면 자동 펼침)
+  if (state.otDetailOpen === undefined)   state.otDetailOpen   = true;
   if (state.otAdvancedOpen === undefined) state.otAdvancedOpen = ch.payment==='scheduled';
   const now = new Date();
   const hhmm = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');

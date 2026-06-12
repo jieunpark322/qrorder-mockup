@@ -1,0 +1,15 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>08. 세션 만료 · 손님 화면 기획</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../cust-board.css">
+</head>
+<body>
+<div class="wrap" id="boards"></div>
+<script src="../cust-board-data.js"></script>
+<script>renderCustBoards({mount:'boards', imgBase:'../img/', only:'session'});</script>
+</body>
+</html>

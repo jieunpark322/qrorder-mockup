@@ -600,6 +600,7 @@ const S = {
   happyHour:false,       // 해피아워 시뮬레이션
   groupMode:false,       // 공동 주문 시뮬레이션 (먹고가기 전용)
   payGroup:false,        // 함께 결제 여부
+  useSplit:false,        // 1/N 분할 결제 선택 여부 (그룹 모드 선택 옵션)
   splitPaid:{},          // { me:bool, g2:bool } 각자 결제 완료 여부
   splitPaySel:{},        // { me:'카드', g2:'카카오페이' } 각자 선택 결제수단
   splitPending:null,     // 현재 결제 처리 중인 참가자 id
@@ -1562,7 +1563,17 @@ function scrCheckout(){
         </div>
       </div>` : ''}
 
-    <button class="primarybtn" onclick="${reqAllChecked?(S.groupMode&&S.orderType==='dinein'?'goToSplitPay()':'goToNotif()'):'highlightTerms()'}">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:S.groupMode&&S.orderType==='dinein'?`1/N 분할 결제 · ${won(finalTotal)}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
+    ${S.groupMode && S.orderType==='dinein' && !isPostpay ? `
+    <div style="margin:0 16px 4px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;padding:14px 16px;border:1.5px solid ${S.useSplit?'var(--blue)':'var(--line)'};" onclick="S.useSplit=!S.useSplit;render()">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:var(--ink);">1/N 분할 결제</div>
+        <div style="font-size:12px;color:var(--ink3);margin-top:2px;">${1+GUEST_CARTS.length}명이 각자 결제해요</div>
+      </div>
+      <div style="width:44px;height:26px;border-radius:13px;background:${S.useSplit?'var(--blue)':'var(--line)'};position:relative;transition:.2s;flex-shrink:0;">
+        <div style="position:absolute;top:3px;${S.useSplit?'right:3px':'left:3px'};width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2);"></div>
+      </div>
+    </div>` : ''}
+    <button class="primarybtn" onclick="${reqAllChecked?(S.groupMode&&S.orderType==='dinein'&&S.useSplit?'goToSplitPay()':'goToNotif()'):'highlightTerms()'}">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:S.groupMode&&S.orderType==='dinein'&&S.useSplit?`1/N 분할 결제 · ${won(finalTotal)}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
 
     ${(()=>{
       if(!S.notifSheet) return '';
@@ -1829,7 +1840,7 @@ function scrDone(){
 }
 function resetOrder(){
   const keepAuth = S.tableActive;
-  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received'; S.splitPaid={}; S.splitPaySel={}; S.splitPending=null;
+  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received'; S.useSplit=false; S.splitPaid={}; S.splitPaySel={}; S.splitPending=null;
   if(!keepAuth){ S.authType='anon'; S.notifChoice=null; }
   S.screen='menu'; render();
 }

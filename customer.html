@@ -262,6 +262,8 @@
   .chips{display:flex;flex-wrap:wrap;gap:8px;}
   .pchip{font-size:15px;font-weight:700;padding:12px 16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;color:var(--ink2);font-family:inherit;display:flex;align-items:center;gap:6px;}
   .pchip.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);font-weight:800;}
+  .rchip{font-size:13px;font-weight:600;padding:8px 14px;border:1.5px solid var(--line);border-radius:20px;background:#fff;cursor:pointer;color:var(--ink2);font-family:inherit;}
+  .rchip.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);font-weight:700;}
   .timechip{min-width:78px;justify-content:center;}
   .timesel{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:15px 13px;font-size:16.5px;font-weight:600;font-family:inherit;color:var(--ink);background:#fff;}
   .timesel:focus{outline:none;border-color:var(--blue);}
@@ -466,6 +468,14 @@ const MENU = [
 ];
 const CATS = ['커피','논커피','티·에이드','스무디·프라페','베이커리','디저트','브런치','병음료','시즌 한정'];
 const PAY_METHODS = [{k:'카드',e:'💳'},{k:'카카오페이',e:'🟡'},{k:'네이버페이',e:'🟢'},{k:'토스페이',e:'🔵'}];
+const REQUEST_OPTIONS = [
+  {id:'cutlery',  label:'🥢 수저·포크 주세요'},
+  {id:'bag',      label:'🛍 봉투 주세요'},
+  {id:'noice',    label:'🧊 얼음 없이'},
+  {id:'hot',      label:'🌡 뜨겁게 해주세요'},
+  {id:'nostraw',  label:'🚫 빨대 필요 없어요'},
+  {id:'quick',    label:'⚡ 빠른 준비 부탁드려요'},
+];
 // 직원 호출 요청 항목 (사장님이 최대 15개까지 설정 가능 · 3열 노출)
 const STAFF_CALL_MSGS = ['물','물티슈','수저/포크','앞접시','휴지','빨대','얼음','추천 메뉴','계산 도움','아기 의자','담요','기타 문의'];
 const SETS = [
@@ -551,6 +561,7 @@ const S = {
   errSim:'none', procStep:null, errType:null,   // 결제 처리상태/에러 시뮬레이션
   searchOpen:false, activeCat:null,             // 검색창 토글 / 현재 보이는 카테고리
   callNo:null,                                  // 포장/예약 호출 번호 (사장님 규칙)
+  requests:[],             // 선택된 요청사항 id 목록
   authType:'kakao', // 'kakao' | 'anon'
   tableActive:true,        // POS 테이블 점유 여부 (false = 테이블 클리어됨)
   termsChecked:{},       // { termId: true/false }
@@ -1451,6 +1462,13 @@ function scrCheckout(){
 
     ${couponSec}
 
+    <div class="sec">
+      <div class="sec-h">📝 요청사항 <span class="opt-pick">선택</span></div>
+      <div class="chips" style="gap:8px;">
+        ${REQUEST_OPTIONS.map(r=>`<button class="rchip ${S.requests.includes(r.id)?'on':''}" onclick="toggleRequest('${r.id}')">${r.label}</button>`).join('')}
+      </div>
+    </div>
+
     ${isPostpay
       ? `<div class="sec"><div class="sec-h">🧾 결제 <span class="opt-pick" style="font-weight:600;">후불 · 나갈 때 결제</span></div>
           <div class="info-pill amber">🧾 <span>지금은 주문만 넣고, <b>나갈 때 카운터에서 결제</b>해요.</span></div></div>`
@@ -1595,6 +1613,7 @@ function tryNotifPay(){
   }
   goToTermsFromNotif();
 }
+function toggleRequest(id){ const i=S.requests.indexOf(id); i===-1?S.requests.push(id):S.requests.splice(i,1); render(); }
 function goToNotif(){
   if(S.orderType==='preorder' && !S.pickup){ toast('수령 시간을 선택해 주세요'); return; }
   if(S.orderType==='dinein' && S.serve==='self' && S.callMethod==='verbal'){
@@ -1768,7 +1787,7 @@ function scrDone(){
 }
 function resetOrder(){
   const keepAuth = S.tableActive; // 테이블 점유 중이면 로그인 상태 유지
-  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={};
+  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requests=[];
   if(!keepAuth){ S.authType='anon'; S.notifChoice=null; }
   S.screen='menu'; render();
 }

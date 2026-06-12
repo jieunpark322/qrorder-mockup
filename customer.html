@@ -1762,7 +1762,7 @@ function scrDone(){
   const isDineinSelf = S.orderType==='dinein' && S.serve==='self';
   const callNoLabel = isDineinSelf ? '주문 번호' : '호출 번호';
   const callNoNote = S.callMethod==='verbal' && isDineinSelf
-    ? '준비되면 직원이 호명으로 불러드려요'
+    ? '준비가 다 되면 알려드릴게요.'
     : S.orderType==='takeout'
       ? '주문하신 메뉴가 준비되면 카카오톡 알림을 보내드려요.'
       : '준비가 다 되면 알려드릴게요.';

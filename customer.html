@@ -1781,7 +1781,7 @@ function scrDone(){
   const receiptNote = (S.orderType==='dinein' && S.serve==='server' && S.payTiming==='prepay' && nl)
     ? `<div style="font-size:12px;color:var(--ink3);margin-top:8px;">🧾 영수증 · ${nl} 발송</div>` : '';
 
-  return `<div class="done"><div class="dlogo">${STORE.logo}</div><div class="ck">✓</div>
+  return `<div class="done"><div class="ck">✓</div>
       <h2>${head}</h2><div class="ordno">주문번호 ${S.orderNo}</div></div>
     ${buildProgressBar()}
     ${callNoCard}

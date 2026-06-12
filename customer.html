@@ -1454,7 +1454,13 @@ function scrCheckout(){
     const link=t.link?`<button class="term-link" onclick="event.stopPropagation();toast('약관 보기 (준비 중)')">보기</button>`:'';
     return `<div class="term-row" onclick="_toggleTerm('${t.id}')"><span class="term-ck ${checked?'checked':''}">${checked?'✓':''}</span><span class="term-label">${badge}${t.label}${link}</span></div>`;
   }).join('');
-  const finalTotal = (()=>{ const base=(S.groupMode&&S.payGroup&&S.orderType==='dinein')?cartTotal()+guestTotal():cartTotal(); return base-couponDiscount(); })();
+  const isSplitMode = S.groupMode && S.useSplit && S.orderType==='dinein';
+  const splitN = 1 + GUEST_CARTS.length;
+  const finalTotal = (()=>{
+    const base = (S.groupMode&&(S.payGroup||S.useSplit)&&S.orderType==='dinein') ? cartTotal()+guestTotal() : cartTotal();
+    const total = base - couponDiscount();
+    return isSplitMode ? Math.ceil(total / splitN) : total;
+  })();
 
   // 쿠폰 섹션 빌더
   const couponSec = (!isPostpay) ? (()=>{
@@ -1549,7 +1555,7 @@ function scrCheckout(){
       <div class="rowline"><span>상품 금액</span><span>${won(cartTotal())}원</span></div>
       ${S.groupMode && S.payGroup && S.orderType==='dinein' ? `<div class="rowline"><span>손님 2 금액</span><span>${won(guestTotal())}원</span></div>` : ''}
       ${couponDiscount()>0 ? `<div class="rowline" style="color:var(--blue);"><span>🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>` : ''}
-      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':(S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액')}</span><span style="color:var(--blue);">${won(finalTotal)}원</span></div>
+      <div class="rowline tot"><span>${isPostpay?'주문 금액 (나갈 때 결제)':isSplitMode?`1인 결제 금액 (${splitN}명 분할)`:S.groupMode&&S.payGroup&&S.orderType==='dinein'?'전체 결제 금액':'결제 금액'}</span><span style="color:var(--blue);">${won(finalTotal)}원</span></div>
     </div>
 
     ${terms.length ? `

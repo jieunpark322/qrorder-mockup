@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>손님 화면 핀 합성</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#fff;}
+  #stage{position:relative;width:440px;}
+  #stage img{display:block;width:440px;height:auto;}
+  .pin{position:absolute;width:28px;height:28px;border-radius:50%;
+    background:#2563EB;color:#fff;font:800 14px/28px 'Pretendard',-apple-system,sans-serif;
+    text-align:center;transform:translate(-50%,-50%);
+    box-shadow:0 2px 6px rgba(0,0,0,.35);border:2px solid #fff;}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="cust-pos.js"></script>
+<script>
+  var key=(/[?&]key=([\w-]+)/.exec(location.search)||[])[1]||'menu';
+  var pos=(window.CUST_POS||{})[key]||{};
+  var stage=document.getElementById('stage');
+  var img=new Image();
+  img.onload=function(){
+    Object.keys(pos).forEach(function(n){
+      var p=pos[n];
+      var d=document.createElement('div');
+      d.className='pin'; d.textContent=n;
+      d.style.left=p.x+'%'; d.style.top=p.y+'%';
+      stage.appendChild(d);
+    });
+    document.title='READY';
+  };
+  img.src='img/cust-'+key+'.png';
+  stage.appendChild(img);
+</script>
+</body>
+</html>

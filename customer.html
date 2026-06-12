@@ -1979,6 +1979,7 @@ function storeInfoSection(){
   if(_g('couponId'))    S.couponId    = _g('couponId')||null;
   if(_g('orderStatus')) S.orderStatus = _g('orderStatus');
   if(_g('orderNo'))     S.orderNo     = _g('orderNo');
+  if(_g('callNo'))      S.callNo      = _g('callNo');
   if(_g('procStep'))    S.procStep    = parseInt(_g('procStep'));
   if(_g('demoCart'))    S.cart=[
     {key:'1|Large·얼음보통',id:1,name:'아메리카노',img:'☕',unit:5300,qty:1,optText:'Large · 얼음 보통'},
@@ -1990,6 +1991,17 @@ function storeInfoSection(){
 render();
 if(window._initSheetId) try{ openSheet(window._initSheetId); }catch(e){}
 if(window.self===window.top){ resetSessionTimer(); if(!S.businessOpen) showClosedAlert(); }
+
+/* ── 기획 보드 캡처 모드 (?cap=1): 시뮬레이터 바 숨기고 폰 본체만 깔끔히. 평상시 영향 없음 ── */
+if(/[?&]cap=1/.test(location.search)){
+  window.__cap=function(){
+    var db=document.getElementById('demobar'); if(db) db.style.display='none';
+    document.documentElement.style.background='#fff';
+    document.body.style.margin='0'; document.body.style.padding='0'; document.body.style.background='#fff';
+    var dev=document.querySelector('.device'); if(dev){ dev.style.margin='0'; dev.style.borderRadius='0'; dev.style.width='440px'; dev.style.maxWidth='440px'; }
+  };
+  __cap(); setTimeout(__cap,200); setTimeout(__cap,500);
+}
 </script>
 </body>
 </html>

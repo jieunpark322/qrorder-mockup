@@ -304,11 +304,11 @@ const SCREENS = [
     id:'b8', num:'08', title:'세션 만료',
     sub:'QR 유효 시간(5분) 초과 시 접속 차단 화면',
     variants:[
-      {label:'세션 만료', url:'customer.html?screen=expired'},
+      {label:'세션 만료', url:'customer.html?screen=session'},
     ],
     pins:[
       {n:1, cat:'purpose',   title:'세션 만료 안내',
-       items:['타이머(5분) 종료 시 자동으로 S.screen=expired 전환','QR 재스캔으로만 새 세션 시작 가능']},
+       items:['타이머(5분) 종료 시 자동으로 S.screen=session 전환','QR 재스캔으로만 새 세션 시작 가능']},
       {n:2, cat:'exception', title:'기획 보드 iframe 예외',
        items:['window.self !== window.top 조건으로 타이머·Alert 미동작 처리','description 보드 내 iframe에서는 세션 타이머 비활성화']},
     ],

@@ -367,25 +367,23 @@
   .callno-box .cn-num{font-size:42px;font-weight:800;color:var(--blue);letter-spacing:3px;line-height:1.1;}
   .callno-box .cn-note{font-size:12.5px;color:var(--ink3);margin-top:9px;line-height:1.5;}
 
-  /* 1/N 정산 화면 */
-  .split-hero{text-align:center;padding:32px 24px 20px;}
-  .split-hero .sh-ic{font-size:48px;margin-bottom:12px;}
-  .split-hero h2{font-size:22px;font-weight:800;margin:0 0 6px;letter-spacing:-.02em;}
-  .split-hero .sh-sub{font-size:14px;color:var(--ink3);}
-  .split-card{margin:0 16px;background:#fff;border-radius:18px;padding:22px 20px;box-shadow:0 2px 12px rgba(0,0,0,.07);}
-  .split-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:14px;color:var(--ink2);}
-  .split-row.main{font-size:18px;font-weight:800;color:var(--blue);border-top:1.5px solid var(--line);margin-top:8px;padding-top:14px;}
-  .tip-section{margin:18px 16px 0;}
-  .tip-section .ts-h{font-size:14px;font-weight:700;color:var(--ink2);margin-bottom:10px;}
-  .tip-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
-  .tip-btn{padding:11px 0;border:1.5px solid var(--line);border-radius:11px;background:#fff;font-size:14px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;text-align:center;}
-  .tip-btn.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);}
-  .tip-custom-input{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:15px;font-family:inherit;color:var(--ink);outline:none;box-sizing:border-box;}
-  .tip-custom-input:focus{border-color:var(--blue);}
-  .split-expect{margin:16px 16px 0;background:var(--blue-50);border:1.5px solid #c5d8f5;border-radius:14px;padding:16px 18px;}
-  .split-expect .se-label{font-size:13px;color:var(--blue-d);font-weight:700;margin-bottom:6px;}
-  .split-expect .se-amt{font-size:28px;font-weight:800;color:var(--blue-d);}
-  .split-expect .se-sub{font-size:12px;color:var(--blue-d);opacity:.72;margin-top:3px;}
+  /* 1/N 분할 결제 화면 */
+  .split-summary{margin:16px 16px 0;background:#fff;border-radius:14px;padding:16px 18px;}
+  .split-summary .ss-row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink2);padding:4px 0;}
+  .split-summary .ss-row.total{font-size:16px;font-weight:800;color:var(--ink);border-top:1.5px solid var(--line);margin-top:8px;padding-top:12px;}
+  .split-progress{margin:14px 16px 0;}
+  .split-progress .sp-bar-bg{background:var(--line2);border-radius:6px;height:8px;overflow:hidden;margin:8px 0 6px;}
+  .split-progress .sp-bar-fill{background:var(--blue);height:100%;border-radius:6px;transition:width .4s ease;}
+  .split-progress .sp-labels{display:flex;justify-content:space-between;font-size:13px;}
+  .split-payer{background:#fff;border-radius:14px;margin:10px 16px 0;padding:16px;}
+  .split-payer.done{background:#f0faf8;border:1.5px solid var(--green);}
+  .split-payer.running{background:var(--bg);border:1.5px solid var(--line);}
+  .sp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .sp-name{font-size:15px;font-weight:800;}
+  .sp-amt{font-size:15px;font-weight:800;}
+  .sp-done-label{font-size:13px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:5px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .mini-spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -602,8 +600,9 @@ const S = {
   happyHour:false,       // 해피아워 시뮬레이션
   groupMode:false,       // 공동 주문 시뮬레이션 (먹고가기 전용)
   payGroup:false,        // 함께 결제 여부
-  splitTip:0,            // 1/N 정산 팁: 0|5|10|15|'custom'
-  splitCustomTip:'',     // 팁 직접입력 값
+  splitPaid:{},          // { me:bool, g2:bool } 각자 결제 완료 여부
+  splitPaySel:{},        // { me:'카드', g2:'카카오페이' } 각자 선택 결제수단
+  splitPending:null,     // 현재 결제 처리 중인 참가자 id
   couponId:null,         // 선택된 쿠폰 id (null = 쿠폰 안 씀)
   couponCode:'',         // 쿠폰번호 입력 값
   notifChoice:null,      // 알림 수단: null | 'kakao' | 'phone' | 'skip'
@@ -624,7 +623,7 @@ const $ = id => document.getElementById(id);
 
 function render(){
   renderDemo();
-  const r = { menu:scrMenu, checkout:scrCheckout, processing:scrProcessing, error:scrError, done:scrDone, split:scrSplit, splitdone:scrSplitDone, session:scrSession }[S.screen];
+  const r = { menu:scrMenu, checkout:scrCheckout, processing:scrProcessing, error:scrError, done:scrDone, splitpay:scrSplitPay, session:scrSession }[S.screen];
   $('screen').innerHTML = r();
   if(!S._keepScroll) window.scrollTo(0,0);
   S._tabAnim=null;
@@ -1558,7 +1557,7 @@ function scrCheckout(){
         </div>
       </div>` : ''}
 
-    <button class="primarybtn" onclick="${reqAllChecked?`goToNotif()`:`highlightTerms()`}">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
+    <button class="primarybtn" onclick="${reqAllChecked?(S.groupMode&&S.orderType==='dinein'?'goToSplitPay()':'goToNotif()'):'highlightTerms()'}">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:S.groupMode&&S.orderType==='dinein'?`1/N 분할 결제 · ${won(finalTotal)}원`:`${won(finalTotal)}원 결제하기`}</button><div style="height:20px;"></div>
 
     ${(()=>{
       if(!S.notifSheet) return '';
@@ -1714,14 +1713,12 @@ function finishOrder(){
   S.screen='done'; render();
 }
 function scrProcessing(){
-  const isPay = S.procStep==='pay' || S.procStep==='splitpay';
-  const isSplit = S.procStep==='splitpay' || S.procStep==='splitsubmit';
+  const isPay = S.procStep==='pay';
   return `<div class="proc">
     <div class="spinner"></div>
-    <h2>${isPay?'결제 처리 중이에요':isSplit?'정산 처리 중이에요':'주문 접수 중이에요'}</h2>
+    <h2>${isPay?'결제 처리 중이에요':'주문 접수 중이에요'}</h2>
     <p>${isPay
       ? `<b>${S.pay}</b>로 결제를 진행하고 있어요.<br>잠시만 기다려 주세요.`
-      : isSplit ? `결제가 완료됐어요.<br>정산을 마무리하고 있어요.`
       : `결제가 완료됐어요.<br>매장에 주문을 전달하고 있어요.`}</p>
   </div>`;
 }
@@ -1823,97 +1820,84 @@ function scrDone(){
         <div class="rowline tot" style="font-size:15px;"><span>${(S.orderType==='dinein'&&S.payTiming==='postpay')?'결제 예정':'결제 금액'}</span><span>${won(cartTotal()-couponDiscount())}원</span></div>
       </div>
     </div>
-    <button class="primarybtn" onclick="resetOrder()">새 주문하기</button>
-    ${S.groupMode && S.orderType==='dinein' ? `<button class="ghostbtn" style="margin:0 16px 0;width:calc(100% - 32px);" onclick="S.screen='split';render()">🧮 1/N 정산하기</button>` : ''}
-    <div style="height:24px;"></div>`;
+    <button class="primarybtn" onclick="resetOrder()">새 주문하기</button><div style="height:24px;"></div>`;
 }
 function resetOrder(){
   const keepAuth = S.tableActive;
-  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received'; S.splitTip=0; S.splitCustomTip='';
+  S.cart=[]; S.sheet=null; S.pickup=null; S.pay='카드'; S.phone=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received'; S.splitPaid={}; S.splitPaySel={}; S.splitPending=null;
   if(!keepAuth){ S.authType='anon'; S.notifChoice=null; }
   S.screen='menu'; render();
 }
 
-/* --- 1/N 정산 --- */
-function processSplitPayment(){
-  S.screen='processing'; S.procStep='splitpay'; render();
+/* --- 1/N 분할 결제 --- */
+function goToSplitPay(){
+  // 참가자별 결제수단 초기값
+  const ids = ['me', ...GUEST_CARTS.map(g=>g.id)];
+  ids.forEach(id=>{ if(!(id in S.splitPaid)) S.splitPaid[id]=false; if(!(id in S.splitPaySel)) S.splitPaySel[id]=S.pay||'카드'; });
+  S.screen='splitpay'; render();
+}
+function paySplit(who){
+  if(S.splitPending || S.splitPaid[who]) return;
+  S.splitPending=who; render();
   setTimeout(()=>{
-    if(S.screen!=='processing') return;
-    S.procStep='splitsubmit'; render();
-    setTimeout(()=>{ S.screen='splitdone'; render(); }, 1000);
-  }, 1500);
+    S.splitPaid[who]=true; S.splitPending=null;
+    const ids=['me',...GUEST_CARTS.map(g=>g.id)];
+    if(ids.every(id=>S.splitPaid[id])){
+      render();
+      setTimeout(()=>{ S.procStep='submit'; S.screen='processing'; render(); setTimeout(finishOrder,1300); },400);
+    } else { render(); }
+  },1500);
 }
-function scrSplitDone(){
-  const n = 1 + GUEST_CARTS.length;
-  const total = cartTotal() + guestTotal() - couponDiscount();
-  const perBase = Math.ceil(total / n);
-  const tipAmt = S.splitTip==='custom'
-    ? (parseInt((S.splitCustomTip||'').replace(/\D/g,''))||0)
-    : Math.round(perBase * S.splitTip / 100);
-  const perFinal = perBase + tipAmt;
-  return `<div class="done"><div class="ck" style="background:var(--green);">✓</div>
-      <h2>정산이 완료됐어요</h2>
-      <div class="ordno">1인 결제 금액 · ${won(perFinal)}원</div></div>
-    <div class="done-card">
-      <div class="split-row"><span style="color:var(--ink3);">정산 금액</span><span>${won(perBase)}원</span></div>
-      ${tipAmt>0?`<div class="split-row"><span style="color:var(--ink3);">팁</span><span>${won(tipAmt)}원</span></div>`:''}
-      <div class="split-row main"><span>결제 금액</span><span>${won(perFinal)}원</span></div>
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line2);font-size:13px;color:var(--ink3);">💳 ${S.pay}</div>
-    </div>
-    <button class="primarybtn" onclick="S.screen='done';render()">확인</button>
-    <div style="height:24px;"></div>`;
-}
-function scrSplit(){
-  const n = 1 + GUEST_CARTS.length;
-  const total = cartTotal() + guestTotal() - couponDiscount();
-  const perBase = Math.ceil(total / n);
-  const tipAmt = S.splitTip==='custom'
-    ? (parseInt((S.splitCustomTip||'').replace(/\D/g,''))||0)
-    : Math.round(perBase * S.splitTip / 100);
-  const perFinal = perBase + tipAmt;
+function scrSplitPay(){
+  const ids=['me',...GUEST_CARTS.map(g=>g.id)];
+  ids.forEach(id=>{ if(!(id in S.splitPaid)) S.splitPaid[id]=false; if(!(id in S.splitPaySel)) S.splitPaySel[id]=S.pay||'카드'; });
+  const n=ids.length;
+  const total=cartTotal()+guestTotal()-couponDiscount();
+  const per=Math.ceil(total/n);
+  const paidCount=ids.filter(id=>S.splitPaid[id]).length;
+  const remaining=Math.max(total-paidCount*per,0);
+  const allPaid=paidCount===n;
+  const pct=Math.round(paidCount/n*100);
 
-  const tipBtns = [0,5,10,15].map(p=>
-    `<button class="tip-btn ${S.splitTip===p?'on':''}" onclick="S.splitTip=${p};S.splitCustomTip='';render()">${p===0?'팁 없음':p+'%'}</button>`
-  ).join('') + `<button class="tip-btn ${S.splitTip==='custom'?'on':''}" onclick="S.splitTip='custom';render()">직접입력</button>`;
-
-  const customInput = S.splitTip==='custom'
-    ? `<input class="tip-custom-input" type="number" placeholder="팁 금액 입력 (원)" value="${S.splitCustomTip}"
-        oninput="S.splitCustomTip=this.value;render()" inputmode="numeric">`
-    : '';
-
-  const expectBlock = `<div class="split-expect">
-    <div class="se-label">예상 결제 금액</div>
-    <div class="se-amt">${won(perFinal)}원</div>
-    ${tipAmt>0?`<div class="se-sub">정산금액 ${won(perBase)}원 + 팁 ${won(tipAmt)}원</div>`:''}
-  </div>`;
-
-  return `<div class="topbar"><button class="back" onclick="S.screen='done';render()">‹</button>
-      <div><div class="ttl">1/N 정산하기</div><div class="sub">${STORE.table} 테이블 · ${n}명</div></div>
-    </div>
-    <div class="scroll">
-      <div class="split-hero">
-        <div class="sh-ic">🧮</div>
-        <h2>${n}명이 나눠요</h2>
-        <div class="sh-sub">전체 금액 ${won(total)}원 ÷ ${n}명</div>
-      </div>
-      <div class="split-card">
-        <div class="split-row"><span>전체 금액</span><span>${won(total)}원</span></div>
-        <div class="split-row"><span>인원</span><span>${n}명</span></div>
-        <div class="split-row main"><span>1인 정산 금액</span><span>${won(perBase)}원</span></div>
-      </div>
-      <div class="tip-section">
-        <div class="ts-h">팁 선택 <span style="font-size:12px;color:var(--ink3);font-weight:600;">· 선택 사항</span></div>
-        <div class="tip-btns">${tipBtns}</div>
-        ${customInput}
-      </div>
-      ${expectBlock}
-      <div class="tip-section" style="margin-top:18px;">
-        <div class="ts-h">결제 수단</div>
-        <div class="chips">${PAY_METHODS.map(p=>`<button class="pchip ${S.pay===p.k?'on':''}" onclick="S.pay='${p.k}';render()">${p.e} ${p.k}</button>`).join('')}</div>
-      </div>
-      <button class="primarybtn" onclick="processSplitPayment()">1/N 정산하기 · ${won(perFinal)}원</button>
-      <div style="height:24px;"></div>
+  const payers=[{id:'me',name:'나'},...GUEST_CARTS.map(g=>({id:g.id,name:g.name}))];
+  const payerCards=payers.map(p=>{
+    const paid=S.splitPaid[p.id], pending=S.splitPending===p.id;
+    if(paid) return `<div class="split-payer done">
+      <div class="sp-head"><span class="sp-name">${p.name}</span><span class="sp-amt" style="color:var(--green);">${won(per)}원</span></div>
+      <div class="sp-done-label">✓ 결제 완료 <span style="font-weight:600;color:var(--ink3);">· ${S.splitPaySel[p.id]}</span></div>
     </div>`;
+    if(pending) return `<div class="split-payer running">
+      <div class="sp-head"><span class="sp-name">${p.name}</span><span class="sp-amt">${won(per)}원</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;"><div class="mini-spin"></div><span style="font-size:13px;color:var(--ink3);">결제 처리 중...</span></div>
+    </div>`;
+    return `<div class="split-payer">
+      <div class="sp-head"><span class="sp-name">${p.name}</span><span class="sp-amt">${won(per)}원</span></div>
+      <div class="chips" style="margin:10px 0 10px;">
+        ${PAY_METHODS.map(pm=>`<button class="pchip ${S.splitPaySel[p.id]===pm.k?'on':''}" onclick="S.splitPaySel['${p.id}']='${pm.k}';render()">${pm.e} ${pm.k}</button>`).join('')}
+      </div>
+      <button class="primarybtn" style="margin:0;padding:14px;" onclick="paySplit('${p.id}')">${won(per)}원 결제하기</button>
+    </div>`;
+  }).join('');
+
+  return `<div class="topbar"><button class="back" onclick="S.screen='checkout';render()">‹</button>
+    <div><div class="ttl">1/N 분할 결제</div><div class="sub">${STORE.table} 테이블 · ${n}명</div></div>
+  </div>
+  <div class="scroll">
+    <div class="split-summary">
+      <div class="ss-row"><span>전체 금액</span><span>${won(total)}원</span></div>
+      <div class="ss-row"><span>1인 금액</span><span>${won(per)}원</span></div>
+      <div class="ss-row total"><span>잔여 금액</span><span style="color:${allPaid?'var(--green)':'var(--red)'};">${won(remaining)}원</span></div>
+    </div>
+    <div class="split-progress">
+      <div class="sp-bar-bg"><div class="sp-bar-fill" style="width:${pct}%;"></div></div>
+      <div class="sp-labels">
+        <span style="color:var(--blue-d);font-weight:700;">${paidCount}/${n}명 완료</span>
+        <span style="color:var(--ink3);">${allPaid?'전체 완료 · 주문 접수 중...':'각자 결제 후 주문이 접수돼요'}</span>
+      </div>
+    </div>
+    ${payerCards}
+    <div style="height:24px;"></div>
+  </div>`;
 }
 
 /* --- 세션 만료 --- */

@@ -1437,34 +1437,40 @@ function scrCheckout(){
 
   // 쿠폰 섹션 빌더
   const hasPhone = (S.phone||'').replace(/\D/g,'').length >= 10;
-  const couponSec = (!isPostpay && hasPhone && S.termsChecked.marketing) ? (()=>{
-    const couponRows = COUPONS.map(cp=>{
-      const base = cartTotal();
-      const applicable = base >= (cp.minOrder||0) && cp.channels.includes(S.orderType);
-      const d = applicable ? (cp.type==='amount' ? cp.value : Math.min(Math.floor(base*cp.value/100), cp.maxDisc||Infinity)) : 0;
-      const sel = S.couponId===cp.id;
-      return `<label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${sel?'var(--blue)':'var(--line)'};background:${sel?'var(--blue-50)':'#fff'};cursor:${applicable?'pointer':'not-allowed'};opacity:${applicable?1:.45};margin-bottom:8px;">
-        <input type="radio" name="coupon" style="margin-top:2px;accent-color:var(--blue);" ${sel?'checked':''} ${!applicable?'disabled':''} onchange="S.couponId='${cp.id}';render()">
-        <span style="flex:1;min-width:0;">
-          <span style="display:block;font-size:14px;font-weight:800;color:var(--ink);">${cp.name}</span>
-          <span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;">${cp.desc}</span>
-        </span>
-        <span style="font-size:15px;font-weight:800;color:var(--blue);white-space:nowrap;">${applicable?'-'+won(d)+'원':'사용 불가'}</span>
-      </label>`;
-    }).join('');
-    const emptyCoupons = !COUPONS.length;
-    return `<div class="sec"><div class="sec-h">🎟️ 쿠폰 할인</div>
-      ${emptyCoupons
-        ? `<div style="padding:10px 2px 14px;font-size:13px;color:var(--ink3);">보유한 쿠폰이 없어요.</div>`
-        : couponRows + `<label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${!S.couponId?'var(--blue)':'var(--line)'};background:${!S.couponId?'var(--blue-50)':'#fff'};cursor:pointer;margin-bottom:12px;">
-        <input type="radio" name="coupon" style="accent-color:var(--blue);" ${!S.couponId?'checked':''} onchange="S.couponId=null;render()">
-        <span style="font-size:14px;font-weight:700;color:var(--ink3);">쿠폰 사용 안 함</span>
-      </label>`}
-      <div style="display:flex;gap:8px;">
-        <input id="couponCodeInput" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="쿠폰번호 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()">
-        <button onclick="applyCode()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">적용</button>
-      </div>
-    </div>`;
+  const codeInputHtml = `<div style="display:flex;gap:8px;">
+    <input id="couponCodeInput" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;font-family:inherit;" placeholder="쿠폰번호 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()">
+    <button onclick="applyCode()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">적용</button>
+  </div>`;
+  const couponSec = !isPostpay ? (()=>{
+    if(hasPhone && S.termsChecked.marketing){
+      // 보유 쿠폰 목록 + 코드 입력
+      const couponRows = COUPONS.map(cp=>{
+        const base = cartTotal();
+        const applicable = base >= (cp.minOrder||0) && cp.channels.includes(S.orderType);
+        const d = applicable ? (cp.type==='amount' ? cp.value : Math.min(Math.floor(base*cp.value/100), cp.maxDisc||Infinity)) : 0;
+        const sel = S.couponId===cp.id;
+        return `<label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${sel?'var(--blue)':'var(--line)'};background:${sel?'var(--blue-50)':'#fff'};cursor:${applicable?'pointer':'not-allowed'};opacity:${applicable?1:.45};margin-bottom:8px;">
+          <input type="radio" name="coupon" style="margin-top:2px;accent-color:var(--blue);" ${sel?'checked':''} ${!applicable?'disabled':''} onchange="S.couponId='${cp.id}';render()">
+          <span style="flex:1;min-width:0;">
+            <span style="display:block;font-size:14px;font-weight:800;color:var(--ink);">${cp.name}</span>
+            <span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;">${cp.desc}</span>
+          </span>
+          <span style="font-size:15px;font-weight:800;color:var(--blue);white-space:nowrap;">${applicable?'-'+won(d)+'원':'사용 불가'}</span>
+        </label>`;
+      }).join('');
+      return `<div class="sec"><div class="sec-h">🎟️ 쿠폰 할인</div>
+        ${!COUPONS.length
+          ? `<div style="padding:10px 2px 14px;font-size:13px;color:var(--ink3);">보유한 쿠폰이 없어요.</div>`
+          : couponRows + `<label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid ${!S.couponId?'var(--blue)':'var(--line)'};background:${!S.couponId?'var(--blue-50)':'#fff'};cursor:pointer;margin-bottom:12px;">
+          <input type="radio" name="coupon" style="accent-color:var(--blue);" ${!S.couponId?'checked':''} onchange="S.couponId=null;render()">
+          <span style="font-size:14px;font-weight:700;color:var(--ink3);">쿠폰 사용 안 함</span>
+        </label>`}
+        ${codeInputHtml}
+      </div>`;
+    } else {
+      // 코드 입력만
+      return `<div class="sec"><div class="sec-h">🎟️ 쿠폰 코드</div>${codeInputHtml}</div>`;
+    }
   })() : '';
 
   return `<div class="topbar"><button class="back" onclick="S.screen='menu';render()">‹</button>

@@ -412,6 +412,8 @@ const STORE = {
   table:'T03',
   // 호출 번호 규칙 (사장님이 사장님 사이트에서 직접 설계 · 카카오 연락처와 무관)
   callConfig:{ prefix:'A', digits:3 },
+  // 매장이 운영하는 주문 유형 (사장님사이트에서 설정) · 2개 이상이면 진입 시 선택 모달
+  orderTypes:['dinein','takeout'],
   // 매장 대표 이미지 (최대 3장 · 자동 전환)
   covers:[
     'https://loremflickr.com/640/360/coffeeshop?lock=70',
@@ -767,6 +769,30 @@ function setBusiness(v){
   if(!v){ S.cart=[]; S.screen='menu'; S.tab='menu'; }
   render();
   if(!v) showClosedAlert();
+}
+
+/* --- 주문 유형 선택 모달 (먹고가기/포장 등 2개 이상 운영 매장 · 최초 진입) --- */
+function showOrderTypeChoice(){
+  if($('typeModal')) return;
+  const types = (STORE.orderTypes||['dinein']).filter(k=>ORDER_TYPES[k]);
+  if(types.length<2) return;  // 단일 유형이면 모달 없이 그대로 진입
+  const el = document.createElement('div');
+  el.id = 'typeModal';
+  el.style.cssText='position:fixed;inset:0;z-index:210;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;';
+  el.innerHTML = `<div style="width:100%;max-width:440px;background:#fff;border-radius:22px 22px 0 0;padding:32px 24px 36px;text-align:center;">
+    <div style="font-size:20px;font-weight:800;color:var(--ink);margin-bottom:8px;">어떻게 이용하시겠어요?</div>
+    <div style="font-size:14px;color:var(--ink3);line-height:1.6;margin-bottom:24px;">주문 방식을 먼저 선택해 주세요.</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${types.map(k=>`<button onclick="chooseOrderType('${k}')" style="width:100%;display:flex;align-items:center;gap:14px;background:var(--bg);border:1.5px solid var(--line2);border-radius:14px;padding:18px 20px;font-size:16px;font-weight:800;color:var(--ink);cursor:pointer;font-family:inherit;text-align:left;">
+        <span style="font-size:28px;line-height:1;">${ORDER_TYPES[k].emoji}</span>${ORDER_TYPES[k].name}</button>`).join('')}
+    </div>
+  </div>`;
+  document.body.appendChild(el);
+}
+function chooseOrderType(k){
+  S.orderType=k; S.cart=[]; S.cat='전체'; S.pickup=null; S.pickupH=''; S.pickupM=''; S.screen='menu'; S.tab='menu';
+  const el=$('typeModal'); if(el) el.remove();
+  render();
 }
 
 /* --- 영업 종료 모달 --- */
@@ -2052,7 +2078,12 @@ function storeInfoSection(){
 
 render();
 if(window._initSheetId) try{ openSheet(window._initSheetId); }catch(e){}
-if(window.self===window.top){ resetSessionTimer(); if(!S.businessOpen) showClosedAlert(); }
+if(window.self===window.top){
+  resetSessionTimer();
+  const _capMode = /[?&]cap=1/.test(location.search);
+  if(!S.businessOpen){ if(!_capMode) showClosedAlert(); }
+  else if(!_capMode){ showOrderTypeChoice(); }
+}
 
 /* ── 기획 보드 캡처 모드 (?cap=1): 시뮬레이터 바 숨기고 폰 본체만 깔끔히. 평상시 영향 없음 ── */
 if(/[?&]cap=1/.test(location.search)){

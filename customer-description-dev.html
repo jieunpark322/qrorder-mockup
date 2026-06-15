@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR오더 손님 화면 · 개발 전달용 기획 보드 (데이터·연동 제외)</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink-1:#111827; --ink-2:#374151; --ink-3:#6B7280; --ink-4:#9CA3AF;
+  --line:#E5E7EB; --bg:#F9FAFB; --white:#FFFFFF;
+  --blue:#2563EB; --blue-bg:#EFF6FF;
+  --green:#059669; --green-bg:#ECFDF5;
+  --amber:#D97706; --amber-bg:#FFFBEB;
+  --phone-w:165px; --phone-h:314px;
+  --scale:0.44; --iframe-w:375px; --iframe-h:714px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Pretendard',-apple-system,sans-serif;
+  background:var(--bg);color:var(--ink-1);
+  display:flex;min-height:100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:196px;flex-shrink:0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  background:var(--white);border-right:1px solid var(--line);
+  padding:20px 0;
+}
+.sidebar-logo{
+  font-size:13px;font-weight:700;color:var(--ink-1);
+  padding:0 16px 4px;
+}
+.sidebar-logo span{font-weight:400;color:var(--ink-3);}
+.sidebar-divider{height:1px;background:var(--line);margin:12px 0;}
+.sidebar-label{
+  font-size:10px;font-weight:700;color:var(--ink-4);
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:0 16px 8px;
+}
+.sidebar-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px;font-size:13px;color:var(--ink-2);
+  text-decoration:none;cursor:pointer;
+}
+.sidebar-item:hover{background:var(--bg);}
+.sidebar-item.active{color:var(--blue);font-weight:600;background:var(--blue-bg);}
+.snum{
+  width:20px;height:20px;border-radius:4px;
+  background:var(--line);font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:var(--ink-3);
+}
+.sidebar-item.active .snum{background:var(--blue);color:white;}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:32px 32px 80px;}
+.page-header{margin-bottom:20px;}
+.page-header h1{font-size:22px;font-weight:700;margin-bottom:4px;}
+.page-header p{font-size:13px;color:var(--ink-3);}
+
+/* ── LEGEND ── */
+.legend{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  background:var(--white);border:1px solid var(--line);border-radius:10px;
+  padding:12px 16px;margin-bottom:14px;
+}
+.legend .lg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);font-weight:600;}
+.legend .dot{width:14px;height:14px;border-radius:4px;flex-shrink:0;}
+.legend .dot.purpose{background:var(--blue);}
+.legend .dot.behavior{background:var(--green);}
+.legend .dot.exception{background:var(--amber);}
+.note-bar{
+  background:var(--blue-bg);border:1px solid #BFDBFE;border-radius:10px;
+  padding:11px 16px;margin-bottom:28px;font-size:12px;color:#1E40AF;line-height:1.6;
+}
+.note-bar b{font-weight:700;}
+
+/* ── BOARD ── */
+.board{
+  background:var(--white);border:1px solid var(--line);
+  border-radius:12px;margin-bottom:28px;overflow:hidden;
+}
+.board-header{
+  padding:14px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;
+}
+.board-num{
+  width:28px;height:28px;background:var(--ink-2);color:white;
+  border-radius:6px;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.board-title{font-size:15px;font-weight:700;}
+.board-sub{font-size:12px;color:var(--ink-3);margin-left:2px;}
+.board-body{
+  display:grid;grid-template-columns:1fr 360px;
+}
+
+/* ── STAGE (phones) ── */
+.stage-area{
+  padding:20px;border-right:1px solid var(--line);
+  overflow-x:auto;
+}
+.phones-row{display:flex;gap:14px;align-items:flex-start;}
+.phone-col{
+  display:flex;flex-direction:column;align-items:center;
+  gap:7px;flex-shrink:0;
+}
+.variant-label{
+  font-size:10px;font-weight:600;color:var(--ink-3);
+  text-align:center;max-width:var(--phone-w);line-height:1.3;
+  background:var(--line);padding:3px 8px;border-radius:4px;
+  white-space:pre-line;
+}
+.phone-chrome{
+  width:var(--phone-w);height:var(--phone-h);
+  border:2px solid var(--ink-2);border-radius:14px;
+  overflow:hidden;background:white;flex-shrink:0;
+}
+.phone-chrome iframe{
+  width:var(--iframe-w);height:var(--iframe-h);
+  transform:scale(var(--scale));transform-origin:top left;
+  border:none;pointer-events:none;
+}
+
+/* ── CARDS ── */
+.cards-area{
+  padding:14px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:9px;
+}
+.card{border-radius:8px;padding:10px 12px;border:1px solid transparent;}
+.card.purpose  {background:var(--blue-bg);  border-color:#BFDBFE;}
+.card.behavior {background:var(--green-bg); border-color:#A7F3D0;}
+.card.exception{background:var(--amber-bg); border-color:#FDE68A;}
+.card-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.pin-b{
+  width:18px;height:18px;border-radius:50%;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.purpose  .pin-b{background:var(--blue);  color:white;}
+.behavior .pin-b{background:var(--green); color:white;}
+.exception .pin-b{background:var(--amber);color:white;}
+.cat-tag{
+  font-size:9px;font-weight:700;letter-spacing:.05em;
+  padding:1px 5px;border-radius:3px;
+}
+.purpose  .cat-tag{color:var(--blue);  background:#DBEAFE;}
+.behavior .cat-tag{color:var(--green); background:#D1FAE5;}
+.exception .cat-tag{color:var(--amber);background:#FEF3C7;}
+.card-title{font-size:12px;font-weight:600;color:var(--ink-1);margin-bottom:4px;}
+.card-body{list-style:none;display:flex;flex-direction:column;gap:2px;}
+.card-body li{
+  font-size:11px;color:var(--ink-2);
+  padding-left:8px;position:relative;line-height:1.5;
+}
+.card-body li::before{content:'·';position:absolute;left:0;}
+.purpose  .card-body li::before{color:var(--blue);}
+.behavior .card-body li::before{color:var(--green);}
+.exception .card-body li::before{color:var(--amber);}
+</style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">QR오더 <span>손님 화면 · 개발 전달용</span></div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-label">화면 목록</div>
+</nav>
+
+<main class="main" id="main">
+  <div class="page-header">
+    <h1>QR오더 손님 화면 · 개발 전달용 기획 보드</h1>
+    <p>customer.html 실제 화면 기반 · 주문 유형별 케이스 분기 · 기능 설계 명세</p>
+  </div>
+  <div class="legend">
+    <span class="lg-item"><span class="dot purpose"></span>🎯 목적</span>
+    <span class="lg-item"><span class="dot behavior"></span>⚙️ 동작·상태</span>
+    <span class="lg-item"><span class="dot exception"></span>⚠️ 예외·UX문구</span>
+  </div>
+  <div class="note-bar">
+    <b>📌 이 보드는 기획 관점(목적 · 동작 · 예외)만 담았습니다.</b> 데이터 바인딩·연동 방식 등 구현 영역은 제외했으며, 해당 부분은 개발팀이 설계합니다. 각 화면은 실제 customer.html을 그대로 임베드한 화면입니다.
+  </div>
+  <div id="boards"></div>
+</main>
+
+<script>
+const SCREENS = [
+  {
+    id:'b1', num:'01', title:'메뉴 화면',
+    sub:'QR 스캔 후 첫 진입 · 주문 유형별 화면 분기',
+    variants:[
+      {label:'내점 · 선결제', url:'customer.html?orderType=dinein&serve=server&payTiming=prepay'},
+      {label:'내점 · 후불', url:'customer.html?orderType=dinein&serve=server&payTiming=postpay'},
+      {label:'포장', url:'customer.html?orderType=takeout'},
+      {label:'예약 픽업', url:'customer.html?orderType=preorder'},
+      {label:'영업시간 외', url:'customer.html?biz=0'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'주문 유형 칩 (상단 고정)',
+       items:['QR 진입 + 매장 설정으로 결정된 주문 유형(내점·포장·예약)을 상단 칩으로 고정 표시','먹고가기+포장 등 2개 이상 운영 매장은 최초 화면에서 주문 방식 선택 모달(가로 병렬)을 먼저 노출']},
+      {n:2, cat:'behavior',  title:'카테고리 탭 & 메뉴 목록',
+       items:['탭 클릭 시 해당 카테고리 섹션으로 스크롤','스크롤 위치에 따라 탭 자동 활성화','메뉴 카드 클릭 시 메뉴 상세 시트 오픈']},
+      {n:3, cat:'exception', title:'품절 메뉴 / 영업시간 외',
+       items:['품절 메뉴: 카드 흐리게 + "품절" 배지, 탭·담기 불가','재고 소량(잔여 N개)이면 메뉴 카드에 배지 표시','영업시간 외: 주문 불가 안내, 메뉴는 둘러볼 수 있어요']},
+      {n:4, cat:'behavior', title:'장바구니 바 (하단 고정)',
+       items:['메뉴를 담으면 수량·합계가 하단 바에 반영','담은 메뉴가 없으면 바 숨김, 1개 이상이면 슬라이드 업']},
+    ],
+  },
+  {
+    id:'b2', num:'02', title:'메뉴 상세 시트',
+    sub:'메뉴 카드 클릭 시 올라오는 바텀 시트',
+    variants:[
+      {label:'기본 음료 (id=1)', url:'customer.html?sheetId=1'},
+      {label:'다중 옵션 메뉴 (id=2)', url:'customer.html?sheetId=2'},
+      {label:'장바구니 있는 상태', url:'customer.html?demoCart=1&sheetId=1'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'메뉴 기본 정보 영역',
+       items:['이미지·이름·단가·설명을 상단에 표시','알레르기 정보가 있으면 함께 안내']},
+      {n:2, cat:'behavior',  title:'옵션 그룹 (필수/선택)',
+       items:['필수 옵션 미선택 시 담기 버튼 비활성화','선택 옵션은 복수 선택 가능','옵션 없는 메뉴는 옵션 섹션 미표시']},
+      {n:3, cat:'behavior',  title:'수량 스테퍼 & 담기 버튼',
+       items:['수량 최소 1개','담기 버튼에 개수·소계 실시간 반영 (예: "2개 담기 · ₩10,600")']},
+      {n:4, cat:'exception', title:'동일 메뉴 재담기',
+       items:['동일 옵션 조합으로 다시 담으면 수량 누적','품절 메뉴는 시트 진입 자체 차단']},
+    ],
+  },
+  {
+    id:'b3', num:'03', title:'결제 화면',
+    sub:'장바구니 확인 · 쿠폰 · 결제수단 · 약관 동의',
+    variants:[
+      {label:'내점 · 선결제', url:'customer.html?screen=checkout&demoCart=1&orderType=dinein&serve=server&payTiming=prepay'},
+      {label:'내점 · 후불', url:'customer.html?screen=checkout&demoCart=1&orderType=dinein&serve=server&payTiming=postpay'},
+      {label:'포장', url:'customer.html?screen=checkout&demoCart=1&orderType=takeout'},
+      {label:'예약 픽업', url:'customer.html?screen=checkout&demoCart=1&orderType=preorder'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'주문 내역 섹션',
+       items:['담은 메뉴·수량·소계 목록 표시','수량 변경·삭제 시 합계 즉시 재산출']},
+      {n:2, cat:'exception', title:'쿠폰 섹션 (선불만 노출)',
+       items:['후불 주문이면 쿠폰 섹션 미노출','쿠폰 목록 선택 또는 쿠폰 번호 직접 입력(현장·종이 쿠폰)으로 적용 · 선택 값','한 번에 1장 적용, 적용 시 합계에서 즉시 차감']},
+      {n:3, cat:'behavior',  title:'결제 수단 선택',
+       items:['선불: 결제수단 6종(토스·카카오·네이버·카드·알리·위챗) 중 선택','후불: 결제수단 숨김 → "나갈 때 카운터 결제" 안내만 표시']},
+      {n:4, cat:'exception', title:'약관 동의 (선불만 노출)',
+       items:['필수 약관 미동의 시 결제 진행 불가','카카오 회원 2개 / 비회원 3개(만 14세 확인 포함)','후불이면 약관 섹션 미노출']},
+      {n:5, cat:'exception', title:'결제하기 버튼 3가지 분기',
+       items:['선불: 알림 수단 입력 → 확인 모달 → 결제 진행','후불: 결제 단계 없이 바로 주문 넣기','예약: 수령 시간(시·분) 미선택 시 버튼 비활성화']},
+    ],
+  },
+  {
+    id:'b4', num:'04', title:'알림 수단 시트',
+    sub:'결제 전, 준비 완료 알림을 받을 방법 선택',
+    variants:[
+      {label:'초기 (선택 전)', url:'customer.html?screen=checkout&demoCart=1&payTiming=prepay&notifSheet=1'},
+      {label:'카카오 인증 (사장님 설정 시)', url:'customer.html?screen=checkout&demoCart=1&payTiming=prepay&notifSheet=1&notifChoice=kakao'},
+      {label:'휴대폰 입력 완료', url:'customer.html?screen=checkout&demoCart=1&payTiming=prepay&notifSheet=1&notifChoice=phone&phone=01012345678'},
+      {label:'이메일 입력 완료 (외국인)', url:'customer.html?screen=checkout&demoCart=1&payTiming=prepay&notifSheet=1&notifChoice=email&email=john@example.com'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'알림 수단 — 기본은 휴대폰',
+       items:['기본(디폴트)은 📱 휴대폰 번호 입력','카카오 인증은 사장님사이트에서 "카카오톡 인증 필수"를 켠 매장에서만 먼저 노출','카카오 사용 매장에서 "카카오톡이 없어요." → 휴대폰/이메일 선택 화면']},
+      {n:2, cat:'behavior',  title:'연락처 입력 & 확인 모달',
+       items:['휴대폰: 번호 입력 → "이 번호로 알림을 보내드려요" 확인 모달','이메일: 형식 검증 → "이 이메일로 알림을 보내드려요" 확인 모달','입력 완료 시 결제 버튼 활성화']},
+      {n:3, cat:'behavior',  title:'마케팅 동의 & 쿠폰',
+       items:['휴대폰 입력 시 마케팅(쿠폰·이벤트) 수신동의 — 최초 1회만, 동일 번호 재노출 안 함','동의 시 보유 쿠폰 바로 표시','이메일은 마케팅 수신동의 받지 않음(주문 알림 용도로만)']},
+      {n:4, cat:'exception', title:'시트 생략 & 닫기',
+       items:['카카오 인증으로 로그인된 상태면 시트 생략하고 바로 진행','같은 기기 재방문 시 이전 번호 기억해 자동 채움(번호 바꿀 때만 수정)','시트 바깥 터치 시 닫고 결제 화면으로 복귀']},
+    ],
+  },
+  {
+    id:'b5', num:'05', title:'결제 처리 중',
+    sub:'결제·접수 처리 중 로딩 · 화면 잠금 상태',
+    variants:[
+      {label:'결제 처리 중', url:'customer.html?screen=processing&procStep=1'},
+      {label:'주문 접수 중', url:'customer.html?screen=processing&procStep=2'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'처리 단계 안내',
+       items:['결제 처리 중 / 주문 접수 중 단계를 안내','처리 단계에 따라 문구 갱신']},
+      {n:2, cat:'exception', title:'화면 잠금 & 실패 전환',
+       items:['처리 중에는 사용자 액션 불가','실패 시 에러 화면으로 전환']},
+    ],
+  },
+  {
+    id:'b6', num:'06', title:'주문 완료',
+    sub:'주문 접수 후 호출번호 · 진행 단계 · 영수증',
+    variants:[
+      {label:'내점 · 선결제', url:'customer.html?screen=done&orderType=dinein&payTiming=prepay&orderNo=2042&demoCart=1'},
+      {label:'내점 · 후불', url:'customer.html?screen=done&orderType=dinein&payTiming=postpay&orderNo=2043&demoCart=1'},
+      {label:'포장', url:'customer.html?screen=done&orderType=takeout&orderNo=2044&demoCart=1'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'호출번호 & 진행 단계',
+       items:['호출번호 표시(서빙 매장 외 발급) · 진행 단계 바 표시','단계: 매장 셀프=접수·준비·수령대기·완료 / 매장 서빙=접수·준비·완료 / 포장·예약=접수·준비·픽업대기·픽업완료']},
+      {n:2, cat:'behavior',  title:'결제 내역 (영수증)',
+       items:['완료 시점 주문 내역 표시(메뉴·옵션·수량·금액)','쿠폰 적용 시 상품 금액 → 🎟️ 쿠폰 할인 → 결제 금액 순으로 표시']},
+      {n:3, cat:'exception', title:'후불 / 예약 안내',
+       items:['후불: "나갈 때 카운터에서 결제해 주세요" 안내','예약: "수령 예정 HH:MM" 안내 · 진행 단계는 포장과 동일(수락대기 미노출)']},
+      {n:4, cat:'behavior',  title:'새 주문 시작 & 직원 호출',
+       items:['"새 주문하기" → 장바구니·쿠폰·연락처 초기화 후 메뉴 복귀','매장+서빙이면 완료 화면에서도 직원 호출 가능']},
+    ],
+  },
+  {
+    id:'b7', num:'07', title:'에러 화면',
+    sub:'결제 실패 · POS 미연결 · 네트워크 오류',
+    variants:[
+      {label:'결제 실패', url:'customer.html?screen=error&errType=payfail'},
+      {label:'POS 미연결', url:'customer.html?screen=error&errType=pos'},
+      {label:'네트워크 오류', url:'customer.html?screen=error&errType=network'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'에러 유형별 메시지',
+       items:['상황별 원인 안내 문구 분기(결제 실패 / POS 미연결 / 네트워크 오류)','능동·긍정 톤으로 다음 행동을 안내']},
+      {n:2, cat:'behavior',  title:'재시도 동선',
+       items:['결제 실패: 다른 방법으로 결제 → 결제 화면 복귀','네트워크: 다시 시도','POS 미연결: 다시 시도 또는 직원 호출']},
+      {n:3, cat:'exception', title:'직원 도움 안내',
+       items:['자동 해결이 어려우면 직원 호출·카운터 이동을 안내','장바구니는 보존되어 재시도 시 그대로 사용']},
+    ],
+  },
+  {
+    id:'b8', num:'08', title:'세션 만료',
+    sub:'접속 후 5분 무활동 시 안내 화면',
+    variants:[
+      {label:'세션 만료', url:'customer.html?screen=session'},
+    ],
+    pins:[
+      {n:1, cat:'purpose',   title:'세션 만료 안내',
+       items:['접속 후 5분간 활동이 없으면 만료 안내 화면 표시','QR 재스캔으로 새 세션을 시작할 수 있어요']},
+      {n:2, cat:'exception', title:'장바구니 보존',
+       items:['만료 후에도 장바구니는 일정 시간 보존','재진입 시 이전에 담은 내용을 다시 사용할 수 있어요']},
+    ],
+  },
+];
+
+const CAT_META = {
+  purpose:  {icon:'🎯', label:'목적', cls:'purpose'},
+  behavior: {icon:'⚙️', label:'동작', cls:'behavior'},
+  exception:{icon:'⚠️', label:'예외', cls:'exception'},
+};
+
+function buildBoard(s) {
+  const phones = s.variants.map(v=>`
+    <div class="phone-col">
+      <div class="variant-label">${v.label}</div>
+      <div class="phone-chrome">
+        <iframe src="${v.url}" loading="lazy" title="${v.label}"></iframe>
+      </div>
+    </div>`).join('');
+
+  // 데이터·연동 카테고리 제외 + 남은 핀 순차 번호 재부여
+  const visible = s.pins.filter(p=>p.cat!=='data');
+  const cards = visible.map((p,idx)=>{
+    const m = CAT_META[p.cat]||CAT_META.purpose;
+    const n = idx+1;
+    return `
+    <div class="card ${m.cls}">
+      <div class="card-head">
+        <span class="pin-b">${n}</span>
+        <span class="cat-tag">${m.icon} ${m.label}</span>
+      </div>
+      <div class="card-title">${p.title}</div>
+      <ul class="card-body">${p.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="board" id="${s.id}">
+    <div class="board-header">
+      <span class="board-num">${s.num}</span>
+      <span class="board-title">${s.title}</span>
+      <span class="board-sub">· ${s.sub}</span>
+    </div>
+    <div class="board-body">
+      <div class="stage-area"><div class="phones-row">${phones}</div></div>
+      <div class="cards-area">${cards}</div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('boards').innerHTML = SCREENS.map(buildBoard).join('');
+
+document.getElementById('sidebar').innerHTML +=
+  SCREENS.map(s=>`
+    <a class="sidebar-item" href="#${s.id}">
+      <span class="snum">${s.num}</span>${s.title}
+    </a>`).join('');
+
+const main = document.getElementById('main');
+const sideItems = ()=>document.querySelectorAll('.sidebar-item');
+main.addEventListener('scroll',()=>{
+  let cur='';
+  document.querySelectorAll('.board').forEach(b=>{
+    if(b.offsetTop - 60 <= main.scrollTop) cur = b.id;
+  });
+  sideItems().forEach(i=>i.classList.toggle('active', i.getAttribute('href')==='#'+cur));
+});
+</script>
+</body>
+</html>

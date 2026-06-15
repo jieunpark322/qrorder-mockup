@@ -294,6 +294,11 @@
   .callopt{padding:16px 6px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);text-align:center;transition:.12s;}
   .callopt.sel{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);font-weight:800;box-shadow:inset 0 0 0 1px var(--blue);}
   .callopt:active{background:var(--blue-50);border-color:var(--blue);}
+  /* 주문 방식 선택 모달 버튼 — 클릭 피드백 */
+  .type-opt{transition:transform .12s ease, background .15s, border-color .15s, color .15s, box-shadow .15s;}
+  .type-opt:active{transform:scale(.94);}
+  .type-opt.sel{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 8px 20px rgba(92,140,218,.35);animation:typePop .22s ease;}
+  @keyframes typePop{0%{transform:scale(1);}45%{transform:scale(1.06);}100%{transform:scale(1);}}
   .rvsec{background:#fff;margin:11px 0;padding:16px 18px;}
   .rv-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
   .rv-ttl{font-size:16.5px;font-weight:800;}
@@ -783,16 +788,26 @@ function showOrderTypeChoice(){
     <div style="font-size:20px;font-weight:800;color:var(--ink);margin-bottom:8px;">어떻게 이용하시겠어요?</div>
     <div style="font-size:14px;color:var(--ink3);line-height:1.6;margin-bottom:24px;">주문 방식을 먼저 선택해 주세요.</div>
     <div style="display:flex;gap:10px;">
-      ${types.map(k=>`<button onclick="chooseOrderType('${k}')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--line2);border-radius:14px;padding:22px 12px;font-size:15px;font-weight:800;color:var(--ink);cursor:pointer;font-family:inherit;">
+      ${types.map(k=>`<button class="type-opt" onclick="chooseOrderType('${k}',this)" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--line2);border-radius:14px;padding:22px 12px;font-size:15px;font-weight:800;color:var(--ink);cursor:pointer;font-family:inherit;">
         <span style="font-size:32px;line-height:1;">${ORDER_TYPES[k].emoji}</span>${ORDER_TYPES[k].name}</button>`).join('')}
     </div>
   </div>`;
   document.body.appendChild(el);
 }
-function chooseOrderType(k){
-  S.orderType=k; S.cart=[]; S.cat='전체'; S.pickup=null; S.pickupH=''; S.pickupM=''; S.screen='menu'; S.tab='menu';
-  const el=$('typeModal'); if(el) el.remove();
-  render();
+function chooseOrderType(k, btn){
+  const modal=$('typeModal');
+  if(modal && modal.dataset.choosing) return;   // 중복 클릭 방지
+  if(modal) modal.dataset.choosing='1';
+  if(btn){
+    // 선택한 버튼만 강조, 나머지는 흐리게
+    document.querySelectorAll('#typeModal .type-opt').forEach(b=>{ if(b!==btn) b.style.opacity='.4'; });
+    btn.classList.add('sel');
+  }
+  setTimeout(()=>{
+    S.orderType=k; S.cart=[]; S.cat='전체'; S.pickup=null; S.pickupH=''; S.pickupM=''; S.screen='menu'; S.tab='menu';
+    const el=$('typeModal'); if(el) el.remove();
+    render();
+  }, 260);
 }
 
 /* --- 영업 종료 모달 --- */

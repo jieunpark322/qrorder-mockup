@@ -483,7 +483,7 @@ const MENU = [
   { id:29, name:'흑임자 라떼',       cat:'시즌 한정',    price:6000, takeout:5500, status:'판매중', img:'⚫', opt:[2,3],   desc:'고소한 국산 흑임자', allerg:['milk'], badges:['new','reco'] },
 ];
 const CATS = ['커피','논커피','티·에이드','스무디·프라페','베이커리','디저트','브런치','병음료','시즌 한정'];
-const PAY_METHODS = [{k:'카드',e:'💳'},{k:'카카오페이',e:'🟡'},{k:'네이버페이',e:'🟢'},{k:'토스페이',e:'🔵'}];
+const PAY_METHODS = [{k:'네이버페이',e:'🟢'},{k:'카카오페이',e:'🟡'},{k:'토스페이',e:'🔵'},{k:'신용/체크카드',e:'💳'}];
 // 직원 호출 요청 항목 (사장님이 최대 15개까지 설정 가능 · 3열 노출)
 const STAFF_CALL_MSGS = ['물','물티슈','수저/포크','앞접시','휴지','빨대','얼음','추천 메뉴','계산 도움','아기 의자','담요','기타 문의'];
 // 매장(사장님사이트)에서 켜고 끄는 손님 주문 화면 부가 옵션 — 데모용 토글
@@ -1889,7 +1889,7 @@ function scrDone(){
 }
 function resetOrder(){
   const keepAuth = S.tableActive;
-  S.cart=[]; S.sheet=null; S.pickup=null; S.pickupH=''; S.pickupM=''; S.pay='카드'; S.phone=''; S.email=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received';
+  S.cart=[]; S.sheet=null; S.pickup=null; S.pickupH=''; S.pickupM=''; S.pay='신용/체크카드'; S.phone=''; S.email=''; S.orderNo=null; S.callNo=null; S.cat='전체'; S.couponId=null; S.couponCode=''; S.termsChecked={}; S.requestNote=''; S.orderStatus='received';
   if(!keepAuth){ S.authType='anon'; S.notifChoice=null; }
   S.screen='menu'; render();
 }

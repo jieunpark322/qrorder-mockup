@@ -783,7 +783,8 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         <ul>
           <li>별도 설정이 없으면 <b>항상 이 화면</b>이 기본</li>
           <li>입력 완료 → 번호 확인 모달</li>
-          <li>주문 알림 용도로만 사용 · 마케팅 수신동의 받지 않음</li>
+          <li><b>최초 입력 시 마케팅(쿠폰·이벤트) 수신동의 체크박스 표시</b> (선택) · 향후 쿠폰을 휴대폰 번호로 발송</li>
+          <li>이미 동의한 번호는 체크박스 생략 · 동의 시 쿠폰 목록 표시</li>
         </ul>
       </div>
       <div class="branch-card kakao">
@@ -800,7 +801,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         <ul>
           <li>카카오 대체 선택 화면 또는 직접 입력으로 진입</li>
           <li>이메일 형식 유효성 검사 → 이메일 확인 모달</li>
-          <li>주문 알림 용도로만 사용 · 마케팅 수신동의 받지 않음</li>
+          <li><b>마케팅 수신동의 체크박스 제외</b> · 주문 알림 용도로만 사용</li>
         </ul>
       </div>
     </div>
@@ -937,7 +938,8 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <ul>
             <li>별도 설정이 없으면 항상 이 화면이 기본</li>
             <li>입력 완료 → "이 번호로 알림을 보내드려요" 확인 모달</li>
-            <li>주문 알림 용도로만 사용 · 마케팅 수신동의 표시 안 함</li>
+            <li>최초 입력 시 마케팅(쿠폰·이벤트) 수신동의 체크박스 표시 (선택)</li>
+            <li>이미 동의한 번호는 체크박스 생략 · 동의 시 쿠폰 목록 표시</li>
           </ul>
         </div>
         <div class="branch-card kakao">
@@ -954,7 +956,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <ul>
             <li>이메일 형식 유효성 검사 (실시간)</li>
             <li>입력 완료 → "이 이메일로 알림을 보내드려요" 확인 모달</li>
-            <li>주문 알림 용도로만 사용 · 마케팅 수신동의 표시 안 함</li>
+            <li>마케팅 수신동의 체크박스 제외 · 주문 알림 용도로만 사용</li>
           </ul>
         </div>
       </div>
@@ -969,9 +971,10 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
     </div>
 
     <div class="callout warn" style="margin-top:12px">
-      <b>✓ 마케팅(쿠폰·이벤트) 수신동의 — 최초 1회만</b><br/>
-      · 선택적 마케팅 수신동의는 <b>최초 1회만</b> 받고, 동일한 사용자에게는 이후 다시 띄우지 않습니다.<br/>
-      · <b>휴대폰·이메일을 직접 입력</b>하는 경우에는 마케팅 수신동의를 받지 않습니다. 이때 입력한 연락처는 <b>주문 알림 용도로만</b> 사용합니다.
+      <b>✓ 마케팅(쿠폰·이벤트) 수신동의 — 휴대폰 입력 시 최초 1회</b><br/>
+      · <b>휴대폰 번호 입력 시</b> 마케팅 수신동의를 받습니다. (향후 쿠폰을 휴대폰 번호로 발송하기 때문)<br/>
+      · <b>최초 1회만</b> 받고, 이미 동의한 번호에는 이후 다시 띄우지 않습니다.<br/>
+      · <b>이메일 입력 시에는 마케팅 수신동의를 받지 않습니다.</b> 이메일은 주문 알림 용도로만 사용합니다.
     </div>
 
   </div>

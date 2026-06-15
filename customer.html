@@ -843,8 +843,8 @@ function brandHero(){
   const ot=ORDER_TYPES[S.orderType];
   const modeLine = S.orderType==='dinein'
     ? `${ot.emoji} 먹고가기 · <span class="btable">🪑 ${STORE.table} 테이블</span>`
-    : S.orderType==='takeout' ? `${ot.emoji} 포장하기 · 즉시 포장`
-    : `${ot.emoji} 포장 예약 · 시간 지정 픽업`;
+    : S.orderType==='takeout' ? `${ot.emoji} 포장하기`
+    : `${ot.emoji} 포장 예약`;
   const grad='linear-gradient(135deg,var(--coffee1),var(--coffee2))';
   const covers=(STORE.covers&&STORE.covers.length)?STORE.covers:[PHOTO.cover];
   return `

@@ -591,6 +591,7 @@ const S = {
   couponCode:'',         // 쿠폰번호 입력 값
   notifChoice:null,      // 알림 수단: null | 'kakao' | 'phone' | 'skip'
   notifSheet:false,      // 알림 바텀시트 표시 여부
+  phoneConfirm:false,    // 번호 확인 모달
 };
 const won = n => n.toLocaleString('ko-KR');
 const priceOf = m => (S.orderType==='dinein') ? m.price : (m.takeout!=null ? m.takeout : m.price);
@@ -1598,7 +1599,6 @@ function scrCheckout(){
                 oninput="S.phone=this.value.replace(/[^0-9]/g,'');render();const _pi=document.getElementById('phoneInput');if(_pi){_pi.focus();_pi.setSelectionRange(_pi.value.length,_pi.value.length);}"
                 style="width:100%;border:1.5px solid ${showPhoneHint?'var(--blue)':'var(--line)'};border-radius:12px;padding:15px 14px;font-size:16px;outline:none;font-family:inherit;box-sizing:border-box;" />
             </div>
-            ${showPhoneHint?`<div style="font-size:12px;color:var(--ink3);padding-left:2px;margin-bottom:16px;"><b style="color:var(--ink2);">${phoneFormatted}</b>으로 알림을 보내드려요. 번호가 맞나요?</div>`:''}
           `:''}
 
           ${showEmail?`
@@ -1641,6 +1641,18 @@ function scrCheckout(){
           })()}
 
           <button onclick="tryNotifPay()" class="primarybtn">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
+
+          ${S.phoneConfirm?`
+            <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:202;display:flex;align-items:flex-end;justify-content:center;">
+              <div style="width:100%;max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:28px 24px 44px;box-sizing:border-box;">
+                <p style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:20px;text-align:center;">이 번호로 알림을 보내드려요</p>
+                <p style="font-size:28px;font-weight:800;color:var(--blue);text-align:center;letter-spacing:2px;margin-bottom:8px;">${phoneFormatted}</p>
+                <p style="font-size:13px;color:var(--ink3);text-align:center;margin-bottom:28px;">번호가 맞나요?</p>
+                <button onclick="S.phoneConfirm=false;goToTermsFromNotif()" class="primarybtn" style="margin-bottom:12px;">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
+                <button onclick="S.phoneConfirm=false;render()" style="background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;width:100%;padding:8px;font-family:inherit;text-decoration:underline;">다시 입력할게요</button>
+              </div>
+            </div>
+          `:''}
 
           ${notifRequired?'':`
             <button onclick="S.notifChoice='skip';goToTermsFromNotif()" style="background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;width:100%;padding:12px 8px 0;font-family:inherit;text-decoration:underline;">
@@ -1690,6 +1702,7 @@ function tryNotifPay(){
   if(S.notifChoice==='phone'){
     const digits=(S.phone||'').replace(/\D/g,'');
     if(digits.length<10){ toast('휴대폰 번호를 입력해 주세요'); const el=document.getElementById('phoneInput'); if(el){el.focus();el.classList.add('term-shake');setTimeout(()=>el.classList.remove('term-shake'),600);} return; }
+    S.phoneConfirm=true; render(); return;
   }
   if(S.notifChoice==='email'){
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((S.email||'').trim())){ toast('이메일 주소를 입력해 주세요'); const el=document.getElementById('emailInput'); if(el){el.focus();el.classList.add('term-shake');setTimeout(()=>el.classList.remove('term-shake'),600);} return; }

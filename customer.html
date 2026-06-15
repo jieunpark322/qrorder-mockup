@@ -592,6 +592,7 @@ const S = {
   notifChoice:null,      // 알림 수단: null | 'kakao' | 'phone' | 'skip'
   notifSheet:false,      // 알림 바텀시트 표시 여부
   phoneConfirm:false,    // 번호 확인 모달
+  emailConfirm:false,    // 이메일 확인 모달
   storeKakaoReq:false,   // 매장 설정: 카카오톡 인증 필수
 };
 const won = n => n.toLocaleString('ko-KR');
@@ -1632,10 +1633,11 @@ function scrCheckout(){
               </button>
             </div>
 
-            <div class="term-row" onclick="S.termsChecked.marketing=!S.termsChecked.marketing;render()" style="margin:4px 0 12px;">
-              <span class="term-ck ${mktChecked?'checked':''}">${mktChecked?'✓':''}</span>
+            ${!mktChecked?`<div class="term-row" onclick="S.termsChecked.marketing=true;render()" style="margin:4px 0 12px;">
+              <span class="term-ck"></span>
               <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
-            </div>
+            </div>`:''}
+
 
             ${(()=>{
               const hasContact = showEmail ? emailValid : phoneRaw.length >= 10;
@@ -1668,6 +1670,18 @@ function scrCheckout(){
                   <p style="font-size:13px;color:var(--ink3);text-align:center;margin-bottom:28px;">번호가 맞나요?</p>
                   <button onclick="S.phoneConfirm=false;goToTermsFromNotif()" class="primarybtn" style="margin-bottom:12px;">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
                   <button onclick="S.phoneConfirm=false;render()" style="background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;width:100%;padding:8px;font-family:inherit;text-decoration:underline;">다시 입력할게요</button>
+                </div>
+              </div>
+            `:''}
+
+            ${S.emailConfirm?`
+              <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:202;display:flex;align-items:flex-end;justify-content:center;">
+                <div style="width:100%;max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:28px 24px 44px;box-sizing:border-box;">
+                  <p style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:20px;text-align:center;">이 이메일로 알림을 보내드려요</p>
+                  <p style="font-size:18px;font-weight:800;color:var(--blue);text-align:center;word-break:break-all;margin-bottom:8px;">${(S.email||'').trim()}</p>
+                  <p style="font-size:13px;color:var(--ink3);text-align:center;margin-bottom:28px;">이메일 주소가 맞나요?</p>
+                  <button onclick="S.emailConfirm=false;goToTermsFromNotif()" class="primarybtn" style="margin-bottom:12px;">${isPostpay?`주문 넣기 · ${won(cartTotal())}원`:`${won(finalTotal)}원 결제하기`}</button>
+                  <button onclick="S.emailConfirm=false;render()" style="background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;width:100%;padding:8px;font-family:inherit;text-decoration:underline;">다시 입력할게요</button>
                 </div>
               </div>
             `:''}
@@ -1729,6 +1743,7 @@ function tryNotifPay(){
   }
   if(S.notifChoice==='email'){
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((S.email||'').trim())){ toast('이메일 주소를 입력해 주세요'); const el=document.getElementById('emailInput'); if(el){el.focus();el.classList.add('term-shake');setTimeout(()=>el.classList.remove('term-shake'),600);} return; }
+    S.emailConfirm=true; render(); return;
   }
   goToTermsFromNotif();
 }
@@ -1746,7 +1761,6 @@ function goToNotif(){
   S.notifSheet = true;
   S.phone = '';
   S.email = '';
-  S.termsChecked.marketing = false;
   render();
 }
 

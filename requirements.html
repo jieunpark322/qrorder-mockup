@@ -263,7 +263,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
     <span class="badge">손님 화면 전용</span>
     <span class="badge">6 시나리오</span>
     <span class="badge">15 에러·상태</span>
-    <span class="badge">10 모달</span>
+    <span class="badge">9 모달</span>
     <span class="badge">9 외부 연동 지점</span>
     <span class="badge">개발팀 인계용</span>
   </div>
@@ -277,7 +277,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
   <div class="stat"><div class="n">5</div><div class="l">결제 분기 축</div></div>
   <div class="stat"><div class="n">4</div><div class="l">차단 블로킹 규칙</div></div>
   <div class="stat"><div class="n">15</div><div class="l">에러·상태코드</div></div>
-  <div class="stat"><div class="n">10</div><div class="l">모달 종류</div></div>
+  <div class="stat"><div class="n">9</div><div class="l">모달 종류</div></div>
   <div class="stat"><div class="n">9</div><div class="l">외부 연동 지점</div></div>
 </div>
 
@@ -296,7 +296,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
     <a class="toc-item" href="#sec-complete"><span class="t-num">06</span><div class="t-title">완료 화면 로직</div><div class="t-desc">호출번호·단계라벨·CTA</div></a>
     <a class="toc-item" href="#sec-block"><span class="t-num">07</span><div class="t-title">차단·블로킹 규칙 4종</div><div class="t-desc">선불/수령시간/함께주문/알림</div></a>
     <a class="toc-item" href="#sec-error"><span class="t-num">08</span><div class="t-title">에러·상태코드 15건</div><div class="t-desc">ERR/WRN/STA/INF</div></a>
-    <a class="toc-item" href="#sec-modal"><span class="t-num">09</span><div class="t-title">모달 10종 트리거</div><div class="t-desc">시트·전체·중앙</div></a>
+    <a class="toc-item" href="#sec-modal"><span class="t-num">09</span><div class="t-title">모달 9종 트리거</div><div class="t-desc">시트·전체·중앙</div></a>
     <a class="toc-item" href="#sec-api"><span class="t-num">10</span><div class="t-title">외부 연동 지점 9종</div><div class="t-desc">무엇을 주고받나</div></a>
   </div>
 </div>
@@ -833,7 +833,6 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         <h5>💳 선불 (SC_01~SC_03, SC_05, SC_06 총 5개 시나리오)</h5>
         <ul>
           <li>결제수단 6종 노출: 토스·카카오페이·네이버페이·신용카드·알리페이·위챗페이</li>
-          <li><b>팁(선택)</b> — 비율 선택 또는 직접 입력, 최종 결제금액에 합산 (입력 안 해도 진행)</li>
           <li>외부 결제(PG) 진행 · 중복 결제 방지 필요</li>
           <li>결제 성공 → 주문 접수 → 완료 화면</li>
           <li>결제 실패 → ERR_005 (장바구니 보존)</li>
@@ -1168,12 +1167,12 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 09 · 모달 10종 -->
+<!-- 09 · 모달 9종 -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="section" id="sec-modal">
   <div class="sec-head">
     <span class="sec-tag">09</span>
-    <h2>모달 10종 트리거 매핑</h2>
+    <h2>모달 9종 트리거 매핑</h2>
     <span class="desc">시트 · 전체 · 중앙 패턴</span>
   </div>
   <div class="sec-body">
@@ -1213,12 +1212,6 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         <span class="mid">MOD-06</span><span class="mtype">시트</span>
         <h5>쿠폰 선택 · 번호 입력</h5>
         <div class="trigger">트리거: 쿠폰 아이콘(M1-05, M3-05) 클릭<br/>→ 보유 쿠폰 목록 선택 또는 쿠폰 번호 직접 입력 (선택 값)</div>
-      </div>
-
-      <div class="modal-card">
-        <span class="mid">MOD-08</span><span class="mtype">시트</span>
-        <h5>팁 직접 입력</h5>
-        <div class="trigger">트리거: 팁 선택란(M3-07) "직접 입력" 클릭<br/>→ 금액 입력 → 결제 금액에 합산</div>
       </div>
 
       <div class="modal-card">
@@ -1331,7 +1324,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
 <div class="footer">
   <b>출처</b> · customer.html 손님 화면 + 종합플로우차트 v1 + 방향성플로우 v1 + 시나리오시뮬레이터 v2 (2026-06-12)<br/>
   <b>작성</b> · 2026-06-15 · Softment 사업부 박지은 · 개발팀 인계용<br/>
-  <b>총 정의 항목</b> · 6 시나리오 · 5 결제분기 · 4 차단규칙 · 5 알림케이스 · 15 에러·상태 · 10 모달 · 9 외부 연동 지점<br/>
+  <b>총 정의 항목</b> · 6 시나리오 · 5 결제분기 · 4 차단규칙 · 5 알림케이스 · 15 에러·상태 · 9 모달 · 9 외부 연동 지점<br/>
   <span style="font-size:10px">※ 본 문서는 기획 관점의 요구사항 정의서입니다. 데이터 연동 방식·API 설계·아키텍처 등 구현 영역은 개발팀이 결정합니다.</span>
 </div>
 

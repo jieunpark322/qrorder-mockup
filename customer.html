@@ -1604,7 +1604,7 @@ function scrCheckout(){
           ${showEmail?`
             <div class="field" style="margin-bottom:10px;">
               <label>이메일 주소</label>
-              <input id="emailInput" type="email" inputmode="email" placeholder="example@email.com" value="${S.email||''}" oninput="S.email=this.value;render();const _ei=document.getElementById('emailInput');if(_ei){_ei.focus();_ei.setSelectionRange(_ei.value.length,_ei.value.length);}" />
+              <input id="emailInput" type="text" inputmode="email" dir="ltr" placeholder="example@email.com" value="${S.email||''}" oninput="S.email=this.value;render();const _ei=document.getElementById('emailInput');if(_ei){_ei.focus();_ei.setSelectionRange(_ei.value.length,_ei.value.length);}" />
             </div>
           `:''}
 

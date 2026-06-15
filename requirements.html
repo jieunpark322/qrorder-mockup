@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Softment QR메뉴판 — 기획 요구사항정의서 v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mint:#11C078;--mint-d:#0AA065;--mint-l:#E5F8F0;--mint-b:#B6E8D2;
+  --kakao:#FEE500;--kakao-d:#3C1E1E;
+  --blue:#0064FF;--blue-l:#E3F2FD;
+  --purple:#9C27B0;--purple-l:#F3E5F5;
+  --orange:#FF6D00;--orange-l:#FFF4E6;
+  --red:#E53935;--red-l:#FFEBEE;
+  --amber:#F57C00;--amber-l:#FFF8E1;
+  --sc1:#1976D2;--sc1-l:#E3F2FD;
+  --sc2:#388E3C;--sc2-l:#E8F5E9;
+  --sc3:#7B1FA2;--sc3-l:#F3E5F5;
+  --sc4:#F57C00;--sc4-l:#FFF3E0;
+  --sc5:#0097A7;--sc5-l:#E0F7FA;
+  --sc6:#C2185B;--sc6-l:#FCE4EC;
+  --ink:#191F28;--ink2:#4E5968;--ink3:#8B95A1;
+  --line:#E8ECF0;--bg:#F0F3F7;--surface:#F9FAFB;
+  --font:'Noto Sans KR',sans-serif;
+  --mono:'Courier New',Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.6;padding:20px 16px;font-size:13px;-webkit-font-smoothing:antialiased}
+.page{max-width:1440px;margin:0 auto}
+
+/* ── Header ── */
+.doc-header{background:linear-gradient(135deg,#0AA065 0%,#11C078 60%,#1976D2 100%);border-radius:16px;padding:36px 40px;color:#fff;margin-bottom:24px;position:relative;overflow:hidden}
+.doc-header::after{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.07)}
+.doc-header h1{font-size:28px;font-weight:900;letter-spacing:-0.8px;margin-bottom:6px}
+.doc-header .sub{font-size:14px;opacity:.85;margin-bottom:16px}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px}
+.badge{padding:4px 12px;border-radius:100px;background:rgba(255,255,255,0.2);font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,0.3)}
+.badge.highlight{background:#fff;color:var(--mint-d)}
+
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:24px}
+.stat{background:#fff;border-radius:10px;padding:14px;border:1px solid var(--line);text-align:center}
+.stat .n{font-size:26px;font-weight:900;color:var(--mint-d);line-height:1;font-family:var(--mono)}
+.stat .l{font-size:10px;color:var(--ink3);margin-top:5px;font-weight:600}
+
+/* ── Section ── */
+.section{background:#fff;border-radius:14px;border:1px solid var(--line);margin-bottom:20px;overflow:hidden}
+.sec-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.sec-tag{font-size:11px;font-weight:800;color:#fff;background:var(--mint);padding:4px 10px;border-radius:6px;font-family:var(--mono);letter-spacing:.3px}
+.sec-head h2{font-size:18px;font-weight:900;letter-spacing:-.4px}
+.sec-head .desc{font-size:12px;color:var(--ink3);margin-left:auto;font-weight:600}
+.sec-body{padding:20px 22px}
+
+/* ── Purpose ── */
+.purpose-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.purpose-card{padding:16px;border-radius:10px;border:1px solid var(--line);background:var(--surface)}
+.purpose-card .icon{font-size:22px;margin-bottom:8px}
+.purpose-card h4{font-size:13px;font-weight:800;margin-bottom:6px}
+.purpose-card p{font-size:11px;color:var(--ink2);line-height:1.7}
+
+/* ── Scenario table ── */
+.sc-table{width:100%;border-collapse:collapse;font-size:11px}
+.sc-table thead th{background:var(--ink);color:#fff;padding:10px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.3px}
+.sc-table thead th.c{text-align:center}
+.sc-table tbody td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.sc-table tbody td.c{text-align:center}
+.sc-table tbody tr:hover{background:var(--mint-l)}
+.sc-code{font-size:10px;font-weight:800;color:#fff;padding:2px 8px;border-radius:4px;display:inline-block;font-family:var(--mono)}
+.tag-req{color:var(--red);font-weight:800;font-size:10px}
+.tag-opt{color:var(--ink3);font-size:10px}
+.tag-skip{color:var(--ink3);font-style:italic;font-size:10px}
+
+/* ── Flow ── */
+.flow-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.flow-card{padding:14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);position:relative}
+.flow-card.gate{border-color:var(--orange);background:var(--orange-l)}
+.flow-card.gate .fc-title{color:#7A3500}
+.flow-card.action{border-color:var(--mint)}
+.flow-card.block{border-color:var(--red);background:var(--red-l)}
+.flow-card.block .fc-title{color:var(--red)}
+.fc-num{font-size:9px;font-weight:800;color:var(--ink3);font-family:var(--mono);margin-bottom:5px}
+.fc-title{font-size:12px;font-weight:800;margin-bottom:4px}
+.fc-desc{font-size:10px;color:var(--ink2);line-height:1.6}
+.fc-code{font-size:9px;font-family:var(--mono);color:var(--red);background:#fff;padding:1px 6px;border-radius:3px;margin-top:5px;display:inline-block;font-weight:700;border:1px solid var(--red)}
+.fc-ok{font-size:9px;font-family:var(--mono);color:var(--mint-d);background:var(--mint-l);padding:1px 6px;border-radius:3px;margin-top:5px;display:inline-block;font-weight:700;border:1px solid var(--mint-b)}
+
+/* ── Branch cards ── */
+.branch-row{display:grid;gap:12px;margin-bottom:12px}
+.branch-row.col3{grid-template-columns:repeat(3,1fr)}
+.branch-row.col2{grid-template-columns:repeat(2,1fr)}
+.branch-row.col5{grid-template-columns:repeat(5,1fr)}
+.branch-card{padding:13px;border-radius:9px;border:1px solid var(--line);background:#fff}
+.branch-card h5{font-size:11px;font-weight:800;margin-bottom:6px}
+.branch-card ul{font-size:10px;color:var(--ink2);line-height:1.8;padding-left:16px}
+.branch-card.required{border-color:var(--red);background:var(--red-l)}
+.branch-card.required h5{color:var(--red)}
+.branch-card.kakao{border-color:var(--kakao);background:#FFFBE6}
+.branch-card.kakao h5{color:var(--kakao-d)}
+.branch-card.amber{border-color:var(--amber);background:var(--amber-l)}
+.branch-card.amber h5{color:var(--amber)}
+.branch-card.mint{border-color:var(--mint);background:var(--mint-l)}
+.branch-card.mint h5{color:var(--mint-d)}
+
+.section-sub{font-size:13px;font-weight:800;margin:18px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--line);display:flex;align-items:center;gap:8px}
+.section-sub .dot{width:10px;height:10px;border-radius:50%;background:var(--mint);display:inline-block}
+
+/* ── Notif matrix table ── */
+.matrix-table{width:100%;border-collapse:collapse;font-size:11px}
+.matrix-table thead th{background:var(--ink);color:#fff;padding:9px 12px;text-align:left;font-size:10px;font-weight:700}
+.matrix-table thead th.c{text-align:center}
+.matrix-table tbody td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.matrix-table tbody td.c{text-align:center}
+.matrix-table tbody tr:hover{background:var(--surface)}
+.req-badge{background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;font-family:var(--mono)}
+.skip-badge{background:var(--surface);color:var(--ink3);font-size:9px;padding:2px 7px;border-radius:4px;border:1px solid var(--line);font-style:italic}
+
+/* ── Error matrix ── */
+.err-table{width:100%;border-collapse:collapse;font-size:11px}
+.err-table thead th{background:var(--ink);color:#fff;padding:9px 12px;text-align:left;font-size:10px;font-weight:700}
+.err-table thead th.c{text-align:center}
+.err-table tbody td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.err-table tbody td.c{text-align:center}
+.err-table tr.err-row:hover{background:var(--red-l)}
+.err-table tr.wrn-row{background:var(--orange-l)}
+.err-table tr.wrn-row:hover{background:#FFE0C0}
+.err-table tr.sta-row{background:var(--purple-l)}
+.err-table tr.inf-row{background:var(--blue-l)}
+.ec{font-family:var(--mono);font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px;color:#fff;display:inline-block}
+.ec.err{background:var(--red)}
+.ec.wrn{background:var(--orange)}
+.ec.sta{background:var(--purple)}
+.ec.inf{background:var(--blue)}
+.block-y{color:var(--red);font-weight:800}
+.block-n{color:var(--ink3)}
+
+/* ── Modal grid ── */
+.modal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.modal-card{padding:12px;border-radius:9px;border:1px solid var(--line);background:#fff}
+.modal-card .mid{font-family:var(--mono);font-size:9px;font-weight:800;color:#fff;background:var(--purple);padding:2px 7px;border-radius:4px;margin-bottom:6px;display:inline-block}
+.modal-card h5{font-size:11px;font-weight:800;margin-bottom:4px}
+.modal-card .mtype{font-size:9px;font-weight:700;color:#fff;background:var(--ink2);padding:1px 6px;border-radius:3px;margin-left:4px}
+.modal-card .trigger{font-size:10px;color:var(--ink2);line-height:1.6;margin-top:4px}
+.modal-card .trigger code{font-family:var(--mono);font-size:9px;background:var(--surface);padding:1px 5px;border-radius:3px;border:1px solid var(--line)}
+
+/* ── API table ── */
+.api-table{width:100%;border-collapse:collapse;font-size:11px}
+.api-table thead th{background:var(--ink);color:#fff;padding:10px 12px;text-align:left;font-size:10px;font-weight:700}
+.api-table thead th.c{text-align:center}
+.api-table tbody td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.api-table tbody td.c{text-align:center}
+.api-table tbody tr:hover{background:var(--surface)}
+.method{font-family:var(--mono);font-size:9px;font-weight:800;padding:2px 8px;border-radius:3px;color:#fff;display:inline-block}
+.method.get{background:#1976D2}
+.method.post{background:#388E3C}
+.method.del{background:#D32F2F}
+.method.ws{background:var(--purple)}
+.method.wh{background:#F57C00}
+.endpoint{font-family:var(--mono);font-size:10px;font-weight:600}
+.idempotent{font-family:var(--mono);font-size:9px;font-weight:700;background:var(--orange-l);color:var(--orange);padding:1px 6px;border-radius:3px;border:1px solid #FFCC80}
+
+/* ── Blocking rules ── */
+.block-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.block-card{padding:14px;border-radius:10px;border-top:4px solid var(--red);background:var(--red-l);border:2px solid var(--red)}
+.block-card h5{font-size:12px;font-weight:800;color:var(--red);margin-bottom:8px}
+.block-card p{font-size:10px;color:#C62828;line-height:1.7}
+.block-card .ex{font-size:9px;font-family:var(--mono);background:#fff;padding:4px 7px;border-radius:4px;margin-top:8px;color:var(--red);border:1px solid var(--red);line-height:1.6;display:block}
+
+/* ── Progress stage ── */
+.stage-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stage-card{padding:12px;border-radius:9px;border:1px solid var(--line);background:#fff}
+.stage-card h5{font-size:11px;font-weight:800;margin-bottom:8px}
+.stage-steps{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:9px}
+.stage-step{padding:3px 8px;border-radius:4px;background:var(--surface);border:1px solid var(--line);font-weight:600;color:var(--ink2)}
+.stage-step.special{background:var(--amber-l);border-color:var(--amber);color:#7A3500;font-weight:800}
+.stage-arrow{color:var(--ink3);font-size:10px}
+
+/* ── Completion conditions ── */
+.cond-table{width:100%;border-collapse:collapse;font-size:11px}
+.cond-table thead th{background:var(--ink);color:#fff;padding:8px 12px;text-align:left;font-size:10px;font-weight:700}
+.cond-table tbody td{padding:8px 12px;border-bottom:1px solid var(--line)}
+.cond-table tbody tr:hover{background:var(--surface)}
+
+/* ── TOC ── */
+.toc{background:#fff;border-radius:12px;border:1px solid var(--line);padding:16px 20px;margin-bottom:20px}
+.toc h3{font-size:11px;font-weight:800;color:var(--ink3);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.toc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.toc-item{padding:9px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--line);cursor:pointer;text-decoration:none;color:inherit;display:block}
+.toc-item:hover{border-color:var(--mint);background:var(--mint-l)}
+.toc-item .t-num{font-family:var(--mono);font-size:8px;font-weight:800;color:#fff;background:var(--mint);padding:1px 6px;border-radius:3px;display:inline-block;margin-bottom:4px}
+.toc-item .t-title{font-size:11px;font-weight:800;color:var(--ink);margin-bottom:1px}
+.toc-item .t-desc{font-size:9px;color:var(--ink3)}
+
+/* ── SC detail grid ── */
+.sc-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sc-detail-card{padding:14px;border-radius:10px;border:2px solid var(--line);background:#fff;position:relative;overflow:hidden}
+.sc-detail-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.sc-detail-card.sc1::before{background:var(--sc1)}.sc-detail-card.sc1{border-color:var(--sc1)}
+.sc-detail-card.sc2::before{background:var(--sc2)}.sc-detail-card.sc2{border-color:var(--sc2)}
+.sc-detail-card.sc3::before{background:var(--sc3)}.sc-detail-card.sc3{border-color:var(--sc3)}
+.sc-detail-card.sc4::before{background:var(--sc4)}.sc-detail-card.sc4{border-color:var(--sc4)}
+.sc-detail-card.sc5::before{background:var(--sc5)}.sc-detail-card.sc5{border-color:var(--sc5)}
+.sc-detail-card.sc6::before{background:var(--sc6)}.sc-detail-card.sc6{border-color:var(--sc6)}
+.sc-detail-card .sc-id{font-family:var(--mono);font-size:10px;font-weight:800;color:#fff;padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:6px}
+.sc-detail-card.sc1 .sc-id{background:var(--sc1)}
+.sc-detail-card.sc2 .sc-id{background:var(--sc2)}
+.sc-detail-card.sc3 .sc-id{background:var(--sc3)}
+.sc-detail-card.sc4 .sc-id{background:var(--sc4)}
+.sc-detail-card.sc5 .sc-id{background:var(--sc5)}
+.sc-detail-card.sc6 .sc-id{background:var(--sc6)}
+.sc-detail-card h4{font-size:13px;font-weight:800;margin-bottom:4px}
+.sc-axes{font-size:10px;color:var(--ink3);margin-bottom:10px}
+.sc-step-list{font-size:10px;color:var(--ink2);line-height:2;padding-left:16px}
+.sc-step-list li.diff{color:var(--red);font-weight:700}
+.sc-step-list li.skip{color:var(--ink3);font-style:italic;list-style-type:none;padding-left:0;margin-left:-16px}
+.sc-step-list li.skip::before{content:'⊘ '}
+.sc-unique{background:var(--orange-l);border-left:3px solid var(--orange);padding:8px 10px;border-radius:5px;font-size:10px;color:#7A3500;font-weight:600;line-height:1.6;margin-top:10px}
+
+.callout{padding:12px 14px;border-radius:8px;font-size:11px;line-height:1.7;margin-bottom:12px}
+.callout.info{background:var(--blue-l);border-left:4px solid var(--blue);color:#1565C0}
+.callout.warn{background:var(--orange-l);border-left:4px solid var(--orange);color:#7A3500}
+.callout.danger{background:var(--red-l);border-left:4px solid var(--red);color:#C62828}
+.callout.mint{background:var(--mint-l);border-left:4px solid var(--mint);color:var(--mint-d)}
+.callout b{font-weight:800}
+
+.footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--ink3);text-align:center;line-height:1.8}
+.footer b{color:var(--mint-d)}
+
+@media print{
+  body{background:#fff;padding:8px}
+  .section{break-inside:avoid}
+  .stats{grid-template-columns:repeat(6,1fr)}
+}
+@media(max-width:1100px){
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .flow-grid{grid-template-columns:repeat(2,1fr)}
+  .modal-grid,.block-grid,.stage-grid{grid-template-columns:repeat(2,1fr)}
+  .sc-detail-grid{grid-template-columns:repeat(2,1fr)}
+  .toc-grid{grid-template-columns:repeat(3,1fr)}
+  .purpose-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- HEADER -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="doc-header">
+  <h1>📋 Softment QR메뉴판 — 기획 요구사항정의서</h1>
+  <p class="sub">손님 화면 기준 · 진입 → 메뉴 → 결제 → 완료 전체 흐름 + 예외 처리 통합 문서 · 개발팀 인계용</p>
+  <div class="badge-row">
+    <span class="badge highlight">v1 · 2026-06-15</span>
+    <span class="badge">손님 화면 전용</span>
+    <span class="badge">6 시나리오</span>
+    <span class="badge">15 에러·상태</span>
+    <span class="badge">10 모달</span>
+    <span class="badge">9 외부 연동 지점</span>
+    <span class="badge">개발팀 인계용</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- STATS -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="stats">
+  <div class="stat"><div class="n">6</div><div class="l">유효 시나리오</div></div>
+  <div class="stat"><div class="n">5</div><div class="l">결제 분기 축</div></div>
+  <div class="stat"><div class="n">4</div><div class="l">차단 블로킹 규칙</div></div>
+  <div class="stat"><div class="n">15</div><div class="l">에러·상태코드</div></div>
+  <div class="stat"><div class="n">10</div><div class="l">모달 종류</div></div>
+  <div class="stat"><div class="n">9</div><div class="l">외부 연동 지점</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOC -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="toc">
+  <h3>📑 목차</h3>
+  <div class="toc-grid">
+    <a class="toc-item" href="#sec-purpose"><span class="t-num">01</span><div class="t-title">목적 및 범위</div><div class="t-desc">서비스 목표 3가지</div></a>
+    <a class="toc-item" href="#sec-req"><span class="t-num">02</span><div class="t-title">요구사항 정의 (6 시나리오)</div><div class="t-desc">SC_01 ~ SC_06 전체</div></a>
+    <a class="toc-item" href="#sec-flow"><span class="t-num">03</span><div class="t-title">전체 워크플로우</div><div class="t-desc">진입 → 결제 → 완료</div></a>
+    <a class="toc-item" href="#sec-branch"><span class="t-num">04</span><div class="t-title">결제 5분기 (★ 핵심)</div><div class="t-desc">유형·서빙·알림·약관·결제</div></a>
+    <a class="toc-item" href="#sec-notif"><span class="t-num">05</span><div class="t-title">알림 시트 매트릭스</div><div class="t-desc">5케이스 필수/생략</div></a>
+    <a class="toc-item" href="#sec-complete"><span class="t-num">06</span><div class="t-title">완료 화면 로직</div><div class="t-desc">호출번호·단계라벨·CTA</div></a>
+    <a class="toc-item" href="#sec-block"><span class="t-num">07</span><div class="t-title">차단·블로킹 규칙 4종</div><div class="t-desc">선불/수령시간/함께주문/알림</div></a>
+    <a class="toc-item" href="#sec-error"><span class="t-num">08</span><div class="t-title">에러·상태코드 15건</div><div class="t-desc">ERR/WRN/STA/INF</div></a>
+    <a class="toc-item" href="#sec-modal"><span class="t-num">09</span><div class="t-title">모달 10종 트리거</div><div class="t-desc">시트·전체·중앙</div></a>
+    <a class="toc-item" href="#sec-api"><span class="t-num">10</span><div class="t-title">외부 연동 지점 9종</div><div class="t-desc">무엇을 주고받나</div></a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 01 · 목적 및 범위 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-purpose">
+  <div class="sec-head">
+    <span class="sec-tag">01</span>
+    <h2>목적 및 범위</h2>
+    <span class="desc">이 시스템이 해결하는 문제</span>
+  </div>
+  <div class="sec-body">
+    <div class="purpose-grid">
+      <div class="purpose-card">
+        <div class="icon">📱</div>
+        <h4>앱 설치 없는 주문 경험</h4>
+        <p>손님은 QR 스캔 한 번으로 설치·로그인 없이 즉시 주문할 수 있어야 합니다. 카카오 로그인은 선택사항이며, 알림을 더 편하게 받기 위한 <em>제안</em>에 그쳐야 합니다.</p>
+      </div>
+      <div class="purpose-card">
+        <div class="icon">🔀</div>
+        <h4>6가지 매장 운영 방식 지원</h4>
+        <p>매장 형태(매장·포장·예약) × 서빙 방식(서빙·셀프호명·셀프알림톡) × 결제 타이밍(선불·후불) 조합에서 발생하는 6개 시나리오를 단일 코드베이스로 처리합니다.</p>
+      </div>
+      <div class="purpose-card">
+        <div class="icon">🛡️</div>
+        <h4>신뢰할 수 있는 결제 흐름</h4>
+        <p>중복 결제 방지, 위조 QR(큐싱) 차단, 세션 만료 후 장바구니 보존, POS 미연결 시 직원 호출 등 실제 운영 환경에서 생길 수 있는 예외 상황을 모두 사전 정의합니다.</p>
+      </div>
+    </div>
+
+    <div class="callout info" style="margin-top:16px">
+      <b>📌 개발 범위 — 손님 화면 (customer.html) 전용</b><br/>
+      이 문서는 손님이 보는 화면에서 일어나는 모든 상태·분기·예외를 정의합니다. 사장님 관리 화면(index.html), POS 연동, 카카오 채널 관리는 별도 문서를 참고하세요.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 02 · 요구사항 정의 (6 시나리오) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-req">
+  <div class="sec-head">
+    <span class="sec-tag">02</span>
+    <h2>요구사항 정의 — 6 시나리오 전체</h2>
+    <span class="desc">유효 조합 6개 · 불가 조합 차단</span>
+  </div>
+  <div class="sec-body">
+
+    <div class="callout warn" style="margin-bottom:14px">
+      <b>⚠️ 조합 제약 사항 (시스템 차단)</b><br/>
+      · <b>포장 + 후불</b> → 불가 (포장은 항상 선불)<br/>
+      · <b>예약 + 후불</b> → 불가<br/>
+      · <b>셀프(호명·알림톡) + 후불</b> → 불가 (후불은 서빙 방식 한정)<br/>
+      · <b>포장·예약 + 함께주문</b> → 불가 (함께주문은 매장 전용)
+    </div>
+
+    <table class="sc-table">
+      <thead>
+        <tr>
+          <th>코드</th>
+          <th>시나리오명</th>
+          <th>주문유형</th>
+          <th>서빙방식</th>
+          <th>결제타이밍</th>
+          <th class="c">알림시트</th>
+          <th class="c">호출번호</th>
+          <th class="c">PG결제</th>
+          <th>고유 특성</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="sc-code" style="background:var(--sc1)">SC_01</span></td>
+          <td><b>매장 · 셀프알림톡 · 선불</b></td>
+          <td>🍽️ 매장</td>
+          <td>📱 셀프 + 알림톡</td>
+          <td>💳 선불</td>
+          <td class="c"><span class="tag-req">★ 필수</span><br/><span style="font-size:9px;color:var(--ink3)">건너뛰기 숨김</span></td>
+          <td class="c"><span class="tag-req">발급 O</span></td>
+          <td class="c"><span class="tag-req">O</span></td>
+          <td>준비완료 알림 없으면 수령 불가 · 카톡/폰/이메일 중 1개 필수</td>
+        </tr>
+        <tr>
+          <td><span class="sc-code" style="background:var(--sc2)">SC_02</span></td>
+          <td><b>매장 · 셀프호명 · 선불</b></td>
+          <td>🍽️ 매장</td>
+          <td>📢 셀프 + 호명</td>
+          <td>💳 선불</td>
+          <td class="c"><span class="tag-skip">생략</span><br/><span style="font-size:9px;color:var(--ink3)">전광판 호명</span></td>
+          <td class="c"><span class="tag-req">발급 O</span></td>
+          <td class="c"><span class="tag-req">O</span></td>
+          <td>연락처 없이 주문 가능 · 전광판 번호로 호명</td>
+        </tr>
+        <tr>
+          <td><span class="sc-code" style="background:var(--sc3)">SC_03</span></td>
+          <td><b>매장 · 서빙 · 선불</b></td>
+          <td>🍽️ 매장</td>
+          <td>🙋 서빙</td>
+          <td>💳 선불</td>
+          <td class="c"><span class="tag-opt">선택</span><br/><span style="font-size:9px;color:var(--ink3)">영수증 토글만</span></td>
+          <td class="c"><span class="tag-skip">미발급</span></td>
+          <td class="c"><span class="tag-req">O</span></td>
+          <td>호출번호 없음 · 직원이 테이블로 서빙 · 진행단계 "서빙중"</td>
+        </tr>
+        <tr style="background:var(--amber-l)">
+          <td><span class="sc-code" style="background:var(--sc4)">SC_04</span></td>
+          <td><b>매장 · 서빙 · 후불 ★</b></td>
+          <td>🍽️ 매장</td>
+          <td>🙋 서빙</td>
+          <td>🧾 후불</td>
+          <td class="c"><span class="tag-opt">선택</span><br/><span style="font-size:9px;color:var(--ink3)">영수증 토글만</span></td>
+          <td class="c"><span class="tag-skip">미발급</span></td>
+          <td class="c"><span style="color:var(--amber);font-weight:800;font-size:10px">결제 없음</span></td>
+          <td><b>유일한 후불</b> · 결제 단계 없이 "주문 넣기"만 · 완료 후 "카운터 결제" 안내</td>
+        </tr>
+        <tr>
+          <td><span class="sc-code" style="background:var(--sc5)">SC_05</span></td>
+          <td><b>포장 · 카운터픽업 · 선불</b></td>
+          <td>🥡 포장</td>
+          <td>— (없음)</td>
+          <td>💳 선불</td>
+          <td class="c"><span class="tag-req">★ 필수</span><br/><span style="font-size:9px;color:var(--ink3)">픽업 알림</span></td>
+          <td class="c"><span class="tag-req">발급 O</span></td>
+          <td class="c"><span class="tag-req">O</span></td>
+          <td>항상 선불 · 함께주문 차단 · 진행단계 "픽업대기"</td>
+        </tr>
+        <tr style="background:var(--sc6-l)">
+          <td><span class="sc-code" style="background:var(--sc6)">SC_06</span></td>
+          <td><b>예약 · 지정시간픽업 · 선불</b></td>
+          <td>📅 예약</td>
+          <td>— (없음)</td>
+          <td>💳 선불</td>
+          <td class="c"><span class="tag-req">★ 필수</span><br/><span style="font-size:9px;color:var(--ink3)">수락 알림</span></td>
+          <td class="c"><span class="tag-req">발급 O</span></td>
+          <td class="c"><span class="tag-req">O</span></td>
+          <td><b>수령시간 선택 필수</b> · 사장님 수락 단계 추가 · 거절 시 자동 환불</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:20px">
+      <div class="section-sub"><span class="dot"></span> 시나리오별 단계 흐름 (상세)</div>
+      <div class="sc-detail-grid">
+
+        <div class="sc-detail-card sc1">
+          <span class="sc-id">SC_01</span>
+          <h4>매장 · 셀프알림톡 · 선불</h4>
+          <div class="sc-axes">🍽️ 매장 / 📱 셀프알림톡 / 💳 선불 · happy-path</div>
+          <ol class="sc-step-list">
+            <li>QR 스캔 + 매장 진입 검증 (4 게이트)</li>
+            <li>메뉴 탐색 (로그인 불필요)</li>
+            <li>주문유형 = 매장, 서빙 = 셀프알림톡 자동 설정</li>
+            <li class="diff">★ 알림 시트 필수 노출 (건너뛰기 버튼 숨김)</li>
+            <li>약관 동의 (회원 2개 / 비회원 3개)</li>
+            <li>결제 (선불, 결제수단 6종)</li>
+            <li>호출번호 발급 + 카카오 알림톡</li>
+            <li>준비완료 → 카운터 수령</li>
+          </ol>
+          <div class="sc-unique">★ 준비완료 알림 없으면 손님이 수령 불가 → 알림 시트 스킵 절대 금지</div>
+        </div>
+
+        <div class="sc-detail-card sc2">
+          <span class="sc-id">SC_02</span>
+          <h4>매장 · 셀프호명 · 선불</h4>
+          <div class="sc-axes">🍽️ 매장 / 📢 셀프호명 / 💳 선불 · happy-path</div>
+          <ol class="sc-step-list">
+            <li>QR 스캔 + 매장 진입 검증</li>
+            <li>메뉴 탐색 (함께주문 가능)</li>
+            <li>주문유형 = 매장, 서빙 = 셀프호명 자동 설정</li>
+            <li class="skip">⊘ 알림 시트 생략 (전광판 호명으로 충분)</li>
+            <li>약관 동의만 표시</li>
+            <li>결제 (선불)</li>
+            <li>호출번호 발급 (전광판 안내)</li>
+            <li>호명 시 카운터 수령</li>
+          </ol>
+          <div class="sc-unique">★ 연락처 수집 없이도 주문 완성 가능한 유일한 매장 시나리오</div>
+        </div>
+
+        <div class="sc-detail-card sc3">
+          <span class="sc-id">SC_03</span>
+          <h4>매장 · 서빙 · 선불</h4>
+          <div class="sc-axes">🍽️ 매장 / 🙋 서빙 / 💳 선불 · happy-path</div>
+          <ol class="sc-step-list">
+            <li>QR 스캔 + 매장 진입 검증</li>
+            <li>메뉴 탐색 (함께주문 활성 가능)</li>
+            <li>주문유형 = 매장, 서빙 = 서빙 자동 설정</li>
+            <li class="skip">⊘ 알림 시트 생략 (영수증 카톡 토글만 제공)</li>
+            <li>약관 동의</li>
+            <li>결제 (선불)</li>
+            <li class="diff">★ 호출번호 미발급 (자리로 서빙)</li>
+            <li>직원이 테이블로 서빙 · 진행단계 "서빙중"</li>
+          </ol>
+          <div class="sc-unique">★ 호출번호 없음 · 진행단계 라벨 = "서빙중" (수령대기 X)</div>
+        </div>
+
+        <div class="sc-detail-card sc4">
+          <span class="sc-id">SC_04</span>
+          <h4>매장 · 서빙 · 후불 ★</h4>
+          <div class="sc-axes">🍽️ 매장 / 🙋 서빙 / 🧾 후불 · 유일한 후불 시나리오</div>
+          <ol class="sc-step-list">
+            <li>QR 스캔 + 매장 진입 검증</li>
+            <li>메뉴 탐색 (함께주문 가능)</li>
+            <li>주문유형 = 매장, 서빙 = 서빙, 결제 = 후불 선택</li>
+            <li class="skip">⊘ 알림 시트 생략 (영수증 토글만)</li>
+            <li>약관 동의</li>
+            <li class="diff">★ 결제 단계 없음 · "주문 넣기" 버튼만 노출</li>
+            <li>호출번호 없음 · 자리로 서빙</li>
+            <li class="diff">★ 완료 화면에 "나갈 때 카운터 결제" 안내 카드</li>
+          </ol>
+          <div class="sc-unique">★ 결제수단 영역 전체 숨김 · 주문만 접수 · 현장 결제</div>
+        </div>
+
+        <div class="sc-detail-card sc5">
+          <span class="sc-id">SC_05</span>
+          <h4>포장 · 카운터픽업 · 선불</h4>
+          <div class="sc-axes">🥡 포장 / 카운터픽업 / 💳 선불 · happy-path</div>
+          <ol class="sc-step-list">
+            <li>QR 스캔 + 매장 진입 검증</li>
+            <li>메뉴 탐색 (함께주문 차단)</li>
+            <li>주문유형 = 포장 자동 설정 (서빙·후불 칩 비활성)</li>
+            <li class="diff">★ 알림 시트 필수 (픽업 완료 알림)</li>
+            <li>약관 동의</li>
+            <li>결제 (선불)</li>
+            <li>픽업 번호 발급 + 알림</li>
+            <li>준비완료 → 카운터 픽업 · 진행단계 "픽업대기"</li>
+          </ol>
+          <div class="sc-unique">★ 매장 식사 없음 · 항상 선불 · 함께주문 완전 차단</div>
+        </div>
+
+        <div class="sc-detail-card sc6">
+          <span class="sc-id">SC_06</span>
+          <h4>예약 · 지정시간픽업 · 선불</h4>
+          <div class="sc-axes">📅 예약 / 지정시간픽업 / 💳 선불 · 진행단계 5개</div>
+          <ol class="sc-step-list">
+            <li>QR 스캔 + 매장 진입 검증</li>
+            <li>메뉴 탐색 (함께주문 차단)</li>
+            <li class="diff">★ 수령 시간 선택 필수 (시·분, 미선택 시 결제 차단)</li>
+            <li class="diff">★ 알림 시트 필수 (수락·준비 알림)</li>
+            <li>약관 동의</li>
+            <li>결제 (선불)</li>
+            <li class="diff">★ 진행단계에 "수락대기" 추가 (5단계)</li>
+            <li>사장님 수락 → 준비 → 지정 시간 픽업</li>
+          </ol>
+          <div class="sc-unique">★ 유일하게 진행단계 5개 · 사장님 거절 시 자동 환불 처리 필요</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 03 · 전체 워크플로우 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-flow">
+  <div class="sec-head">
+    <span class="sec-tag">03</span>
+    <h2>전체 워크플로우 — QR 스캔 → 완료</h2>
+    <span class="desc">4단계 큰 흐름 + 각 단계 차단 조건</span>
+  </div>
+  <div class="sec-body">
+
+    <!-- Phase 1: 진입 게이트 -->
+    <div class="section-sub"><span class="dot"></span> Phase 1 · 진입 게이트 (4개, 직렬 순서대로 검증)</div>
+    <div class="flow-grid">
+      <div class="flow-card gate">
+        <div class="fc-num">GATE-01</div>
+        <div class="fc-title">QR 토큰 검증 (큐싱 방지)</div>
+        <div class="fc-desc">QR 위변조 여부 확인 · 피싱/복제 QR 감지 시 즉시 차단</div>
+        <span class="fc-code">실패 → ERR_008</span>
+      </div>
+      <div class="flow-card gate">
+        <div class="fc-num">GATE-02</div>
+        <div class="fc-title">매장 정보 로드</div>
+        <div class="fc-desc">매장 설정·메뉴·운영 정책 조회 · 실패 시 자동 재시도</div>
+        <span class="fc-code">실패 → ERR_007</span>
+      </div>
+      <div class="flow-card gate">
+        <div class="fc-num">GATE-03</div>
+        <div class="fc-title">영업시간 체크</div>
+        <div class="fc-desc">현재 시각이 운영시간 안인지 확인<br/>종료 30분 전 WRN_001 표시 (주문 가능)</div>
+        <span class="fc-code">종료 → ERR_002</span>
+        <span class="fc-ok">30분전 → WRN_001</span>
+      </div>
+      <div class="flow-card gate">
+        <div class="fc-num">GATE-04</div>
+        <div class="fc-title">거리 검증 (매장 설정 시)</div>
+        <div class="fc-desc">매장 인근에서 접속했는지 확인<br/>매장이 거리 제한을 끄면 생략 (거리 기준은 매장 설정)</div>
+        <span class="fc-code">초과 → ERR_003</span>
+        <span class="fc-ok">비활성 → 생략 가능</span>
+      </div>
+    </div>
+
+    <!-- Phase 2: 메뉴 탐색 -->
+    <div class="section-sub"><span class="dot"></span> Phase 2 · 메뉴 탐색</div>
+    <div class="callout mint" style="margin-bottom:12px">
+      <b>✓ 로그인 불필요</b> — 메뉴 탐색 전 구간은 인증 없이 접근 가능합니다. 카카오 로그인은 결제 직전에만 제안(선택 사항)합니다.
+    </div>
+    <div class="branch-row col3">
+      <div class="branch-card mint">
+        <h5>📋 메뉴판 표시</h5>
+        <ul>
+          <li>카테고리·메뉴·옵션·가격 렌더링</li>
+          <li>품절 메뉴 비활성 표시</li>
+          <li>재고 2개 이하 → INF_001 표시</li>
+        </ul>
+      </div>
+      <div class="branch-card">
+        <h5>🛒 함께주문 (매장 전용)</h5>
+        <ul>
+          <li>같은 테이블 손님끼리 장바구니 실시간 공유</li>
+          <li>포장·예약 시 자동 차단</li>
+          <li>현재: 한 명 결제 시 전체 잠금</li>
+          <li>방장 없음, 누구나 결제 가능</li>
+          <li><b style="color:var(--blue)">향후: 1/N 분할 결제 디벨롭 필요</b></li>
+        </ul>
+      </div>
+      <div class="branch-card" style="border-style:dashed;border-color:var(--blue);background:var(--blue-l)">
+        <h5 style="color:var(--blue)">🔜 향후 과제 · 1/N 분할 결제</h5>
+        <ul>
+          <li>현재는 한 명이 전체 금액을 결제</li>
+          <li>향후 함께주문 참여 인원수로 금액을 나눠 각자 결제하는 1/N 분할 결제 기능으로 발전 필요</li>
+          <li>분할 방식·정산 처리는 별도 기획·개발 검토</li>
+        </ul>
+      </div>
+      <div class="branch-card">
+        <h5>⏱ 세션 만료 (무활동 감시)</h5>
+        <ul>
+          <li>접속 후 <b>5분간 아무 행위 없으면</b> 세션 만료 → WRN_002 표시</li>
+          <li>중간에 액션이 있으면 만료 시점 갱신 (5분 재계산)</li>
+          <li>만료 후에도 장바구니 일정 시간 보존</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Phase 3: 결제 -->
+    <div class="section-sub"><span class="dot"></span> Phase 3 · 결제 (★ 가장 복잡 — 아래 04절 참조)</div>
+    <div class="callout info" style="margin-bottom:12px">
+      결제 진입 시 카카오 로그인 제안 (선택 · "알림을 편하게 받기" 메시지). 결제 5분기는 아래 <a href="#sec-branch" style="color:var(--blue);font-weight:700">04절</a>에서 상세히 정의합니다.
+    </div>
+
+    <!-- Phase 4: 완료 -->
+    <div class="section-sub"><span class="dot"></span> Phase 4 · 완료 (아래 06절 참조)</div>
+    <div class="callout mint">
+      주문 접수 후 완료 화면은 호출번호(조건부) → 진행단계 표시 → 후불/예약 안내 카드(조건부) → 카카오 채널 CTA(조건부) 순으로 구성합니다. 자세한 조건은 <a href="#sec-complete" style="color:var(--mint-d);font-weight:700">06절</a>을 참조하세요.
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 04 · 결제 5분기 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-branch">
+  <div class="sec-head">
+    <span class="sec-tag">04</span>
+    <h2>결제 5분기 — ★ 핵심 의사결정 트리</h2>
+    <span class="desc">5단계 순서대로 결정 · 앞 분기가 뒤 분기를 제약</span>
+  </div>
+  <div class="sec-body">
+
+    <div class="callout warn" style="margin-bottom:16px">
+      <b>⚠️ 중요:</b> 분기는 ①→②→③→④→⑤ 순서가 중요합니다. 앞 분기 결과가 뒤 분기 선택지를 제한합니다 (예: 주문유형 = 포장이면 서빙 분기 ②는 건너뜁니다).
+    </div>
+
+    <!-- 분기 1 -->
+    <div class="section-sub"><span class="dot" style="background:var(--blue)"></span> 분기 ① 주문 유형 (3-way)</div>
+    <div class="branch-row col3">
+      <div class="branch-card mint">
+        <h5>🍽️ 매장</h5>
+        <ul>
+          <li>→ 분기 ② 서빙 방식으로 진행</li>
+          <li>함께주문 활성화 가능</li>
+        </ul>
+      </div>
+      <div class="branch-card">
+        <h5>🥡 포장</h5>
+        <ul>
+          <li>→ 분기 ② 건너뜀</li>
+          <li>→ 분기 ③ 알림 시트 <b>필수</b></li>
+          <li>후불 선택 차단</li>
+          <li>함께주문 차단</li>
+        </ul>
+      </div>
+      <div class="branch-card amber">
+        <h5>📅 예약</h5>
+        <ul>
+          <li>→ 수령 시간 선택 단계 추가 (미선택 시 결제 버튼 비활성)</li>
+          <li>→ 분기 ③ 알림 시트 <b>필수</b></li>
+          <li>함께주문 차단</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 분기 2 -->
+    <div class="section-sub"><span class="dot" style="background:var(--blue)"></span> 분기 ② 서빙 방식 (매장 전용, 3-way)</div>
+    <div class="branch-row col3">
+      <div class="branch-card">
+        <h5>🙋 테이블 서빙</h5>
+        <ul>
+          <li>→ 분기 ③ 알림 시트 생략 (영수증 토글만)</li>
+          <li>후불 가능 (유일)</li>
+          <li>진행단계 라벨 = "서빙중"</li>
+          <li>호출번호 미발급</li>
+        </ul>
+      </div>
+      <div class="branch-card">
+        <h5>📢 셀프 + 호명</h5>
+        <ul>
+          <li>→ 분기 ③ 알림 시트 생략 (전광판 호명)</li>
+          <li>후불 차단</li>
+          <li>호출번호 발급 (전광판)</li>
+        </ul>
+      </div>
+      <div class="branch-card required">
+        <h5>📱 셀프 + 알림톡 ★</h5>
+        <ul>
+          <li>→ 분기 ③ 알림 시트 <b>필수</b></li>
+          <li>건너뛰기 버튼 완전 숨김</li>
+          <li>후불 차단</li>
+          <li>호출번호 발급 + 카톡 알림</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 분기 3 -->
+    <div class="section-sub"><span class="dot" style="background:var(--blue)"></span> 분기 ③ 알림 시트 노출 여부 + 입력 수단</div>
+    <div class="callout info" style="margin-bottom:12px">
+      알림 시트는 손님의 연락처를 받는 바텀 시트입니다. 아래 05절 <a href="#sec-notif" style="color:var(--blue);font-weight:700">알림 시트 매트릭스</a>에서 5케이스를 상세히 정의합니다.
+    </div>
+    <div class="branch-row col3">
+      <div class="branch-card kakao">
+        <h5>💛 카카오 로그인 (최우선 권장)</h5>
+        <ul>
+          <li>사장님이 카카오 인증을 필수로 설정한 경우 최초 화면에 표시</li>
+          <li>로그인 성공 → 알림 시트 건너뜀</li>
+          <li>카카오톡 없는 손님 → "카카오톡이 없어요." 버튼 → 폰/이메일 중 선택 화면</li>
+        </ul>
+      </div>
+      <div class="branch-card">
+        <h5>📱 휴대폰 번호 입력</h5>
+        <ul>
+          <li>입력 완료 → 번호 확인 모달</li>
+          <li>주문 알림 용도로만 사용</li>
+          <li>선택적 마케팅 수신동의는 받지 않음</li>
+        </ul>
+      </div>
+      <div class="branch-card">
+        <h5>📧 이메일 입력</h5>
+        <ul>
+          <li>이메일 형식 유효성 검사</li>
+          <li>입력 완료 → 이메일 확인 모달</li>
+          <li>주문 알림 용도로만 사용 · 마케팅 수신동의 받지 않음</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 분기 4 -->
+    <div class="section-sub"><span class="dot" style="background:var(--blue)"></span> 분기 ④ 약관 동의 (2-way)</div>
+    <div class="branch-row col2">
+      <div class="branch-card kakao">
+        <h5>💛 카카오 회원 — 2개</h5>
+        <ul>
+          <li>✓ 이용약관 (필수)</li>
+          <li>✓ 개인정보 처리방침 (필수)</li>
+          <li><em>만 14세 이상 확인 생략 (가입 시 확인됨)</em></li>
+        </ul>
+      </div>
+      <div class="branch-card required">
+        <h5>👤 비회원 — 3개</h5>
+        <ul>
+          <li>✓ 이용약관 (필수)</li>
+          <li>✓ 개인정보 처리방침 (필수)</li>
+          <li><b>✓ 만 14세 이상 확인 (필수, 미동의 시 결제 차단)</b></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 분기 5 -->
+    <div class="section-sub"><span class="dot" style="background:var(--blue)"></span> 분기 ⑤ 결제 모드 (2-way) — 선불 / 후불</div>
+    <div class="branch-row col2">
+      <div class="branch-card">
+        <h5>💳 선불 (SC_01~SC_03, SC_05, SC_06 총 5개 시나리오)</h5>
+        <ul>
+          <li>결제수단 6종 노출: 토스·카카오페이·네이버페이·신용카드·알리페이·위챗페이</li>
+          <li>외부 결제(PG) 진행 · 중복 결제 방지 필요</li>
+          <li>결제 성공 → 주문 접수 → 완료 화면</li>
+          <li>결제 실패 → ERR_005 (장바구니 보존)</li>
+        </ul>
+      </div>
+      <div class="branch-card amber">
+        <h5>🧾 후불 (SC_04 단 1개 시나리오)</h5>
+        <ul>
+          <li>결제수단 영역 <b>전체 숨김</b></li>
+          <li>"주문 넣기 · ₩X원" 버튼만 노출</li>
+          <li>결제 단계 없음 · 주문만 접수</li>
+          <li>완료 후 "나갈 때 카운터 결제" 안내 카드 표시</li>
+          <li>매장 + 서빙 방식만 가능 (셀프 + 후불 차단)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout mint" style="margin-top:4px">
+      <b>🎟️ 쿠폰 번호 직접 입력 (선택)</b><br/>
+      · 결제 페이지에서 <b>쿠폰 번호를 직접 입력</b>해 적용할 수 있습니다. (보유 쿠폰 목록 선택과 별개)<br/>
+      · 현장에서 받았거나 별도 종이 쿠폰 등으로 받은 쿠폰도 번호만 있으면 적용 가능합니다.<br/>
+      · <b>선택적 마케팅 수신동의 여부와 무관</b>하게 사용할 수 있으며, 쿠폰 적용 자체가 <b>선택 값</b>입니다 (입력하지 않아도 결제 진행).
+    </div>
+
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 05 · 알림 시트 매트릭스 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-notif">
+  <div class="sec-head">
+    <span class="sec-tag">05</span>
+    <h2>알림 시트 매트릭스 — 5케이스 필수/생략</h2>
+    <span class="desc">연락처 수집 바텀 시트의 노출 조건</span>
+  </div>
+  <div class="sec-body">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>주문유형</th>
+          <th>서빙방식</th>
+          <th class="c">시트 노출</th>
+          <th>이유</th>
+          <th>연락처 수단</th>
+          <th>스킵 허용</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>매장</td>
+          <td>서빙 (테이블)</td>
+          <td class="c"><span class="skip-badge">생략</span></td>
+          <td>직원이 자리로 서빙 · 알림 불필요</td>
+          <td>영수증 카톡 수신 토글만 제공</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>매장</td>
+          <td>셀프 + 호명</td>
+          <td class="c"><span class="skip-badge">생략</span></td>
+          <td>전광판 호명으로 충분 · 연락처 없이 가능</td>
+          <td>없음</td>
+          <td>—</td>
+        </tr>
+        <tr style="background:var(--red-l)">
+          <td><b>매장</b></td>
+          <td><b>셀프 + 알림톡</b></td>
+          <td class="c"><span class="req-badge">★ 필수</span></td>
+          <td>준비완료 알림 없으면 수령 불가</td>
+          <td>카카오톡 / 휴대폰 / 이메일</td>
+          <td><b style="color:var(--red)">건너뛰기 버튼 숨김</b></td>
+        </tr>
+        <tr style="background:var(--red-l)">
+          <td><b>포장</b></td>
+          <td>—</td>
+          <td class="c"><span class="req-badge">★ 필수</span></td>
+          <td>픽업 준비완료 알림 필요</td>
+          <td>카카오톡 / 휴대폰 / 이메일</td>
+          <td><b style="color:var(--red)">건너뛰기 버튼 숨김</b></td>
+        </tr>
+        <tr style="background:var(--red-l)">
+          <td><b>예약</b></td>
+          <td>—</td>
+          <td class="c"><span class="req-badge">★ 필수</span></td>
+          <td>수락·준비 알림 필요 · 거절 시 환불 안내</td>
+          <td>카카오톡 / 휴대폰 / 이메일</td>
+          <td><b style="color:var(--red)">건너뛰기 버튼 숨김</b></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:16px">
+      <div class="section-sub"><span class="dot"></span> 알림 시트 내부 흐름 상세 (필수 케이스 한정)</div>
+      <div class="branch-row col3">
+        <div class="branch-card kakao">
+          <h5>💛 카카오 로그인 (사장님 필수 설정 시 최우선)</h5>
+          <ul>
+            <li>카카오 로그인 → 성공 시 알림 시트 즉시 종료, 주문 진행</li>
+            <li>"카카오톡이 없어요." 버튼 클릭 → altpick 화면 진입</li>
+            <li>altpick: 📱 휴대폰 / 📧 이메일 선택 버튼 + "돌아가기"</li>
+          </ul>
+        </div>
+        <div class="branch-card">
+          <h5>📱 휴대폰 번호 입력</h5>
+          <ul>
+            <li>입력 완료 → "이 번호로 알림을 보내드려요" 확인 모달</li>
+            <li>주문 알림 용도로만 사용</li>
+            <li>선택적 마케팅 수신동의 체크박스 표시 안 함</li>
+          </ul>
+        </div>
+        <div class="branch-card">
+          <h5>📧 이메일 입력</h5>
+          <ul>
+            <li>이메일 형식 유효성 검사 (실시간)</li>
+            <li>입력 완료 → "이 이메일로 알림을 보내드려요" 확인 모달</li>
+            <li>주문 알림 용도로만 사용 · 마케팅 수신동의 표시 안 함</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout mint" style="margin-top:12px">
+      <b>✓ 같은 기기 — 기존 로그인·연락처 정보 기억</b><br/>
+      같은 기기로 다시 주문하면 이전에 입력한 정보를 기억해 재입력을 생략합니다.<br/>
+      · <b>카카오톡 인증으로 로그인했던 경우</b> → 로그인 상태 유지, 다시 로그인하지 않아도 됨<br/>
+      · <b>휴대폰 번호를 입력했던 경우</b> → 해당 번호를 기억해 자동으로 채워 줌<br/>
+      · 손님이 <b>번호를 바꾸려는 경우에만</b> 직접 수정할 수 있게 함 (재입력 강제 아님)
+    </div>
+
+    <div class="callout warn" style="margin-top:12px">
+      <b>✓ 마케팅(쿠폰·이벤트) 수신동의 — 최초 1회만</b><br/>
+      · 선택적 마케팅 수신동의는 <b>최초 1회만</b> 받고, 동일한 사용자에게는 이후 다시 띄우지 않습니다.<br/>
+      · <b>휴대폰·이메일을 직접 입력</b>하는 경우에는 마케팅 수신동의를 받지 않습니다. 이때 입력한 연락처는 <b>주문 알림 용도로만</b> 사용합니다.
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 06 · 완료 화면 로직 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-complete">
+  <div class="sec-head">
+    <span class="sec-tag">06</span>
+    <h2>완료 화면 로직 — 호출번호 · 단계라벨 · CTA</h2>
+    <span class="desc">주문 접수 후 화면 구성 조건</span>
+  </div>
+  <div class="sec-body">
+
+    <div class="section-sub"><span class="dot"></span> 호출번호 발급 여부 (시나리오별)</div>
+    <table class="cond-table">
+      <thead>
+        <tr><th>시나리오</th><th>호출번호</th><th>번호 형태</th><th>알림 수단</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="sc-code" style="background:var(--sc1);font-size:9px">SC_01</span> 매장·셀프알림톡</td><td><b style="color:var(--mint-d)">발급 O</b></td><td>카운터 호명 번호</td><td>카카오 알림톡</td></tr>
+        <tr><td><span class="sc-code" style="background:var(--sc2);font-size:9px">SC_02</span> 매장·셀프호명</td><td><b style="color:var(--mint-d)">발급 O</b></td><td>전광판 호명 번호</td><td>전광판 직접 확인</td></tr>
+        <tr><td><span class="sc-code" style="background:var(--sc3);font-size:9px">SC_03</span> 매장·서빙·선불</td><td style="color:var(--ink3)">미발급</td><td>—</td><td>직원 자리 서빙</td></tr>
+        <tr><td><span class="sc-code" style="background:var(--sc4);font-size:9px">SC_04</span> 매장·서빙·후불</td><td style="color:var(--ink3)">미발급</td><td>—</td><td>직원 자리 서빙</td></tr>
+        <tr><td><span class="sc-code" style="background:var(--sc5);font-size:9px">SC_05</span> 포장</td><td><b style="color:var(--mint-d)">발급 O</b></td><td>픽업 번호</td><td>카카오 알림톡 (준비완료)</td></tr>
+        <tr><td><span class="sc-code" style="background:var(--sc6);font-size:9px">SC_06</span> 예약</td><td><b style="color:var(--mint-d)">발급 O</b></td><td>예약 픽업 번호</td><td>카카오 알림톡 (수락→준비)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="section-sub" style="margin-top:18px"><span class="dot"></span> 진행 단계 라벨 (4가지 유형)</div>
+    <div class="stage-grid">
+      <div class="stage-card">
+        <h5>🍽️ 매장 셀프 (SC_01, SC_02)</h5>
+        <div class="stage-steps">
+          <span class="stage-step">접수</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step">준비</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step special">수령대기</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step">완료</span>
+        </div>
+      </div>
+      <div class="stage-card">
+        <h5>🙋 매장 서빙 (SC_03, SC_04)</h5>
+        <div class="stage-steps">
+          <span class="stage-step">접수</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step">준비</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step special">서빙중</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step">완료</span>
+        </div>
+      </div>
+      <div class="stage-card">
+        <h5>🥡 포장 (SC_05)</h5>
+        <div class="stage-steps">
+          <span class="stage-step">접수</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step">준비</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step special">픽업대기</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step">픽업완료</span>
+        </div>
+      </div>
+      <div class="stage-card">
+        <h5>📅 예약 ★ 5단계 (SC_06)</h5>
+        <div class="stage-steps">
+          <span class="stage-step">접수</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step special">수락대기</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step">준비</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step">완료</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-sub" style="margin-top:18px"><span class="dot"></span> 완료 화면 조건부 요소</div>
+    <div class="branch-row col2">
+      <div class="branch-card amber">
+        <h5>🧾 SC_04 후불 안내 카드</h5>
+        <ul>
+          <li>표시 조건: 후불 결제 주문 (SC_04)</li>
+          <li>내용: "나갈 때 카운터에서 결제해 주세요"</li>
+        </ul>
+      </div>
+      <div class="branch-card amber">
+        <h5>📅 SC_06 예약 안내 카드</h5>
+        <ul>
+          <li>표시 조건: 예약 시나리오 + 수락 대기 중</li>
+          <li>내용: "수령 예정 HH:MM · 사장님 수락 후 확정"</li>
+          <li>거절 시: 자동 환불 처리 + 안내 화면</li>
+        </ul>
+      </div>
+    </div>
+    <div class="branch-row col2" style="margin-top:10px">
+      <div class="branch-card kakao">
+        <h5>💛 카카오 채널 CTA (조건부)</h5>
+        <ul>
+          <li>표시 조건: 카카오 로그인 완료 + 매장 채널 미추가 상태</li>
+          <li>문구: "카카오톡 채널 추가하고 쿠폰 받기"</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-sub" style="margin-top:18px"><span class="dot"></span> 완료 화면 결제 내역 표시 규칙</div>
+    <div class="callout mint">
+      <b>쿠폰 적용 시 금액 표시 순서:</b><br/>
+      1. 개별 메뉴 항목 (메뉴명 × 수량 / 금액)<br/>
+      2. 상품 금액 소계 (쿠폰 적용 시에만 표시)<br/>
+      3. 🎟️ 쿠폰 할인 금액 (쿠폰 적용 시에만 표시, 파란색 강조)<br/>
+      4. 최종 결제 금액 (선불: "결제 금액" / 후불: "결제 예정")
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 07 · 차단·블로킹 규칙 4종 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-block">
+  <div class="sec-head">
+    <span class="sec-tag">07</span>
+    <h2>차단·블로킹 규칙 4종</h2>
+    <span class="desc">위반 시 진행 불가 · UI에서 강제 비활성</span>
+  </div>
+  <div class="sec-body">
+    <div class="block-grid">
+      <div class="block-card">
+        <h5>🚫 포장·예약 = 항상 선불</h5>
+        <p>포장 또는 예약 선택 시 후불 결제 옵션을 UI에서 숨깁니다. 후불은 매장 + 서빙 조합에서만 노출됩니다.</p>
+      </div>
+      <div class="block-card">
+        <h5>🚫 예약 = 수령시간 미선택 시 결제 차단</h5>
+        <p>예약 주문에서 수령 시간(시·분)을 선택하지 않으면 결제 버튼이 비활성 상태를 유지합니다. 결제 시도 시 "수령 시간을 선택해 주세요" 안내를 표시합니다.</p>
+      </div>
+      <div class="block-card">
+        <h5>🚫 포장·예약 = 함께주문 차단</h5>
+        <p>실시간 공동 장바구니(함께주문)는 매장 내 식사 전용입니다. 포장·예약 선택 시 함께주문 버튼을 비활성화하고, 이미 연결된 경우 연결을 해제합니다.</p>
+      </div>
+      <div class="block-card">
+        <h5>🚫 셀프 + 알림톡 = 건너뛰기 금지</h5>
+        <p>서빙 방식이 셀프알림톡이거나 포장·예약인 경우 알림 시트의 "건너뛰기" 버튼을 숨겨 연락처 수집을 강제합니다. 알림 없이 주문이 완료되면 수령이 불가능합니다.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 08 · 에러·상태코드 16건 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-error">
+  <div class="sec-head">
+    <span class="sec-tag">08</span>
+    <h2>에러·상태·경고·정보 코드 15건</h2>
+    <span class="desc">ERR 9 + STA 2 + WRN 3 + INF 1</span>
+  </div>
+  <div class="sec-body">
+    <table class="err-table">
+      <thead>
+        <tr>
+          <th style="width:90px">코드</th>
+          <th style="width:140px">상황</th>
+          <th>발생 단계</th>
+          <th>복구 액션 / 동작</th>
+          <th class="c" style="width:70px">주문차단</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="err-row"><td><span class="ec err">ERR_001</span></td><td>네트워크 끊김</td><td>전 단계 공통</td><td>자동 재시도 → 실패 시 수동 재시도 버튼 표시</td><td class="c block-y">차단</td></tr>
+        <tr class="err-row"><td><span class="ec err">ERR_002</span></td><td>영업 종료</td><td>진입 GATE-03</td><td>메뉴 미리보기 모드 활성 + 다음 영업일 알림 수신 유도</td><td class="c block-y">차단</td></tr>
+        <tr class="err-row"><td><span class="ec err">ERR_003</span></td><td>거리 제한 초과</td><td>진입 GATE-04</td><td>"매장 근처로 이동 후 QR 재스캔" 안내</td><td class="c block-y">차단</td></tr>
+        <tr class="err-row"><td><span class="ec err">ERR_004</span></td><td>품절 충돌</td><td>메뉴 탐색·결제</td><td>장바구니에서 자동 삭제 + 비슷한 메뉴 추천 (MOD-11)</td><td class="c block-y">차단</td></tr>
+        <tr class="err-row"><td><span class="ec err">ERR_005</span></td><td>결제 실패 (잔액·한도)</td><td>PG 콜백</td><td>장바구니 보존 · "다른 결제수단 또는 충전 후 재시도" 안내 · 중복 결제 방지 처리 필요</td><td class="c block-y">차단</td></tr>
+        <tr class="err-row"><td><span class="ec err">ERR_007</span></td><td>매장 정보 로드 실패</td><td>진입 GATE-02</td><td>자동 재시도 → 최종 실패 시 직원 호출 안내</td><td class="c block-y">차단</td></tr>
+        <tr class="err-row"><td><span class="ec err">ERR_008</span></td><td>큐싱 의심 QR</td><td>진입 GATE-01</td><td>즉시 화면 잠금 · 매장 직원 호출 · 보안 이력 기록</td><td class="c block-y">차단</td></tr>
+        <tr class="err-row"><td><span class="ec err">ERR_009</span></td><td>테이블 점유 충돌</td><td>진입·탐색</td><td>"함께주문 참여" 권장 또는 새 테이블로 이동 안내</td><td class="c block-y">차단</td></tr>
+        <tr class="err-row"><td><span class="ec err">ERR_010</span></td><td>POS 미연결</td><td>POS 전송</td><td>직원 호출 안내 · 자동 재시도</td><td class="c block-y">차단</td></tr>
+        <tr class="sta-row"><td><span class="ec sta">STA_001</span></td><td>결제 진행 중</td><td>PG 호출 후</td><td>처리 중 화면 표시 · 모든 사용자 액션 불가</td><td class="c" style="color:var(--purple);font-weight:700">⏳ 대기</td></tr>
+        <tr class="sta-row"><td><span class="ec sta">STA_002</span></td><td>주문 접수 중</td><td>POS 전송 후</td><td>잠시 후 직원 호출 버튼 활성화</td><td class="c" style="color:var(--purple);font-weight:700">⏳ 대기</td></tr>
+        <tr class="wrn-row"><td><span class="ec wrn">WRN_001</span></td><td>영업 종료 30분 전</td><td>진입·탐색</td><td>배너 표시 · 계속 주문 가능 · 빠른 메뉴 추천</td><td class="c block-n">주문 가능</td></tr>
+        <tr class="wrn-row"><td><span class="ec wrn">WRN_002</span></td><td>세션 만료 (5분 무활동)</td><td>탐색 중 5분 무활동</td><td>접속 후 5분간 행위 없으면 만료 · "계속 사용" / "지금 결제" 선택 모달 · 만료 후 장바구니 일정 시간 보존</td><td class="c block-n">주문 가능</td></tr>
+        <tr class="wrn-row"><td><span class="ec wrn">WRN_003</span></td><td>가격 변경 감지</td><td>결제 직전</td><td>변경된 가격 적용 확인 또는 메뉴 삭제 선택 모달</td><td class="c block-n">확인 후 가능</td></tr>
+        <tr class="inf-row"><td><span class="ec inf">INF_001</span></td><td>재고 임박 (잔여 소량)</td><td>메뉴 탐색</td><td>메뉴 카드에 잔여 수량 배지 표시 · 지금 주문 또는 다른 메뉴 보기</td><td class="c block-n">주문 가능</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 09 · 모달 10종 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-modal">
+  <div class="sec-head">
+    <span class="sec-tag">09</span>
+    <h2>모달 10종 트리거 매핑</h2>
+    <span class="desc">시트 · 전체 · 중앙 패턴</span>
+  </div>
+  <div class="sec-body">
+    <div class="modal-grid">
+
+      <div class="modal-card">
+        <span class="mid">MOD-01</span><span class="mtype">전체</span>
+        <h5>검색 모달</h5>
+        <div class="trigger">트리거: 상단 검색 버튼(M1-03) 클릭<br/>→ 검색 결과 표시 → 메뉴 상세 진입</div>
+      </div>
+
+      <div class="modal-card">
+        <span class="mid">MOD-02</span><span class="mtype">전체</span>
+        <h5>알림 패널</h5>
+        <div class="trigger">트리거: 알림 아이콘(M1-02) 길게 누름<br/>→ 수신 알림 목록 → 해당 알림 페이지</div>
+      </div>
+
+      <div class="modal-card">
+        <span class="mid">MOD-03</span><span class="mtype">시트</span>
+        <h5>매장 상세 정보</h5>
+        <div class="trigger">트리거: 매장명/로고(M1-01) 클릭<br/>→ 영업시간·주소·전화번호</div>
+      </div>
+
+      <div class="modal-card">
+        <span class="mid">MOD-04</span><span class="mtype">시트</span>
+        <h5>직원 호출</h5>
+        <div class="trigger">트리거: 직원호출(M1-09) 또는 완료화면(M4-08) 클릭<br/>→ 호출 유형 선택 → 사장님 앱 알림</div>
+      </div>
+
+      <div class="modal-card">
+        <span class="mid">MOD-05</span><span class="mtype">시트</span>
+        <h5>장바구니 수정</h5>
+        <div class="trigger">트리거: 장바구니 항목(M3-02) 탭<br/>→ 옵션·수량 수정</div>
+      </div>
+
+      <div class="modal-card">
+        <span class="mid">MOD-06</span><span class="mtype">시트</span>
+        <h5>쿠폰 선택 · 번호 입력</h5>
+        <div class="trigger">트리거: 쿠폰 아이콘(M1-05, M3-05) 클릭<br/>→ 보유 쿠폰 목록 선택 또는 쿠폰 번호 직접 입력 (선택 값)</div>
+      </div>
+
+      <div class="modal-card">
+        <span class="mid">MOD-08</span><span class="mtype">시트</span>
+        <h5>팁 직접 입력</h5>
+        <div class="trigger">트리거: 팁 선택란(M3-07) "직접 입력" 클릭<br/>→ 금액 입력 → 결제 금액에 합산</div>
+      </div>
+
+      <div class="modal-card">
+        <span class="mid">MOD-10</span><span class="mtype">중앙</span>
+        <h5>리뷰 분기</h5>
+        <div class="trigger">트리거: 완료화면 리뷰 버튼(M4-06)<br/>→ 네이버 / 자사 앱 / 둘 다 선택</div>
+      </div>
+
+      <div class="modal-card">
+        <span class="mid">MOD-11</span><span class="mtype">시트</span>
+        <h5>품절 충돌</h5>
+        <div class="trigger">트리거: ERR_004 발생<br/>→ 품절 메뉴 자동 삭제 안내 + 비슷한 메뉴 3종 추천</div>
+      </div>
+
+      <div class="modal-card">
+        <span class="mid">MOD-12</span><span class="mtype">중앙</span>
+        <h5>간편 인증</h5>
+        <div class="trigger">트리거: 완료화면(M4-07) 인증 버튼<br/>→ 지문/SMS 인증</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 10 · 외부 연동 지점 9종 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-api">
+  <div class="sec-head">
+    <span class="sec-tag">10</span>
+    <h2>외부 연동 지점 — 무엇을 주고받아야 하는지</h2>
+    <span class="desc">연동 대상 · 주고받는 정보 (방식은 개발팀 설계)</span>
+  </div>
+  <div class="sec-body">
+    <div class="callout info" style="margin-bottom:14px">
+      <b>📌 기획 관점의 정의입니다.</b> 이 절은 손님 화면이 <b>어떤 외부 시스템과 무엇을 주고받아야 하는지</b>만 정리합니다. API 설계(엔드포인트·메서드·실시간 동기 방식·폴링 주기·중복 결제 방지 기법·재시도 정책 등)는 개발팀이 결정합니다.
+    </div>
+    <table class="api-table">
+      <thead>
+        <tr>
+          <th style="width:150px">연동 대상</th>
+          <th>주고받아야 하는 정보</th>
+          <th style="width:150px">발생 시점</th>
+          <th class="c" style="width:90px">관련 코드</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>QR 인증</b></td>
+          <td>QR 위변조 여부 확인 (피싱·복제 QR 차단)</td>
+          <td>진입 GATE-01</td>
+          <td class="c"><span class="ec err" style="font-size:9px">ERR_008</span></td>
+        </tr>
+        <tr>
+          <td><b>매장 정보</b></td>
+          <td>매장 기본 정보 · 메뉴 · 운영 정책 조회</td>
+          <td>진입 GATE-02</td>
+          <td class="c"><span class="ec err" style="font-size:9px">ERR_007</span></td>
+        </tr>
+        <tr>
+          <td><b>영업 시간</b></td>
+          <td>현재 영업 여부 · 브레이크 타임 · 마감 임박 여부</td>
+          <td>진입 GATE-03</td>
+          <td class="c"><span class="ec err" style="font-size:9px">ERR_002</span></td>
+        </tr>
+        <tr style="background:var(--purple-l)">
+          <td><b>함께주문 (실시간 공유)</b></td>
+          <td>같은 테이블 손님들의 공동 장바구니 실시간 공유 · 한 명 결제 시 전체 잠금</td>
+          <td>메뉴 탐색 (매장 전용)</td>
+          <td class="c">—</td>
+        </tr>
+        <tr>
+          <td><b>카카오 로그인</b></td>
+          <td>카카오 계정 인증 (알림 수단 확보 목적, 강제 아님)</td>
+          <td>결제 진입 (선택)</td>
+          <td class="c">—</td>
+        </tr>
+        <tr style="background:var(--amber-l)">
+          <td><b>결제 (PG)</b></td>
+          <td>주문 정보 전달 · 결제 처리 · 결과 수신 · 중복 결제 방지 필요</td>
+          <td>결제</td>
+          <td class="c"><span class="ec err" style="font-size:9px">ERR_005</span></td>
+        </tr>
+        <tr>
+          <td><b>주문 상태 (POS)</b></td>
+          <td>주문 전달 · 진행 상태(접수·준비·완료 등) 실시간 수신</td>
+          <td>주문 접수 후 ~ 완료</td>
+          <td class="c"><span class="ec err" style="font-size:9px">ERR_010</span></td>
+        </tr>
+        <tr>
+          <td><b>알림 발송</b></td>
+          <td>영수증·준비완료·픽업·수락 알림 발송 (알림톡/SMS 등)</td>
+          <td>주문 완료 후</td>
+          <td class="c">—</td>
+        </tr>
+        <tr>
+          <td><b>세션·장바구니 보존</b></td>
+          <td>5분 무활동 시 세션 만료 처리 · 만료 후에도 장바구니 일정 시간 보존</td>
+          <td>탐색 중 5분 무활동</td>
+          <td class="c"><span class="ec wrn" style="font-size:9px">WRN_002</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- FOOTER -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="footer">
+  <b>출처</b> · customer.html 손님 화면 + 종합플로우차트 v1 + 방향성플로우 v1 + 시나리오시뮬레이터 v2 (2026-06-12)<br/>
+  <b>작성</b> · 2026-06-15 · Softment 사업부 박지은 · 개발팀 인계용<br/>
+  <b>총 정의 항목</b> · 6 시나리오 · 5 결제분기 · 4 차단규칙 · 5 알림케이스 · 15 에러·상태 · 10 모달 · 9 외부 연동 지점<br/>
+  <span style="font-size:10px">※ 본 문서는 기획 관점의 요구사항 정의서입니다. 데이터 연동 방식·API 설계·아키텍처 등 구현 영역은 개발팀이 결정합니다.</span>
+</div>
+
+</div>
+</body>
+</html>

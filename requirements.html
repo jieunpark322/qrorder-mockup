@@ -718,32 +718,36 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
     </div>
 
     <!-- 분기 3 -->
-    <div class="section-sub"><span class="dot" style="background:var(--blue)"></span> 분기 ③ 알림 시트 노출 여부 + 입력 수단</div>
-    <div class="callout info" style="margin-bottom:12px">
-      알림 시트는 손님의 연락처를 받는 바텀 시트입니다. 아래 05절 <a href="#sec-notif" style="color:var(--blue);font-weight:700">알림 시트 매트릭스</a>에서 5케이스를 상세히 정의합니다.
+    <div class="section-sub"><span class="dot" style="background:var(--blue)"></span> 분기 ③ 알림 시트 노출 여부 + 인증 수단 (★ 디폴트 = 휴대폰)</div>
+    <div class="callout danger" style="margin-bottom:12px">
+      <b>⚠️ 인증 수단 기본 정책 — 카카오·휴대폰을 둘 다 보여주지 않습니다.</b><br/>
+      · <b>디폴트는 휴대폰 번호 입력</b>입니다. 평소에는 카카오 인증을 노출하지 않습니다.<br/>
+      · <b>사장님사이트에서 "카카오톡 인증 필수"를 켠 매장에서만</b> 카카오 인증을 먼저 유도합니다.<br/>
+      · 즉, 카카오 인증 화면은 <b>매장 설정에 따라 조건부로</b> 나타납니다. (설정 OFF = 휴대폰 입력, 설정 ON = 카카오 우선)
     </div>
     <div class="branch-row col3">
-      <div class="branch-card kakao">
-        <h5>💛 카카오 로그인 (최우선 권장)</h5>
+      <div class="branch-card mint">
+        <h5>📱 휴대폰 번호 입력 — <b>기본(디폴트)</b></h5>
         <ul>
-          <li>사장님이 카카오 인증을 필수로 설정한 경우 최초 화면에 표시</li>
-          <li>로그인 성공 → 알림 시트 건너뜀</li>
-          <li>카카오톡 없는 손님 → "카카오톡이 없어요." 버튼 → 폰/이메일 중 선택 화면</li>
-        </ul>
-      </div>
-      <div class="branch-card">
-        <h5>📱 휴대폰 번호 입력</h5>
-        <ul>
+          <li>별도 설정이 없으면 <b>항상 이 화면</b>이 기본</li>
           <li>입력 완료 → 번호 확인 모달</li>
-          <li>주문 알림 용도로만 사용</li>
-          <li>선택적 마케팅 수신동의는 받지 않음</li>
+          <li>주문 알림 용도로만 사용 · 마케팅 수신동의 받지 않음</li>
+        </ul>
+      </div>
+      <div class="branch-card kakao">
+        <h5>💛 카카오 인증 — <b>조건부(사장님 설정 ON)</b></h5>
+        <ul>
+          <li><b>사장님사이트 "카카오톡 인증 필수" ON일 때만</b> 노출</li>
+          <li>이 경우 카카오 인증 화면을 <b>먼저</b> 보여줌</li>
+          <li>로그인 성공 → 알림 시트(연락처 입력) 건너뜀</li>
+          <li>카카오톡 없는 손님 → "카카오톡이 없어요." → 휴대폰/이메일 선택 화면</li>
         </ul>
       </div>
       <div class="branch-card">
-        <h5>📧 이메일 입력</h5>
+        <h5>📧 이메일 입력 — 대체 수단</h5>
         <ul>
-          <li>이메일 형식 유효성 검사</li>
-          <li>입력 완료 → 이메일 확인 모달</li>
+          <li>카카오 대체 선택 화면 또는 직접 입력으로 진입</li>
+          <li>이메일 형식 유효성 검사 → 이메일 확인 모달</li>
           <li>주문 알림 용도로만 사용 · 마케팅 수신동의 받지 않음</li>
         </ul>
       </div>
@@ -848,7 +852,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <td><b>셀프 + 알림톡</b></td>
           <td class="c"><span class="req-badge">★ 필수</span></td>
           <td>준비완료 알림 없으면 수령 불가</td>
-          <td>카카오톡 / 휴대폰 / 이메일</td>
+          <td>휴대폰(기본) · 이메일 / 카카오(사장님 설정 ON 시)</td>
           <td><b style="color:var(--red)">건너뛰기 버튼 숨김</b></td>
         </tr>
         <tr style="background:var(--red-l)">
@@ -856,7 +860,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <td>—</td>
           <td class="c"><span class="req-badge">★ 필수</span></td>
           <td>픽업 준비완료 알림 필요</td>
-          <td>카카오톡 / 휴대폰 / 이메일</td>
+          <td>휴대폰(기본) · 이메일 / 카카오(사장님 설정 ON 시)</td>
           <td><b style="color:var(--red)">건너뛰기 버튼 숨김</b></td>
         </tr>
         <tr style="background:var(--red-l)">
@@ -864,7 +868,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <td>—</td>
           <td class="c"><span class="req-badge">★ 필수</span></td>
           <td>수락·준비 알림 필요 · 거절 시 환불 안내</td>
-          <td>카카오톡 / 휴대폰 / 이메일</td>
+          <td>휴대폰(기본) · 이메일 / 카카오(사장님 설정 ON 시)</td>
           <td><b style="color:var(--red)">건너뛰기 버튼 숨김</b></td>
         </tr>
       </tbody>
@@ -872,21 +876,25 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
 
     <div style="margin-top:16px">
       <div class="section-sub"><span class="dot"></span> 알림 시트 내부 흐름 상세 (필수 케이스 한정)</div>
+      <div class="callout danger" style="margin-bottom:12px">
+        <b>⚠️ 디폴트는 휴대폰 번호 입력입니다.</b> 카카오 인증은 <b>사장님사이트 "카카오톡 인증 필수" 설정이 ON인 매장에서만</b> 먼저 나타나고, 그 외에는 휴대폰 번호 입력이 기본 화면입니다.
+      </div>
       <div class="branch-row col3">
-        <div class="branch-card kakao">
-          <h5>💛 카카오 로그인 (사장님 필수 설정 시 최우선)</h5>
+        <div class="branch-card mint">
+          <h5>📱 휴대폰 번호 입력 — 기본(디폴트)</h5>
           <ul>
-            <li>카카오 로그인 → 성공 시 알림 시트 즉시 종료, 주문 진행</li>
-            <li>"카카오톡이 없어요." 버튼 클릭 → altpick 화면 진입</li>
-            <li>altpick: 📱 휴대폰 / 📧 이메일 선택 버튼 + "돌아가기"</li>
+            <li>별도 설정이 없으면 항상 이 화면이 기본</li>
+            <li>입력 완료 → "이 번호로 알림을 보내드려요" 확인 모달</li>
+            <li>주문 알림 용도로만 사용 · 마케팅 수신동의 표시 안 함</li>
           </ul>
         </div>
-        <div class="branch-card">
-          <h5>📱 휴대폰 번호 입력</h5>
+        <div class="branch-card kakao">
+          <h5>💛 카카오 인증 — 사장님 설정 ON일 때만</h5>
           <ul>
-            <li>입력 완료 → "이 번호로 알림을 보내드려요" 확인 모달</li>
-            <li>주문 알림 용도로만 사용</li>
-            <li>선택적 마케팅 수신동의 체크박스 표시 안 함</li>
+            <li>"카카오톡 인증 필수" ON 매장에서만 카카오 인증을 먼저 노출</li>
+            <li>카카오 로그인 → 성공 시 알림 시트 즉시 종료, 주문 진행</li>
+            <li>"카카오톡이 없어요." 버튼 클릭 → 휴대폰/이메일 선택 화면</li>
+            <li>선택 화면: 📱 휴대폰 / 📧 이메일 + "돌아가기"</li>
           </ul>
         </div>
         <div class="branch-card">

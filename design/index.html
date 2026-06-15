@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR오더 손님 화면 · 디자인용 SVG</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Pretendard',-apple-system,sans-serif;background:#F4F5F7;color:#111827;margin:0;padding:32px;}
+h1{font-size:21px;font-weight:800;margin-bottom:6px;}
+.sub{font-size:13px;color:#6B7280;margin-bottom:24px;max-width:720px;line-height:1.6;}
+.grp{font-size:13px;font-weight:800;color:#2563EB;margin:26px 0 12px;padding-bottom:6px;border-bottom:1px solid #E5E7EB;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;}
+.card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;}
+.card:hover{border-color:#2563EB;box-shadow:0 6px 18px rgba(0,0,0,.08);}
+.thumb{height:230px;background:#fafbfc;border-bottom:1px solid #E5E7EB;overflow:hidden;display:flex;justify-content:center;align-items:flex-start;}
+.thumb img{width:160px;display:block;}
+.meta{padding:10px 12px;}
+.meta .nm{font-size:13px;font-weight:700;}
+.meta .fn{font-size:11px;color:#9CA3AF;margin-top:2px;font-family:ui-monospace,monospace;}
+</style>
+</head>
+<body>
+<h1>QR오더 손님 화면 · 디자인용 SVG</h1>
+<div class="sub">customer.html의 각 상태를 화면 그대로 캡처해 SVG로 담았습니다(이미지 임베드). Figma(html.to.design)로 가져가 디자인 작업의 밑그림·레퍼런스로 쓰세요. 카드를 누르면 SVG 원본이 열립니다 — 우클릭 저장하거나 Figma로 드래그하세요.</div>
+<div id="root"></div>
+<script>
+const GROUPS = [
+  {g:'메인 (메뉴)', items:[
+    ['01-menu-dinein','내점'],['02-menu-takeout','포장'],['03-menu-preorder','예약'],['04-menu-closed','영업 종료']]},
+  {g:'메뉴 상세', items:[['05-sheet','메뉴 상세 시트']]},
+  {g:'결제 화면', items:[
+    ['06-checkout-dinein-prepay','내점·선불'],['07-checkout-dinein-postpay','내점·후불'],
+    ['08-checkout-takeout','포장'],['09-checkout-preorder','예약(수령시간)']]},
+  {g:'알림 수단 시트', items:[
+    ['10-notif-select','선택 전'],['11-notif-phone','휴대폰 입력'],['12-notif-email','이메일 입력(외국인)']]},
+  {g:'결제 처리 중', items:[['13-processing','처리 중']]},
+  {g:'결제 완료', items:[
+    ['14-done-dinein','내점'],['15-done-takeout','포장'],['16-done-preorder','예약'],['17-done-postpay','후불(현장결제)']]},
+  {g:'에러', items:[['18-error-payfail','결제 실패'],['19-error-network','네트워크 오류']]},
+  {g:'세션', items:[['20-session','세션 만료']]},
+];
+document.getElementById('root').innerHTML = GROUPS.map(grp=>`
+  <div class="grp">${grp.g}</div>
+  <div class="grid">${grp.items.map(([f,nm])=>`
+    <a class="card" href="svg/${f}.svg" target="_blank">
+      <div class="thumb"><img src="svg/${f}.svg" loading="lazy" alt="${nm}"></div>
+      <div class="meta"><div class="nm">${nm}</div><div class="fn">${f}.svg</div></div>
+    </a>`).join('')}</div>`).join('');
+</script>
+</body>
+</html>

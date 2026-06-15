@@ -1919,6 +1919,7 @@ function scrDone(){
       ${receiptNote}${extraNote}
       <div style="${(receiptNote||extraNote)?'border-top:1px solid var(--line2);margin-top:14px;padding-top:13px;':''}">
         ${S.cart.map(c=>`<div class="rowline" style="padding:3px 0;"><span style="flex:1;">${c.name} ×${c.qty}</span><span style="color:var(--ink);font-weight:700;">${won(c.unit*c.qty)}원</span></div>`).join('')}
+        ${couponDiscount()>0?`<div class="rowline" style="padding:4px 0 3px;margin-top:4px;border-top:1px solid var(--line2);color:var(--ink3);font-size:13px;"><span style="flex:1;">상품 금액</span><span>${won(cartTotal())}원</span></div>`:''}
         ${couponDiscount()>0?`<div class="rowline" style="padding:3px 0;color:var(--blue);"><span style="flex:1;">🎟️ 쿠폰 할인</span><span>-${won(couponDiscount())}원</span></div>`:''}
         <div class="rowline tot" style="font-size:15px;"><span>${(S.orderType==='dinein'&&S.payTiming==='postpay')?'결제 예정':'결제 금액'}</span><span>${won(cartTotal()-couponDiscount())}원</span></div>
       </div>

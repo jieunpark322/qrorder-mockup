@@ -1095,6 +1095,14 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
       4. 최종 결제 금액 (선불: "결제 금액" / 후불: "결제 예정")
     </div>
 
+    <div class="section-sub" style="margin-top:18px"><span class="dot"></span> 주문 내역 동기화 (POS ↔ 손님 화면)</div>
+    <div class="callout danger">
+      <b>🔄 주문접수프로그램에서 테이블·주문 건이 클리어되면, 손님 화면의 주문 내역도 즉시 초기화·갱신되어야 합니다.</b><br/>
+      · 매장(주문접수프로그램)에서 <b>테이블을 비우거나(클리어)</b> 특정 <b>주문 건을 정리</b>하면, 그 테이블/주문으로 진행 중이던 손님 화면의 <b>주문 내역도 자동으로 비워지거나 최신 상태로 갱신</b>됩니다.<br/>
+      · 손님이 새로고침하지 않아도 반영되어야 하며, 이미 정리된 주문이 손님 화면에 계속 남아 혼선이 생기지 않도록 합니다.<br/>
+      · 동기화 방식(실시간 푸시·폴링 등)은 개발팀이 결정합니다.
+    </div>
+
   </div>
 </div>
 
@@ -1301,8 +1309,8 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         </tr>
         <tr>
           <td><b>주문 상태 (POS)</b></td>
-          <td>주문 전달 · 진행 상태(접수·준비·완료 등) 실시간 수신</td>
-          <td>주문 접수 후 ~ 완료</td>
+          <td>주문 전달 · 진행 상태(접수·준비·완료 등) 실시간 수신 · <b>주문접수프로그램에서 테이블 또는 해당 주문 건을 클리어하면 손님 화면의 주문 내역도 즉시 초기화·갱신</b></td>
+          <td>주문 접수 후 ~ 완료/클리어</td>
           <td class="c"><span class="ec err" style="font-size:9px">ERR_010</span></td>
         </tr>
         <tr>

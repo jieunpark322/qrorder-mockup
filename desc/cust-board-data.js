@@ -176,7 +176,7 @@ window.CUST_SCREENS = [
   function boardHTML(s, imgBase){
     var cards = s.pins.map(function(pin){
       return '<div class="pinrow"><div class="pinrow-h"><span class="pn">'+pin.n+'</span><span class="pt">'+pin.title+'</span></div>'+
-        '<div class="cat4">'+catBlock('p',pin.p)+catBlock('b',pin.b)+catBlock('d',pin.d)+catBlock('e',pin.e)+'</div></div>';
+        '<div class="cat4">'+catBlock('p',pin.p)+catBlock('b',pin.b)+catBlock('e',pin.e)+'</div></div>';
     }).join('');
     return '<div class="board" id="b-'+s.key+'"><div class="board-h"><span class="num">'+s.ord+'</span>'+
       '<span class="nm">'+s.icon+' '+s.name+'</span><span class="gp">· '+s.group+'</span></div>'+

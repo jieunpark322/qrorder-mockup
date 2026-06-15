@@ -439,7 +439,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <td class="c"><span class="tag-opt">선택</span><br/><span style="font-size:9px;color:var(--ink3)">영수증 토글만</span></td>
           <td class="c"><span class="tag-skip">미발급</span></td>
           <td class="c"><span class="tag-req">O</span></td>
-          <td>호출번호 없음 · 직원이 테이블로 서빙 · 진행단계 "서빙중"</td>
+          <td>호출번호 없음 · 직원이 테이블로 서빙 · 진행단계 접수·준비·완료(3단계)</td>
         </tr>
         <tr style="background:var(--amber-l)">
           <td><span class="sc-code" style="background:var(--sc4)">SC_04</span></td>
@@ -469,10 +469,10 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <td>📅 예약</td>
           <td>— (없음)</td>
           <td>💳 선불</td>
-          <td class="c"><span class="tag-req">★ 필수</span><br/><span style="font-size:9px;color:var(--ink3)">수락 알림</span></td>
+          <td class="c"><span class="tag-req">★ 필수</span><br/><span style="font-size:9px;color:var(--ink3)">픽업 알림</span></td>
           <td class="c"><span class="tag-req">발급 O</span></td>
           <td class="c"><span class="tag-req">O</span></td>
-          <td><b>수령시간 선택 필수</b> · 사장님 수락 단계 추가 · 거절 시 자동 환불</td>
+          <td><b>수령시간 선택 필수</b> · 진행단계 포장과 동일 · 미수락(거절) 시 자동 환불(백그라운드)</td>
         </tr>
       </tbody>
     </table>
@@ -527,9 +527,9 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
             <li>약관 동의</li>
             <li>결제 (선불)</li>
             <li class="diff">★ 호출번호 미발급 (자리로 서빙)</li>
-            <li>직원이 테이블로 서빙 · 진행단계 "서빙중"</li>
+            <li>직원이 테이블로 서빙 · 진행단계 접수→준비→완료</li>
           </ol>
-          <div class="sc-unique">★ 호출번호 없음 · 진행단계 라벨 = "서빙중" (수령대기 X)</div>
+          <div class="sc-unique">★ 호출번호 없음 · 진행단계 3단계(접수·준비·완료) · 수령대기 없음</div>
         </div>
 
         <div class="sc-detail-card sc4">
@@ -569,18 +569,18 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         <div class="sc-detail-card sc6">
           <span class="sc-id">SC_06</span>
           <h4>예약 · 지정시간픽업 · 선불</h4>
-          <div class="sc-axes">📅 예약 / 지정시간픽업 / 💳 선불 · 진행단계 5개</div>
+          <div class="sc-axes">📅 예약 / 지정시간픽업 / 💳 선불 · 진행단계 포장과 동일</div>
           <ol class="sc-step-list">
             <li>QR 스캔 + 매장 진입 검증</li>
             <li>메뉴 탐색 (함께주문 차단)</li>
             <li class="diff">★ 수령 시간 선택 필수 (시·분, 미선택 시 결제 차단)</li>
-            <li class="diff">★ 알림 시트 필수 (수락·준비 알림)</li>
+            <li class="diff">★ 알림 시트 필수 (준비·픽업 알림)</li>
             <li>약관 동의</li>
             <li>결제 (선불)</li>
-            <li class="diff">★ 진행단계에 "수락대기" 추가 (5단계)</li>
-            <li>사장님 수락 → 준비 → 지정 시간 픽업</li>
+            <li>진행단계: 접수→준비→픽업대기→픽업완료 (포장과 동일)</li>
+            <li>지정 시간에 픽업</li>
           </ol>
-          <div class="sc-unique">★ 유일하게 진행단계 5개 · 사장님 거절 시 자동 환불 처리 필요</div>
+          <div class="sc-unique">★ 고객 화면 진행단계는 포장과 동일(수락대기 미노출) · 사장님 미수락(거절) 시 자동 환불은 백그라운드 처리</div>
         </div>
 
       </div>
@@ -746,7 +746,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         <ul>
           <li>→ 분기 ③ 알림 시트 생략 (영수증 토글만)</li>
           <li>후불 가능 (유일)</li>
-          <li>진행단계 라벨 = "서빙중"</li>
+          <li>진행단계 3단계(접수→준비→완료)</li>
           <li>호출번호 미발급</li>
         </ul>
       </div>
@@ -920,7 +920,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <td><b>예약</b></td>
           <td>—</td>
           <td class="c"><span class="req-badge">★ 필수</span></td>
-          <td>수락·준비 알림 필요 · 거절 시 환불 안내</td>
+          <td>준비·픽업 알림 필요 · 미수락 시 환불 안내</td>
           <td>휴대폰(기본) · 이메일 / 카카오(사장님 설정 ON 시)</td>
           <td><b style="color:var(--red)">건너뛰기 버튼 숨김</b></td>
         </tr>
@@ -1000,7 +1000,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         <tr><td><span class="sc-code" style="background:var(--sc3);font-size:9px">SC_03</span> 매장·서빙·선불</td><td style="color:var(--ink3)">미발급</td><td>—</td><td>직원 자리 서빙</td></tr>
         <tr><td><span class="sc-code" style="background:var(--sc4);font-size:9px">SC_04</span> 매장·서빙·후불</td><td style="color:var(--ink3)">미발급</td><td>—</td><td>직원 자리 서빙</td></tr>
         <tr><td><span class="sc-code" style="background:var(--sc5);font-size:9px">SC_05</span> 포장</td><td><b style="color:var(--mint-d)">발급 O</b></td><td>픽업 번호</td><td>카카오 알림톡 (준비완료)</td></tr>
-        <tr><td><span class="sc-code" style="background:var(--sc6);font-size:9px">SC_06</span> 예약</td><td><b style="color:var(--mint-d)">발급 O</b></td><td>예약 픽업 번호</td><td>카카오 알림톡 (수락→준비)</td></tr>
+        <tr><td><span class="sc-code" style="background:var(--sc6);font-size:9px">SC_06</span> 예약</td><td><b style="color:var(--mint-d)">발급 O</b></td><td>예약 픽업 번호</td><td>카카오 알림톡 (준비→픽업)</td></tr>
       </tbody>
     </table>
 
@@ -1019,13 +1019,11 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         </div>
       </div>
       <div class="stage-card">
-        <h5>🙋 매장 서빙 (SC_03, SC_04)</h5>
+        <h5>🙋 매장 서빙 (SC_03, SC_04) — 3단계</h5>
         <div class="stage-steps">
           <span class="stage-step">접수</span>
           <span class="stage-arrow">→</span>
           <span class="stage-step">준비</span>
-          <span class="stage-arrow">→</span>
-          <span class="stage-step special">서빙중</span>
           <span class="stage-arrow">→</span>
           <span class="stage-step">완료</span>
         </div>
@@ -1043,15 +1041,15 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         </div>
       </div>
       <div class="stage-card">
-        <h5>📅 예약 ★ 5단계 (SC_06)</h5>
+        <h5>📅 예약 (SC_06) — 포장과 동일</h5>
         <div class="stage-steps">
           <span class="stage-step">접수</span>
           <span class="stage-arrow">→</span>
-          <span class="stage-step special">수락대기</span>
-          <span class="stage-arrow">→</span>
           <span class="stage-step">준비</span>
           <span class="stage-arrow">→</span>
-          <span class="stage-step">완료</span>
+          <span class="stage-step special">픽업대기</span>
+          <span class="stage-arrow">→</span>
+          <span class="stage-step">픽업완료</span>
         </div>
       </div>
     </div>
@@ -1068,9 +1066,10 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
       <div class="branch-card amber">
         <h5>📅 SC_06 예약 안내 카드</h5>
         <ul>
-          <li>표시 조건: 예약 시나리오 + 수락 대기 중</li>
-          <li>내용: "수령 예정 HH:MM · 사장님 수락 후 확정"</li>
-          <li>거절 시: 자동 환불 처리 + 안내 화면</li>
+          <li>표시 조건: 예약 시나리오</li>
+          <li>내용: "수령 예정 HH:MM" (지정 시간 안내)</li>
+          <li>진행단계는 포장과 동일 (수락대기 미노출)</li>
+          <li>미수락(거절) 시: 자동 환불 + 안내 (백그라운드 처리)</li>
         </ul>
       </div>
     </div>

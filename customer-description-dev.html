@@ -342,13 +342,15 @@ const CAT_META = {
 };
 
 function buildBoard(s) {
-  const phones = s.variants.map(v=>`
+  const phones = s.variants.map(v=>{
+    const src = v.url + (v.url.includes('?')?'&':'?') + 'cap=1';  // 데모(시뮬레이터)바 숨김
+    return `
     <div class="phone-col">
       <div class="variant-label">${v.label}</div>
       <div class="phone-chrome">
-        <iframe src="${v.url}" loading="lazy" title="${v.label}"></iframe>
+        <iframe src="${src}" loading="lazy" title="${v.label}"></iframe>
       </div>
-    </div>`).join('');
+    </div>`;}).join('');
 
   // 데이터·연동 카테고리 제외 + 남은 핀 순차 번호 재부여
   const visible = s.pins.filter(p=>p.cat!=='data');

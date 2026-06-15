@@ -2109,7 +2109,8 @@ if(/[?&]cap=1/.test(location.search)){
     var db=document.getElementById('demobar'); if(db) db.style.display='none';
     document.documentElement.style.background='#fff';
     document.body.style.margin='0'; document.body.style.padding='0'; document.body.style.background='#fff';
-    var dev=document.querySelector('.device'); if(dev){ dev.style.margin='0'; dev.style.borderRadius='0'; dev.style.width='440px'; dev.style.maxWidth='440px'; }
+    var dev=document.querySelector('.device'); if(dev){ dev.style.margin='0'; dev.style.borderRadius='0'; dev.style.boxShadow='none'; dev.style.border='none';
+      if(window.self===window.top){ dev.style.width='440px'; dev.style.maxWidth='440px'; } }  /* iframe(보드)에선 폭 강제 안 함 → 잘림 방지 */
   };
   __cap(); setTimeout(__cap,200); setTimeout(__cap,500);
 }

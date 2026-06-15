@@ -133,6 +133,7 @@ body{
 .card.purpose  {background:var(--blue-bg);  border-color:#BFDBFE;}
 .card.behavior {background:var(--green-bg); border-color:#A7F3D0;}
 .card.exception{background:var(--amber-bg); border-color:#FDE68A;}
+.card.design   {background:#FDF2F8; border-color:#FBCFE8;}
 .card-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
 .pin-b{
   width:18px;height:18px;border-radius:50%;
@@ -142,6 +143,7 @@ body{
 .purpose  .pin-b{background:var(--blue);  color:white;}
 .behavior .pin-b{background:var(--green); color:white;}
 .exception .pin-b{background:var(--amber);color:white;}
+.design   .pin-b{background:#DB2777;color:white;}
 .cat-tag{
   font-size:9px;font-weight:700;letter-spacing:.05em;
   padding:1px 5px;border-radius:3px;
@@ -149,6 +151,7 @@ body{
 .purpose  .cat-tag{color:var(--blue);  background:#DBEAFE;}
 .behavior .cat-tag{color:var(--green); background:#D1FAE5;}
 .exception .cat-tag{color:var(--amber);background:#FEF3C7;}
+.design   .cat-tag{color:#DB2777;background:#FCE7F3;}
 .card-title{font-size:12px;font-weight:600;color:var(--ink-1);margin-bottom:4px;}
 .card-body{list-style:none;display:flex;flex-direction:column;gap:2px;}
 .card-body li{
@@ -159,6 +162,7 @@ body{
 .purpose  .card-body li::before{color:var(--blue);}
 .behavior .card-body li::before{color:var(--green);}
 .exception .card-body li::before{color:var(--amber);}
+.design   .card-body li::before{color:#DB2777;}
 </style>
 </head>
 <body>
@@ -178,9 +182,10 @@ body{
     <span class="lg-item"><span class="dot purpose"></span>🎯 목적</span>
     <span class="lg-item"><span class="dot behavior"></span>⚙️ 동작·상태</span>
     <span class="lg-item"><span class="dot exception"></span>⚠️ 예외·UX문구</span>
+    <span class="lg-item"><span class="dot design"></span>🎨 디자인·인터랙션</span>
   </div>
   <div class="note-bar">
-    <b>📌 이 보드는 기획 관점(목적 · 동작 · 예외)만 담았습니다.</b> 데이터 바인딩·연동 방식 등 구현 영역은 제외했으며, 해당 부분은 개발팀이 설계합니다. 각 화면은 실제 customer.html을 그대로 임베드한 화면입니다.
+    <b>📌 개발자·디자이너 공용 보드입니다.</b> 목적 · 동작 · 예외와 함께 <b>🎨 디자인·인터랙션</b>(애니메이션·전환·강조 등)을 표시했습니다. 데이터 바인딩·연동 방식 등 구현 영역은 개발팀이 설계합니다. 각 화면은 실제 customer.html을 캡처한 화면입니다.
   </div>
   <div id="boards"></div>
 </main>
@@ -206,6 +211,8 @@ const SCREENS = [
        items:['품절 메뉴: 카드 흐리게 + "품절" 배지, 탭·담기 불가','재고 소량(잔여 N개)이면 메뉴 카드에 배지 표시','영업시간 외: 주문 불가 안내, 메뉴는 둘러볼 수 있어요']},
       {n:4, cat:'behavior', title:'장바구니 바 (하단 고정)',
        items:['메뉴를 담으면 수량·합계가 하단 바에 반영','담은 메뉴가 없으면 바 숨김, 1개 이상이면 슬라이드 업']},
+      {n:5, cat:'design', title:'주문 방식 선택 모달 · 장바구니 바',
+       items:['먹고가기+포장 운영 매장의 선택지는 가로로 나란히(병렬) 배치','버튼을 누르면 살짝 작아지고(눌림), 선택한 버튼은 파란색으로 강조되며 통 튀는 효과 후 진입','모달이 떠 있는 동안 배경 스크롤 잠금','장바구니 바는 하단에서 슬라이드 업으로 등장']},
     ],
   },
   {
@@ -225,6 +232,8 @@ const SCREENS = [
        items:['수량 최소 1개','담기 버튼에 개수·소계 실시간 반영 (예: "2개 담기 · ₩10,600")']},
       {n:4, cat:'exception', title:'동일 메뉴 재담기',
        items:['동일 옵션 조합으로 다시 담으면 수량 누적','품절 메뉴는 시트 진입 자체 차단']},
+      {n:5, cat:'design', title:'바텀 시트 모션',
+       items:['화면 아래에서 위로 슬라이드 업하며 등장','시트가 열린 동안 배경 스크롤 잠금','담기 버튼 누르면 살짝 눌리는 피드백']},
     ],
   },
   {
@@ -246,7 +255,7 @@ const SCREENS = [
       {n:4, cat:'exception', title:'약관 동의 (선불만 노출)',
        items:['필수 약관 미동의 시 결제 진행 불가','카카오 회원 2개 / 비회원 3개(만 14세 확인 포함)','후불이면 약관 섹션 미노출']},
       {n:5, cat:'exception', title:'결제하기 버튼 3가지 분기',
-       items:['선불: 알림 수단 입력 → 확인 모달 → 결제 진행','후불: 결제 단계 없이 바로 주문 넣기','예약: 수령 시간(시·분) 미선택 시 버튼 비활성화']},
+       items:['선불: 알림 수단 입력 → 확인 모달 → 결제 진행','후불: 결제 단계 없이 바로 주문하기','예약: 수령 시간(시·분) 미선택 시 버튼 비활성화']},
     ],
   },
   {
@@ -267,6 +276,8 @@ const SCREENS = [
        items:['휴대폰 입력 시 마케팅(쿠폰·이벤트) 수신동의 — 최초 1회만, 동일 번호 재노출 안 함','동의 시 보유 쿠폰 바로 표시','이메일은 마케팅 수신동의 받지 않음(주문 알림 용도로만)']},
       {n:4, cat:'exception', title:'시트 생략 & 닫기',
        items:['카카오 인증으로 로그인된 상태면 시트 생략하고 바로 진행','같은 기기 재방문 시 이전 번호 기억해 자동 채움(번호 바꿀 때만 수정)','시트 바깥 터치 시 닫고 결제 화면으로 복귀']},
+      {n:5, cat:'design', title:'시트·확인 모달 모션',
+       items:['알림 시트는 하단에서 슬라이드 업으로 등장','연락처 입력 후 확인 모달이 한 번 더 부드럽게 올라옴','시트가 열린 동안 배경 스크롤 잠금']},
     ],
   },
   {
@@ -281,6 +292,8 @@ const SCREENS = [
        items:['결제 처리 중 / 주문 접수 중 단계를 안내','처리 단계에 따라 문구 갱신']},
       {n:2, cat:'exception', title:'화면 잠금 & 실패 전환',
        items:['처리 중에는 사용자 액션 불가','실패 시 에러 화면으로 전환']},
+      {n:3, cat:'design', title:'로딩 표현',
+       items:['회전 스피너로 처리 중임을 표현','화면 전체를 덮어 상호작용을 막음']},
     ],
   },
   {
@@ -300,6 +313,8 @@ const SCREENS = [
        items:['후불: "나갈 때 카운터에서 결제해 주세요" 안내','예약: "수령 예정 HH:MM" 안내 · 진행 단계는 포장과 동일(수락대기 미노출)']},
       {n:4, cat:'behavior',  title:'새 주문 시작 & 직원 호출',
        items:['"새 주문하기" → 장바구니·쿠폰·연락처 초기화 후 메뉴 복귀','매장+서빙이면 완료 화면에서도 직원 호출 가능']},
+      {n:5, cat:'design', title:'진행 단계 바',
+       items:['현재 단계를 색으로 강조 표시','지난 단계는 체크 표시로 완료감 전달','상태가 바뀌면 단계가 순차적으로 채워짐']},
     ],
   },
   {
@@ -338,6 +353,7 @@ const CAT_META = {
   purpose:  {icon:'🎯', label:'목적', cls:'purpose'},
   behavior: {icon:'⚙️', label:'동작', cls:'behavior'},
   exception:{icon:'⚠️', label:'예외', cls:'exception'},
+  design:   {icon:'🎨', label:'디자인', cls:'design'},
 };
 
 function buildBoard(s) {

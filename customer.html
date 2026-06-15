@@ -1574,63 +1574,56 @@ function scrCheckout(){
     ${(()=>{
       if(!S.notifSheet) return '';
       const notifRequired = S.orderType !== 'dinein' || (S.serve === 'self' && S.callMethod === 'alimtalk');
-      const showPhone = S.notifChoice === 'phone';
       const showEmail = S.notifChoice === 'email';
-      const showMarketing = showPhone || S.notifChoice==='kakao';
       const mktChecked = S.termsChecked.marketing || false;
+      const phoneRaw = (S.phone||'').replace(/\D/g,'');
+      const phoneFormatted = phoneRaw.length===11
+        ? phoneRaw.replace(/(\d{3})(\d{4})(\d{4})/,'$1-$2-$3')
+        : phoneRaw.length===10
+        ? phoneRaw.replace(/(\d{3})(\d{3})(\d{4})/,'$1-$2-$3')
+        : phoneRaw;
+      const showPhoneHint = phoneRaw.length >= 10;
       const emailValid = showEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.email||'');
-      const canPay = S.notifChoice==='kakao' || S.notifChoice==='skip'
-        || (showPhone && (S.phone||'').replace(/\D/g,'').length>=10) || emailValid;
+      const sheetTitle = (S.orderType!=='dinein') ? '영수증·알림 받을 번호를 입력해 주세요' : '주문 알림 받을 번호를 입력해 주세요';
+      const sheetDesc  = (S.orderType!=='dinein') ? '입력하신 번호로 결제와 주문 상태 알림을 보내드려요.' : '입력하신 번호로 조리 완료 등 주문 상태를 알려드려요.';
       return `
-        <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;" onclick="S.notifSheet=false;S.notifChoice=null;render()"></div>
+        <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;" onclick="S.notifSheet=false;S.notifChoice='phone';render()"></div>
         <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:20px 20px 40px;z-index:201;box-sizing:border-box;">
           <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 20px;"></div>
-          <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;">${S.serve==='server'?'영수증을 카카오 알림톡으로 발송해 드려요.':'카카오 알림톡으로 알려드려요.'}</p>
-          <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'4px':'16px'};">연락처를 어떻게 등록할까요?</p>
-          ${notifRequired?`<p style="font-size:12px;color:var(--red);margin-bottom:12px;">알림 수단을 선택해야 주문할 수 있어요.</p>`:''}
+          <p style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;">${sheetTitle}</p>
+          <p style="font-size:13px;color:var(--ink3);margin-bottom:${notifRequired?'4px':'16px'};">${sheetDesc}</p>
+          ${notifRequired?`<p style="font-size:12px;color:var(--red);margin-bottom:12px;">연락처를 등록해야 주문할 수 있어요.</p>`:''}
 
-          <div style="display:flex;gap:8px;margin-bottom:16px;">
-            <button onclick="S.notifChoice='kakao';render()" style="flex:1;padding:13px 8px;border-radius:12px;border:2px solid ${S.notifChoice==='kakao'?'#E6C000':'var(--line)'};background:${S.notifChoice==='kakao'?'#FEE500':'#fff'};font-size:14px;font-weight:700;color:#191919;cursor:pointer;font-family:inherit;line-height:1.4;text-align:center;">
-              🟡 카카오톡 로그인
-            </button>
-            <button onclick="S.notifChoice='phone';S.authType='anon';render()" style="flex:1;padding:13px 8px;border-radius:12px;border:2px solid ${S.notifChoice==='phone'?'var(--blue)':'var(--line)'};background:${S.notifChoice==='phone'?'var(--blue-50)':'#fff'};font-size:14px;font-weight:700;color:${S.notifChoice==='phone'?'var(--blue-d)':'var(--ink2)'};cursor:pointer;font-family:inherit;line-height:1.4;text-align:center;">
-              📱 휴대폰번호<br>직접 입력
-            </button>
-          </div>
-
-          <div style="text-align:center;margin:-4px 0 10px;">
-            <button onclick="S.notifChoice=S.notifChoice==='email'?null:'email';render()" style="background:none;border:1.5px solid ${S.notifChoice==='email'?'var(--blue)':'var(--line)'};border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:${S.notifChoice==='email'?'var(--blue-d)':'var(--ink3)'};cursor:pointer;font-family:inherit;">
-              ✉️ 이메일로 받기 <span style="font-weight:400;font-size:11px;">(휴대폰 번호가 없는 경우)</span>
-            </button>
-          </div>
-
-          ${showPhone?`
-            <div class="field" style="margin-bottom:10px;">
-              <label>휴대폰 번호</label>
-              <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}" oninput="S.phone=this.value.replace(/[^0-9]/g,'');render();const _pi=document.getElementById('phoneInput');if(_pi){_pi.focus();_pi.setSelectionRange(_pi.value.length,_pi.value.length);}"  />
-            </div>`:''}
+          ${!showEmail?`
+            <div style="margin-bottom:${showPhoneHint?'8px':'16px'};">
+              <input id="phoneInput" inputmode="numeric" maxlength="13" placeholder="010-1234-5678" value="${S.phone}"
+                oninput="S.phone=this.value.replace(/[^0-9]/g,'');render();const _pi=document.getElementById('phoneInput');if(_pi){_pi.focus();_pi.setSelectionRange(_pi.value.length,_pi.value.length);}"
+                style="width:100%;border:1.5px solid ${showPhoneHint?'var(--blue)':'var(--line)'};border-radius:12px;padding:15px 14px;font-size:16px;outline:none;font-family:inherit;box-sizing:border-box;" />
+            </div>
+            ${showPhoneHint?`<div style="font-size:12px;color:var(--ink3);padding-left:2px;margin-bottom:16px;"><b style="color:var(--ink2);">${phoneFormatted}</b>으로 알림을 보내드려요. 번호가 맞나요?</div>`:''}
+          `:''}
 
           ${showEmail?`
             <div class="field" style="margin-bottom:10px;">
               <label>이메일 주소</label>
               <input id="emailInput" type="email" inputmode="email" placeholder="example@email.com" value="${S.email||''}" oninput="S.email=this.value;render();const _ei=document.getElementById('emailInput');if(_ei){_ei.focus();_ei.setSelectionRange(_ei.value.length,_ei.value.length);}" />
-            </div>`:''}
+            </div>
+          `:''}
 
-          ${showMarketing?`
-            <div class="term-row" onclick="S.termsChecked.marketing=!S.termsChecked.marketing;render()" style="margin:4px 0 12px;">
-              <span class="term-ck ${mktChecked?'checked':''}">${mktChecked?'✓':''}</span>
-              <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
-            </div>`:`<div style="height:4px;"></div>`}
+          <div style="text-align:center;margin:-4px 0 14px;">
+            <button onclick="S.notifChoice=S.notifChoice==='email'?'phone':'email';S.email='';render()" style="background:none;border:none;color:var(--ink3);font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;">
+              ${showEmail?'휴대폰 번호로 진행':'한국 번호가 없으신가요? 이메일로 받기'}
+            </button>
+          </div>
+
+          <div class="term-row" onclick="S.termsChecked.marketing=!S.termsChecked.marketing;render()" style="margin:4px 0 12px;">
+            <span class="term-ck ${mktChecked?'checked':''}">${mktChecked?'✓':''}</span>
+            <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
+          </div>
 
           ${(()=>{
-            const isKakaoNotif = S.notifChoice === 'kakao';
-            if(!showPhone && !isKakaoNotif) return '';
-            if(showPhone){
-              const notifDigits = (S.phone||'').replace(/\D/g,'');
-              if(notifDigits.length < 10 || !mktChecked) return '';
-            } else {
-              if(!mktChecked) return '';
-            }
+            const hasContact = showEmail ? emailValid : phoneRaw.length >= 10;
+            if(!hasContact || !mktChecked) return '';
             const avail = COUPONS.filter(cp=>cp.channels.includes(S.orderType));
             if(!avail.length) return `<div style="font-size:13px;color:var(--ink3);text-align:center;padding:6px 0 14px;">현재 사용 가능한 쿠폰이 없어요.</div>`;
             return `<div style="background:#FFF8E6;border:1px solid #FFE3A3;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
@@ -1715,7 +1708,7 @@ function goToNotif(){
   if(S.orderType==='dinein' && S.serve==='server' && S.payTiming==='postpay'){
     S.notifChoice='skip'; S.notifSheet=false; placeOrder(); return;
   }
-  S.notifChoice = null;
+  S.notifChoice = 'phone';
   S.notifSheet = true;
   S.phone = '';
   S.email = '';

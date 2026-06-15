@@ -1647,7 +1647,7 @@ function scrCheckout(){
               </button>
             </div>
 
-            ${!mktChecked?`<div class="term-row" onclick="S.termsChecked.marketing=true;render()" style="margin:4px 0 12px;">
+            ${!mktChecked&&!showEmail?`<div class="term-row" onclick="S.termsChecked.marketing=true;render()" style="margin:4px 0 12px;">
               <span class="term-ck"></span>
               <span class="term-label"><span class="term-opt">선택</span>쿠폰·이벤트 알림 수신 동의</span>
             </div>`:''}

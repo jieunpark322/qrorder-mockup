@@ -793,6 +793,7 @@ function showOrderTypeChoice(){
     </div>
   </div>`;
   document.body.appendChild(el);
+  syncScrollLock();
 }
 function chooseOrderType(k, btn){
   const modal=$('typeModal');
@@ -806,6 +807,7 @@ function chooseOrderType(k, btn){
   setTimeout(()=>{
     S.orderType=k; S.cart=[]; S.cat='전체'; S.pickup=null; S.pickupH=''; S.pickupM=''; S.screen='menu'; S.tab='menu';
     const el=$('typeModal'); if(el) el.remove();
+    syncScrollLock();
     render();
   }, 260);
 }
@@ -1080,7 +1082,8 @@ let _scrollLockY = 0;
 function anyOverlayOpen(){
   return $('sheetbg').classList.contains('on')
     || $('cartsheetbg').classList.contains('on')
-    || !!document.getElementById('closedModal');
+    || !!document.getElementById('closedModal')
+    || !!document.getElementById('typeModal');
 }
 function syncScrollLock(){
   const locked = document.body.classList.contains('scroll-locked');

@@ -1898,8 +1898,8 @@ const ERR_CASES = {
       ? '매장 POS와 통신이 잠시 끊겼어요.<br>직원 호출 후 주문하거나 잠시 뒤 다시 시도해 주세요.'
       : '매장 POS와 통신이 잠시 끊겼어요.<br>잠시 뒤 다시 시도해 주세요.'; },
     primary:'다시 시도', onPrimary:'placeOrder()'},
-  network:{icon:'🌐', title:'연결이 불안정해요', code:'NETWORK_ERROR',
-    msg:'네트워크 연결이 원활하지 않아요.<br>연결 상태를 확인하고 다시 시도해 주세요.',
+  network:{icon:'🌐', title:'매장과 잠시 연결이 끊어졌어요', code:'NETWORK_ERROR',
+    msg:'네트워크 상태가 불안정해요.<br>조금 뒤에 다시 시도해 주세요.',
     primary:'다시 시도', onPrimary:'placeOrder()'},
 };
 function scrError(){

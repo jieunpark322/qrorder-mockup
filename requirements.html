@@ -224,6 +224,13 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
 .callout.mint{background:var(--mint-l);border-left:4px solid var(--mint);color:var(--mint-d)}
 .callout b{font-weight:800}
 
+.screens-gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.screen-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.screen-card img{width:100%;border-radius:8px;border:1px solid var(--line);display:block;background:#fff}
+.screen-card .cap{font-size:12px;font-weight:800;margin-top:10px}
+.screen-card .sub{font-size:10px;color:var(--ink3);margin-top:3px;line-height:1.5}
+@media(max-width:1100px){.screens-gallery{grid-template-columns:repeat(2,1fr)}}
+
 .footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--ink3);text-align:center;line-height:1.8}
 .footer b{color:var(--mint-d)}
 
@@ -281,6 +288,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
   <h3>📑 목차</h3>
   <div class="toc-grid">
     <a class="toc-item" href="#sec-purpose"><span class="t-num">01</span><div class="t-title">목적 및 범위</div><div class="t-desc">서비스 목표 3가지</div></a>
+    <a class="toc-item" href="#sec-screens"><span class="t-num">참고</span><div class="t-title">실제 서비스 화면</div><div class="t-desc">손님 화면 캡처 4종</div></a>
     <a class="toc-item" href="#sec-req"><span class="t-num">02</span><div class="t-title">요구사항 정의 (6 시나리오)</div><div class="t-desc">SC_01 ~ SC_06 전체</div></a>
     <a class="toc-item" href="#sec-flow"><span class="t-num">03</span><div class="t-title">전체 워크플로우</div><div class="t-desc">진입 → 결제 → 완료</div></a>
     <a class="toc-item" href="#sec-branch"><span class="t-num">04</span><div class="t-title">결제 5분기 (★ 핵심)</div><div class="t-desc">유형·서빙·알림·약관·결제</div></a>
@@ -324,6 +332,44 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
     <div class="callout info" style="margin-top:16px">
       <b>📌 개발 범위 — 손님 화면 (customer.html) 전용</b><br/>
       이 문서는 손님이 보는 화면에서 일어나는 모든 상태·분기·예외를 정의합니다. 사장님 관리 화면(index.html), POS 연동, 카카오 채널 관리는 별도 문서를 참고하세요.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 참고 · 실제 서비스 화면 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-screens">
+  <div class="sec-head">
+    <span class="sec-tag" style="background:var(--blue)">참고</span>
+    <h2>실제 서비스 화면 (손님 화면 캡처)</h2>
+    <span class="desc">기획 이해용 참고 자료 · 실제 동작은 라이브 목업 참조</span>
+  </div>
+  <div class="sec-body">
+    <div class="callout info" style="margin-bottom:14px">
+      아래는 실제 구현된 손님 화면(customer.html)을 캡처한 참고 이미지입니다. 라이브 목업: <a href="customer.html" style="color:var(--blue);font-weight:700">customer.html 열기</a>
+    </div>
+    <div class="screens-gallery">
+      <div class="screen-card">
+        <img src="screens/cap_menu.png" alt="메뉴판 화면">
+        <div class="cap">① 메뉴판</div>
+        <div class="sub">카테고리·메뉴·가격·품절/잔여 배지 · 로그인 없이 탐색</div>
+      </div>
+      <div class="screen-card">
+        <img src="screens/cap_checkout.png" alt="주문 확인·결제 화면">
+        <div class="cap">② 주문 확인 · 결제</div>
+        <div class="sub">주문 내용·수량 · 쿠폰 코드 입력 · 요청사항 · 결제수단 · 약관</div>
+      </div>
+      <div class="screen-card">
+        <img src="screens/cap_done.png" alt="주문 완료 화면">
+        <div class="cap">③ 주문 완료</div>
+        <div class="sub">호출번호 · 진행 단계 바 · 결제 내역</div>
+      </div>
+      <div class="screen-card">
+        <img src="screens/cap_session.png" alt="세션 만료 화면">
+        <div class="cap">④ 세션 만료</div>
+        <div class="sub">5분 무활동 시 · QR 재스캔 안내</div>
+      </div>
     </div>
   </div>
 </div>
@@ -604,8 +650,8 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         <ul>
           <li>같은 테이블 손님끼리 장바구니 실시간 공유</li>
           <li>포장·예약 시 자동 차단</li>
-          <li>현재: 한 명 결제 시 전체 잠금</li>
-          <li>방장 없음, 누구나 결제 가능</li>
+          <li>장바구니에서 개별 결제 / 함께 결제 선택</li>
+          <li>현재: 함께 결제 시 대표 1인이 전체 금액 결제 (결제 시 전체 잠금)</li>
           <li><b style="color:var(--blue)">향후: 1/N 분할 결제 디벨롭 필요</b></li>
         </ul>
       </div>
@@ -655,6 +701,12 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
 
     <div class="callout warn" style="margin-bottom:16px">
       <b>⚠️ 중요:</b> 분기는 ①→②→③→④→⑤ 순서가 중요합니다. 앞 분기 결과가 뒤 분기 선택지를 제한합니다 (예: 주문유형 = 포장이면 서빙 분기 ②는 건너뜁니다).
+    </div>
+
+    <div class="callout info" style="margin-bottom:16px">
+      <b>📌 주문 유형·서빙 방식은 진입 시점에 결정됩니다.</b><br/>
+      · 주문 유형(매장/포장/예약)과 서빙 방식은 <b>QR 진입 + 매장 설정</b>으로 자동 결정되며, 손님이 주문 중 임의로 바꾸는 UI는 없습니다.<br/>
+      · 주문 유형이 바뀌는 경우(예: 다른 QR로 재진입) <b>담은 메뉴·쿠폰·연락처 설정은 초기화</b>됩니다.
     </div>
 
     <!-- 분기 1 -->
@@ -781,6 +833,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         <h5>💳 선불 (SC_01~SC_03, SC_05, SC_06 총 5개 시나리오)</h5>
         <ul>
           <li>결제수단 6종 노출: 토스·카카오페이·네이버페이·신용카드·알리페이·위챗페이</li>
+          <li><b>팁(선택)</b> — 비율 선택 또는 직접 입력, 최종 결제금액에 합산 (입력 안 해도 진행)</li>
           <li>외부 결제(PG) 진행 · 중복 결제 방지 필요</li>
           <li>결제 성공 → 주문 접수 → 완료 화면</li>
           <li>결제 실패 → ERR_005 (장바구니 보존)</li>
@@ -1148,7 +1201,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
       <div class="modal-card">
         <span class="mid">MOD-04</span><span class="mtype">시트</span>
         <h5>직원 호출</h5>
-        <div class="trigger">트리거: 직원호출(M1-09) 또는 완료화면(M4-08) 클릭<br/>→ 호출 유형 선택 → 사장님 앱 알림</div>
+        <div class="trigger">트리거: 직원호출(M1-09) 또는 완료화면(M4-08) 클릭<br/>→ 요청 항목 다중 선택(물·수저·앞접시·휴지 등 사전 정의) + 자유 입력 → 사장님 앱 알림</div>
       </div>
 
       <div class="modal-card">

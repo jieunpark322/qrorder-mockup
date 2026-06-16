@@ -298,6 +298,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
     <a class="toc-item" href="#sec-error"><span class="t-num">08</span><div class="t-title">에러·상태코드 15건</div><div class="t-desc">ERR/WRN/STA/INF</div></a>
     <a class="toc-item" href="#sec-modal"><span class="t-num">09</span><div class="t-title">모달 9종 트리거</div><div class="t-desc">시트·전체·중앙</div></a>
     <a class="toc-item" href="#sec-api"><span class="t-num">10</span><div class="t-title">외부 연동 지점 9종</div><div class="t-desc">무엇을 주고받나</div></a>
+    <a class="toc-item" href="#sec-roadmap" style="border-color:var(--blue);background:var(--blue-l);"><span class="t-num" style="background:var(--blue);">로드맵</span><div class="t-title">향후 과제 (추후 디벨롭)</div><div class="t-desc">F-01~F-05 아카이브</div></a>
   </div>
 </div>
 
@@ -1356,6 +1357,64 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <td>5분 무활동 시 세션 만료 처리 · 만료 후에도 장바구니 일정 시간 보존</td>
           <td>탐색 중 5분 무활동</td>
           <td class="c"><span class="ec wrn" style="font-size:9px">WRN_002</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 11 · 향후 과제 (로드맵) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-roadmap" style="page-break-before:always;border:2px solid var(--blue);">
+  <div class="sec-head" style="background:var(--blue-l);">
+    <span class="sec-tag" style="background:var(--blue);">로드맵</span>
+    <h2>향후 과제 (추후 디벨롭) — 아카이브</h2>
+    <span class="desc">이번 적용 대상 아님 · 디자이너·개발자 사전 인지용</span>
+  </div>
+  <div class="sec-body">
+    <div class="callout info" style="margin-bottom:14px">
+      <b>📌 이 페이지는 향후 디벨롭 예정 항목만 따로 모은 아카이브입니다.</b> 본문 각 섹션에도 같은 표시가 있으며, 여기서는 한눈에 보도록 모았습니다. <b>이번 구현 범위에는 포함되지 않습니다.</b>
+    </div>
+    <table class="api-table">
+      <thead>
+        <tr>
+          <th style="width:60px">번호</th>
+          <th style="width:180px">항목</th>
+          <th>내용</th>
+          <th style="width:130px">위치 / 상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="c"><b>F-01</b></td>
+          <td><b>홍보 배너 롤링 영역</b></td>
+          <td>네이버 영수증 리뷰 배너 <b>위쪽</b>에 매장이 원하는 만큼 홍보 배너를 추가해 <b>자동 롤링(캐러셀)</b> — 각 배너 이미지+URL, 노출 순서·개수는 사장님사이트에서 설정 (광고·이벤트·공지)</td>
+          <td>메뉴 화면 · 추후 디벨롭</td>
+        </tr>
+        <tr>
+          <td class="c"><b>F-02</b></td>
+          <td><b>네이버 영수증 리뷰 On/Off</b></td>
+          <td>네이버 영수증 리뷰 배너의 노출 On/Off를 <b>사장님사이트</b>에서 설정 (현재 배너 자체는 적용, 토글만 추후)</td>
+          <td>사장님사이트 · 개발 진행 중</td>
+        </tr>
+        <tr>
+          <td class="c"><b>F-03</b></td>
+          <td><b>대표 이미지 URL 삽입</b></td>
+          <td>매장 상단 대표 이미지(최대 3장)에 <b>URL을 삽입</b>해 탭 시 이동 (예: 인스타그램·홈페이지)</td>
+          <td>메뉴 화면 · 추후 디벨롭</td>
+        </tr>
+        <tr>
+          <td class="c"><b>F-04</b></td>
+          <td><b>리뷰 작성 화면 상세</b></td>
+          <td>완료 후 리뷰 요청 알림(②방식)은 적용 · <b>리뷰 작성 화면(별점·메뉴태그·사진·후기)</b> 상세 설계는 추후 고도화</td>
+          <td>완료 후 리뷰 · 추후 고도화</td>
+        </tr>
+        <tr>
+          <td class="c"><b>F-05</b></td>
+          <td><b>함께주문 1/N 분할 결제</b></td>
+          <td>현재는 대표 1인이 전체 금액 결제 · 향후 <b>참여 인원수로 금액을 나눠 각자 결제</b>하는 1/N 분할 결제로 발전</td>
+          <td>함께주문 · 추후 디벨롭</td>
         </tr>
       </tbody>
     </table>

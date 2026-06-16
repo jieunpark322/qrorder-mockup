@@ -329,6 +329,14 @@
   /* 해피아워 배너 */
   .happy-banner{margin:12px 14px 0;display:flex;gap:9px;align-items:center;background:linear-gradient(135deg,#fff3bf,#fff9db);border:1.5px solid #ffd43b;border-radius:11px;padding:13px 15px;font-size:14px;font-weight:700;color:#5c3d02;}
   .happy-banner .htime{font-size:12px;font-weight:600;color:#92400e;margin-top:2px;}
+  /* 네이버 영수증 리뷰 배너 */
+  .nrv-banner{display:flex;align-items:center;gap:11px;margin:12px 14px 0;background:linear-gradient(135deg,#03C75A,#02A94B);border-radius:12px;padding:13px 15px;color:#fff;text-decoration:none;box-shadow:0 4px 12px rgba(3,199,90,.25);}
+  .nrv-banner:active{transform:scale(.99);}
+  .nrv-ico{width:30px;height:30px;border-radius:8px;background:#fff;color:#03C75A;font-weight:900;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;}
+  .nrv-tx{flex:1;line-height:1.35;}
+  .nrv-tx .t1{font-size:13.5px;font-weight:800;}
+  .nrv-tx .t2{font-size:11px;opacity:.9;margin-top:1px;}
+  .nrv-arrow{font-size:16px;opacity:.9;}
   /* 공동 주문 */
   .group-bar{display:flex;align-items:center;gap:9px;margin:10px 14px 0;background:var(--blue-50);border:1px solid #c5d8f5;border-radius:11px;padding:11px 14px;font-size:13px;color:var(--blue-d);font-weight:600;}
   .gavatar{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;border:2px solid #fff;flex-shrink:0;}
@@ -419,6 +427,10 @@ const STORE = {
   callConfig:{ prefix:'A', digits:3 },
   // 매장이 운영하는 주문 유형 (사장님사이트에서 설정) · 2개 이상이면 진입 시 선택 모달
   orderTypes:['dinein','takeout'],
+  // 네이버 영수증 리뷰 배너 (URL 삽입형) · On/Off는 사장님사이트에서 — 추후 반영
+  naverReceiptReview:{ enabled:true, url:'https://m.place.naver.com/' },
+  // 매장 대표 이미지 클릭 시 이동할 URL (추후 디벨롭) · 비워두면 링크 없음
+  coverLink:'',
   // 매장 대표 이미지 (최대 3장 · 자동 전환)
   covers:[
     'https://loremflickr.com/640/360/coffeeshop?lock=70',
@@ -909,8 +921,19 @@ function scrMenu(){
   const animCls = S._tabAnim ? 'tab-anim' : '';
   return `
     ${brandHero()}
+    ${naverReceiptBanner()}
     ${mainTabs()}
     <div id="tabContent" class="${animCls}" style="--tab-dx:${dx};">${content}</div>`;
+}
+/* --- 네이버 영수증 리뷰 배너 (사장님사이트 On/Off · 추후 반영) --- */
+function naverReceiptBanner(){
+  const n = STORE.naverReceiptReview;
+  if(!n || !n.enabled || !n.url) return '';
+  return `<a class="nrv-banner" href="${n.url}" target="_blank" rel="noopener">
+    <span class="nrv-ico">N</span>
+    <span class="nrv-tx"><div class="t1">네이버 영수증 리뷰 작성하기</div><div class="t2">방문 인증하고 리뷰 남기면 다른 손님께 큰 도움이 돼요</div></span>
+    <span class="nrv-arrow">›</span>
+  </a>`;
 }
 /* --- 메뉴 검색 --- */
 function onMenuSearch(v){ S.search=v; renderMenuResults(); }
@@ -1997,7 +2020,6 @@ function scrDone(){
         <div class="rowline tot" style="font-size:15px;"><span>${(S.orderType==='dinein'&&S.payTiming==='postpay')?'결제 예정':'결제 금액'}</span><span>${won(cartTotal()-couponDiscount())}원</span></div>
       </div>
     </div>
-    <div class="info-pill" style="margin-top:12px;background:#FDF2F8;color:#9D174D;border:1px solid #FBCFE8;">⭐ <span>식사 후 <b>30분~1시간 뒤</b>, 후기를 남길 수 있는 리뷰 요청 알림을 보내드릴게요.</span></div>
     <button class="primarybtn" onclick="resetOrder()">새 주문하기</button><div style="height:24px;"></div>`;
 }
 function resetOrder(){

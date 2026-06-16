@@ -636,6 +636,12 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
     <div class="callout mint" style="margin-bottom:12px">
       <b>✓ 로그인 불필요</b> — 메뉴 탐색 전 구간은 인증 없이 접근 가능합니다. 카카오 로그인은 결제 직전에만 제안(선택 사항)합니다.
     </div>
+    <div class="callout info" style="margin-bottom:12px">
+      <b>🟢 네이버 영수증 리뷰 배너 (메뉴/리뷰/매장정보 탭 위에 고정 노출)</b><br/>
+      · 메뉴 화면 상단(탭 바로 위)에 <b>URL 삽입형 배너</b>를 노출해, 탭하면 네이버 영수증 리뷰 작성 페이지로 이동합니다.<br/>
+      · 인지도가 낮은 자사 리뷰보다 <b>네이버 영수증 리뷰</b>가 영향력이 커 우선 노출합니다.<br/>
+      · <b style="color:var(--blue)">On/Off는 사장님사이트에서 설정 — 추후 반영</b> (현재 개발 진행 중 · 최초 기획에는 미포함된 항목)
+    </div>
     <div class="branch-row col3">
       <div class="branch-card mint">
         <h5>📋 메뉴판 표시</h5>
@@ -643,6 +649,8 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <li>카테고리·메뉴·옵션·가격 렌더링</li>
           <li>품절 메뉴 비활성 표시</li>
           <li>재고 2개 이하 → INF_001 표시</li>
+          <li>상단 대표 이미지(최대 3장) 자동 전환</li>
+          <li><b style="color:var(--blue)">향후 디벨롭: 대표 이미지에 URL 삽입(탭 시 이동)</b></li>
         </ul>
       </div>
       <div class="branch-card">
@@ -1100,7 +1108,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
       <b>⭐ 식사·픽업 완료 30~60분 뒤, "오늘 주문 어떠셨어요?" 리뷰 요청 알림을 발송합니다.</b><br/>
       · 카카오 인증·채널 추가 손님 → <b>카카오 알림톡</b> / 카카오 미사용(휴대폰·이메일 수기 입력) 손님 → <b>SMS·이메일 대체 발송</b><br/>
       · 알림의 "리뷰 남기기" 버튼은 <b>주문 인증 토큰이 담긴 링크</b>로, <b>실제 주문한 손님만</b> 작성할 수 있습니다.<br/>
-      · 주문 1건당 1회 발송(정보성) · 완료 화면에도 "리뷰 요청 알림을 보내드려요" 안내를 노출합니다.<br/>
+      · 주문 1건당 1회 발송(정보성)<br/>
       · <span style="color:var(--ink3)">리뷰 작성 화면 상세는 추후 고도화 예정.</span>
     </div>
     <div class="callout mint">

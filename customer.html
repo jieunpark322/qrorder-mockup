@@ -1990,7 +1990,7 @@ function scrDone(){
 
   // 번호 카드 note — 알림 수단 포함
   const isDineinSelf = S.orderType==='dinein' && S.serve==='self';
-  const callNoLabel = isDineinSelf ? '주문 번호' : '호출 번호';
+  const callNoLabel = '호출 번호';
   // 준비 완료 알림 수단 — 연락처 포함 안내
   const donePF = (()=>{ const r=(S.phone||'').replace(/\D/g,''); return r.length===11?r.replace(/(\d{3})(\d{4})(\d{4})/,'$1-$2-$3'):r.length===10?r.replace(/(\d{3})(\d{3})(\d{4})/,'$1-$2-$3'):r; })();
   const notifMsg = (isKakao || S.notifChoice==='kakao')

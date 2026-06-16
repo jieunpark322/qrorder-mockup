@@ -1113,7 +1113,8 @@ function anyOverlayOpen(){
   return $('sheetbg').classList.contains('on')
     || $('cartsheetbg').classList.contains('on')
     || !!document.getElementById('closedModal')
-    || !!document.getElementById('typeModal');
+    || !!document.getElementById('typeModal')
+    || !!document.getElementById('rvLightbox');
 }
 function syncScrollLock(){
   const locked = document.body.classList.contains('scroll-locked');
@@ -2082,22 +2083,40 @@ function reviewsSection(){
     </div>`).join('')}
   </div>`;
 }
-/* 리뷰 사진: 메인 1장 노출 · 탭하면 다음 사진으로 순환 (1→2→3→1) */
+/* 리뷰 사진: 목록은 작은 썸네일(메인 1장) · 탭하면 큰 화면 뷰어로 보기(1→2→3 넘기기) */
 function reviewPhoto(v,i){
   const ps=v.photos||[]; if(!ps.length) return '';
-  const idx=(window._rvIdx&&window._rvIdx[i])||0;
-  const cur=ps[idx]||ps[0];
   const multi=ps.length>1;
-  return `<div class="rv-photo" ${multi?`onclick="cycleReviewPhoto(${i},${ps.length})"`:''}>
-    <img src="${cur}" loading="lazy" alt="리뷰 사진">
-    ${multi?`<span class="rv-count">${idx+1}/${ps.length}</span>`:''}
+  return `<div class="rv-photo" onclick="openReviewPhotos(${i})">
+    <img src="${ps[0]}" loading="lazy" alt="리뷰 사진">
+    ${multi?`<span class="rv-count">📷 ${ps.length}</span>`:''}
   </div>`;
 }
-function cycleReviewPhoto(i,len){
-  window._rvIdx=window._rvIdx||{};
-  window._rvIdx[i]=(((window._rvIdx[i]||0)+1)%len);
-  render();
+/* 큰 사진 뷰어(라이트박스) */
+function openReviewPhotos(i){
+  const ps=(REVIEWS[i]||{}).photos||[]; if(!ps.length) return;
+  window._lb={photos:ps, idx:0};
+  renderLightbox(); syncScrollLock();
 }
+function renderLightbox(){
+  const ex=document.getElementById('rvLightbox'); if(ex) ex.remove();
+  if(!window._lb) return;
+  const {photos,idx}=window._lb, multi=photos.length>1;
+  const el=document.createElement('div'); el.id='rvLightbox';
+  el.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;';
+  el.innerHTML=`
+    <button onclick="closeReviewPhotos()" style="position:absolute;top:14px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;border:none;font-size:18px;cursor:pointer;font-family:inherit;">✕</button>
+    <img src="${photos[idx]}" style="max-width:90%;max-height:72%;border-radius:12px;object-fit:contain;box-shadow:0 12px 40px rgba(0,0,0,.5);">
+    ${multi?`<div style="display:flex;align-items:center;gap:22px;color:#fff;">
+      <button onclick="lbNav(-1)" style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;border:none;font-size:22px;cursor:pointer;font-family:inherit;">‹</button>
+      <span style="font-size:14px;font-weight:700;min-width:46px;text-align:center;">${idx+1} / ${photos.length}</span>
+      <button onclick="lbNav(1)" style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;border:none;font-size:22px;cursor:pointer;font-family:inherit;">›</button>
+    </div>`:''}`;
+  el.onclick=function(e){ if(e.target===el) closeReviewPhotos(); };
+  document.body.appendChild(el);
+}
+function lbNav(d){ const n=window._lb.photos.length; window._lb.idx=(window._lb.idx+d+n)%n; renderLightbox(); }
+function closeReviewPhotos(){ window._lb=null; const el=document.getElementById('rvLightbox'); if(el) el.remove(); syncScrollLock(); }
 function storeInfoSection(){
   return `<div class="stsec">
     <div class="st-ttl">🏪 매장 정보</div>

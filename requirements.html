@@ -1095,6 +1095,28 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
       4. 최종 결제 금액 (선불: "결제 금액" / 후불: "결제 예정")
     </div>
 
+    <div class="section-sub" style="margin-top:18px"><span class="dot"></span> 완료 후 리뷰 요청 (알림톡/문자)</div>
+    <div class="callout info">
+      <b>⭐ 식사·픽업 완료 30~60분 뒤, "오늘 주문 어떠셨어요?" 리뷰 요청 알림을 발송합니다.</b><br/>
+      · 카카오 인증·채널 추가 손님 → <b>카카오 알림톡</b> / 카카오 미사용(휴대폰·이메일 수기 입력) 손님 → <b>SMS·이메일 대체 발송</b><br/>
+      · 알림의 "리뷰 남기기" 버튼은 <b>주문 인증 토큰이 담긴 링크</b>로, <b>실제 주문한 손님만</b> 작성할 수 있습니다.<br/>
+      · 주문 1건당 1회 발송(정보성) · 완료 화면에도 "리뷰 요청 알림을 보내드려요" 안내를 노출합니다.<br/>
+      · <span style="color:var(--ink3)">리뷰 작성 화면 상세는 추후 고도화 예정.</span>
+    </div>
+    <div class="callout mint">
+      <b>📨 알림톡 템플릿(안)</b><br/>
+      <span style="font-family:monospace;font-size:11px;display:block;background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin-top:6px;line-height:1.7;white-space:pre-line;">[#{매장명}] 오늘 주문, 어떠셨어요? ⭐
+
+#{고객명}님, 방금 즐기신 #{대표메뉴} #{외N건} 맛있게 드셨나요?
+잠깐 시간 내어 별점과 한 줄 후기를 남겨주시면 큰 힘이 됩니다 :)
+
+· 1분이면 충분해요
+· 남겨주신 후기는 다른 손님께도 도움이 돼요
+
+[버튼] 리뷰 남기기 → …/review?order=#{주문번호}&token=#{인증토큰}</span>
+      <span style="font-size:11px;color:var(--ink3)">변수: #{매장명} #{고객명} #{대표메뉴} #{외N건} #{주문번호} #{인증토큰}</span>
+    </div>
+
     <div class="section-sub" style="margin-top:18px"><span class="dot"></span> 주문 내역 동기화 (POS ↔ 손님 화면)</div>
     <div class="callout danger">
       <b>🔄 주문접수프로그램에서 테이블·주문 건이 클리어되면, 손님 화면의 주문 내역도 즉시 초기화·갱신되어야 합니다.</b><br/>
@@ -1315,7 +1337,7 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
         </tr>
         <tr>
           <td><b>알림 발송</b></td>
-          <td>영수증·준비완료·픽업·수락 알림 발송 (알림톡/SMS 등)</td>
+          <td>영수증·준비완료·픽업·수락 알림 발송 + <b>완료 30~60분 뒤 리뷰 요청 알림</b> 발송 (알림톡/SMS/이메일)</td>
           <td>주문 완료 후</td>
           <td class="c">—</td>
         </tr>

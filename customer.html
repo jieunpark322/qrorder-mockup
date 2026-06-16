@@ -312,6 +312,11 @@
   .rv-cust{font-weight:700;color:var(--ink2);}
   .rv-date{color:var(--ink4);margin-left:auto;}
   .rv-body{font-size:15px;color:var(--ink);margin-top:7px;line-height:1.55;}
+  /* 리뷰 사진 — 메인 1장, 탭하면 1·2·3 순환 */
+  .rv-photo{position:relative;width:128px;height:128px;border-radius:12px;overflow:hidden;margin-top:9px;cursor:pointer;background:var(--line2);}
+  .rv-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+  .rv-photo .rv-count{position:absolute;right:7px;bottom:7px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;}
+  .rv-photo .rv-tap{position:absolute;left:7px;bottom:7px;background:rgba(0,0,0,.45);color:#fff;font-size:10px;padding:2px 7px;border-radius:100px;}
   .rv-reply{font-size:13.5px;color:var(--ink2);background:var(--bg);border-radius:9px;padding:10px 12px;margin-top:8px;line-height:1.55;}
   .rv-reply b{color:var(--blue-d);margin-right:5px;}
   .allergy{display:flex;flex-direction:column;gap:4px;margin-top:14px;background:#fff8e6;border:1px solid #ffe3a3;border-radius:11px;padding:12px 14px;}
@@ -535,10 +540,11 @@ const COUPON_CODES = {
   'SOFT10': { couponId:'CP002' },
 };
 
+// 리뷰 사진은 작성 시 최대 3장 첨부 · 표시 시 메인 1장 노출 → 탭하면 1·2·3 순환
 const REVIEWS = [
-  {c:'홍**',d:'2026-05-15',r:5,b:'분위기가 너무 좋고 커피도 맛있어요. 또 올게요!',reply:''},
-  {c:'김**',d:'2026-05-14',r:4,b:'크로아상이 정말 신선하네요. 다만 카운터 줄이 좀…',reply:''},
-  {c:'이**',d:'2026-05-13',r:5,b:'바닐라라떼 진짜 맛있어요!',reply:'좋게 봐주셔서 감사해요 :)'},
+  {c:'홍**',d:'2026-05-15',r:5,b:'분위기가 너무 좋고 커피도 맛있어요. 또 올게요!',reply:'',photos:['https://loremflickr.com/360/360/coffee?lock=201','https://loremflickr.com/360/360/cafe?lock=202','https://loremflickr.com/360/360/latte?lock=203']},
+  {c:'김**',d:'2026-05-14',r:4,b:'크로아상이 정말 신선하네요. 다만 카운터 줄이 좀…',reply:'',photos:['https://loremflickr.com/360/360/croissant?lock=204','https://loremflickr.com/360/360/bakery?lock=205']},
+  {c:'이**',d:'2026-05-13',r:5,b:'바닐라라떼 진짜 맛있어요!',reply:'좋게 봐주셔서 감사해요 :)',photos:['https://loremflickr.com/360/360/vanillalatte?lock=206']},
   {c:'박**',d:'2026-05-12',r:3,b:'치즈케이크가 평소보다 덜 신선했어요.',reply:''},
   {c:'정**',d:'2026-05-11',r:5,b:'사장님이 친절하세요!',reply:'감사합니다 :)'},
   {c:'최**',d:'2026-05-09',r:5,b:'아이스 아메리카노 시원하고 좋아요.',reply:'감사합니다!'},
@@ -2068,12 +2074,29 @@ function reviewsSection(){
       <div><div class="rv-ttl">💬 손님 리뷰</div><div class="rv-sub">실제 방문 손님이 남긴 후기예요</div></div>
       <div class="rv-score"><span class="rv-num">⭐ ${avgRating()}</span><span class="rv-cnt">리뷰 ${REVIEWS.length}개</span></div>
     </div>
-    ${REVIEWS.map(v=>`<div class="rv-card">
+    ${REVIEWS.map((v,i)=>`<div class="rv-card">
       <div class="rv-top"><span class="rv-stars">${stars(v.r)}</span><span class="rv-cust">${v.c}</span><span class="rv-date">${v.d}</span></div>
       <div class="rv-body">${v.b}</div>
+      ${reviewPhoto(v,i)}
       ${v.reply?`<div class="rv-reply"><b>사장님</b>${v.reply}</div>`:''}
     </div>`).join('')}
   </div>`;
+}
+/* 리뷰 사진: 메인 1장 노출 · 탭하면 다음 사진으로 순환 (1→2→3→1) */
+function reviewPhoto(v,i){
+  const ps=v.photos||[]; if(!ps.length) return '';
+  const idx=(window._rvIdx&&window._rvIdx[i])||0;
+  const cur=ps[idx]||ps[0];
+  const multi=ps.length>1;
+  return `<div class="rv-photo" ${multi?`onclick="cycleReviewPhoto(${i},${ps.length})"`:''}>
+    <img src="${cur}" loading="lazy" alt="리뷰 사진">
+    ${multi?`<span class="rv-count">${idx+1} / ${ps.length}</span><span class="rv-tap">탭하면 다음 사진</span>`:''}
+  </div>`;
+}
+function cycleReviewPhoto(i,len){
+  window._rvIdx=window._rvIdx||{};
+  window._rvIdx[i]=(((window._rvIdx[i]||0)+1)%len);
+  render();
 }
 function storeInfoSection(){
   return `<div class="stsec">

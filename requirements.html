@@ -1112,7 +1112,14 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
       · 카카오 인증·채널 추가 손님 → <b>카카오 알림톡</b> / 카카오 미사용(휴대폰·이메일 수기 입력) 손님 → <b>SMS·이메일 대체 발송</b><br/>
       · 알림의 "리뷰 남기기" 버튼은 <b>주문 인증 토큰이 담긴 링크</b>로, <b>실제 주문한 손님만</b> 작성할 수 있습니다.<br/>
       · 주문 1건당 1회 발송(정보성)<br/>
-      · <span style="color:var(--ink3)">리뷰 작성 화면 상세는 추후 고도화 예정.</span>
+      · <b>리뷰 작성 시 사진 첨부 — 최대 3장</b> (이번 적용 범위)<br/>
+      · <span style="color:var(--ink3)">별점·메뉴 태그 등 작성 화면의 그 외 상세는 추후 고도화 예정.</span>
+    </div>
+    <div class="callout mint">
+      <b>🖼️ 리뷰 사진 표시 규칙 (리뷰 탭)</b><br/>
+      · 리뷰 카드에는 <b>메인 사진 1장만</b> 노출합니다.<br/>
+      · 사진을 <b>탭하면 1 → 2 → 3 순서로 순환</b>(현재 장수/총 장수 "1 / 3" 표시).<br/>
+      · <b style="color:var(--blue)">[추후 디벨롭]</b> 사진 리뷰만 필터링해서 보기 — 추후 과제(F-06).
     </div>
     <div class="callout mint">
       <b>📨 알림톡 템플릿(안)</b><br/>
@@ -1415,6 +1422,12 @@ body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1
           <td><b>함께주문 1/N 분할 결제</b></td>
           <td>현재는 대표 1인이 전체 금액 결제 · 향후 <b>참여 인원수로 금액을 나눠 각자 결제</b>하는 1/N 분할 결제로 발전</td>
           <td>함께주문 · 추후 디벨롭</td>
+        </tr>
+        <tr>
+          <td class="c"><b>F-06</b></td>
+          <td><b>사진 리뷰 필터링</b></td>
+          <td>리뷰 목록에서 <b>사진이 첨부된 리뷰만 필터링</b>해서 보기 (사진 첨부·갤러리 표시는 이번 적용 · 필터만 추후)</td>
+          <td>리뷰 탭 · 추후 디벨롭</td>
         </tr>
       </tbody>
     </table>

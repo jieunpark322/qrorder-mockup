@@ -360,13 +360,20 @@ const CAT_META = {
   design:   {icon:'🎨', label:'디자인', cls:'design'},
 };
 
+// 폰 스크린샷 실제 픽셀 높이(폭은 모두 880px). 기본 1674, b3 결제만 다름.
+const SHOT_H = {'b3-1':2980,'b3-2':2000,'b3-3':2980,'b3-4':3260};
+const SHOT_W = 165;  // 보드 표시 폭
+
 function buildBoard(s) {
   const phones = s.variants.map((v,idx)=>{
     const img = `desc/img/dev-${s.id}-${idx+1}.png`;  // 캡처 이미지 (Figma 임포트 호환 · iframe 미사용)
+    const natH = SHOT_H[`${s.id}-${idx+1}`] || 1674;
+    const dispH = Math.round(SHOT_W * natH / 880);     // 폭 165px 기준 비율 높이
+    // 인라인 픽셀 크기 고정 + 즉시 로딩 → Figma 임포트 시 크기 어긋남/빈 박스 방지
     return `
     <div class="phone-col">
       <div class="variant-label">${v.label}</div>
-      <img class="phone-shot" src="${img}" loading="lazy" alt="${v.label}">
+      <img class="phone-shot" src="${img}" width="${SHOT_W}" height="${dispH}" style="width:${SHOT_W}px;height:${dispH}px" alt="${v.label}">
     </div>`;}).join('');
 
   // 데이터·연동 카테고리 제외 + 남은 핀 순차 번호 재부여

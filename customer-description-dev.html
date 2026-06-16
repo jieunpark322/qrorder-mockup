@@ -114,14 +114,10 @@ body{
   background:var(--line);padding:3px 8px;border-radius:4px;
   white-space:pre-line;
 }
-.phone-chrome{
-  width:var(--phone-w);
-  border:2px solid var(--ink-2);border-radius:14px;
-  overflow:hidden;background:white;flex-shrink:0;
-  line-height:0;
-}
-.phone-chrome img{
-  width:100%;height:auto;display:block;border:none;
+/* 폰 화면 = 단일 이미지 요소 (Figma 임포트 시 프레임/이미지 어긋남 방지) */
+.phone-shot{
+  width:var(--phone-w);height:auto;display:block;flex-shrink:0;
+  border:2px solid var(--ink-2);border-radius:14px;background:#fff;
 }
 
 /* ── CARDS ── */
@@ -368,9 +364,7 @@ function buildBoard(s) {
     return `
     <div class="phone-col">
       <div class="variant-label">${v.label}</div>
-      <div class="phone-chrome">
-        <img src="${img}" loading="lazy" alt="${v.label}">
-      </div>
+      <img class="phone-shot" src="${img}" loading="lazy" alt="${v.label}">
     </div>`;}).join('');
 
   // 데이터·연동 카테고리 제외 + 남은 핀 순차 번호 재부여

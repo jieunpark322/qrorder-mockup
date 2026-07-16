@@ -296,6 +296,11 @@
   <button class="ds-chip on" id="bill-pre" onclick="setBill('pre')">선불형</button>
   <button class="ds-chip" id="bill-post" onclick="setBill('post')">후불형</button>
   <span class="ds-div"></span>
+  <span class="lbl">대기표시(브랜드)</span>
+  <button class="ds-chip on" id="wait-count" onclick="setBrandWait('count')">대기 인원</button>
+  <button class="ds-chip" id="wait-time" onclick="setBrandWait('time')">대기 시간</button>
+  <button class="ds-chip" id="wait-off" onclick="setBrandWait('off')">미표시</button>
+  <span class="ds-div"></span>
   <span class="lbl">상황</span>
   <button class="ds-chip" onclick="go('closed')">영업종료</button>
   <button class="ds-chip" onclick="go('break')">브레이크</button>
@@ -332,7 +337,7 @@
 /* ══════════════ 데이터 ══════════════ */
 const STORES = [
   { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'linear-gradient(135deg,#ff922b,#f76707)', cover:'linear-gradient(135deg,#ff922b,#e8590c)',
-    open:true, loc:'A구역 · 부스 3번', wait:{type:'count', v:'대기 12팀'}, rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
+    open:true, loc:'A구역 · 부스 3번', waitCount:'12팀', waitTime:'약 15분', rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
     menus:[
       {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', left:null},
       {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', left:5, hh:true, hhPrice:4400},
@@ -341,14 +346,14 @@ const STORES = [
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', soldout:true},
     ]},
   { id:'coffee', name:'소프트커피', logo:'☕', thumb:'linear-gradient(135deg,#8a5a36,#4a2f1c)', cover:'linear-gradient(135deg,#8a5a36,#4a2f1c)',
-    open:true, loc:'B구역 · 부스 1번', wait:{type:'time', v:'약 5분 대기'}, rep:'핸드드립 아메리카노', cat:'음료', cat2:'B구역',
+    open:true, loc:'B구역 · 부스 1번', waitCount:'3팀', waitTime:'약 5분', rep:'핸드드립 아메리카노', cat:'음료', cat2:'B구역',
     menus:[
       {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕'},
       {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛'},
       {id:'c3', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', left:3},
     ]},
   { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'linear-gradient(135deg,#fab005,#f08c00)', cover:'linear-gradient(135deg,#fab005,#e67700)',
-    open:false, loc:'C구역 · 부스 2번', wait:null, rep:'바삭 후라이드', cat:'푸드', cat2:'C구역', menus:[] },
+    open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역', menus:[] },
 ];
 
 let S = {
@@ -361,6 +366,7 @@ let S = {
   cart:[],           // {store, menu, name, emoji, opt, qty, price, img}
   adult:false,
   searchOpen:false,
+  brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   tmpQty:1, tmpOpt:0,
   loginType:'kakao', // kakao | guest | phone
 };
@@ -380,6 +386,11 @@ function setBill(b){
   S.bill=b;
   document.getElementById('bill-pre').classList.toggle('on',b==='pre');
   document.getElementById('bill-post').classList.toggle('on',b==='post');
+  render();
+}
+function setBrandWait(m){
+  S.brandWait=m;
+  ['count','time','off'].forEach(k=>document.getElementById('wait-'+k).classList.toggle('on',k===m));
   render();
 }
 function restart(){
@@ -500,7 +511,12 @@ function scHome(){
   </div>`;
 }
 function scardHTML(s){
-  const wait = s.wait ? `<span class="s-tag wait">⏳ ${s.wait.v}</span>` : '';
+  // 대기 표시는 브랜드 설정(우선)을 따름 — 매장 개별 설정을 덮어씀
+  let wait='';
+  if(s.open && S.brandWait!=='off'){
+    const v = S.brandWait==='time' ? s.waitTime : s.waitCount;
+    if(v) wait = `<span class="s-tag wait">⏳ ${S.brandWait==='time'?'':'대기 '}${v}</span>`;
+  }
   const badge = s.open ? `<span class="s-badge open">영업중</span>` : `<span class="s-badge closed">영업종료</span>`;
   return `<button class="scard ${s.open?'':'closed'}" onclick="${s.open?`openStore('${s.id}')`:`toast('영업 종료 — 메뉴판만 조회할 수 있어요');openStore('${s.id}')`}">
     <div class="s-thumb" style="background:${s.thumb}">${s.logo}<div class="s-logo">${s.logo}</div></div>

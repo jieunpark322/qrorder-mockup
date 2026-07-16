@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>야외형 QR오더 — 구조 이해 가이드</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --blue:#5C8CDA; --blue-d:#3a6fc9; --blue-50:#eef4fd;
+    --ink:#191f28; --ink2:#4e5968; --ink3:#8b95a1; --ink4:#b0b8c1;
+    --line:#e5e8eb; --line2:#f1f3f5; --bg:#f2f4f6; --card:#fff;
+    --green:#12b886; --red:#e03131; --amber:#f59f00;
+    --festA:#ff6b4a; --festB:#ffb03a; --purple:#7048e8;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased;font-size:16px;letter-spacing:-.01em;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 80px;}
+
+  /* 헤더 */
+  .hero{background:linear-gradient(135deg,var(--festA),var(--festB));color:#fff;padding:46px 0 40px;margin-bottom:0;}
+  .hero .wrap{padding-bottom:0;}
+  .hero .eyebrow{font-size:13px;font-weight:800;letter-spacing:.05em;opacity:.9;background:rgba(255,255,255,.18);display:inline-block;padding:5px 12px;border-radius:20px;}
+  .hero h1{font-size:34px;font-weight:900;margin:14px 0 8px;letter-spacing:-.02em;line-height:1.25;}
+  .hero p{font-size:16.5px;opacity:.95;margin:0;max-width:620px;}
+  .hero .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+  .hero .links a{font-size:14px;font-weight:800;color:var(--ink);background:#fff;text-decoration:none;padding:11px 17px;border-radius:11px;display:inline-flex;align-items:center;gap:7px;}
+  .hero .links a.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4);}
+
+  section{margin-top:44px;}
+  .sec-num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;background:var(--ink);color:#fff;font-size:15px;font-weight:800;margin-right:10px;flex-shrink:0;}
+  h2{font-size:23px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;margin:0 0 6px;}
+  .sec-desc{font-size:15.5px;color:var(--ink2);margin:0 0 18px;padding-left:40px;}
+
+  .oneliner{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--festA);border-radius:14px;padding:20px 22px;font-size:17px;font-weight:600;color:var(--ink);}
+  .oneliner b{color:var(--festA);font-weight:900;}
+
+  /* 행사 카드 그리드 */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+  .ev{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 17px;}
+  .ev .ei{font-size:30px;}
+  .ev .en{font-size:16px;font-weight:800;margin-top:8px;}
+  .ev .ed{font-size:13.5px;color:var(--ink3);margin-top:4px;line-height:1.55;}
+  .common{margin-top:14px;background:var(--blue-50);border:1px solid #c5d8f5;border-radius:12px;padding:15px 18px;font-size:14.5px;color:var(--blue-d);}
+  .common b{color:var(--ink);}
+  .common .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+  .common .tags span{background:#fff;border:1px solid #c5d8f5;border-radius:8px;padding:5px 11px;font-size:13px;font-weight:700;color:var(--blue-d);}
+
+  /* 계층 다이어그램 */
+  .hier{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;}
+  .tier{display:flex;align-items:center;gap:14px;}
+  .tier .badge{flex-shrink:0;width:90px;font-size:12.5px;font-weight:800;color:#fff;text-align:center;padding:6px 0;border-radius:8px;}
+  .tier.brand .badge{background:var(--purple);}
+  .tier.store .badge{background:var(--festA);}
+  .tier.cust .badge{background:var(--green);}
+  .tier .box{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:13px 16px;font-size:15px;font-weight:700;}
+  .tier .box .sub{font-size:13px;color:var(--ink3);font-weight:600;margin-top:2px;}
+  .stores{flex:1;display:flex;gap:10px;flex-wrap:wrap;}
+  .stores .box{flex:1;min-width:120px;text-align:center;}
+  .conn{height:22px;width:2px;background:var(--line);margin:4px 0 4px 44px;}
+  .conn.multi{margin-left:44px;}
+
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){ .twocol{grid-template-columns:1fr;} .sec-desc{padding-left:0;} }
+  .modecard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+  .modecard h3{font-size:16.5px;font-weight:800;margin:0 0 4px;display:flex;align-items:center;gap:8px;}
+  .modecard .mtag{font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:20px;}
+  .mtag.g{color:var(--purple);background:#f3f0ff;} .mtag.s{color:var(--festA);background:#fff4e6;}
+  .modecard ul{margin:10px 0 0;padding-left:18px;font-size:14.5px;color:var(--ink2);}
+  .modecard li{margin:5px 0;}
+
+  /* 우선순위 섹션 */
+  .rule{background:#fff8e6;border:1.5px solid #ffe3a3;border-radius:14px;padding:18px 20px;font-size:15.5px;color:#92400e;font-weight:600;}
+  .rule b{color:var(--ink);font-weight:900;}
+  .prio{display:grid;grid-template-columns:1fr 44px 1fr;align-items:center;gap:8px;margin-top:16px;}
+  @media(max-width:640px){ .prio{grid-template-columns:1fr;} .prio .arrow{transform:rotate(90deg);margin:0 auto;} }
+  .arrow{font-size:26px;color:var(--ink4);text-align:center;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+  .panel .pt{font-size:13px;font-weight:800;color:var(--ink3);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+  .panel .pt .dot{width:8px;height:8px;border-radius:50%;}
+  .panel.set .pt .dot{background:var(--purple);} .panel.res .pt .dot{background:var(--green);}
+
+  /* 브랜드 설정 목업 */
+  .setrow{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line2);}
+  .setrow:last-child{border-bottom:none;}
+  .setrow .lbl{font-size:14.5px;font-weight:700;}
+  .setrow .lbl .d{font-size:12.5px;color:var(--ink3);font-weight:600;margin-top:2px;}
+  .toggle{width:46px;height:26px;border-radius:20px;background:var(--green);position:relative;flex-shrink:0;}
+  .toggle::after{content:'';position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;}
+  .radios{display:flex;gap:8px;margin-top:10px;}
+  .radio{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-size:14px;font-weight:700;text-align:center;color:var(--ink3);}
+  .radio.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);}
+  .radio .rt{font-size:12px;font-weight:600;color:var(--ink4);margin-top:2px;}
+  .radio.on .rt{color:var(--blue-d);}
+
+  /* 결과: 손님 매장 카드 미니 */
+  .mini{display:flex;gap:11px;align-items:center;background:var(--bg);border-radius:12px;padding:11px;margin-bottom:9px;}
+  .mini:last-child{margin-bottom:0;}
+  .mini .mt{width:44px;height:44px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;}
+  .mini .mn{font-size:14.5px;font-weight:800;}
+  .mini .mw{font-size:12.5px;font-weight:700;color:#e8590c;background:#fff4e6;border-radius:7px;padding:4px 9px;margin-left:auto;white-space:nowrap;}
+
+  .note{font-size:13.5px;color:var(--ink3);margin-top:14px;line-height:1.7;background:var(--bg);border-radius:11px;padding:14px 16px;}
+  .note b{color:var(--ink2);}
+  footer{margin-top:50px;padding-top:22px;border-top:1px solid var(--line);font-size:13px;color:var(--ink4);text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow">디지털사업본부 · 타부서 공유용</span>
+    <h1>야외형 QR오더 — 구조 이해 가이드</h1>
+    <p>야외 행사장에서 손님이 QR을 스캔해 여러 매장의 메뉴를 주문·픽업하는 서비스입니다. 어디에 쓰이고, 어떤 구조로 돌아가는지 한눈에 정리했어요.</p>
+    <div class="links">
+      <a href="outdoor-customer.html">📱 손님 화면 프로토타입 열기</a>
+      <a class="ghost" href="https://app.notion.com/p/421b808c23f383d19e5e01ebf6f994e5" target="_blank">📄 기능 명세(Notion)</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 1. 한 줄 요약 -->
+  <section>
+    <h2><span class="sec-num">1</span>한 줄 요약</h2>
+    <div class="oneliner">여러 매장(부스·푸드트럭)이 모인 <b>야외 행사장</b>에서, 손님은 앱 설치 없이 <b>QR 스캔 → 메뉴 주문 → 현장 픽업</b>까지 한 번에. 운영 주체(브랜드)는 행사 단위로 매장·메뉴·정책을 통합 관리합니다.</div>
+  </section>
+
+  <!-- 2. 어디에 쓰이나 -->
+  <section>
+    <h2><span class="sec-num">2</span>어디에 쓰이나 — 행사 현장</h2>
+    <p class="sec-desc">단기간, 다수 매장, 대기·혼잡이 발생하는 야외 현장이 핵심 무대예요.</p>
+    <div class="grid">
+      <div class="ev"><div class="ei">🎪</div><div class="en">푸드트럭 페스티벌</div><div class="ed">여러 푸드트럭이 한 장소에 모이는 미식 행사</div></div>
+      <div class="ev"><div class="ei">🌃</div><div class="en">야시장 · 플리마켓</div><div class="ed">먹거리·소품 부스가 늘어선 야간 장터</div></div>
+      <div class="ev"><div class="ei">🎉</div><div class="en">지역 축제</div><div class="ed">지자체·상권 주최의 대규모 먹거리 행사</div></div>
+      <div class="ev"><div class="ei">🎤</div><div class="en">공연 · 페스티벌</div><div class="ed">콘서트·뮤직 페스티벌 현장 매점</div></div>
+      <div class="ev"><div class="ei">🏟️</div><div class="en">스포츠 경기장</div><div class="ed">경기장 내 매점·부스 사전 주문/픽업</div></div>
+      <div class="ev"><div class="ei">🏬</div><div class="en">박람회 · 전시</div><div class="ed">전시장 내 다수 F&B 부스 운영</div></div>
+      <div class="ev"><div class="ei">🎓</div><div class="en">대학 축제</div><div class="ed">학과·동아리 부스가 모인 캠퍼스 행사</div></div>
+      <div class="ev"><div class="ei">🛍️</div><div class="en">팝업 행사</div><div class="ed">기간 한정 브랜드·마켓 팝업</div></div>
+    </div>
+    <div class="common">
+      <b>공통 특징</b> — 이 조건들이 야외형 QR오더가 필요한 이유예요.
+      <div class="tags">
+        <span>다수 매장이 한 장소에</span><span>짧은 운영 기간</span><span>줄서기·대기 혼잡</span>
+        <span>현장 픽업(포장)</span><span>불특정 다수 방문</span><span>외국인 방문객</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 핵심 구조 -->
+  <section>
+    <h2><span class="sec-num">3</span>핵심 구조 — 브랜드 · 매장 · 손님</h2>
+    <p class="sec-desc">운영은 3계층으로 이뤄져요. 위 계층의 설정이 아래 계층에 적용됩니다.</p>
+    <div class="hier">
+      <div class="tier brand"><span class="badge">브랜드</span><div class="box">행사 운영 주체 (주최자 · 대행사)<div class="sub">행사 단위 정책·배너·공지·매장 구성·표시 방식 설정 → 사장님사이트에서 관리</div></div></div>
+      <div class="conn"></div>
+      <div class="tier store"><span class="badge">매장</span><div class="stores">
+        <div class="box">부스 A<div class="sub">푸드트럭</div></div>
+        <div class="box">부스 B<div class="sub">음료</div></div>
+        <div class="box">부스 C<div class="sub">디저트</div></div>
+      </div></div>
+      <div class="conn"></div>
+      <div class="tier cust"><span class="badge">손님</span><div class="box">QR 스캔 → 주문 → 픽업<div class="sub">앱 설치 없이 웹에서 · 다국어 자동 번역</div></div></div>
+    </div>
+  </section>
+
+  <!-- 4. 두 구조 -->
+  <section>
+    <h2><span class="sec-num">4</span>두 가지 화면 구조</h2>
+    <p class="sec-desc">행사 규모·구성에 따라 두 방식 중 선택돼요. (프로토타입 상단 토글로 비교 가능)</p>
+    <div class="twocol">
+      <div class="modecard">
+        <h3>매장 그룹 구조 <span class="mtag g">여러 매장</span></h3>
+        <ul>
+          <li>스플래시 → 그룹 홈(배너·공지·검색·카테고리·매장 목록) → 매장 진입</li>
+          <li>여러 매장을 한 화면에서 탐색</li>
+          <li>담기 방식: <b>통합 결제</b>(여러 매장 한 번에) / <b>개별 결제</b>(매장별)</li>
+        </ul>
+      </div>
+      <div class="modecard">
+        <h3>단일 매장 구조 <span class="mtag s">한 매장</span></h3>
+        <ul>
+          <li>매장 페이지가 곧 시작점 (그룹 홈 없음)</li>
+          <li>단독 운영 매장·소규모 행사에 적합</li>
+          <li>해당 매장 상품만 담기·결제</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 설정 우선순위 -->
+  <section>
+    <h2><span class="sec-num">5</span>설정 우선순위 — 브랜드가 매장보다 우선</h2>
+    <p class="sec-desc">대기 정보 표시를 예로, 같은 브랜드(행사)에 속하면 브랜드 설정이 매장 개별 설정을 덮어써요.</p>
+    <div class="rule">
+      🔑 <b>규칙</b> — 매장은 평소 대기 표시를 자유롭게 설정하지만, <b>브랜드가 이 행사에 대해 표시 방식을 설정 완료한 순간부터는 브랜드 설정이 우선</b> 적용됩니다. 결과적으로 행사 내 전 매장이 <b>동일한 방식</b>으로 통일 노출돼요.
+    </div>
+
+    <div class="prio">
+      <!-- 브랜드 설정 페이지 -->
+      <div class="panel set">
+        <div class="pt"><span class="dot"></span>브랜드 설정 페이지 (사장님사이트)</div>
+        <div class="setrow">
+          <div class="lbl">이 행사에 대기 정보 표시<div class="d">① 노출 여부</div></div>
+          <div class="toggle"></div>
+        </div>
+        <div class="setrow" style="display:block">
+          <div class="lbl">표시 방식<div class="d">② 인원 / 시간 중 택1</div></div>
+          <div class="radios">
+            <div class="radio">대기 인원<div class="rt">예: 12팀</div></div>
+            <div class="radio on">대기 시간<div class="rt">예: 약 5분</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">➜</div>
+
+      <!-- 결과: 손님 화면 -->
+      <div class="panel res">
+        <div class="pt"><span class="dot"></span>결과 · 손님 화면 (전 매장 통일)</div>
+        <div class="mini"><div class="mt" style="background:linear-gradient(135deg,#ff922b,#f76707)">🍔</div><div class="mn">소프트버거 트럭</div><div class="mw">⏳ 약 15분</div></div>
+        <div class="mini"><div class="mt" style="background:linear-gradient(135deg,#8a5a36,#4a2f1c)">☕</div><div class="mn">소프트커피</div><div class="mw">⏳ 약 5분</div></div>
+        <div class="mini"><div class="mt" style="background:linear-gradient(135deg,#fab005,#f08c00)">🍗</div><div class="mn">소프트치킨</div><div class="mw">⏳ 약 8분</div></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>정리</b><br>
+      · <b>매장 단위(평소)</b>: 대기 현황을 매장이 자유 설정 — 표시 여부 및 방식(주문 대기수 / 대기 인원 / 대기 시간).<br>
+      · <b>브랜드 단위(행사 소속 시, 우선)</b>: 브랜드 설정 페이지에서 이 행사의 대기 정보 ① 표시 여부, ② 표시 방식(대기 인원 ↔ 대기 시간)을 지정 → 행사 내 전 매장에 우선 적용.<br>
+      · 브랜드가 <b>미표시</b>로 두면 개별 매장이 켜 두었더라도 노출되지 않아요.
+    </div>
+  </section>
+
+  <footer>
+    야외형 QR오더 구조 이해 가이드 · 디지털사업본부 · 손님 화면 프로토타입과 함께 보세요
+  </footer>
+</div>
+
+</body>
+</html>

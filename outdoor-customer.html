@@ -556,7 +556,7 @@ function scardHTML(s){
   }
   const badge = s.open ? `<span class="s-badge open">영업중</span>` : `<span class="s-badge closed">영업종료</span>`;
   return `<button class="scard ${s.open?'':'closed'}" onclick="${s.open?`openStore('${s.id}')`:`toast('영업 종료 — 메뉴판만 조회할 수 있어요');openStore('${s.id}')`}">
-    <div class="s-thumb" style="background:${s.thumb}">${s.logo}<div class="s-logo">${s.logo}</div></div>
+    <div class="s-thumb" style="background:${s.thumb}">${s.logo}</div>
     <div class="s-body">
       <div class="s-name">${s.name} ${badge}</div>
       <div class="s-rep">대표 · ${s.rep}</div>

@@ -41,7 +41,9 @@
   .hdr{position:sticky;top:0;z-index:30;background:#fff;display:flex;align-items:center;gap:10px;padding:14px 14px;border-bottom:1px solid var(--line);}
   .hdr .bk{border:none;background:none;font-size:22px;cursor:pointer;color:var(--ink);width:30px;padding:0;font-family:inherit;}
   .hdr .ht{font-size:17px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .hdr .lang{font-size:12px;font-weight:700;color:var(--ink2);border:1px solid var(--line);border-radius:20px;padding:6px 11px;cursor:pointer;background:#fff;font-family:inherit;display:inline-flex;align-items:center;gap:4px;}
+  /* 시스템 자동 번역: 사용자가 고르는 게 아니라 접속 언어로 자동 적용됨을 알리는 수동 표시 */
+  .autotrans{font-size:11.5px;font-weight:700;color:var(--ink3);background:var(--bg);border-radius:20px;padding:5px 11px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+  .autotrans .adot{width:6px;height:6px;border-radius:50%;background:var(--green);}
 
   /* ── 스플래시 ───────────────────────── */
   #s-splash .scroll{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
@@ -400,7 +402,7 @@ function scHome(){
   return `
   <div class="hdr" style="justify-content:space-between">
     <div class="ht" style="flex:0">🎪 소프트 푸드트럭 페스티벌</div>
-    <button class="lang" onclick="toast('다국어 자동 번역: 한국어 · English · 日本語 · 中文')">🌐 한국어 ▾</button>
+    <span class="autotrans" title="접속 언어로 자동 번역돼요 (미지원 언어는 기본 언어)"><span class="adot"></span>🌐 자동 번역</span>
   </div>
   <div class="scroll">
     <!-- 메인 배너 (최대 3장 자동 롤링) -->
@@ -463,7 +465,7 @@ function scStore(){
   <div class="hdr">
     ${backBtn}
     <div class="ht">${s.name}</div>
-    <button class="lang" onclick="toast('다국어 자동 번역 지원')">🌐</button>
+    <span class="autotrans" title="접속 언어로 자동 번역돼요 (미지원 언어는 기본 언어)"><span class="adot"></span>🌐 자동 번역</span>
   </div>
   <div class="scroll">
     <div class="cover" style="background:${s.cover}"></div>

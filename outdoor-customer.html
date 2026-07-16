@@ -123,7 +123,7 @@
   .catsec-h{padding:18px 18px 6px;font-size:16px;font-weight:800;}
   .mcard{display:flex;gap:13px;padding:14px 16px;background:#fff;cursor:pointer;border-bottom:1px solid var(--line2);width:100%;border:none;font-family:inherit;text-align:left;align-items:center;position:relative;}
   .mcard:active{background:var(--bg);}
-  .mcard.soldout{opacity:.55;}
+  .mcard.soldout{opacity:.66;}
   .m-thumb{width:76px;height:76px;border-radius:12px;flex-shrink:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;}
   .m-thumb .so-dim{position:absolute;inset:0;background:rgba(255,255,255,.55);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--red);}
   .m-body{flex:1;min-width:0;}
@@ -139,6 +139,10 @@
   .m-dc{font-size:12px;font-weight:800;color:var(--red);}
   .m-hh{font-size:11px;font-weight:800;color:#fff;background:var(--amber);padding:2px 6px;border-radius:5px;}
   .m-left{font-size:12px;font-weight:700;color:#e8590c;margin-top:6px;}
+  /* 잔여 개수: 메뉴명 영역이 아니라 카드 오른쪽에 별도 표시 */
+  .m-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-left:6px;}
+  .m-left-r{font-size:12px;font-weight:800;color:#e8590c;background:#fff4e6;border-radius:9px;padding:6px 10px;white-space:nowrap;text-align:center;line-height:1.25;}
+  .m-left-r b{font-size:14px;}
 
   /* ── 메뉴 상세 ───────────────────────── */
   .d-hero{aspect-ratio:1/1;max-height:300px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:80px;}
@@ -261,7 +265,10 @@
   .ms-grab span{display:block;width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.9);box-shadow:0 1px 3px rgba(0,0,0,.25);}
   .ms-close{position:absolute;top:12px;right:14px;z-index:6;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.4);color:#fff;border:none;font-size:16px;cursor:pointer;font-family:inherit;}
   .ms-scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;}
-  .sheet-menu .d-hero{aspect-ratio:16/10;max-height:210px;font-size:72px;}
+  .sheet-menu .d-hero{position:relative;aspect-ratio:16/10;max-height:210px;font-size:72px;}
+  .so-dim-lg{position:absolute;inset:0;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--red);letter-spacing:2px;}
+  .ms-warn{margin-top:12px;background:#fff0f0;border:1px solid #ffc9c9;border-radius:10px;padding:12px 14px;font-size:13.5px;font-weight:700;color:#c92a2a;line-height:1.55;}
+  .ms-warn.amber{background:#fff8e6;border-color:#ffe3a3;color:#92400e;}
   .sheet-menu .d-body{padding:16px 18px 20px;}
   .ms-foot{flex-shrink:0;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#fff;}
 
@@ -377,7 +384,7 @@ function restart(){
 function go(scr){ closeMenuSheet(); closeAdult(); S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
   if(scr==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); } }
 function openStore(id){ S.curStore=id; go('store'); }
-function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); if(m.soldout)return toast('품절된 메뉴예요'); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; showMenuSheet(); }
+function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; showMenuSheet(); }
 function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); }
 function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); }
 
@@ -517,54 +524,62 @@ function mcardHTML(sid,m,closed){
   if(m.hh){ price=`<span class="m-hh">해피아워</span><span class="m-now" style="color:var(--amber)">${won(m.hhPrice)}</span><span class="m-was">${won(m.price)}</span>`; }
   else if(m.was){ price=`<span class="m-now">${won(m.price)}</span><span class="m-was">${won(m.was)}</span><span class="m-dc">${Math.round((1-m.price/m.was)*100)}%</span>`; }
   else { price=`<span class="m-now">${won(m.price)}</span>`; }
-  return `<button class="mcard ${m.soldout?'soldout':''}" onclick="${closed?`toast('영업 종료 — 주문할 수 없어요')`:`openMenu('${sid}','${m.id}')`}">
+  return `<button class="mcard ${m.soldout?'soldout':''}" onclick="openMenu('${sid}','${m.id}')">
     <div class="m-thumb" style="background:var(--bg)">${m.img}${m.soldout?'<div class="so-dim">품절</div>':''}</div>
     <div class="m-body">
       ${badges?`<div class="m-badges">${badges}</div>`:''}
       <div class="m-name">${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''} ${m.reuse?'♻️':''}</div>
       ${m.desc?`<div class="m-desc">${m.desc}</div>`:''}
       <div class="m-price">${price}</div>
-      ${m.left!=null?`<div class="m-left">🔥 잔여 ${m.left}개</div>`:''}
     </div>
+    ${(!m.soldout && m.left!=null)?`<div class="m-right"><span class="m-left-r">잔여<br><b>${m.left}개</b></span></div>`:''}
   </button>`;
 }
 
 /* ── 메뉴 상세 (바텀시트) ── */
 function renderMenuSheet(){
   const m=S.curMenu; if(!m)return;
+  const s=store(S.curStore);
+  const closed=!s.open;
+  const disabled = m.soldout || closed;   // 품절 or 영업종료 → 정보 조회는 가능, 주문만 비활성화
   const opts=['Regular','Large (+1,500원)'];
   const base = m.hh?m.hhPrice:m.price;
   const optAdd = S.tmpOpt===1?1500:0;
   const total=(base+optAdd)*S.tmpQty;
+  const orderControls = `
+    <div class="opt-sec">
+      <div class="opt-h">사이즈 <span class="opt-req">필수</span></div>
+      ${opts.map((o,i)=>`<div class="opt ${S.tmpOpt===i?'on':''}" onclick="S.tmpOpt=${i};renderMenuSheet()"><span>${o}</span><span class="dot"></span></div>`).join('')}
+    </div>
+    <div class="qty">
+      <button class="qbtn" onclick="S.tmpQty=Math.max(1,S.tmpQty-1);renderMenuSheet()">−</button>
+      <span class="qnum">${S.tmpQty}</span>
+      <button class="qbtn" onclick="S.tmpQty=Math.min(${m.left||20},S.tmpQty+1);renderMenuSheet()">＋</button>
+    </div>
+    ${m.left!=null?`<div style="text-align:center;font-size:12.5px;color:#e8590c;font-weight:700;margin-top:10px">잔여 ${m.left}개 · 초과 선택 불가</div>`:''}`;
   document.getElementById('menuSheetInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closeMenuSheet()">✕</button>
     <div class="ms-scroll">
-      <div class="d-hero" style="background:var(--bg)">${m.img}</div>
+      <div class="d-hero" style="background:var(--bg)">${m.img}${m.soldout?'<div class="so-dim-lg">품절</div>':''}</div>
       <div class="d-body">
         <div class="d-name">${m.name} ${m.emoji||''}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
         <div class="d-price">${won(base)}</div>
+        ${disabled?`<div class="ms-warn ${m.soldout?'':'amber'}">${m.soldout?'😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.':'🌙 지금은 영업 종료 상태예요. 메뉴 정보만 확인할 수 있어요.'}</div>`:''}
         <div class="d-info">
           <b>메뉴 정보</b><br>
           🥜 알러지: 밀·대두·우유 함유 가능<br>
-          🔥 영양: 약 ${420+S.tmpQty*10}kcal
+          🔥 영양: 약 ${420+(disabled?0:S.tmpQty*10)}kcal
           ${m.adult?'<br>🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증 필요':''}
         </div>
-        <div class="opt-sec">
-          <div class="opt-h">사이즈 <span class="opt-req">필수</span></div>
-          ${opts.map((o,i)=>`<div class="opt ${S.tmpOpt===i?'on':''}" onclick="S.tmpOpt=${i};renderMenuSheet()"><span>${o}</span><span class="dot"></span></div>`).join('')}
-        </div>
-        <div class="qty">
-          <button class="qbtn" onclick="S.tmpQty=Math.max(1,S.tmpQty-1);renderMenuSheet()">−</button>
-          <span class="qnum">${S.tmpQty}</span>
-          <button class="qbtn" onclick="S.tmpQty=Math.min(${m.left||20},S.tmpQty+1);renderMenuSheet()">＋</button>
-        </div>
-        ${m.left!=null?`<div style="text-align:center;font-size:12.5px;color:#e8590c;font-weight:700;margin-top:10px">잔여 ${m.left}개 · 초과 선택 불가</div>`:''}
+        ${disabled?'':orderControls}
       </div>
     </div>
     <div class="ms-foot">
-      <button class="cta-btn" onclick="addToCart()">담기 <span class="amt">${won(total)}</span></button>
+      ${disabled
+        ? `<button class="cta-btn" disabled>${m.soldout?'품절된 메뉴예요':'지금은 주문할 수 없어요'}</button>`
+        : `<button class="cta-btn" onclick="addToCart()">담기 <span class="amt">${won(total)}</span></button>`}
     </div>`;
 }
 function addToCart(){

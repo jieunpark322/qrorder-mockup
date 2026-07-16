@@ -254,6 +254,17 @@
   .authbtn{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:16px;font-size:15px;font-weight:800;font-family:inherit;background:#fff;cursor:pointer;margin-top:12px;display:flex;align-items:center;gap:12px;}
   .authbtn .aic{font-size:22px;}
 
+  /* 메뉴 상세 바텀시트 (아래에서 올라옴) */
+  #menuSheet{z-index:250;}
+  .sheet-menu{position:relative;padding:0;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;}
+  .ms-grab{position:absolute;top:9px;left:50%;transform:translateX(-50%);z-index:6;}
+  .ms-grab span{display:block;width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.9);box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .ms-close{position:absolute;top:12px;right:14px;z-index:6;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.4);color:#fff;border:none;font-size:16px;cursor:pointer;font-family:inherit;}
+  .ms-scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;}
+  .sheet-menu .d-hero{aspect-ratio:16/10;max-height:210px;font-size:72px;}
+  .sheet-menu .d-body{padding:16px 18px 20px;}
+  .ms-foot{flex-shrink:0;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#fff;}
+
   .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(25,31,40,.94);color:#fff;padding:13px 22px;border-radius:24px;font-size:14px;font-weight:700;z-index:400;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;}
   .toast.on{opacity:1;bottom:110px;}
 </style>
@@ -294,6 +305,11 @@
     <button class="authbtn" onclick="doAuth()"><span class="aic">🛂</span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인 사용자</div></div></button>
     <button class="ghostbtn" onclick="closeAdult()">닫기</button>
   </div>
+</div>
+
+<!-- 메뉴 상세 바텀시트 -->
+<div class="modal-bg" id="menuSheet" onclick="if(event.target===this)closeMenuSheet()">
+  <div class="sheet sheet-menu" id="menuSheetInner"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -358,17 +374,19 @@ function restart(){
   render();
   if(S.screen==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); }
 }
-function go(scr){ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
+function go(scr){ closeMenuSheet(); closeAdult(); S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
   if(scr==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); } }
 function openStore(id){ S.curStore=id; go('store'); }
-function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); if(m.soldout)return toast('품절된 메뉴예요'); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; go('menu'); }
+function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); if(m.soldout)return toast('품절된 메뉴예요'); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; showMenuSheet(); }
+function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); }
+function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); }
 
 function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('on'); clearTimeout(window._t); window._t=setTimeout(()=>el.classList.remove('on'),1600); }
 
 /* ══════════════ 렌더 ══════════════ */
 function render(){
   const scr = {
-    splash:scSplash, home:scHome, store:scStore, menu:scMenu, cart:scCart,
+    splash:scSplash, home:scHome, store:scStore, cart:scCart,
     checkout:scCheckout, pay:scPay, done:scDone, history:scHistory,
     closed:()=>full('🌙','지금은 주문할 수 없는 시간이에요','매장 영업이 종료되어 주문을 받을 수 없어요.<br>매장의 영업시간을 확인한 후 이용해 주세요.','메뉴판 보기','store','영업 종료 시 메뉴판만 조회할 수 있어요 (주문 불가)'),
     break:()=>full('🍳','지금은 브레이크 타임이에요','더 맛있는 음식을 대접하기 위해 매장을 정비하고 있어요.<br>준비가 끝나는 대로 주문을 재개할게요. 잠시만 기다려 주세요.','메뉴판 보기','store',''),
@@ -511,42 +529,43 @@ function mcardHTML(sid,m,closed){
   </button>`;
 }
 
-/* ── 메뉴 상세 ── */
-function scMenu(){
-  const m=S.curMenu, s=store(S.curStore);
+/* ── 메뉴 상세 (바텀시트) ── */
+function renderMenuSheet(){
+  const m=S.curMenu; if(!m)return;
   const opts=['Regular','Large (+1,500원)'];
   const base = m.hh?m.hhPrice:m.price;
   const optAdd = S.tmpOpt===1?1500:0;
   const total=(base+optAdd)*S.tmpQty;
-  return `
-  <div class="hdr"><button class="bk" onclick="go('store')">‹</button><div class="ht">${s.name}</div></div>
-  <div class="scroll">
-    <div class="d-hero" style="background:var(--bg)">${m.img}</div>
-    <div class="d-body">
-      <div class="d-name">${m.name} ${m.emoji||''}</div>
-      ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
-      <div class="d-price">${won(base)}</div>
-      <div class="d-info">
-        <b>메뉴 정보</b><br>
-        🥜 알러지: 밀·대두·우유 함유 가능<br>
-        🔥 영양: 약 ${420+S.tmpQty*10}kcal
-        ${m.adult?'<br>🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증 필요':''}
+  document.getElementById('menuSheetInner').innerHTML = `
+    <div class="ms-grab"><span></span></div>
+    <button class="ms-close" onclick="closeMenuSheet()">✕</button>
+    <div class="ms-scroll">
+      <div class="d-hero" style="background:var(--bg)">${m.img}</div>
+      <div class="d-body">
+        <div class="d-name">${m.name} ${m.emoji||''}</div>
+        ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
+        <div class="d-price">${won(base)}</div>
+        <div class="d-info">
+          <b>메뉴 정보</b><br>
+          🥜 알러지: 밀·대두·우유 함유 가능<br>
+          🔥 영양: 약 ${420+S.tmpQty*10}kcal
+          ${m.adult?'<br>🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증 필요':''}
+        </div>
+        <div class="opt-sec">
+          <div class="opt-h">사이즈 <span class="opt-req">필수</span></div>
+          ${opts.map((o,i)=>`<div class="opt ${S.tmpOpt===i?'on':''}" onclick="S.tmpOpt=${i};renderMenuSheet()"><span>${o}</span><span class="dot"></span></div>`).join('')}
+        </div>
+        <div class="qty">
+          <button class="qbtn" onclick="S.tmpQty=Math.max(1,S.tmpQty-1);renderMenuSheet()">−</button>
+          <span class="qnum">${S.tmpQty}</span>
+          <button class="qbtn" onclick="S.tmpQty=Math.min(${m.left||20},S.tmpQty+1);renderMenuSheet()">＋</button>
+        </div>
+        ${m.left!=null?`<div style="text-align:center;font-size:12.5px;color:#e8590c;font-weight:700;margin-top:10px">잔여 ${m.left}개 · 초과 선택 불가</div>`:''}
       </div>
-      <div class="opt-sec">
-        <div class="opt-h">사이즈 <span class="opt-req">필수</span></div>
-        ${opts.map((o,i)=>`<div class="opt ${S.tmpOpt===i?'on':''}" onclick="S.tmpOpt=${i};render()"><span>${o}</span><span class="dot"></span></div>`).join('')}
-      </div>
-      <div class="qty">
-        <button class="qbtn" onclick="S.tmpQty=Math.max(1,S.tmpQty-1);render()">−</button>
-        <span class="qnum">${S.tmpQty}</span>
-        <button class="qbtn" onclick="S.tmpQty=Math.min(m.left||20,S.tmpQty+1);render()">＋</button>
-      </div>
-      ${m.left!=null?`<div style="text-align:center;font-size:12.5px;color:#e8590c;font-weight:700;margin-top:10px">잔여 ${m.left}개 · 초과 선택 불가</div>`:''}
     </div>
-  </div>
-  <div class="cta">
-    <button class="cta-btn" onclick="addToCart()">담기 <span class="amt">${won(total)}</span></button>
-  </div>`;
+    <div class="ms-foot">
+      <button class="cta-btn" onclick="addToCart()">담기 <span class="amt">${won(total)}</span></button>
+    </div>`;
 }
 function addToCart(){
   const m=S.curMenu;
@@ -559,7 +578,8 @@ function addToCart(){
   S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, emoji:m.emoji||'', img:m.img,
     opt:S.tmpOpt===1?'Large':'Regular', qty:S.tmpQty, price:(base+(S.tmpOpt===1?1500:0))});
   toast('장바구니에 담았어요');
-  go('store');
+  closeMenuSheet();
+  render();   // 뒤에 깔린 매장 화면 갱신 → 하단 장바구니 바 표시
 }
 function closeAdult(){ document.getElementById('adultModal').classList.remove('on'); }
 function doAuth(){ S.adult=true; closeAdult(); toast('성인 인증 완료 · 오늘 자정까지 유지'); addToCart(); }

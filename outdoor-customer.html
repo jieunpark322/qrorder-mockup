@@ -151,6 +151,23 @@
   .m-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-left:6px;}
   .m-left-r{font-size:12px;font-weight:800;color:#e8590c;background:#fff4e6;border-radius:9px;padding:6px 10px;white-space:nowrap;text-align:center;line-height:1.25;}
   .m-left-r b{font-size:14px;}
+  .m-left-r.fcfs{color:var(--red);background:#fff0f0;}
+  .m-reuse{font-size:11.5px;font-weight:700;color:#2f9e44;margin-top:5px;}
+  .info-multi{white-space:pre-line;font-size:14.5px;color:var(--ink);line-height:1.8;}
+  /* 매장 배너 롤링 (브랜드 → 매장) */
+  .sbanner-roll{position:relative;margin:14px 18px 0;height:58px;border-radius:12px;overflow:hidden;cursor:pointer;}
+  .sb-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:9px;color:#fff;font-size:14px;font-weight:800;opacity:0;animation:sbfade 8s infinite;}
+  .sb-slide:nth-child(2){animation-delay:4s;}
+  @keyframes sbfade{0%,45%{opacity:1;}50%,100%{opacity:0;}}
+  .sb-tag{font-size:10px;font-weight:800;background:rgba(255,255,255,.28);padding:3px 8px;border-radius:20px;}
+  /* 포장 예약 시간 슬롯 */
+  .timeslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .tslot{position:relative;border:1.5px solid var(--line);border-radius:10px;padding:12px 0;font-size:15px;font-weight:700;background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .tslot.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);}
+  .tslot.dis{color:var(--ink4);background:var(--bg);cursor:not-allowed;}
+  .tslot .ts-x{font-size:10px;font-weight:800;color:var(--red);margin-top:2px;}
+  /* 조리완료 픽업 유도 */
+  .oh-pickup{background:#e6fcf5;border-top:1px solid #c3fae8;color:#0b7285;font-size:13.5px;font-weight:800;padding:11px 16px;line-height:1.5;}
 
   /* ── 메뉴 상세 ───────────────────────── */
   .d-hero{aspect-ratio:1/1;max-height:300px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:80px;}
@@ -331,6 +348,16 @@
   <div class="sheet sheet-menu" id="menuSheetInner"></div>
 </div>
 
+<!-- 입력 더블체크 확인 시트 -->
+<div class="modal-bg" id="confirmModal" onclick="if(event.target===this)closeConfirm()">
+  <div class="sheet">
+    <div class="sheet-t">입력하신 정보가 맞나요?</div>
+    <div class="sheet-s" id="confirmMsg"></div>
+    <button class="cta-btn" style="margin-top:20px" onclick="closeConfirm();payConfirm()">확인 · 주문 진행</button>
+    <button class="ghostbtn" onclick="closeConfirm()">다시 입력</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -338,22 +365,27 @@
 const STORES = [
   { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'linear-gradient(135deg,#ff922b,#f76707)', cover:'linear-gradient(135deg,#ff922b,#e8590c)',
     open:true, loc:'A구역 · 부스 3번', waitCount:'12팀', waitTime:'약 15분', rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
+    info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · 행사장 A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
       {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', left:null},
       {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', left:5, hh:true, hhPrice:4400},
       {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤'},
       {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', adult:true},
+      {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 한정', price:15000, fcfs:true, fcfsPrice:9900, fcfsLeft:8, badges:['hot'], img:'🍱'},
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', soldout:true},
     ]},
   { id:'coffee', name:'소프트커피', logo:'☕', thumb:'linear-gradient(135deg,#8a5a36,#4a2f1c)', cover:'linear-gradient(135deg,#8a5a36,#4a2f1c)',
     open:true, loc:'B구역 · 부스 1번', waitCount:'3팀', waitTime:'약 5분', rep:'핸드드립 아메리카노', cat:'음료', cat2:'B구역',
+    info:{ceo:'이영희', regno:'234-56-78901', address:'서울 마포구 성미산로 000 · 행사장 B구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
     menus:[
-      {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕'},
-      {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛'},
+      {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', reuse:true},
+      {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', reuse:true},
       {id:'c3', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', left:3},
+      {id:'c4', name:'선착순 콜드브루', desc:'하루 30잔 한정 특가', price:5500, fcfs:true, fcfsPrice:3900, fcfsLeft:12, badges:['rec'], img:'🧊'},
     ]},
   { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'linear-gradient(135deg,#fab005,#f08c00)', cover:'linear-gradient(135deg,#fab005,#e67700)',
-    open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역', menus:[] },
+    open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
+    info:{ceo:'박민수', regno:'345-67-89012', address:'서울 마포구 성미산로 000 · 행사장 C구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
 ];
 
 let S = {
@@ -367,8 +399,13 @@ let S = {
   adult:false,
   searchOpen:false,
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
+  storeTab:'menu',     // 매장 페이지 탭: menu | info
+  pickup:'now',        // 수령: now(즉시 포장) | reserve(포장 예약)
+  pickupTime:null,     // 예약 수령 시간
+  alertCh:'phone',     // 알림 채널: phone(카톡·문자) | email
+  contact:'',          // 입력한 휴대폰/이메일
   tmpQty:1, tmpOpt:0,
-  loginType:'kakao', // kakao | guest | phone
+  loginType:'kakao', // kakao | phone | email
 };
 
 const won = n => n.toLocaleString('ko-KR')+'원';
@@ -400,9 +437,9 @@ function restart(){
   render();
   if(S.screen==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); }
 }
-function go(scr){ closeMenuSheet(); closeAdult(); S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
+function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
   if(scr==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); } }
-function openStore(id){ S.curStore=id; go('store'); }
+function openStore(id){ S.curStore=id; S.storeTab='menu'; go('store'); }
 function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; showMenuSheet(); }
 function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); }
 function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); }
@@ -565,18 +602,23 @@ function scStore(){
         : `<div class="bstatus open"><span class="sdot"></span> 영업중</div>`}
       <div class="bloc">📍 ${s.loc}</div>
     </div>
-    <!-- 매장 배너 (브랜드 배너 → 매장 배너 순 롤링) -->
-    <div class="sbanner" onclick="toast('배너 탭 → 지정 URL 랜딩')">🎁 첫 주문 시 사이드 메뉴 500원 할인</div>
+    <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링) -->
+    <div class="sbanner-roll" onclick="toast('배너 탭 → 지정 URL 랜딩')">
+      <div class="sb-slide" style="background:linear-gradient(100deg,#6741d9,#9775fa)"><span class="sb-tag">브랜드</span> 🎪 전 매장 공통 · 개장기념 이벤트</div>
+      <div class="sb-slide" style="background:linear-gradient(100deg,#e8590c,#ff922b)"><span class="sb-tag">매장</span> 🎁 첫 주문 시 사이드 500원 할인</div>
+    </div>
     <!-- 탭 -->
     <div class="mtabs">
-      <button class="mtab on">메뉴</button>
-      <button class="mtab" onclick="toast('매장 정보: 상호·대표·사업자번호 · 원산지 · 위치 · 운영시간')">매장 정보</button>
+      <button class="mtab ${S.storeTab==='menu'?'on':''}" onclick="S.storeTab='menu';render()">메뉴</button>
+      <button class="mtab ${S.storeTab==='info'?'on':''}" onclick="S.storeTab='info';render()">매장 정보</button>
     </div>
     ${closed ? `<div class="notice" style="background:#fff0f0;border-color:#ffc9c9;color:#c92a2a;margin-top:12px"><span class="nic">🌙</span><div>지금은 영업 종료 상태예요. 메뉴 구경만 가능하고 주문은 할 수 없어요.</div></div>` : ''}
-    <div class="cattabs">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
-    ${s.menus.length===0
-      ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
-      : cats.map(c=>`<div class="catsec-h">${c}</div>${s.menus.filter(m=>(m.cat||'메뉴')===c).map(m=>mcardHTML(s.id,m,closed)).join('')}`).join('')}
+    ${S.storeTab==='info' ? storeInfoHTML(s) : `
+      <div class="cattabs">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
+      ${s.menus.length===0
+        ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
+        : cats.map(c=>`<div class="catsec-h">${c}</div>${s.menus.filter(m=>(m.cat||'메뉴')===c).map(m=>mcardHTML(s.id,m,closed)).join('')}`).join('')}
+    `}
   </div>
   ${cartBar()}
   `;
@@ -584,19 +626,45 @@ function scStore(){
 function mcardHTML(sid,m,closed){
   const badges = (m.badges||[]).map(b=>({hot:'<span class="m-badge mb-hot">인기</span>',new:'<span class="m-badge mb-new">신메뉴</span>',rec:'<span class="m-badge mb-rec">추천</span>'}[b])).join('');
   let price;
-  if(m.hh){ price=`<span class="m-hh">해피아워</span><span class="m-now" style="color:var(--amber)">${won(m.hhPrice)}</span><span class="m-was">${won(m.price)}</span>`; }
+  if(m.fcfs){ price=`<span class="m-hh" style="background:var(--red)">선착순</span><span class="m-now" style="color:var(--red)">${won(m.fcfsPrice)}</span><span class="m-was">${won(m.price)}</span>`; }
+  else if(m.hh){ price=`<span class="m-hh">해피아워</span><span class="m-now" style="color:var(--amber)">${won(m.hhPrice)}</span><span class="m-was">${won(m.price)}</span>`; }
   else if(m.was){ price=`<span class="m-now">${won(m.price)}</span><span class="m-was">${won(m.was)}</span><span class="m-dc">${Math.round((1-m.price/m.was)*100)}%</span>`; }
   else { price=`<span class="m-now">${won(m.price)}</span>`; }
+  const rightVal = m.fcfs ? {t:'선착순', n:m.fcfsLeft} : (m.left!=null ? {t:'잔여', n:m.left} : null);
   return `<button class="mcard ${m.soldout?'soldout':''}" onclick="openMenu('${sid}','${m.id}')">
     <div class="m-thumb" style="background:var(--bg)">${m.img}${m.soldout?'<div class="so-dim">품절</div>':''}</div>
     <div class="m-body">
       ${badges?`<div class="m-badges">${badges}</div>`:''}
-      <div class="m-name">${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''} ${m.reuse?'♻️':''}</div>
+      <div class="m-name">${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}</div>
       ${m.desc?`<div class="m-desc">${m.desc}</div>`:''}
       <div class="m-price">${price}</div>
+      ${m.reuse?`<div class="m-reuse">♻️ 다회용기 제공</div>`:''}
     </div>
-    ${(!m.soldout && m.left!=null)?`<div class="m-right"><span class="m-left-r">잔여<br><b>${m.left}개</b></span></div>`:''}
+    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${m.fcfs?'fcfs':''}">${rightVal.t}<br><b>${rightVal.n}개</b></span></div>`:''}
   </button>`;
+}
+
+/* ── 매장 정보 탭 ── */
+function storeInfoHTML(s){
+  const i=s.info||{};
+  return `<div style="padding-bottom:8px">
+    <div class="sect"><div class="sect-h">사업자 정보</div>
+      <div class="row"><span>상호</span><span class="v">${s.name}</span></div>
+      <div class="row"><span>대표자</span><span class="v">${i.ceo||'-'}</span></div>
+      <div class="row"><span>사업자등록번호</span><span class="v">${i.regno||'-'}</span></div>
+    </div>
+    <div class="sect"><div class="sect-h">원산지 정보</div>
+      <div class="info-multi">${i.origin||'등록된 원산지 정보가 없어요'}</div>
+      <div style="font-size:12px;color:var(--ink4);margin-top:8px">※ 원산지는 관련 법령에 따라 표기돼요</div>
+    </div>
+    <div class="sect"><div class="sect-h">매장 위치</div>
+      <div class="row"><span>행사장 위치</span><span class="v">📍 ${s.loc}</span></div>
+      <div style="font-size:14px;color:var(--ink2);margin-top:8px">${i.address||''}</div>
+    </div>
+    <div class="sect"><div class="sect-h">운영 시간</div>
+      <div class="info-multi">${i.hours||'-'}</div>
+    </div>
+  </div>`;
 }
 
 /* ── 메뉴 상세 (바텀시트) ── */
@@ -606,7 +674,7 @@ function renderMenuSheet(){
   const closed=!s.open;
   const disabled = m.soldout || closed;   // 품절 or 영업종료 → 정보 조회는 가능, 주문만 비활성화
   const opts=['Regular','Large (+1,500원)'];
-  const base = m.hh?m.hhPrice:m.price;
+  const base = m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
   const optAdd = S.tmpOpt===1?1500:0;
   const total=(base+optAdd)*S.tmpQty;
   const orderControls = `
@@ -652,9 +720,12 @@ function addToCart(){
   if(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore){
     return toast('개별 결제형 — 한 매장 상품만 담을 수 있어요');
   }
-  const base=m.hh?m.hhPrice:m.price;
+  const base=m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
+  const listBase=m.was||m.price;   // 정가(할인 전) — 금액 요약 할인 세분화용
+  const add=S.tmpOpt===1?1500:0;
   S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, emoji:m.emoji||'', img:m.img,
-    opt:S.tmpOpt===1?'Large':'Regular', qty:S.tmpQty, price:(base+(S.tmpOpt===1?1500:0))});
+    opt:S.tmpOpt===1?'Large':'Regular', qty:S.tmpQty, price:(base+add), listPrice:(listBase+add),
+    disc:(m.fcfs?'선착순':(m.hh?'해피아워':(m.was?'할인':null)))});
   toast('장바구니에 담았어요');
   closeMenuSheet();
   render();   // 뒤에 깔린 매장 화면 갱신 → 하단 장바구니 바 표시
@@ -701,10 +772,13 @@ function scCart(){
         </div>`).join('')}
       `).join('')}
     </div>
-    <!-- 주문 방식 (야외 = 포장 기본) -->
+    <!-- 주문 방식 (야외 = 포장 기본, 예약 On 매장은 시간 선택) -->
     <div class="sect"><div class="sect-h">주문 방식</div>
-      <div class="seg"><button class="on">포장</button><button onclick="toast('포장 예약: 매장이 설정(On)한 경우에만 노출')">포장 예약</button></div>
-      <div style="font-size:12.5px;color:var(--ink3);margin-top:10px">야외형은 포장 픽업이 기본이에요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>
+      <div class="seg">
+        <button class="${S.pickup==='now'?'on':''}" onclick="S.pickup='now';render()">즉시 포장</button>
+        <button class="${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">포장 예약</button>
+      </div>
+      ${S.pickup==='reserve' ? timeSlotsHTML() : `<div style="font-size:12.5px;color:var(--ink3);margin-top:10px">야외형은 포장 픽업이 기본이에요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>`}
     </div>
   </div>
   <div class="cta">
@@ -718,12 +792,24 @@ function setSeparate(){
 }
 function chQty(i,d){ S.cart[i].qty=Math.max(1,S.cart[i].qty+d); render(); }
 function delItem(i){ S.cart.splice(i,1); render(); }
+function timeSlotsHTML(){
+  const slots=['12:30','13:00','13:30','14:00','14:30','15:00'];
+  const closedSlots=['12:30'];   // 예약 가능 시간 마감 예시
+  return `<div style="font-size:13.5px;font-weight:800;margin:14px 0 9px">수령 예약 시간 선택</div>
+    <div class="timeslots">${slots.map(t=>{
+      const dis=closedSlots.includes(t);
+      return `<button class="tslot ${S.pickupTime===t?'on':''} ${dis?'dis':''}" ${dis?'disabled':''} onclick="S.pickupTime='${t}';render()">${t}${dis?'<div class="ts-x">마감</div>':''}</button>`;
+    }).join('')}</div>
+    <div style="font-size:12px;color:var(--ink4);margin-top:9px">예약 가능 시간대 중 선택 · 마감된 시간은 선택할 수 없어요</div>`;
+}
 
 /* ── 주문 확인 및 결제 ── */
 function scCheckout(){
-  const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
-  const coupon=1000, hh=0;
-  const final=sum-coupon;
+  const listSum=S.cart.reduce((a,c)=>a+(c.listPrice||c.price)*c.qty,0);  // 정가 합계
+  const paidSum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);                  // 할인 적용가 합계
+  const itemDisc=listSum-paidSum;                                        // 해피아워·선착순·일반 할인 합
+  const coupon=1000;
+  const final=paidSum-coupon;
   const MIN=8000;
   const belowMin=final<MIN;
   const post = S.bill==='post';
@@ -733,7 +819,7 @@ function scCheckout(){
     <!-- 주문 메뉴 -->
     <div class="sect"><div class="sect-h">주문 메뉴 · 수령 정보</div>
       ${S.cart.map(c=>`<div class="row"><span>${c.name} ${c.emoji} · ${c.opt} × ${c.qty}</span><span class="v">${won(c.price*c.qty)}</span></div>`).join('')}
-      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">🥡 포장 픽업</span></div>
+      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">${S.pickup==='reserve'?`📅 포장 예약 · ${S.pickupTime||'시간 미선택'}`:'🥡 즉시 포장 픽업'}</span></div>
     </div>
     <!-- 자리 입력 -->
     <div class="sect"><div class="sect-h">받을 자리</div>
@@ -750,14 +836,21 @@ function scCheckout(){
       <div style="display:flex;gap:8px"><input class="field" placeholder="쿠폰 코드 입력"><button class="ghostbtn" style="width:auto;margin:0;padding:0 20px;white-space:nowrap" onclick="toast('유효하지 않거나 만료된 쿠폰이면 오류 안내')">적용</button></div>
       <div style="font-size:13px;color:var(--green);font-weight:700;margin-top:8px">✓ 개장기념 쿠폰 −1,000원 적용됨</div>
     </div>
-    <!-- 알림 채널 -->
+    <!-- 알림 채널 (카톡·문자 or 이메일) -->
     <div class="sect"><div class="sect-h">주문 알림 받기</div>
-      <div class="seg"><button class="on">📱 휴대폰 번호로 받게요</button><button onclick="toast('이메일 수신으로 전환 (외국인 사용자 고려)')">✉️ 이메일로 받게요</button></div>
-      <div class="kakao-note"><span class="kic">💬</span><div>조리 완료 시 <b>카카오톡 알림톡</b>으로 알려드려요</div></div>
+      <div class="seg">
+        <button class="${S.alertCh==='phone'?'on':''}" onclick="setAlert('phone')">📱 휴대폰(카톡·문자)</button>
+        <button class="${S.alertCh==='email'?'on':''}" onclick="setAlert('email')">✉️ 이메일</button>
+      </div>
+      ${S.alertCh==='phone'
+        ? `<div class="kakao-note"><span class="kic">💬</span><div>조리 완료 시 <b>카카오톡 알림톡</b>(미설치 시 <b>문자</b>)으로 알려드려요</div></div>`
+        : `<div class="notice" style="margin:12px 0 0"><span class="nic">✉️</span><div>입력하신 <b>이메일</b>로 주문 확인·완료 알림을 보내드려요 (외국인 사용자 등)</div></div>`}
+      <div style="font-size:12px;color:var(--ink4);margin-top:9px;line-height:1.55">주문 내역·상태는 이 화면(웹)에서 확인할 수 있어요 · 앱 푸시 알림은 제공하지 않아요</div>
     </div>
-    <!-- 금액 요약 -->
+    <!-- 금액 요약 (할인 세분화) -->
     <div class="sect"><div class="sect-h">${post?'주문 금액 요약':'결제 금액 요약'}</div>
-      <div class="row"><span>상품 합계</span><span class="v">${won(sum)}</span></div>
+      <div class="row"><span>상품 합계 (정가)</span><span class="v">${won(listSum)}</span></div>
+      ${itemDisc>0?`<div class="row"><span>상품 할인 (해피아워·선착순 등)</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
       <div class="row"><span>쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>
       <div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-size:17px;font-weight:800;color:var(--ink)"><span>${post?'주문 금액':'최종 결제금액'}</span><span>${won(final)}</span></div>
       ${belowMin?`<div class="minwarn">최소 주문 금액이 부족해요. ${won(MIN)} 이상 주문 시 ${post?'주문':'결제'}할 수 있어요.</div>`:''}
@@ -799,18 +892,37 @@ function scPay(){
 
     <div style="display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--ink4);font-size:13px"><div style="flex:1;height:1px;background:var(--line)"></div>또는<div style="flex:1;height:1px;background:var(--line)"></div></div>
 
+    ${S.alertCh==='email' ? `
+    <div style="font-size:14px;font-weight:800;margin-bottom:10px">비회원 · 이메일 직접 입력</div>
+    <input class="field" id="emailIn" type="email" placeholder="example@email.com" style="margin-bottom:10px">
+    <button class="ghostbtn" style="margin:0" onclick="submitContact('email')">이 이메일로 주문하기</button>
+    <div style="font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6">· 이메일 형식 오류(도메인 누락 등) 시 진행 불가<br>· 외국인 사용자 고려</div>
+    ` : `
     <div style="font-size:14px;font-weight:800;margin-bottom:10px">비회원 · 휴대폰 번호 직접 입력</div>
     <input class="field" id="phoneIn" placeholder="휴대폰 번호 (숫자 11자리)" inputmode="numeric" maxlength="11" style="margin-bottom:10px">
-    <button class="ghostbtn" style="margin:0" onclick="S.loginType='phone';validatePhone()">이 번호로 주문하기</button>
-    <div style="font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6">· 휴대폰 11자리 미충족·미입력 시 진행 불가<br>· 외국인 사용자는 이메일 입력도 가능해요</div>
+    <button class="ghostbtn" style="margin:0" onclick="submitContact('phone')">이 번호로 주문하기</button>
+    <div style="font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6">· 휴대폰 11자리 미충족·미입력 시 진행 불가</div>
+    `}
   </div>`;
 }
-function validatePhone(){
-  const v=(document.getElementById('phoneIn')||{}).value||'';
-  if(v.replace(/\D/g,'').length!==11) return toast('휴대폰 번호 11자리를 정확히 입력해 주세요');
-  // 입력 더블체크
-  if(confirm(`이 번호로 알림을 보낼게요\n\n${v}\n\n확인하면 주문을 진행해요`)) payConfirm();
+function setAlert(ch){ S.alertCh=ch; render(); }
+function submitContact(type){
+  if(type==='phone'){
+    const v=(document.getElementById('phoneIn')||{}).value||'';
+    if(v.replace(/\D/g,'').length!==11) return toast('휴대폰 번호 11자리를 정확히 입력해 주세요');
+    S.loginType='phone'; S.contact=v; openConfirm('번호', v);
+  } else {
+    const v=(document.getElementById('emailIn')||{}).value.trim()||'';
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return toast('이메일 형식을 확인해 주세요 (예: name@email.com)');
+    S.loginType='email'; S.contact=v; openConfirm('이메일 주소', v);
+  }
 }
+/* 입력 더블체크 (전용 확인 시트) */
+function openConfirm(label,val){
+  document.getElementById('confirmMsg').innerHTML=`이 ${label}로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${val}</b>`;
+  document.getElementById('confirmModal').classList.add('on');
+}
+function closeConfirm(){ document.getElementById('confirmModal').classList.remove('on'); }
 function payConfirm(){
   if(S.bill==='pre'){
     // 선불: 결제 시도 → 성공 가정 (실패는 데모바 '결제실패'로 확인)
@@ -825,21 +937,23 @@ function payConfirm(){
 /* ── 주문 완료 ── */
 function scDone(){
   const post=S.bill==='post';
-  const callNo = S.loginType==='kakao' ? '3821' : '7714';
+  const digits=(S.contact||'').replace(/\D/g,'');
+  const callNo = S.loginType==='kakao' ? '3821' : (S.loginType==='phone' && digits.length>=4 ? digits.slice(-4) : '0417');
+  const ch = S.loginType==='kakao' ? '카카오톡 알림톡' : (S.alertCh==='email' ? '입력하신 이메일' : '카카오톡 알림톡·문자');
   return `
   <div class="hdr"><div class="ht" style="flex:1;text-align:center">주문 완료</div></div>
   <div class="scroll done-wrap">
     <div class="done-ic">✓</div>
     <div class="done-t">${post?'주문이 접수되었어요!':'결제가 완료되었어요!'}</div>
-    <div class="done-s">${post?'매장에서 주문을 확인하고 조리를 시작해요':'조리가 시작되면 알림톡으로 알려드릴게요'}</div>
+    <div class="done-s">${post?'매장에서 주문을 확인하고 조리를 시작해요':'조리가 시작되면 알림으로 알려드릴게요'}</div>
     <div class="callno">
       <div class="cl-lbl">내 호출번호</div>
       <div class="cl-num">${callNo}</div>
     </div>
     <div class="pickinfo">
-      🥡 <b>포장 픽업</b> · ${store(S.curStore).loc}<br>
+      ${S.pickup==='reserve'?`📅 <b>포장 예약</b> · ${S.pickupTime||''} 수령`:'🥡 <b>즉시 포장 픽업</b>'} · ${store(S.curStore).loc}<br>
       ⏱️ 예상 조리 시간 약 12분<br>
-      💬 조리 완료 시 ${S.loginType==='kakao'?'카카오톡 알림톡':'입력하신 번호'}으로 알림
+      💬 조리 완료 시 <b>${ch}</b>으로 알림
     </div>
     <button class="fm-btn" style="margin-top:26px;background:var(--blue)" onclick="go('history')">내 주문 내역 보기</button>
   </div>`;
@@ -871,15 +985,43 @@ function scHistory(){
   return `
   <div class="hdr"><button class="bk" onclick="go(S.mode==='group'?'home':'store')">‹</button><div class="ht">내 주문 내역</div></div>
   <div class="scroll">
-    <div class="oh-hint">주문하신 내역은 당일 자정이 지나면 자동으로 사라져요. 영수증이나 기록이 필요하시다면 미리 화면을 캡처해 두시는 것을 추천해 드려요! 📸</div>
+    <div class="oh-hint">주문하신 내역은 당일 자정이 지나면 자동으로 사라져요. 영수증이나 기록이 필요하시다면 미리 화면을 캡처해 두시는 것을 추천해 드려요! 📸<br><br>💬 상태 변화는 <b>카카오톡 알림톡 · 문자 · 이메일</b> 중 선택하신 방법으로 안내드려요. (웹 기반이라 앱 푸시 알림은 없어요)</div>
     ${blocks}
-    <!-- 품절 자동취소: 별도 전체화면이 아니라 카톡 알림 + 주문 내역 안의 '상태값'으로 확인 -->
+    <!-- 조리완료: 픽업 유도 강조 -->
     <div class="oh-store">
-      <div class="oh-shead"><div class="oh-sname">🏪 소프트치킨</div><span class="st-badge st-rej">주문 취소</span></div>
+      <div class="oh-shead"><div class="oh-sname">☕ 소프트커피</div><span class="st-badge st-done">조리완료</span></div>
+      <div class="oh-pickup">🔔 조리가 끝났어요! 지금 <b>B구역 1번 부스</b>에서 픽업해 주세요</div>
+      <div class="oh-round">
+        <div class="oh-rnd-h"><span>1차 주문 · 6분 전</span><span>${won(8300)}</span></div>
+        <div class="oh-line"><span>아메리카노 × 1</span><span>${won(3500)}</span></div>
+        <div class="oh-line"><span>바닐라 라떼 × 1</span><span>${won(4800)}</span></div>
+      </div>
+      <div class="oh-phone">📱 주문 번호 010-****-5678</div>
+    </div>
+    <!-- 픽업완료 -->
+    <div class="oh-store" style="opacity:.72">
+      <div class="oh-shead"><div class="oh-sname">🍔 소프트버거 트럭</div><span class="st-badge st-pick">픽업완료</span></div>
+      <div class="oh-round">
+        <div class="oh-rnd-h"><span>이전 주문 · 55분 전</span><span>${won(3000)}</span></div>
+        <div class="oh-line"><span>수제 콜라 × 1</span><span>${won(3000)}</span></div>
+      </div>
+    </div>
+    <!-- 품절 자동취소: 별도 전체화면이 아니라 카톡/문자/이메일 알림 + 주문 내역 안의 '상태값'으로 확인 -->
+    <div class="oh-store">
+      <div class="oh-shead"><div class="oh-sname">🍗 소프트치킨</div><span class="st-badge st-rej">주문 취소</span></div>
       <div class="oh-round">
         <div class="oh-rnd-h"><span>1차 주문 · 41분 전</span><span>${won(8500)}</span></div>
         <div class="oh-line"><span>후라이드 세트 × 1</span><span>${won(8500)}</span></div>
         <div style="font-size:12.5px;color:#c92a2a;font-weight:700;margin-top:9px;line-height:1.55">😢 상품 품절로 자동 취소되었어요 · 결제 금액은 자동 환불 처리 (카드사 사정에 따라 영업일 3~7일 소요)</div>
+      </div>
+    </div>
+    <!-- 주문 거절 -->
+    <div class="oh-store">
+      <div class="oh-shead"><div class="oh-sname">🍗 소프트치킨</div><span class="st-badge st-rej">주문 거절</span></div>
+      <div class="oh-round">
+        <div class="oh-rnd-h"><span>1차 주문 · 48분 전</span><span>${won(12000)}</span></div>
+        <div class="oh-line"><span>양념치킨 × 1</span><span>${won(12000)}</span></div>
+        <div style="font-size:12.5px;color:#c92a2a;font-weight:700;margin-top:9px;line-height:1.55">🙏 매장 사정(주문 폭주)으로 접수되지 못했어요 · 결제 금액은 자동 환불 처리</div>
       </div>
     </div>
     <div style="background:#fff;margin:12px 14px;border-radius:14px;border:1px solid var(--line);padding:16px">

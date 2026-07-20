@@ -953,11 +953,11 @@ function scardHTML(s){
     const v = S.brandWait==='time' ? s.waitTime : s.waitCount;
     if(v) waitTxt = `${S.brandWait==='time'?'':'대기 '}${v}`;
   }
-  const badge = s.open ? `<span class="s-badge open">영업중</span>` : `<span class="s-badge closed">영업종료</span>`;
+  // 영업중은 별도 뱃지 없음(기본 상태) · 영업종료는 dimming + 썸네일 '영업종료' 오버레이로 표시
   return `<button class="scard ${s.open?'':'closed'}" onclick="${s.open?`openStore('${s.id}')`:`toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`}">
     <div class="s-thumb" style="background-image:url('${s.thumb}');background-size:cover;background-position:center;background-color:var(--bg)"></div>
     <div class="s-body">
-      <div class="s-name">${s.name} ${badge}</div>
+      <div class="s-name">${s.name}</div>
       <div class="s-rep">대표 · ${s.rep}</div>
       <div class="s-meta"><span class="s-loc">📍 ${s.loc}</span>${waitTxt?`<span class="s-wait">⏳ ${waitTxt}</span>`:''}</div>
     </div>

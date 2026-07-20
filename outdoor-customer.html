@@ -305,8 +305,9 @@
   .ms-grab{position:absolute;top:9px;left:50%;transform:translateX(-50%);z-index:6;}
   .ms-grab span{display:block;width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.9);box-shadow:0 1px 3px rgba(0,0,0,.25);}
   .ms-close{position:absolute;top:12px;right:14px;z-index:6;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.4);color:#fff;border:none;font-size:16px;cursor:pointer;font-family:inherit;}
-  .ms-scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;}
-  .sheet-menu .d-hero{position:relative;aspect-ratio:16/10;max-height:210px;font-size:72px;}
+  .ms-scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .ms-scroll::-webkit-scrollbar{display:none;}
+  .sheet-menu .d-hero{position:relative;width:100%;height:200px;aspect-ratio:auto;max-height:none;font-size:72px;background-size:cover;background-position:center;}
   .so-dim-lg{position:absolute;inset:0;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--red);letter-spacing:2px;}
   .ms-warn{margin-top:12px;background:#fff0f0;border:1px solid #ffc9c9;border-radius:10px;padding:12px 14px;font-size:13.5px;font-weight:700;color:#c92a2a;line-height:1.55;}
   .ms-warn.amber{background:#fff8e6;border-color:#ffe3a3;color:#92400e;}
@@ -437,7 +438,7 @@
   .sect-h,.catsec-h,.d-name,.done-t,.fm-t,.sheet-t,.opt-h,.oh-tot,.m-now,.d-price{
     font-family:var(--ui);font-weight:800;letter-spacing:-.02em;}
   .done-t,.fm-t{font-weight:900;}
-  .catsec-h{padding-left:0;color:var(--ink);font-size:17px;} .catsec-h::before{content:none;}
+  .catsec-h{padding:18px 18px 8px;color:var(--ink);font-size:17px;} .catsec-h::before{content:none;}
   .sect-h{font-size:16px;} .d-name{font-size:21px;} .done-t{font-size:22px;} .fm-t{font-size:21px;}
   .m-now{font-size:16px;color:var(--ink);} .d-price{font-size:22px;color:var(--ink);}
   .sp-title{opacity:.9;} .mb-t{font-size:25px;} .callno .cl-num{font-size:58px;}
@@ -559,6 +560,13 @@
   .blockbanner.break{background:#FBF1DB;color:#9A6B08;border:1px solid #F0DDA8;}
   /* 성인 메뉴 안내 (메뉴 상세) */
   .d-adult{margin-top:12px;background:#FDECEC;border:1px solid #F5C6C6;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:#C0392B;line-height:1.5;}
+  /* 메뉴 정보 토글 버튼 */
+  .d-info-btn{width:100%;margin-top:16px;display:flex;align-items:center;justify-content:space-between;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit;}
+  .d-info-btn:active{background:#fafafa;}
+  .d-info-btn.open{border-color:var(--persimmon);color:var(--persimmon);border-bottom-left-radius:0;border-bottom-right-radius:0;}
+  .d-info-btn .chev{font-size:11px;color:var(--ink3);}
+  .d-info-btn.open .chev{color:var(--persimmon);}
+  .d-info-btn.open + .d-info{margin-top:0;border-top:none;border-top-left-radius:0;border-top-right-radius:0;}
 </style>
 </head>
 <body>
@@ -663,6 +671,7 @@ let S = {
   pickupH:null, pickupM:null,   // 선택한 시/분
   alertCh:'phone',     // 알림 채널: phone(카톡·문자) | email
   contact:'',          // 입력한 휴대폰/이메일
+  infoOpen:false,      // 메뉴 정보(알레르기·영양) 펼침 여부
   tmpQty:1, tmpOpt:0,
   loginType:'kakao', // kakao | phone | email
 };
@@ -705,7 +714,7 @@ function simState(st){
   if(st==='closed') toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');
   else if(st==='break') toast('지금은 브레이크 타임이에요.','잠시 후 다시 열어요. 메뉴는 둘러볼 수 있어요.');
 }
-function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; showMenuSheet(); }
+function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; S.infoOpen=false; showMenuSheet(); }
 function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); }
 function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); }
 
@@ -950,7 +959,10 @@ function renderMenuSheet(){
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
         <div class="d-price">${won(base)}</div>
         ${disabled?`<div class="ms-warn ${m.soldout?'':'amber'}">${m.soldout?'😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.':(S.demoState==='break'?'☕ 지금은 브레이크 타임이에요. 메뉴 정보만 확인할 수 있어요.':'🌙 지금은 영업 종료 상태예요. 메뉴 정보만 확인할 수 있어요.')}</div>`:''}
-        ${(m.allergy||m.nutrition)?`<div class="d-info"><b>메뉴 정보</b><br>${[m.allergy?`🥜 알러지: ${m.allergy}`:'',m.nutrition?`🔥 영양: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
+        ${(m.allergy||m.nutrition)?`
+          <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보 · 알레르기·영양<span class="chev">${S.infoOpen?'▲':'▾'}</span></button>
+          ${S.infoOpen?`<div class="d-info">${[m.allergy?`🥜 알러지 유발성분: ${m.allergy}`:'',m.nutrition?`🔥 영양 정보: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
+        `:''}
         ${m.adult?`<div class="d-adult">🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}
         ${disabled?'':orderControls}
       </div>

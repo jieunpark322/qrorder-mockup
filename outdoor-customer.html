@@ -872,7 +872,6 @@ function scStore(){
       <button class="mtab ${S.storeTab==='menu'?'on':''}" onclick="S.storeTab='menu';render()">메뉴</button>
       <button class="mtab ${S.storeTab==='info'?'on':''}" onclick="S.storeTab='info';render()">매장 정보</button>
     </div>
-    ${blocked ? `<div class="blockbanner ${stBreak?'break':'closed'}">${stBreak?'☕ 지금은 브레이크 타임이에요. 메뉴는 둘러볼 수 있지만 주문은 할 수 없어요.':'🌙 지금은 영업 종료 상태예요. 메뉴는 둘러볼 수 있지만 주문은 할 수 없어요.'}</div>` : ''}
     ${S.storeTab==='info' ? storeInfoHTML(s) : `
       <div class="cattabs">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       ${s.menus.length===0

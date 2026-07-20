@@ -564,12 +564,9 @@
   /* 성인 메뉴 안내 (메뉴 상세) */
   .d-adult{margin-top:12px;background:#FDECEC;border:1px solid #F5C6C6;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:#C0392B;line-height:1.5;}
   /* 메뉴 정보 토글 버튼 */
-  .d-info-btn{width:100%;margin-top:16px;display:flex;align-items:center;justify-content:space-between;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;font-family:inherit;}
-  .d-info-btn:active{background:#fafafa;}
-  .d-info-btn.open{border-color:var(--persimmon);color:var(--persimmon);border-bottom-left-radius:0;border-bottom-right-radius:0;}
-  .d-info-btn .chev{font-size:11px;color:var(--ink3);}
-  .d-info-btn.open .chev{color:var(--persimmon);}
-  .d-info-btn.open + .d-info{margin-top:0;border-top:none;border-top-left-radius:0;border-top-right-radius:0;}
+  .d-info-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 13px;border:none;border-radius:9px;background:var(--blue-50);color:var(--persimmon);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .d-info-btn:active{transform:scale(.97);}
+  .d-info-btn .chev{font-size:10px;}
 </style>
 </head>
 <body>
@@ -963,7 +960,7 @@ function renderMenuSheet(){
         <div class="d-price">${won(base)}</div>
         ${disabled?`<div class="ms-warn ${m.soldout?'':'amber'}">${m.soldout?'😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.':(S.demoState==='break'?'☕ 지금은 브레이크 타임이에요. 메뉴 정보만 확인할 수 있어요.':'🌙 지금은 영업 종료 상태예요. 메뉴 정보만 확인할 수 있어요.')}</div>`:''}
         ${(m.allergy||m.nutrition)?`
-          <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보 · 알레르기·영양<span class="chev">${S.infoOpen?'▲':'▾'}</span></button>
+          <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보 <span class="chev">${S.infoOpen?'▲':'▾'}</span></button>
           ${S.infoOpen?`<div class="d-info">${[m.allergy?`🥜 알러지 유발성분: ${m.allergy}`:'',m.nutrition?`🔥 영양 정보: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
         `:''}
         ${m.adult?`<div class="d-adult">🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}

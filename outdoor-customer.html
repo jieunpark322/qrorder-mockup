@@ -19,6 +19,7 @@
     --line:#EBEBEE; --line2:#F3F3F5; --bg:#F5F5F6; --card:#FFFFFF;
     --green:#1E8E5F; --red:#DD3B3B; --amber:#D9930F;
     --festA:#5C8CDA; --festB:#5CB9DA;
+    --point:#F2503E; --point-50:#FFEDE9;   /* 포인트 컬러 — 할인가·강조 전용(블루의 보색) */
     --display:'Black Han Sans','Pretendard',sans-serif;
     --ui:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
     --shadow:0 2px 10px rgba(20,20,25,.05);
@@ -528,13 +529,16 @@
   .m-name{font-size:16px;font-weight:700;color:var(--ink);}
   .m-price{margin-top:7px;gap:7px;align-items:center;}
   .m-now{font-family:var(--ui);font-weight:800;font-size:16px;color:var(--ink);}
-  .m-now.sale{color:var(--persimmon);}
+  .m-now.sale{color:var(--point);}
+  .d-price .d-was{font-size:16px;color:var(--ink4);text-decoration:line-through;font-weight:600;margin-right:6px;}
+  .d-price .d-sale{color:var(--point);}
   .m-was{font-size:13px;color:var(--ink4);text-decoration:line-through;}
-  .m-promo{font-size:11px;font-weight:700;color:var(--persimmon);background:var(--blue-50);padding:3px 7px;border-radius:6px;}
+  .m-promo{font-size:11px;font-weight:700;color:var(--point);background:var(--point-50);padding:3px 7px;border-radius:6px;}
   .m-reuse{font-size:11.5px;font-weight:600;color:var(--ink3);margin-top:5px;}
   .m-right{padding-left:8px;}
-  .m-left-r{font-size:12px;font-weight:700;color:var(--ink2);background:#F3F3F5;border-radius:8px;padding:6px 10px;white-space:nowrap;line-height:1;text-align:center;}
-  .m-left-r b{font-size:13px;color:var(--persimmon);}
+  .m-left-r{font-size:12px;font-weight:700;color:var(--point);background:var(--point-50);border-radius:8px;padding:6px 10px;white-space:nowrap;line-height:1;text-align:center;}
+  .m-left-r b{font-size:13px;color:var(--point);}
+  .m-left-r.fcfs{color:var(--point);background:var(--point-50);}
 
   /* ── 토스트: 제목+본문 팝업 ── */
   .toast{background:rgba(30,30,34,.96);}
@@ -959,6 +963,7 @@ function renderMenuSheet(){
   const disabled = m.soldout || blocked;   // 품절·영업종료·브레이크 → 정보 조회는 가능, 주문만 비활성화
   const opts=['Regular','Large (+1,500원)'];
   const base = m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
+  const listPx = m.was||m.price; const isSale = base<listPx;   // 할인 여부
   const optAdd = S.tmpOpt===1?1500:0;
   const total=(base+optAdd)*S.tmpQty;
   const orderControls = `
@@ -980,7 +985,7 @@ function renderMenuSheet(){
       <div class="d-body">
         <div class="d-name">${m.name} ${m.emoji||''}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
-        <div class="d-price">${won(base)}</div>
+        <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
         ${disabled?`<div class="ms-warn ${m.soldout?'':'amber'}">${m.soldout?'😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.':(S.demoState==='break'?'☕ 지금은 브레이크 타임이에요. 메뉴 정보만 확인할 수 있어요.':'🌙 지금은 영업 종료 상태예요. 메뉴 정보만 확인할 수 있어요.')}</div>`:''}
         ${(m.allergy||m.nutrition)?`
           <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보</button>

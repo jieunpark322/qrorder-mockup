@@ -499,6 +499,32 @@
   .done-ic{background:#EAF6EF;color:var(--green);box-shadow:none;}
   .callno{background:var(--persimmon);box-shadow:0 12px 30px rgba(234,78,27,.24);}
   .pickinfo{background:#F5F5F7;}
+
+  /* ── 카테고리 2단: 라벨 + 구분선으로 독립 선택 영역 명시 ── */
+  .filterset{background:#fff;border-bottom:1px solid var(--line);}
+  .frow{display:flex;align-items:center;gap:9px;padding:11px 14px;}
+  .frow + .frow{border-top:1px solid var(--line2);}
+  .flabel{flex-shrink:0;width:30px;font-size:12px;font-weight:700;color:var(--ink3);letter-spacing:-.01em;}
+  .frow + .frow .cchip.on{background:var(--persimmon);color:#fff;}   /* 두 번째(구역) 선택색 구분 */
+
+  /* ── 매장 화면 상태·대기 ── */
+  .bmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:7px;}
+  .bstatus{margin-top:0;}
+  .bwait{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--persimmon);background:var(--blue-50);border-radius:8px;padding:4px 10px;}
+
+  /* ── 메뉴 카드: 정리된 태그·가격(뉴트럴 + 단일 액센트) ── */
+  .m-badges{gap:4px;margin-bottom:6px;}
+  .m-tag{font-size:11px;font-weight:700;color:var(--ink2);background:#F3F3F5;padding:3px 8px;border-radius:6px;}
+  .m-name{font-size:16px;font-weight:700;color:var(--ink);}
+  .m-price{margin-top:7px;gap:7px;align-items:center;}
+  .m-now{font-family:var(--ui);font-weight:800;font-size:16px;color:var(--ink);}
+  .m-now.sale{color:var(--persimmon);}
+  .m-was{font-size:13px;color:var(--ink4);text-decoration:line-through;}
+  .m-promo{font-size:11px;font-weight:700;color:var(--persimmon);background:var(--blue-50);padding:3px 7px;border-radius:6px;}
+  .m-reuse{font-size:11.5px;font-weight:600;color:var(--ink3);margin-top:5px;}
+  .m-right{padding-left:8px;}
+  .m-left-r{font-size:12px;font-weight:700;color:var(--ink2);background:#F3F3F5;border-radius:8px;padding:6px 10px;white-space:nowrap;line-height:1;text-align:center;}
+  .m-left-r b{font-size:13px;color:var(--persimmon);}
 </style>
 </head>
 <body>
@@ -666,7 +692,6 @@ function scSplash(){
       <div class="sp-title">소프트 푸드트럭 페스티벌</div>
       <div class="sp-welcome">방문을 환영해요! 🎉</div>
     </div>
-    <div class="splash-load"></div>
   </div>`;
 }
 
@@ -693,20 +718,26 @@ function scHome(){
       <span class="nic">📢</span>
       <div><b>우천 시 운영 안내</b><br>비가 올 경우 야외 좌석은 조기 마감될 수 있어요. 픽업 시 부스 위치를 꼭 확인해 주세요. <a onclick="window.open('https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html','_blank','noopener')">자세히 보기 ›</a></div>
     </div>
-    <!-- 검색(접힘) + 카테고리 2단 · 기본값 '전체' -->
+    <!-- 검색(접힘) + 카테고리 2단 (분류·구역은 서로 다른 선택 영역) -->
     ${S.searchOpen ? `
-    <div class="catbar">
+    <div class="filterset"><div class="frow">
       <div class="searchbar-inline">
         <span class="ic">🔍</span>
-        <input id="homeSearch" placeholder="매장명 · 메뉴명으로 검색" oninput="toast('결과 없을 시: 찾으시는 결과를 찾지 못했어요')">
+        <input id="homeSearch" placeholder="매장·메뉴 검색" oninput="toast('찾으시는 결과가 없어요')">
         <button class="clr" onclick="toggleSearch()">✕</button>
       </div>
-    </div>` : `
-    <div class="catbar">
-      <button class="searchtog" onclick="toggleSearch()" aria-label="검색">🔍</button>
-      <div class="cchips">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
-    </div>
-    <div class="catrow sub">${cats2.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>`}
+    </div></div>` : `
+    <div class="filterset">
+      <div class="frow">
+        <button class="searchtog" onclick="toggleSearch()" aria-label="검색">🔍</button>
+        <span class="flabel">분류</span>
+        <div class="cchips">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
+      </div>
+      <div class="frow">
+        <span class="flabel">구역</span>
+        <div class="cchips">${cats2.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
+      </div>
+    </div>`}
     <!-- 매장 목록 -->
     <div class="storelist">
       ${STORES.map(s=>scardHTML(s)).join('')}
@@ -762,9 +793,13 @@ function scStore(){
     <div class="brandinfo">
       <div class="logo">${s.logo}</div>
       <div class="bstore">${s.name}</div>
-      ${closed
-        ? `<div class="bstatus" style="color:var(--red)"><span class="sdot" style="background:var(--red)"></span> 영업 종료 · 메뉴판만 조회 가능</div>`
-        : `<div class="bstatus open"><span class="sdot"></span> 영업중</div>`}
+      <div class="bmeta">
+        ${closed
+          ? `<span class="bstatus" style="color:var(--red)"><span class="sdot" style="background:var(--red)"></span> 영업 종료</span>`
+          : `<span class="bstatus open"><span class="sdot"></span> 영업중</span>`}
+        ${(s.open && S.brandWait!=='off' && (S.brandWait==='time'?s.waitTime:s.waitCount))
+          ? `<span class="bwait">⏳ ${S.brandWait==='time'?s.waitTime:'대기 '+s.waitCount}</span>` : ''}
+      </div>
       <div class="bloc">📍 ${s.loc}</div>
     </div>
     <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링) -->
@@ -789,12 +824,13 @@ function scStore(){
   `;
 }
 function mcardHTML(sid,m,closed){
-  const badges = (m.badges||[]).map(b=>({hot:'<span class="m-badge mb-hot">인기</span>',new:'<span class="m-badge mb-new">신메뉴</span>',rec:'<span class="m-badge mb-rec">추천</span>'}[b])).join('');
-  let price;
-  if(m.fcfs){ price=`<span class="m-hh" style="background:var(--red)">선착순</span><span class="m-now" style="color:var(--red)">${won(m.fcfsPrice)}</span><span class="m-was">${won(m.price)}</span>`; }
-  else if(m.hh){ price=`<span class="m-hh">해피아워</span><span class="m-now" style="color:var(--amber)">${won(m.hhPrice)}</span><span class="m-was">${won(m.price)}</span>`; }
-  else if(m.was){ price=`<span class="m-now">${won(m.price)}</span><span class="m-was">${won(m.was)}</span><span class="m-dc">${Math.round((1-m.price/m.was)*100)}%</span>`; }
-  else { price=`<span class="m-now">${won(m.price)}</span>`; }
+  // 태그는 뉴트럴 통일, 색은 가격/할인(퍼시몬) 하나로만 — 시각적 정리
+  const badges = (m.badges||[]).map(b=>({hot:'인기',new:'신메뉴',rec:'추천'}[b])).map(t=>`<span class="m-tag">${t}</span>`).join('');
+  let promo='', now=m.price, was='';
+  if(m.fcfs){ promo='선착순'; now=m.fcfsPrice; was=m.price; }
+  else if(m.hh){ promo='해피아워'; now=m.hhPrice; was=m.price; }
+  else if(m.was){ was=m.was; }
+  const price = `${promo?`<span class="m-promo">${promo}</span>`:''}<span class="m-now ${(promo||was)?'sale':''}">${won(now)}</span>${was?`<span class="m-was">${won(was)}</span>`:''}`;
   const rightVal = m.fcfs ? {t:'선착순', n:m.fcfsLeft} : (m.left!=null ? {t:'잔여', n:m.left} : null);
   return `<button class="mcard ${m.soldout?'soldout':''}" onclick="openMenu('${sid}','${m.id}')">
     <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">품절</div>':''}</div>
@@ -805,7 +841,7 @@ function mcardHTML(sid,m,closed){
       <div class="m-price">${price}</div>
       ${m.reuse?`<div class="m-reuse">♻️ 다회용기 제공</div>`:''}
     </div>
-    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${m.fcfs?'fcfs':''}">${rightVal.t}<br><b>${rightVal.n}개</b></span></div>`:''}
+    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r">${rightVal.t} <b>${rightVal.n}개</b></span></div>`:''}
   </button>`;
 }
 

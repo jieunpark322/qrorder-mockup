@@ -5,13 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>야외형 QR오더 · 손님 주문 페이지</title>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gaegu:wght@700&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --blue:#5C8CDA; --blue-d:#3a6fc9; --blue-50:#eef4fd;
-    --ink:#191f28; --ink2:#4e5968; --ink3:#8b95a1; --ink4:#b0b8c1;
-    --line:#e5e8eb; --line2:#f1f3f5; --bg:#f2f4f6; --card:#fff;
-    --green:#12b886; --red:#e03131; --amber:#f59f00;
-    --festA:#ff6b4a; --festB:#ffb03a;
+    /* Sunset Night-Market — 노을·야시장 팔레트 */
+    --persimmon:#E8501E; --persimmon-d:#C13C10; --mustard:#EDA400; --mulberry:#B01F5A; --plum:#3A2440;
+    --blue:#E8501E; --blue-d:#C13C10; --blue-50:#FFF0E6;          /* accent 리매핑 → 감귤/퍼시몬 */
+    --ink:#2A201A; --ink2:#6E5D50; --ink3:#9C8B7C; --ink4:#C7B9AA;
+    --line:#EADFCF; --line2:#F3ECDF; --bg:#F6EEE1; --card:#FFFDF8;
+    --green:#1F9268; --red:#D42A3C; --amber:#E39A12;
+    --festA:#FF6A2C; --festB:#F2A400;
+    --display:'Black Han Sans','Pretendard',sans-serif;
+    --ui:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    --shadow:0 6px 22px rgba(74,45,20,.10),0 2px 6px rgba(74,45,20,.06);
+    --shadow-lg:0 24px 60px rgba(28,16,6,.34);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -304,8 +313,104 @@
   .sheet-menu .d-body{padding:16px 18px 20px;}
   .ms-foot{flex-shrink:0;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#fff;}
 
-  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(25,31,40,.94);color:#fff;padding:13px 22px;border-radius:24px;font-size:14px;font-weight:700;z-index:400;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;}
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(42,32,26,.95);color:#fff;padding:13px 22px;border-radius:24px;font-size:14px;font-weight:700;z-index:400;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;}
   .toast.on{opacity:1;bottom:110px;}
+
+  /* ═══════════════ 리디자인 레이어 · Sunset Night-Market ═══════════════ */
+  body{font-family:var(--ui);background:#1a120b;
+    background-image:radial-gradient(130% 90% at 50% -12%, #4a2d16 0%, #2a1b10 42%, #17100a 100%);}
+  /* 필름 그레인 */
+  body::after{content:'';position:fixed;inset:0;z-index:600;pointer-events:none;opacity:.045;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .device{box-shadow:var(--shadow-lg);}
+
+  /* ── 디스플레이 타이포 (포스터/메뉴판 감성) ── */
+  .sp-title,.sp-welcome,.mb-t,.bstore,.s-name,.done-t,.fm-t,.hdr .ht,.sect-h,.catsec-h,.d-name,
+  .sheet-t,.callno .cl-num,.d-price,.m-now,.oh-tot,.opt-h{font-family:var(--display);font-weight:400;letter-spacing:.005em;}
+  .hdr .ht{font-size:20px;} .sect-h{font-size:18px;} .catsec-h{font-size:20px;}
+  .sp-title{font-size:22px;opacity:.95;} .sp-welcome{font-size:30px;line-height:1.15;margin-top:6px;}
+  .mb-t{font-size:26px;} .bstore{font-size:27px;} .d-name{font-size:25px;} .done-t{font-size:27px;} .fm-t{font-size:26px;line-height:1.25;}
+  .m-now{font-size:18px;color:var(--persimmon-d);} .d-price{font-size:26px;color:var(--persimmon-d);}
+  .catsec-h{color:var(--ink);position:relative;padding-left:30px;}
+  .catsec-h::before{content:'';position:absolute;left:18px;top:50%;transform:translateY(-45%);width:6px;height:18px;border-radius:3px;background:linear-gradient(var(--persimmon),var(--mustard));}
+
+  /* ── 데모바 (따뜻한 차콜) ── */
+  .demobar{background:#241811;border-bottom:1px solid #3a281c;}
+  .demobar .lbl{color:var(--mustard);}
+  .ds-chip{background:#38271b;border-color:#4c3626;color:#e9d9c7;}
+  .ds-chip.on{background:var(--mustard);color:#241811;border-color:var(--mustard);}
+  .ds-div{background:#4c3626;} .ds-note{color:#a78e78;}
+
+  /* ── 스플래시 (따뜻한 노을 오버레이) ── */
+  .splash-full::before{content:'';position:absolute;inset:0;z-index:1;mix-blend-mode:multiply;
+    background:linear-gradient(158deg,rgba(232,80,30,.5),rgba(58,36,64,.62));}
+  .splash-load{border-top-color:var(--mustard);}
+
+  /* ── 헤더 / 배너 ── */
+  .hdr{background:var(--card);border-bottom:1px solid var(--line);}
+  .mb-t{text-shadow:0 2px 8px rgba(0,0,0,.6);}
+
+  /* ── 공지문 (블루 하드코딩 제거 → 머스타드 티켓) ── */
+  .notice{background:linear-gradient(180deg,#FFF7E8,#FFF0DA);border:1px solid #F3DDA6;color:#7A4E12;}
+  .notice b{color:var(--ink);} .notice a{color:var(--persimmon-d);}
+
+  /* ── 카드: 종이질감 + 따뜻한 그림자 + 등장 모션 ── */
+  .scard,.oh-store{box-shadow:var(--shadow);border-color:var(--line);border-radius:18px;}
+  @keyframes rise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  .storelist .scard{animation:rise .5s both;}
+  .storelist .scard:nth-child(1){animation-delay:.04s} .storelist .scard:nth-child(2){animation-delay:.12s}
+  .storelist .scard:nth-child(3){animation-delay:.20s} .storelist .scard:nth-child(4){animation-delay:.28s}
+  @media(hover:hover){ .scard:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(74,45,20,.16);}
+    .mcard:hover{background:var(--blue-50);} }
+  .s-thumb{border-radius:15px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
+  .s-badge.open{color:var(--green);background:#E4F6EC;} .s-badge.closed{color:var(--red);background:#FCE9EA;}
+  .s-tag.wait{color:var(--persimmon-d);background:#FFEAD9;}
+
+  /* ── 매장 커버/로고 ── */
+  .logo{border-radius:20px;box-shadow:0 6px 18px rgba(40,20,8,.22);}
+  .bstatus.open{color:var(--green);}
+
+  /* ── 메뉴 카드 뱃지 (따뜻하게 통일) ── */
+  .mb-hot{color:#fff;background:var(--persimmon);} .mb-rec{color:#fff;background:var(--green);}
+  .mb-new{color:#fff;background:var(--mulberry);}
+  .m-hh{background:var(--mustard);color:#3a2410;}
+  .m-thumb{border-radius:14px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
+  .m-left-r{background:#FFEAD9;color:var(--persimmon-d);}
+  .m-left-r.fcfs{background:#FCE4EC;color:var(--mulberry);}
+
+  /* ── 세그/칩/옵션/입력 ── */
+  .cchip.on{background:var(--ink);} .catrow.sub .cchip.on{background:var(--persimmon);}
+  .seg button.on{color:var(--persimmon-d);}
+  .opt.on,.pay-opt.on,.tslot.on{border-color:var(--persimmon);background:var(--blue-50);}
+  .opt.on .dot{border-color:var(--persimmon);background:var(--persimmon);}
+  .field:focus,.searchbar-inline{border-color:var(--persimmon);}
+  .chk.on{background:var(--persimmon);border-color:var(--persimmon);}
+  .store-group-h{background:var(--blue-50);color:var(--persimmon-d);}
+  .oh-rnd-h{color:var(--persimmon-d);}
+
+  /* ── CTA: 퍼시몬 그라데이션 + 촉각 프레스 ── */
+  .cta{background:var(--card);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(28,16,6,.06);}
+  .cta-btn{background:linear-gradient(180deg,#FF6A2C,var(--persimmon-d));box-shadow:0 8px 20px rgba(232,80,30,.34);letter-spacing:.01em;}
+  .cta-btn:active{transform:translateY(1px) scale(.994);}
+  .cta-btn:disabled{background:var(--line);color:var(--ink4);box-shadow:none;}
+  .ghostbtn:active,.authbtn:active,.fm-btn:active{transform:scale(.985);}
+  .fm-btn{border-radius:14px;}
+
+  /* ── 완료: 호출번호 티켓(퍼포레이션) ── */
+  .done-ic{background:#E4F6EC;color:var(--green);box-shadow:0 8px 20px rgba(31,146,104,.22);}
+  .callno{position:relative;background:linear-gradient(135deg,var(--persimmon),var(--mustard));
+    box-shadow:0 16px 36px rgba(232,80,30,.34);overflow:hidden;}
+  .callno::before,.callno::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:var(--bg);}
+  .callno::before{left:-11px;} .callno::after{right:-11px;}
+  .callno .cl-num{font-size:62px;letter-spacing:3px;}
+
+  /* ── 주문내역 상태 뱃지 ── */
+  .st-cook{color:var(--persimmon-d);background:#FFEAD9;} .st-done{color:var(--green);background:#E4F6EC;}
+  .oh-pickup{background:#E4F6EC;border-top-color:#BFEBD5;color:#0E7A54;}
+  .oh-hint{background:#FFF7E8;border-color:#F3DDA6;color:#7A4E12;}
+
+  /* ── 상황 화면 ── */
+  .fm-btn{background:var(--ink);}
 </style>
 </head>
 <body>
@@ -329,7 +434,7 @@
   <button class="ds-chip" onclick="go('loaderr')">로딩실패</button>
   <span class="ds-div"></span>
   <button class="ds-chip" onclick="restart()">↻ 처음부터</button>
-  <div class="ds-note">야외형 QR오더 · 손님 주문 페이지 프로토타입 — 상단에서 구조/결제유형을 바꿔 흐름을 비교해 보세요</div>
+  <div class="ds-note">야외형 QR오더 · 손님 주문 페이지 프로토타입 — 상단에서 결제유형·대기표시·상황을 바꿔 확인해 보세요</div>
 </div>
 
 <div class="device" id="device"></div>

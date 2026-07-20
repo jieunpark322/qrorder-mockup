@@ -56,7 +56,10 @@
   /* ── 메인 배너 (그룹) ───────────────────────── */
   .mbanner{position:relative;overflow:hidden;background:#e9ecef;}
   .mbanner .slides{display:flex;transition:transform .5s ease;}
-  .mb-slide{min-width:100%;aspect-ratio:3/1;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:19px;text-align:center;padding:18px;line-height:1.4;}
+  .mb-slide{min-width:100%;aspect-ratio:16/9;max-height:240px;background-size:cover;background-position:center;background-color:#2c1250;display:flex;align-items:flex-end;cursor:pointer;}
+  .mb-txt{padding:15px 18px;color:#fff;}
+  .mb-t{font-size:20px;font-weight:900;letter-spacing:-.02em;text-shadow:0 1px 5px rgba(0,0,0,.55);}
+  .mb-s{font-size:13.5px;font-weight:700;opacity:.96;margin-top:3px;text-shadow:0 1px 4px rgba(0,0,0,.55);}
   .mb-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;}
   .mb-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);}
   .mb-dot.on{width:16px;border-radius:3px;background:#fff;}
@@ -504,28 +507,26 @@ function scSplash(){ return `<div class="splash-full">
 
 /* ── 그룹 홈 ── */
 function scHome(){
+  // 실제 행사 배너: 배경 이미지 + 클릭 시 URL 랜딩 (이미지 로드 실패 시 fb 그라데이션이 대체)
+  // 실제 운영 시 img/url은 브랜드가 등록한 배너 이미지·랜딩 주소로 교체
   const banners = [
-    {t:'🎉 개장 기념 · 전 매장 10% 할인', bg:'linear-gradient(120deg,#ff6b4a,#ff922b)'},
-    {t:'☕ 오후 3~5시 해피아워 · 음료 20% off', bg:'linear-gradient(120deg,#4c6ef5,#748ffc)'},
-    {t:'🍺 야간 라이브 공연 8PM · B구역 무대', bg:'linear-gradient(120deg,#7048e8,#9775fa)'},
+    {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'소프트 푸드트럭 페스티벌', s:'🎉 개장 기념 · 전 매장 10% 할인'},
+    {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'야간 라이브 공연', s:'🎤 매일 저녁 8PM · B구역 무대'},
+    {img:'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#1971c2,#4dabf7)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'해피아워 타임', s:'☕ 15:00 ~ 17:00 · 음료 20% off'},
   ];
   const cats = ['전체','푸드','음료','디저트'];
   const cats2 = ['구역 전체','A구역','B구역','C구역'];
   return `
-  <div class="hdr" style="justify-content:space-between">
-    <div class="ht" style="flex:0">🎪 소프트 푸드트럭 페스티벌</div>
-    <span class="autotrans" title="접속 언어로 자동 번역돼요 (미지원 언어는 기본 언어)"><span class="adot"></span>🌐 자동 번역</span>
-  </div>
   <div class="scroll">
-    <!-- 메인 배너 (최대 3장 자동 롤링) -->
+    <!-- 메인 배너 (화면 상단 밀착 · 최대 3장 자동 롤링 · 탭 시 URL 랜딩) -->
     <div class="mbanner">
-      <div class="slides" id="banSlides">${banners.map(b=>`<div class="mb-slide" style="background:${b.bg}">${b.t}</div>`).join('')}</div>
+      <div class="slides" id="banSlides">${banners.map(b=>`<div class="mb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.66)),url('${b.img}'),${b.fb};" onclick="window.open('${b.url}','_blank','noopener')"><div class="mb-txt"><div class="mb-t">${b.t}</div><div class="mb-s">${b.s}</div></div></div>`).join('')}</div>
       <div class="mb-dots" id="banDots">${banners.map((_,i)=>`<div class="mb-dot ${i===0?'on':''}"></div>`).join('')}</div>
     </div>
-    <!-- 공지문 -->
+    <!-- 공지문 (링크: 하이퍼링크 or URL 직접입력 → 클릭 시 URL 랜딩) -->
     <div class="notice">
       <span class="nic">📢</span>
-      <div><b>우천 시 운영 안내</b><br>비가 올 경우 야외 좌석은 조기 마감될 수 있어요. 픽업 시 부스 위치를 꼭 확인해 주세요. <a onclick="toast('공지 링크로 이동 (지정 URL 랜딩)')">자세히 보기 ›</a></div>
+      <div><b>우천 시 운영 안내</b><br>비가 올 경우 야외 좌석은 조기 마감될 수 있어요. 픽업 시 부스 위치를 꼭 확인해 주세요. <a onclick="window.open('https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html','_blank','noopener')">자세히 보기 ›</a></div>
     </div>
     <!-- 검색(접힘) + 카테고리 2단 · 기본값 '전체' -->
     ${S.searchOpen ? `
@@ -590,7 +591,6 @@ function scStore(){
   <div class="hdr">
     ${backBtn}
     <div class="ht">${s.name}</div>
-    <span class="autotrans" title="접속 언어로 자동 번역돼요 (미지원 언어는 기본 언어)"><span class="adot"></span>🌐 자동 번역</span>
   </div>
   <div class="scroll">
     <div class="cover" style="background:${s.cover}"></div>

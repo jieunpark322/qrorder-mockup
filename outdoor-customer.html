@@ -10,17 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gaegu:wght@700&display=swap" rel="stylesheet" />
 <style>
   :root{
-    /* Sunset Night-Market — 노을·야시장 팔레트 */
-    --persimmon:#E8501E; --persimmon-d:#C13C10; --mustard:#EDA400; --mulberry:#B01F5A; --plum:#3A2440;
-    --blue:#E8501E; --blue-d:#C13C10; --blue-50:#FFF0E6;          /* accent 리매핑 → 감귤/퍼시몬 */
-    --ink:#2A201A; --ink2:#6E5D50; --ink3:#9C8B7C; --ink4:#C7B9AA;
-    --line:#EADFCF; --line2:#F3ECDF; --bg:#F6EEE1; --card:#FFFDF8;
-    --green:#1F9268; --red:#D42A3C; --amber:#E39A12;
-    --festA:#FF6A2C; --festB:#F2A400;
+    /* Clean White — 뉴트럴 화이트 베이스 + 절제된 퍼시몬 액센트 */
+    --persimmon:#EA4E1B; --persimmon-d:#C43C10; --mustard:#D9930F; --mulberry:#B0357A; --plum:#3A2440;
+    --blue:#EA4E1B; --blue-d:#C43C10; --blue-50:#FFF1EC;          /* accent = 퍼시몬 */
+    --ink:#1E1E22; --ink2:#5C5C63; --ink3:#8C8C94; --ink4:#BDBDC4;
+    --line:#EBEBEE; --line2:#F3F3F5; --bg:#F5F5F6; --card:#FFFFFF;
+    --green:#1E8E5F; --red:#DD3B3B; --amber:#D9930F;
+    --festA:#EA4E1B; --festB:#F2842C;
     --display:'Black Han Sans','Pretendard',sans-serif;
     --ui:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
-    --shadow:0 6px 22px rgba(74,45,20,.10),0 2px 6px rgba(74,45,20,.06);
-    --shadow-lg:0 24px 60px rgba(28,16,6,.34);
+    --shadow:0 2px 10px rgba(20,20,25,.05);
+    --shadow-lg:0 12px 44px rgba(20,20,25,.14);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -426,6 +426,79 @@
 
   /* ── 상황 화면 ── */
   .fm-btn{background:var(--ink);}
+
+  /* ═══════════════ CLEAN WHITE 오버라이드 (전체 정돈 · 흰 배경) ═══════════════ */
+  /* 배경: 그라데이션·그레인 제거 → 뉴트럴 라이트, 카드 화이트 */
+  body{background:#EAEAEC;background-image:none;}
+  body::after{display:none;}
+  .device{box-shadow:0 12px 44px rgba(20,20,25,.14);}
+
+  /* 디스플레이 폰트는 스플래시·배너·호출번호에만. 나머지는 Pretendard 강조체 */
+  .sect-h,.catsec-h,.d-name,.done-t,.fm-t,.sheet-t,.opt-h,.oh-tot,.m-now,.d-price{
+    font-family:var(--ui);font-weight:800;letter-spacing:-.02em;}
+  .done-t,.fm-t{font-weight:900;}
+  .catsec-h{padding-left:0;color:var(--ink);font-size:17px;} .catsec-h::before{content:none;}
+  .sect-h{font-size:16px;} .d-name{font-size:21px;} .done-t{font-size:22px;} .fm-t{font-size:21px;}
+  .m-now{font-size:16px;color:var(--ink);} .d-price{font-size:22px;color:var(--ink);}
+  .sp-title{opacity:.9;} .mb-t{font-size:25px;} .callno .cl-num{font-size:58px;}
+  .oh-rnd-h{color:var(--ink2);}
+
+  /* 데모바: 뉴트럴 차콜 */
+  .demobar{background:#1c1c20;border-bottom-color:#2a2a2f;}
+  .demobar .lbl{color:#e8934a;}
+  .ds-chip{background:#2b2b31;border-color:#3a3a41;color:#d6d6da;}
+  .ds-chip.on{background:#fff;color:#1c1c20;border-color:#fff;}
+  .ds-div{background:#3a3a41;} .ds-note{color:#8a8a92;}
+
+  /* 스플래시: 워밍 오버레이 제거(뉴트럴 딤은 인라인 그라데이션이 담당) */
+  .splash-full{background:#111;} .splash-full::before{content:none;} .splash-load{border-top-color:#fff;}
+
+  /* 공지: 미니멀 에디토리얼 콜아웃 (좌측 룰 + 인라인 '공지' 태그) */
+  .notice{background:#fff;background-image:none;border:1px solid var(--line);border-left:3px solid var(--persimmon);
+    border-radius:12px;color:var(--ink2);box-shadow:var(--shadow);overflow:visible;padding:15px 16px 15px 17px;line-height:1.62;}
+  .notice::before,.notice::after{content:none;}
+  .notice > div{padding-right:0;}
+  .notice b{color:var(--ink);}
+  .notice b::before{content:'공지';display:inline-block;font-size:11px;font-weight:800;color:var(--persimmon);
+    background:var(--blue-50);padding:3px 8px;border-radius:6px;margin-right:8px;vertical-align:middle;font-family:var(--ui);letter-spacing:0;}
+  .notice a{color:var(--persimmon);border-bottom:1px solid rgba(234,78,27,.35);}
+
+  /* 카드/그림자 절제 */
+  .scard,.oh-store{box-shadow:var(--shadow);border-color:var(--line);border-radius:16px;}
+  @media(hover:hover){ .scard:hover{box-shadow:0 8px 24px rgba(20,20,25,.08);border-color:#e0e0e4;transform:translateY(-2px);}
+    .mcard:hover{background:#fafafa;} }
+  .logo{box-shadow:0 4px 14px rgba(0,0,0,.12);}
+
+  /* 뱃지: 절제된 틴트 */
+  .mb-hot{color:var(--persimmon);background:var(--blue-50);}
+  .mb-rec{color:var(--green);background:#EAF6EF;}
+  .mb-new{color:var(--mulberry);background:#FBECF4;}
+  .m-hh{color:#B0740A;background:#FBF1DB;}
+  .s-badge.open{color:var(--green);background:#EAF6EF;} .s-badge.closed{color:var(--red);background:#FDECEC;}
+  .s-tag{background:#F3F3F5;color:var(--ink2);} .s-tag.wait{color:var(--persimmon);background:var(--blue-50);}
+  .m-left-r{color:var(--persimmon);background:var(--blue-50);} .m-left-r.fcfs{color:var(--mulberry);background:#FBECF4;}
+  .st-cook{color:var(--persimmon);background:var(--blue-50);} .st-done{color:var(--green);background:#EAF6EF;}
+  .st-pick{color:var(--ink3);background:#F1F1F3;} .st-rej{color:var(--red);background:#FDECEC;}
+  .oh-pickup{background:#EAF6EF;border-top-color:#D8EFE3;color:#157A52;}
+  .oh-hint{background:#F5F5F7;border-color:var(--line);color:var(--ink2);}
+  .oh-tot{background:#FAFAFB;}
+
+  /* 칩/세그/검색 뉴트럴 */
+  .cchip{background:#F3F3F5;color:var(--ink3);} .cchip.on{background:var(--ink);color:#fff;}
+  .catrow.sub .cchip.on{background:var(--persimmon);}
+  .seg{background:#F1F1F3;} .seg button.on{color:var(--ink);}
+  .searchtog{background:#F3F3F5;} .store-group-h{background:var(--blue-50);color:var(--persimmon);}
+
+  /* CTA: 솔리드 퍼시몬 + 촉각 프레스 */
+  .cta{background:#fff;border-top:1px solid var(--line);box-shadow:none;}
+  .cta-btn{background:var(--persimmon);box-shadow:0 4px 14px rgba(234,78,27,.26);letter-spacing:-.01em;}
+  .cta-btn:active{background:var(--persimmon-d);transform:translateY(1px);}
+  .cta-btn:disabled{background:#E7E7EA;color:var(--ink4);box-shadow:none;}
+
+  /* 완료: 티켓 솔리드(퍼포레이션 유지) */
+  .done-ic{background:#EAF6EF;color:var(--green);box-shadow:none;}
+  .callno{background:var(--persimmon);box-shadow:0 12px 30px rgba(234,78,27,.24);}
+  .pickinfo{background:#F5F5F7;}
 </style>
 </head>
 <body>
@@ -485,7 +558,7 @@
 <script>
 /* ══════════════ 데이터 ══════════════ */
 const STORES = [
-  { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'https://loremflickr.com/240/240/cheeseburger?lock=1', cover:'https://loremflickr.com/760/430/foodtruck,burger?lock=1',
+  { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=760&q=72',
     open:true, loc:'A구역 · 부스 3번', waitCount:'12팀', waitTime:'약 15분', rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
     info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · 행사장 A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
@@ -496,7 +569,7 @@ const STORES = [
       {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 한정', price:15000, fcfs:true, fcfsPrice:9900, fcfsLeft:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
     ]},
-  { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://loremflickr.com/240/240/coffee?lock=2', cover:'https://loremflickr.com/760/430/cafe,coffee?lock=2',
+  { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=760&q=72',
     open:true, loc:'B구역 · 부스 1번', waitCount:'3팀', waitTime:'약 5분', rep:'핸드드립 아메리카노', cat:'음료', cat2:'B구역',
     info:{ceo:'이영희', regno:'234-56-78901', address:'서울 마포구 성미산로 000 · 행사장 B구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
     menus:[
@@ -505,7 +578,7 @@ const STORES = [
       {id:'c3', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', photo:'https://loremflickr.com/320/320/lemonade?lock=19', left:3},
       {id:'c4', name:'선착순 콜드브루', desc:'하루 30잔 한정 특가', price:5500, fcfs:true, fcfsPrice:3900, fcfsLeft:12, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20'},
     ]},
-  { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://loremflickr.com/240/240/friedchicken?lock=3', cover:'https://loremflickr.com/760/430/friedchicken?lock=3',
+  { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=760&q=72',
     open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
     info:{ceo:'박민수', regno:'345-67-89012', address:'서울 마포구 성미산로 000 · 행사장 C구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
 ];

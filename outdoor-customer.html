@@ -516,7 +516,10 @@
 
   /* ── 메뉴 카드: 정리된 태그·가격(뉴트럴 + 단일 액센트) ── */
   .m-badges{gap:4px;margin-bottom:6px;}
-  .m-tag{font-size:11px;font-weight:700;color:var(--ink2);background:#F3F3F5;padding:3px 8px;border-radius:6px;}
+  .m-tag{font-size:11px;font-weight:800;color:var(--ink2);background:#F3F3F5;padding:3px 8px;border-radius:6px;}
+  .m-tag.hot{color:#E8501E;background:#FFEBE1;}   /* 인기 */
+  .m-tag.rec{color:#1E8E5F;background:#E6F6EE;}   /* 추천 */
+  .m-tag.new{color:#2F6FE0;background:#E9F1FE;}   /* 신메뉴 */
   .m-name{font-size:16px;font-weight:700;color:var(--ink);}
   .m-price{margin-top:7px;gap:7px;align-items:center;}
   .m-now{font-family:var(--ui);font-weight:800;font-size:16px;color:var(--ink);}
@@ -884,7 +887,8 @@ function scStore(){
 }
 function mcardHTML(sid,m,closed){
   // 태그는 뉴트럴 통일, 색은 가격/할인(퍼시몬) 하나로만 — 시각적 정리
-  const badges = (m.badges||[]).map(b=>({hot:'인기',new:'신메뉴',rec:'추천'}[b])).map(t=>`<span class="m-tag">${t}</span>`).join('');
+  const badgeMap={hot:['인기','hot'],new:['신메뉴','new'],rec:['추천','rec']};
+  const badges = (m.badges||[]).map(b=>badgeMap[b]).filter(Boolean).map(([t,c])=>`<span class="m-tag ${c}">${t}</span>`).join('');
   let promo='', now=m.price, was='';
   if(m.fcfs){ promo='선착순'; now=m.fcfsPrice; was=m.price; }
   else if(m.hh){ promo='해피아워'; now=m.hhPrice; was=m.price; }

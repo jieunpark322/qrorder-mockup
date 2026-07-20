@@ -565,6 +565,10 @@
   /* 성인 메뉴 안내 (메뉴 상세) */
   .d-adult{margin-top:12px;background:#FDECEC;border:1px solid #F5C6C6;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:#C0392B;line-height:1.5;}
   .d-reuse{margin-top:12px;background:#E6F6EE;border:1px solid #C7EAD8;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:#1E7A52;line-height:1.5;}
+  /* 개별 결제: 담긴 매장 [대괄호] 안내 */
+  .cart-scope-note{margin:12px 14px 0;background:var(--blue-50);border:1px solid #F7D9C9;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--persimmon-d);line-height:1.5;}
+  .cart-scope-note.warn{background:#FBF1DB;border-color:#F0DDA8;color:#9A6B08;}
+  .cart-scope-note b{color:var(--ink);}
   /* 메뉴 정보 토글 버튼 */
   .d-info-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 13px;border:none;border-radius:9px;background:var(--blue-50);color:var(--persimmon);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
   .d-info-btn:active{transform:scale(.97);}
@@ -615,10 +619,10 @@
 <!-- 입력 더블체크 확인 시트 -->
 <div class="modal-bg" id="confirmModal" onclick="if(event.target===this)closeConfirm()">
   <div class="sheet">
-    <div class="sheet-t">입력하신 정보가 맞나요?</div>
+    <div class="sheet-t" id="confirmTitle">확인</div>
     <div class="sheet-s" id="confirmMsg"></div>
-    <button class="cta-btn" style="margin-top:20px" onclick="closeConfirm();payConfirm()">확인 · 주문 진행</button>
-    <button class="ghostbtn" onclick="closeConfirm()">다시 입력</button>
+    <button class="cta-btn" id="confirmOk" style="margin-top:20px" onclick="confirmProceed()">확인</button>
+    <button class="ghostbtn" id="confirmCancel" onclick="closeConfirm()">취소</button>
   </div>
 </div>
 
@@ -717,8 +721,14 @@ function simState(st){
   else if(st==='break') toast('지금은 브레이크 타임이에요.','잠시 후 다시 열어요. 메뉴는 둘러볼 수 있어요.');
 }
 function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; S.infoOpen=false; showMenuSheet(); }
-function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); }
-function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); }
+function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); syncBgLock(); }
+function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); syncBgLock(); }
+// 시트/모달이 하나라도 열려 있으면 배경(페이지) 스크롤 잠금 → 상세 화면만 컨트롤
+function syncBgLock(){
+  const open=['menuSheet','adultModal','confirmModal'].some(id=>document.getElementById(id).classList.contains('on'));
+  document.documentElement.style.overflow=open?'hidden':'';
+  document.body.style.overflow=open?'hidden':'';
+}
 
 function toast(t, body){
   const el=document.getElementById('toast');
@@ -874,6 +884,7 @@ function scStore(){
       <button class="mtab ${S.storeTab==='info'?'on':''}" onclick="S.storeTab='info';render()">매장 정보</button>
     </div>
     ${S.storeTab==='info' ? storeInfoHTML(s) : `
+      ${(S.payScope==='separate' && S.cart.length) ? `<div class="cart-scope-note ${S.cart[0].store!==S.curStore?'warn':''}">${S.cart[0].store===S.curStore ? `🛒 <b>[${store(S.cart[0].store).name}]</b>에 담는 중 · 장바구니엔 같은 매장 메뉴만 담을 수 있어요` : `⚠️ 다른 매장이에요 · 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요`}</div>` : ''}
       <div class="cattabs">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       ${s.menus.length===0
         ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
@@ -977,10 +988,12 @@ function renderMenuSheet(){
 }
 function addToCart(){
   const m=S.curMenu;
-  if(m.adult && !S.adult){ document.getElementById('adultModal').classList.add('on'); return; }
-  // 개별 결제형: 타 매장 담기 차단
+  if(m.adult && !S.adult){ document.getElementById('adultModal').classList.add('on'); syncBgLock(); return; }
+  // 개별 결제형: 다른 매장 메뉴를 담으면 기존 장바구니가 비워진다고 안내 후 교체
   if(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore){
-    return toast('개별 결제형 — 한 매장 상품만 담을 수 있어요');
+    const prev=store(S.cart[0].store).name;
+    openConfirm('다른 매장 메뉴예요', `개별 결제는 한 매장만 담을 수 있어요.<br>담으면 <b style="color:var(--ink)">[${prev}]</b>에 담은 상품이 사라지고 새로 담겨요.`, '네, 새로 담을게요', '취소', ()=>{ S.cart=[]; addToCart(); });
+    return;
   }
   const base=m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
   const listBase=m.was||m.price;   // 정가(할인 전) — 금액 요약 할인 세분화용
@@ -992,7 +1005,7 @@ function addToCart(){
   closeMenuSheet();
   render();   // 뒤에 깔린 매장 화면 갱신 → 하단 장바구니 바 표시
 }
-function closeAdult(){ document.getElementById('adultModal').classList.remove('on'); }
+function closeAdult(){ document.getElementById('adultModal').classList.remove('on'); syncBgLock(); }
 function doAuth(){ S.adult=true; closeAdult(); toast('성인 인증 완료 · 오늘 자정까지 유지'); addToCart(); }
 
 /* 하단 장바구니 바 (매장 페이지) */
@@ -1000,7 +1013,8 @@ function cartBar(){
   if(!S.cart.length) return '';
   const cnt=S.cart.reduce((a,c)=>a+c.qty,0);
   const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
-  return `<div class="cta"><button class="cta-btn" onclick="go('cart')">🛒 장바구니 ${cnt}개 보기 <span class="amt">${won(sum)}</span></button></div>`;
+  const brk = S.payScope==='separate' ? `[${store(S.cart[0].store).name}] ` : '';
+  return `<div class="cta"><button class="cta-btn" onclick="go('cart')">🛒 ${brk}장바구니 ${cnt}개 <span class="amt">${won(sum)}</span></button></div>`;
 }
 
 /* ── 장바구니 ── */
@@ -1237,19 +1251,24 @@ function submitContact(type){
   if(type==='phone'){
     const v=(document.getElementById('phoneIn')||{}).value||'';
     if(v.replace(/\D/g,'').length!==11) return toast('휴대폰 번호 11자리를 정확히 입력해 주세요');
-    S.loginType='phone'; S.contact=v; openConfirm('번호', v);
+    S.loginType='phone'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 번호로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인 · 주문 진행', '다시 입력', payConfirm);
   } else {
     const v=(document.getElementById('emailIn')||{}).value.trim()||'';
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return toast('이메일 형식을 확인해 주세요 (예: name@email.com)');
-    S.loginType='email'; S.contact=v; openConfirm('이메일 주소', v);
+    S.loginType='email'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 이메일로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인 · 주문 진행', '다시 입력', payConfirm);
   }
 }
-/* 입력 더블체크 (전용 확인 시트) */
-function openConfirm(label,val){
-  document.getElementById('confirmMsg').innerHTML=`이 ${label}로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${val}</b>`;
-  document.getElementById('confirmModal').classList.add('on');
+/* 범용 확인 시트 (제목·본문·버튼 라벨·확인 콜백) */
+function openConfirm(title,msg,okLabel,cancelLabel,onOk){
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmMsg').innerHTML=msg;
+  document.getElementById('confirmOk').textContent=okLabel||'확인';
+  document.getElementById('confirmCancel').textContent=cancelLabel||'취소';
+  S._confirmAction=onOk||null;
+  document.getElementById('confirmModal').classList.add('on'); syncBgLock();
 }
-function closeConfirm(){ document.getElementById('confirmModal').classList.remove('on'); }
+function confirmProceed(){ const a=S._confirmAction; S._confirmAction=null; closeConfirm(); if(a)a(); }
+function closeConfirm(){ document.getElementById('confirmModal').classList.remove('on'); syncBgLock(); }
 function payConfirm(){
   if(S.bill==='pre'){
     // 선불: 결제 시도 → 성공 가정 (실패는 데모바 '결제실패'로 확인)

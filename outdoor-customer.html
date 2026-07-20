@@ -570,6 +570,10 @@
   .cart-scope-note{margin:12px 14px 0;background:var(--blue-50);border:1px solid #F7D9C9;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--persimmon-d);line-height:1.5;}
   .cart-scope-note.warn{background:#FBF1DB;border-color:#F0DDA8;color:#9A6B08;}
   .cart-scope-note b{color:var(--ink);}
+  /* 매장 카드 메타: pill 제거 → 배경 없는 한 줄(위치 회색·대기 퍼시몬) */
+  .s-meta{gap:10px;margin-top:7px;font-size:12.5px;color:var(--ink3);}
+  .s-loc{color:var(--ink3);font-weight:600;}
+  .s-wait{color:var(--persimmon);font-weight:700;}
   /* 메뉴 정보 토글 버튼 */
   .d-info-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 13px;border:none;border-radius:9px;background:#EEEEF0;color:var(--ink2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
   .d-info-btn:active{transform:scale(.97);}
@@ -814,10 +818,10 @@ function scHome(){
 }
 function scardHTML(s){
   // 대기 표시는 브랜드 설정(우선)을 따름 — 매장 개별 설정을 덮어씀
-  let wait='';
+  let waitTxt='';
   if(s.open && S.brandWait!=='off'){
     const v = S.brandWait==='time' ? s.waitTime : s.waitCount;
-    if(v) wait = `<span class="s-tag wait">⏳ ${S.brandWait==='time'?'':'대기 '}${v}</span>`;
+    if(v) waitTxt = `${S.brandWait==='time'?'':'대기 '}${v}`;
   }
   const badge = s.open ? `<span class="s-badge open">영업중</span>` : `<span class="s-badge closed">영업종료</span>`;
   return `<button class="scard ${s.open?'':'closed'}" onclick="${s.open?`openStore('${s.id}')`:`toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`}">
@@ -825,10 +829,7 @@ function scardHTML(s){
     <div class="s-body">
       <div class="s-name">${s.name} ${badge}</div>
       <div class="s-rep">대표 · ${s.rep}</div>
-      <div class="s-meta">
-        <span class="s-tag">📍 ${s.loc}</span>
-        ${wait}
-      </div>
+      <div class="s-meta"><span class="s-loc">📍 ${s.loc}</span>${waitTxt?`<span class="s-wait">⏳ ${waitTxt}</span>`:''}</div>
     </div>
   </button>`;
 }

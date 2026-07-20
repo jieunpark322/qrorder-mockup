@@ -115,7 +115,11 @@
   .storelist{padding:12px 14px;}
   .scard{display:flex;gap:13px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;margin-bottom:11px;cursor:pointer;position:relative;width:100%;font-family:inherit;text-align:left;align-items:center;}
   .scard:active{background:var(--bg);}
-  .scard.closed{opacity:.72;}
+  .scard.closed{background:#F5F5F7;border-color:var(--line2);}
+  .scard.closed .s-thumb{filter:grayscale(100%) brightness(.9);}
+  .scard.closed .s-thumb::after{content:'영업종료';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,32,.5);color:#fff;font-size:12px;font-weight:800;letter-spacing:.02em;border-radius:inherit;}
+  .scard.closed .s-name{color:var(--ink3);}
+  .scard.closed .s-rep,.scard.closed .s-meta{color:var(--ink4);}
   .s-thumb{width:82px;height:82px;border-radius:13px;flex-shrink:0;background-size:cover;background-position:center;position:relative;display:flex;align-items:center;justify-content:center;font-size:34px;}
   .s-logo{position:absolute;left:-6px;bottom:-6px;width:32px;height:32px;border-radius:9px;background:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:16px;}
   .s-body{flex:1;min-width:0;}

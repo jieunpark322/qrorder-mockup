@@ -290,6 +290,10 @@
   /* ── 하단 고정 CTA ───────────────────────── */
   /* 하단 결제/장바구니: 화면 위아래로 스크롤해도 항상 보이는 플로팅(뷰포트 고정) */
   .cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
+  /* 주문 내역 플로팅 진입 버튼 (device 컬럼 우측 하단 정렬) */
+  .hist-fabwrap{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:440px;display:flex;justify-content:flex-end;padding:0 16px;z-index:38;pointer-events:none;}
+  .hist-fab{pointer-events:auto;background:#fff;color:var(--persimmon-d);border:1px solid var(--line);box-shadow:0 6px 18px rgba(20,20,25,.16);border-radius:24px;padding:11px 16px;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;}
+  .hist-fab:active{transform:scale(.96);}
   .cta-btn{width:100%;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:17px;font-size:16.5px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
   .cta-btn:disabled{background:var(--line);color:var(--ink4);}
   .cta-btn .amt{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:8px;font-size:14px;}
@@ -789,6 +793,7 @@ let S = {
   searchOpen:false,
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
+  histView:'store',    // 주문 내역 보기: store(매장별) | round(주문 회차별) · 매장별은 통합결제만
   demoState:'open',    // 매장 상태 데모: open | closed | break (영업종료·브레이크 = 메뉴판만)
   pickup:'now',        // 수령: now(즉시 포장) | reserve(포장 예약)
   pickupTime:null,     // 예약 수령 시간 'HH:MM'
@@ -928,7 +933,14 @@ function scHome(){
     <div class="storelist">
       ${STORES.map(s=>scardHTML(s)).join('')}
     </div>
-  </div>`;
+    <div style="height:78px"></div>
+  </div>
+  ${histFab()}`;
+}
+// 주문 내역 진입 (device 컬럼 우측 하단 고정) · 매장 장바구니 바가 있으면 위로 띄움
+function histFab(){
+  const raised = (S.screen==='store' && S.cart.length);
+  return `<div class="hist-fabwrap" style="bottom:${raised?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문내역</button></div>`;
 }
 function scardHTML(s){
   // 대기 표시는 브랜드 설정(우선)을 따름 — 매장 개별 설정을 덮어씀
@@ -1005,8 +1017,10 @@ function scStore(){
       ${s.menus.length===0
         ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
         : cats.map(c=>`<div class="catsec-h">${c}</div>${s.menus.filter(m=>(m.cat||'메뉴')===c).map(m=>mcardHTML(s.id,m,blocked)).join('')}`).join('')}
+      <div style="height:78px"></div>
     `}
   </div>
+  ${histFab()}
   ${cartBar()}
   `;
 }
@@ -1453,62 +1467,71 @@ function scDone(){
 
 /* ── 내 주문 내역 ── */
 function scHistory(){
-  const post=S.bill==='post';
-  // 데모용 회차 데이터 (현재 장바구니 + 가상 2차)
-  const cur = S.cart.length? S.cart : [{name:'더블 치즈버거',opt:'Regular',qty:1,price:9800,store:'burger'}];
-  const g={}; cur.forEach(c=>{(g[c.store||'burger']=g[c.store||'burger']||[]).push(c);});
-  let grand=0;
-  const blocks=Object.entries(g).map(([sid,items])=>{
-    const sum=items.reduce((a,c)=>a+c.price*c.qty,0); grand+=sum;
-    return `<div class="oh-store">
-      <div class="oh-shead"><div class="oh-sname">🏪 ${store(sid).name}</div><span class="st-badge st-cook">조리중</span></div>
-      <div class="oh-round">
-        <div class="oh-rnd-h"><span>2차 주문 · 방금 전</span><span>${won(sum)}</span></div>
-        ${items.map(c=>`<div class="oh-line"><span>${c.name} ${c.opt?'· '+c.opt:''} × ${c.qty}</span><span>${won(c.price*c.qty)}</span></div>`).join('')}
-      </div>
-      <div class="oh-round">
-        <div class="oh-rnd-h"><span>1차 주문 · 32분 전</span><span>${won(3500)}</span></div>
-        <div class="oh-line"><span>아메리카노 × 1</span><span>${won(3500)}</span></div>
-      </div>
-      <div class="oh-tot"><span>매장 합계 (누적)</span><span>${won(sum+3500)}</span></div>
-      <div class="oh-phone">📱 주문 번호 010-****-1234</div>
-    </div>`;
-  }).join('');
+  const unified = S.payScope==='unified';
+  // 매장별 보기는 통합결제에만 해당 (개별결제는 매장별 주문이 당연 → 매장 기준만)
+  const view = unified ? (S.histView||'store') : 'store';
+  const stCls = {'조리중':'st-cook','조리완료':'st-done','픽업완료':'st-pick','주문 취소':'st-rej'};
+  const sumOf = items => items.reduce((a,c)=>a+c.price*c.qty,0);
+  const lineHTML = (it,showStore)=>`<div class="oh-line"><span>${store(it.store).logo} ${it.name}${it.opt?' · '+it.opt:''} × ${it.qty}${showStore?` <span style="color:var(--ink4)">· ${store(it.store).name}</span>`:''}</span><span>${won(it.price*it.qty)}</span></div>`;
+  // 데모 주문 데이터 — 회차 × 매장 (현재 장바구니를 최신 회차로 반영)
+  const live = (S.cart.length?S.cart:[{store:'burger',name:'더블 치즈버거',opt:'Regular',qty:1,price:9800}])
+                .map(c=>({store:c.store||'burger',name:c.name,opt:c.opt||'',qty:c.qty,price:c.price}));
+  const ROUNDS = [
+    {label:'2차 주문', time:'방금 전', status:'조리중', items:live},
+    {label:'1차 주문', time:'12분 전', status:'조리완료', pickup:'B구역 1번 부스',
+      items:[{store:'coffee',name:'바닐라 라떼',opt:'',qty:1,price:4800},{store:'coffee',name:'아메리카노',opt:'ICE',qty:1,price:3500}]},
+    {label:'이전 주문', time:'55분 전', status:'픽업완료',
+      items:[{store:'burger',name:'수제 콜라',opt:'',qty:1,price:3000}]},
+    {label:'이전 주문', time:'41분 전', status:'주문 취소', cancel:'상품 품절로 자동 취소되었어요 · 결제 금액은 자동 환불 처리 (카드사 사정에 따라 영업일 3~7일 소요)',
+      items:[{store:'chicken',name:'후라이드 세트',opt:'',qty:1,price:8500}]},
+  ];
+  let body='';
+  if(view==='round'){
+    // 주문 회차별: 한 번의 주문(회차)에 여러 매장이 함께 담김
+    body = ROUNDS.map(r=>`
+      <div class="oh-store">
+        <div class="oh-shead"><div class="oh-sname">🧾 ${r.label} · ${r.time}</div><span class="st-badge ${stCls[r.status]}">${r.status}</span></div>
+        ${(r.status==='조리완료'&&r.pickup)?`<div class="oh-pickup">🔔 조리가 끝났어요! 지금 <b>${r.pickup}</b>에서 픽업해 주세요</div>`:''}
+        <div class="oh-round">
+          ${r.items.map(it=>lineHTML(it,true)).join('')}
+          ${r.cancel?`<div style="font-size:12.5px;color:#c92a2a;font-weight:700;margin-top:9px;line-height:1.55">😢 ${r.cancel}</div>`:''}
+        </div>
+        <div class="oh-tot"><span>회차 합계</span><span>${won(r.status==='주문 취소'?0:sumOf(r.items))}</span></div>
+      </div>`).join('');
+  } else {
+    // 매장별: 회차 데이터를 매장 기준으로 재그룹
+    const byStore={};
+    ROUNDS.forEach(r=>{
+      const bySid={}; r.items.forEach(it=>{(bySid[it.store]=bySid[it.store]||[]).push(it);});
+      Object.entries(bySid).forEach(([sid,items])=>{ (byStore[sid]=byStore[sid]||[]).push({label:r.label,time:r.time,status:r.status,pickup:r.pickup,cancel:r.cancel,items}); });
+    });
+    body = Object.entries(byStore).map(([sid,rounds])=>`
+      <div class="oh-store">
+        <div class="oh-shead"><div class="oh-sname">${store(sid).logo} ${store(sid).name}</div><span class="st-badge ${stCls[rounds[0].status]}">${rounds[0].status}</span></div>
+        ${rounds.map(rd=>`
+          ${(rd.status==='조리완료'&&rd.pickup)?`<div class="oh-pickup">🔔 조리가 끝났어요! 지금 <b>${rd.pickup}</b>에서 픽업해 주세요</div>`:''}
+          <div class="oh-round">
+            <div class="oh-rnd-h"><span>${rd.label} · ${rd.time}</span><span>${won(rd.status==='주문 취소'?0:sumOf(rd.items))}</span></div>
+            ${rd.items.map(it=>lineHTML(it,false)).join('')}
+            ${rd.cancel?`<div style="font-size:12.5px;color:#c92a2a;font-weight:700;margin-top:9px;line-height:1.55">😢 ${rd.cancel}</div>`:''}
+          </div>`).join('')}
+        <div class="oh-tot"><span>매장 합계 (누적)</span><span>${won(rounds.reduce((a,rd)=>a+(rd.status==='주문 취소'?0:sumOf(rd.items)),0))}</span></div>
+      </div>`).join('');
+  }
+  const grand = ROUNDS.reduce((a,r)=>a+(r.status==='주문 취소'?0:sumOf(r.items)),0);
   return `
   <div class="hdr"><button class="bk" onclick="go(S.mode==='group'?'home':'store')">‹</button><div class="ht">내 주문 내역</div></div>
   <div class="scroll">
+    ${unified
+      ? `<div style="padding:12px 14px 2px"><div class="seg">
+          <button class="${view==='store'?'on':''}" onclick="S.histView='store';render()">매장별</button>
+          <button class="${view==='round'?'on':''}" onclick="S.histView='round';render()">주문 회차별</button>
+        </div></div>`
+      : `<div class="oh-hint" style="margin-bottom:0">개별 결제는 매장별로 주문이 담겨, 매장 기준으로 보여드려요.</div>`}
     <div class="oh-hint">주문하신 내역은 당일 자정이 지나면 자동으로 사라져요. 영수증이나 기록이 필요하시다면 미리 화면을 캡처해 두시는 것을 추천해 드려요! 📸<br><br>💬 상태 변화는 <b>카카오톡 알림톡 · 이메일</b> 중 선택하신 방법으로 안내드려요. (웹 기반이라 앱 푸시 알림은 없어요)</div>
-    ${blocks}
-    <!-- 조리완료: 픽업 유도 강조 -->
-    <div class="oh-store">
-      <div class="oh-shead"><div class="oh-sname">☕ 소프트커피</div><span class="st-badge st-done">조리완료</span></div>
-      <div class="oh-pickup">🔔 조리가 끝났어요! 지금 <b>B구역 1번 부스</b>에서 픽업해 주세요</div>
-      <div class="oh-round">
-        <div class="oh-rnd-h"><span>1차 주문 · 6분 전</span><span>${won(8300)}</span></div>
-        <div class="oh-line"><span>아메리카노 × 1</span><span>${won(3500)}</span></div>
-        <div class="oh-line"><span>바닐라 라떼 × 1</span><span>${won(4800)}</span></div>
-      </div>
-      <div class="oh-phone">📱 주문 번호 010-****-5678</div>
-    </div>
-    <!-- 픽업완료 -->
-    <div class="oh-store" style="opacity:.72">
-      <div class="oh-shead"><div class="oh-sname">🍔 소프트버거 트럭</div><span class="st-badge st-pick">픽업완료</span></div>
-      <div class="oh-round">
-        <div class="oh-rnd-h"><span>이전 주문 · 55분 전</span><span>${won(3000)}</span></div>
-        <div class="oh-line"><span>수제 콜라 × 1</span><span>${won(3000)}</span></div>
-      </div>
-    </div>
-    <!-- 품절 자동취소: 별도 전체화면이 아니라 카톡/이메일 알림 + 주문 내역 안의 '상태값'으로 확인 -->
-    <div class="oh-store">
-      <div class="oh-shead"><div class="oh-sname">🍗 소프트치킨</div><span class="st-badge st-rej">주문 취소</span></div>
-      <div class="oh-round">
-        <div class="oh-rnd-h"><span>1차 주문 · 41분 전</span><span>${won(8500)}</span></div>
-        <div class="oh-line"><span>후라이드 세트 × 1</span><span>${won(8500)}</span></div>
-        <div style="font-size:12.5px;color:#c92a2a;font-weight:700;margin-top:9px;line-height:1.55">😢 상품 품절로 자동 취소되었어요 · 결제 금액은 자동 환불 처리 (카드사 사정에 따라 영업일 3~7일 소요)</div>
-      </div>
-    </div>
+    ${body}
     <div style="background:#fff;margin:12px 14px;border-radius:14px;border:1px solid var(--line);padding:16px">
-      <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:900"><span>전체 합계 (누적)</span><span>${won(grand+3500)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:900"><span>전체 합계 (누적)</span><span>${won(grand)}</span></div>
       <div style="font-size:12px;color:var(--ink4);margin-top:6px">※ 취소·환불 건은 합계에서 제외돼요</div>
     </div>
     <div style="height:20px"></div>

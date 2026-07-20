@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QR오더 사장님 관리자 — Mockup 가이드</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --blue:#3182f6; --blue-50:#e8f3ff; --blue-100:#cfe4ff;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1; --ink-4:#b0b8c1;
+    --line:#e5e8eb; --line-2:#f2f4f6;
+    --bg:#f9fafb; --bg-2:#f2f4f6;
+    --red:#f04452; --red-50:#ffeaec;
+    --green:#1eb18d; --green-50:#e3f6f0;
+    --amber-bg:#fff7e6; --amber-line:#ffd591; --amber-ink:#7a4d00; --amber-ink-2:#5a3a00;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:#eceef1;color:var(--ink);font-family:'Pretendard','Apple SD Gothic Neo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.65;}
+  .wrap{max-width:960px;margin:32px auto 60px;padding:0 20px;}
+  .card{background:#fff;border-radius:16px;border:1px solid var(--line);box-shadow:0 8px 32px rgba(0,0,0,.06);padding:44px 52px;}
+
+  /* 헤더 */
+  .doc-head{padding-bottom:28px;border-bottom:1px solid var(--line);margin-bottom:32px;}
+  .doc-head .tag{display:inline-block;background:var(--blue-50);color:var(--blue);font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;margin-bottom:12px;}
+  h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0 0 12px;line-height:1.3;}
+  .doc-head .lead{font-size:15px;color:var(--ink-2);margin:0;}
+
+  /* 본문 헤딩 */
+  h2{font-size:20px;font-weight:800;letter-spacing:-.01em;margin:42px 0 16px;padding-top:8px;}
+  h2:first-of-type{margin-top:0;}
+  h3{font-size:15px;font-weight:700;color:var(--ink);margin:24px 0 10px;}
+  p{margin:10px 0;color:var(--ink-2);font-size:14px;}
+
+  /* 링크 */
+  a{color:var(--blue);text-decoration:none;font-weight:600;}
+  a:hover{text-decoration:underline;}
+
+  /* 강조 박스 */
+  .callout{background:var(--blue-50);border:1px solid var(--blue-100);border-radius:10px;padding:14px 18px;margin:14px 0;font-size:13px;color:var(--ink-2);line-height:1.6;}
+  .callout b{color:var(--ink);}
+  .callout-amber{background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);}
+  .callout-amber b{color:var(--amber-ink-2);}
+
+  /* 표 */
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px;}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line-2);color:var(--ink-2);vertical-align:top;}
+  th{background:var(--bg-2);font-weight:700;color:var(--ink);font-size:12px;letter-spacing:.02em;}
+  td b{color:var(--ink);}
+  td code{font-size:12px;}
+
+  /* 리스트 */
+  ul,ol{margin:10px 0;padding-left:22px;color:var(--ink-2);font-size:14px;}
+  li{margin:6px 0;line-height:1.65;}
+  li b{color:var(--ink);}
+  .check-list{list-style:none;padding-left:0;}
+  .check-list li{position:relative;padding-left:26px;margin:10px 0;}
+  .check-list li::before{content:'';position:absolute;left:0;top:8px;width:16px;height:16px;background:var(--blue);border-radius:50%;}
+  .check-list li::after{content:'';position:absolute;left:5px;top:11px;width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
+
+  /* 코드 */
+  code{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12.5px;background:var(--bg-2);padding:2px 6px;border-radius:4px;color:#c7254e;}
+  pre{background:#0d1117;color:#e6edf3;padding:18px 20px;border-radius:10px;overflow-x:auto;font-size:12.5px;line-height:1.6;margin:12px 0;}
+  pre code{background:transparent;color:inherit;padding:0;font-size:12.5px;}
+  pre .c{color:#8b949e;}
+  pre .k{color:#ff7b72;}
+  pre .s{color:#a5d6ff;}
+  pre .n{color:#d2a8ff;}
+
+  /* 번호 강조 */
+  .num-grid{counter-reset:item;margin:14px 0;}
+  .num-grid > div{position:relative;padding:14px 14px 14px 50px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;font-size:13.5px;color:var(--ink-2);line-height:1.6;}
+  .num-grid > div::before{counter-increment:item;content:counter(item);position:absolute;left:14px;top:14px;width:24px;height:24px;background:var(--blue);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+  .num-grid > div b{color:var(--ink);}
+
+  /* 푸터 */
+  .foot{margin-top:48px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3);text-align:center;}
+  .foot b{color:var(--ink-2);}
+
+  hr{border:none;border-top:1px solid var(--line-2);margin:32px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+
+    <div class="doc-head">
+      <div class="tag">개발자 진입 가이드</div>
+      <h1>QR오더 사장님 관리자 — 매출·정산 영역 Mockup</h1>
+      <p class="lead">비개발 사장님이 "오늘 얼마 벌었고, 언제 얼마 들어와요?"를 한눈에 보고 이해할 수 있게 만드는 게 목표입니다.</p>
+    </div>
+
+    <h2>🔗 진입점</h2>
+    <ul>
+      <li><b>라이브 데모</b>: <a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">https://jieunpark322.github.io/qrorder-mockup/</a></li>
+      <li><b>PRD (비즈니스 요구사항·정합성 검증)</b>: <a href="./PRD.md">PRD.md</a></li>
+      <li><b>단일 파일 mockup</b>: <a href="./index.html">index.html</a> — 외부 의존성은 Chart.js(CDN), Pretendard 폰트뿐. 더블클릭으로 바로 열림.</li>
+    </ul>
+
+    <h2>📌 이 문서가 책임지는 범위</h2>
+    <table>
+      <thead><tr><th style="width:30%;">문서</th><th>다루는 내용</th></tr></thead>
+      <tbody>
+        <tr><td><b>README.html / README.md</b><br/>(이 문서)</td><td>개발자가 mockup을 어떻게 읽고 무엇을 구현해야 하는지 — 진입점 가이드</td></tr>
+        <tr><td><b>PRD.md</b></td><td>비즈니스 룰, 정산식, Before→After 비교, 데이터 정합성 검증 결과</td></tr>
+        <tr><td><b>index.html</b></td><td>동작하는 화면·인터랙션·UI 디테일의 단일 진실의 원천</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      → mockup의 <b>시각·인터랙션은 <code>index.html</code>이 정답</b>, <b>숫자·규칙은 <code>PRD.md</code>가 정답</b>입니다. 두 문서가 충돌하면 알려주세요.
+    </div>
+
+    <h2>🚀 빠른 시작</h2>
+
+    <h3>보기만 하려면</h3>
+    <ol>
+      <li><a href="https://jieunpark322.github.io/qrorder-mockup/" target="_blank">라이브 데모</a> 접속</li>
+      <li>좌측 사이드바에서 메뉴 클릭하며 동선 따라가 보기</li>
+      <li>우상단의 <code>🕒 영업시간 기준</code> 토글, 거래 행 클릭(모달), 정산 회차 클릭(이동) 등 인터랙션 확인</li>
+    </ol>
+
+    <h3>로컬에서 코드 보면서 만지려면</h3>
+<pre><code><span class="c"># 클론</span>
+git clone https://github.com/jieunpark322/qrorder-mockup.git
+<span class="k">cd</span> qrorder-mockup
+
+<span class="c"># 별도 빌드 불필요 — 그냥 브라우저로 index.html 열기</span>
+<span class="c"># 또는 간단한 정적 서버</span>
+python -m http.server 8010
+<span class="c"># → http://localhost:8010</span></code></pre>
+
+    <h2>🗺 화면 구조와 핵심 흐름</h2>
+
+    <h3>사이드바 (좌측 메뉴 8종)</h3>
+<pre><code>주문관리
+  📋 주문 내역              orders
+매출관리
+  📊 매출 한눈에 보기        overview
+  🔎 매출 상세 보기          detail   (기간별/시간대별/메뉴별/카테고리별/결제수단별 5탭)
+정산관리
+  🗓️  정산 달력             stl-calendar
+  🔎 정산 내역              stl-list
+  🏦 정산 계좌              bank</code></pre>
+
+    <p>→ 라우팅은 <code>index.html</code>의 <code>sectionMap</code> 참고. SPA 형태, 한 페이지에서 <code>state.section</code>만 바꿔 렌더링.</p>
+
+    <h3>대표 사용자 흐름 4가지 (PRD §7 시나리오와 동일)</h3>
+    <table>
+      <thead><tr><th style="width:8%;">흐름</th><th style="width:38%;">진입</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td><b>A</b></td><td>정산 내역 (기본 진입 = 오늘 1일치)</td><td>행 클릭 → 정산 회차 상세</td></tr>
+        <tr><td><b>B</b></td><td>정산 내역 → 칩 <code>[이번 달]</code></td><td>15일치 합계 KPI</td></tr>
+        <tr><td><b>C</b></td><td>주문 내역 → 행 클릭 (모달) → 회차 링크</td><td>해당 회차 상세 자동 이동</td></tr>
+        <tr><td><b>D</b></td><td>정산 달력 → 5/19 셀</td><td>정산 회차 상세 직행 (중간 단계 생략)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>⚠️ 구현 시 반드시 지켜야 할 것</h2>
+    <p>세부 룰은 PRD에 있고, 여기선 <b>자주 놓치는 6가지</b>만 강조합니다.</p>
+
+    <div class="num-grid">
+      <div><b>정산 화면은 항상 "자정 기준" 고정</b> — 사장님이 매출 화면에서 영업시간 기준 토글을 켜도 정산 화면(달력/내역/상세/계좌)은 영향받지 않습니다. 카드사 표준이라 협상 불가.</div>
+      <div><b>매출 화면은 자정 기준 ↔ 영업시간 기준 토글 가능</b> — 매출 한눈에 보기 / 매출 상세 보기 두 곳에서만 동작. <code>state.useBusinessHours</code> 참고.</div>
+      <div><b>자정 넘김 매장은 안내 박스 노출</b> — 매장 영업시간(<code>businessHoursOpen</code> ~ <code>businessHoursClose</code>)이 자정을 넘기는 매장에서 영업시간 기준을 켜면 <code>bhActiveNotice()</code> 함수가 큰 안내 박스를 띄움. 안 넘김 매장은 작은 한 줄만.</div>
+      <div><b>정산 회차 ID는 표에 노출하지 않음</b> — 정산 내역 표에는 ID 없음, 정산 회차 상세 페이지에서만 표시. PRD §3 Before→After 참조.</div>
+      <div><b>D+2 영업일 정산 + 주말/공휴일 자동 스킵</b> — <code>HOLIDAYS_2026</code> 리스트 참조. 토·일·공휴일 매출은 다음 영업일 회차로 합산.</div>
+      <div><b>카드번호 마스킹 (PCI DSS)</b> — 1년 이내 거래는 <code>BIN(6) + 끝 4자리</code>, 1년 초과는 전체 마스킹 + 검색 자체 차단. <code>isWithinYear()</code> 함수 참고.</div>
+    </div>
+
+    <h2>🧪 Mockup의 더미·한계 (실 구현 시 백엔드 연동 필요)</h2>
+    <p>mockup에서 하드코딩되어 있어 <b>실 구현에서 동적으로 채워져야 하는 부분</b>:</p>
+    <table>
+      <thead><tr><th style="width:24%;">부분</th><th style="width:38%;">현 상태 (mockup)</th><th>실 구현</th></tr></thead>
+      <tbody>
+        <tr><td><b>오늘 날짜</b></td><td><code>TODAY_DATE = '2026-05-15'</code> 고정</td><td>서버 현재 KST 일자</td></tr>
+        <tr><td><b>매장 정보</b></td><td><code>STORE = { name:'소프트커피 합정점', owner:'홍길동' }</code></td><td>로그인한 점주의 매장 정보</td></tr>
+        <tr><td><b>매출 데이터</b></td><td><code>DAY</code> 배열 15일치 하드코딩</td><td>DB에서 일자별 집계</td></tr>
+        <tr><td><b>주문 14건</b></td><td><code>ORDERS</code> 배열 하드코딩</td><td>페이지네이션 + 검색·필터 쿼리</td></tr>
+        <tr><td><b>정산 회차</b></td><td><code>DAY</code>에서 동적 생성 (<code>SETTLEMENTS</code>)</td><td>정산 시스템과 동기화된 회차 데이터</td></tr>
+        <tr><td><b>영업시간 기준 토글</b></td><td>자정 기준 매출에 <b>비율(<code>bhRatio()</code>)을 곱해서 시뮬레이션</b></td><td>실제로는 시간 단위 매출에서 영업시간 외 거래를 제외해 재계산 필요</td></tr>
+        <tr><td><b>공휴일</b></td><td><code>HOLIDAYS_2026</code> 16일 하드코딩 (2026년만)</td><td>매년 갱신, 운영자 도구 필요</td></tr>
+        <tr><td><b>차트 데이터</b></td><td>더미 비율로 분해</td><td>실제 시간대·메뉴·카테고리 집계</td></tr>
+        <tr><td><b>결제번호(tid)</b></td><td>더미 문자열</td><td>PG 응답 그대로</td></tr>
+        <tr><td><b>정산 상세 결제 내역 8건</b></td><td>하드코딩</td><td>ORDERS와 회차 매핑으로 동적 (PRD §9 중기 과제)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🧱 데이터 모델 핵심</h2>
+    <p>PRD §5에 상세히 있고, 코드 진입점은 아래와 같습니다.</p>
+<pre><code><span class="c">// 매장 정보</span>
+<span class="k">const</span> STORE = { name, owner };
+
+<span class="c">// 진실의 원천 — 일별 매출 15일치</span>
+<span class="k">const</span> DAY = [
+  { d:<span class="s">'5/15'</span>, w:<span class="s">'금'</span>, gross, disc, pt, ref, rcnt, ocnt },
+  ...
+];
+
+<span class="c">// 정산 회차 — DAY에서 자동 생성</span>
+<span class="c">// ID 포맷: STL-{정산일YYYYMMDD}-{영업일MMDD}</span>
+<span class="k">const</span> SETTLEMENTS = [
+  { id, approvalDate, approvalDow, settleDate, settleDow,
+    cnt, grossAmt, refundAmt, feeAmt, payoutAmt, status,
+    approvalDays:[{ date, dow, gross, ref, cnt }, ...] },
+  ...
+];
+
+<span class="c">// 주문 — 검색·필터·정산 회차 추적용</span>
+<span class="k">const</span> ORDERS = [
+  { id, date, time, channel, ch, menu, issuer, amt,
+    status, stl, card, tid, _expired, _settlementId },
+  ...
+];
+
+<span class="c">// 화면 상태 — 단일 객체로 관리, 변경 후 renderApp() 호출하면 전체 리렌더</span>
+state = {
+  section, useBusinessHours, businessHoursOpen, businessHoursClose,
+  overviewPeriod, detailTab, orderDateFilter, ...
+}</code></pre>
+    <p>→ 모든 매출 숫자는 <code>DAY</code>에서 파생되어 화면 간 일치 (PRD §10 정합성 검증).</p>
+
+    <h2>🎨 디자인 토큰</h2>
+    <p><code>index.html</code> <code>:root</code> 변수 그대로 사용 중.</p>
+<pre><code><span class="n">--blue</span>: #3182f6;  <span class="n">--blue-50</span>: #e8f3ff;  <span class="n">--blue-100</span>: #cfe4ff;
+<span class="n">--ink</span>:  #191f28;  <span class="n">--ink-2</span>:  #4e5968;  <span class="n">--ink-3</span>:   #8b95a1;  <span class="n">--ink-4</span>: #b0b8c1;
+<span class="n">--line</span>: #e5e8eb;  <span class="n">--line-2</span>: #f2f4f6;
+<span class="n">--bg</span>:   #f9fafb;  <span class="n">--bg-2</span>:   #f2f4f6;
+<span class="n">--red</span>:  #f04452;  <span class="n">--red-50</span>:  #ffeaec;
+<span class="n">--green</span>:#1eb18d;  <span class="n">--green-50</span>:#e3f6f0;</code></pre>
+    <ul>
+      <li><b>폰트</b>: <code>Pretendard</code>, <code>Apple SD Gothic Neo</code>, system-ui</li>
+      <li><b>숫자 컬럼</b>: <code>font-variant-numeric: tabular-nums</code> (자릿수 정렬용)</li>
+      <li><b>컨테이너 최대폭</b>: 1280px</li>
+      <li><b>모서리</b>: 카드 10~14px, 버튼·칩 8~10px</li>
+      <li><b>그림자</b>: <code>0 8px 32px rgba(0,0,0,.06)</code> (메인 카드)</li>
+    </ul>
+
+    <h2>📋 결정 대기·미확정 항목</h2>
+    <p>PRD §9 향후 과제 참조. 개발 들어가기 전 합의 필요한 것들:</p>
+    <ul>
+      <li><b>권한 분리</b>: 현재는 점주 단일 권한. 본사·운영자·점주 분리는 별도 PRD 필요.</li>
+      <li><b>매장 영업시간 설정 저장 위치</b>: mockup은 클라이언트 state. 실 구현은 매장 마스터에 저장 필요.</li>
+      <li><b>비과세/면세 매출</b>: 현재 일괄 10% VAT 처리. 실제로는 메뉴별 과세 구분 필요.</li>
+      <li><b>자체 포인트·상품권 매출의 정산 처리</b>: mockup에선 정산 제외. 정책 확정 필요.</li>
+      <li><b>부분취소 시 수수료 환급 명세</b>: 현재 표시 없음.</li>
+    </ul>
+
+    <div class="callout callout-amber">
+      <b>❓ 문의</b><br/>
+      mockup 의도가 모호한 부분, 누락된 케이스가 보이면 GitHub Issues 또는 작성자(박지은, 소프트먼트)에게 바로 알려주세요. 화면 캡처와 함께 주시면 빠릅니다.
+    </div>
+
+    <div class="foot">
+      <b>QR오더 사장님 관리자 Mockup</b> · 작성 2026-05-21
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

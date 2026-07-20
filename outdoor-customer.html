@@ -115,11 +115,12 @@
   .storelist{padding:12px 14px;}
   .scard{display:flex;gap:13px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;margin-bottom:11px;cursor:pointer;position:relative;width:100%;font-family:inherit;text-align:left;align-items:center;}
   .scard:active{background:var(--bg);}
-  .scard.closed{background:#F5F5F7;border-color:var(--line2);}
-  .scard.closed .s-thumb{filter:grayscale(100%) brightness(.9);}
-  .scard.closed .s-thumb::after{content:'영업종료';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,32,.5);color:#fff;font-size:12px;font-weight:800;letter-spacing:.02em;border-radius:inherit;}
-  .scard.closed .s-name{color:var(--ink3);}
-  .scard.closed .s-rep,.scard.closed .s-meta{color:var(--ink4);}
+  .scard.dimmed{background:#F5F5F7;border-color:var(--line2);}
+  .scard.dimmed .s-thumb{filter:grayscale(100%) brightness(.9);}
+  .scard.dimmed .s-thumb::after{content:attr(data-label);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,32,.5);color:#fff;font-size:12px;font-weight:800;letter-spacing:.02em;border-radius:inherit;}
+  .scard.dimmed .s-thumb.paused::after{background:rgba(154,107,8,.66);}
+  .scard.dimmed .s-name{color:var(--ink3);}
+  .scard.dimmed .s-rep,.scard.dimmed .s-meta{color:var(--ink4);}
   .s-thumb{width:82px;height:82px;border-radius:13px;flex-shrink:0;background-size:cover;background-position:center;position:relative;display:flex;align-items:center;justify-content:center;font-size:34px;}
   .s-logo{position:absolute;left:-6px;bottom:-6px;width:32px;height:32px;border-radius:9px;background:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:16px;}
   .s-body{flex:1;min-width:0;}
@@ -618,6 +619,7 @@
   <span class="ds-div"></span>
   <span class="lbl">상황</span>
   <button class="ds-chip" onclick="simState('closed')">영업종료</button>
+  <button class="ds-chip" onclick="simState('paused')">일시중지</button>
   <button class="ds-chip" onclick="simState('break')">브레이크</button>
   <button class="ds-chip" onclick="go('payfail')">결제실패</button>
   <button class="ds-chip" onclick="go('expired')">세션만료</button>
@@ -712,7 +714,7 @@ const STORES = [
       {id:'p3', name:'갈릭 브레드', desc:'', price:4000, badges:['rec'], img:'🥖', photo:'https://loremflickr.com/320/320/garlicbread?lock=63', upsell:true},
     ]},
   { id:'ramen', name:'소프트라멘', logo:'🍜', thumb:'https://loremflickr.com/240/240/ramen?lock=7', cover:'https://loremflickr.com/760/430/ramen,noodle?lock=7',
-    open:true, loc:'B구역 · 부스 2번', waitCount:'15팀', waitTime:'약 20분', rep:'돈코츠 라멘', cat:'푸드', cat2:'B구역',
+    open:true, paused:true, loc:'B구역 · 부스 2번', waitCount:'15팀', waitTime:'약 20분', rep:'돈코츠 라멘', cat:'푸드', cat2:'B구역',
     ohStart:660, ohEnd:1200,
     info:{ceo:'강동원', regno:'789-01-23456', address:'서울 마포구 성미산로 000 · 행사장 B구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'돼지고기: 국내산 · 면(밀): 국내산'},
     menus:[
@@ -798,7 +800,7 @@ let S = {
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
   histView:'store',    // 주문 내역 보기: store(매장별) | round(주문 회차별) · 매장별은 통합결제만
-  demoState:'open',    // 매장 상태 데모: open | closed | break (영업종료·브레이크 = 메뉴판만)
+  demoState:'open',    // 매장 상태 데모: open | closed | paused | break (영업종료·준비중·브레이크 = 메뉴판만)
   pickup:'now',        // 수령: now(즉시 포장) | reserve(포장 예약)
   pickupTime:null,     // 예약 수령 시간 'HH:MM'
   pickupH:null, pickupM:null,   // 선택한 시/분
@@ -948,14 +950,22 @@ function histFab(){
 }
 function scardHTML(s){
   // 대기 표시는 브랜드 설정(우선)을 따름 — 매장 개별 설정을 덮어씀
+  const paused = s.open && s.paused;          // 영업 일시중지(준비중)
   let waitTxt='';
-  if(s.open && S.brandWait!=='off'){
+  if(s.open && !paused && S.brandWait!=='off'){
     const v = S.brandWait==='time' ? s.waitTime : s.waitCount;
     if(v) waitTxt = `${S.brandWait==='time'?'':'대기 '}${v}`;
   }
-  // 영업중은 별도 뱃지 없음(기본 상태) · 영업종료는 dimming + 썸네일 '영업종료' 오버레이로 표시
-  return `<button class="scard ${s.open?'':'closed'}" onclick="${s.open?`openStore('${s.id}')`:`toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`}">
-    <div class="s-thumb" style="background-image:url('${s.thumb}');background-size:cover;background-position:center;background-color:var(--bg)"></div>
+  // 영업중은 별도 뱃지 없음(기본) · 영업종료/준비중은 dimming + 썸네일 오버레이로 표시
+  const dimmed = !s.open || paused;
+  const label = !s.open ? '영업종료' : (paused ? '준비중' : '');
+  const tap = !s.open
+    ? `toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
+    : paused
+      ? `toast('지금은 잠시 준비 중이에요.','곧 다시 열어요. 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
+      : `openStore('${s.id}')`;
+  return `<button class="scard ${dimmed?'dimmed':''}" onclick="${tap}">
+    <div class="s-thumb${paused?' paused':''}" data-label="${label}" style="background-image:url('${s.thumb}');background-size:cover;background-position:center;background-color:var(--bg)"></div>
     <div class="s-body">
       <div class="s-name">${s.name}</div>
       <div class="s-rep">대표 · ${s.rep}</div>
@@ -982,7 +992,8 @@ function scStore(){
   const backBtn = S.mode==='group' ? `<button class="bk" onclick="go('home')">‹</button>` : '';
   const stClosed = (!s.open) || S.demoState==='closed';   // 영업 종료
   const stBreak = S.demoState==='break';                  // 브레이크 타임
-  const blocked = stClosed || stBreak;                    // 둘 다: 메뉴판만, 주문 불가
+  const stPaused = S.demoState==='paused' || (s.open && s.paused && S.demoState==='open'); // 영업 일시중지(준비중)
+  const blocked = stClosed || stBreak || stPaused;        // 모두: 메뉴판만, 주문 불가
   const cats = [...new Set(s.menus.map(m=>m.cat||'메뉴'))];
   return `
   <div class="hdr">
@@ -999,7 +1010,9 @@ function scStore(){
           ? `<span class="bstatus break"><span class="sdot"></span> 브레이크 타임</span>`
           : stClosed
             ? `<span class="bstatus" style="color:var(--red)"><span class="sdot" style="background:var(--red)"></span> 영업 종료</span>`
-            : `<span class="bstatus open"><span class="sdot"></span> 영업중</span>`}
+            : stPaused
+              ? `<span class="bstatus break"><span class="sdot"></span> 준비중 (영업 일시중지)</span>`
+              : `<span class="bstatus open"><span class="sdot"></span> 영업중</span>`}
         ${(!blocked && S.brandWait!=='off' && (S.brandWait==='time'?s.waitTime:s.waitCount))
           ? `<span class="bwait">⏳ ${S.brandWait==='time'?s.waitTime:'대기 '+s.waitCount}</span>` : ''}
       </div>
@@ -1078,8 +1091,9 @@ function storeInfoHTML(s){
 function renderMenuSheet(){
   const m=S.curMenu; if(!m)return;
   const s=store(S.curStore);
-  const blocked = (!s.open) || S.demoState==='closed' || S.demoState==='break';
-  const disabled = m.soldout || blocked;   // 품절·영업종료·브레이크 → 정보 조회는 가능, 주문만 비활성화
+  const stPaused = S.demoState==='paused' || (s.open && s.paused && S.demoState==='open');
+  const blocked = (!s.open) || S.demoState==='closed' || S.demoState==='break' || stPaused;
+  const disabled = m.soldout || blocked;   // 품절·영업종료·브레이크·준비중 → 정보 조회는 가능, 주문만 비활성화
   const opts=['Regular','Large (+1,500원)'];
   const base = m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
   const listPx = m.was||m.price; const isSale = base<listPx;   // 할인 여부
@@ -1105,7 +1119,7 @@ function renderMenuSheet(){
         <div class="d-name">${m.name} ${m.emoji||''}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
         <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
-        ${disabled?`<div class="ms-warn ${m.soldout?'':'amber'}">${m.soldout?'😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.':(S.demoState==='break'?'☕ 지금은 브레이크 타임이에요. 메뉴 정보만 확인할 수 있어요.':'🌙 지금은 영업 종료 상태예요. 메뉴 정보만 확인할 수 있어요.')}</div>`:''}
+        ${disabled?`<div class="ms-warn ${m.soldout?'':'amber'}">${m.soldout?'😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.':(S.demoState==='break'?'☕ 지금은 브레이크 타임이에요. 메뉴 정보만 확인할 수 있어요.':stPaused?'⏸️ 지금은 잠시 준비 중이에요. 메뉴 정보만 확인할 수 있어요.':'🌙 지금은 영업 종료 상태예요. 메뉴 정보만 확인할 수 있어요.')}</div>`:''}
         ${(m.allergy||m.nutrition)?`
           <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보</button>
           ${S.infoOpen?`<div class="d-info">${[m.allergy?`🥜 알러지 유발성분: ${m.allergy}`:'',m.nutrition?`🔥 영양 정보: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}

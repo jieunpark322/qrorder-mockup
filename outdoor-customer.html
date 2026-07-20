@@ -535,6 +535,21 @@
   /* 담기/결제 방식 안내 (브랜드 설정 · 패시브) */
   .scope-note{margin:12px 14px 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--ink2);box-shadow:var(--shadow);}
   .scope-chip{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--ink3);background:#F3F3F5;padding:3px 9px;border-radius:6px;letter-spacing:-.01em;}
+
+  /* 포장 예약 시/분 선택기 */
+  .tp-wrap{margin-top:14px;}
+  .tp-sub{font-size:12px;font-weight:700;color:var(--ink3);margin:12px 0 8px;}
+  .tp-sub:first-child{margin-top:0;}
+  .tp-row{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;min-height:44px;}
+  .tp-row::-webkit-scrollbar{display:none;}
+  .tp-chip{flex-shrink:0;border:1.5px solid var(--line);border-radius:10px;padding:10px 13px;font-size:14px;font-weight:700;background:#fff;color:var(--ink);cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .tp-chip.on{border-color:var(--persimmon);background:var(--blue-50);color:var(--persimmon);}
+  .tp-chip.dis{color:var(--ink4);background:#F5F5F6;border-color:var(--line2);cursor:not-allowed;text-decoration:line-through;}
+  .tp-empty{font-size:13px;color:var(--ink3);padding:11px 2px;}
+  .tp-note{margin-top:14px;font-size:14px;font-weight:800;color:var(--ink);}
+  .tp-note.dim{font-weight:600;color:var(--ink3);}
+  .tp-note b{color:var(--persimmon);}
+  .tp-hint{margin-top:6px;font-size:12px;color:var(--ink4);line-height:1.5;}
 </style>
 </head>
 <body>
@@ -600,6 +615,7 @@
 const STORES = [
   { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=760&q=72',
     open:true, loc:'A구역 · 부스 3번', waitCount:'12팀', waitTime:'약 15분', rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
+    ohStart:660, ohEnd:1260, brkStart:900, brkEnd:960,   /* 영업 11:00~21:00, 브레이크 15:00~16:00 (분) */
     info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · 행사장 A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
       {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null},
@@ -611,6 +627,7 @@ const STORES = [
     ]},
   { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=760&q=72',
     open:true, loc:'B구역 · 부스 1번', waitCount:'3팀', waitTime:'약 5분', rep:'핸드드립 아메리카노', cat:'음료', cat2:'B구역',
+    ohStart:660, ohEnd:1260,   /* 영업 11:00~21:00 */
     info:{ceo:'이영희', regno:'234-56-78901', address:'서울 마포구 성미산로 000 · 행사장 B구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
     menus:[
       {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true},
@@ -620,6 +637,7 @@ const STORES = [
     ]},
   { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=760&q=72',
     open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
+    ohStart:660, ohEnd:1200,   /* 영업 11:00~20:00 */
     info:{ceo:'박민수', regno:'345-67-89012', address:'서울 마포구 성미산로 000 · 행사장 C구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
 ];
 
@@ -636,7 +654,8 @@ let S = {
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
   pickup:'now',        // 수령: now(즉시 포장) | reserve(포장 예약)
-  pickupTime:null,     // 예약 수령 시간
+  pickupTime:null,     // 예약 수령 시간 'HH:MM'
+  pickupH:null, pickupM:null,   // 선택한 시/분
   alertCh:'phone',     // 알림 채널: phone(카톡·문자) | email
   contact:'',          // 입력한 휴대폰/이메일
   tmpQty:1, tmpOpt:0,
@@ -980,9 +999,9 @@ function scCart(){
       ${Object.entries(groups).map(([sid,items])=>`
         ${multi?`<div class="store-group-h">🏪 ${store(sid).name}</div>`:''}
         ${items.map(c=>`<div class="citem">
-          <div class="ci-th" style="background-image:url('${c.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${c.photo?'':c.img}</div>
+          <div class="ci-th" style="background-image:url('${c.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${c.photo?'':(c.img||'')}</div>
           <div class="ci-b">
-            <div class="ci-n">${c.name} ${c.emoji}</div>
+            <div class="ci-n">${c.name} ${c.emoji||''}</div>
             <div class="ci-o">${c.opt}</div>
             <div class="ci-bot">
               <div class="stepper"><button onclick="chQty(${c.idx},-1)">−</button><b>${c.qty}</b><button onclick="chQty(${c.idx},1)">＋</button></div>
@@ -999,11 +1018,11 @@ function scCart(){
         <button class="${S.pickup==='now'?'on':''}" onclick="S.pickup='now';render()">즉시 포장</button>
         <button class="${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">포장 예약</button>
       </div>
-      ${S.pickup==='reserve' ? timeSlotsHTML() : `<div style="font-size:12.5px;color:var(--ink3);margin-top:10px">야외형은 포장 픽업이 기본이에요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>`}
+      ${S.pickup==='reserve' ? timePickerHTML() : `<div style="font-size:12.5px;color:var(--ink3);margin-top:10px">야외형은 포장 픽업이 기본이에요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>`}
     </div>
   </div>
   <div class="cta">
-    <button class="cta-btn" onclick="go('checkout')">${S.bill==='post'?'주문 확인':'결제 확인'} <span class="amt">${won(sum)}</span></button>
+    <button class="cta-btn" onclick="go('checkout')">${S.bill==='post'?'주문하기':'결제하기'} <span class="amt">${won(sum)}</span></button>
   </div>`;
 }
 // 담기/결제 방식은 브랜드·매장 설정 (고객 선택 아님) — 데모바에서 시뮬레이션
@@ -1018,6 +1037,41 @@ function setScope(v){
 }
 function chQty(i,d){ S.cart[i].qty=Math.max(1,S.cart[i].qty+d); render(); }
 function delItem(i){ S.cart.splice(i,1); render(); }
+/* 포장 예약: 시/분 직접 선택 (5분 단위) · 매장 영업시간 밖은 선택 불가 */
+const pad2 = n => String(n).padStart(2,'0');
+const fmtMin = t => `${pad2(Math.floor(t/60))}:${pad2(t%60)}`;
+function validPickup(s,t){ return t>=s.ohStart && t<=s.ohEnd && !(s.brkStart!=null && t>=s.brkStart && t<s.brkEnd); }
+function pickHour(h){
+  const s=store(S.curStore);
+  S.pickupH=h;
+  if(S.pickupM!=null && !validPickup(s,h*60+S.pickupM)) S.pickupM=null;   // 새 시간대에서 무효한 분 초기화
+  syncPickup(); render();
+}
+function pickMin(m){
+  const s=store(S.curStore);
+  if(S.pickupH==null || !validPickup(s,S.pickupH*60+m)) return;
+  S.pickupM=m; syncPickup(); render();
+}
+function syncPickup(){ S.pickupTime = (S.pickupH!=null && S.pickupM!=null) ? `${pad2(S.pickupH)}:${pad2(S.pickupM)}` : null; }
+function timePickerHTML(){
+  const s=store(S.curStore);
+  const startH=Math.floor(s.ohStart/60)-1, endH=Math.floor(s.ohEnd/60)+1;   // 영업시간 밖도 1시간씩 보여줘 '선택 불가' 인지
+  const hourOk = h => { for(let m=0;m<60;m+=5){ if(validPickup(s,h*60+m)) return true; } return false; };
+  const hours=[]; for(let h=Math.max(0,startH); h<=Math.min(23,endH); h++) hours.push(h);
+  const mins=[]; for(let m=0;m<60;m+=5) mins.push(m);
+  const hourRow = hours.map(h=>{const dis=!hourOk(h); return `<button class="tp-chip ${S.pickupH===h?'on':''} ${dis?'dis':''}" ${dis?'disabled':''} onclick="pickHour(${h})">${h}시</button>`;}).join('');
+  const minRow = mins.map(m=>{const dis=(S.pickupH==null)||!validPickup(s,S.pickupH*60+m); return `<button class="tp-chip ${S.pickupM===m?'on':''} ${dis?'dis':''}" ${dis?'disabled':''} onclick="pickMin(${m})">${pad2(m)}분</button>`;}).join('');
+  const brk = s.brkStart!=null ? ` · 브레이크 ${fmtMin(s.brkStart)}~${fmtMin(s.brkEnd)}` : '';
+  return `
+    <div class="tp-wrap">
+      <div class="tp-sub">시간대</div>
+      <div class="tp-row">${hourRow}</div>
+      <div class="tp-sub">분 (5분 단위)</div>
+      <div class="tp-row">${S.pickupH==null?`<div class="tp-empty">먼저 시간대를 선택해 주세요</div>`:minRow}</div>
+      ${S.pickupTime?`<div class="tp-note">✅ 수령 시간 <b>${S.pickupTime}</b>로 예약할게요</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
+      <div class="tp-hint">영업 시간 ${fmtMin(s.ohStart)}~${fmtMin(s.ohEnd)}${brk} 외에는 선택할 수 없어요</div>
+    </div>`;
+}
 function timeSlotsHTML(){
   const slots=['12:30','13:00','13:30','14:00','14:30','15:00'];
   const closedSlots=['12:30'];   // 예약 가능 시간 마감 예시

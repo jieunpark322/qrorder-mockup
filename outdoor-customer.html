@@ -43,7 +43,7 @@
 
   .screen{display:none;animation:fade .28s ease;}
   .screen.on{display:block;}
-  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}   /* transform 제거: 플로팅 CTA가 뷰포트 기준 고정되도록 */
   .scroll{padding-bottom:130px;min-height:calc(100vh - 62px);}
 
   /* ── 공통 헤더 ───────────────────────── */
@@ -283,7 +283,8 @@
   .fm-note{margin-top:16px;font-size:12.5px;color:var(--ink4);}
 
   /* ── 하단 고정 CTA ───────────────────────── */
-  .cta{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
+  /* 하단 결제/장바구니: 화면 위아래로 스크롤해도 항상 보이는 플로팅(뷰포트 고정) */
+  .cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
   .cta-btn{width:100%;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:17px;font-size:16.5px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
   .cta-btn:disabled{background:var(--line);color:var(--ink4);}
   .cta-btn .amt{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:8px;font-size:14px;}
@@ -563,6 +564,7 @@
   .blockbanner.break{background:#FBF1DB;color:#9A6B08;border:1px solid #F0DDA8;}
   /* 성인 메뉴 안내 (메뉴 상세) */
   .d-adult{margin-top:12px;background:#FDECEC;border:1px solid #F5C6C6;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:#C0392B;line-height:1.5;}
+  .d-reuse{margin-top:12px;background:#E6F6EE;border:1px solid #C7EAD8;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:#1E7A52;line-height:1.5;}
   /* 메뉴 정보 토글 버튼 */
   .d-info-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 13px;border:none;border-radius:9px;background:var(--blue-50);color:var(--persimmon);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
   .d-info-btn:active{transform:scale(.97);}
@@ -631,8 +633,8 @@ const STORES = [
     info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · 행사장 A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
       {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null, allergy:'밀·대두·우유·달걀 함유', nutrition:'약 620kcal'},
-      {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, hh:true, hhPrice:4400, nutrition:'약 380kcal'},
-      {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13'},
+      {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, hh:true, hhPrice:4400, nutrition:'약 380kcal', upsell:true},
+      {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13', upsell:true},
       {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
       {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 한정', price:15000, fcfs:true, fcfsPrice:9900, fcfsLeft:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
@@ -642,10 +644,10 @@ const STORES = [
     ohStart:660, ohEnd:1260,   /* 영업 11:00~21:00 */
     info:{ceo:'이영희', regno:'234-56-78901', address:'서울 마포구 성미산로 000 · 행사장 B구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
     menus:[
-      {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true},
+      {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true, upsell:true},
       {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true, allergy:'우유 함유', nutrition:'약 250kcal'},
       {id:'c3', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', photo:'https://loremflickr.com/320/320/lemonade?lock=19', left:3},
-      {id:'c4', name:'선착순 콜드브루', desc:'하루 30잔 한정 특가', price:5500, fcfs:true, fcfsPrice:3900, fcfsLeft:12, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20'},
+      {id:'c4', name:'선착순 콜드브루', desc:'하루 30잔 한정 특가', price:5500, fcfs:true, fcfsPrice:3900, fcfsLeft:12, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20', upsell:true},
     ]},
   { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=760&q=72',
     open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
@@ -786,11 +788,10 @@ function scHome(){
     </div></div>` : `
     <div class="filterset">
       <div class="frow">
-        <button class="searchtog" onclick="toggleSearch()" aria-label="검색">🔍</button>
         <div class="cchips">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
+        <button class="searchtog" onclick="toggleSearch()" aria-label="검색">🔍</button>
       </div>
       <div class="frow">
-        <span class="tog-spacer" aria-hidden="true"></span>
         <div class="cchips">${cats2.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       </div>
     </div>`}
@@ -964,6 +965,7 @@ function renderMenuSheet(){
           ${S.infoOpen?`<div class="d-info">${[m.allergy?`🥜 알러지 유발성분: ${m.allergy}`:'',m.nutrition?`🔥 영양 정보: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
         `:''}
         ${m.adult?`<div class="d-adult">🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}
+        ${m.reuse?`<div class="d-reuse">♻️ 다회용기로 제공되는 메뉴예요 · 사용 후 용기 반납이 필요해요</div>`:''}
         ${disabled?'':orderControls}
       </div>
     </div>
@@ -1040,6 +1042,7 @@ function scCart(){
       </div>
       ${S.pickup==='reserve' ? timePickerHTML() : `<div style="font-size:12.5px;color:var(--ink3);margin-top:10px">야외형은 포장 픽업이 기본이에요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>`}
     </div>
+    ${(()=>{ const up=computeUpsell(); return up.length?`<div class="sect"><div class="sect-h">함께 담으면 좋아요</div>${up.map(({sid,m})=>upsellRow(sid,m,S.payScope==='unified')).join('')}</div>`:''; })()}
   </div>
   <div class="cta">
     <button class="cta-btn" onclick="go('checkout')">${S.bill==='post'?'주문하기':'결제하기'} <span class="amt">${won(sum)}</span></button>
@@ -1057,6 +1060,30 @@ function setScope(v){
 }
 function chQty(i,d){ S.cart[i].qty=Math.max(1,S.cart[i].qty+d); render(); }
 function delItem(i){ S.cart.splice(i,1); render(); }
+/* 업셀링: 매장이 '업셀링'으로 설정한 메뉴만 · 통합=전 매장 랜덤 노출(특정 매장 편중 방지) · 개별=해당 가맹점 메뉴만 */
+function computeUpsell(){
+  const inCart=new Set(S.cart.map(c=>c.menu));
+  const sig=S.payScope+'|'+S.cart.map(c=>c.menu).sort().join(',');
+  if(S._upsellSig===sig && S._upsellList) return S._upsellList;
+  let pool=[];
+  if(S.payScope==='separate' && S.cart.length){
+    const sid=S.cart[0].store;
+    store(sid).menus.forEach(m=>{ if(m.upsell&&!m.soldout&&!inCart.has(m.id)) pool.push({sid,m}); });
+  } else {
+    STORES.forEach(s=>{ if(!s.open) return; s.menus.forEach(m=>{ if(m.upsell&&!m.soldout&&!inCart.has(m.id)) pool.push({sid:s.id,m}); }); });
+    for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }  // 랜덤 셔플
+  }
+  S._upsellSig=sig; S._upsellList=pool.slice(0,3);
+  return S._upsellList;
+}
+function upsellRow(sid,m,showStore){
+  const price = m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
+  return `<div class="citem" style="border:none;padding:10px 0">
+    <div class="ci-th" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.photo?'':(m.img||'')}</div>
+    <div class="ci-b"><div class="ci-n">${m.name} ${m.emoji||''}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
+    <button class="ghostbtn" style="width:auto;margin:0;padding:0 15px;white-space:nowrap" onclick="openMenu('${sid}','${m.id}')">담기</button>
+  </div>`;
+}
 /* 포장 예약: 시/분 직접 선택 (5분 단위) · 매장 영업시간 밖은 선택 불가 */
 const pad2 = n => String(n).padStart(2,'0');
 const fmtMin = t => `${pad2(Math.floor(t/60))}:${pad2(t%60)}`;
@@ -1318,15 +1345,6 @@ function scHistory(){
     <div style="background:#fff;margin:12px 14px;border-radius:14px;border:1px solid var(--line);padding:16px">
       <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:900"><span>전체 합계 (누적)</span><span>${won(grand+3500)}</span></div>
       <div style="font-size:12px;color:var(--ink4);margin-top:6px">※ 취소·환불 건은 합계에서 제외돼요</div>
-    </div>
-    <!-- 업셀링 -->
-    <div class="sect" style="margin:12px 14px;border-radius:14px;border:1px solid var(--line)">
-      <div class="sect-h">함께 담기 좋은 메뉴</div>
-      <div class="citem" style="border:none">
-        <div class="ci-th" style="background-image:url('https://loremflickr.com/320/320/fries?lock=12');background-size:cover;background-position:center;background-color:var(--bg)"></div>
-        <div class="ci-b"><div class="ci-n">트러플 감자튀김</div><div class="ci-o">지금 담으면 해피아워가</div></div>
-        <button class="ghostbtn" style="width:auto;margin:0;padding:0 16px" onclick="toast('추천 메뉴 담기 → 장바구니 추가')">담기</button>
-      </div>
     </div>
     <div style="height:20px"></div>
   </div>`;

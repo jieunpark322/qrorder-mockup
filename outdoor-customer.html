@@ -505,6 +505,7 @@
   .frow{display:flex;align-items:center;gap:9px;padding:11px 14px;}
   .frow + .frow{border-top:1px solid var(--line2);}
   .flabel{flex-shrink:0;width:30px;font-size:12px;font-weight:700;color:var(--ink3);letter-spacing:-.01em;}
+  .tog-spacer{flex-shrink:0;width:40px;}   /* 돋보기 버튼 폭만큼 비워 2번째 줄 칩을 1번째 줄 시작점과 정렬 */
   .frow + .frow .cchip.on{background:var(--persimmon);color:#fff;}   /* 두 번째(구역) 선택색 구분 */
 
   /* ── 매장 화면 상태·대기 ── */
@@ -780,6 +781,7 @@ function scHome(){
         <div class="cchips">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       </div>
       <div class="frow">
+        <span class="tog-spacer" aria-hidden="true"></span>
         <div class="cchips">${cats2.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       </div>
     </div>`}

@@ -46,9 +46,12 @@
   .autotrans .adot{width:6px;height:6px;border-radius:50%;background:var(--green);}
 
   /* ── 스플래시 (전체 화면 이미지) ───────────────────────── */
-  .splash-full{position:relative;width:100%;height:calc(100vh - 62px);overflow:hidden;background:#3b1a5e;}
+  .splash-full{position:relative;width:100%;height:calc(100vh - 62px);overflow:hidden;background:#2c1250;background-size:cover;background-position:center;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
   @media(min-width:480px){ .splash-full{height:calc(100vh - 90px);border-radius:0 0 28px 28px;} }
-  .splash-full svg,.splash-full img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .sp-center{position:relative;z-index:2;color:#fff;padding:0 32px;}
+  .sp-emoji{font-size:60px;margin-bottom:16px;animation:pop .6s ease;}
+  .sp-title{font-size:23px;font-weight:800;letter-spacing:-.02em;text-shadow:0 2px 10px rgba(0,0,0,.6);}
+  .sp-welcome{font-size:20px;font-weight:900;margin-top:10px;text-shadow:0 2px 10px rgba(0,0,0,.6);}
   .splash-load{position:absolute;bottom:46px;left:50%;transform:translateX(-50%);width:30px;height:30px;border:3px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;z-index:2;}
   @keyframes pop{from{transform:scale(.6);opacity:0;}to{transform:scale(1);opacity:1;}}
   @keyframes spin{to{transform:rotate(360deg);}}
@@ -56,11 +59,12 @@
   /* ── 메인 배너 (그룹) ───────────────────────── */
   .mbanner{position:relative;overflow:hidden;background:#e9ecef;}
   .mbanner .slides{display:flex;transition:transform .5s ease;}
-  .mb-slide{min-width:100%;aspect-ratio:16/9;max-height:240px;background-size:cover;background-position:center;background-color:#2c1250;display:flex;align-items:flex-end;cursor:pointer;}
+  /* 배너: 세로 1 : 가로 1 정사각 비율 (실제 스펙은 등록 이미지 비율에 따라 세로 높이 자동 조정) */
+  .mb-slide{min-width:100%;aspect-ratio:1/1;background-size:cover;background-position:center;background-color:#2c1250;display:flex;align-items:flex-end;cursor:pointer;}
   .mb-txt{padding:15px 18px;color:#fff;}
   .mb-t{font-size:20px;font-weight:900;letter-spacing:-.02em;text-shadow:0 1px 5px rgba(0,0,0,.55);}
   .mb-s{font-size:13.5px;font-weight:700;opacity:.96;margin-top:3px;text-shadow:0 1px 4px rgba(0,0,0,.55);}
-  .mb-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;}
+  .mb-dots{position:absolute;bottom:14px;right:14px;display:flex;gap:5px;}
   .mb-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);}
   .mb-dot.on{width:16px;border-radius:3px;background:#fff;}
 
@@ -366,27 +370,27 @@
 <script>
 /* ══════════════ 데이터 ══════════════ */
 const STORES = [
-  { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'linear-gradient(135deg,#ff922b,#f76707)', cover:'linear-gradient(135deg,#ff922b,#e8590c)',
+  { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'https://loremflickr.com/240/240/cheeseburger?lock=1', cover:'https://loremflickr.com/760/430/foodtruck,burger?lock=1',
     open:true, loc:'A구역 · 부스 3번', waitCount:'12팀', waitTime:'약 15분', rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
     info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · 행사장 A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
-      {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', left:null},
-      {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', left:5, hh:true, hhPrice:4400},
-      {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤'},
-      {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', adult:true},
-      {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 한정', price:15000, fcfs:true, fcfsPrice:9900, fcfsLeft:8, badges:['hot'], img:'🍱'},
-      {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', soldout:true},
+      {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null},
+      {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, hh:true, hhPrice:4400},
+      {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13'},
+      {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true},
+      {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 한정', price:15000, fcfs:true, fcfsPrice:9900, fcfsLeft:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
+      {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
     ]},
-  { id:'coffee', name:'소프트커피', logo:'☕', thumb:'linear-gradient(135deg,#8a5a36,#4a2f1c)', cover:'linear-gradient(135deg,#8a5a36,#4a2f1c)',
+  { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://loremflickr.com/240/240/coffee?lock=2', cover:'https://loremflickr.com/760/430/cafe,coffee?lock=2',
     open:true, loc:'B구역 · 부스 1번', waitCount:'3팀', waitTime:'약 5분', rep:'핸드드립 아메리카노', cat:'음료', cat2:'B구역',
     info:{ceo:'이영희', regno:'234-56-78901', address:'서울 마포구 성미산로 000 · 행사장 B구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
     menus:[
-      {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', reuse:true},
-      {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', reuse:true},
-      {id:'c3', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', left:3},
-      {id:'c4', name:'선착순 콜드브루', desc:'하루 30잔 한정 특가', price:5500, fcfs:true, fcfsPrice:3900, fcfsLeft:12, badges:['rec'], img:'🧊'},
+      {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true},
+      {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true},
+      {id:'c3', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', photo:'https://loremflickr.com/320/320/lemonade?lock=19', left:3},
+      {id:'c4', name:'선착순 콜드브루', desc:'하루 30잔 한정 특가', price:5500, fcfs:true, fcfsPrice:3900, fcfsLeft:12, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20'},
     ]},
-  { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'linear-gradient(135deg,#fab005,#f08c00)', cover:'linear-gradient(135deg,#fab005,#e67700)',
+  { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://loremflickr.com/240/240/friedchicken?lock=3', cover:'https://loremflickr.com/760/430/friedchicken?lock=3',
     open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
     info:{ceo:'박민수', regno:'345-67-89012', address:'서울 마포구 성미산로 000 · 행사장 C구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
 ];
@@ -465,45 +469,19 @@ function render(){
   if(S.screen==='home') startBanner();
 }
 
-/* ── 스플래시 (전체 화면 이미지) ── */
-/* 실제 이미지 적용 시: 아래 <svg>...</svg> 를 <img src="스플래시이미지.jpg" alt="" /> 로 교체하면 그대로 전체 화면에 채워집니다. */
-function scSplash(){ return `<div class="splash-full">
-  <svg viewBox="0 0 375 812" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#2c1250"/><stop offset="0.55" stop-color="#8b2fb0"/><stop offset="1" stop-color="#ff6b4a"/>
-      </linearGradient>
-      <radialGradient id="glow" cx="0.5" cy="0.42" r="0.6">
-        <stop offset="0" stop-color="#ffd43b" stop-opacity="0.35"/><stop offset="1" stop-color="#ffd43b" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <rect width="375" height="812" fill="url(#sky)"/>
-    <rect width="375" height="812" fill="url(#glow)"/>
-    <!-- 가랜드(bunting) -->
-    <path d="M0 96 Q187 132 375 96" stroke="rgba(255,255,255,.55)" stroke-width="1.5" fill="none"/>
-    <g>
-      <polygon points="24,101 44,101 34,123" fill="#ff8787"/><polygon points="70,107 90,107 80,129" fill="#ffd43b"/>
-      <polygon points="118,112 138,112 128,134" fill="#69db7c"/><polygon points="166,115 186,115 176,137" fill="#4dabf7"/>
-      <polygon points="214,115 234,115 224,137" fill="#ff8787"/><polygon points="262,112 282,112 272,134" fill="#ffd43b"/>
-      <polygon points="310,107 330,107 320,129" fill="#69db7c"/>
-    </g>
-    <!-- 컨페티 -->
-    <circle cx="40" cy="200" r="4" fill="#ffd43b" opacity=".8"/><circle cx="330" cy="230" r="5" fill="#ff8787" opacity=".8"/>
-    <circle cx="70" cy="300" r="3" fill="#fff" opacity=".7"/><circle cx="310" cy="330" r="4" fill="#4dabf7" opacity=".8"/>
-    <circle cx="45" cy="430" r="4" fill="#69db7c" opacity=".8"/><circle cx="340" cy="470" r="3" fill="#fff" opacity=".7"/>
-    <circle cx="300" cy="560" r="4" fill="#ffd43b" opacity=".8"/><circle cx="55" cy="560" r="3" fill="#ff8787" opacity=".8"/>
-    <!-- 히어로 이모지 -->
-    <text x="187" y="250" font-size="82" text-anchor="middle">🎪</text>
-    <text x="120" y="560" font-size="46" text-anchor="middle">🍔</text>
-    <text x="187" y="575" font-size="52" text-anchor="middle">🍺</text>
-    <text x="255" y="560" font-size="46" text-anchor="middle">🍟</text>
-    <!-- 타이틀 -->
-    <text x="187" y="350" font-family="Pretendard, sans-serif" font-size="34" font-weight="800" fill="#fff" text-anchor="middle" letter-spacing="-1">소프트 푸드트럭</text>
-    <text x="187" y="392" font-family="Pretendard, sans-serif" font-size="34" font-weight="800" fill="#ffd43b" text-anchor="middle" letter-spacing="-1">페스티벌</text>
-    <text x="187" y="432" font-family="Pretendard, sans-serif" font-size="15" font-weight="600" fill="rgba(255,255,255,.9)" text-anchor="middle">QR을 스캔해 주셔서 감사해요 🙌</text>
-  </svg>
-  <div class="splash-load"></div>
-</div>`; }
+/* ── 스플래시 (실제 축제 배경 사진 + 환영 문구) ── */
+/* 배경/문구는 브랜드가 등록한 행사 이미지·행사명으로 교체됨 */
+function scSplash(){
+  const bg="linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.72)),url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=75')";
+  return `<div class="splash-full" style="background-image:${bg}">
+    <div class="sp-center">
+      <div class="sp-emoji">🎪</div>
+      <div class="sp-title">소프트 푸드트럭 페스티벌</div>
+      <div class="sp-welcome">방문을 환영해요! 🎉</div>
+    </div>
+    <div class="splash-load"></div>
+  </div>`;
+}
 
 /* ── 그룹 홈 ── */
 function scHome(){
@@ -557,7 +535,7 @@ function scardHTML(s){
   }
   const badge = s.open ? `<span class="s-badge open">영업중</span>` : `<span class="s-badge closed">영업종료</span>`;
   return `<button class="scard ${s.open?'':'closed'}" onclick="${s.open?`openStore('${s.id}')`:`toast('영업 종료 — 메뉴판만 조회할 수 있어요');openStore('${s.id}')`}">
-    <div class="s-thumb" style="background:${s.thumb}">${s.logo}</div>
+    <div class="s-thumb" style="background-image:url('${s.thumb}');background-size:cover;background-position:center;background-color:var(--bg)"></div>
     <div class="s-body">
       <div class="s-name">${s.name} ${badge}</div>
       <div class="s-rep">대표 · ${s.rep}</div>
@@ -593,7 +571,7 @@ function scStore(){
     <div class="ht">${s.name}</div>
   </div>
   <div class="scroll">
-    <div class="cover" style="background:${s.cover}"></div>
+    <div class="cover" style="background-image:url('${s.cover}');background-size:cover;background-position:center;background-color:#2c1250"></div>
     <div class="brandinfo">
       <div class="logo">${s.logo}</div>
       <div class="bstore">${s.name}</div>
@@ -632,7 +610,7 @@ function mcardHTML(sid,m,closed){
   else { price=`<span class="m-now">${won(m.price)}</span>`; }
   const rightVal = m.fcfs ? {t:'선착순', n:m.fcfsLeft} : (m.left!=null ? {t:'잔여', n:m.left} : null);
   return `<button class="mcard ${m.soldout?'soldout':''}" onclick="openMenu('${sid}','${m.id}')">
-    <div class="m-thumb" style="background:var(--bg)">${m.img}${m.soldout?'<div class="so-dim">품절</div>':''}</div>
+    <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">품절</div>':''}</div>
     <div class="m-body">
       ${badges?`<div class="m-badges">${badges}</div>`:''}
       <div class="m-name">${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}</div>
@@ -692,7 +670,7 @@ function renderMenuSheet(){
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closeMenuSheet()">✕</button>
     <div class="ms-scroll">
-      <div class="d-hero" style="background:var(--bg)">${m.img}${m.soldout?'<div class="so-dim-lg">품절</div>':''}</div>
+      <div class="d-hero" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim-lg">품절</div>':''}</div>
       <div class="d-body">
         <div class="d-name">${m.name} ${m.emoji||''}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
@@ -723,7 +701,7 @@ function addToCart(){
   const base=m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
   const listBase=m.was||m.price;   // 정가(할인 전) — 금액 요약 할인 세분화용
   const add=S.tmpOpt===1?1500:0;
-  S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, emoji:m.emoji||'', img:m.img,
+  S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, emoji:m.emoji||'', img:m.img, photo:m.photo||'',
     opt:S.tmpOpt===1?'Large':'Regular', qty:S.tmpQty, price:(base+add), listPrice:(listBase+add),
     disc:(m.fcfs?'선착순':(m.hh?'해피아워':(m.was?'할인':null)))});
   toast('장바구니에 담았어요');
@@ -759,7 +737,7 @@ function scCart(){
       ${Object.entries(groups).map(([sid,items])=>`
         ${multi?`<div class="store-group-h">🏪 ${store(sid).name}</div>`:''}
         ${items.map(c=>`<div class="citem">
-          <div class="ci-th" style="background:var(--bg)">${c.img}</div>
+          <div class="ci-th" style="background-image:url('${c.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${c.photo?'':c.img}</div>
           <div class="ci-b">
             <div class="ci-n">${c.name} ${c.emoji}</div>
             <div class="ci-o">${c.opt}</div>
@@ -1032,7 +1010,7 @@ function scHistory(){
     <div class="sect" style="margin:12px 14px;border-radius:14px;border:1px solid var(--line)">
       <div class="sect-h">함께 담기 좋은 메뉴</div>
       <div class="citem" style="border:none">
-        <div class="ci-th" style="background:var(--bg)">🍟</div>
+        <div class="ci-th" style="background-image:url('https://loremflickr.com/320/320/fries?lock=12');background-size:cover;background-position:center;background-color:var(--bg)"></div>
         <div class="ci-b"><div class="ci-n">트러플 감자튀김</div><div class="ci-o">지금 담으면 해피아워가</div></div>
         <button class="ghostbtn" style="width:auto;margin:0;padding:0 16px" onclick="toast('추천 메뉴 담기 → 장바구니 추가')">담기</button>
       </div>

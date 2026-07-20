@@ -221,6 +221,12 @@
   .field{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:13px 14px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink);outline:none;}
   .field:focus{border-color:var(--blue);}
   textarea.field{resize:none;min-height:70px;}
+  /* 휴대폰 3박스 입력 (010 고정 + 4자리 + 4자리) */
+  .phone3{display:flex;align-items:center;gap:8px;}
+  .phone3 .field{text-align:center;padding:13px 6px;letter-spacing:.08em;}
+  .phone3 .pf-fixed{flex:0 0 66px;background:#F2F2F4;color:var(--ink2);font-weight:800;}
+  .phone3 .pf-num{flex:1;min-width:0;}
+  .phone3 .pf-dash{color:var(--ink4);font-weight:700;}
   .cnt{font-size:12px;color:var(--ink4);text-align:right;margin-top:5px;}
 
   /* 장바구니 아이템 */
@@ -1445,17 +1451,27 @@ function scPay(){
     <button class="ghostbtn" style="margin:0" onclick="submitContact('email')">이 이메일로 주문하기</button>
     <div style="font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6">· 입력하신 이메일로 주문 확인·완료 알림을 보내드려요 (외국인 사용자 등)<br>· 이메일 형식 오류(도메인 누락 등) 시 진행 불가</div>
     ` : `
-    <input class="field" id="phoneIn" placeholder="휴대폰 번호 (숫자 11자리)" inputmode="numeric" maxlength="11" style="margin-bottom:10px">
+    <div class="phone3" style="margin-bottom:10px">
+      <input class="field pf-fixed" value="010" readonly tabindex="-1" aria-label="앞자리 010 고정">
+      <span class="pf-dash">–</span>
+      <input class="field pf-num" id="phoneMid" inputmode="numeric" maxlength="4" placeholder="0000" oninput="phoneAuto(this,'phoneEnd')">
+      <span class="pf-dash">–</span>
+      <input class="field pf-num" id="phoneEnd" inputmode="numeric" maxlength="4" placeholder="0000" oninput="this.value=this.value.replace(/\\D/g,'')">
+    </div>
     <button class="ghostbtn" style="margin:0" onclick="submitContact('phone')">이 번호로 주문하기</button>
-    <div style="font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6">· 조리 완료 시 카카오톡 알림톡으로 알려드려요<br>· 휴대폰 11자리 미충족·미입력 시 진행 불가</div>
+    <div style="font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6">· 조리 완료 시 카카오톡 알림톡으로 알려드려요<br>· 앞자리는 010 고정 · 뒤 4자리+4자리(총 8자리)를 입력하면 주문할 수 있어요</div>
     `}
   </div>`;
 }
 function setAlert(ch){ S.alertCh=ch; render(); }
+// 휴대폰 뒤 4자리 입력 시 다음 칸으로 자동 이동
+function phoneAuto(el,nextId){ el.value=el.value.replace(/\D/g,''); if(el.value.length>=4){ const n=document.getElementById(nextId); if(n) n.focus(); } }
 function submitContact(type){
   if(type==='phone'){
-    const v=(document.getElementById('phoneIn')||{}).value||'';
-    if(v.replace(/\D/g,'').length!==11) return toast('휴대폰 번호 11자리를 정확히 입력해 주세요');
+    const mid=((document.getElementById('phoneMid')||{}).value||'').replace(/\D/g,'');
+    const end=((document.getElementById('phoneEnd')||{}).value||'').replace(/\D/g,'');
+    if(mid.length!==4 || end.length!==4) return toast('휴대폰 뒤 8자리(4자리 + 4자리)를 정확히 입력해 주세요');
+    const v=`010-${mid}-${end}`;
     S.loginType='phone'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 번호로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인 · 주문 진행', '다시 입력', payConfirm);
   } else {
     const v=(document.getElementById('emailIn')||{}).value.trim()||'';

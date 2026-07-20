@@ -1188,10 +1188,9 @@ function tryCheckout(){
   const act = S.bill==='post' ? '주문' : '결제';
   if(mi.on && mi.below){
     if(mi.basis==='group'){
-      toast(`조금만 더 담으면 ${act}할 수 있어요`, `매장 그룹 통합 ${act} 기준 최소 ${won(mi.min)}부터 가능해요. ${won(mi.shortfall)}만 더 담아 주세요.`);
+      toast(`조금만 더 담으면 ${act}할 수 있어요`, `매장 그룹 통합 ${act} 기준 최소 ${won(mi.min)}부터 가능해요.`);
     } else {
-      const names=mi.shortStores.map(s=>`${s.name} ${won(s.need)}`).join(' · ');
-      toast(`조금만 더 담으면 ${act}할 수 있어요`, `매장별 최소 ${won(mi.min)}부터 ${act}할 수 있어요. ${names} 더 담아 주세요.`);
+      toast(`조금만 더 담으면 ${act}할 수 있어요`, `매장별 최소 ${won(mi.min)}부터 ${act}할 수 있어요.`);
     }
     return;
   }

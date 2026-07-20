@@ -528,9 +528,13 @@
 
   /* ── 토스트: 제목+본문 팝업 ── */
   .toast{background:rgba(30,30,34,.96);}
-  .toast.rich{max-width:340px;width:calc(100% - 44px);text-align:left;white-space:normal;padding:15px 18px;border-radius:16px;line-height:1.5;box-shadow:0 14px 34px rgba(0,0,0,.30);}
+  .toast.rich{max-width:340px;width:calc(100% - 44px);text-align:center;white-space:normal;padding:16px 18px;border-radius:16px;line-height:1.5;box-shadow:0 14px 34px rgba(0,0,0,.30);}
   .toast .toast-t{font-size:15px;font-weight:800;color:#fff;}
   .toast .toast-b{font-size:13px;font-weight:500;color:rgba(255,255,255,.82);margin-top:4px;}
+
+  /* 담기/결제 방식 안내 (브랜드 설정 · 패시브) */
+  .scope-note{margin:12px 14px 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--ink2);box-shadow:var(--shadow);}
+  .scope-chip{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--ink3);background:#F3F3F5;padding:3px 9px;border-radius:6px;letter-spacing:-.01em;}
 </style>
 </head>
 <body>
@@ -545,6 +549,10 @@
   <button class="ds-chip on" id="wait-count" onclick="setBrandWait('count')">대기 인원</button>
   <button class="ds-chip" id="wait-time" onclick="setBrandWait('time')">대기 시간</button>
   <button class="ds-chip" id="wait-off" onclick="setBrandWait('off')">미표시</button>
+  <span class="ds-div"></span>
+  <span class="lbl">담기방식(브랜드)</span>
+  <button class="ds-chip on" id="scope-unified" onclick="setScope('unified')">통합 결제</button>
+  <button class="ds-chip" id="scope-separate" onclick="setScope('separate')">개별 결제</button>
   <span class="ds-div"></span>
   <span class="lbl">상황</span>
   <button class="ds-chip" onclick="go('closed')">영업종료</button>
@@ -965,9 +973,9 @@ function scCart(){
   return `
   <div class="hdr"><button class="bk" onclick="go('store')">‹</button><div class="ht">장바구니</div></div>
   <div class="scroll">
-    ${S.mode==='group'?`<div class="sect"><div class="sect-h">담기 방식</div>
-      <div class="seg"><button class="${S.payScope==='unified'?'on':''}" onclick="S.payScope='unified';render()">통합 결제</button><button class="${S.payScope==='separate'?'on':''}" onclick="setSeparate()">개별 결제</button></div>
-      <div style="font-size:12.5px;color:var(--ink3);margin-top:10px;line-height:1.6">${S.payScope==='unified'?'여러 매장 상품을 한 번에 결제해요.':'단일 매장 상품만 담아 매장별로 개별 결제해요.'}</div></div>`:''}
+    ${S.payScope==='unified'
+      ? `<div class="scope-note">🧺 여러 매장 상품을 한 번에 담아 결제할 수 있어요</div>`
+      : `<div class="scope-note">🧺 한 매장씩 담아 매장별로 결제하는 방식이에요</div>`}
     <div class="sect">
       ${Object.entries(groups).map(([sid,items])=>`
         ${multi?`<div class="store-group-h">🏪 ${store(sid).name}</div>`:''}
@@ -998,10 +1006,15 @@ function scCart(){
     <button class="cta-btn" onclick="go('checkout')">${S.bill==='post'?'주문 확인':'결제 확인'} <span class="amt">${won(sum)}</span></button>
   </div>`;
 }
-function setSeparate(){
-  const stores=new Set(S.cart.map(c=>c.store));
-  if(stores.size>1){ return toast('여러 매장이 담겨 있어요 — 통합 결제만 가능해요'); }
-  S.payScope='separate'; render();
+// 담기/결제 방식은 브랜드·매장 설정 (고객 선택 아님) — 데모바에서 시뮬레이션
+function setScope(v){
+  S.payScope=v;
+  ['unified','separate'].forEach(k=>document.getElementById('scope-'+k).classList.toggle('on',k===v));
+  if(v==='separate'){ // 개별 방식이면 서로 다른 매장 혼합분은 최근 매장만 남김
+    const last=S.cart.length?S.cart[S.cart.length-1].store:null;
+    if(last) S.cart=S.cart.filter(c=>c.store===last);
+  }
+  render();
 }
 function chQty(i,d){ S.cart[i].qty=Math.max(1,S.cart[i].qty+d); render(); }
 function delItem(i){ S.cart.splice(i,1); render(); }
@@ -1060,8 +1073,8 @@ function scCheckout(){
         : `<div class="notice" style="margin:12px 0 0"><span class="nic">✉️</span><div>입력하신 <b>이메일</b>로 주문 확인·완료 알림을 보내드려요 (외국인 사용자 등)</div></div>`}
       <div style="font-size:12px;color:var(--ink4);margin-top:9px;line-height:1.55">주문 내역·상태는 이 화면(웹)에서 확인할 수 있어요 · 앱 푸시 알림은 제공하지 않아요</div>
     </div>
-    <!-- 금액 요약 (할인 세분화) -->
-    <div class="sect"><div class="sect-h">${post?'주문 금액 요약':'결제 금액 요약'}</div>
+    <!-- 금액 요약 (할인 세분화 · 통합/개별은 브랜드 설정) -->
+    <div class="sect"><div class="sect-h" style="display:flex;justify-content:space-between;align-items:center">${post?'주문 금액 요약':'결제 금액 요약'}<span class="scope-chip">${S.payScope==='unified'?'여러 매장 통합 결제':'매장별 개별 결제'}</span></div>
       <div class="row"><span>상품 합계 (정가)</span><span class="v">${won(listSum)}</span></div>
       ${itemDisc>0?`<div class="row"><span>상품 할인 (해피아워·선착순 등)</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
       <div class="row"><span>쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>

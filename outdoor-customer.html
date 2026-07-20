@@ -595,9 +595,10 @@
   <button class="ds-chip on" id="scope-unified" onclick="setScope('unified')">통합 결제</button>
   <button class="ds-chip" id="scope-separate" onclick="setScope('separate')">개별 결제</button>
   <span class="ds-div"></span>
-  <span class="lbl">최소주문(브랜드)</span>
-  <button class="ds-chip on" id="min-on" onclick="setMinOrder(true)">8,000원</button>
-  <button class="ds-chip" id="min-off" onclick="setMinOrder(false)">끔</button>
+  <span class="lbl">최소주문</span>
+  <button class="ds-chip on" id="min-group" onclick="setMinOrder('group')">그룹 8,000원</button>
+  <button class="ds-chip" id="min-store" onclick="setMinOrder('store')">매장별 5,000원</button>
+  <button class="ds-chip" id="min-off" onclick="setMinOrder('off')">끔</button>
   <span class="ds-div"></span>
   <span class="lbl">상황</span>
   <button class="ds-chip" onclick="simState('closed')">영업종료</button>
@@ -690,7 +691,7 @@ let S = {
   alertCh:'phone',     // 알림 채널: phone(카톡·문자) | email
   contact:'',          // 입력한 휴대폰/이메일
   infoOpen:false,      // 메뉴 정보(알레르기·영양) 펼침 여부
-  minOn:true,          // 브랜드 최소 주문 금액 적용 여부(On/Off)
+  minBasis:'group',    // 최소 주문 금액 기준: group(매장 그룹=통합결제 총액) | store(매장별 소계) | off
   tmpQty:1, tmpOpt:0,
   loginType:'kakao', // kakao | phone | email
 };
@@ -1073,7 +1074,21 @@ function scCart(){
   </div>`;
 }
 // 담기/결제 방식은 브랜드·매장 설정 (고객 선택 아님) — 데모바에서 시뮬레이션
-function setMinOrder(on){ S.minOn=on; document.getElementById('min-on').classList.toggle('on',on); document.getElementById('min-off').classList.toggle('on',!on); render(); }
+function setMinOrder(b){ S.minBasis=b; ['group','store','off'].forEach(k=>document.getElementById('min-'+k).classList.toggle('on',k===b)); render(); }
+// 최소 주문 금액 판정 — 그룹(통합결제 총액) / 매장별 소계. 개별결제는 그룹 기준이 성립 안 되어 매장별로 적용.
+function minInfo(){
+  if(S.minBasis==='off') return {on:false};
+  const GROUP_MIN=8000, STORE_MIN=5000;
+  let basis=S.minBasis;
+  if(basis==='group' && S.payScope==='separate') basis='store';
+  if(basis==='group'){
+    const total=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
+    return {on:true,basis:'group',label:'매장 그룹(통합 결제) 기준',min:GROUP_MIN,below:total<GROUP_MIN,shortfall:Math.max(0,GROUP_MIN-total)};
+  }
+  const bySt={}; S.cart.forEach(c=>{bySt[c.store]=(bySt[c.store]||0)+c.price*c.qty;});
+  const shortStores=Object.keys(bySt).filter(sid=>bySt[sid]<STORE_MIN).map(sid=>({name:store(sid).name,need:STORE_MIN-bySt[sid]}));
+  return {on:true,basis:'store',label:'매장별 기준',min:STORE_MIN,below:shortStores.length>0,shortStores};
+}
 function setScope(v){
   S.payScope=v;
   ['unified','separate'].forEach(k=>document.getElementById('scope-'+k).classList.toggle('on',k===v));
@@ -1162,11 +1177,9 @@ function scCheckout(){
   const itemDisc=listSum-paidSum;                                        // 해피아워·선착순·일반 할인 합
   const coupon=1000;
   const final=paidSum-coupon;
-  const MIN = S.minOn ? 8000 : 0;                 // 브랜드 최소 주문 금액(On/Off)
-  const belowMin = MIN>0 && final<MIN;
-  const shortfall = Math.max(0, MIN-final);
   const post = S.bill==='post';
-  const minBasis = post ? '주문 금액 기준' : (S.payScope==='unified' ? '통합 결제 기준' : '매장별 결제 기준');
+  const mi = minInfo();
+  const belowMin = mi.on && mi.below;
   return `
   <div class="hdr"><button class="bk" onclick="go('cart')">‹</button><div class="ht">${post?'주문 확인':'주문 확인 및 결제'}</div></div>
   <div class="scroll">
@@ -1207,9 +1220,11 @@ function scCheckout(){
       ${itemDisc>0?`<div class="row"><span>상품 할인 (해피아워·선착순 등)</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
       <div class="row"><span>쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>
       <div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-size:17px;font-weight:800;color:var(--ink)"><span>${post?'주문 금액':'최종 결제금액'}</span><span>${won(final)}</span></div>
-      ${S.minOn ? (belowMin
-        ? `<div class="minwarn">최소 주문 금액 <b>${won(MIN)}</b>까지 <b>${won(shortfall)}</b> 남았어요 · 더 담으면 ${post?'주문':'결제'}할 수 있어요<br><span style="font-weight:600;opacity:.85">· ${minBasis}</span></div>`
-        : `<div class="minok">✓ 최소 주문 금액 ${won(MIN)} 충족 · ${minBasis}</div>`) : ''}
+      ${mi.on ? (mi.below
+        ? (mi.basis==='group'
+            ? `<div class="minwarn">최소 주문 금액 <b>${won(mi.min)}</b>까지 <b>${won(mi.shortfall)}</b> 남았어요 · 더 담으면 ${post?'주문':'결제'}할 수 있어요<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`
+            : `<div class="minwarn">매장별 최소 주문 금액 <b>${won(mi.min)}</b> 미달 매장이 있어요<br>${mi.shortStores.map(x=>`· <b>${x.name}</b> ${won(x.need)} 더 담기`).join('<br>')}<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`)
+        : `<div class="minok">✓ 최소 주문 금액 ${won(mi.min)} 충족 · ${mi.label}</div>`) : ''}
     </div>
     <!-- 결제 수단 (선불형만) -->
     ${post?'':`<div class="sect"><div class="sect-h">결제 수단</div>
@@ -1228,7 +1243,7 @@ function scCheckout(){
     </div>
   </div>
   <div class="cta">
-    <button class="cta-btn" ${belowMin?'disabled':''} onclick="go('pay')">${belowMin?`최소 ${won(MIN)}부터 ${post?'주문':'결제'} 가능` : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`}</button>
+    <button class="cta-btn" ${belowMin?'disabled':''} onclick="go('pay')">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`}</button>
   </div>`;
 }
 function toggleChk(el){ el.querySelector('.chk').classList.toggle('on'); }

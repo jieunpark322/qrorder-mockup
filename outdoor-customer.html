@@ -32,7 +32,7 @@
     display:flex;flex-direction:column;align-items:center;min-height:100vh;}
 
   /* ── 데모 컨트롤 바 ───────────────────────── */
-  .demobar{width:100%;position:sticky;top:0;z-index:200;background:#191f28;color:#fff;
+  .demobar{width:100%;z-index:200;background:#191f28;color:#fff;
     display:flex;align-items:center;gap:7px;justify-content:center;padding:9px 12px;flex-wrap:wrap;font-size:11px;}
   .demobar .lbl{font-weight:800;color:#ffd43b;letter-spacing:.02em;margin-right:2px;}
   .ds-chip{font-size:11px;font-weight:700;color:#ced4da;background:#343a40;border:1px solid #495057;border-radius:20px;padding:6px 12px;cursor:pointer;font-family:inherit;}
@@ -41,7 +41,7 @@
   .ds-note{width:100%;text-align:center;color:#868e96;font-size:10.5px;margin-top:1px;}
 
   .device{width:100%;max-width:440px;background:var(--bg);min-height:calc(100vh - 62px);position:relative;
-    box-shadow:0 0 0 1px rgba(0,0,0,.04),0 18px 50px rgba(0,0,0,.22);overflow:hidden;}
+    box-shadow:0 0 0 1px rgba(0,0,0,.04),0 18px 50px rgba(0,0,0,.22);overflow:clip;}
   @media(min-width:480px){ .device{border-radius:0 0 28px 28px;margin-bottom:22px;} }
 
   .screen{display:none;animation:fade .28s ease;}
@@ -508,7 +508,7 @@
   .pickinfo{background:#F5F5F7;}
 
   /* ── 카테고리 2단: 라벨 + 구분선으로 독립 선택 영역 명시 ── */
-  .filterset{background:#fff;border-bottom:1px solid var(--line);}
+  .filterset{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:16;}
   .frow{display:flex;align-items:center;gap:9px;padding:11px 14px;}
   .frow + .frow{border-top:1px solid var(--line2);}
   .flabel{flex-shrink:0;width:30px;font-size:12px;font-weight:700;color:var(--ink3);letter-spacing:-.01em;}
@@ -674,6 +674,22 @@ const STORES = [
     open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1200,   /* 영업 11:00~20:00 */
     info:{ceo:'박민수', regno:'345-67-89012', address:'서울 마포구 성미산로 000 · 행사장 C구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
+  { id:'taco', name:'소프트타코', logo:'🌮', thumb:'https://loremflickr.com/240/240/taco?lock=4', cover:'https://loremflickr.com/760/430/taco,mexican?lock=4',
+    open:true, loc:'A구역 · 부스 5번', waitCount:'6팀', waitTime:'약 10분', rep:'비프 타코', cat:'푸드', cat2:'A구역',
+    ohStart:660, ohEnd:1260,
+    info:{ceo:'최지우', regno:'456-78-90123', address:'서울 마포구 성미산로 000 · 행사장 A구역 5번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소고기: 호주산 · 토르티야(밀): 미국산'},
+    menus:[
+      {id:'t1', name:'비프 타코 2P', desc:'살사·과카몰리', price:6500, badges:['hot'], img:'🌮', photo:'https://loremflickr.com/320/320/taco?lock=41', upsell:true},
+      {id:'t2', name:'나초 치즈', desc:'할라피뇨 추가 가능', price:6000, was:6000, img:'🧀', photo:'https://loremflickr.com/320/320/nachos?lock=42', left:4},
+    ]},
+  { id:'dessert', name:'소프트디저트', logo:'🍰', thumb:'https://loremflickr.com/240/240/dessert?lock=5', cover:'https://loremflickr.com/760/430/dessert,cake?lock=5',
+    open:true, loc:'B구역 · 부스 4번', waitCount:'2팀', waitTime:'약 4분', rep:'수제 츄러스', cat:'디저트', cat2:'B구역',
+    ohStart:660, ohEnd:1260,
+    info:{ceo:'한소민', regno:'567-89-01234', address:'서울 마포구 성미산로 000 · 행사장 B구역 4번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
+    menus:[
+      {id:'de1', name:'수제 츄러스', desc:'시나몬 슈가', price:4000, badges:['rec'], img:'🥨', photo:'https://loremflickr.com/320/320/churros?lock=51', reuse:true, upsell:true},
+      {id:'de2', name:'소프트 아이스크림', desc:'바닐라 / 초코', price:3500, img:'🍦', photo:'https://loremflickr.com/320/320/icecream?lock=52'},
+    ]},
 ];
 
 let S = {

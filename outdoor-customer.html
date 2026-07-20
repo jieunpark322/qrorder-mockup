@@ -556,6 +556,8 @@
   .blockbanner{margin:12px 14px 0;border-radius:12px;padding:13px 15px;font-size:13.5px;font-weight:700;line-height:1.5;}
   .blockbanner.closed{background:#FDECEC;color:#C0392B;border:1px solid #F5C6C6;}
   .blockbanner.break{background:#FBF1DB;color:#9A6B08;border:1px solid #F0DDA8;}
+  /* 성인 메뉴 안내 (메뉴 상세) */
+  .d-adult{margin-top:12px;background:#FDECEC;border:1px solid #F5C6C6;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:#C0392B;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -588,8 +590,8 @@
   <div class="sheet">
     <div class="sheet-t">🔞 성인 인증이 필요해요</div>
     <div class="sheet-s">알코올 메뉴는 성인 인증 후에만 담을 수 있어요.<br>최초 1회 인증하면 오늘 자정까지 다시 인증하지 않아도 돼요.</div>
-    <button class="authbtn" onclick="doAuth()"><span class="aic">📱</span><div><div>본인 명의 휴대폰 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">내국인 만 19세 이상</div></div></button>
-    <button class="authbtn" onclick="doAuth()"><span class="aic">🛂</span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인 사용자</div></div></button>
+    <button class="authbtn" onclick="doAuth()"><span class="aic">📱</span><div><div>본인 명의 휴대폰 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">내국인 · 만 19세 이상</div></div></button>
+    <button class="authbtn" onclick="doAuth()"><span class="aic">🛂</span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인 · 만 18세 이상</div></div></button>
     <button class="ghostbtn" onclick="closeAdult()">닫기</button>
   </div>
 </div>
@@ -619,10 +621,10 @@ const STORES = [
     ohStart:660, ohEnd:1260, brkStart:900, brkEnd:960,   /* 영업 11:00~21:00, 브레이크 15:00~16:00 (분) */
     info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · 행사장 A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
-      {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null},
-      {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, hh:true, hhPrice:4400},
+      {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null, allergy:'밀·대두·우유·달걀 함유', nutrition:'약 620kcal'},
+      {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, hh:true, hhPrice:4400, nutrition:'약 380kcal'},
       {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13'},
-      {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true},
+      {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
       {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 한정', price:15000, fcfs:true, fcfsPrice:9900, fcfsLeft:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
     ]},
@@ -632,7 +634,7 @@ const STORES = [
     info:{ceo:'이영희', regno:'234-56-78901', address:'서울 마포구 성미산로 000 · 행사장 B구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
     menus:[
       {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true},
-      {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true},
+      {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true, allergy:'우유 함유', nutrition:'약 250kcal'},
       {id:'c3', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', photo:'https://loremflickr.com/320/320/lemonade?lock=19', left:3},
       {id:'c4', name:'선착순 콜드브루', desc:'하루 30잔 한정 특가', price:5500, fcfs:true, fcfsPrice:3900, fcfsLeft:12, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20'},
     ]},
@@ -948,12 +950,8 @@ function renderMenuSheet(){
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
         <div class="d-price">${won(base)}</div>
         ${disabled?`<div class="ms-warn ${m.soldout?'':'amber'}">${m.soldout?'😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.':(S.demoState==='break'?'☕ 지금은 브레이크 타임이에요. 메뉴 정보만 확인할 수 있어요.':'🌙 지금은 영업 종료 상태예요. 메뉴 정보만 확인할 수 있어요.')}</div>`:''}
-        <div class="d-info">
-          <b>메뉴 정보</b><br>
-          🥜 알러지: 밀·대두·우유 함유 가능<br>
-          🔥 영양: 약 ${420+(disabled?0:S.tmpQty*10)}kcal
-          ${m.adult?'<br>🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증 필요':''}
-        </div>
+        ${(m.allergy||m.nutrition)?`<div class="d-info"><b>메뉴 정보</b><br>${[m.allergy?`🥜 알러지: ${m.allergy}`:'',m.nutrition?`🔥 영양: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
+        ${m.adult?`<div class="d-adult">🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}
         ${disabled?'':orderControls}
       </div>
     </div>

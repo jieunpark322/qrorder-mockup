@@ -525,6 +525,12 @@
   .m-right{padding-left:8px;}
   .m-left-r{font-size:12px;font-weight:700;color:var(--ink2);background:#F3F3F5;border-radius:8px;padding:6px 10px;white-space:nowrap;line-height:1;text-align:center;}
   .m-left-r b{font-size:13px;color:var(--persimmon);}
+
+  /* ── 토스트: 제목+본문 팝업 ── */
+  .toast{background:rgba(30,30,34,.96);}
+  .toast.rich{max-width:340px;width:calc(100% - 44px);text-align:left;white-space:normal;padding:15px 18px;border-radius:16px;line-height:1.5;box-shadow:0 14px 34px rgba(0,0,0,.30);}
+  .toast .toast-t{font-size:15px;font-weight:800;color:#fff;}
+  .toast .toast-b{font-size:13px;font-weight:500;color:rgba(255,255,255,.82);margin-top:4px;}
 </style>
 </head>
 <body>
@@ -665,7 +671,13 @@ function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); S.curS
 function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); }
 function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); }
 
-function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('on'); clearTimeout(window._t); window._t=setTimeout(()=>el.classList.remove('on'),1600); }
+function toast(t, body){
+  const el=document.getElementById('toast');
+  if(body){ el.classList.add('rich'); el.innerHTML=`<div class="toast-t">${t}</div><div class="toast-b">${body}</div>`; }
+  else { el.classList.remove('rich'); el.textContent=t; }
+  el.classList.add('on'); clearTimeout(window._t);
+  window._t=setTimeout(()=>el.classList.remove('on'), body?2800:1600);
+}
 
 /* ══════════════ 렌더 ══════════════ */
 function render(){
@@ -752,7 +764,7 @@ function scardHTML(s){
     if(v) wait = `<span class="s-tag wait">⏳ ${S.brandWait==='time'?'':'대기 '}${v}</span>`;
   }
   const badge = s.open ? `<span class="s-badge open">영업중</span>` : `<span class="s-badge closed">영업종료</span>`;
-  return `<button class="scard ${s.open?'':'closed'}" onclick="${s.open?`openStore('${s.id}')`:`toast('영업 종료 — 메뉴판만 조회할 수 있어요');openStore('${s.id}')`}">
+  return `<button class="scard ${s.open?'':'closed'}" onclick="${s.open?`openStore('${s.id}')`:`toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`}">
     <div class="s-thumb" style="background-image:url('${s.thumb}');background-size:cover;background-position:center;background-color:var(--bg)"></div>
     <div class="s-body">
       <div class="s-name">${s.name} ${badge}</div>

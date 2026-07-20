@@ -325,11 +325,15 @@
   .device{box-shadow:var(--shadow-lg);}
 
   /* ── 디스플레이 타이포 (포스터/메뉴판 감성) ── */
-  .sp-title,.sp-welcome,.mb-t,.bstore,.s-name,.done-t,.fm-t,.hdr .ht,.sect-h,.catsec-h,.d-name,
+  .sp-title,.sp-welcome,.mb-t,.done-t,.fm-t,.sect-h,.catsec-h,.d-name,
   .sheet-t,.callno .cl-num,.d-price,.m-now,.oh-tot,.opt-h{font-family:var(--display);font-weight:400;letter-spacing:.005em;}
-  .hdr .ht{font-size:20px;} .sect-h{font-size:18px;} .catsec-h{font-size:20px;}
+  /* 매장명·헤더는 가독성 위해 Pretendard 강조체 (디스플레이 폰트 미적용) */
+  .hdr .ht{font-family:var(--ui);font-weight:800;font-size:18px;letter-spacing:-.02em;}
+  .bstore{font-family:var(--ui);font-weight:800;font-size:24px;letter-spacing:-.03em;}
+  .s-name{font-family:var(--ui);font-weight:800;letter-spacing:-.02em;}
+  .sect-h{font-size:18px;} .catsec-h{font-size:20px;}
   .sp-title{font-size:22px;opacity:.95;} .sp-welcome{font-size:30px;line-height:1.15;margin-top:6px;}
-  .mb-t{font-size:26px;} .bstore{font-size:27px;} .d-name{font-size:25px;} .done-t{font-size:27px;} .fm-t{font-size:26px;line-height:1.25;}
+  .mb-t{font-size:26px;} .d-name{font-size:25px;} .done-t{font-size:27px;} .fm-t{font-size:26px;line-height:1.25;}
   .m-now{font-size:18px;color:var(--persimmon-d);} .d-price{font-size:26px;color:var(--persimmon-d);}
   .catsec-h{color:var(--ink);position:relative;padding-left:30px;}
   .catsec-h::before{content:'';position:absolute;left:18px;top:50%;transform:translateY(-45%);width:6px;height:18px;border-radius:3px;background:linear-gradient(var(--persimmon),var(--mustard));}
@@ -350,9 +354,20 @@
   .hdr{background:var(--card);border-bottom:1px solid var(--line);}
   .mb-t{text-shadow:0 2px 8px rgba(0,0,0,.6);}
 
-  /* ── 공지문 (블루 하드코딩 제거 → 머스타드 티켓) ── */
-  .notice{background:linear-gradient(180deg,#FFF7E8,#FFF0DA);border:1px solid #F3DDA6;color:#7A4E12;}
-  .notice b{color:var(--ink);} .notice a{color:var(--persimmon-d);}
+  /* ── 공지: 크래프트 게시판 + '공지' 도장 스탬프 + 축제 테이프 엣지 ── */
+  .notice{position:relative;display:block;margin:14px;padding:14px 16px 14px 20px;
+    background:#EFE1C4;background-image:linear-gradient(180deg,#F2E6CB,#EADAB6);
+    border:1px solid #DECBA0;border-radius:5px;color:#6B4E1E;
+    box-shadow:0 5px 16px rgba(74,45,20,.11);overflow:hidden;line-height:1.6;}
+  .notice::before{content:'';position:absolute;left:0;top:0;bottom:0;width:7px;
+    background:repeating-linear-gradient(45deg,var(--persimmon) 0 7px,#2A201A 7px 14px);}
+  .notice::after{content:'공지';position:absolute;top:11px;right:13px;font-family:var(--display);font-size:15px;
+    color:var(--mulberry);width:47px;height:47px;border:2.5px solid var(--mulberry);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;transform:rotate(-11deg);opacity:.3;letter-spacing:1px;z-index:0;}
+  .notice .nic{display:none;}
+  .notice > div{position:relative;z-index:1;padding-right:34px;}
+  .notice b{display:block;font-family:var(--ui);font-weight:800;font-size:15.5px;color:var(--ink);margin-bottom:5px;letter-spacing:-.02em;}
+  .notice a{color:var(--persimmon-d);font-weight:800;text-decoration:none;border-bottom:2px solid rgba(232,80,30,.4);white-space:nowrap;}
 
   /* ── 카드: 종이질감 + 따뜻한 그림자 + 등장 모션 ── */
   .scard,.oh-store{box-shadow:var(--shadow);border-color:var(--line);border-radius:18px;}

@@ -617,6 +617,11 @@
   <button class="ds-chip" id="min-store" onclick="setMinOrder('store')">매장별 5,000원</button>
   <button class="ds-chip" id="min-off" onclick="setMinOrder('off')">끔</button>
   <span class="ds-div"></span>
+  <span class="lbl">노출순서(브랜드)</span>
+  <button class="ds-chip on" id="sort-fixed" onclick="setSort('fixed')">순서대로</button>
+  <button class="ds-chip" id="sort-random" onclick="setSort('random')">랜덤</button>
+  <button class="ds-chip" id="sort-openfirst" onclick="toggleOpenFirst()">영업중 우선</button>
+  <span class="ds-div"></span>
   <span class="lbl">상황</span>
   <button class="ds-chip" onclick="simState('closed')">영업종료</button>
   <button class="ds-chip" onclick="simState('paused')">일시중지</button>
@@ -800,6 +805,9 @@ let S = {
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
   histView:'store',    // 주문 내역 보기: store(매장별) | round(주문 회차별) · 매장별은 통합결제만
+  sortMode:'fixed',    // 브랜드 설정 매장 노출 순서: fixed(순서대로) | random(페이지 열 때마다 랜덤)
+  openFirst:false,     // 브랜드 설정 영업중 매장 우선(영업종료·일시중지는 하단)
+  _homeOrder:null,     // 랜덤 노출 시 이번 진입의 매장 순서 캐시
   demoState:'open',    // 매장 상태 데모: open | closed | paused | break (영업종료·준비중·브레이크 = 메뉴판만)
   pickup:'now',        // 수령: now(즉시 포장) | reserve(포장 예약)
   pickupTime:null,     // 예약 수령 시간 'HH:MM'
@@ -841,7 +849,7 @@ function restart(){
   render();
   if(S.screen==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); }
 }
-function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
+function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); if(scr==='home') S._homeOrder=null; /* 홈 진입마다 랜덤 재배치 */ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
   if(scr==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); } }
 function openStore(id){ S.demoState='open'; S.curStore=id; S.storeTab='menu'; go('store'); }
 // 영업종료·브레이크 데모: 전체화면이 아니라 매장 화면에서 메뉴판만 조회(주문 불가)
@@ -935,9 +943,9 @@ function scHome(){
         <div class="cchips">${cats2.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       </div>
     </div>`}
-    <!-- 매장 목록 -->
+    <!-- 매장 목록 (브랜드 설정: 순서대로/랜덤 + 영업중 우선) -->
     <div class="storelist">
-      ${STORES.map(s=>scardHTML(s)).join('')}
+      ${homeStores().map(s=>scardHTML(s)).join('')}
     </div>
     <div style="height:78px"></div>
   </div>
@@ -974,6 +982,25 @@ function scardHTML(s){
   </button>`;
 }
 function pickChip(el){ el.parentNode.querySelectorAll('.cchip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); }
+// 매장 노출 순서 — 브랜드 설정: 랜덤(페이지 열 때마다 순서 뒤바뀜) / 순서대로 + 영업중 우선(종료·일시중지는 하단)
+function homeStores(){
+  let list = STORES.slice();
+  if(S.sortMode==='random'){
+    if(!S._homeOrder){                                   // 홈 진입 시 1회 셔플 → 필터 조작 중엔 순서 유지
+      const ids = STORES.map(s=>s.id);
+      for(let i=ids.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ids[i],ids[j]]=[ids[j],ids[i]]; }
+      S._homeOrder = ids;
+    }
+    list = S._homeOrder.map(id=>store(id));
+  }
+  if(S.openFirst){                                        // 영업중=상단, 영업종료·일시중지=하단 (안정 정렬로 그룹 내 순서 유지)
+    const rank = s => (s.open && !s.paused) ? 0 : 1;
+    list = list.map((s,i)=>[s,i]).sort((a,b)=>rank(a[0])-rank(b[0])||a[1]-b[1]).map(x=>x[0]);
+  }
+  return list;
+}
+function setSort(m){ S.sortMode=m; S._homeOrder=null; ['fixed','random'].forEach(k=>document.getElementById('sort-'+k).classList.toggle('on',k===m)); render(); }
+function toggleOpenFirst(){ S.openFirst=!S.openFirst; document.getElementById('sort-openfirst').classList.toggle('on',S.openFirst); render(); }
 function toggleSearch(){ S.searchOpen=!S.searchOpen; render(); if(S.searchOpen){ setTimeout(()=>{const i=document.getElementById('homeSearch'); if(i)i.focus();},60); } }
 
 let _banI=0;

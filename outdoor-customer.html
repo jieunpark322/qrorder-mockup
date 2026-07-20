@@ -777,11 +777,9 @@ function scHome(){
     <div class="filterset">
       <div class="frow">
         <button class="searchtog" onclick="toggleSearch()" aria-label="검색">🔍</button>
-        <span class="flabel">분류</span>
         <div class="cchips">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       </div>
       <div class="frow">
-        <span class="flabel">구역</span>
         <div class="cchips">${cats2.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       </div>
     </div>`}

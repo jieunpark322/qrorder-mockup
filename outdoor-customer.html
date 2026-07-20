@@ -570,9 +570,9 @@
   .cart-scope-note.warn{background:#FBF1DB;border-color:#F0DDA8;color:#9A6B08;}
   .cart-scope-note b{color:var(--ink);}
   /* 메뉴 정보 토글 버튼 */
-  .d-info-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 13px;border:none;border-radius:9px;background:var(--blue-50);color:var(--persimmon);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .d-info-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 13px;border:none;border-radius:9px;background:#EEEEF0;color:var(--ink2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
   .d-info-btn:active{transform:scale(.97);}
-  .d-info-btn .chev{font-size:10px;}
+  .d-info-btn.open{background:#E4E4E7;color:var(--ink);}
 </style>
 </head>
 <body>
@@ -972,7 +972,7 @@ function renderMenuSheet(){
         <div class="d-price">${won(base)}</div>
         ${disabled?`<div class="ms-warn ${m.soldout?'':'amber'}">${m.soldout?'😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.':(S.demoState==='break'?'☕ 지금은 브레이크 타임이에요. 메뉴 정보만 확인할 수 있어요.':'🌙 지금은 영업 종료 상태예요. 메뉴 정보만 확인할 수 있어요.')}</div>`:''}
         ${(m.allergy||m.nutrition)?`
-          <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보 <span class="chev">${S.infoOpen?'▲':'▾'}</span></button>
+          <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보</button>
           ${S.infoOpen?`<div class="d-info">${[m.allergy?`🥜 알러지 유발성분: ${m.allergy}`:'',m.nutrition?`🔥 영양 정보: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
         `:''}
         ${m.adult?`<div class="d-adult">🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}

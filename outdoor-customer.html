@@ -1094,14 +1094,16 @@ function scHome(){
     </div>`}
     <!-- 매장 목록 (검색 or 분류·구역 필터 + 브랜드 설정: 순서대로/랜덤 + 영업중 우선) -->
     <div class="storelist">${storelistHTML()}</div>
-    <div style="height:78px"></div>
+    <div style="height:${(S.payScope==='unified'&&S.cart.length)?150:78}px"></div>
   </div>
-  ${histFab()}`;
+  ${histFab()}
+  ${S.payScope==='unified'?cartBar():''}`;
 }
 // 주문 내역 진입 (device 컬럼 우측 하단 고정) · 매장 장바구니 바가 있으면 위로 띄움
 function histFab(){
-  const raised = (S.screen==='store' && S.cart.length);
-  return `<div class="hist-fabwrap" style="bottom:${raised?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
+  // 장바구니 바(cta)가 깔리는 화면에서는 그 위로 띄움: 매장 화면 or 홈(통합주문)
+  const cartBarShown = S.cart.length && (S.screen==='store' || (S.screen==='home' && S.payScope==='unified'));
+  return `<div class="hist-fabwrap" style="bottom:${cartBarShown?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
 }
 function scardHTML(s){
   // 대기 표시는 브랜드 설정(우선)을 따름 — 매장 개별 설정을 덮어씀

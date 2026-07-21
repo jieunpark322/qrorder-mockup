@@ -669,7 +669,7 @@
   <button class="ds-chip on" id="bill-pre" onclick="setBill('pre')">선불형</button>
   <button class="ds-chip" id="bill-post" onclick="setBill('post')">후불형</button>
   <span class="ds-div"></span>
-  <span class="lbl">서비스(브랜드)</span>
+  <span class="lbl">서비스(매장·브랜드)</span>
   <button class="ds-chip on" id="svc-pickup" onclick="setService('pickup')">포장</button>
   <button class="ds-chip" id="svc-delivery" onclick="setService('delivery')">자리로 받기</button>
   <span class="ds-div"></span>
@@ -875,7 +875,7 @@ let S = {
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
   histView:'store',    // 주문 내역 보기: store(매장별) | round(주문 회차별) · 매장별은 통합결제만
-  service:'pickup',    // 브랜드/그룹 서비스 유형: pickup(포장) | delivery(자리로 받기=현장 배달) · 고객 선택 아님 · 자리입력 기본 Off
+  service:'pickup',    // 서비스 유형: pickup(포장) | delivery(자리로 받기=현장 배달) · 매장·브랜드가 설정(고객 선택 아님) · 자리입력 기본 Off
   fCat:'전체',         // 홈 분류 필터 (전체/푸드/음료/디저트 → store.cat)
   fZone:'전체',        // 홈 구역 필터 (전체/A~D구역 → store.cat2)
   sortMode:'fixed',    // 브랜드 설정 매장 노출 순서: fixed(순서대로) | random(페이지 열 때마다 랜덤)
@@ -1354,7 +1354,7 @@ function minInfo(){
   const shortStores=Object.keys(bySt).filter(sid=>bySt[sid]<STORE_MIN).map(sid=>({name:store(sid).name,need:STORE_MIN-bySt[sid]}));
   return {on:true,basis:'store',label:'매장별 기준',min:STORE_MIN,below:shortStores.length>0,shortStores};
 }
-// 서비스 유형(브랜드 설정) — 포장 루트 / 자리로 받기(현장 배달) 루트. 고객이 고르는 값이 아님(자리입력 기본 Off)
+// 서비스 유형(매장·브랜드 설정) — 포장 루트 / 자리로 받기(현장 배달) 루트. 브랜드는 자리로 받기 설정된 매장을 그룹화. 고객 선택 아님(자리입력 기본 Off)
 function setService(v){
   S.service=v; if(v==='delivery') S.pickup='now';
   ['pickup','delivery'].forEach(k=>document.getElementById('svc-'+k).classList.toggle('on',k===v));

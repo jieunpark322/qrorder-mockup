@@ -890,6 +890,7 @@ let S = {
   cart:[],           // {store, menu, name, emoji, opt, qty, price, img}
   adult:false,
   searchOpen:false,
+  searchQ:'',          // 홈 검색어 (매장명·메뉴명)
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
   histView:'store',    // 주문 내역 보기: store(매장별) | round(주문 회차별) · 매장별은 통합결제만
@@ -934,7 +935,7 @@ function setBrandWait(m){
   render();
 }
 function restart(){
-  S.cart=[]; S.adult=false; S.searchOpen=false; S.demoState='open'; S.fCat='전체'; S.fZone='전체';
+  S.cart=[]; S.adult=false; S.searchOpen=false; S.searchQ=''; S.demoState='open'; S.fCat='전체'; S.fZone='전체';
   S.screen = S.mode==='group' ? 'splash' : 'store';
   S.curStore = S.mode==='group' ? 'burger' : 'burger';
   render();
@@ -1005,7 +1006,6 @@ function scHome(){
   ];
   const cats = ['전체','푸드','음료','디저트'];
   const cats2 = ['전체','A구역','B구역','C구역','D구역'];
-  const list = homeStores();
   return `
   <div class="scroll">
     <!-- 메인 배너 (화면 상단 밀착 · 최대 3장 자동 롤링 · 탭 시 URL 랜딩) -->
@@ -1023,7 +1023,7 @@ function scHome(){
     <div class="filterset"><div class="frow">
       <div class="searchbar-inline">
         <span class="ic">🔍</span>
-        <input id="homeSearch" placeholder="매장·메뉴 검색" oninput="toast('찾으시는 결과가 없어요')">
+        <input id="homeSearch" placeholder="매장명·메뉴명 검색" value="${S.searchQ||''}" oninput="onSearch(this.value)">
         <button class="clr" onclick="toggleSearch()">✕</button>
       </div>
     </div></div>` : `
@@ -1036,11 +1036,8 @@ function scHome(){
         <div class="cchips">${cats2.map(c=>`<button class="cchip ${S.fZone===c?'on':''}" onclick="setHomeFilter('zone','${c}')">${c}</button>`).join('')}</div>
       </div>
     </div>`}
-    <!-- 매장 목록 (분류·구역 필터 + 브랜드 설정: 순서대로/랜덤 + 영업중 우선) -->
-    <div class="storelist">
-      ${list.length ? list.map(s=>scardHTML(s)).join('')
-        : `<div class="storelist-empty">선택한 조건에 맞는 매장이 없어요<div class="se-sub">다른 분류나 구역을 선택해 보세요</div></div>`}
-    </div>
+    <!-- 매장 목록 (검색 or 분류·구역 필터 + 브랜드 설정: 순서대로/랜덤 + 영업중 우선) -->
+    <div class="storelist">${storelistHTML()}</div>
     <div style="height:78px"></div>
   </div>
   ${histFab()}`;
@@ -1079,8 +1076,15 @@ function pickChip(el){ el.parentNode.querySelectorAll('.cchip').forEach(c=>c.cla
 // 홈 매장 목록 — ① 분류·구역 필터 → ② 노출 순서(랜덤/순서대로) → ③ 영업중 우선
 function homeStores(){
   let list = STORES.slice();
-  if(S.fCat && S.fCat!=='전체') list = list.filter(s=>s.cat===S.fCat);      // 분류 필터
-  if(S.fZone && S.fZone!=='전체') list = list.filter(s=>s.cat2===S.fZone);  // 구역 필터
+  const q = (S.searchOpen && S.searchQ) ? S.searchQ.trim().toLowerCase() : '';
+  if(q){                                                                    // 검색: 매장명·대표메뉴·메뉴명
+    list = list.filter(s=> s.name.toLowerCase().includes(q)
+      || (s.rep||'').toLowerCase().includes(q)
+      || (s.menus||[]).some(m=>m.name.toLowerCase().includes(q)));
+  } else {
+    if(S.fCat && S.fCat!=='전체') list = list.filter(s=>s.cat===S.fCat);      // 분류 필터
+    if(S.fZone && S.fZone!=='전체') list = list.filter(s=>s.cat2===S.fZone);  // 구역 필터
+  }
   if(S.sortMode==='random'){                              // 랜덤(페이지 열 때마다 순서 뒤바뀜)
     if(!S._homeOrder){                                    // 홈 진입 시 1회 셔플 → 필터 조작 중엔 순서 유지
       const ids = STORES.map(s=>s.id);
@@ -1098,9 +1102,24 @@ function homeStores(){
 }
 // 홈 카테고리 필터 선택 (분류/구역 각각 단일 선택 · 전체=해제)
 function setHomeFilter(kind,val){ if(kind==='cat') S.fCat=val; else S.fZone=val; render(); }
+// 매장 목록 렌더 (검색어/필터 반영 · 결과 없으면 안내)
+function storelistHTML(){
+  const list=homeStores();
+  if(list.length) return list.map(scardHTML).join('');
+  const q=(S.searchOpen&&S.searchQ)?S.searchQ.trim():'';
+  return q
+    ? `<div class="storelist-empty">‘${q}’ 검색 결과가 없어요<div class="se-sub">매장명 또는 메뉴명으로 다시 검색해 보세요</div></div>`
+    : `<div class="storelist-empty">선택한 조건에 맞는 매장이 없어요<div class="se-sub">다른 분류나 구역을 선택해 보세요</div></div>`;
+}
+// 검색 입력: 입력창 포커스 유지 위해 목록 영역만 갱신
+function onSearch(v){
+  S.searchQ=v;
+  const el=document.querySelector('#device .storelist');
+  if(el) el.innerHTML=storelistHTML();
+}
 function setSort(m){ S.sortMode=m; S._homeOrder=null; ['fixed','random'].forEach(k=>document.getElementById('sort-'+k).classList.toggle('on',k===m)); render(); }
 function toggleOpenFirst(){ S.openFirst=!S.openFirst; document.getElementById('sort-openfirst').classList.toggle('on',S.openFirst); render(); }
-function toggleSearch(){ S.searchOpen=!S.searchOpen; render(); if(S.searchOpen){ setTimeout(()=>{const i=document.getElementById('homeSearch'); if(i)i.focus();},60); } }
+function toggleSearch(){ S.searchOpen=!S.searchOpen; S.searchQ=''; render(); if(S.searchOpen){ setTimeout(()=>{const i=document.getElementById('homeSearch'); if(i)i.focus();},60); } }
 
 let _banI=0;
 function startBanner(){

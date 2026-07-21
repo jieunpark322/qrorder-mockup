@@ -278,6 +278,17 @@
   .callno .cl-lbl{font-size:13px;opacity:.9;font-weight:700;}
   .callno .cl-num{font-size:52px;font-weight:900;letter-spacing:2px;margin-top:4px;}
   .pickinfo{margin:22px auto 0;max-width:300px;font-size:14px;color:var(--ink2);line-height:1.7;background:var(--bg);border-radius:12px;padding:16px;}
+  /* 통합결제 다매장 픽업 인지 */
+  .multi-pick{margin:16px auto 0;max-width:320px;text-align:left;background:#FFF8EC;border:1px solid #F5DFA8;border-radius:14px;padding:16px;}
+  .multi-pick .mp-h{font-size:15px;font-weight:900;color:#9A6B08;}
+  .multi-pick .mp-b{font-size:13px;color:#7A5A12;line-height:1.6;margin-top:6px;}
+  .multi-pick .mp-b b{color:#7A4E00;}
+  .multi-pick .mp-list{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+  .multi-pick .mp-row{display:flex;justify-content:space-between;gap:10px;background:#fff;border-radius:9px;padding:9px 11px;font-size:13px;}
+  .multi-pick .mp-s{font-weight:800;color:var(--ink);}
+  .multi-pick .mp-l{color:var(--ink3);font-weight:600;text-align:right;}
+  .multi-note{margin:12px 0 0;background:#FFF8EC;border:1px solid #F5DFA8;border-radius:11px;padding:12px 14px;font-size:12.5px;font-weight:600;color:#7A5A12;line-height:1.55;}
+  .multi-note b{color:#7A4E00;font-weight:800;}
 
   /* 주문내역 (결제건=회차 카드) */
   .oh-tabwrap{padding:12px 14px 2px;}
@@ -1487,6 +1498,7 @@ function scCheckout(){
             : `<div class="minwarn">매장별 최소 주문 금액 <b>${won(mi.min)}</b> 미달 매장이 있어요<br>${mi.shortStores.map(x=>`· <b>${x.name}</b> ${won(x.need)} 더 담기`).join('<br>')}<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`)
         : `<div class="minok">✓ 최소 주문 금액 ${won(mi.min)} 충족 · ${mi.label}</div>`) : ''}
     </div>
+    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note">🏪 통합 결제지만 <b>매장별로 따로 준비·${S.service==='delivery'?'배달':'픽업'}</b>돼요 · 매장 수만큼 <b>알림톡이 따로</b> 오고, 각 매장에서 받게 돼요</div>`:''}
     <!-- 결제 수단 (선불형만) -->
     ${post?'':`<div class="sect"><div class="sect-h">결제 수단</div>
       <div class="pay-opt on"><span class="pic">💳</span> 신용/체크카드</div>
@@ -1590,6 +1602,10 @@ function scDone(){
   const digits=(S.contact||'').replace(/\D/g,'');
   const callNo = S.loginType==='kakao' ? '3821' : (S.loginType==='phone' && digits.length>=4 ? digits.slice(-4) : '0417');
   const ch = S.loginType==='kakao' ? '카카오톡 알림톡' : (S.alertCh==='email' ? '입력하신 이메일' : '카카오톡 알림톡');
+  // 통합 결제 + 여러 매장 → 매장별 준비·픽업·알림톡이 각각이라는 인지
+  const sids=[...new Set((S.cart.length?S.cart:[{store:S.curStore}]).map(c=>c.store||S.curStore))];
+  const multi = S.payScope==='unified' && sids.length>1;
+  const loc = multi ? '매장별 부스에서 각각 수령' : store(S.curStore).loc;
   return `
   <div class="hdr"><div class="ht" style="flex:1;text-align:center">주문 완료</div></div>
   <div class="scroll done-wrap">
@@ -1601,10 +1617,16 @@ function scDone(){
       <div class="cl-num">${callNo}</div>
     </div>
     <div class="pickinfo">
-      ${S.service==='delivery'?`🛎️ <b>자리로 받기</b> · 입력하신 자리로 현장 배달`:(S.pickup==='reserve'?`📅 <b>포장 예약</b> · ${S.pickupTime||''} 수령`:'🥡 <b>즉시 포장 픽업</b>')} · ${store(S.curStore).loc}<br>
+      ${S.service==='delivery'?`🛎️ <b>자리로 받기</b> · 입력하신 자리로 현장 배달`:(S.pickup==='reserve'?`📅 <b>포장 예약</b> · ${S.pickupTime||''} 수령`:'🥡 <b>즉시 포장 픽업</b>')} · ${loc}<br>
       ⏱️ 예상 조리 시간 약 12분<br>
-      💬 조리 완료 시 <b>${ch}</b>으로 알림
+      💬 조리 완료 시 ${multi?`매장마다 <b>${ch}</b>이 따로 와요`:`<b>${ch}</b>으로 알림`}
     </div>
+    ${multi?`
+    <div class="multi-pick">
+      <div class="mp-h">🏪 매장별로 따로 ${S.service==='delivery'?'배달돼요':'받아요'}</div>
+      <div class="mp-b">통합 결제했지만 준비·${S.service==='delivery'?'배달':'픽업'}은 <b>매장별</b>이에요. <b>${sids.length}개 매장</b>에서 ${S.service==='delivery'?'각각 준비해 자리로 가져다드리고':'각각 준비돼 부스에서 따로 받게 되고'}, 준비 완료 <b>알림톡도 매장마다 따로</b> 도착해요.</div>
+      <div class="mp-list">${sids.map(sid=>`<div class="mp-row"><span class="mp-s">${store(sid).logo} ${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
+    </div>`:''}
     <button class="fm-btn" style="margin-top:26px;background:var(--blue)" onclick="go('history')">내 주문 내역 보기</button>
   </div>`;
 }

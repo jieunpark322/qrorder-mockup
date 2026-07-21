@@ -272,6 +272,21 @@
   .pay-div{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--ink4);font-size:13px;}
   .pay-div span{flex:1;height:1px;background:var(--line);}
   .pay-hint{font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6;}
+  .pay-mkt{display:flex;align-items:center;gap:9px;padding:11px 2px;cursor:pointer;}
+  .pay-mkt-ck{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;}
+  .pay-mkt-ck.on{background:var(--blue);border-color:var(--blue);}
+  .pay-mkt-t{flex:1;font-size:14px;color:var(--ink2);}
+  .pay-mkt-t b{font-size:10.5px;font-weight:800;color:var(--ink3);background:#F1F1F3;border-radius:5px;padding:2px 7px;margin-right:6px;}
+  .pay-coupon{background:#FFF8E6;border:1px solid #FFE3A3;border-radius:12px;padding:12px 14px;margin:4px 0 14px;}
+  .pcp-h{font-size:13px;font-weight:800;color:#92400e;margin-bottom:9px;}
+  .pcp-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;border:1.5px solid transparent;cursor:pointer;margin-bottom:5px;}
+  .pcp-row.on{background:#fff;border-color:#E6A817;}
+  .pcp-ck{width:20px;height:20px;border-radius:50%;border:2px solid #D1A050;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:900;}
+  .pcp-row.on .pcp-ck{background:#E6A817;border-color:#E6A817;}
+  .pcp-n{font-size:13px;font-weight:700;color:#78350f;}
+  .pcp-d{font-size:12px;color:#92400e;margin-top:2px;}
+  .pcp-clear{background:none;border:none;font-size:12px;color:#92400e;cursor:pointer;font-family:inherit;padding:4px 0 0;opacity:.7;text-decoration:underline;}
+  .pay-coupon-none{font-size:13px;color:var(--ink3);text-align:center;padding:6px 0 14px;}
   .chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;}
   .chk.on{background:var(--blue);border-color:var(--blue);}
   .agree-all .chk.on{background:var(--green);border-color:var(--green);}
@@ -941,6 +956,10 @@ let S = {
   pickupH:null, pickupM:null,   // 선택한 시/분
   alertCh:'phone',     // 알림 채널: phone(카톡) | email
   contact:'',          // 입력한 휴대폰/이메일
+  couponId:null,       // 선택된 쿠폰 (null=미사용)
+  couponCode:'',       // 쿠폰 코드 입력값
+  mktConsent:false,    // 혜택(쿠폰·이벤트) 알림 수신 동의 → 연락처 입력 시 보유 쿠폰 노출 트리거
+  pMid:'', pEnd:'', pEmail:'',  // 결제 시트 연락처 입력 (실시간 쿠폰 노출용)
   infoOpen:false,      // 메뉴 정보(알레르기·영양) 펼침 여부
   minBasis:'group',    // 최소 주문 금액 기준: group(매장 그룹=통합결제 총액) | store(매장별 소계) | off
   tmpQty:1, tmpOpt:0,
@@ -971,6 +990,7 @@ function setBrandWait(m){
 }
 function restart(){
   S.cart=[]; S.adult=false; S.searchOpen=false; S.searchQ=''; S.demoState='open'; S.fCat='전체'; S.fZone='전체';
+  S.couponId=null; S.couponCode=''; S.mktConsent=false; S.pMid=''; S.pEnd=''; S.pEmail='';
   S.screen = S.mode==='group' ? 'splash' : 'store';
   S.curStore = S.mode==='group' ? 'burger' : 'burger';
   render();
@@ -1521,13 +1541,39 @@ function timeSlotsHTML(){
     <div style="font-size:12px;color:var(--ink4);margin-top:9px">예약 가능 시간대 중 선택 · 마감된 시간은 선택할 수 없어요</div>`;
 }
 
+/* ── 쿠폰 (내점형 기준 동기화) ──
+   ※ 통합결제(여러 매장) 시 쿠폰 적용 범위(그룹 전체 vs 매장별)는 재정립 필요 — 현재는 주문 전체 합계 기준 데모 */
+const COUPONS = [
+  { id:'CP001', name:'개장기념 감사 쿠폰', type:'amount', value:1000, minOrder:8000,  desc:'8,000원 이상 주문 시 1,000원 할인' },
+  { id:'CP002', name:'음료 10% 할인',      type:'rate',   value:10,   maxDisc:3000, minOrder:0, desc:'최대 3,000원 할인' },
+];
+const COUPON_CODES = { 'HELLO2026':'CP001', 'SOFT10':'CP002' };
+function cartSum(){ return S.cart.reduce((a,c)=>a+c.price*c.qty,0); }
+function couponDiscount(){
+  if(!S.couponId) return 0;
+  const cp=COUPONS.find(c=>c.id===S.couponId); if(!cp) return 0;
+  const total=cartSum(); if(total<cp.minOrder) return 0;
+  if(cp.type==='amount') return Math.min(cp.value,total);
+  if(cp.type==='rate') return Math.min(Math.round(total*cp.value/100), cp.maxDisc||Infinity);
+  return 0;
+}
+function applyCode(){
+  const code=(S.couponCode||'').trim().toUpperCase();
+  if(!code) return toast('쿠폰 코드를 입력해 주세요');
+  const cid=COUPON_CODES[code];
+  if(!cid) return toast('유효하지 않거나 만료된 쿠폰 코드예요');
+  S.couponId=cid; S.couponCode=''; toast('쿠폰이 적용됐어요 🎉'); render();
+}
+function pickCoupon(id){ S.couponId = (S.couponId===id? null : id); refreshPaySheet(); render(); }
+function toggleMkt(){ S.mktConsent=!S.mktConsent; refreshPaySheet(); }
+
 /* ── 주문 확인 및 결제 ── */
 function scCheckout(){
   const listSum=S.cart.reduce((a,c)=>a+(c.listPrice||c.price)*c.qty,0);  // 정가 합계
   const paidSum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);                  // 할인 적용가 합계
   const itemDisc=listSum-paidSum;                                        // 해피아워·선착순·일반 할인 합
-  const coupon=1000;
-  const final=paidSum-coupon;
+  const coupon=couponDiscount();
+  const final=Math.max(0,paidSum-coupon);
   const post = S.bill==='post';
   const mi = minInfo();
   const belowMin = mi.on && mi.below;
@@ -1559,16 +1605,19 @@ function scCheckout(){
              <div class="cnt"><span id="reqcnt">0</span>/50</div>`;
       })()}
     </div>
-    <!-- 쿠폰 -->
-    <div class="sect"><div class="sect-h">쿠폰</div>
-      <div style="display:flex;gap:8px"><input class="field" placeholder="쿠폰 코드 입력"><button class="ghostbtn" style="width:auto;margin:0;padding:0 20px;white-space:nowrap" onclick="toast('유효하지 않거나 만료된 쿠폰이면 오류 안내')">적용</button></div>
-      <div style="font-size:13px;color:var(--green);font-weight:700;margin-top:8px">✓ 개장기념 쿠폰 −1,000원 적용됨</div>
+    <!-- 쿠폰 코드 (보유 쿠폰은 결제 단계에서 연락처+수신동의 시 자동 노출) -->
+    <div class="sect"><div class="sect-h">쿠폰 코드 <span class="scope-chip">선택</span></div>
+      <div style="display:flex;gap:8px"><input class="field" placeholder="쿠폰 코드 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()"><button class="ghostbtn" style="width:auto;margin:0;padding:0 20px;white-space:nowrap" onclick="applyCode()">적용</button></div>
+      ${(()=>{ const cp=COUPONS.find(c=>c.id===S.couponId); if(!cp) return `<div style="font-size:12.5px;color:var(--ink4);margin-top:8px">혜택 알림에 동의하면 결제 단계에서 보유 쿠폰이 표시돼요.</div>`;
+        const d=couponDiscount();
+        return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;background:#FFF8E6;border:1px solid #FFE3A3;border-radius:10px;padding:10px 13px"><span style="font-size:13px;font-weight:800;color:#92400e">🎟️ ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button style="background:none;border:none;color:#92400e;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit" onclick="S.couponId=null;render()">해제</button></div>`;
+      })()}
     </div>
     <!-- 금액 요약 (할인 세분화 · 통합/개별은 브랜드 설정) -->
     <div class="sect"><div class="sect-h" style="display:flex;justify-content:space-between;align-items:center">${post?'주문 금액 요약':'결제 금액 요약'}<span class="scope-chip">${S.payScope==='unified'?'여러 매장 통합 결제':'매장별 개별 결제'}</span></div>
       <div class="row"><span>상품 합계 (정가)</span><span class="v">${won(listSum)}</span></div>
       ${itemDisc>0?`<div class="row"><span>상품 할인 (해피아워·선착순 등)</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
-      <div class="row"><span>쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>
+      ${coupon>0?`<div class="row"><span>🎟️ 쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>`:''}
       <div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-size:17px;font-weight:800;color:var(--ink)"><span>${post?'주문 금액':'최종 결제금액'}</span><span>${won(final)}</span></div>
       ${mi.on ? (mi.below
         ? (mi.basis==='group'
@@ -1588,7 +1637,6 @@ function scCheckout(){
       <div style="margin-top:8px">
         <div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span><span class="ag-req">필수</span><span class="ag-t">개인정보 수집·이용 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('privacy')">보기</a></div>
         ${post?'':`<div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span><span class="ag-req">필수</span><span class="ag-t">전자금융거래 이용약관</span><a class="ag-view" onclick="event.stopPropagation();openTerms('efin')">보기</a></div>`}
-        <div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span><span class="ag-req opt">선택</span><span class="ag-t">쿠폰·이벤트 알림 수신 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('mkt')">보기</a></div>
       </div>
       ${post?`<div style="font-size:12px;color:var(--ink4);margin-top:8px">후불형은 결제 관련 약관 없이 개인정보 동의만 받아요</div>`:''}
     </div>
@@ -1623,6 +1671,19 @@ function closeTerms(){ const el=document.getElementById('termsModal'); if(el){ e
 /* ── 결제(알림 받을 방법) — 바텀시트: 화면 전환 없이 흐름을 짧게 ── */
 function paySheetHTML(){
   const post=S.bill==='post'; const act=post?'주문':'결제';
+  const emailValid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.pEmail||'');
+  const contactOk = S.alertCh==='email' ? emailValid : ((S.pMid||'').length===4 && (S.pEnd||'').length===4);
+  const finalAmt = Math.max(0, cartSum()-couponDiscount());
+  // 연락처 입력 + 혜택 수신동의 → 보유 쿠폰 노출 (내점형 기준)
+  const couponReveal = (contactOk && S.mktConsent) ? (()=>{
+    const avail=COUPONS;   // 데모: 전체 노출 (실서비스는 발급받은 쿠폰만)
+    if(!avail.length) return `<div class="pay-coupon-none">지금 사용 가능한 쿠폰이 없어요.</div>`;
+    return `<div class="pay-coupon">
+      <div class="pcp-h">🎟️ 사용 가능한 쿠폰 ${avail.length}장</div>
+      ${avail.map(cp=>{ const sel=S.couponId===cp.id; return `<div class="pcp-row ${sel?'on':''}" onclick="pickCoupon('${cp.id}')"><span class="pcp-ck">${sel?'✓':''}</span><div class="pcp-b"><div class="pcp-n">${cp.name}</div><div class="pcp-d">${cp.desc}</div></div></div>`; }).join('')}
+      ${S.couponId?`<button class="pcp-clear" onclick="S.couponId=null;refreshPaySheet();render()">쿠폰 사용 안 함</button>`:''}
+    </div>`;
+  })() : '';
   return `
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closePaySheet()">✕</button>
@@ -1637,22 +1698,32 @@ function paySheetHTML(){
         <button class="${S.alertCh==='email'?'on':''}" onclick="setAlert('email')">✉️ 이메일</button>
       </div>
       ${S.alertCh==='email' ? `
-      <input class="field" id="emailIn" type="email" placeholder="example@email.com" style="margin-bottom:12px">
-      <button class="cta-btn" onclick="submitContact('email')">이 이메일로 ${act}하기</button>
-      <div class="pay-hint">· 입력하신 이메일로 주문 확인·완료 알림을 보내드려요 (외국인 사용자 등)<br>· 이메일 형식 오류(도메인 누락 등) 시 진행 불가</div>
+      <input class="field" id="emailIn" type="email" placeholder="example@email.com" value="${S.pEmail||''}" oninput="onPayEmail(this)" style="margin-bottom:12px">
       ` : `
       <div class="phone3" style="margin-bottom:12px">
         <input class="field pf-fixed" value="010" readonly tabindex="-1" aria-label="앞자리 010 고정">
         <span class="pf-dash">–</span>
-        <input class="field pf-num" id="phoneMid" inputmode="numeric" maxlength="4" placeholder="0000" oninput="phoneAuto(this,'phoneEnd')">
+        <input class="field pf-num" id="phoneMid" inputmode="numeric" maxlength="4" placeholder="0000" value="${S.pMid||''}" oninput="onPayPhone(this,'mid')">
         <span class="pf-dash">–</span>
-        <input class="field pf-num" id="phoneEnd" inputmode="numeric" maxlength="4" placeholder="0000" oninput="this.value=this.value.replace(/\\D/g,'')">
+        <input class="field pf-num" id="phoneEnd" inputmode="numeric" maxlength="4" placeholder="0000" value="${S.pEnd||''}" oninput="onPayPhone(this,'end')">
       </div>
-      <button class="cta-btn" onclick="submitContact('phone')">이 번호로 ${act}하기</button>
-      <div class="pay-hint">· 조리 완료 시 카카오톡 알림톡으로 알려드려요<br>· 앞자리는 010 고정 · 뒤 4자리+4자리(총 8자리)를 입력하면 진행돼요</div>
       `}
+      <label class="pay-mkt" onclick="toggleMkt()"><span class="pay-mkt-ck ${S.mktConsent?'on':''}">${S.mktConsent?'✓':''}</span><span class="pay-mkt-t"><b>선택</b> 쿠폰·이벤트 알림 수신 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('mkt')">보기</a></label>
+      ${couponReveal}
+      <button class="cta-btn" onclick="submitContact('${S.alertCh}')">${S.alertCh==='email'?'이 이메일로':'이 번호로'} ${won(finalAmt)} ${act}하기</button>
+      <div class="pay-hint">${S.alertCh==='email'?'· 입력하신 이메일로 주문 확인·완료 알림을 보내드려요 (외국인 사용자 등)<br>· 이메일 형식 오류(도메인 누락 등) 시 진행 불가':'· 조리 완료 시 카카오톡 알림톡으로 알려드려요<br>· 앞자리는 010 고정 · 뒤 4자리+4자리(총 8자리)를 입력하면 진행돼요'}</div>
     </div>`;
 }
+// 결제 시트 연락처 입력 → 상태 저장 후 시트만 갱신(쿠폰 실시간 노출) · 포커스 유지
+function onPayPhone(el,which){
+  const v=el.value.replace(/\D/g,'');
+  if(which==='mid') S.pMid=v; else S.pEnd=v;
+  const advance = which==='mid' && v.length>=4;
+  refreshPaySheet();
+  const id = advance?'phoneEnd':(which==='mid'?'phoneMid':'phoneEnd');
+  const n=document.getElementById(id); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); }
+}
+function onPayEmail(el){ S.pEmail=el.value; refreshPaySheet(); const n=document.getElementById('emailIn'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } }
 function openPaySheet(){ document.getElementById('payInner').innerHTML=paySheetHTML(); document.getElementById('payModal').classList.add('on'); syncBgLock(); }
 function closePaySheet(){ const el=document.getElementById('payModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 function refreshPaySheet(){ const el=document.getElementById('payModal'); if(el&&el.classList.contains('on')) document.getElementById('payInner').innerHTML=paySheetHTML(); }
@@ -1661,13 +1732,12 @@ function setAlert(ch){ S.alertCh=ch; refreshPaySheet(); }
 function phoneAuto(el,nextId){ el.value=el.value.replace(/\D/g,''); if(el.value.length>=4){ const n=document.getElementById(nextId); if(n) n.focus(); } }
 function submitContact(type){
   if(type==='phone'){
-    const mid=((document.getElementById('phoneMid')||{}).value||'').replace(/\D/g,'');
-    const end=((document.getElementById('phoneEnd')||{}).value||'').replace(/\D/g,'');
+    const mid=(S.pMid||'').replace(/\D/g,''), end=(S.pEnd||'').replace(/\D/g,'');
     if(mid.length!==4 || end.length!==4) return toast('휴대폰 뒤 8자리(4자리 + 4자리)를 정확히 입력해 주세요');
     const v=`010-${mid}-${end}`;
     S.loginType='phone'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 번호로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인했어요.', '다시 입력할게요.', payConfirm);
   } else {
-    const v=(document.getElementById('emailIn')||{}).value.trim()||'';
+    const v=(S.pEmail||'').trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return toast('이메일 형식을 확인해 주세요 (예: name@email.com)');
     S.loginType='email'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 이메일로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인했어요.', '다시 입력할게요.', payConfirm);
   }

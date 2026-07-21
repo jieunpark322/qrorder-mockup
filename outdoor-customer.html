@@ -1385,6 +1385,7 @@ function scCart(){
   S.cart.forEach((c,i)=>{ (groups[c.store]=groups[c.store]||[]).push({...c,idx:i}); });
   const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
   const multi=Object.keys(groups).length>1;
+  const showStoreH = S.payScope==='unified' || multi;  // 통합결제는 1개만 담아도 메뉴별 매장 표기
   return `
   <div class="hdr"><button class="bk" onclick="go('store')">‹</button><div class="ht">장바구니</div></div>
   <div class="scroll">
@@ -1393,7 +1394,7 @@ function scCart(){
       : `<div class="scope-note">🧺 한 매장씩 담아 매장별로 결제하는 방식이에요</div>`}
     <div class="sect">
       ${Object.entries(groups).map(([sid,items])=>`
-        ${multi?`<div class="store-group-h">🏪 ${store(sid).name}</div>`:''}
+        ${showStoreH?`<div class="store-group-h">🏪 ${store(sid).name}</div>`:''}
         ${items.map(c=>`<div class="citem">
           <div class="ci-th" style="background-image:url('${c.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${c.photo?'':(c.img||'')}</div>
           <div class="ci-b">

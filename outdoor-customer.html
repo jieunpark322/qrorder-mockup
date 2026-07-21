@@ -1238,7 +1238,7 @@ function scStore(){
       <button class="mtab ${S.storeTab==='info'?'on':''}" onclick="S.storeTab='info';render()">매장 정보</button>
     </div>
     ${S.storeTab==='info' ? storeInfoHTML(s) : `
-      ${(S.payScope==='separate' && S.cart.length) ? `<div class="cart-scope-note ${S.cart[0].store!==S.curStore?'warn':''}">${S.cart[0].store===S.curStore ? `🛒 <b>[${store(S.cart[0].store).name}]</b>에 담는 중 · 장바구니엔 같은 매장 메뉴만 담을 수 있어요` : `⚠️ 다른 매장이에요 · 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요`}</div>` : ''}
+      ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn">⚠️ 다른 매장이에요 · 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요</div>` : ''}
       <div class="cattabs">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       ${s.menus.length===0
         ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`

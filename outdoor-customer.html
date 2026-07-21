@@ -1045,7 +1045,7 @@ function scHome(){
 // 주문 내역 진입 (device 컬럼 우측 하단 고정) · 매장 장바구니 바가 있으면 위로 띄움
 function histFab(){
   const raised = (S.screen==='store' && S.cart.length);
-  return `<div class="hist-fabwrap" style="bottom:${raised?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문내역</button></div>`;
+  return `<div class="hist-fabwrap" style="bottom:${raised?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
 }
 function scardHTML(s){
   // 대기 표시는 브랜드 설정(우선)을 따름 — 매장 개별 설정을 덮어씀
@@ -1640,7 +1640,7 @@ function scDone(){
       <div class="mp-b">통합 결제했지만 준비·${S.service==='delivery'?'배달':'픽업'}은 <b>매장별</b>이에요. <b>${sids.length}개 매장</b>에서 ${S.service==='delivery'?'각각 준비해 자리로 가져다드리고':'각각 준비돼 부스에서 따로 받게 되고'}, 준비 완료 <b>알림톡도 매장마다 따로</b> 도착해요.</div>
       <div class="mp-list">${sids.map(sid=>`<div class="mp-row"><span class="mp-s">${store(sid).logo} ${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
     </div>`:''}
-    <button class="fm-btn" style="margin-top:26px;background:var(--blue)" onclick="go('history')">내 주문 내역 보기</button>
+    <button class="fm-btn" style="margin-top:26px;background:var(--blue)" onclick="go('history')">주문 내역 보기</button>
   </div>`;
 }
 
@@ -1734,7 +1734,7 @@ function scHistory(){
   }
   const grand = P.reduce((a,p)=>a+payTotal(p),0);
   return `
-  <div class="hdr"><button class="bk" onclick="go(S.mode==='group'?'home':'store')">‹</button><div class="ht">내 주문 내역</div></div>
+  <div class="hdr"><button class="bk" onclick="go(S.mode==='group'?'home':'store')">‹</button><div class="ht">주문 내역</div></div>
   <div class="scroll">
     ${unified
       ? `<div class="oh-tabwrap"><div class="seg">

@@ -263,6 +263,15 @@
   .ag-view{font-size:12.5px;color:var(--ink3);text-decoration:underline;font-weight:600;flex-shrink:0;cursor:pointer;}
   .terms-body{font-size:13.5px;color:var(--ink2);line-height:1.7;}
   .terms-body b{color:var(--ink);font-weight:800;}
+  /* 결제(알림 받을 방법) 바텀시트 */
+  #confirmModal{z-index:340;}   /* 결제 시트 위에서 더블체크가 항상 보이도록 */
+  .pay-scroll{max-height:86vh;overflow-y:auto;padding:28px 22px 26px;}
+  .pay-t{font-size:19px;font-weight:900;}
+  .pay-s{font-size:13.5px;color:var(--ink2);line-height:1.55;margin:7px 0 20px;}
+  .pay-kko-note{font-size:12px;color:var(--ink4);text-align:center;margin-top:8px;}
+  .pay-div{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--ink4);font-size:13px;}
+  .pay-div span{flex:1;height:1px;background:var(--line);}
+  .pay-hint{font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6;}
   .chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;}
   .chk.on{background:var(--blue);border-color:var(--blue);}
   .agree-all .chk.on{background:var(--green);border-color:var(--green);}
@@ -771,6 +780,11 @@
   <div class="sheet sheet-receipt" id="termsInner"></div>
 </div>
 
+<!-- 결제(알림 받을 방법) 바텀시트 -->
+<div class="modal-bg" id="payModal" onclick="if(event.target===this)closePaySheet()">
+  <div class="sheet sheet-receipt" id="payInner"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -962,7 +976,7 @@ function restart(){
   render();
   if(S.screen==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); }
 }
-function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); closeReceipt(); closeTerms(); if(scr==='home') S._homeOrder=null; /* 홈 진입마다 랜덤 재배치 */ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
+function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); closeReceipt(); closeTerms(); closePaySheet(); if(scr==='home') S._homeOrder=null; /* 홈 진입마다 랜덤 재배치 */ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
   if(scr==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); } }
 function openStore(id){ S.demoState='open'; S.curStore=id; S.storeTab='menu'; go('store'); }
 // 영업종료·브레이크 데모: 전체화면이 아니라 매장 화면에서 메뉴판만 조회(주문 불가)
@@ -977,7 +991,7 @@ function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet'
 function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); syncBgLock(); }
 // 시트/모달이 하나라도 열려 있으면 배경(페이지) 스크롤 잠금 → 상세 화면만 컨트롤
 function syncBgLock(){
-  const open=['menuSheet','adultModal','confirmModal','receiptModal','termsModal'].some(id=>document.getElementById(id).classList.contains('on'));
+  const open=['menuSheet','adultModal','confirmModal','receiptModal','termsModal','payModal'].some(id=>document.getElementById(id).classList.contains('on'));
   document.documentElement.style.overflow=open?'hidden':'';
   document.body.style.overflow=open?'hidden':'';
 }
@@ -994,7 +1008,7 @@ function toast(t, body){
 function render(){
   const scr = {
     splash:scSplash, home:scHome, store:scStore, cart:scCart,
-    checkout:scCheckout, pay:scPay, done:scDone, history:scHistory,
+    checkout:scCheckout, done:scDone, history:scHistory,
     payfail:()=>full('💳','결제가 정상적으로 진행되지 않았어요','잔액 부족이나 한도 초과 등의 일시적인 오류일 수 있어요.<br>다른 결제 수단으로 다시 시도해 주세요.','결제 화면으로 돌아가기','checkout','장바구니·입력 정보는 그대로 유지돼요 · 선불형 전용 (후불형은 해당 없음)'),
     expired:()=>full('⏱️','접속 시간이 만료되었어요','안전한 결제 환경을 위해 연결이 종료되었습니다.<br>QR 코드를 다시 한 번 스캔해 주세요.','QR 다시 스캔','splash','주문 당일 자정이 지나면 세션·내역이 삭제돼요'),
     loaderr:()=>full('📡','화면을 불러오지 못했어요','네트워크 연결이 불안정하거나 일시적인 시스템 오류일 수 있어요.<br>잠시 후 [새로고침] 버튼을 눌러 다시 시도해 주세요.','새로고침','splash','지속 실패 시 네트워크 상태를 확인해 주세요'),
@@ -1580,7 +1594,7 @@ function scCheckout(){
     </div>
   </div>
   <div class="cta">
-    <button class="cta-btn" ${belowMin?'disabled':''} onclick="go('pay')">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`}</button>
+    <button class="cta-btn" ${belowMin?'disabled':''} onclick="openPaySheet()">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`}</button>
   </div>`;
 }
 function toggleChk(el){ el.querySelector('.chk').classList.toggle('on'); }
@@ -1606,43 +1620,43 @@ function openTerms(key){
 }
 function closeTerms(){ const el=document.getElementById('termsModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 
-/* ── 결제하기 (로그인/번호 입력) ── */
-function scPay(){
-  const post=S.bill==='post';
+/* ── 결제(알림 받을 방법) — 바텀시트: 화면 전환 없이 흐름을 짧게 ── */
+function paySheetHTML(){
+  const post=S.bill==='post'; const act=post?'주문':'결제';
   return `
-  <div class="hdr"><button class="bk" onclick="go('checkout')">‹</button><div class="ht">${post?'주문 정보 입력':'결제하기'}</div></div>
-  <div class="scroll" style="padding:20px 18px 130px">
-    <div style="font-size:19px;font-weight:800;margin-bottom:6px">주문 알림을 받을 방법을 선택해 주세요</div>
-    <div style="font-size:14px;color:var(--ink2);margin-bottom:22px">호출번호와 조리 완료 알림에 사용돼요</div>
-
-    <button class="kakaobtn" onclick="S.loginType='kakao';payConfirm()">💬 카카오톡으로 시작하기</button>
-    <div style="font-size:12px;color:var(--ink4);text-align:center;margin-top:8px">카카오 로그인 시 번호가 자동 수집돼요</div>
-
-    <div style="display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--ink4);font-size:13px"><div style="flex:1;height:1px;background:var(--line)"></div>또는 비회원으로 진행<div style="flex:1;height:1px;background:var(--line)"></div></div>
-
-    <div style="font-size:14px;font-weight:800;margin-bottom:10px">알림 받을 방법을 선택해 주세요</div>
-    <div class="seg" style="margin-bottom:14px">
-      <button class="${S.alertCh==='phone'?'on':''}" onclick="setAlert('phone')">📱 휴대폰</button>
-      <button class="${S.alertCh==='email'?'on':''}" onclick="setAlert('email')">✉️ 이메일</button>
-    </div>
-    ${S.alertCh==='email' ? `
-    <input class="field" id="emailIn" type="email" placeholder="example@email.com" style="margin-bottom:10px">
-    <button class="ghostbtn" style="margin:0" onclick="submitContact('email')">이 이메일로 주문하기</button>
-    <div style="font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6">· 입력하신 이메일로 주문 확인·완료 알림을 보내드려요 (외국인 사용자 등)<br>· 이메일 형식 오류(도메인 누락 등) 시 진행 불가</div>
-    ` : `
-    <div class="phone3" style="margin-bottom:10px">
-      <input class="field pf-fixed" value="010" readonly tabindex="-1" aria-label="앞자리 010 고정">
-      <span class="pf-dash">–</span>
-      <input class="field pf-num" id="phoneMid" inputmode="numeric" maxlength="4" placeholder="0000" oninput="phoneAuto(this,'phoneEnd')">
-      <span class="pf-dash">–</span>
-      <input class="field pf-num" id="phoneEnd" inputmode="numeric" maxlength="4" placeholder="0000" oninput="this.value=this.value.replace(/\\D/g,'')">
-    </div>
-    <button class="ghostbtn" style="margin:0" onclick="submitContact('phone')">이 번호로 주문하기</button>
-    <div style="font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6">· 조리 완료 시 카카오톡 알림톡으로 알려드려요<br>· 앞자리는 010 고정 · 뒤 4자리+4자리(총 8자리)를 입력하면 주문할 수 있어요</div>
-    `}
-  </div>`;
+    <div class="ms-grab"><span></span></div>
+    <button class="ms-close" onclick="closePaySheet()">✕</button>
+    <div class="pay-scroll">
+      <div class="pay-t">💬 어디로 알림을 보내드릴까요?</div>
+      <div class="pay-s">호출번호와 조리 완료 알림에 사용돼요.${post?'':' 주문을 완료하려면 꼭 필요해요.'}</div>
+      <button class="kakaobtn" onclick="S.loginType='kakao';payConfirm()">💬 카카오톡으로 시작하기</button>
+      <div class="pay-kko-note">카카오 로그인 시 번호가 자동 수집돼요</div>
+      <div class="pay-div"><span></span>또는 비회원으로 진행<span></span></div>
+      <div class="seg" style="margin-bottom:14px">
+        <button class="${S.alertCh==='phone'?'on':''}" onclick="setAlert('phone')">📱 휴대폰</button>
+        <button class="${S.alertCh==='email'?'on':''}" onclick="setAlert('email')">✉️ 이메일</button>
+      </div>
+      ${S.alertCh==='email' ? `
+      <input class="field" id="emailIn" type="email" placeholder="example@email.com" style="margin-bottom:12px">
+      <button class="cta-btn" onclick="submitContact('email')">이 이메일로 ${act}하기</button>
+      <div class="pay-hint">· 입력하신 이메일로 주문 확인·완료 알림을 보내드려요 (외국인 사용자 등)<br>· 이메일 형식 오류(도메인 누락 등) 시 진행 불가</div>
+      ` : `
+      <div class="phone3" style="margin-bottom:12px">
+        <input class="field pf-fixed" value="010" readonly tabindex="-1" aria-label="앞자리 010 고정">
+        <span class="pf-dash">–</span>
+        <input class="field pf-num" id="phoneMid" inputmode="numeric" maxlength="4" placeholder="0000" oninput="phoneAuto(this,'phoneEnd')">
+        <span class="pf-dash">–</span>
+        <input class="field pf-num" id="phoneEnd" inputmode="numeric" maxlength="4" placeholder="0000" oninput="this.value=this.value.replace(/\\D/g,'')">
+      </div>
+      <button class="cta-btn" onclick="submitContact('phone')">이 번호로 ${act}하기</button>
+      <div class="pay-hint">· 조리 완료 시 카카오톡 알림톡으로 알려드려요<br>· 앞자리는 010 고정 · 뒤 4자리+4자리(총 8자리)를 입력하면 진행돼요</div>
+      `}
+    </div>`;
 }
-function setAlert(ch){ S.alertCh=ch; render(); }
+function openPaySheet(){ document.getElementById('payInner').innerHTML=paySheetHTML(); document.getElementById('payModal').classList.add('on'); syncBgLock(); }
+function closePaySheet(){ const el=document.getElementById('payModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
+function refreshPaySheet(){ const el=document.getElementById('payModal'); if(el&&el.classList.contains('on')) document.getElementById('payInner').innerHTML=paySheetHTML(); }
+function setAlert(ch){ S.alertCh=ch; refreshPaySheet(); }
 // 휴대폰 뒤 4자리 입력 시 다음 칸으로 자동 이동
 function phoneAuto(el,nextId){ el.value=el.value.replace(/\D/g,''); if(el.value.length>=4){ const n=document.getElementById(nextId); if(n) n.focus(); } }
 function submitContact(type){

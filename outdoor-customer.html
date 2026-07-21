@@ -643,6 +643,9 @@
   /* 섹션 보조 설명 */
   .sect-sub{font-size:12.5px;color:var(--ink3);line-height:1.55;margin:-2px 0 11px;}
   .sect-sub b{color:var(--persimmon-d);font-weight:800;}
+  /* 자리로 받기(현장 배달) 고정 안내 */
+  .deliver-fix{background:var(--blue-50);border:1px solid #CFE0F7;border-radius:10px;padding:12px 14px;font-size:13.5px;font-weight:700;color:var(--persimmon-d);line-height:1.5;}
+  .deliver-fix b{color:var(--ink);}
   /* 개별 결제: 담긴 매장 [대괄호] 안내 */
   .cart-scope-note{margin:12px 14px 0;background:var(--blue-50);border:1px solid #CFE0F7;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--persimmon-d);line-height:1.5;}
   .cart-scope-note.warn{background:#FBF1DB;border-color:#F0DDA8;color:#9A6B08;}
@@ -664,6 +667,10 @@
   <span class="lbl">결제</span>
   <button class="ds-chip on" id="bill-pre" onclick="setBill('pre')">선불형</button>
   <button class="ds-chip" id="bill-post" onclick="setBill('post')">후불형</button>
+  <span class="ds-div"></span>
+  <span class="lbl">서비스(브랜드)</span>
+  <button class="ds-chip on" id="svc-pickup" onclick="setService('pickup')">포장</button>
+  <button class="ds-chip" id="svc-delivery" onclick="setService('delivery')">자리로 받기</button>
   <span class="ds-div"></span>
   <span class="lbl">담기방식(브랜드)</span>
   <button class="ds-chip on" id="scope-unified" onclick="setScope('unified')">통합 결제</button>
@@ -867,6 +874,7 @@ let S = {
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
   histView:'store',    // 주문 내역 보기: store(매장별) | round(주문 회차별) · 매장별은 통합결제만
+  service:'pickup',    // 브랜드/그룹 서비스 유형: pickup(포장) | delivery(자리로 받기=현장 배달) · 고객 선택 아님 · 자리입력 기본 Off
   fCat:'전체',         // 홈 분류 필터 (전체/푸드/음료/디저트 → store.cat)
   fZone:'전체',        // 홈 구역 필터 (전체/A~D구역 → store.cat2)
   sortMode:'fixed',    // 브랜드 설정 매장 노출 순서: fixed(순서대로) | random(페이지 열 때마다 랜덤)
@@ -1296,15 +1304,18 @@ function scCart(){
         </div>`).join('')}
       `).join('')}
     </div>
-    <!-- 수령 방식 (야외 = 포장 기본, 예약 On 매장은 시간 선택) -->
+    <!-- 수령 방식 (서비스 유형은 브랜드 설정 · 고객 선택 아님) -->
     <div class="sect"><div class="sect-h">수령 방식</div>
-      <div class="sect-sub">야외형은 <b>포장 픽업</b>이 기본이에요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>
-      <div class="seg">
-        <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">즉시 포장</button>
-        <button class="${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">포장 예약</button>
-      </div>
-      ${S.pickup==='reserve' ? timePickerHTML()
-        : `<div style="font-size:12.5px;color:var(--ink3);margin-top:10px">준비되면 부스에서 바로 픽업하는 방식이에요.</div>`}
+      ${S.service==='delivery'
+        ? `<div class="sect-sub">이 행사는 <b>자리로 받기(현장 배달)</b> 서비스예요. 주문하신 자리로 현장 스태프가 가져다드려요.</div>
+           <div class="deliver-fix">🛎️ 자리로 받기 · 다음 화면에서 <b>받을 자리</b>를 입력해요</div>`
+        : `<div class="sect-sub">이 행사는 <b>포장 픽업</b> 서비스예요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>
+           <div class="seg">
+             <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">즉시 포장</button>
+             <button class="${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">포장 예약</button>
+           </div>
+           ${S.pickup==='reserve' ? timePickerHTML()
+             : `<div style="font-size:12.5px;color:var(--ink3);margin-top:10px">준비되면 부스에서 바로 픽업하는 방식이에요.</div>`}`}
     </div>
     ${(()=>{ const up=computeUpsell(); return up.length?`<div class="sect"><div class="sect-h">함께 담으면 좋아요</div>${up.map(({sid,m})=>upsellRow(sid,m,S.payScope==='unified')).join('')}</div>`:''; })()}
   </div>
@@ -1341,6 +1352,12 @@ function minInfo(){
   const bySt={}; S.cart.forEach(c=>{bySt[c.store]=(bySt[c.store]||0)+c.price*c.qty;});
   const shortStores=Object.keys(bySt).filter(sid=>bySt[sid]<STORE_MIN).map(sid=>({name:store(sid).name,need:STORE_MIN-bySt[sid]}));
   return {on:true,basis:'store',label:'매장별 기준',min:STORE_MIN,below:shortStores.length>0,shortStores};
+}
+// 서비스 유형(브랜드 설정) — 포장 루트 / 자리로 받기(현장 배달) 루트. 고객이 고르는 값이 아님(자리입력 기본 Off)
+function setService(v){
+  S.service=v; if(v==='delivery') S.pickup='now';
+  ['pickup','delivery'].forEach(k=>document.getElementById('svc-'+k).classList.toggle('on',k===v));
+  render();
 }
 function setScope(v){
   S.payScope=v;
@@ -1439,8 +1456,14 @@ function scCheckout(){
     <!-- 주문 메뉴 -->
     <div class="sect"><div class="sect-h">주문 메뉴 · 수령 정보</div>
       ${S.cart.map(c=>`<div class="row"><span>${c.name} ${c.emoji} · ${c.opt} × ${c.qty}</span><span class="v">${won(c.price*c.qty)}</span></div>`).join('')}
-      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">${S.pickup==='reserve'?`📅 포장 예약 · ${S.pickupTime||'시간 미선택'}`:'🥡 즉시 포장 픽업'}</span></div>
+      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">${S.service==='delivery'?'🛎️ 자리로 받기 (현장 배달)':(S.pickup==='reserve'?`📅 포장 예약 · ${S.pickupTime||'시간 미선택'}`:'🥡 즉시 포장 픽업')}</span></div>
     </div>
+    <!-- 받을 자리 : 자리로 받기(현장 배달) 서비스일 때만 노출 · 사장님사이트 자리입력 기능 -->
+    ${S.service==='delivery' ? `
+    <div class="sect"><div class="sect-h">받을 자리</div>
+      <input class="field" placeholder="A구역 12번">
+      <div style="font-size:12px;color:var(--ink4);margin-top:6px">현장 스태프가 이 자리로 가져다드려요 · 사장님이 설정한 예시 문구가 안내돼요</div>
+    </div>` : ''}
     <!-- 요청사항 -->
     <div class="sect"><div class="sect-h">요청사항</div>
       <textarea class="field" maxlength="50" placeholder="매장에 전달할 요청사항을 입력해 주세요" oninput="document.getElementById('reqcnt').textContent=this.value.length"></textarea>
@@ -1577,7 +1600,7 @@ function scDone(){
       <div class="cl-num">${callNo}</div>
     </div>
     <div class="pickinfo">
-      ${S.pickup==='reserve'?`📅 <b>포장 예약</b> · ${S.pickupTime||''} 수령`:'🥡 <b>즉시 포장 픽업</b>'} · ${store(S.curStore).loc}<br>
+      ${S.service==='delivery'?`🛎️ <b>자리로 받기</b> · 입력하신 자리로 현장 배달`:(S.pickup==='reserve'?`📅 <b>포장 예약</b> · ${S.pickupTime||''} 수령`:'🥡 <b>즉시 포장 픽업</b>')} · ${store(S.curStore).loc}<br>
       ⏱️ 예상 조리 시간 약 12분<br>
       💬 조리 완료 시 <b>${ch}</b>으로 알림
     </div>

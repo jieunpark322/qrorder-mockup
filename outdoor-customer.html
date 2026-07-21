@@ -121,6 +121,8 @@
   .scard.dimmed .s-thumb.paused::after{background:rgba(154,107,8,.66);}
   .scard.dimmed .s-name{color:var(--ink3);}
   .scard.dimmed .s-rep,.scard.dimmed .s-meta{color:var(--ink4);}
+  .storelist-empty{text-align:center;color:var(--ink3);font-size:15px;font-weight:700;padding:52px 20px;}
+  .storelist-empty .se-sub{font-size:13px;color:var(--ink4);font-weight:500;margin-top:8px;}
   .s-thumb{width:82px;height:82px;border-radius:13px;flex-shrink:0;background-size:cover;background-position:center;position:relative;display:flex;align-items:center;justify-content:center;font-size:34px;}
   .s-logo{position:absolute;left:-6px;bottom:-6px;width:32px;height:32px;border-radius:9px;background:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:16px;}
   .s-body{flex:1;min-width:0;}
@@ -853,6 +855,8 @@ let S = {
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
   histView:'store',    // 주문 내역 보기: store(매장별) | round(주문 회차별) · 매장별은 통합결제만
+  fCat:'전체',         // 홈 분류 필터 (전체/푸드/음료/디저트 → store.cat)
+  fZone:'전체',        // 홈 구역 필터 (전체/A~D구역 → store.cat2)
   sortMode:'fixed',    // 브랜드 설정 매장 노출 순서: fixed(순서대로) | random(페이지 열 때마다 랜덤)
   openFirst:false,     // 브랜드 설정 영업중 매장 우선(영업종료·일시중지는 하단)
   _homeOrder:null,     // 랜덤 노출 시 이번 진입의 매장 순서 캐시
@@ -891,7 +895,7 @@ function setBrandWait(m){
   render();
 }
 function restart(){
-  S.cart=[]; S.adult=false; S.searchOpen=false; S.demoState='open';
+  S.cart=[]; S.adult=false; S.searchOpen=false; S.demoState='open'; S.fCat='전체'; S.fZone='전체';
   S.screen = S.mode==='group' ? 'splash' : 'store';
   S.curStore = S.mode==='group' ? 'burger' : 'burger';
   render();
@@ -905,6 +909,7 @@ function simState(st){
   S.demoState=st; S.curStore='burger'; S.storeTab='menu'; go('store');
   if(st==='closed') toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');
   else if(st==='break') toast('지금은 브레이크 타임이에요.','잠시 후 다시 열어요. 메뉴는 둘러볼 수 있어요.');
+  else if(st==='paused') toast('지금은 잠시 준비 중이에요.','곧 다시 열어요. 메뉴는 둘러볼 수 있어요.');
 }
 function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; S.infoOpen=false; showMenuSheet(); }
 function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); syncBgLock(); }
@@ -960,7 +965,8 @@ function scHome(){
     {img:'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#1971c2,#4dabf7)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'해피아워 타임', s:'☕ 15:00 ~ 17:00 · 음료 20% off'},
   ];
   const cats = ['전체','푸드','음료','디저트'];
-  const cats2 = ['전체','A구역','B구역','C구역'];
+  const cats2 = ['전체','A구역','B구역','C구역','D구역'];
+  const list = homeStores();
   return `
   <div class="scroll">
     <!-- 메인 배너 (화면 상단 밀착 · 최대 3장 자동 롤링 · 탭 시 URL 랜딩) -->
@@ -984,16 +990,17 @@ function scHome(){
     </div></div>` : `
     <div class="filterset">
       <div class="frow">
-        <div class="cchips">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
+        <div class="cchips">${cats.map(c=>`<button class="cchip ${S.fCat===c?'on':''}" onclick="setHomeFilter('cat','${c}')">${c}</button>`).join('')}</div>
         <button class="searchtog" onclick="toggleSearch()" aria-label="검색">🔍</button>
       </div>
       <div class="frow">
-        <div class="cchips">${cats2.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
+        <div class="cchips">${cats2.map(c=>`<button class="cchip ${S.fZone===c?'on':''}" onclick="setHomeFilter('zone','${c}')">${c}</button>`).join('')}</div>
       </div>
     </div>`}
-    <!-- 매장 목록 (브랜드 설정: 순서대로/랜덤 + 영업중 우선) -->
+    <!-- 매장 목록 (분류·구역 필터 + 브랜드 설정: 순서대로/랜덤 + 영업중 우선) -->
     <div class="storelist">
-      ${homeStores().map(s=>scardHTML(s)).join('')}
+      ${list.length ? list.map(s=>scardHTML(s)).join('')
+        : `<div class="storelist-empty">선택한 조건에 맞는 매장이 없어요<div class="se-sub">다른 분류나 구역을 선택해 보세요</div></div>`}
     </div>
     <div style="height:78px"></div>
   </div>
@@ -1030,16 +1037,19 @@ function scardHTML(s){
   </button>`;
 }
 function pickChip(el){ el.parentNode.querySelectorAll('.cchip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); }
-// 매장 노출 순서 — 브랜드 설정: 랜덤(페이지 열 때마다 순서 뒤바뀜) / 순서대로 + 영업중 우선(종료·일시중지는 하단)
+// 홈 매장 목록 — ① 분류·구역 필터 → ② 노출 순서(랜덤/순서대로) → ③ 영업중 우선
 function homeStores(){
   let list = STORES.slice();
-  if(S.sortMode==='random'){
-    if(!S._homeOrder){                                   // 홈 진입 시 1회 셔플 → 필터 조작 중엔 순서 유지
+  if(S.fCat && S.fCat!=='전체') list = list.filter(s=>s.cat===S.fCat);      // 분류 필터
+  if(S.fZone && S.fZone!=='전체') list = list.filter(s=>s.cat2===S.fZone);  // 구역 필터
+  if(S.sortMode==='random'){                              // 랜덤(페이지 열 때마다 순서 뒤바뀜)
+    if(!S._homeOrder){                                    // 홈 진입 시 1회 셔플 → 필터 조작 중엔 순서 유지
       const ids = STORES.map(s=>s.id);
       for(let i=ids.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ids[i],ids[j]]=[ids[j],ids[i]]; }
       S._homeOrder = ids;
     }
-    list = S._homeOrder.map(id=>store(id));
+    const pos = id => S._homeOrder.indexOf(id);
+    list = list.slice().sort((a,b)=>pos(a.id)-pos(b.id));
   }
   if(S.openFirst){                                        // 영업중=상단, 영업종료·일시중지=하단 (안정 정렬로 그룹 내 순서 유지)
     const rank = s => (s.open && !s.paused) ? 0 : 1;
@@ -1047,6 +1057,8 @@ function homeStores(){
   }
   return list;
 }
+// 홈 카테고리 필터 선택 (분류/구역 각각 단일 선택 · 전체=해제)
+function setHomeFilter(kind,val){ if(kind==='cat') S.fCat=val; else S.fZone=val; render(); }
 function setSort(m){ S.sortMode=m; S._homeOrder=null; ['fixed','random'].forEach(k=>document.getElementById('sort-'+k).classList.toggle('on',k===m)); render(); }
 function toggleOpenFirst(){ S.openFirst=!S.openFirst; document.getElementById('sort-openfirst').classList.toggle('on',S.openFirst); render(); }
 function toggleSearch(){ S.searchOpen=!S.searchOpen; render(); if(S.searchOpen){ setTimeout(()=>{const i=document.getElementById('homeSearch'); if(i)i.focus();},60); } }
@@ -1194,7 +1206,7 @@ function renderMenuSheet(){
         <div class="d-name">${m.name} ${m.emoji||''}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
         <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
-        ${disabled?`<div class="ms-warn ${m.soldout?'':'amber'}">${m.soldout?'😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.':(S.demoState==='break'?'☕ 지금은 브레이크 타임이에요. 메뉴 정보만 확인할 수 있어요.':stPaused?'⏸️ 지금은 잠시 준비 중이에요. 메뉴 정보만 확인할 수 있어요.':'🌙 지금은 영업 종료 상태예요. 메뉴 정보만 확인할 수 있어요.')}</div>`:''}
+        ${m.soldout?`<div class="ms-warn">😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.</div>`:''}
         ${(m.allergy||m.nutrition)?`
           <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보</button>
           ${S.infoOpen?`<div class="d-info">${[m.allergy?`🥜 알러지 유발성분: ${m.allergy}`:'',m.nutrition?`🔥 영양 정보: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}

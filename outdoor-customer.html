@@ -256,7 +256,13 @@
 
   /* 약관 */
   .agree-all{display:flex;align-items:center;gap:10px;padding:14px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;font-weight:800;cursor:pointer;}
-  .agree{display:flex;align-items:center;gap:10px;padding:10px 4px;font-size:14px;color:var(--ink2);cursor:pointer;}
+  .agree{display:flex;align-items:center;gap:9px;padding:10px 4px;font-size:14px;color:var(--ink2);cursor:pointer;}
+  .ag-req{font-size:10.5px;font-weight:800;color:var(--persimmon-d);background:var(--blue-50);border-radius:5px;padding:2px 7px;flex-shrink:0;}
+  .ag-req.opt{color:var(--ink3);background:#F1F1F3;}
+  .ag-t{flex:1;min-width:0;}
+  .ag-view{font-size:12.5px;color:var(--ink3);text-decoration:underline;font-weight:600;flex-shrink:0;cursor:pointer;}
+  .terms-body{font-size:13.5px;color:var(--ink2);line-height:1.7;}
+  .terms-body b{color:var(--ink);font-weight:800;}
   .chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;}
   .chk.on{background:var(--blue);border-color:var(--blue);}
   .agree-all .chk.on{background:var(--green);border-color:var(--green);}
@@ -281,6 +287,16 @@
   .callno .cl-lbl{font-size:13px;opacity:.9;font-weight:700;}
   .callno .cl-num{font-size:52px;font-weight:900;letter-spacing:2px;margin-top:4px;}
   .pickinfo{margin:22px auto 0;max-width:300px;font-size:14px;color:var(--ink2);line-height:1.7;background:var(--bg);border-radius:12px;padding:16px;}
+  /* 완료 화면 주문 진행 스텝퍼 */
+  .ord-steps{display:flex;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 10px;margin:24px auto 0;max-width:320px;box-shadow:var(--shadow);}
+  .ost{display:flex;flex-direction:column;align-items:center;gap:7px;flex:0 0 auto;width:54px;}
+  .ost-dot{width:26px;height:26px;border-radius:50%;background:var(--line2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+  .ost.done .ost-dot{background:var(--blue);}
+  .ost.cur .ost-dot{background:var(--blue);box-shadow:0 0 0 4px var(--blue-50);}
+  .ost-lbl{font-size:11px;color:var(--ink4);font-weight:700;white-space:nowrap;}
+  .ost.done .ost-lbl,.ost.cur .ost-lbl{color:var(--blue-d);}
+  .ost-line{flex:1;height:2px;background:var(--line2);margin-top:12px;border-radius:2px;}
+  .ost-line.done{background:var(--blue);}
   /* 통합결제 다매장 픽업 인지 */
   .multi-pick{margin:16px auto 0;max-width:320px;text-align:left;background:#FFF8EC;border:1px solid #F5DFA8;border-radius:14px;padding:16px;}
   .multi-pick .mp-h{font-size:15px;font-weight:900;color:#9A6B08;}
@@ -750,6 +766,11 @@
   <div class="sheet sheet-receipt" id="receiptInner"></div>
 </div>
 
+<!-- 약관 전문 시트 -->
+<div class="modal-bg" id="termsModal" onclick="if(event.target===this)closeTerms()">
+  <div class="sheet sheet-receipt" id="termsInner"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -941,7 +962,7 @@ function restart(){
   render();
   if(S.screen==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); }
 }
-function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); closeReceipt(); if(scr==='home') S._homeOrder=null; /* 홈 진입마다 랜덤 재배치 */ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
+function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); closeReceipt(); closeTerms(); if(scr==='home') S._homeOrder=null; /* 홈 진입마다 랜덤 재배치 */ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
   if(scr==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); } }
 function openStore(id){ S.demoState='open'; S.curStore=id; S.storeTab='menu'; go('store'); }
 // 영업종료·브레이크 데모: 전체화면이 아니라 매장 화면에서 메뉴판만 조회(주문 불가)
@@ -956,7 +977,7 @@ function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet'
 function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); syncBgLock(); }
 // 시트/모달이 하나라도 열려 있으면 배경(페이지) 스크롤 잠금 → 상세 화면만 컨트롤
 function syncBgLock(){
-  const open=['menuSheet','adultModal','confirmModal','receiptModal'].some(id=>document.getElementById(id).classList.contains('on'));
+  const open=['menuSheet','adultModal','confirmModal','receiptModal','termsModal'].some(id=>document.getElementById(id).classList.contains('on'));
   document.documentElement.style.overflow=open?'hidden':'';
   document.body.style.overflow=open?'hidden':'';
 }
@@ -1547,13 +1568,13 @@ function scCheckout(){
       <div class="pay-opt on"><span class="pic">💳</span> 신용/체크카드</div>
       <div class="pay-opt" onclick="this.parentNode.querySelectorAll('.pay-opt').forEach(p=>p.classList.remove('on'));this.classList.add('on')"><span class="pic">🅿️</span> 간편결제 (카카오페이/네이버페이)</div>
     </div>`}
-    <!-- 약관 -->
+    <!-- 약관 (항목별 필수/선택 배지 + '보기'로 전문 열람) -->
     <div class="sect"><div class="sect-h">약관 동의</div>
       <div class="agree-all" onclick="toggleAll(this)"><span class="chk">✓</span> 전체 동의</div>
       <div style="margin-top:8px">
-        <div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span> (필수) 개인정보 수집·이용 동의</div>
-        ${post?'':`<div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span> (필수) 전자금융거래 이용약관</div>`}
-        <div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span> (선택) 쿠폰·이벤트 알림 수신 동의</div>
+        <div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span><span class="ag-req">필수</span><span class="ag-t">개인정보 수집·이용 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('privacy')">보기</a></div>
+        ${post?'':`<div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span><span class="ag-req">필수</span><span class="ag-t">전자금융거래 이용약관</span><a class="ag-view" onclick="event.stopPropagation();openTerms('efin')">보기</a></div>`}
+        <div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span><span class="ag-req opt">선택</span><span class="ag-t">쿠폰·이벤트 알림 수신 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('mkt')">보기</a></div>
       </div>
       ${post?`<div style="font-size:12px;color:var(--ink4);margin-top:8px">후불형은 결제 관련 약관 없이 개인정보 동의만 받아요</div>`:''}
     </div>
@@ -1564,6 +1585,26 @@ function scCheckout(){
 }
 function toggleChk(el){ el.querySelector('.chk').classList.toggle('on'); }
 function toggleAll(el){ const on=!el.querySelector('.chk').classList.contains('on'); el.querySelector('.chk').classList.toggle('on',on); el.parentNode.querySelectorAll('.agree .chk').forEach(c=>c.classList.toggle('on',on)); }
+/* 약관 전문 — '보기'로 열람 */
+const TERMS = {
+  privacy:{ t:'개인정보 수집·이용 동의', req:'필수', body:`<b>1. 수집 항목</b><br>휴대폰 번호 또는 이메일 주소, 주문 내역(메뉴·금액·시간)<br><br><b>2. 수집·이용 목적</b><br>주문 접수·조리 완료 알림 발송, 주문 확인 및 고객 문의 대응<br><br><b>3. 보유·이용 기간</b><br>당일 자정 경과 시 자동 삭제 (관련 법령에 따라 거래 기록은 별도 보관될 수 있어요)<br><br><b>4. 동의 거부 권리</b><br>동의를 거부할 수 있으나, 필수 항목 미동의 시 주문이 어려워요.` },
+  efin:{ t:'전자금융거래 이용약관', req:'필수', body:`<b>1. 목적</b><br>본 약관은 전자금융거래를 통한 결제 서비스 이용에 관한 사항을 정해요.<br><br><b>2. 결제 수단</b><br>신용/체크카드, 간편결제(카카오페이·네이버페이·토스페이 등)<br><br><b>3. 결제 대행</b><br>결제는 전자결제대행사(PG)를 통해 처리되며, 승인·취소·환불은 카드사·PG 정책을 따라요.<br><br><b>4. 취소·환불</b><br>상품 품절 등으로 주문이 취소되면 결제 금액은 자동 환불되며, 카드사 사정에 따라 영업일 3~7일이 소요될 수 있어요.` },
+  mkt:{ t:'쿠폰·이벤트 알림 수신 동의', req:'선택', body:`<b>1. 목적</b><br>할인 쿠폰, 이벤트·프로모션 소식을 알림톡·이메일로 보내드려요.<br><br><b>2. 수신 채널</b><br>카카오톡 알림톡 또는 입력하신 이메일<br><br><b>3. 철회</b><br>선택 항목이므로 동의하지 않아도 주문에는 영향이 없고, 동의 후에도 언제든 수신을 해지할 수 있어요.` },
+};
+function openTerms(key){
+  const t=TERMS[key]; if(!t)return;
+  document.getElementById('termsInner').innerHTML=`
+    <div class="ms-grab"><span></span></div>
+    <button class="ms-close" onclick="closeTerms()">✕</button>
+    <div class="rc-scroll">
+      <div class="rc-badge" style="${t.req==='선택'?'background:#F1F1F3;color:var(--ink3)':'background:var(--blue-50);color:var(--persimmon-d)'}">${t.req}</div>
+      <div class="rc-title">${t.t}</div>
+      <div class="rc-hr"></div>
+      <div class="terms-body">${t.body}</div>
+    </div>`;
+  document.getElementById('termsModal').classList.add('on'); syncBgLock();
+}
+function closeTerms(){ const el=document.getElementById('termsModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 
 /* ── 결제하기 (로그인/번호 입력) ── */
 function scPay(){
@@ -1655,6 +1696,8 @@ function scDone(){
     <div class="done-ic">✓</div>
     <div class="done-t">${post?'주문이 접수되었어요!':'결제가 완료되었어요!'}</div>
     <div class="done-s">${post?'매장에서 주문을 확인하고 조리를 시작해요':'조리가 시작되면 알림으로 알려드릴게요'}</div>
+    ${(()=>{ const steps=S.service==='delivery'?['주문 접수','준비 중','배달 중','배달 완료']:['주문 접수','준비 중','픽업 대기','픽업 완료']; const cur=1;
+      return `<div class="ord-steps">${steps.map((st,i)=>`${i?`<div class="ost-line ${i<=cur?'done':''}"></div>`:''}<div class="ost ${i<cur?'done':''} ${i===cur?'cur':''}"><div class="ost-dot">${i<cur?'✓':(i+1)}</div><div class="ost-lbl">${st}</div></div>`).join('')}</div>`; })()}
     <div class="callno">
       <div class="cl-lbl">내 호출번호</div>
       <div class="cl-num">${callNo}</div>

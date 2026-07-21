@@ -658,6 +658,10 @@
   /* 자리로 받기(현장 배달) 고정 안내 */
   .deliver-fix{background:var(--blue-50);border:1px solid #CFE0F7;border-radius:10px;padding:12px 14px;font-size:13.5px;font-weight:700;color:var(--persimmon-d);line-height:1.5;}
   .deliver-fix b{color:var(--ink);}
+  /* 매장별 요청사항 */
+  .req-store{margin-top:12px;}
+  .req-store:first-of-type{margin-top:4px;}
+  .req-store-h{font-size:13.5px;font-weight:800;color:var(--ink);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
   /* 개별 결제: 담긴 매장 [대괄호] 안내 */
   .cart-scope-note{margin:12px 14px 0;background:var(--blue-50);border:1px solid #CFE0F7;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--persimmon-d);line-height:1.5;}
   .cart-scope-note.warn{background:#FBF1DB;border-color:#F0DDA8;color:#9A6B08;}
@@ -1476,10 +1480,19 @@ function scCheckout(){
       <input class="field" placeholder="A구역 12번">
       <div style="font-size:12px;color:var(--ink4);margin-top:6px">현장 스태프가 이 자리로 가져다드려요 · 사장님이 설정한 예시 문구가 안내돼요</div>
     </div>` : ''}
-    <!-- 요청사항 -->
+    <!-- 요청사항 (여러 매장이면 매장별로 분리 — 어느 매장 요청인지 명확히) -->
     <div class="sect"><div class="sect-h">요청사항</div>
-      <textarea class="field" maxlength="50" placeholder="매장에 전달할 요청사항을 입력해 주세요" oninput="document.getElementById('reqcnt').textContent=this.value.length"></textarea>
-      <div class="cnt"><span id="reqcnt">0</span>/50</div>
+      ${(()=>{ const sids=[...new Set(S.cart.map(c=>c.store))];
+        return sids.length>1
+          ? `<div class="sect-sub">매장마다 준비가 따로라, 요청사항도 <b>매장별로</b> 남겨 주세요.</div>
+             ${sids.map(sid=>`<div class="req-store">
+               <div class="req-store-h">${store(sid).logo} ${store(sid).name}</div>
+               <textarea class="field" maxlength="50" placeholder="이 매장에 전달할 요청사항" oninput="document.getElementById('rc-${sid}').textContent=this.value.length"></textarea>
+               <div class="cnt"><span id="rc-${sid}">0</span>/50</div>
+             </div>`).join('')}`
+          : `<textarea class="field" maxlength="50" placeholder="매장에 전달할 요청사항을 입력해 주세요" oninput="document.getElementById('reqcnt').textContent=this.value.length"></textarea>
+             <div class="cnt"><span id="reqcnt">0</span>/50</div>`;
+      })()}
     </div>
     <!-- 쿠폰 -->
     <div class="sect"><div class="sect-h">쿠폰</div>
@@ -1567,11 +1580,11 @@ function submitContact(type){
     const end=((document.getElementById('phoneEnd')||{}).value||'').replace(/\D/g,'');
     if(mid.length!==4 || end.length!==4) return toast('휴대폰 뒤 8자리(4자리 + 4자리)를 정확히 입력해 주세요');
     const v=`010-${mid}-${end}`;
-    S.loginType='phone'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 번호로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인 · 주문 진행', '다시 입력', payConfirm);
+    S.loginType='phone'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 번호로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인했어요.', '다시 입력할게요.', payConfirm);
   } else {
     const v=(document.getElementById('emailIn')||{}).value.trim()||'';
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return toast('이메일 형식을 확인해 주세요 (예: name@email.com)');
-    S.loginType='email'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 이메일로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인 · 주문 진행', '다시 입력', payConfirm);
+    S.loginType='email'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 이메일로 주문 확인·완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인했어요.', '다시 입력할게요.', payConfirm);
   }
 }
 /* 범용 확인 시트 (제목·본문·버튼 라벨·확인 콜백) */

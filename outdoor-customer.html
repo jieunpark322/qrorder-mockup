@@ -182,11 +182,14 @@
   .m-reuse{font-size:11.5px;font-weight:700;color:#2f9e44;margin-top:5px;}
   .info-multi{white-space:pre-line;font-size:14.5px;color:var(--ink);line-height:1.8;}
   /* 매장 배너 롤링 (브랜드 → 매장) */
-  .sbanner-roll{position:relative;margin:14px 18px 0;height:58px;border-radius:12px;overflow:hidden;cursor:pointer;}
-  .sb-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:9px;color:#fff;font-size:14px;font-weight:800;opacity:0;animation:sbfade 8s infinite;}
+  /* 매장 배너: 이미지 기반 · 3:1 비율(권장 1080×360) · 브랜드↔매장 크로스페이드 롤링 */
+  .sbanner-roll{position:relative;margin:14px 18px 0;aspect-ratio:1080/360;border-radius:14px;overflow:hidden;cursor:pointer;background:#e9ecef;box-shadow:var(--shadow);}
+  .sb-slide{position:absolute;inset:0;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;padding:13px 16px;opacity:0;animation:sbfade 8s infinite;}
   .sb-slide:nth-child(2){animation-delay:4s;}
   @keyframes sbfade{0%,45%{opacity:1;}50%,100%{opacity:0;}}
-  .sb-tag{font-size:10px;font-weight:800;background:rgba(255,255,255,.28);padding:3px 8px;border-radius:20px;}
+  .sb-tag{align-self:flex-start;margin-bottom:auto;font-size:10.5px;font-weight:800;background:rgba(255,255,255,.92);color:var(--ink);padding:3px 10px;border-radius:20px;}
+  .sb-txt{color:#fff;font-size:15px;font-weight:800;line-height:1.35;text-shadow:0 1px 5px rgba(0,0,0,.55);}
+  .sb-sub{color:rgba(255,255,255,.92);font-size:12px;font-weight:600;margin-top:3px;text-shadow:0 1px 5px rgba(0,0,0,.55);}
   /* 포장 예약 시간 슬롯 */
   .timeslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
   .tslot{position:relative;border:1.5px solid var(--line);border-radius:10px;padding:12px 0;font-size:15px;font-weight:700;background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);}
@@ -1143,8 +1146,16 @@ function scStore(){
     </div>
     <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링) -->
     <div class="sbanner-roll" onclick="toast('배너 탭 → 지정 URL 랜딩')">
-      <div class="sb-slide" style="background:linear-gradient(100deg,#6741d9,#9775fa)"><span class="sb-tag">브랜드</span> 🎪 전 매장 공통 · 개장기념 이벤트</div>
-      <div class="sb-slide" style="background:linear-gradient(100deg,#e8590c,#ff922b)"><span class="sb-tag">매장</span> 🎁 첫 주문 시 사이드 500원 할인</div>
+      <div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('https://loremflickr.com/1080/360/festival,foodtruck?lock=201')">
+        <span class="sb-tag">브랜드</span>
+        <div class="sb-txt">🎪 전 매장 공통 · 개장기념 이벤트</div>
+        <div class="sb-sub">행사 기간 내내 전 부스 10% 할인</div>
+      </div>
+      <div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('https://loremflickr.com/1080/360/burger,food?lock=202')">
+        <span class="sb-tag">매장</span>
+        <div class="sb-txt">🎁 첫 주문 시 사이드 500원 할인</div>
+        <div class="sb-sub">${s.name} 단독 혜택</div>
+      </div>
     </div>
     <!-- 탭 -->
     <div class="mtabs">

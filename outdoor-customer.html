@@ -284,6 +284,7 @@
   .pcp-ck{width:20px;height:20px;border-radius:50%;border:2px solid #D1A050;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:900;}
   .pcp-row.on .pcp-ck{background:#E6A817;border-color:#E6A817;}
   .pcp-n{font-size:13px;font-weight:700;color:#78350f;}
+  .pcp-scope{font-size:10.5px;font-weight:800;color:#92400e;background:#fff;border:1px solid #FFE3A3;border-radius:5px;padding:1px 6px;margin-right:6px;}
   .pcp-d{font-size:12px;color:#92400e;margin-top:2px;}
   .pcp-clear{background:none;border:none;font-size:12px;color:#92400e;cursor:pointer;font-family:inherit;padding:4px 0 0;opacity:.7;text-decoration:underline;}
   .pay-coupon-none{font-size:13px;color:var(--ink3);text-align:center;padding:6px 0 14px;}
@@ -956,7 +957,7 @@ let S = {
   pickupH:null, pickupM:null,   // 선택한 시/분
   alertCh:'phone',     // 알림 채널: phone(카톡) | email
   contact:'',          // 입력한 휴대폰/이메일
-  couponId:null,       // 선택된 쿠폰 (null=미사용)
+  selCoupons:{},       // 스코프별 선택 쿠폰 { group:id, [storeId]:id } — 그룹/매장 쿠폰 동시 지원
   couponCode:'',       // 쿠폰 코드 입력값
   mktConsent:false,    // 혜택(쿠폰·이벤트) 알림 수신 동의 → 연락처 입력 시 보유 쿠폰 노출 트리거
   pMid:'', pEnd:'', pEmail:'',  // 결제 시트 연락처 입력 (실시간 쿠폰 노출용)
@@ -990,7 +991,7 @@ function setBrandWait(m){
 }
 function restart(){
   S.cart=[]; S.adult=false; S.searchOpen=false; S.searchQ=''; S.demoState='open'; S.fCat='전체'; S.fZone='전체';
-  S.couponId=null; S.couponCode=''; S.mktConsent=false; S.pMid=''; S.pEnd=''; S.pEmail='';
+  S.selCoupons={}; S.couponCode=''; S.mktConsent=false; S.pMid=''; S.pEnd=''; S.pEmail='';
   S.screen = S.mode==='group' ? 'splash' : 'store';
   S.curStore = S.mode==='group' ? 'burger' : 'burger';
   render();
@@ -1541,30 +1542,41 @@ function timeSlotsHTML(){
     <div style="font-size:12px;color:var(--ink4);margin-top:9px">예약 가능 시간대 중 선택 · 마감된 시간은 선택할 수 없어요</div>`;
 }
 
-/* ── 쿠폰 (내점형 기준 동기화) ──
-   ※ 통합결제(여러 매장) 시 쿠폰 적용 범위(그룹 전체 vs 매장별)는 재정립 필요 — 현재는 주문 전체 합계 기준 데모 */
+/* ── 쿠폰 (내점형 기준 동기화 + 야외형 재정립) ──
+   scope: 'group'(브랜드/그룹 = 주문 전체 합계) | 매장id(매장 쿠폰 = 해당 매장 소계) — 둘 다 지원(동시 선택 가능)
+   발급 기준: 입력한 연락처로 발급된 쿠폰만 노출 (데모: ISSUED가 그 목록) */
 const COUPONS = [
-  { id:'CP001', name:'개장기념 감사 쿠폰', type:'amount', value:1000, minOrder:8000,  desc:'8,000원 이상 주문 시 1,000원 할인' },
-  { id:'CP002', name:'음료 10% 할인',      type:'rate',   value:10,   maxDisc:3000, minOrder:0, desc:'최대 3,000원 할인' },
+  { id:'CP001', name:'개장기념 감사 쿠폰',       scope:'group',  type:'amount', value:1000, minOrder:8000, desc:'전체 주문 8,000원 이상 시 1,000원 할인' },
+  { id:'CP002', name:'음료 10% 할인',            scope:'group',  type:'rate',   value:10, maxDisc:3000, minOrder:0, desc:'전체 주문 최대 3,000원 할인' },
+  { id:'CP003', name:'소프트버거 트럭 단독 할인', scope:'burger', type:'amount', value:2000, minOrder:5000, desc:'이 매장 5,000원 이상 시 2,000원 할인' },
+  { id:'CP004', name:'소프트커피 쿠폰',          scope:'coffee', type:'amount', value:1000, minOrder:0, desc:'이 매장에서 1,000원 할인' },
 ];
-const COUPON_CODES = { 'HELLO2026':'CP001', 'SOFT10':'CP002' };
+const COUPON_CODES = { 'HELLO2026':'CP001', 'SOFT10':'CP002', 'BURGER2000':'CP003' };
+// 데모: 입력한 연락처로 발급된 쿠폰 id (실서비스는 서버에서 그 연락처 기준으로 내려줌)
+const ISSUED = ['CP001','CP002','CP003','CP004'];
 function cartSum(){ return S.cart.reduce((a,c)=>a+c.price*c.qty,0); }
-function couponDiscount(){
-  if(!S.couponId) return 0;
-  const cp=COUPONS.find(c=>c.id===S.couponId); if(!cp) return 0;
-  const total=cartSum(); if(total<cp.minOrder) return 0;
-  if(cp.type==='amount') return Math.min(cp.value,total);
-  if(cp.type==='rate') return Math.min(Math.round(total*cp.value/100), cp.maxDisc||Infinity);
-  return 0;
+function storeSum(sid){ return S.cart.filter(c=>c.store===sid).reduce((a,c)=>a+c.price*c.qty,0); }
+function couponBase(cp){ return cp.scope==='group' ? cartSum() : storeSum(cp.scope); }
+function couponAmt(cp){ const base=couponBase(cp); if(base<=0||base<cp.minOrder) return 0;
+  if(cp.type==='amount') return Math.min(cp.value,base);
+  if(cp.type==='rate') return Math.min(Math.round(base*cp.value/100), cp.maxDisc||Infinity);
+  return 0; }
+function selectedCoupons(){ return Object.values(S.selCoupons||{}).filter(Boolean).map(id=>COUPONS.find(c=>c.id===id)).filter(Boolean); }
+function couponDiscount(){ return selectedCoupons().reduce((a,cp)=>a+couponAmt(cp),0); }
+// 발급받은 쿠폰 중, 이번 주문에 적용 가능한 것(그룹 or 장바구니에 있는 매장)
+function availCoupons(){
+  const inCart=new Set(S.cart.map(c=>c.store));
+  return COUPONS.filter(cp=>ISSUED.includes(cp.id) && (cp.scope==='group' || inCart.has(cp.scope)));
 }
+function pickCoupon(id){ const cp=COUPONS.find(c=>c.id===id); if(!cp)return; S.selCoupons=S.selCoupons||{}; S.selCoupons[cp.scope]=(S.selCoupons[cp.scope]===id?null:id); refreshPaySheet(); render(); }
 function applyCode(){
   const code=(S.couponCode||'').trim().toUpperCase();
   if(!code) return toast('쿠폰 코드를 입력해 주세요');
-  const cid=COUPON_CODES[code];
-  if(!cid) return toast('유효하지 않거나 만료된 쿠폰 코드예요');
-  S.couponId=cid; S.couponCode=''; toast('쿠폰이 적용됐어요 🎉'); render();
+  const cid=COUPON_CODES[code]; const cp=cid&&COUPONS.find(c=>c.id===cid);
+  if(!cp) return toast('유효하지 않거나 만료된 쿠폰 코드예요');
+  if(cp.scope!=='group' && !S.cart.some(c=>c.store===cp.scope)) return toast(`${store(cp.scope).name} 상품을 담아야 쓸 수 있는 쿠폰이에요`);
+  S.selCoupons=S.selCoupons||{}; S.selCoupons[cp.scope]=cp.id; S.couponCode=''; toast('쿠폰이 적용됐어요 🎉'); render();
 }
-function pickCoupon(id){ S.couponId = (S.couponId===id? null : id); refreshPaySheet(); render(); }
 function toggleMkt(){ S.mktConsent=!S.mktConsent; refreshPaySheet(); }
 
 /* ── 주문 확인 및 결제 ── */
@@ -1608,9 +1620,10 @@ function scCheckout(){
     <!-- 쿠폰 코드 (보유 쿠폰은 결제 단계에서 연락처+수신동의 시 자동 노출) -->
     <div class="sect"><div class="sect-h">쿠폰 코드 <span class="scope-chip">선택</span></div>
       <div style="display:flex;gap:8px"><input class="field" placeholder="쿠폰 코드 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()"><button class="ghostbtn" style="width:auto;margin:0;padding:0 20px;white-space:nowrap" onclick="applyCode()">적용</button></div>
-      ${(()=>{ const cp=COUPONS.find(c=>c.id===S.couponId); if(!cp) return `<div style="font-size:12.5px;color:var(--ink4);margin-top:8px">혜택 알림에 동의하면 결제 단계에서 보유 쿠폰이 표시돼요.</div>`;
-        const d=couponDiscount();
-        return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;background:#FFF8E6;border:1px solid #FFE3A3;border-radius:10px;padding:10px 13px"><span style="font-size:13px;font-weight:800;color:#92400e">🎟️ ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button style="background:none;border:none;color:#92400e;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit" onclick="S.couponId=null;render()">해제</button></div>`;
+      ${(()=>{ const sel=selectedCoupons(); if(!sel.length) return `<div style="font-size:12.5px;color:var(--ink4);margin-top:8px">혜택 알림에 동의하면 결제 단계에서 발급받은 쿠폰이 표시돼요.</div>`;
+        return sel.map(cp=>{ const d=couponAmt(cp); const sc=cp.scope==='group'?'전체':store(cp.scope).name;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;background:#FFF8E6;border:1px solid #FFE3A3;border-radius:10px;padding:10px 13px"><span style="font-size:13px;font-weight:800;color:#92400e"><span style="font-size:11px;background:#fff;border:1px solid #FFE3A3;border-radius:5px;padding:1px 6px;margin-right:6px">${sc}</span>🎟️ ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button style="background:none;border:none;color:#92400e;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit" onclick="S.selCoupons['${cp.scope}']=null;render()">해제</button></div>`;
+        }).join('');
       })()}
     </div>
     <!-- 금액 요약 (할인 세분화 · 통합/개별은 브랜드 설정) -->
@@ -1677,12 +1690,14 @@ function paySheetHTML(){
   const finalAmt = Math.max(0, cartSum()-couponDiscount());
   // 연락처 입력 + 혜택 수신동의 → 보유 쿠폰 노출 (내점형 기준)
   const couponReveal = (contactOk && S.mktConsent) ? (()=>{
-    const avail=COUPONS;   // 데모: 전체 노출 (실서비스는 발급받은 쿠폰만)
-    if(!avail.length) return `<div class="pay-coupon-none">지금 사용 가능한 쿠폰이 없어요.</div>`;
+    const avail=availCoupons();   // 발급받은 쿠폰 중 이번 주문 적용 가능분(그룹 + 담긴 매장)
+    if(!avail.length) return `<div class="pay-coupon-none">입력하신 연락처로 발급된 쿠폰이 없어요.</div>`;
+    const anySel=selectedCoupons().length>0;
     return `<div class="pay-coupon">
-      <div class="pcp-h">🎟️ 사용 가능한 쿠폰 ${avail.length}장</div>
-      ${avail.map(cp=>{ const sel=S.couponId===cp.id; return `<div class="pcp-row ${sel?'on':''}" onclick="pickCoupon('${cp.id}')"><span class="pcp-ck">${sel?'✓':''}</span><div class="pcp-b"><div class="pcp-n">${cp.name}</div><div class="pcp-d">${cp.desc}</div></div></div>`; }).join('')}
-      ${S.couponId?`<button class="pcp-clear" onclick="S.couponId=null;refreshPaySheet();render()">쿠폰 사용 안 함</button>`:''}
+      <div class="pcp-h">🎟️ 발급받은 쿠폰 ${avail.length}장 · 그룹/매장 각각 선택할 수 있어요</div>
+      ${avail.map(cp=>{ const sel=(S.selCoupons||{})[cp.scope]===cp.id; const sc=cp.scope==='group'?'전체':store(cp.scope).name; const amt=couponAmt(cp);
+        return `<div class="pcp-row ${sel?'on':''}" onclick="pickCoupon('${cp.id}')"><span class="pcp-ck">${sel?'✓':''}</span><div class="pcp-b"><div class="pcp-n"><span class="pcp-scope">${sc}</span>${cp.name}</div><div class="pcp-d">${cp.desc}${sel&&amt===0?' · 현재 조건 미충족':''}</div></div></div>`; }).join('')}
+      ${anySel?`<button class="pcp-clear" onclick="S.selCoupons={};refreshPaySheet();render()">쿠폰 모두 사용 안 함</button>`:''}
     </div>`;
   })() : '';
   return `

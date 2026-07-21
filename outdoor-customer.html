@@ -314,6 +314,7 @@
   .callno{margin:26px auto 0;background:linear-gradient(135deg,var(--festA),var(--festB));color:#fff;border-radius:18px;padding:22px;max-width:280px;}
   .callno .cl-lbl{font-size:13px;opacity:.9;font-weight:700;}
   .callno .cl-num{font-size:52px;font-weight:900;letter-spacing:2px;margin-top:4px;}
+  .callno .cl-sub{font-size:12px;opacity:.85;font-weight:600;margin-top:6px;}
   .pickinfo{margin:22px auto 0;max-width:300px;font-size:14px;color:var(--ink2);line-height:1.7;background:var(--bg);border-radius:12px;padding:16px;}
   /* 완료 화면 주문 진행 스텝퍼 */
   .ord-steps{display:flex;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 10px;margin:24px auto 0;max-width:320px;box-shadow:var(--shadow);}
@@ -1811,6 +1812,7 @@ function scDone(){
     <div class="callno">
       <div class="cl-lbl">내 호출번호</div>
       <div class="cl-num">${callNo}</div>
+      <div class="cl-sub">${S.loginType==='email'?'주문 시 입력한 정보 기준':'휴대폰 번호 뒤 4자리'}</div>
     </div>
     <div class="pickinfo">
       ${S.service==='delivery'?`🛎️ <b>자리로 받기</b> · 입력하신 자리로 현장 배달`:(S.pickup==='reserve'?`📅 <b>포장 예약</b> · ${S.pickupTime||''} 수령`:'🥡 <b>즉시 포장 픽업</b>')} · ${loc}<br>

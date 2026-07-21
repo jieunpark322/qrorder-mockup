@@ -284,10 +284,23 @@
   .oh-card{background:#fff;border-radius:16px;margin:12px 14px;border:1px solid var(--line);box-shadow:0 2px 10px rgba(20,20,25,.05);overflow:hidden;}
   .oh-card.cancel{opacity:.92;}
   .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;background:linear-gradient(180deg,#fafafb,#fff);border-bottom:1px solid var(--line2);}
-  .oh-top-l{display:flex;align-items:baseline;gap:9px;min-width:0;}
+  .oh-top-l{display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .oh-ord-row{display:flex;align-items:baseline;gap:9px;}
   .oh-ord{font-size:15px;font-weight:900;color:var(--ink);}
   .oh-store-name{font-size:16px;font-weight:900;color:var(--ink);}
   .oh-time{font-size:12.5px;color:var(--ink3);font-weight:600;}
+  .oh-where{font-size:13px;color:var(--ink2);font-weight:600;}
+  .oh-contact{font-size:12.5px;}
+  .oh-contact.sm{margin:2px 0 8px;}
+  .oh-ct{color:var(--ink3);font-weight:600;background:var(--bg);border-radius:6px;padding:2px 8px;display:inline-block;}
+  .oh-detail{background:#fff;border:1.5px solid var(--line2);color:var(--ink2);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;}
+  .oh-detail.sm{padding:6px 11px;font-size:12px;}
+  .oh-detail:active{transform:scale(.96);}
+  .oh-foot-btns{display:flex;align-items:center;gap:8px;}
+  .oh-grp-btns{display:flex;align-items:center;gap:7px;}
+  .oh-grand.top{margin:12px 14px 4px;}
+  .oh-grand.top b{font-weight:900;}
+  .oh-grand-note{font-size:12px;color:var(--ink4);margin:0 16px 4px;text-align:right;}
   .st-badge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap;}
   .st-badge.sm{font-size:11px;padding:2px 8px;}
   .st-cook{color:#e8590c;background:#fff4e6;} .st-done{color:var(--green);background:#e6fcf5;} .st-pick{color:var(--ink3);background:var(--bg);} .st-rej{color:var(--red);background:#fff0f0;}
@@ -1583,16 +1596,16 @@ function scDone(){
 /* ── 주문 데이터 (결제건=회차=전자영수증 1건) ── */
 const ST_CLS = {'조리중':'st-cook','조리완료':'st-done','픽업완료':'st-pick','주문취소':'st-rej'};
 function getPayments(){
-  // 현재 장바구니를 최신 결제건으로 반영 (없으면 데모)
+  // 현재 장바구니를 최신 결제건으로 반영 (없으면 데모) · contact = 결제 시 입력한 연락처
   const live = (S.cart.length?S.cart:[{store:'burger',name:'더블 치즈버거',opt:'Regular',qty:1,price:9800}])
                 .map(c=>({store:c.store||'burger',name:c.name,opt:c.opt||'',qty:c.qty,price:c.price}));
   return [
-    {id:'A1042', time:'방금 전', paidAt:'2026-07-21 14:32', status:'조리중', pay:'신용카드', items:live},
-    {id:'A1039', time:'12분 전', paidAt:'2026-07-21 14:20', status:'조리완료', pickup:'B구역 1번 부스', pay:'카카오페이',
+    {id:'A1042', time:'방금 전', paidAt:'2026-07-21 14:32', status:'조리중', pay:'신용카드', contact:(S.contact||'010-1234-5678'), items:live},
+    {id:'A1039', time:'12분 전', paidAt:'2026-07-21 14:20', status:'조리완료', pickup:'B구역 1번 부스', pay:'카카오페이', contact:'010-9876-5432',
       items:[{store:'coffee',name:'바닐라 라떼',opt:'',qty:1,price:4800},{store:'coffee',name:'아메리카노',opt:'ICE',qty:1,price:3500}]},
-    {id:'A1035', time:'55분 전', paidAt:'2026-07-21 13:37', status:'픽업완료', pay:'신용카드',
+    {id:'A1035', time:'55분 전', paidAt:'2026-07-21 13:37', status:'픽업완료', pay:'신용카드', contact:'sohee@email.com',
       items:[{store:'burger',name:'수제 콜라',opt:'',qty:1,price:3000}]},
-    {id:'A1031', time:'41분 전', paidAt:'2026-07-21 13:11', status:'주문취소', canceledAt:'2026-07-21 13:14', pay:'신용카드',
+    {id:'A1031', time:'41분 전', paidAt:'2026-07-21 13:11', status:'주문취소', canceledAt:'2026-07-21 13:14', pay:'신용카드', contact:'010-1234-5678',
       cancel:'상품 품절로 자동 취소되었어요 · 결제 금액은 자동 환불 처리 (카드사 사정에 따라 영업일 3~7일 소요)',
       items:[{store:'chicken',name:'후라이드 세트',opt:'',qty:1,price:8500}]},
   ];
@@ -1601,41 +1614,47 @@ const sumItems = items => items.reduce((a,c)=>a+c.price*c.qty,0);
 const payTotal = p => p.status==='주문취소' ? 0 : sumItems(p.items);
 const grpByStore = items => { const g={}; items.forEach(it=>{(g[it.store]=g[it.store]||[]).push(it);}); return g; };
 const ohLine = it => `<div class="oh-line"><span class="ohl-n">${it.name}${it.opt?' · '+it.opt:''}</span><span class="ohl-q">×${it.qty}</span><span class="ohl-p">${won(it.price*it.qty)}</span></div>`;
+const contactHTML = c => (c||'').includes('@') ? `<span class="oh-ct">✉️ ${c}</span>` : `<span class="oh-ct">📱 ${c}</span>`;
+const storesLabel = items => { const ns=[...new Set(items.map(it=>store(it.store).name))]; return ns.length<=1?ns[0]:`${ns[0]} 외 ${ns.length-1}곳`; };
+function toggleHistDetail(id){ S.histOpen=S.histOpen||{}; S.histOpen[id]=!S.histOpen[id]; render(); }
 
-/* ── 내 주문 내역 ── */
+/* ── 내 주문 내역 (요약 + 상태 · 상세 버튼으로 메뉴 펼침) ── */
 function scHistory(){
   const unified = S.payScope==='unified';
   const view = unified ? (S.histView||'round') : 'store';   // 매장별은 통합결제만 · 기본은 회차별
   const P = getPayments();
+  const open = id => !!(S.histOpen && S.histOpen[id]);
+  const itemsBlock = groups => Object.entries(groups).map(([sid,items])=>`
+    <div class="oh-grp"><div class="oh-grp-h">${store(sid).logo} ${store(sid).name}</div>${items.map(ohLine).join('')}</div>`).join('');
   let body='';
 
   if(view==='round'){
-    // 회차(결제건)별 — 1 카드 = 1 결제 = 1 영수증
+    // 회차(결제건)별 — 1 카드 = 1 결제 = 1 영수증 · 요약 후 상세 버튼으로 메뉴 표시
     body = P.map(p=>{
-      const canceled = p.status==='주문취소';
-      const groups = grpByStore(p.items);
+      const canceled=p.status==='주문취소', o=open(p.id);
+      const total = canceled?sumItems(p.items):payTotal(p);
       return `<div class="oh-card ${canceled?'cancel':''}">
         <div class="oh-top">
-          <div class="oh-top-l"><span class="oh-ord">주문 #${p.id}</span><span class="oh-time">${p.time}</span></div>
+          <div class="oh-top-l">
+            <div class="oh-ord-row"><span class="oh-ord">주문 #${p.id}</span><span class="oh-time">${p.time}</span></div>
+            <div class="oh-where">📍 ${storesLabel(p.items)}</div>
+            <div class="oh-contact">${contactHTML(p.contact)}</div>
+          </div>
           <span class="st-badge ${ST_CLS[p.status]}">${p.status}</span>
         </div>
         ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup">🔔 조리가 끝났어요! 지금 <b>${p.pickup}</b>에서 픽업해 주세요</div>`:''}
-        <div class="oh-body">
-          ${Object.entries(groups).map(([sid,items])=>`
-            <div class="oh-grp">
-              <div class="oh-grp-h">${store(sid).logo} ${store(sid).name}</div>
-              ${items.map(ohLine).join('')}
-            </div>`).join('')}
-          ${canceled?`<div class="oh-cancelnote">↩️ ${p.cancel}</div>`:''}
-        </div>
+        ${o?`<div class="oh-body">${itemsBlock(grpByStore(p.items))}${canceled?`<div class="oh-cancelnote">↩️ ${p.cancel}</div>`:''}</div>`:''}
         <div class="oh-foot">
-          <div class="oh-foot-sum">${canceled?'취소 금액':'결제금액'} <b>${won(canceled?sumItems(p.items):payTotal(p))}</b></div>
-          <button class="oh-receipt" onclick="openReceipt('${p.id}')">🧾 ${canceled?'취소 영수증':'전자영수증'}</button>
+          <div class="oh-foot-sum">${canceled?'취소 금액':'결제금액'} <b>${won(total)}</b></div>
+          <div class="oh-foot-btns">
+            <button class="oh-detail" onclick="toggleHistDetail('${p.id}')">${o?'접기 ▲':'상세 ▼'}</button>
+            <button class="oh-receipt sm" onclick="openReceipt('${p.id}')">🧾 영수증</button>
+          </div>
         </div>
       </div>`;
     }).join('');
   } else {
-    // 매장별 — 매장 카드 안에서 결제건(회차)을 구분
+    // 매장별 — 매장 카드 안에서 결제건(회차)을 요약 + 상세 토글
     const byStore={};
     P.forEach(p=>{ const g=grpByStore(p.items); Object.entries(g).forEach(([sid,items])=>{ (byStore[sid]=byStore[sid]||[]).push({...p,items}); }); });
     body = Object.entries(byStore).map(([sid,pays])=>{
@@ -1647,13 +1666,14 @@ function scHistory(){
         </div>
         <div class="oh-body">
           ${pays.map(p=>{
-            const canceled=p.status==='주문취소';
+            const canceled=p.status==='주문취소', o=open(p.id);
+            const total = canceled?sumItems(p.items):payTotal(p);
             return `<div class="oh-grp">
               <div class="oh-grp-h split"><span class="oh-grp-ord">주문 #${p.id} · ${p.time}</span><span class="st-badge sm ${ST_CLS[p.status]}">${p.status}</span></div>
+              <div class="oh-contact sm">${contactHTML(p.contact)}</div>
               ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup sm">🔔 <b>${p.pickup}</b>에서 픽업해 주세요</div>`:''}
-              ${p.items.map(ohLine).join('')}
-              ${canceled?`<div class="oh-cancelnote">↩️ ${p.cancel}</div>`:''}
-              <div class="oh-grp-foot"><span>${canceled?'취소 금액':'소계'} ${won(canceled?sumItems(p.items):payTotal(p))}</span><button class="oh-receipt sm" onclick="openReceipt('${p.id}')">🧾 ${canceled?'취소 영수증':'영수증'}</button></div>
+              ${o?`${p.items.map(ohLine).join('')}${canceled?`<div class="oh-cancelnote">↩️ ${p.cancel}</div>`:''}`:''}
+              <div class="oh-grp-foot"><span>${canceled?'취소 금액':'소계'} ${won(total)}</span><span class="oh-grp-btns"><button class="oh-detail sm" onclick="toggleHistDetail('${p.id}')">${o?'접기':'상세'}</button><button class="oh-receipt sm" onclick="openReceipt('${p.id}')">🧾 영수증</button></span></div>
             </div>`;
           }).join('')}
         </div>
@@ -1670,13 +1690,11 @@ function scHistory(){
           <button class="${view==='round'?'on':''}" onclick="S.histView='round';render()">주문 회차별</button>
           <button class="${view==='store'?'on':''}" onclick="S.histView='store';render()">매장별</button>
         </div></div>`
-      : `<div class="oh-hint" style="margin-bottom:0">개별 결제는 매장별로 주문이 담겨, 매장 기준으로 보여드려요.</div>`}
-    <div class="oh-hint">💡 결제 1건마다 전자영수증이 발행돼요 (취소 건은 취소 영수증). 영수증 버튼으로 확인할 수 있어요.<br>주문 내역은 당일 자정이 지나면 자동으로 사라지니, 필요하면 화면을 캡처해 두세요 📸</div>
+      : ''}
+    <div class="oh-grand top"><span>전체 합계 (누적)</span><b>${won(grand)}</b></div>
+    <div class="oh-grand-note">${unified?'':'개별 결제는 매장 기준으로 보여드려요 · '}※ 취소·환불 건은 합계에서 제외돼요</div>
+    <div class="oh-hint">💡 결제 1건마다 영수증이 발행돼요 · 상세 버튼으로 주문 메뉴를, 영수증 버튼으로 결제 내역을 볼 수 있어요.<br>주문 내역은 당일 자정이 지나면 자동으로 사라지니, 필요하면 화면을 캡처해 두세요 📸</div>
     ${body}
-    <div class="oh-grand">
-      <span>전체 합계 (누적)</span><span>${won(grand)}</span>
-    </div>
-    <div style="font-size:12px;color:var(--ink4);margin:-4px 16px 0;text-align:right">※ 취소·환불 건은 합계에서 제외돼요</div>
     <div style="height:24px"></div>
   </div>`;
 }

@@ -1907,7 +1907,7 @@ function scHistory(){
               <div class="oh-contact sm">${contactHTML(p.contact)}</div>
               ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup sm">🔔 <b>${p.pickup}</b>에서 픽업해 주세요</div>`:''}
               ${o?`${p.items.map(ohLine).join('')}${canceled?`<div class="oh-cancelnote">↩️ ${p.cancel}</div>`:''}`:''}
-              <div class="oh-grp-foot"><span>${canceled?'취소 금액':'소계'} ${won(total)}</span><span class="oh-grp-btns"><button class="oh-detail sm" onclick="toggleHistDetail('${p.id}')">${o?'접기':'상세'}</button><button class="oh-receipt sm" onclick="openReceipt('${p.id}')">🧾 영수증</button></span></div>
+              <div class="oh-grp-foot"><span>${canceled?'취소 금액':'소계'} ${won(total)}</span><button class="oh-detail sm" onclick="toggleHistDetail('${p.id}')">${o?'접기':'상세'}</button></div>
             </div>`;
           }).join('')}
         </div>
@@ -1927,7 +1927,7 @@ function scHistory(){
       : ''}
     <div class="oh-grand top"><span>전체 합계 (누적)</span><b>${won(grand)}</b></div>
     <div class="oh-grand-note">${unified?'':'개별 결제는 매장 기준으로 보여드려요 · '}※ 취소·환불 건은 합계에서 제외돼요</div>
-    <div class="oh-hint">💡 결제 1건마다 영수증이 발행돼요 · 상세 버튼으로 주문 메뉴를, 영수증 버튼으로 결제 내역을 볼 수 있어요.<br>주문 내역은 당일 자정이 지나면 자동으로 사라지니, 필요하면 화면을 캡처해 두세요 📸</div>
+    <div class="oh-hint">💡 영수증은 결제 1건 기준이라 <b>‘주문 회차별’</b>에서 확인할 수 있어요. <b>‘매장별’</b>은 매장 기준으로 정렬해 보는 화면이에요.<br>주문 내역은 당일 자정이 지나면 자동으로 사라지니, 필요하면 화면을 캡처해 두세요 📸</div>
     ${body}
     <div style="height:24px"></div>
   </div>`;

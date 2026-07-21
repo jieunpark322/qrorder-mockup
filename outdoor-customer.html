@@ -1320,7 +1320,7 @@ function tryCheckout(){
     if(mi.basis==='group'){
       toast(`조금만 더 담으면 ${act}할 수 있어요`, `매장 그룹 통합 ${act} 기준 최소 ${won(mi.min)}부터 가능해요.`);
     } else {
-      toast(`조금만 더 담으면 ${act}할 수 있어요`, `매장별 최소 ${won(mi.min)}부터 ${act}할 수 있어요.`);
+      toast(`조금만 더 담으면 ${act}할 수 있어요`, `매장에서 정한 최소 주문 금액을 채워야 ${act}할 수 있어요.`);
     }
     return;
   }

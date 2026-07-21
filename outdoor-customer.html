@@ -277,18 +277,55 @@
   .callno .cl-num{font-size:52px;font-weight:900;letter-spacing:2px;margin-top:4px;}
   .pickinfo{margin:22px auto 0;max-width:300px;font-size:14px;color:var(--ink2);line-height:1.7;background:var(--bg);border-radius:12px;padding:16px;}
 
-  /* 주문내역 */
-  .oh-store{background:#fff;border-radius:14px;margin:12px 14px;overflow:hidden;border:1px solid var(--line);}
-  .oh-shead{padding:14px 16px;border-bottom:1px solid var(--line2);display:flex;align-items:center;justify-content:space-between;}
-  .oh-sname{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;}
-  .st-badge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;}
+  /* 주문내역 (결제건=회차 카드) */
+  .oh-tabwrap{padding:12px 14px 2px;}
+  .oh-card{background:#fff;border-radius:16px;margin:12px 14px;border:1px solid var(--line);box-shadow:0 2px 10px rgba(20,20,25,.05);overflow:hidden;}
+  .oh-card.cancel{opacity:.92;}
+  .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;background:linear-gradient(180deg,#fafafb,#fff);border-bottom:1px solid var(--line2);}
+  .oh-top-l{display:flex;align-items:baseline;gap:9px;min-width:0;}
+  .oh-ord{font-size:15px;font-weight:900;color:var(--ink);}
+  .oh-store-name{font-size:16px;font-weight:900;color:var(--ink);}
+  .oh-time{font-size:12.5px;color:var(--ink3);font-weight:600;}
+  .st-badge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+  .st-badge.sm{font-size:11px;padding:2px 8px;}
   .st-cook{color:#e8590c;background:#fff4e6;} .st-done{color:var(--green);background:#e6fcf5;} .st-pick{color:var(--ink3);background:var(--bg);} .st-rej{color:var(--red);background:#fff0f0;}
-  .oh-round{padding:12px 16px;border-bottom:1px solid var(--line2);}
-  .oh-rnd-h{font-size:13px;font-weight:800;color:var(--blue-d);margin-bottom:8px;display:flex;justify-content:space-between;}
-  .oh-line{display:flex;justify-content:space-between;font-size:14px;padding:4px 0;color:var(--ink2);}
-  .oh-tot{padding:12px 16px;display:flex;justify-content:space-between;font-size:15px;font-weight:800;background:var(--bg);}
-  .oh-phone{font-size:12px;color:var(--ink4);padding:0 16px 12px;}
+  .oh-body{padding:4px 16px;}
+  .oh-grp{padding:12px 0;border-bottom:1px dashed var(--line2);}
+  .oh-grp:last-child{border-bottom:none;}
+  .oh-grp-h{font-size:13.5px;font-weight:800;color:var(--ink);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+  .oh-grp-h.split{justify-content:space-between;}
+  .oh-grp-ord{font-size:13px;font-weight:800;color:var(--persimmon-d);}
+  .oh-line{display:flex;align-items:baseline;gap:8px;font-size:14px;padding:3px 0;color:var(--ink2);}
+  .oh-line .ohl-n{flex:1;min-width:0;}
+  .oh-line .ohl-q{color:var(--ink3);font-size:13px;font-weight:700;}
+  .oh-line .ohl-p{font-weight:700;color:var(--ink);}
+  .oh-cancelnote{font-size:12.5px;color:#c92a2a;font-weight:700;margin-top:8px;line-height:1.55;background:#fff0f0;border-radius:8px;padding:9px 11px;}
+  .oh-grp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:13px;font-weight:800;color:var(--ink);}
+  .oh-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--bg);border-top:1px solid var(--line2);}
+  .oh-foot-sum{font-size:14px;font-weight:700;color:var(--ink2);}
+  .oh-foot-sum b{font-size:16px;font-weight:900;color:var(--ink);margin-left:4px;}
+  .oh-receipt{background:#fff;border:1.5px solid var(--persimmon);color:var(--persimmon-d);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;}
+  .oh-receipt.sm{padding:6px 11px;font-size:12px;}
+  .oh-receipt:active{transform:scale(.96);}
+  .oh-pickup.sm{margin:0 0 8px;padding:8px 11px;font-size:12.5px;}
+  .oh-grand{display:flex;justify-content:space-between;align-items:center;background:#fff;margin:14px 14px 8px;border-radius:14px;border:1px solid var(--line);padding:16px;font-size:17px;font-weight:900;}
   .oh-hint{margin:12px 14px;font-size:12.5px;color:var(--ink3);line-height:1.65;background:#fff9e6;border:1px solid #ffe8a3;border-radius:10px;padding:13px;}
+  /* 전자영수증 시트 */
+  .sheet-receipt{padding:0;position:relative;max-height:86vh;}
+  .rc-scroll{max-height:86vh;overflow-y:auto;padding:30px 22px 26px;}
+  .rc-badge{display:inline-block;background:var(--blue-50);color:var(--persimmon-d);font-size:12px;font-weight:800;padding:4px 12px;border-radius:20px;}
+  .rc-badge.cancel{background:#fff0f0;color:var(--red);}
+  .rc-title{font-size:20px;font-weight:900;margin-top:12px;}
+  .rc-meta{font-size:12.5px;color:var(--ink3);margin-top:8px;line-height:1.6;}
+  .rc-meta b{color:var(--ink);}
+  .rc-cancel-at{color:var(--red);font-weight:700;}
+  .rc-hr{border-top:1px dashed var(--line);margin:16px 0;}
+  .rc-store{font-size:13.5px;font-weight:800;color:var(--ink);margin:12px 0 6px;}
+  .rc-line{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:4px 0;color:var(--ink2);}
+  .rc-line.dim{color:var(--ink3);}
+  .rc-total{font-size:17px;font-weight:900;color:var(--ink);border-top:1px solid var(--line);margin-top:6px;padding-top:12px;}
+  .rc-cancelbox{background:#fff0f0;border:1px solid #f5c6c6;border-radius:10px;padding:11px 13px;font-size:12.5px;color:#c0392b;font-weight:700;line-height:1.55;margin-top:12px;}
+  .rc-foot{font-size:11.5px;color:var(--ink4);line-height:1.6;margin-top:4px;}
 
   /* 상황 전체화면 */
   .fullmsg{min-height:calc(100vh - 62px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 34px;}
@@ -668,6 +705,11 @@
   </div>
 </div>
 
+<!-- 전자영수증 시트 -->
+<div class="modal-bg" id="receiptModal" onclick="if(event.target===this)closeReceipt()">
+  <div class="sheet sheet-receipt" id="receiptInner"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -855,7 +897,7 @@ function restart(){
   render();
   if(S.screen==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); }
 }
-function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); if(scr==='home') S._homeOrder=null; /* 홈 진입마다 랜덤 재배치 */ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
+function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); closeReceipt(); if(scr==='home') S._homeOrder=null; /* 홈 진입마다 랜덤 재배치 */ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
   if(scr==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); } }
 function openStore(id){ S.demoState='open'; S.curStore=id; S.storeTab='menu'; go('store'); }
 // 영업종료·브레이크 데모: 전체화면이 아니라 매장 화면에서 메뉴판만 조회(주문 불가)
@@ -869,7 +911,7 @@ function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet'
 function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); syncBgLock(); }
 // 시트/모달이 하나라도 열려 있으면 배경(페이지) 스크롤 잠금 → 상세 화면만 컨트롤
 function syncBgLock(){
-  const open=['menuSheet','adultModal','confirmModal'].some(id=>document.getElementById(id).classList.contains('on'));
+  const open=['menuSheet','adultModal','confirmModal','receiptModal'].some(id=>document.getElementById(id).classList.contains('on'));
   document.documentElement.style.overflow=open?'hidden':'';
   document.body.style.overflow=open?'hidden':'';
 }
@@ -1526,78 +1568,138 @@ function scDone(){
   </div>`;
 }
 
+/* ── 주문 데이터 (결제건=회차=전자영수증 1건) ── */
+const ST_CLS = {'조리중':'st-cook','조리완료':'st-done','픽업완료':'st-pick','주문취소':'st-rej'};
+function getPayments(){
+  // 현재 장바구니를 최신 결제건으로 반영 (없으면 데모)
+  const live = (S.cart.length?S.cart:[{store:'burger',name:'더블 치즈버거',opt:'Regular',qty:1,price:9800}])
+                .map(c=>({store:c.store||'burger',name:c.name,opt:c.opt||'',qty:c.qty,price:c.price}));
+  return [
+    {id:'A1042', time:'방금 전', paidAt:'2026-07-21 14:32', status:'조리중', pay:'신용카드', items:live},
+    {id:'A1039', time:'12분 전', paidAt:'2026-07-21 14:20', status:'조리완료', pickup:'B구역 1번 부스', pay:'카카오페이',
+      items:[{store:'coffee',name:'바닐라 라떼',opt:'',qty:1,price:4800},{store:'coffee',name:'아메리카노',opt:'ICE',qty:1,price:3500}]},
+    {id:'A1035', time:'55분 전', paidAt:'2026-07-21 13:37', status:'픽업완료', pay:'신용카드',
+      items:[{store:'burger',name:'수제 콜라',opt:'',qty:1,price:3000}]},
+    {id:'A1031', time:'41분 전', paidAt:'2026-07-21 13:11', status:'주문취소', canceledAt:'2026-07-21 13:14', pay:'신용카드',
+      cancel:'상품 품절로 자동 취소되었어요 · 결제 금액은 자동 환불 처리 (카드사 사정에 따라 영업일 3~7일 소요)',
+      items:[{store:'chicken',name:'후라이드 세트',opt:'',qty:1,price:8500}]},
+  ];
+}
+const sumItems = items => items.reduce((a,c)=>a+c.price*c.qty,0);
+const payTotal = p => p.status==='주문취소' ? 0 : sumItems(p.items);
+const grpByStore = items => { const g={}; items.forEach(it=>{(g[it.store]=g[it.store]||[]).push(it);}); return g; };
+const ohLine = it => `<div class="oh-line"><span class="ohl-n">${it.name}${it.opt?' · '+it.opt:''}</span><span class="ohl-q">×${it.qty}</span><span class="ohl-p">${won(it.price*it.qty)}</span></div>`;
+
 /* ── 내 주문 내역 ── */
 function scHistory(){
   const unified = S.payScope==='unified';
-  // 매장별 보기는 통합결제에만 해당 (개별결제는 매장별 주문이 당연 → 매장 기준만)
-  const view = unified ? (S.histView||'store') : 'store';
-  const stCls = {'조리중':'st-cook','조리완료':'st-done','픽업완료':'st-pick','주문 취소':'st-rej'};
-  const sumOf = items => items.reduce((a,c)=>a+c.price*c.qty,0);
-  const lineHTML = (it,showStore)=>`<div class="oh-line"><span>${store(it.store).logo} ${it.name}${it.opt?' · '+it.opt:''} × ${it.qty}${showStore?` <span style="color:var(--ink4)">· ${store(it.store).name}</span>`:''}</span><span>${won(it.price*it.qty)}</span></div>`;
-  // 데모 주문 데이터 — 회차 × 매장 (현재 장바구니를 최신 회차로 반영)
-  const live = (S.cart.length?S.cart:[{store:'burger',name:'더블 치즈버거',opt:'Regular',qty:1,price:9800}])
-                .map(c=>({store:c.store||'burger',name:c.name,opt:c.opt||'',qty:c.qty,price:c.price}));
-  const ROUNDS = [
-    {label:'2차 주문', time:'방금 전', status:'조리중', items:live},
-    {label:'1차 주문', time:'12분 전', status:'조리완료', pickup:'B구역 1번 부스',
-      items:[{store:'coffee',name:'바닐라 라떼',opt:'',qty:1,price:4800},{store:'coffee',name:'아메리카노',opt:'ICE',qty:1,price:3500}]},
-    {label:'이전 주문', time:'55분 전', status:'픽업완료',
-      items:[{store:'burger',name:'수제 콜라',opt:'',qty:1,price:3000}]},
-    {label:'이전 주문', time:'41분 전', status:'주문 취소', cancel:'상품 품절로 자동 취소되었어요 · 결제 금액은 자동 환불 처리 (카드사 사정에 따라 영업일 3~7일 소요)',
-      items:[{store:'chicken',name:'후라이드 세트',opt:'',qty:1,price:8500}]},
-  ];
+  const view = unified ? (S.histView||'round') : 'store';   // 매장별은 통합결제만 · 기본은 회차별
+  const P = getPayments();
   let body='';
+
   if(view==='round'){
-    // 주문 회차별: 한 번의 주문(회차)에 여러 매장이 함께 담김
-    body = ROUNDS.map(r=>`
-      <div class="oh-store">
-        <div class="oh-shead"><div class="oh-sname">🧾 ${r.label} · ${r.time}</div><span class="st-badge ${stCls[r.status]}">${r.status}</span></div>
-        ${(r.status==='조리완료'&&r.pickup)?`<div class="oh-pickup">🔔 조리가 끝났어요! 지금 <b>${r.pickup}</b>에서 픽업해 주세요</div>`:''}
-        <div class="oh-round">
-          ${r.items.map(it=>lineHTML(it,true)).join('')}
-          ${r.cancel?`<div style="font-size:12.5px;color:#c92a2a;font-weight:700;margin-top:9px;line-height:1.55">😢 ${r.cancel}</div>`:''}
+    // 회차(결제건)별 — 1 카드 = 1 결제 = 1 영수증
+    body = P.map(p=>{
+      const canceled = p.status==='주문취소';
+      const groups = grpByStore(p.items);
+      return `<div class="oh-card ${canceled?'cancel':''}">
+        <div class="oh-top">
+          <div class="oh-top-l"><span class="oh-ord">주문 #${p.id}</span><span class="oh-time">${p.time}</span></div>
+          <span class="st-badge ${ST_CLS[p.status]}">${p.status}</span>
         </div>
-        <div class="oh-tot"><span>회차 합계</span><span>${won(r.status==='주문 취소'?0:sumOf(r.items))}</span></div>
-      </div>`).join('');
+        ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup">🔔 조리가 끝났어요! 지금 <b>${p.pickup}</b>에서 픽업해 주세요</div>`:''}
+        <div class="oh-body">
+          ${Object.entries(groups).map(([sid,items])=>`
+            <div class="oh-grp">
+              <div class="oh-grp-h">${store(sid).logo} ${store(sid).name}</div>
+              ${items.map(ohLine).join('')}
+            </div>`).join('')}
+          ${canceled?`<div class="oh-cancelnote">↩️ ${p.cancel}</div>`:''}
+        </div>
+        <div class="oh-foot">
+          <div class="oh-foot-sum">${canceled?'취소 금액':'결제금액'} <b>${won(canceled?sumItems(p.items):payTotal(p))}</b></div>
+          <button class="oh-receipt" onclick="openReceipt('${p.id}')">🧾 ${canceled?'취소 영수증':'전자영수증'}</button>
+        </div>
+      </div>`;
+    }).join('');
   } else {
-    // 매장별: 회차 데이터를 매장 기준으로 재그룹
+    // 매장별 — 매장 카드 안에서 결제건(회차)을 구분
     const byStore={};
-    ROUNDS.forEach(r=>{
-      const bySid={}; r.items.forEach(it=>{(bySid[it.store]=bySid[it.store]||[]).push(it);});
-      Object.entries(bySid).forEach(([sid,items])=>{ (byStore[sid]=byStore[sid]||[]).push({label:r.label,time:r.time,status:r.status,pickup:r.pickup,cancel:r.cancel,items}); });
-    });
-    body = Object.entries(byStore).map(([sid,rounds])=>`
-      <div class="oh-store">
-        <div class="oh-shead"><div class="oh-sname">${store(sid).logo} ${store(sid).name}</div><span class="st-badge ${stCls[rounds[0].status]}">${rounds[0].status}</span></div>
-        ${rounds.map(rd=>`
-          ${(rd.status==='조리완료'&&rd.pickup)?`<div class="oh-pickup">🔔 조리가 끝났어요! 지금 <b>${rd.pickup}</b>에서 픽업해 주세요</div>`:''}
-          <div class="oh-round">
-            <div class="oh-rnd-h"><span>${rd.label} · ${rd.time}</span><span>${won(rd.status==='주문 취소'?0:sumOf(rd.items))}</span></div>
-            ${rd.items.map(it=>lineHTML(it,false)).join('')}
-            ${rd.cancel?`<div style="font-size:12.5px;color:#c92a2a;font-weight:700;margin-top:9px;line-height:1.55">😢 ${rd.cancel}</div>`:''}
-          </div>`).join('')}
-        <div class="oh-tot"><span>매장 합계 (누적)</span><span>${won(rounds.reduce((a,rd)=>a+(rd.status==='주문 취소'?0:sumOf(rd.items)),0))}</span></div>
-      </div>`).join('');
+    P.forEach(p=>{ const g=grpByStore(p.items); Object.entries(g).forEach(([sid,items])=>{ (byStore[sid]=byStore[sid]||[]).push({...p,items}); }); });
+    body = Object.entries(byStore).map(([sid,pays])=>{
+      const stTotal = pays.reduce((a,p)=>a+payTotal(p),0);
+      return `<div class="oh-card">
+        <div class="oh-top">
+          <div class="oh-top-l"><span class="oh-store-name">${store(sid).logo} ${store(sid).name}</span></div>
+          <span class="st-badge ${ST_CLS[pays[0].status]}">${pays[0].status}</span>
+        </div>
+        <div class="oh-body">
+          ${pays.map(p=>{
+            const canceled=p.status==='주문취소';
+            return `<div class="oh-grp">
+              <div class="oh-grp-h split"><span class="oh-grp-ord">주문 #${p.id} · ${p.time}</span><span class="st-badge sm ${ST_CLS[p.status]}">${p.status}</span></div>
+              ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup sm">🔔 <b>${p.pickup}</b>에서 픽업해 주세요</div>`:''}
+              ${p.items.map(ohLine).join('')}
+              ${canceled?`<div class="oh-cancelnote">↩️ ${p.cancel}</div>`:''}
+              <div class="oh-grp-foot"><span>${canceled?'취소 금액':'소계'} ${won(canceled?sumItems(p.items):payTotal(p))}</span><button class="oh-receipt sm" onclick="openReceipt('${p.id}')">🧾 ${canceled?'취소 영수증':'영수증'}</button></div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="oh-foot"><div class="oh-foot-sum">매장 합계 <b>${won(stTotal)}</b></div></div>
+      </div>`;
+    }).join('');
   }
-  const grand = ROUNDS.reduce((a,r)=>a+(r.status==='주문 취소'?0:sumOf(r.items)),0);
+  const grand = P.reduce((a,p)=>a+payTotal(p),0);
   return `
   <div class="hdr"><button class="bk" onclick="go(S.mode==='group'?'home':'store')">‹</button><div class="ht">내 주문 내역</div></div>
   <div class="scroll">
     ${unified
-      ? `<div style="padding:12px 14px 2px"><div class="seg">
-          <button class="${view==='store'?'on':''}" onclick="S.histView='store';render()">매장별</button>
+      ? `<div class="oh-tabwrap"><div class="seg">
           <button class="${view==='round'?'on':''}" onclick="S.histView='round';render()">주문 회차별</button>
+          <button class="${view==='store'?'on':''}" onclick="S.histView='store';render()">매장별</button>
         </div></div>`
       : `<div class="oh-hint" style="margin-bottom:0">개별 결제는 매장별로 주문이 담겨, 매장 기준으로 보여드려요.</div>`}
-    <div class="oh-hint">주문하신 내역은 당일 자정이 지나면 자동으로 사라져요. 영수증이나 기록이 필요하시다면 미리 화면을 캡처해 두시는 것을 추천해 드려요! 📸<br><br>💬 상태 변화는 <b>카카오톡 알림톡 · 이메일</b> 중 선택하신 방법으로 안내드려요. (웹 기반이라 앱 푸시 알림은 없어요)</div>
+    <div class="oh-hint">💡 결제 1건마다 전자영수증이 발행돼요 (취소 건은 취소 영수증). 영수증 버튼으로 확인할 수 있어요.<br>주문 내역은 당일 자정이 지나면 자동으로 사라지니, 필요하면 화면을 캡처해 두세요 📸</div>
     ${body}
-    <div style="background:#fff;margin:12px 14px;border-radius:14px;border:1px solid var(--line);padding:16px">
-      <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:900"><span>전체 합계 (누적)</span><span>${won(grand)}</span></div>
-      <div style="font-size:12px;color:var(--ink4);margin-top:6px">※ 취소·환불 건은 합계에서 제외돼요</div>
+    <div class="oh-grand">
+      <span>전체 합계 (누적)</span><span>${won(grand)}</span>
     </div>
-    <div style="height:20px"></div>
+    <div style="font-size:12px;color:var(--ink4);margin:-4px 16px 0;text-align:right">※ 취소·환불 건은 합계에서 제외돼요</div>
+    <div style="height:24px"></div>
   </div>`;
 }
+/* ── 전자영수증 ── */
+function openReceipt(id){
+  const p=getPayments().find(x=>x.id===id); if(!p)return;
+  const canceled=p.status==='주문취소';
+  const groups=grpByStore(p.items);
+  const sub=sumItems(p.items);
+  const coupon = canceled?0:1000;               // 데모: 취소건은 쿠폰 미적용 가정
+  const total=Math.max(0,sub-coupon);
+  document.getElementById('receiptInner').innerHTML = `
+    <div class="ms-grab"><span></span></div>
+    <button class="ms-close" onclick="closeReceipt()">✕</button>
+    <div class="rc-scroll">
+      <div class="rc-badge ${canceled?'cancel':''}">${canceled?'취소 전자영수증':'전자영수증'}</div>
+      <div class="rc-title">${canceled?'주문이 취소되었어요':'결제가 완료되었어요'}</div>
+      <div class="rc-meta">주문번호 <b>${p.id}</b><br>결제일시 ${p.paidAt}${canceled?`<br><span class="rc-cancel-at">취소일시 ${p.canceledAt}</span>`:''}</div>
+      <div class="rc-hr"></div>
+      ${Object.entries(groups).map(([sid,items])=>`
+        <div class="rc-store">${store(sid).logo} ${store(sid).name}</div>
+        ${items.map(it=>`<div class="rc-line"><span>${it.name}${it.opt?' · '+it.opt:''} ×${it.qty}</span><span>${won(it.price*it.qty)}</span></div>`).join('')}
+      `).join('')}
+      <div class="rc-hr"></div>
+      <div class="rc-line"><span>상품 합계</span><span>${won(sub)}</span></div>
+      ${coupon?`<div class="rc-line"><span>쿠폰 할인</span><span>−${won(coupon)}</span></div>`:''}
+      <div class="rc-line rc-total"><span>${canceled?'환불 예정 금액':'결제금액'}</span><span>${won(total)}</span></div>
+      <div class="rc-line dim"><span>결제수단</span><span>${p.pay}</span></div>
+      ${canceled?`<div class="rc-cancelbox">↩️ ${p.cancel}</div>`:''}
+      <div class="rc-hr"></div>
+      <div class="rc-foot">본 영수증은 전자적으로 발행된 거래 확인 내역이에요. 세금계산서·현금영수증과는 별개예요.<br>당일 자정 이후 자동 삭제되니 필요하면 화면을 캡처해 두세요 📸</div>
+    </div>`;
+  document.getElementById('receiptModal').classList.add('on'); syncBgLock();
+}
+function closeReceipt(){ const el=document.getElementById('receiptModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 
 /* ── 상황 전체화면 공통 ── */
 function full(ic,t,b,btn,target,note){

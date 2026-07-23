@@ -181,7 +181,6 @@
   .m-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-left:6px;}
   .m-left-r{font-size:12px;font-weight:800;color:#e8590c;background:#fff4e6;border-radius:9px;padding:6px 10px;white-space:nowrap;text-align:center;line-height:1.25;}
   .m-left-r b{font-size:14px;}
-  .m-left-r.fcfs{color:var(--red);background:#fff0f0;}
   .m-reuse{font-size:11.5px;font-weight:700;color:#2f9e44;margin-top:5px;}
   .info-multi{white-space:pre-line;font-size:14.5px;color:var(--ink);line-height:1.8;}
   /* 매장 배너 롤링 (브랜드 → 매장) */
@@ -525,7 +524,6 @@
   .m-hh{background:var(--mustard);color:#3a2410;}
   .m-thumb{border-radius:14px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
   .m-left-r{background:#FFEAD9;color:var(--persimmon-d);}
-  .m-left-r.fcfs{background:#FCE4EC;color:var(--mulberry);}
 
   /* ── 세그/칩/옵션/입력 ── */
   .cchip.on{background:var(--ink);} .catrow.sub .cchip.on{background:var(--persimmon);}
@@ -610,7 +608,7 @@
   .m-hh{color:#B0740A;background:#FBF1DB;}
   .s-badge.open{color:var(--green);background:#EAF6EF;} .s-badge.closed{color:var(--red);background:#FDECEC;}
   .s-tag{background:#F3F3F5;color:var(--ink2);} .s-tag.wait{color:var(--persimmon);background:var(--blue-50);}
-  .m-left-r{color:var(--persimmon-d);background:var(--blue-50);} .m-left-r.fcfs{color:var(--mulberry);background:#ECEBFB;}
+  .m-left-r{color:var(--persimmon-d);background:var(--blue-50);}
   .st-cook{color:var(--persimmon);background:var(--blue-50);} .st-done{color:var(--green);background:#EAF6EF;}
   .st-pick{color:var(--ink3);background:#F1F1F3;} .st-rej{color:var(--red);background:#FDECEC;}
   .oh-pickup{background:#EAF6EF;border-top-color:#D8EFE3;color:#157A52;}
@@ -665,7 +663,6 @@
   .m-right{padding-left:8px;}
   .m-left-r{font-size:11.5px;font-weight:700;color:var(--point);background:var(--point-50);border-radius:8px;padding:6px 10px;white-space:nowrap;line-height:1.3;text-align:center;}
   .m-left-r b{font-size:13px;color:var(--point);}
-  .m-left-r.fcfs{color:var(--point);background:var(--point-50);}
   .m-left-r.low{color:#fff;background:var(--point);animation:lowPulse 1.5s infinite;}
   .m-left-r.low b{color:#fff;}
   @keyframes lowPulse{0%{box-shadow:0 0 0 0 rgba(242,80,62,.45)}70%{box-shadow:0 0 0 7px rgba(242,80,62,0)}100%{box-shadow:0 0 0 0 rgba(242,80,62,0)}}
@@ -822,7 +819,7 @@ const STORES = [
       {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, hh:true, hhPrice:4400, nutrition:'약 380kcal', upsell:true},
       {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13', upsell:true},
       {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
-      {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 한정', price:15000, fcfs:true, fcfsPrice:9900, fcfsLeft:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
+      {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료', price:15000, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
     ]},
   { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=760&q=72',
@@ -833,7 +830,7 @@ const STORES = [
       {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true, upsell:true},
       {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true, allergy:'우유 함유', nutrition:'약 250kcal'},
       {id:'c3', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', photo:'https://loremflickr.com/320/320/lemonade?lock=19', left:3},
-      {id:'c4', name:'선착순 콜드브루', desc:'하루 30잔 한정 특가', price:5500, fcfs:true, fcfsPrice:3900, fcfsLeft:12, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20', upsell:true},
+      {id:'c4', name:'콜드브루', desc:'', price:5500, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20', upsell:true},
     ]},
   { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=760&q=72',
     open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
@@ -1264,11 +1261,10 @@ function mcardHTML(sid,m,closed){
   const badgeMap={hot:['인기','hot'],new:['신메뉴','new'],rec:['추천','rec']};
   const badges = (m.badges||[]).map(b=>badgeMap[b]).filter(Boolean).map(([t,c])=>`<span class="m-tag ${c}">${t}</span>`).join('');
   let promo='', now=m.price, was='';
-  if(m.fcfs){ promo='선착순'; now=m.fcfsPrice; was=m.price; }
-  else if(m.hh){ promo='해피아워'; now=m.hhPrice; was=m.price; }
+  if(m.hh){ promo='해피아워'; now=m.hhPrice; was=m.price; }
   else if(m.was){ was=m.was; }
   const price = `${promo?`<span class="m-promo">${promo}</span>`:''}<span class="m-now ${(promo||was)?'sale':''}">${won(now)}</span>${was?`<span class="m-was">${won(was)}</span>`:''}`;
-  const rightVal = m.fcfs ? {t:'선착순', n:m.fcfsLeft} : (m.left!=null ? {t:'남은 수량', n:m.left} : null);
+  const rightVal = m.left!=null ? {t:'남은 수량', n:m.left} : null;
   const lowStock = rightVal && rightVal.n<=5;   // 5개 이하 = 곧 품절 강조
   return `<button class="mcard ${m.soldout?'soldout':''}" onclick="openMenu('${sid}','${m.id}')">
     <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">품절</div>':''}</div>
@@ -1279,7 +1275,7 @@ function mcardHTML(sid,m,closed){
       <div class="m-price">${price}</div>
       ${m.reuse?`<div class="m-reuse">♻️ 다회용기 제공</div>`:''}
     </div>
-    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${m.fcfs?'fcfs':''} ${lowStock?'low':''}">${lowStock?`🔥 품절임박<br><b>${rightVal.n}개</b>`:`${rightVal.t}<br><b>${rightVal.n}개</b>`}</span></div>`:''}
+    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${lowStock?'low':''}">${lowStock?`🔥 품절임박<br><b>${rightVal.n}개</b>`:`${rightVal.t}<br><b>${rightVal.n}개</b>`}</span></div>`:''}
   </button>`;
 }
 
@@ -1314,7 +1310,7 @@ function renderMenuSheet(){
   const blocked = (!s.open) || S.demoState==='closed' || S.demoState==='break' || stPaused;
   const disabled = m.soldout || blocked;   // 품절·영업종료·브레이크·준비중 → 정보 조회는 가능, 주문만 비활성화
   const opts=['Regular','Large (+1,500원)'];
-  const base = m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
+  const base = m.hh?m.hhPrice:m.price;
   const listPx = m.was||m.price; const isSale = base<listPx;   // 할인 여부
   const optAdd = S.tmpOpt===1?1500:0;
   const total=(base+optAdd)*S.tmpQty;
@@ -1363,12 +1359,12 @@ function addToCart(){
     openConfirm('다른 매장 메뉴예요', `개별 결제는 한 매장만 담을 수 있어요.<br>담으면 <b style="color:var(--ink)">[${prev}]</b>에 담은 상품이 사라지고 새로 담겨요.`, '네, 새로 담을게요', '취소', ()=>{ S.cart=[]; addToCart(); });
     return;
   }
-  const base=m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
+  const base=m.hh?m.hhPrice:m.price;
   const listBase=m.was||m.price;   // 정가(할인 전) — 금액 요약 할인 세분화용
   const add=S.tmpOpt===1?1500:0;
   S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, emoji:m.emoji||'', img:m.img, photo:m.photo||'',
     opt:S.tmpOpt===1?'Large':'Regular', qty:S.tmpQty, price:(base+add), listPrice:(listBase+add),
-    disc:(m.fcfs?'선착순':(m.hh?'해피아워':(m.was?'할인':null)))});
+    disc:(m.hh?'해피아워':(m.was?'할인':null))});
   toast('장바구니에 담았어요');
   closeMenuSheet();
   render();   // 뒤에 깔린 매장 화면 갱신 → 하단 장바구니 바 표시
@@ -1500,7 +1496,7 @@ function computeUpsell(){
   return S._upsellList;
 }
 function upsellRow(sid,m,showStore){
-  const price = m.fcfs?m.fcfsPrice:(m.hh?m.hhPrice:m.price);
+  const price = m.hh?m.hhPrice:m.price;
   return `<div class="citem" style="border:none;padding:10px 0">
     <div class="ci-th" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.photo?'':(m.img||'')}</div>
     <div class="ci-b"><div class="ci-n">${m.name} ${m.emoji||''}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
@@ -1594,7 +1590,7 @@ function toggleMkt(){ S.mktConsent=!S.mktConsent; refreshPaySheet(); }
 function scCheckout(){
   const listSum=S.cart.reduce((a,c)=>a+(c.listPrice||c.price)*c.qty,0);  // 정가 합계
   const paidSum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);                  // 할인 적용가 합계
-  const itemDisc=listSum-paidSum;                                        // 해피아워·선착순·일반 할인 합
+  const itemDisc=listSum-paidSum;                                        // 해피아워·일반 할인 합
   const coupon=couponDiscount();
   const final=Math.max(0,paidSum-coupon);
   const post = S.bill==='post';
@@ -1640,7 +1636,7 @@ function scCheckout(){
     <!-- 금액 요약 (할인 세분화 · 통합/개별은 브랜드 설정) -->
     <div class="sect"><div class="sect-h" style="display:flex;justify-content:space-between;align-items:center">${post?'주문 금액 요약':'결제 금액 요약'}<span class="scope-chip">${S.payScope==='unified'?'여러 매장 통합 결제':'매장별 개별 결제'}</span></div>
       <div class="row"><span>상품 합계 (정가)</span><span class="v">${won(listSum)}</span></div>
-      ${itemDisc>0?`<div class="row"><span>상품 할인 (해피아워·선착순 등)</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
+      ${itemDisc>0?`<div class="row"><span>상품 할인 (해피아워 등)</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
       ${coupon>0?`<div class="row"><span>🎟️ 쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>`:''}
       <div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-size:17px;font-weight:800;color:var(--ink)"><span>${post?'주문 금액':'최종 결제금액'}</span><span>${won(final)}</span></div>
       ${mi.on ? (mi.below

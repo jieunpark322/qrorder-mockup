@@ -24,7 +24,12 @@
     --ui:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
     --shadow:0 2px 10px rgba(20,20,25,.05);
     --shadow-lg:0 12px 44px rgba(20,20,25,.14);
+    /* 타이포 6단 스케일 (본문 최소 15px) */
+    --t-title:22px; --t-lg:17px; --t-body:15px; --t-sub:14px; --t-meta:13px; --t-cap:11.5px;
   }
+  /* 단색 라인 아이콘 (currentColor 상속) */
+  .ic-svg{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-3px;}
+  .nums{font-variant-numeric:tabular-nums;}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
   body{font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
@@ -722,6 +727,62 @@
   .d-info-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 13px;border:none;border-radius:9px;background:#EEEEF0;color:var(--ink2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
   .d-info-btn:active{transform:scale(.97);}
   .d-info-btn.open{background:#E4E4E7;color:var(--ink);}
+
+  /* ══════════════ 디자인 고도화 오버라이드 (홈: 카테고리·매장 카드·아이콘·타이포) ══════════════ */
+  /* 1) 카테고리 — 분류=pill, 구역=텍스트 탭 */
+  .filterset{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:16;}
+  .filterset .frow{display:flex;align-items:center;gap:8px;padding:10px 16px;min-height:56px;}
+  .filterset .frow.tabs{padding-top:2px;padding-bottom:8px;min-height:48px;}
+  .filterset .frow + .frow{border-top:none;}
+  .cchips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;}
+  .cchips::-webkit-scrollbar{display:none;}
+  .cchip{flex-shrink:0;min-height:44px;padding:0 17px;border-radius:999px;background:#fff;border:1px solid var(--line);
+    color:var(--ink2);font-size:var(--t-body);font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;letter-spacing:-.01em;}
+  .cchip.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:800;}
+  .ztab{flex-shrink:0;min-height:40px;padding:0 4px;background:none;border:none;box-shadow:none;
+    color:var(--ink3);font-size:var(--t-body);font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;}
+  .frow.tabs .cchips{gap:16px;}
+  .ztab.on{color:var(--ink);font-weight:800;}
+  .searchtog{flex-shrink:0;width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--ink2);cursor:pointer;font-family:inherit;}
+  .searchtog .ic-svg{width:20px;height:20px;}
+  .searchtog:active{transform:scale(.95);}
+  .searchbar-inline{flex:1;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--blue);border-radius:12px;padding:12px 14px;min-height:48px;}
+  .searchbar-inline .ic{display:flex;color:var(--ink3);}
+  .searchbar-inline input{flex:1;min-width:0;border:none;background:none;font-size:var(--t-body);font-family:inherit;outline:none;color:var(--ink);}
+
+  /* 2) 매장 목록 — 헤어라인 리스트(테두리·그림자 제거), 행 높이 84 */
+  .storelist{padding:0 16px;}
+  .scard{display:flex;gap:14px;align-items:center;width:100%;background:none;border:none;border-radius:0;box-shadow:none;margin:0;
+    padding:16px 0;min-height:84px;border-bottom:1px solid var(--line);cursor:pointer;font-family:inherit;text-align:left;position:relative;}
+  .scard:last-child{border-bottom:none;}
+  .scard:active{background:var(--line2);}
+  .scard.dimmed{background:none;}
+  .s-thumb{width:64px;height:64px;border-radius:12px;flex-shrink:0;background-size:cover;background-position:center;position:relative;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
+  .scard.dimmed .s-thumb::after{font-size:11.5px;}
+  .s-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+  .s-hero{font-size:var(--t-lg);font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .s-sub{display:flex;align-items:center;gap:5px;font-size:var(--t-sub);font-weight:600;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .s-sub .ic-svg{width:15px;height:15px;color:var(--ink3);}
+  .s-meta{display:flex;align-items:center;gap:14px;font-size:var(--t-meta);color:var(--ink3);margin-top:2px;}
+  .s-meta .s-loc,.s-meta .s-wait{display:inline-flex;align-items:center;gap:4px;}
+  .s-meta .ic-svg{width:15px;height:15px;}
+  .s-loc{color:var(--ink3);font-weight:600;}
+  .s-wait{color:var(--persimmon-d);font-weight:700;}
+  .scard.dimmed .s-hero{color:var(--ink3);} .scard.dimmed .s-sub,.scard.dimmed .s-meta{color:var(--ink4);}
+
+  /* 3) 공지 — 헤어라인 카드(액센트 레일 제거) + 라인 아이콘 */
+  .notice{margin:14px 16px 2px;padding:14px 16px;display:flex;gap:11px;align-items:flex-start;
+    background:#fff;border:1px solid var(--line);border-radius:14px;color:var(--ink2);font-size:var(--t-sub);line-height:1.55;}
+  .notice::before{display:none;}
+  .notice .nic{display:flex;color:var(--blue-d);flex-shrink:0;margin-top:1px;}
+  .notice .nic .ic-svg{width:19px;height:19px;}
+  .notice b{color:var(--ink);font-weight:800;font-size:var(--t-body);}
+  .notice a{color:var(--blue-d);font-weight:700;text-decoration:none;white-space:nowrap;}
+
+  /* 4) 아이콘 정렬 — CTA·FAB */
+  .cta-btn .ic-svg{width:19px;height:19px;margin-right:2px;vertical-align:-4px;}
+  .hist-fab .ic-svg{width:16px;height:16px;color:var(--persimmon-d);}
 </style>
 </head>
 <body>
@@ -1056,6 +1117,17 @@ function scSplash(){
 }
 
 /* ── 그룹 홈 ── */
+/* ── 단색 라인 아이콘 세트 (이모지 대체) ── */
+const ICON = {
+  search:'<svg class="ic-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg>',
+  pin:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 21s6.5-5.7 6.5-10.5A6.5 6.5 0 0 0 5.5 10.5C5.5 15.3 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.3"/></svg>',
+  clock:'<svg class="ic-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.6V12l3 1.8"/></svg>',
+  cart:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M4 5h2.2l1.9 10.2a1.6 1.6 0 0 0 1.6 1.3h7.8a1.6 1.6 0 0 0 1.6-1.3L20.5 8H7"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>',
+  receipt:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2z"/><path d="M9 8.5h6M9 12h6"/></svg>',
+  mega:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7"/></svg>',
+  bell:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M6.5 9.5a5.5 5.5 0 0 1 11 0c0 4.5 1.8 5.5 1.8 5.5H4.7s1.8-1 1.8-5.5z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>',
+  store:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M4 9.5 5.2 5h13.6L20 9.5M4 9.5h16M4 9.5v9.5h16V9.5M4 9.5a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/></svg>',
+};
 function scHome(){
   // 실제 행사 배너: 배경 이미지 + 클릭 시 URL 랜딩 (이미지 로드 실패 시 fb 그라데이션이 대체)
   // 실제 운영 시 img/url은 브랜드가 등록한 배너 이미지·랜딩 주소로 교체
@@ -1075,25 +1147,25 @@ function scHome(){
     </div>
     <!-- 공지문 (링크: 하이퍼링크 or URL 직접입력 → 클릭 시 URL 랜딩) -->
     <div class="notice">
-      <span class="nic">📢</span>
-      <div><b>우천 시 운영 안내</b><br>비가 올 경우 야외 좌석은 조기 마감될 수 있어요. 픽업 시 부스 위치를 꼭 확인해 주세요. <a onclick="window.open('https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html','_blank','noopener')">자세히 보기 ›</a></div>
+      <span class="nic">${ICON.mega}</span>
+      <div><b>우천 시 운영 안내</b><br>비가 오면 야외 좌석은 일찍 마감될 수 있어요. <a onclick="window.open('https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html','_blank','noopener')">자세히 보기</a></div>
     </div>
-    <!-- 검색(접힘) + 카테고리 2단 (분류·구역은 서로 다른 선택 영역) -->
+    <!-- 검색(접힘) + 카테고리 2단 (분류=pill · 구역=텍스트 탭) -->
     ${S.searchOpen ? `
     <div class="filterset"><div class="frow">
       <div class="searchbar-inline">
-        <span class="ic">🔍</span>
-        <input id="homeSearch" placeholder="매장명·메뉴명 검색" value="${S.searchQ||''}" oninput="onSearch(this.value)">
+        <span class="ic">${ICON.search}</span>
+        <input id="homeSearch" placeholder="매장·메뉴 검색" value="${S.searchQ||''}" oninput="onSearch(this.value)">
         <button class="clr" onclick="toggleSearch()">✕</button>
       </div>
     </div></div>` : `
     <div class="filterset">
       <div class="frow">
         <div class="cchips">${cats.map(c=>`<button class="cchip ${S.fCat===c?'on':''}" onclick="setHomeFilter('cat','${c}')">${c}</button>`).join('')}</div>
-        <button class="searchtog" onclick="toggleSearch()" aria-label="검색">🔍</button>
+        <button class="searchtog" onclick="toggleSearch()" aria-label="검색">${ICON.search}</button>
       </div>
-      <div class="frow">
-        <div class="cchips">${cats2.map(c=>`<button class="cchip ${S.fZone===c?'on':''}" onclick="setHomeFilter('zone','${c}')">${c}</button>`).join('')}</div>
+      <div class="frow tabs">
+        <div class="cchips">${cats2.map(c=>`<button class="ztab ${S.fZone===c?'on':''}" onclick="setHomeFilter('zone','${c}')">${c}</button>`).join('')}</div>
       </div>
     </div>`}
     <!-- 매장 목록 (검색 or 분류·구역 필터 + 브랜드 설정: 순서대로/랜덤 + 영업중 우선) -->
@@ -1107,7 +1179,7 @@ function scHome(){
 function histFab(){
   // 장바구니 바(cta)가 깔리는 화면에서는 그 위로 띄움: 매장 화면 or 홈(통합주문)
   const cartBarShown = S.cart.length && (S.screen==='store' || (S.screen==='home' && S.payScope==='unified'));
-  return `<div class="hist-fabwrap" style="bottom:${cartBarShown?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
+  return `<div class="hist-fabwrap" style="bottom:${cartBarShown?96:20}px"><button class="hist-fab" onclick="go('history')">${ICON.receipt}주문 내역</button></div>`;
 }
 function scardHTML(s){
   // 대기 표시는 브랜드 설정(우선)을 따름 — 매장 개별 설정을 덮어씀
@@ -1129,8 +1201,8 @@ function scardHTML(s){
     <div class="s-thumb${paused?' paused':''}" data-label="${label}" style="background-image:url('${s.thumb}');background-size:cover;background-position:center;background-color:var(--bg)"></div>
     <div class="s-body">
       <div class="s-hero">${s.rep}</div>
-      <div class="s-sub">🏪 ${s.name}</div>
-      <div class="s-meta"><span class="s-loc">📍 ${s.loc}</span>${waitTxt?`<span class="s-wait">⏳ ${waitTxt}</span>`:''}</div>
+      <div class="s-sub">${ICON.store}${s.name}</div>
+      <div class="s-meta"><span class="s-loc">${ICON.pin}${s.loc}</span>${waitTxt?`<span class="s-wait">${ICON.clock}<span class="nums">${waitTxt}</span></span>`:''}</div>
     </div>
   </button>`;
 }
@@ -1378,7 +1450,7 @@ function cartBar(){
   const cnt=S.cart.reduce((a,c)=>a+c.qty,0);
   const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
   const brk = S.payScope==='separate' ? `[${store(S.cart[0].store).name}] ` : '';
-  return `<div class="cta"><button class="cta-btn" onclick="go('cart')">🛒 ${brk}장바구니 ${cnt}개 <span class="amt">${won(sum)}</span></button></div>`;
+  return `<div class="cta"><button class="cta-btn" onclick="go('cart')">${ICON.cart}${brk}장바구니 ${cnt}개 <span class="amt nums">${won(sum)}</span></button></div>`;
 }
 
 /* ── 장바구니 ── */

@@ -862,6 +862,15 @@
   /* 스플래시: 이모지 제거 → 타이포 위계 강화 */
   .sp-title{font-size:16px;font-weight:700;opacity:.82;letter-spacing:.01em;}
   .sp-welcome{margin-top:10px;}
+
+  /* ══════════════ 홈 레이아웃 정돈 · 구역 탭 바 · 정렬 · 공지 여백 ══════════════ */
+  /* 1) 구역(서브 카테고리) 탭 — 매장 상세 탭처럼 활성 항목 아래 언더바 표시 */
+  .filterset .frow.tabs{padding:2px 16px 0;min-height:46px;align-items:stretch;}
+  .frow.tabs .cchips{gap:20px;padding-left:16px;align-items:stretch;}  /* 16px = 1행 [전체] pill 텍스트와 좌측 정렬 */
+  .ztab{min-height:44px;padding:0 2px;border-bottom:2.5px solid transparent;border-radius:0;align-items:center;transition:color .15s;}
+  .ztab.on{color:var(--ink);font-weight:800;border-bottom-color:var(--ink);}
+  /* 2) 공지 — 상하 여백 대칭(위=아래) */
+  .notice{margin:14px 16px;}
 </style>
 </head>
 <body>

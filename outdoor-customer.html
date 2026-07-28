@@ -809,15 +809,13 @@
   /* 장바구니 빈 화면 아이콘 */
   .fullmsg .fm-ic .ic-svg{color:var(--ink4);}
 
-  /* 콜아웃 행: 리딩 라인 아이콘 + 본문 (플렉스 정렬) */
+  /* 콜아웃 행: 리딩 라인 아이콘(.co-ic) + 본문 (플렉스 정렬) */
   .cart-scope-note,.deliver-fix,.scope-note,.multi-note,.oh-pickup,.oh-cancelnote,
-  .oh-hint,.rc-cancelbox,.d-adult,.d-reuse,.ms-warn,.multi-note{display:flex;align-items:flex-start;gap:9px;}
+  .oh-hint,.rc-cancelbox,.d-adult,.d-reuse,.ms-warn{display:flex;align-items:flex-start;gap:9px;}
   .oh-pickup{align-items:center;}
-  .csn-ic,.df-ic,.scn-ic,.mn-ic,.ohp-ic,.ohc-ic,.ohh-ic,.rcb-ic,.dad-ic,.drs-ic,.msw-ic{flex-shrink:0;display:flex;margin-top:1px;}
-  .csn-ic .ic-svg,.df-ic .ic-svg,.scn-ic .ic-svg,.mn-ic .ic-svg,.ohp-ic .ic-svg,.ohc-ic .ic-svg,
-  .ohh-ic .ic-svg,.rcb-ic .ic-svg,.dad-ic .ic-svg,.drs-ic .ic-svg,.msw-ic .ic-svg{width:17px;height:17px;stroke-width:1.8;}
-  .scope-note .scn-ic{color:var(--ink3);}
-  .oh-pickup .ohp-ic .ic-svg{width:16px;height:16px;}
+  .co-ic{flex-shrink:0;display:flex;margin-top:1px;}
+  .co-ic .ic-svg{width:17px;height:17px;stroke-width:1.8;}
+  .scope-note .co-ic{color:var(--ink3);}
 
   /* 헤딩·라벨 안 인라인 아이콘(매장/위치) — 텍스트 크기에 맞춤 */
   .store-group-h,.req-store-h,.oh-grp-h,.oh-store-name,.rc-store,.oh-where,.multi-pick .mp-h,.pcp-h,.mp-s{display:inline-flex;align-items:center;gap:6px;}
@@ -1228,13 +1226,10 @@ const ICON = {
   phone:'<svg class="ic-svg" viewBox="0 0 24 24"><rect x="7" y="3.5" width="10" height="17" rx="2.4"/><path d="M10.5 17.5h3"/></svg>',
   chat:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M5 6.5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9.5L5 19z"/></svg>',
   undo:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M8.5 7 5 10.5 8.5 14"/><path d="M5 10.5h9.5a4.5 4.5 0 0 1 0 9H11"/></svg>',
-  cam:'<svg class="ic-svg" viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="17" height="11.5" rx="2.2"/><circle cx="12" cy="13.2" r="3"/><path d="M8.5 7.5 9.6 5.5h4.8l1.1 2"/></svg>',
   info:'<svg class="ic-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8h.01"/></svg>',
   alert:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 4 2.9 20h18.2z"/><path d="M12 10v4.2M12 17.2h.01"/></svg>',
-  gift:'<svg class="ic-svg" viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.6"/><path d="M4 13h16M12 9v11"/><path d="M12 9C11 6 9.6 5 8.2 5a1.9 1.9 0 0 0 0 4zM12 9c1-3 2.4-4 3.8-4a1.9 1.9 0 0 1 0 4z"/></svg>',
   leaf:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z"/><path d="M9 15c2.5-1 4.5-3 5.5-6"/></svg>',
   signal:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M4.5 12a10 10 0 0 1 15 0M7.8 15a6 6 0 0 1 8.4 0M12 18.3h.01"/></svg>',
-  doc:'<svg class="ic-svg" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/></svg>',
 };
 function scHome(){
   // 실제 행사 배너: 배경 이미지 + 클릭 시 URL 랜딩 (이미지 로드 실패 시 fb 그라데이션이 대체)
@@ -1439,7 +1434,7 @@ function scStore(){
       <button class="mtab ${S.storeTab==='info'?'on':''}" onclick="S.storeTab='info';render()">매장 정보</button>
     </div>
     ${S.storeTab==='info' ? storeInfoHTML(s) : `
-      ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn"><span class="csn-ic">${ICON.alert}</span><span>다른 매장이에요 · 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요</span></div>` : ''}
+      ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn"><span class="co-ic">${ICON.alert}</span><span>다른 매장이에요 · 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요</span></div>` : ''}
       <div class="cattabs">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       ${s.menus.length===0
         ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
@@ -1529,13 +1524,13 @@ function renderMenuSheet(){
         <div class="d-name">${m.name}${m.adult?`<span class="m-adult">19+</span>`:''}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
         <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
-        ${m.soldout?`<div class="ms-warn"><span class="msw-ic">${ICON.info}</span><span>현재 품절된 메뉴예요 · 정보는 볼 수 있지만 주문은 할 수 없어요</span></div>`:''}
+        ${m.soldout?`<div class="ms-warn"><span class="co-ic">${ICON.info}</span><span>현재 품절된 메뉴예요 · 정보는 볼 수 있지만 주문은 할 수 없어요</span></div>`:''}
         ${(m.allergy||m.nutrition)?`
           <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">${ICON.info} 알레르기 · 영양 정보</button>
           ${S.infoOpen?`<div class="d-info">${[m.allergy?`<b>알레르기 유발성분</b> ${m.allergy}`:'',m.nutrition?`<b>영양 정보</b> ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
         `:''}
-        ${m.adult?`<div class="d-adult"><span class="dad-ic">${ICON.alert}</span><span>성인(19+) 알코올 메뉴 · 담기 전 성인 인증이 필요해요</span></div>`:''}
-        ${m.reuse?`<div class="d-reuse"><span class="drs-ic">${ICON.leaf}</span><span>다회용기로 제공돼요 · 사용 후 용기를 반납해 주세요</span></div>`:''}
+        ${m.adult?`<div class="d-adult"><span class="co-ic">${ICON.alert}</span><span>성인(19+) 알코올 메뉴 · 담기 전 성인 인증이 필요해요</span></div>`:''}
+        ${m.reuse?`<div class="d-reuse"><span class="co-ic">${ICON.leaf}</span><span>다회용기로 제공돼요 · 사용 후 용기를 반납해 주세요</span></div>`:''}
         ${disabled?'':orderControls}
       </div>
     </div>
@@ -1557,7 +1552,7 @@ function addToCart(){
   const base=m.hh?m.hhPrice:m.price;
   const listBase=m.was||m.price;   // 정가(할인 전) — 금액 요약 할인 세분화용
   const add=S.tmpOpt===1?1500:0;
-  S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, emoji:m.emoji||'', img:m.img, photo:m.photo||'',
+  S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, img:m.img, photo:m.photo||'',
     opt:S.tmpOpt===1?'Large':'Regular', qty:S.tmpQty, price:(base+add), listPrice:(listBase+add),
     disc:(m.hh?'해피아워':(m.was?'할인':null))});
   toast('장바구니에 담았어요');
@@ -1592,8 +1587,8 @@ function scCart(){
   <div class="hdr"><button class="bk" onclick="go('store')">‹</button><div class="ht">장바구니</div></div>
   <div class="scroll">
     ${S.payScope==='unified'
-      ? `<div class="scope-note"><span class="scn-ic">${ICON.cart}</span><span>여러 매장 상품을 한 번에 담아 결제할 수 있어요</span></div>`
-      : `<div class="scope-note"><span class="scn-ic">${ICON.cart}</span><span>한 매장씩 담아 매장별로 결제하는 방식이에요</span></div>`}
+      ? `<div class="scope-note"><span class="co-ic">${ICON.cart}</span><span>여러 매장 상품을 한 번에 담아 결제할 수 있어요</span></div>`
+      : `<div class="scope-note"><span class="co-ic">${ICON.cart}</span><span>한 매장씩 담아 매장별로 결제하는 방식이에요</span></div>`}
     <div class="sect">
       ${Object.entries(groups).map(([sid,items])=>`
         ${showStoreH?`<div class="store-group-h">${ICON.store} ${store(sid).name}</div>`:''}
@@ -1615,7 +1610,7 @@ function scCart(){
     <div class="sect"><div class="sect-h">수령 방식</div>
       ${S.service==='delivery'
         ? `<div class="sect-sub">이 행사는 <b>자리로 받기(현장 배달)</b> 서비스예요. 주문하신 자리로 현장 스태프가 가져다드려요.</div>
-           <div class="deliver-fix"><span class="df-ic">${ICON.tray}</span><span>자리로 받기 · 다음 화면에서 <b>받을 자리</b>를 입력해요</span></div>`
+           <div class="deliver-fix"><span class="co-ic">${ICON.tray}</span><span>자리로 받기 · 다음 화면에서 <b>받을 자리</b>를 입력해요</span></div>`
         : `<div class="sect-sub">이 행사는 <b>포장 픽업</b> 서비스예요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>
            <div class="seg">
              <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">즉시 포장</button>
@@ -1843,7 +1838,7 @@ function scCheckout(){
             : `<div class="minwarn">매장별 최소 주문 금액 <b>${won(mi.min)}</b> 미달 매장이 있어요<br>${mi.shortStores.map(x=>`· <b>${x.name}</b> ${won(x.need)} 더 담기`).join('<br>')}<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`)
         : `<div class="minok">최소 주문 금액 ${won(mi.min)} 충족 · ${mi.label}</div>`) : ''}
     </div>
-    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note"><span class="mn-ic">${ICON.store}</span><span>통합 결제지만 <b>매장별로 따로 준비·${S.service==='delivery'?'배달':'픽업'}</b>돼요 · 매장 수만큼 <b>알림톡이 따로</b> 오고, 각 매장에서 받게 돼요</span></div>`:''}
+    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note"><span class="co-ic">${ICON.store}</span><span>통합 결제지만 <b>매장별로 따로 준비·${S.service==='delivery'?'배달':'픽업'}</b>돼요 · 매장 수만큼 <b>알림톡이 따로</b> 오고, 각 매장에서 받게 돼요</span></div>`:''}
     <!-- 결제 수단 (선불형만) -->
     ${post?'':`<div class="sect"><div class="sect-h">결제 수단</div>
       <div class="pay-opt on"><span class="pic">${ICON.card}</span> 신용/체크카드</div>
@@ -2072,8 +2067,8 @@ function scHistory(){
           </div>
           <span class="st-badge ${ST_CLS[p.status]}">${p.status}</span>
         </div>
-        ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup"><span class="ohp-ic">${ICON.bell}</span><span>조리가 끝났어요 · 지금 <b>${p.pickup}</b>에서 픽업해 주세요</span></div>`:''}
-        ${o?`<div class="oh-body">${itemsBlock(grpByStore(p.items))}${canceled?`<div class="oh-cancelnote"><span class="ohc-ic">${ICON.undo}</span><span>${p.cancel}</span></div>`:''}</div>`:''}
+        ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup"><span class="co-ic">${ICON.bell}</span><span>조리가 끝났어요 · 지금 <b>${p.pickup}</b>에서 픽업해 주세요</span></div>`:''}
+        ${o?`<div class="oh-body">${itemsBlock(grpByStore(p.items))}${canceled?`<div class="oh-cancelnote"><span class="co-ic">${ICON.undo}</span><span>${p.cancel}</span></div>`:''}</div>`:''}
         <div class="oh-foot">
           <div class="oh-foot-sum">${canceled?'취소 금액':'결제금액'} <b>${won(total)}</b></div>
           <div class="oh-foot-btns">
@@ -2101,8 +2096,8 @@ function scHistory(){
             return `<div class="oh-grp">
               <div class="oh-grp-h split"><span class="oh-grp-ord">주문 #${p.id} · ${p.time}</span><span class="st-badge sm ${ST_CLS[p.status]}">${p.status}</span></div>
               <div class="oh-contact sm">${contactHTML(p.contact)}</div>
-              ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup sm"><span class="ohp-ic">${ICON.bell}</span><span><b>${p.pickup}</b>에서 픽업해 주세요</span></div>`:''}
-              ${o?`${p.items.map(ohLine).join('')}${canceled?`<div class="oh-cancelnote"><span class="ohc-ic">${ICON.undo}</span><span>${p.cancel}</span></div>`:''}`:''}
+              ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup sm"><span class="co-ic">${ICON.bell}</span><span><b>${p.pickup}</b>에서 픽업해 주세요</span></div>`:''}
+              ${o?`${p.items.map(ohLine).join('')}${canceled?`<div class="oh-cancelnote"><span class="co-ic">${ICON.undo}</span><span>${p.cancel}</span></div>`:''}`:''}
               <div class="oh-grp-foot"><span>${canceled?'취소 금액':'소계'} ${won(total)}</span><button class="oh-detail sm" onclick="toggleHistDetail('${p.id}')">${o?'접기':'상세'}</button></div>
             </div>`;
           }).join('')}
@@ -2123,7 +2118,7 @@ function scHistory(){
       : ''}
     <div class="oh-grand top"><span>전체 합계 (누적)</span><b>${won(grand)}</b></div>
     <div class="oh-grand-note">${unified?'':'개별 결제는 매장 기준으로 보여드려요 · '}※ 취소·환불 건은 합계에서 제외돼요</div>
-    <div class="oh-hint"><span class="ohh-ic">${ICON.info}</span><span>영수증은 결제 1건 기준이라 <b>‘주문 회차별’</b>에서 확인할 수 있어요. <b>‘매장별’</b>은 매장 기준으로 정렬해 보는 화면이에요.<br>주문 내역은 당일 자정이 지나면 자동으로 사라지니, 필요하면 화면을 캡처해 두세요.</span></div>
+    <div class="oh-hint"><span class="co-ic">${ICON.info}</span><span>영수증은 결제 1건 기준이라 <b>‘주문 회차별’</b>에서 확인할 수 있어요. <b>‘매장별’</b>은 매장 기준으로 정렬해 보는 화면이에요.<br>주문 내역은 당일 자정이 지나면 자동으로 사라지니, 필요하면 화면을 캡처해 두세요.</span></div>
     ${body}
     <div style="height:24px"></div>
   </div>`;
@@ -2153,7 +2148,7 @@ function openReceipt(id){
       ${coupon?`<div class="rc-line"><span>쿠폰 할인</span><span>−${won(coupon)}</span></div>`:''}
       <div class="rc-line rc-total"><span>${canceled?'환불 예정 금액':'결제금액'}</span><span>${won(total)}</span></div>
       <div class="rc-line dim"><span>결제수단</span><span>${p.pay}</span></div>
-      ${canceled?`<div class="rc-cancelbox"><span class="rcb-ic">${ICON.undo}</span><span>${p.cancel}</span></div>`:''}
+      ${canceled?`<div class="rc-cancelbox"><span class="co-ic">${ICON.undo}</span><span>${p.cancel}</span></div>`:''}
       <div class="rc-hr"></div>
       <div class="rc-foot">본 영수증은 전자적으로 발행된 거래 확인 내역이에요. 세금계산서·현금영수증과는 별개예요.<br>당일 자정 이후 자동 삭제되니 필요하면 화면을 캡처해 두세요.</div>
     </div>`;

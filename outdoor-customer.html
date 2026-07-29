@@ -756,12 +756,13 @@
   .m-promo{font-size:11px;font-weight:700;color:var(--point);background:var(--point-50);padding:3px 7px;border-radius:6px;}
   .m-reuse{font-size:11.5px;font-weight:600;color:var(--ink3);margin-top:5px;}
   .m-right{padding-left:8px;}
-  /* 남은 수량 배지 — 수량 자릿수·이모지 유무와 무관하게 고정 크기 + 입체(3D) */
-  .m-left-r{box-sizing:border-box;width:76px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  /* 남은 수량 배지 — 수량 자릿수·이모지 유무와 무관하게 고정 크기 + 입체(3D) · 텍스트는 항상 가운데 */
+  .m-left-r{position:relative;box-sizing:border-box;width:76px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
     font-size:11px;font-weight:800;line-height:1.15;text-align:center;white-space:nowrap;overflow:hidden;border-radius:13px;color:var(--point);
     background:linear-gradient(157deg,#FFF4E8,#FFE3C6 68%,#FFD2A4);
     box-shadow:0 3px 8px rgba(230,120,20,.22), inset 0 1px 0 rgba(255,255,255,.9), inset 0 -2px 4px rgba(200,100,20,.16);}
   .m-left-r .mlr-t{font-size:10.5px;letter-spacing:-.02em;}
+  .m-left-r .mlr-fire{position:absolute;top:3px;right:5px;font-size:11px;line-height:1;}
   .m-left-r b{font-size:15px;color:var(--point);}
   .m-left-r.low{color:#fff;
     background:linear-gradient(157deg,#FF9A52,#F2670E 66%,#DC5406);
@@ -1590,7 +1591,7 @@ function mcardHTML(sid,m,closed){
       <div class="m-price">${price}</div>
       ${m.reuse?`<div class="m-reuse">♻️ 다회용기 제공</div>`:''}
     </div>
-    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${lowStock?'low':''}"><span class="mlr-t">${lowStock?'🔥 ':''}${rightVal.t}</span><b>${rightVal.n}개</b></span></div>`:''}
+    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${lowStock?'low':''}">${lowStock?'<span class="mlr-fire">🔥</span>':''}<span class="mlr-t">${rightVal.t}</span><b>${rightVal.n}개</b></span></div>`:''}
   </button>`;
 }
 

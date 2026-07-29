@@ -304,8 +304,8 @@
   .kakao-note .kic{width:28px;height:28px;border-radius:8px;background:#3c1e1e;color:#FEE500;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 
   /* 약관 */
-  .agree-all{display:flex;align-items:center;gap:10px;padding:14px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;font-weight:800;cursor:pointer;}
-  .agree{display:flex;align-items:center;gap:9px;padding:10px 4px;font-size:14px;color:var(--ink2);cursor:pointer;}
+  .agree-all{display:flex;align-items:center;gap:10px;padding:14px 14px 14px 12.5px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;font-weight:800;cursor:pointer;}
+  .agree{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:14px;color:var(--ink2);cursor:pointer;}
   .ag-req{font-size:10.5px;font-weight:800;color:var(--persimmon-d);background:var(--blue-50);border-radius:5px;padding:2px 7px;flex-shrink:0;}
   .ag-req.opt{color:var(--ink3);background:#F1F1F3;}
   .ag-t{flex:1;min-width:0;}
@@ -1804,6 +1804,7 @@ function tryCheckout(){
     }
     return;
   }
+  S.agree={};   // 결제 진입 시 약관 동의 초기화(필수 동의 전 결제 버튼 비활성화)
   go('checkout');
 }
 // 담기/결제 방식은 브랜드·매장 설정 (고객 선택 아님) — 데모바에서 시뮬레이션
@@ -2007,21 +2008,24 @@ function scCheckout(){
     </div>`}
     <!-- 약관 (내점형 기준: 이용약관·개인정보·연령 필수 · 항목별 배지 + '보기' 전문 열람) -->
     <div class="sect"><div class="sect-h">약관 동의</div>
-      <div class="agree-all" onclick="toggleAll(this)"><span class="chk">✓</span> 전체 동의하기</div>
+      <div class="agree-all ${allAgreed()?'on':''}" onclick="toggleAgreeAll()"><span class="chk ${allAgreed()?'on':''}">✓</span> 전체 동의하기</div>
       <div style="margin-top:8px">
-        ${post?'':`<div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span><span class="ag-req">필수</span><span class="ag-t">이용약관 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('tos')">보기</a></div>`}
-        <div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span><span class="ag-req">필수</span><span class="ag-t">개인정보 수집·이용 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('privacy')">보기</a></div>
-        <div class="agree" onclick="toggleChk(this)"><span class="chk">✓</span><span class="ag-req">필수</span><span class="ag-t">만 14세 이상임을 확인합니다</span></div>
+        ${post?'':`<div class="agree" onclick="toggleAgree('tos')"><span class="chk ${(S.agree&&S.agree.tos)?'on':''}">✓</span><span class="ag-req">필수</span><span class="ag-t">이용약관 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('tos')">보기</a></div>`}
+        <div class="agree" onclick="toggleAgree('privacy')"><span class="chk ${(S.agree&&S.agree.privacy)?'on':''}">✓</span><span class="ag-req">필수</span><span class="ag-t">개인정보 수집·이용 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('privacy')">보기</a></div>
+        <div class="agree" onclick="toggleAgree('age')"><span class="chk ${(S.agree&&S.agree.age)?'on':''}">✓</span><span class="ag-req">필수</span><span class="ag-t">만 14세 이상임을 확인합니다</span></div>
       </div>
       ${post?`<div style="font-size:12px;color:var(--ink4);margin-top:8px">후불형은 결제 관련 약관 없이 개인정보 동의·연령 확인만 받아요</div>`:''}
     </div>
   </div>
   <div class="cta">
-    <button class="cta-btn" ${belowMin?'disabled':''} onclick="openPaySheet()">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`}</button>
+    <button class="cta-btn" ${(belowMin||!allAgreed())?'disabled':''} onclick="openPaySheet()">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : (!allAgreed()?'필수 약관에 동의해 주세요' : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`)}</button>
   </div>`;
 }
-function toggleChk(el){ el.querySelector('.chk').classList.toggle('on'); }
-function toggleAll(el){ const on=!el.querySelector('.chk').classList.contains('on'); el.querySelector('.chk').classList.toggle('on',on); el.parentNode.querySelectorAll('.agree .chk').forEach(c=>c.classList.toggle('on',on)); }
+// 약관 동의 — 상태 기반 (필수: 이용약관[선불형만]·개인정보·연령) · 전부 체크 전엔 결제 버튼 비활성화
+function agreeKeys(){ return S.bill==='post' ? ['privacy','age'] : ['tos','privacy','age']; }
+function allAgreed(){ return agreeKeys().every(k=>S.agree&&S.agree[k]); }
+function toggleAgree(k){ S.agree=S.agree||{}; S.agree[k]=!S.agree[k]; render(); }
+function toggleAgreeAll(){ S.agree=S.agree||{}; const all=allAgreed(); agreeKeys().forEach(k=>S.agree[k]=!all); render(); }
 /* 약관 전문 — '보기'로 열람 */
 const TERMS = {
   tos:{ t:'이용약관 동의', req:'필수', body:`<b>1. 목적</b><br>본 약관은 야외형 QR 주문 서비스 이용에 관한 사항을 정해요.<br><br><b>2. 주문·결제</b><br>메뉴 주문·결제는 매장·브랜드가 제공하는 조건을 따르며, 결제는 전자결제대행사(PG)를 통해 처리돼요(신용/체크카드·간편결제).<br><br><b>3. 취소·환불</b><br>상품 품절 등으로 주문이 취소되면 결제 금액은 자동 환불되며, 카드사 사정에 따라 영업일 3~7일이 소요될 수 있어요.<br><br><b>4. 이용자 의무</b><br>정확한 연락처를 입력해야 주문 알림을 받을 수 있어요.` },
@@ -2050,10 +2054,9 @@ function paySheetHTML(){
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closePaySheet()">✕</button>
     <div class="pay-scroll">
-      <div class="pay-t">💬 어디로 알림을 보내드릴까요?</div>
-      <div class="pay-s">호출번호와 조리 완료 알림에 사용돼요.${post?'':' 주문을 완료하려면 꼭 필요해요.'}</div>
+      <div class="pay-t">💬 어디로 알려드릴까요?</div>
+      <div class="pay-s">준비가 다 되면 바로 알려드릴게요.${post?'':' 주문을 마무리하려면 꼭 필요해요.'}</div>
       <button class="kakaobtn" onclick="S.loginType='kakao';payConfirm()">💬 카카오톡으로 시작하기</button>
-      <div class="pay-kko-note">카카오 로그인 시 번호가 자동 수집돼요</div>
       <div class="pay-div"><span></span>또는 비회원으로 진행<span></span></div>
       <div class="seg" style="margin-bottom:14px">
         <button class="${S.alertCh==='phone'?'on':''}" onclick="setAlert('phone')">📱 휴대폰</button>
@@ -2070,8 +2073,8 @@ function paySheetHTML(){
         <input class="field pf-num" id="phoneEnd" inputmode="numeric" maxlength="4" placeholder="0000" value="${S.pEnd||''}" oninput="onPayPhone(this,'end')">
       </div>
       `}
-      <button class="cta-btn" onclick="submitContact('${S.alertCh}')">${S.alertCh==='email'?'이 이메일로':'이 번호로'} ${won(finalAmt)} ${act}하기</button>
-      <div class="pay-hint">${S.alertCh==='email'?'· 입력하신 이메일로 주문 확인·완료 알림을 보내드려요 (외국인 사용자 등)<br>· 이메일 형식 오류(도메인 누락 등) 시 진행 불가':'· 조리 완료 시 카카오톡 알림톡으로 알려드려요<br>· 앞자리는 010 고정 · 뒤 4자리+4자리(총 8자리)를 입력하면 진행돼요'}</div>
+      <button class="cta-btn" onclick="submitContact('${S.alertCh}')">${won(finalAmt)} ${act}하기</button>
+      ${S.alertCh==='email'?'':'<div class="pay-hint">· 준비가 완료되면 카카오톡 알림톡으로 알려드려요<br>· 앞자리는 010 고정 · 뒤 4자리+4자리(총 8자리)를 입력하면 진행돼요</div>'}
     </div>`;
 }
 // 결제 시트 연락처 입력 → 상태 저장 후 시트만 갱신(쿠폰 실시간 노출) · 포커스 유지
@@ -2139,18 +2142,13 @@ function scDone(){
   <div class="scroll done-wrap">
     <div class="done-ic">✓</div>
     <div class="done-t">${post?'주문이 접수되었어요!':'결제가 완료되었어요!'}</div>
-    <div class="done-s">${post?'매장에서 주문을 확인하고 조리를 시작해요':'조리가 시작되면 알림으로 알려드릴게요'}</div>
+    <div class="done-s">${post?'매장에서 주문을 확인하고 준비를 시작해요':'준비가 완료되면 알림으로 알려드릴게요'}</div>
     ${(()=>{ const steps=S.service==='delivery'?['주문요청','준비중','배달중','수령완료']:['주문요청','준비중','준비완료','수령완료']; const cur=0;   // 결제 완료 직후=주문요청(매장 수락 전) · 라벨은 "주문 상태 스텝(공통 정의)" SSOT
       return `<div class="ord-steps">${steps.map((st,i)=>`${i?`<div class="ost-line ${i<=cur?'done':''}"></div>`:''}<div class="ost ${i<cur?'done':''} ${i===cur?'cur':''}"><div class="ost-dot">${i<cur?'✓':(i+1)}</div><div class="ost-lbl">${st}</div></div>`).join('')}</div>`; })()}
     <div class="callno">
       <div class="cl-lbl">내 호출번호</div>
       <div class="cl-num">${callNo}</div>
       <div class="cl-sub">${S.loginType==='email'?'주문 시 입력한 정보 기준':'휴대폰 번호 뒤 4자리'}</div>
-    </div>
-    <div class="pickinfo">
-      ${S.service==='delivery'?`🛎️ <b>자리로 받기</b> · 입력하신 자리로 현장 배달`:(S.pickup==='reserve'?`📅 <b>포장 예약</b> · ${S.pickupTime||''} 수령`:'🥡 <b>즉시 포장 픽업</b>')} · ${loc}<br>
-      ⏱️ 예상 조리 시간 약 12분<br>
-      💬 조리 완료 시 ${multi?`매장마다 <b>${ch}</b>이 따로 와요`:`<b>${ch}</b>으로 알림`}
     </div>
     ${multi?`
     <div class="multi-pick">

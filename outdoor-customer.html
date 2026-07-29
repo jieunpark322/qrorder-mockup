@@ -389,7 +389,19 @@
   .oh-stage-cell.on .oh-stage-n{color:var(--ink);}
   .oh-stage-cell.on .oh-stage-lbl{color:var(--ink2);}
   .oh-stage-cell.ready .oh-stage-n,.oh-stage-cell.ready .oh-stage-lbl{color:var(--green);}
-  .oh-stage-cancel{margin-top:11px;padding-top:9px;border-top:1px dashed var(--line);text-align:center;font-size:11.5px;font-weight:700;color:var(--red);}
+  /* 단계 셀을 탭 가능한 필터로 — 건수가 있는 단계만 눌러 해당 주문만 모아 봄 */
+  .oh-stage-cell.tap{cursor:pointer;border-radius:10px;padding-top:4px;padding-bottom:4px;transition:background .12s,transform .08s;}
+  .oh-stage-cell.tap:active{transform:scale(.94);}
+  .oh-stage-cell.sel{background:var(--blue-50);}
+  .oh-stage-cell.sel .oh-stage-n,.oh-stage-cell.sel .oh-stage-lbl{color:var(--blue-d);}
+  .oh-stage-cell.sel.ready{background:#e9f9ef;}
+  .oh-stage-cell.sel.ready .oh-stage-n,.oh-stage-cell.sel.ready .oh-stage-lbl{color:var(--green);}
+  /* 주문취소 셀 — 취소 건이 있을 때만 수령완료 오른쪽에 붙는 요약(빨강) */
+  .oh-stage-cell.cancel .oh-stage-n,.oh-stage-cell.cancel .oh-stage-lbl{color:var(--red);}
+  .oh-stage-cell.sel.cancel{background:#fdeaea;}
+  .oh-stage-cell.sel.cancel .oh-stage-n,.oh-stage-cell.sel.cancel .oh-stage-lbl{color:var(--red);}
+  .oh-stage-hint{margin-top:11px;padding-top:9px;border-top:1px dashed var(--line);text-align:center;font-size:11.5px;font-weight:700;color:var(--ink4);line-height:1.4;}
+  .oh-stage-hint .reset{color:var(--blue-d);text-decoration:underline;cursor:pointer;margin-left:6px;}
   /* 카드: 핵심(회차·시간·진행단계·금액)만 노출 · 나머지는 자세히 보기로 접힘 */
   .oh-card.ready{border-color:#BFE9D3;box-shadow:0 3px 14px rgba(30,142,95,.13);}
   .oh-meta{font-size:12.5px;color:var(--ink3);font-weight:600;}
@@ -1058,6 +1070,7 @@ let S = {
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
   histByStore:false,   // 주문 내역 '매장별로 모아보기' 체크 여부 (기본 회차별 · 통합결제에서만 노출)
+  histStage:null,      // 주문 내역 상단 단계 필터 — null(전체) | 주문요청 | 준비중 | 준비완료 | 수령완료 (탭하면 해당 단계 주문만 표시)
   service:'pickup',    // 서비스 유형: pickup(포장) | delivery(자리로 받기=현장 배달) · 매장·브랜드가 설정(고객 선택 아님) · 자리입력 기본 Off
   fCat:'전체',         // 홈 분류 필터 (전체/푸드/음료/디저트 → store.cat)
   fZone:'전체',        // 홈 구역 필터 (전체/A~D구역 → store.cat2)
@@ -2045,19 +2058,42 @@ const ST_BADGE = {'준비완료':'st-done','배달중':'st-done','준비중':'st
 // 액션 우선 정렬 — 지금 받으러 가야 하는 건이 항상 맨 위 (정책 › 통합결제 회차별 보드와 동일 기준)
 const ACT_ORDER = {'준비완료':0,'배달중':1,'준비중':2,'주문요청':3,'수령완료':4,'주문취소':5};
 const byAction = list => list.map((p,i)=>[p,i]).sort((a,b)=>(ACT_ORDER[a[0].status]??9)-(ACT_ORDER[b[0].status]??9)||a[1]-b[1]).map(x=>x[0]);
-// 상단 요약 — 주문한 '매장 단위'로 각 단계에 몇 곳이 놓여 있는지 집계 (취소는 단계에서 빼고 별도 표기)
+// 단계 필터 — 선택 단계의 상태 매칭(준비완료는 배달중까지 포함)
+const stageMatch = (status, stage) => stage==='준비완료' ? (status==='준비완료'||status==='배달중') : status===stage;
+// 셀 탭 → 그 단계만 보기 / 같은 셀 다시 탭 → 전체 보기
+function setHistStage(st){ S.histStage = (S.histStage===st ? null : st); render(); }
+// 선택 단계에 해당하는 매장만 남겨 회차를 재구성(없으면 그 회차는 제외) · 합계·상태 재계산
+function applyStageFilter(P, stage){
+  if(!stage) return P;
+  return P.map(p=>{
+    const stores = p.stores.filter(s=>stageMatch(s.status, stage));
+    if(!stores.length) return null;
+    const items = stores.flatMap(s=>s.items.map(it=>({...it,store:s.sid})));
+    return {...p, stores, items, status: byAction(stores)[0].status};
+  }).filter(Boolean);
+}
+// 상단 요약 겸 필터 — 매장 단위로 각 단계 곳 수를 집계, 셀을 탭하면 그 단계 주문만 모아 봄
+// 주문취소는 상시 노출이 아니라, 취소 건이 있을 때만 '수령완료' 오른쪽 셀로 덧붙음
 function stageSummaryHTML(P){
   const units=[]; P.forEach(p=>p.stores.forEach(s=>units.push(s.status)));
   const cnt = st => units.filter(x=>x===st).length;
-  const cells = HIST_STEPS.map(st=>{
-    const n = st==='준비완료' ? cnt('준비완료')+cnt('배달중') : cnt(st);
-    const cls = n===0 ? '' : (st==='준비완료' ? 'on ready' : 'on');
-    return `<div class="oh-stage-cell ${cls}"><span class="oh-stage-n">${n}</span><span class="oh-stage-lbl">${st==='준비완료'&&S.service==='delivery'?'배달중':st}</span></div>`;
-  }).join('');
+  const cell = (key, n, extraCls) => {
+    const tap=n>0, sel=S.histStage===key;
+    const lbl=(key==='준비완료'&&S.service==='delivery')?'배달중':key;
+    return `<div class="oh-stage-cell ${n?extraCls:''} ${tap?'tap':''} ${sel?'sel':''}"${tap?` onclick="setHistStage('${key}')"`:''}>
+      <span class="oh-stage-n">${n}</span><span class="oh-stage-lbl">${lbl}</span></div>`;
+  };
+  let cells = HIST_STEPS.map(st=>cell(st, st==='준비완료'?cnt('준비완료')+cnt('배달중'):cnt(st), st==='준비완료'?'on ready':'on')).join('');
   const canceled = cnt('주문취소');
+  if(canceled) cells += cell('주문취소', canceled, 'on cancel');   // 취소가 있을 때만 노출
+  const cur = S.histStage;
+  const curLbl = (cur==='준비완료'&&S.service==='delivery')?'배달중':cur;
+  const hint = cur
+    ? `<div class="oh-stage-hint"><b>${curLbl}</b> 단계만 보는 중<span class="reset" onclick="setHistStage(null)">전체 보기</span></div>`
+    : `<div class="oh-stage-hint">단계를 탭하면 해당 주문만 모아 볼 수 있어요</div>`;
   return `<div class="oh-lead">
     <div class="oh-stage">${cells}</div>
-    ${canceled?`<div class="oh-stage-cancel">주문 취소 ${canceled}곳 (합계에서 제외)</div>`:''}
+    ${hint}
   </div>`;
 }
 
@@ -2067,7 +2103,8 @@ function scHistory(){
   // 기본은 회차별 · 통합결제일 때만 '매장별로 모아보기'를 켜서 같은 목록을 매장 기준으로 다시 묶을 수 있음
   // (개별결제는 한 회차 = 한 매장이라 회차별 목록에 이미 매장이 그대로 드러나므로 전환 옵션 자체가 없음)
   const view = (unified && S.histByStore) ? 'store' : 'round';
-  const P = getPayments().slice().sort((a,b)=>b.round-a.round);   // 최신 회차가 맨 위
+  const Pfull = getPayments().slice().sort((a,b)=>b.round-a.round);   // 최신 회차가 맨 위
+  const P = applyStageFilter(Pfull, S.histStage);                     // 단계 필터 적용(전체면 그대로)
   let body='';
 
   if(view==='round'){
@@ -2086,11 +2123,11 @@ function scHistory(){
       ${pays.map(p=>roundCardHTML(p,false)).join('')}`;
     }).join('');
   }
-  const grand = P.reduce((a,p)=>a+payTotal(p),0);
+  const grand = Pfull.reduce((a,p)=>a+payTotal(p),0);   // 누적 전체 합계는 필터와 무관하게 전체 기준
   return `
   <div class="hdr"><button class="bk" onclick="go(S.mode==='group'?'home':'store')">‹</button><div class="ht">주문 내역</div></div>
   <div class="scroll">
-    ${stageSummaryHTML(P)}
+    ${stageSummaryHTML(Pfull)}
     ${unified
       ? `<button class="oh-viewtog ${view==='store'?'on':''}" onclick="S.histByStore=!S.histByStore;render()">
           <span class="chk ${view==='store'?'on':''}">${view==='store'?'✓':''}</span>

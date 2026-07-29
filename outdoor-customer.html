@@ -2247,17 +2247,11 @@ function roundCardHTML(p, showNames){
 const open = id => !!(S.histOpen && S.histOpen[id]);
 // 카드 내부 — 매장마다 '매장명 + 상태 배지 + 진행 막대' 한 세트 (매장이 1곳이든 여러 곳이든 동일한 구조)
 function storeRowsHTML(stores, showNames){
-  const rows = byAction(stores).map(s=>{
-    const green = (s.status==='준비완료' || s.status==='수령완료');
-    return `<div class="oh-st-row">
-    <div class="oh-st-head">
-      ${showNames?`<span class="oh-st-name">${store(s.sid).logo} ${store(s.sid).name}</span>`:''}
-      <span class="oh-step-lbl ${green?'g':'b'}">${stepLabel(s.status)} · ${stepIdx(s.status)+1}/4단계</span>
-    </div>
+  const rows = byAction(stores).map(s=>`<div class="oh-st-row">
+    ${showNames?`<div class="oh-st-head"><span class="oh-st-name">${store(s.sid).logo} ${store(s.sid).name}</span></div>`:''}
     ${stepBarHTML(s.status)}
     ${canPickup(s.status)?`<div class="oh-pickup sm">🔔 지금 받아 가세요 · ${store(s.sid).loc}</div>`:''}
-  </div>`;
-  }).join('');
+  </div>`).join('');
   return `<div class="oh-stores">${rows}</div>`;
 }
 const ST_BADGE = {'준비완료':'st-done','배달중':'st-done','준비중':'st-cook','주문요청':'st-cook','수령완료':'st-pick','주문취소':'st-rej'};

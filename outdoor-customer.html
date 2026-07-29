@@ -1031,7 +1031,7 @@ const STORES = [
       {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, nutrition:'약 380kcal', upsell:true},
       {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13', upsell:true},
       {id:'b4', name:'수제 흑맥주 500ml', emoji:'', desc:'현장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
-      {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 준비', price:15000, left:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
+      {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 준비', price:15000, left:8, maxOrder:2, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
     ]},
   { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=760&q=72',
@@ -1644,12 +1644,13 @@ function renderMenuSheet(){
       <div class="opt-h">사이즈 <span class="opt-req">필수</span></div>
       ${opts.map((o,i)=>`<div class="opt ${S.tmpOpt===i?'on':''}" onclick="S.tmpOpt=${i};renderMenuSheet()"><span>${o}</span><span class="dot"></span></div>`).join('')}
     </div>
-    ${(()=>{ const maxQ=m.left||20; const atMax=S.tmpQty>=maxQ, atMin=S.tmpQty<=1; return `<div class="qty">
+    ${(()=>{ const cap=Math.min(m.left!=null?m.left:Infinity, m.maxOrder||Infinity); const maxQ=isFinite(cap)?cap:20; const atMax=S.tmpQty>=maxQ, atMin=S.tmpQty<=1; return `<div class="qty">
       <button class="qbtn ${atMin?'dim':''}" ${atMin?'disabled':''} onclick="S.tmpQty=Math.max(1,S.tmpQty-1);renderMenuSheet()">−</button>
       <span class="qnum">${S.tmpQty}</span>
       <button class="qbtn ${atMax?'dim':''}" ${atMax?'disabled':''} onclick="S.tmpQty=Math.min(${maxQ},S.tmpQty+1);renderMenuSheet()">＋</button>
     </div>`; })()}
-    ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:10px;color:${m.left<=5?'var(--point)':'#e8590c'}">${m.left<=5?'🔥 ':''}품절까지 ${m.left}개 남았어요.</div>`:''}`;
+    ${m.maxOrder?`<div style="text-align:right;font-size:12.5px;font-weight:700;margin-top:8px;color:var(--ink3)">🛒 1인 최대 ${m.maxOrder}개까지 구매할 수 있어요.</div>`:''}
+    ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:6px;color:${m.left<=5?'var(--point)':'#e8590c'}">${m.left<=5?'🔥 ':''}품절까지 ${m.left}개 남았어요.</div>`:''}`;
   document.getElementById('menuSheetInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closeMenuSheet()">✕</button>

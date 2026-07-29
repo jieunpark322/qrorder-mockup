@@ -246,14 +246,17 @@
   .opt.on .dot{border-color:var(--blue);background:var(--blue);box-shadow:inset 0 0 0 3px #fff;}
   .qty{display:flex;align-items:center;gap:16px;margin-top:20px;justify-content:flex-end;}
   .qbtn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:#fff;font-size:22px;cursor:pointer;font-family:inherit;}
+  /* 최소(1)·최대(재고) 도달 시 해당 버튼 dimming — 추가 선택 불가 */
+  .qbtn.dim{opacity:.35;background:var(--bg);color:var(--ink4);cursor:not-allowed;}
   .qnum{font-size:22px;font-weight:800;min-width:30px;text-align:center;}
 
   /* ── 리스트/행 공통 ───────────────────────── */
   .sect{background:#fff;margin-top:10px;padding:16px 18px;}
   .sect-h{font-size:16px;font-weight:800;margin-bottom:12px;}
   /* 3D 아이콘 배지 — 베벨(상단 하이라이트+하단 음영) + 드롭 그림자로 입체감 · 이모지를 담아 표현 */
+  .sect-h-ic{display:flex;align-items:center;}
   .ic3d{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;
-    font-size:16px;line-height:1;margin-right:9px;vertical-align:-8px;flex-shrink:0;
+    font-size:16px;line-height:1;margin-right:9px;vertical-align:middle;flex-shrink:0;
     background:linear-gradient(150deg,#ffffff,#eef1f6 58%,#dfe4ec);
     box-shadow:0 2px 6px rgba(30,40,60,.16), inset 0 1px 0 rgba(255,255,255,.95), inset 0 -2px 4px rgba(30,40,60,.10);}
   .row{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;padding:8px 0;color:var(--ink2);}
@@ -741,11 +744,15 @@
   .bwait{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--persimmon);background:var(--blue-50);border-radius:8px;padding:4px 10px;}
 
   /* ── 메뉴 카드: 정리된 태그·가격(뉴트럴 + 단일 액센트) ── */
-  .m-badges{gap:4px;margin-bottom:6px;}
-  .m-tag{font-size:11px;font-weight:800;color:var(--ink2);background:#F3F3F5;padding:3px 8px;border-radius:6px;}
-  .m-tag.hot{color:#3F6FC9;background:#E9F0FC;}   /* 인기 · 키블루 */
-  .m-tag.rec{color:#1E8E5F;background:#E6F6EE;}   /* 추천 · 그린 */
-  .m-tag.new{color:#5A54CE;background:#ECEBFB;}   /* 신메뉴 · 블루바이올렛 */
+  .m-badges{gap:5px;margin-bottom:6px;}
+  /* 배지 — 3D 알약(아이콘 + 라벨): 그라데이션 + 상단 하이라이트/하단 음영(inset) + 드롭 그림자 */
+  .m-tag{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:var(--ink2);padding:3px 9px 3px 7px;border-radius:20px;
+    background:linear-gradient(160deg,#fafbfd,#eceef2);
+    box-shadow:0 2px 4px rgba(30,40,60,.14), inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 2px rgba(30,40,60,.08);}
+  .m-tag .mt-ic{font-size:11px;line-height:1;}
+  .m-tag.hot{color:#2F5BB0;background:linear-gradient(160deg,#f3f8ff,#dae7fc);}   /* 인기 · 키블루 */
+  .m-tag.rec{color:#177A4F;background:linear-gradient(160deg,#eefaf3,#d4f1e0);}   /* 추천 · 그린 */
+  .m-tag.new{color:#4A44C0;background:linear-gradient(160deg,#f5f4fe,#e3e1fb);}   /* 신메뉴 · 블루바이올렛 */
   .m-name{font-size:16px;font-weight:700;color:var(--ink);}
   .m-price{margin-top:7px;gap:7px;align-items:center;}
   .m-now{font-family:var(--ui);font-weight:800;font-size:16px;color:var(--ink);}
@@ -754,7 +761,10 @@
   .d-price .d-sale{color:var(--point);}
   .m-was{font-size:13px;color:var(--ink4);text-decoration:line-through;}
   .m-promo{font-size:11px;font-weight:700;color:var(--point);background:var(--point-50);padding:3px 7px;border-radius:6px;}
-  .m-reuse{font-size:11.5px;font-weight:600;color:var(--ink3);margin-top:5px;}
+  .m-reuse{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:#177A4F;margin-top:6px;
+    padding:4px 10px 4px 8px;border-radius:20px;background:linear-gradient(160deg,#eefaf3,#d4f1e0);
+    box-shadow:0 2px 4px rgba(20,120,80,.18), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -1px 2px rgba(20,120,80,.12);}
+  .m-reuse .mt-ic{font-size:12px;line-height:1;}
   .m-right{padding-left:8px;}
   /* 남은 수량 배지 — 수량 자릿수·이모지 유무와 무관하게 고정 크기 + 입체(3D) · 텍스트는 항상 가운데 */
   .m-left-r{position:relative;box-sizing:border-box;width:76px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
@@ -1016,19 +1026,19 @@ const STORES = [
   { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=760&q=72',
     open:true, loc:'A구역 · 부스 3번', waitCount:'12팀', waitTime:'약 15분', rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260, brkStart:900, brkEnd:960,   /* 영업 11:00~21:00, 브레이크 15:00~16:00 (분) */
-    info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · 행사장 A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
+    info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
       {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null, allergy:'밀·대두·우유·달걀 함유', nutrition:'약 620kcal'},
       {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, nutrition:'약 380kcal', upsell:true},
       {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13', upsell:true},
-      {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
+      {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'현장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
       {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 준비', price:15000, left:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
     ]},
   { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=760&q=72',
     open:true, loc:'B구역 · 부스 1번', waitCount:'3팀', waitTime:'약 5분', rep:'핸드드립 아메리카노', cat:'음료', cat2:'B구역',
     ohStart:660, ohEnd:1260,   /* 영업 11:00~21:00 */
-    info:{ceo:'이영희', regno:'234-56-78901', address:'서울 마포구 성미산로 000 · 행사장 B구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
+    info:{ceo:'이영희', regno:'234-56-78901', address:'서울 마포구 성미산로 000 · B구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
     menus:[
       {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true, upsell:true},
       {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true, allergy:'우유 함유', nutrition:'약 250kcal'},
@@ -1038,11 +1048,11 @@ const STORES = [
   { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=760&q=72',
     open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1200,   /* 영업 11:00~20:00 */
-    info:{ceo:'박민수', regno:'345-67-89012', address:'서울 마포구 성미산로 000 · 행사장 C구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
+    info:{ceo:'박민수', regno:'345-67-89012', address:'서울 마포구 성미산로 000 · C구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
   { id:'taco', name:'소프트타코', logo:'🌮', thumb:'https://loremflickr.com/240/240/taco?lock=4', cover:'https://loremflickr.com/760/430/taco,mexican?lock=4',
     open:true, loc:'A구역 · 부스 5번', waitCount:'6팀', waitTime:'약 10분', rep:'비프 타코', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'최지우', regno:'456-78-90123', address:'서울 마포구 성미산로 000 · 행사장 A구역 5번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소고기: 호주산 · 토르티야(밀): 미국산'},
+    info:{ceo:'최지우', regno:'456-78-90123', address:'서울 마포구 성미산로 000 · A구역 5번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소고기: 호주산 · 토르티야(밀): 미국산'},
     menus:[
       {id:'t1', name:'비프 타코 2P', desc:'살사·과카몰리', price:6500, badges:['hot'], img:'🌮', photo:'https://loremflickr.com/320/320/taco?lock=41', upsell:true},
       {id:'t2', name:'나초 치즈', desc:'할라피뇨 추가 가능', price:6000, was:6000, img:'🧀', photo:'https://loremflickr.com/320/320/nachos?lock=42', left:4},
@@ -1050,7 +1060,7 @@ const STORES = [
   { id:'juice', name:'소프트주스바', logo:'🧃', thumb:'https://loremflickr.com/240/240/juice?lock=9', cover:'',   /* 커버 미등록 데모 — 상세에서 커버 영역 없이 표시 */
     open:true, loc:'C구역 · 부스 5번', waitCount:'2팀', waitTime:'약 3분', rep:'생과일 착즙주스', cat:'음료', cat2:'C구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'오세훈', regno:'890-12-34567', address:'서울 마포구 성미산로 000 · 행사장 C구역 5번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'과일: 국내산'},
+    info:{ceo:'오세훈', regno:'890-12-34567', address:'서울 마포구 성미산로 000 · C구역 5번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'과일: 국내산'},
     menus:[
       {id:'j1', name:'생오렌지 주스', desc:'착즙 그대로', price:5000, badges:['rec'], img:'🍊', photo:'https://loremflickr.com/320/320/orangejuice?lock=91', reuse:true, upsell:true},
       {id:'j2', name:'딸기 스무디', desc:'생딸기 듬뿍', price:6000, img:'🍓', photo:'https://loremflickr.com/320/320/strawberry,smoothie?lock=92'},
@@ -1058,7 +1068,7 @@ const STORES = [
   { id:'dessert', name:'소프트디저트', logo:'🍰', thumb:'https://loremflickr.com/240/240/dessert?lock=5', cover:'https://loremflickr.com/760/430/dessert,cake?lock=5',
     open:true, loc:'B구역 · 부스 4번', waitCount:'2팀', waitTime:'약 4분', rep:'수제 츄러스', cat:'디저트', cat2:'B구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'한소민', regno:'567-89-01234', address:'서울 마포구 성미산로 000 · 행사장 B구역 4번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
+    info:{ceo:'한소민', regno:'567-89-01234', address:'서울 마포구 성미산로 000 · B구역 4번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
     menus:[
       {id:'de1', name:'수제 츄러스', desc:'시나몬 슈가', price:4000, badges:['rec'], img:'🥨', photo:'https://loremflickr.com/320/320/churros?lock=51', reuse:true, upsell:true},
       {id:'de2', name:'소프트 아이스크림', desc:'바닐라 / 초코', price:3500, img:'🍦', photo:'https://loremflickr.com/320/320/icecream?lock=52'},
@@ -1066,7 +1076,7 @@ const STORES = [
   { id:'pizza', name:'소프트피자', logo:'🍕', thumb:'https://loremflickr.com/240/240/pizza?lock=6', cover:'https://loremflickr.com/760/430/pizza?lock=6',
     open:true, loc:'A구역 · 부스 6번', waitCount:'9팀', waitTime:'약 12분', rep:'화덕 마르게리타', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'정우성', regno:'678-90-12345', address:'서울 마포구 성미산로 000 · 행사장 A구역 6번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 치즈: 국내산 · 토마토: 이탈리아산'},
+    info:{ceo:'정우성', regno:'678-90-12345', address:'서울 마포구 성미산로 000 · A구역 6번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 치즈: 국내산 · 토마토: 이탈리아산'},
     menus:[
       {id:'p1', name:'마르게리타 피자', desc:'화덕 도우 · 바질', price:9000, badges:['hot'], img:'🍕', photo:'https://loremflickr.com/320/320/margherita,pizza?lock=61', upsell:true},
       {id:'p2', name:'페퍼로니 피자', desc:'더블 페퍼로니', price:10500, was:12000, img:'🍕', photo:'https://loremflickr.com/320/320/pepperoni,pizza?lock=62'},
@@ -1075,7 +1085,7 @@ const STORES = [
   { id:'ramen', name:'소프트라멘', logo:'🍜', thumb:'https://loremflickr.com/240/240/ramen?lock=7', cover:'https://loremflickr.com/760/430/ramen,noodle?lock=7',
     open:true, paused:true, loc:'B구역 · 부스 2번', waitCount:'15팀', waitTime:'약 20분', rep:'돈코츠 라멘', cat:'푸드', cat2:'B구역',
     ohStart:660, ohEnd:1200,
-    info:{ceo:'강동원', regno:'789-01-23456', address:'서울 마포구 성미산로 000 · 행사장 B구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'돼지고기: 국내산 · 면(밀): 국내산'},
+    info:{ceo:'강동원', regno:'789-01-23456', address:'서울 마포구 성미산로 000 · B구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'돼지고기: 국내산 · 면(밀): 국내산'},
     menus:[
       {id:'r1', name:'돈코츠 라멘', desc:'진한 돼지사골 국물', price:8500, badges:['hot'], img:'🍜', photo:'https://loremflickr.com/320/320/tonkotsu,ramen?lock=71', reuse:true},
       {id:'r2', name:'차슈 추가', desc:'부드러운 차슈 3점', price:2500, img:'🥩', photo:'https://loremflickr.com/320/320/chashu,pork?lock=72', upsell:true},
@@ -1083,7 +1093,7 @@ const STORES = [
   { id:'hotdog', name:'소프트핫도그', logo:'🌭', thumb:'https://loremflickr.com/240/240/hotdog?lock=8', cover:'https://loremflickr.com/760/430/hotdog?lock=8',
     open:true, loc:'C구역 · 부스 3번', waitCount:'4팀', waitTime:'약 6분', rep:'명물 감자핫도그', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'손예진', regno:'890-12-34567', address:'서울 마포구 성미산로 000 · 행사장 C구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소시지(돼지): 국내산 · 감자: 국내산'},
+    info:{ceo:'손예진', regno:'890-12-34567', address:'서울 마포구 성미산로 000 · C구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소시지(돼지): 국내산 · 감자: 국내산'},
     menus:[
       {id:'h1', name:'감자 핫도그', desc:'겉바속촉 큐브감자', price:4500, badges:['hot'], img:'🌭', photo:'https://loremflickr.com/320/320/corndog?lock=81', upsell:true},
       {id:'h2', name:'모짜렐라 핫도그', desc:'쭉 늘어나는 치즈', price:5000, badges:['rec'], img:'🧀', photo:'https://loremflickr.com/320/320/mozzarella,corndog?lock=82'},
@@ -1091,7 +1101,7 @@ const STORES = [
   { id:'ade', name:'소프트에이드', logo:'🥤', thumb:'https://loremflickr.com/240/240/lemonade?lock=9', cover:'https://loremflickr.com/760/430/lemonade,drink?lock=9',
     open:true, loc:'B구역 · 부스 3번', waitCount:'2팀', waitTime:'약 3분', rep:'청포도 에이드', cat:'음료', cat2:'B구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'김태리', regno:'901-23-45678', address:'서울 마포구 성미산로 000 · 행사장 B구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'청포도: 칠레산 · 레몬: 미국산'},
+    info:{ceo:'김태리', regno:'901-23-45678', address:'서울 마포구 성미산로 000 · B구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'청포도: 칠레산 · 레몬: 미국산'},
     menus:[
       {id:'a1', name:'청포도 에이드', desc:'상큼 톡톡', price:5000, badges:['rec'], img:'🍇', photo:'https://loremflickr.com/320/320/grape,ade?lock=91', reuse:true},
       {id:'a2', name:'자몽 에이드', desc:'상큼 쌉싸름', price:5000, was:5500, img:'🍊', photo:'https://loremflickr.com/320/320/grapefruit,ade?lock=92', upsell:true},
@@ -1099,7 +1109,7 @@ const STORES = [
   { id:'skewer', name:'소프트꼬치', logo:'🍢', thumb:'https://loremflickr.com/240/240/skewer?lock=10', cover:'https://loremflickr.com/760/430/skewer,grill?lock=10',
     open:true, loc:'D구역 · 부스 1번', waitCount:'7팀', waitTime:'약 10분', rep:'양념 닭꼬치', cat:'푸드', cat2:'D구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'조인성', regno:'012-34-56789', address:'서울 마포구 성미산로 000 · 행사장 D구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'닭고기: 국내산'},
+    info:{ceo:'조인성', regno:'012-34-56789', address:'서울 마포구 성미산로 000 · D구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'닭고기: 국내산'},
     menus:[
       {id:'sk1', name:'양념 닭꼬치', desc:'매콤달콤', price:3500, badges:['hot'], img:'🍢', photo:'https://loremflickr.com/320/320/chicken,skewer?lock=101', upsell:true},
       {id:'sk2', name:'소금 닭꼬치', desc:'담백한 소금 구이', price:3500, img:'🍢', photo:'https://loremflickr.com/320/320/yakitori?lock=102'},
@@ -1107,7 +1117,7 @@ const STORES = [
   { id:'waffle', name:'소프트와플', logo:'🧇', thumb:'https://loremflickr.com/240/240/waffle?lock=11', cover:'https://loremflickr.com/760/430/waffle,dessert?lock=11',
     open:true, loc:'A구역 · 부스 7번', waitCount:'5팀', waitTime:'약 7분', rep:'생크림 와플', cat:'디저트', cat2:'A구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'전지현', regno:'112-34-56780', address:'서울 마포구 성미산로 000 · 행사장 A구역 7번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
+    info:{ceo:'전지현', regno:'112-34-56780', address:'서울 마포구 성미산로 000 · A구역 7번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
     menus:[
       {id:'w1', name:'생크림 와플', desc:'딸기 토핑', price:6000, badges:['rec'], img:'🧇', photo:'https://loremflickr.com/320/320/waffle,cream?lock=111', reuse:true, upsell:true},
       {id:'w2', name:'초코 와플', desc:'진한 벨기에 초코', price:6000, img:'🍫', photo:'https://loremflickr.com/320/320/chocolate,waffle?lock=112'},
@@ -1115,15 +1125,15 @@ const STORES = [
   { id:'beer', name:'소프트비어', logo:'🍺', thumb:'https://loremflickr.com/240/240/beer?lock=12', cover:'https://loremflickr.com/760/430/beer,craft?lock=12',
     open:true, loc:'D구역 · 부스 2번', waitCount:'10팀', waitTime:'약 13분', rep:'수제 크래프트 비어', cat:'음료', cat2:'D구역',
     ohStart:660, ohEnd:1320,
-    info:{ceo:'하정우', regno:'223-45-67801', address:'서울 마포구 성미산로 000 · 행사장 D구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 22:00', origin:'맥아: 독일산 · 홉: 미국산'},
+    info:{ceo:'하정우', regno:'223-45-67801', address:'서울 마포구 성미산로 000 · D구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 22:00', origin:'맥아: 독일산 · 홉: 미국산'},
     menus:[
-      {id:'be1', name:'크래프트 IPA 500ml', emoji:'🔞', desc:'행사장 한정 생맥주', price:8000, badges:['hot'], img:'🍺', photo:'https://loremflickr.com/320/320/ipa,beer?lock=121', adult:true, allergy:'보리·밀 함유'},
+      {id:'be1', name:'크래프트 IPA 500ml', emoji:'🔞', desc:'현장 한정 생맥주', price:8000, badges:['hot'], img:'🍺', photo:'https://loremflickr.com/320/320/ipa,beer?lock=121', adult:true, allergy:'보리·밀 함유'},
       {id:'be2', name:'감자튀김', desc:'맥주 안주로 좋아요', price:5000, img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=122', upsell:true},
     ]},
   { id:'bunsik', name:'소프트분식', logo:'🥟', thumb:'https://loremflickr.com/240/240/tteokbokki?lock=13', cover:'https://loremflickr.com/760/430/tteokbokki,korean?lock=13',
     open:true, loc:'C구역 · 부스 4번', waitCount:'11팀', waitTime:'약 14분', rep:'국물 떡볶이', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1200,
-    info:{ceo:'마동석', regno:'334-56-78901', address:'서울 마포구 성미산로 000 · 행사장 C구역 4번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'쌀떡: 국내산 · 고춧가루: 국내산'},
+    info:{ceo:'마동석', regno:'334-56-78901', address:'서울 마포구 성미산로 000 · C구역 4번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'쌀떡: 국내산 · 고춧가루: 국내산'},
     menus:[
       {id:'bs1', name:'국물 떡볶이', desc:'매운맛 조절 가능', price:5000, badges:['hot'], img:'🌶️', photo:'https://loremflickr.com/320/320/tteokbokki?lock=131', reuse:true},
       {id:'bs2', name:'모둠 튀김', desc:'바삭한 모둠 튀김', price:4000, badges:['rec'], img:'🍤', photo:'https://loremflickr.com/320/320/korean,fried?lock=132', upsell:true},
@@ -1131,7 +1141,7 @@ const STORES = [
   { id:'smoothie', name:'소프트스무디', logo:'🍓', thumb:'https://loremflickr.com/240/240/smoothie?lock=14', cover:'https://loremflickr.com/760/430/smoothie,fruit?lock=14',
     open:true, loc:'A구역 · 부스 8번', waitCount:'3팀', waitTime:'약 5분', rep:'딸기 바나나 스무디', cat:'음료', cat2:'A구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'아이유', regno:'445-67-89012', address:'서울 마포구 성미산로 000 · 행사장 A구역 8번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'딸기: 국내산 · 바나나: 필리핀산'},
+    info:{ceo:'아이유', regno:'445-67-89012', address:'서울 마포구 성미산로 000 · A구역 8번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'딸기: 국내산 · 바나나: 필리핀산'},
     menus:[
       {id:'sm1', name:'딸기 바나나 스무디', desc:'생과일 100%', price:5500, badges:['rec'], img:'🍓', photo:'https://loremflickr.com/320/320/strawberry,smoothie?lock=141', reuse:true, upsell:true},
       {id:'sm2', name:'망고 스무디', desc:'진한 망고 과육', price:5500, img:'🥭', photo:'https://loremflickr.com/320/320/mango,smoothie?lock=142'},
@@ -1139,7 +1149,7 @@ const STORES = [
   { id:'bakery', name:'소프트베이커리', logo:'🥐', thumb:'https://loremflickr.com/240/240/bakery?lock=15', cover:'https://loremflickr.com/760/430/bakery,bread?lock=15',
     open:false, loc:'B구역 · 부스 5번', waitCount:'6팀', waitTime:'약 8분', rep:'버터 크루아상', cat:'디저트', cat2:'B구역',
     ohStart:600, ohEnd:1140,
-    info:{ceo:'박서준', regno:'556-78-90123', address:'서울 마포구 성미산로 000 · 행사장 B구역 5번 부스', hours:'행사 기간 매일 10:00 ~ 19:00', origin:'밀: 프랑스산 · 버터: 프랑스산'},
+    info:{ceo:'박서준', regno:'556-78-90123', address:'서울 마포구 성미산로 000 · B구역 5번 부스', hours:'행사 기간 매일 10:00 ~ 19:00', origin:'밀: 프랑스산 · 버터: 프랑스산'},
     menus:[
       {id:'bk1', name:'버터 크루아상', desc:'겹겹이 바삭한 결', price:4000, img:'🥐', photo:'https://loremflickr.com/320/320/croissant?lock=151'},
       {id:'bk2', name:'소금빵', desc:'짭조름 고소', price:3500, img:'🥖', photo:'https://loremflickr.com/320/320/saltbread?lock=152'},
@@ -1574,8 +1584,8 @@ function scStore(){
 }
 function mcardHTML(sid,m,closed){
   // 태그는 뉴트럴 통일, 색은 가격/할인(퍼시몬) 하나로만 — 시각적 정리
-  const badgeMap={hot:['인기','hot'],new:['신메뉴','new'],rec:['추천','rec']};
-  const badges = (m.badges||[]).map(b=>badgeMap[b]).filter(Boolean).map(([t,c])=>`<span class="m-tag ${c}">${t}</span>`).join('');
+  const badgeMap={hot:['🔥','인기','hot'],new:['🆕','신메뉴','new'],rec:['👍','추천','rec']};
+  const badges = (m.badges||[]).map(b=>badgeMap[b]).filter(Boolean).map(([ic,t,c])=>`<span class="m-tag ${c}"><span class="mt-ic">${ic}</span>${t}</span>`).join('');
   let promo='', now=m.price, was='';
   if(m.hh){ promo='해피아워'; now=m.hhPrice; was=m.price; }
   else if(m.was){ was=m.was; }
@@ -1589,7 +1599,7 @@ function mcardHTML(sid,m,closed){
       <div class="m-name">${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}</div>
       ${m.desc?`<div class="m-desc">${m.desc}</div>`:''}
       <div class="m-price">${price}</div>
-      ${m.reuse?`<div class="m-reuse">♻️ 다회용기 제공</div>`:''}
+      ${m.reuse?`<div class="m-reuse"><span class="mt-ic">♻️</span>다회용기 제공</div>`:''}
     </div>
     ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${lowStock?'low':''}">${lowStock?'<span class="mlr-fire">🔥</span>':''}<span class="mlr-t">${rightVal.t}</span><b>${rightVal.n}개</b></span></div>`:''}
   </button>`;
@@ -1599,18 +1609,18 @@ function mcardHTML(sid,m,closed){
 function storeInfoHTML(s){
   const i=s.info||{};
   return `<div style="padding-bottom:8px">
-    <div class="sect"><div class="sect-h"><span class="ic3d">🌱</span>원산지 정보</div>
+    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">🌱</span>원산지 정보</div>
       <div class="info-multi">${i.origin||'등록된 원산지 정보가 없어요'}</div>
       <div style="font-size:12px;color:var(--ink4);margin-top:8px">※ 원산지는 관련 법령에 따라 표기돼요</div>
     </div>
-    <div class="sect"><div class="sect-h"><span class="ic3d">📍</span>매장 위치</div>
-      <div class="row"><span>행사장 위치</span><span class="v">📍 ${s.loc}</span></div>
+    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">📍</span>매장 위치</div>
+      <div class="row"><span>현장 위치</span><span class="v">📍 ${s.loc}</span></div>
       <div style="font-size:14px;color:var(--ink2);margin-top:8px">${i.address||''}</div>
     </div>
-    <div class="sect"><div class="sect-h"><span class="ic3d">🕒</span>운영 시간</div>
+    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">🕒</span>운영 시간</div>
       <div class="info-multi">${i.hours||'-'}</div>
     </div>
-    <div class="sect"><div class="sect-h"><span class="ic3d">🧾</span>사업자 정보</div>
+    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">🧾</span>사업자 정보</div>
       <div class="row"><span>상호</span><span class="v">${s.name}</span></div>
       <div class="row"><span>대표자</span><span class="v">${i.ceo||'-'}</span></div>
       <div class="row"><span>사업자등록번호</span><span class="v">${i.regno||'-'}</span></div>
@@ -1635,11 +1645,11 @@ function renderMenuSheet(){
       <div class="opt-h">사이즈 <span class="opt-req">필수</span></div>
       ${opts.map((o,i)=>`<div class="opt ${S.tmpOpt===i?'on':''}" onclick="S.tmpOpt=${i};renderMenuSheet()"><span>${o}</span><span class="dot"></span></div>`).join('')}
     </div>
-    <div class="qty">
-      <button class="qbtn" onclick="S.tmpQty=Math.max(1,S.tmpQty-1);renderMenuSheet()">−</button>
+    ${(()=>{ const maxQ=m.left||20; const atMax=S.tmpQty>=maxQ, atMin=S.tmpQty<=1; return `<div class="qty">
+      <button class="qbtn ${atMin?'dim':''}" ${atMin?'disabled':''} onclick="S.tmpQty=Math.max(1,S.tmpQty-1);renderMenuSheet()">−</button>
       <span class="qnum">${S.tmpQty}</span>
-      <button class="qbtn" onclick="S.tmpQty=Math.min(${m.left||20},S.tmpQty+1);renderMenuSheet()">＋</button>
-    </div>
+      <button class="qbtn ${atMax?'dim':''}" ${atMax?'disabled':''} onclick="S.tmpQty=Math.min(${maxQ},S.tmpQty+1);renderMenuSheet()">＋</button>
+    </div>`; })()}
     ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:10px;color:${m.left<=5?'var(--point)':'#e8590c'}">${m.left<=5?'🔥 ':''}남은 수량 ${m.left}개 · 초과 선택 불가</div>`:''}`;
   document.getElementById('menuSheetInner').innerHTML = `
     <div class="ms-grab"><span></span></div>

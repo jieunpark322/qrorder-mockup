@@ -192,7 +192,12 @@
   .mcard:active{background:var(--bg);}
   .mcard.soldout{opacity:.66;}
   .m-thumb{width:76px;height:76px;border-radius:12px;flex-shrink:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;}
-  .m-thumb .so-dim{position:absolute;inset:0;background:rgba(255,255,255,.55);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--red);}
+  /* 일시 품절 — 썸네일 위 다크 원형 오버레이(레퍼런스 톤) */
+  .m-thumb .so-dim{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:66%;aspect-ratio:1;border-radius:50%;
+    background:rgba(42,44,50,.70);color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;font-weight:800;line-height:1.25;}
+  /* 저재고 — 썸네일 하단 다크 pill 'N개 남음' */
+  .m-thumb-tag{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);background:rgba(30,30,35,.82);color:#fff;
+    font-size:11px;font-weight:800;padding:3px 11px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);}
   .m-body{flex:1;min-width:0;}
   .m-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;}
   .m-badge{font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;}
@@ -200,9 +205,9 @@
   .m-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px;}
   .m-emoji{font-size:15px;}
   /* 성인 메뉴 연령 배지 — 금지 마크(🔞) 대신 깔끔한 '19' 배지(3D) */
-  .age-badge{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;padding:0;border-radius:50%;
-    background:linear-gradient(160deg,#FF6B6B,#E03131);color:#fff;font-size:10.5px;font-weight:900;letter-spacing:-.04em;vertical-align:middle;flex-shrink:0;
-    box-shadow:0 1px 3px rgba(224,49,49,.4), inset 0 1px 0 rgba(255,255,255,.35);margin-right:5px;}
+  .age-badge{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;padding:0;border-radius:50%;
+    background:linear-gradient(160deg,#FF6B6B,#E03131);color:#fff;font-size:9px;font-weight:900;letter-spacing:-.05em;vertical-align:middle;flex-shrink:0;
+    box-shadow:0 1px 3px rgba(224,49,49,.4), inset 0 1px 0 rgba(255,255,255,.35);margin-right:3px;}
   .m-desc{font-size:12.5px;color:var(--ink3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .m-price{margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .m-now{font-size:16px;font-weight:800;}
@@ -1620,7 +1625,7 @@ function mcardHTML(sid,m,closed){
   const rightVal = (m.left!=null ? {t:'남은 수량', n:m.left} : null);
   const lowStock = rightVal && rightVal.n<=5;   // 5개 이하 = 곧 품절 강조
   return `<button class="mcard ${m.soldout?'soldout':''}" onclick="openMenu('${sid}','${m.id}')">
-    <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">품절</div>':''}</div>
+    <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">일시<br>품절</div>':(m.left!=null&&m.left<=10?`<div class="m-thumb-tag">${m.left}개 남음</div>`:'')}</div>
     <div class="m-body">
       ${(badges || m.reuse)?`<div class="m-badges">${badges}${m.reuse?`<span class="m-reuse"><span class="mt-ic">♻️</span>다회용기</span>`:''}</div>`:''}
       <div class="m-name">${m.adult?'<span class="age-badge">19</span>':''}${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}</div>

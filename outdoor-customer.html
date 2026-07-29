@@ -1511,11 +1511,6 @@ function mcardHTML(sid,m,closed){
 function storeInfoHTML(s){
   const i=s.info||{};
   return `<div style="padding-bottom:8px">
-    <div class="sect"><div class="sect-h">사업자 정보</div>
-      <div class="row"><span>상호</span><span class="v">${s.name}</span></div>
-      <div class="row"><span>대표자</span><span class="v">${i.ceo||'-'}</span></div>
-      <div class="row"><span>사업자등록번호</span><span class="v">${i.regno||'-'}</span></div>
-    </div>
     <div class="sect"><div class="sect-h">원산지 정보</div>
       <div class="info-multi">${i.origin||'등록된 원산지 정보가 없어요'}</div>
       <div style="font-size:12px;color:var(--ink4);margin-top:8px">※ 원산지는 관련 법령에 따라 표기돼요</div>
@@ -1526,6 +1521,11 @@ function storeInfoHTML(s){
     </div>
     <div class="sect"><div class="sect-h">운영 시간</div>
       <div class="info-multi">${i.hours||'-'}</div>
+    </div>
+    <div class="sect"><div class="sect-h">사업자 정보</div>
+      <div class="row"><span>상호</span><span class="v">${s.name}</span></div>
+      <div class="row"><span>대표자</span><span class="v">${i.ceo||'-'}</span></div>
+      <div class="row"><span>사업자등록번호</span><span class="v">${i.regno||'-'}</span></div>
     </div>
   </div>`;
 }

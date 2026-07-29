@@ -1313,7 +1313,8 @@ function bottomBar(){
     const brk = S.payScope==='separate' ? `[${store(S.cart[0].store).name}] ` : '';
     cartBtn = `<button class="bb-cart" onclick="go('cart')">🛒 ${brk}장바구니 ${cnt}개 <span class="amt">${won(sum)}</span></button>`;
   }
-  return `<div class="bottombar ${cartActive?'has-cart':''}">${cartBtn}<button class="bb-hist ${cartActive?'compact':''}" onclick="go('history')">🧾 주문 내역</button></div>`;
+  const histBtn = `<button class="bb-hist ${cartActive?'compact':''}" onclick="go('history')">🧾 주문 내역</button>`;
+  return `<div class="bottombar ${cartActive?'has-cart':''}">${histBtn}${cartBtn}</div>`;
 }
 function scardHTML(s){
   // 매장 그룹(홈) 목록에는 대기 정보 미노출 — 대기가 긴 매장이 선택에서 불리해지지 않도록

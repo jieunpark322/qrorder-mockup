@@ -494,7 +494,8 @@
   .cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
   /* 주문 내역 플로팅 진입 버튼 (device 컬럼 우측 하단 정렬) */
   .hist-fabwrap{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:440px;display:flex;justify-content:flex-end;padding:0 16px;z-index:38;pointer-events:none;}
-  .hist-fab{pointer-events:auto;background:#fff;color:var(--persimmon-d);border:1px solid var(--line);box-shadow:0 6px 18px rgba(20,20,25,.16);border-radius:24px;padding:11px 16px;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;}
+  .hist-fab{pointer-events:auto;background:var(--persimmon);color:#fff;border:none;box-shadow:0 8px 22px rgba(92,140,218,.42);border-radius:24px;padding:12px 18px;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;}
+  .hist-fab:active{transform:scale(.96);}
   .hist-fab:active{transform:scale(.96);}
   .cta-btn{width:100%;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:17px;font-size:16.5px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
   .cta-btn:disabled{background:var(--line);color:var(--ink4);}
@@ -794,10 +795,23 @@
   .cart-scope-note{margin:12px 14px 0;background:var(--blue-50);border:1px solid #CFE0F7;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--persimmon-d);line-height:1.5;}
   .cart-scope-note.warn{background:#FBF1DB;border-color:#F0DDA8;color:#9A6B08;}
   .cart-scope-note b{color:var(--ink);}
-  /* 매장 카드 메타: pill 제거 → 배경 없는 한 줄(위치 회색·대기 퍼시몬) */
-  .s-meta{gap:10px;margin-top:7px;font-size:12.5px;color:var(--ink3);}
-  .s-loc{color:var(--ink3);font-weight:600;}
+  /* 매장 카드 메타: 위치는 아이콘 박스(칩)로 표시 */
+  .s-meta{gap:8px;margin-top:8px;font-size:12.5px;}
+  .s-loc{display:inline-flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px 9px;color:var(--ink2);font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .s-loc-ic{font-size:11px;line-height:1;flex-shrink:0;}
   .s-wait{color:var(--persimmon);font-weight:700;}
+  /* 매장 그룹 2열 배치(브랜드 설정) — 대표메뉴 사진+명+위치+가격 */
+  .storelist.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 14px;padding:16px;}
+  .gcard{display:flex;flex-direction:column;gap:5px;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;text-align:left;width:100%;position:relative;}
+  .gcard:active{opacity:.85;}
+  .g-thumb{width:100%;aspect-ratio:1/1;border-radius:14px;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);position:relative;margin-bottom:5px;display:flex;align-items:center;justify-content:center;}
+  .g-thumb.noimg{background:linear-gradient(135deg,#eceef1,#e0e3e8);}
+  .g-thumb.noimg::before{content:'🖼';font-size:30px;opacity:.38;}
+  .g-hero{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .g-sub{font-size:12px;}
+  .g-price{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-top:2px;}
+  .gcard.dimmed .g-thumb{filter:grayscale(100%) brightness(.9);}
+  .gcard.dimmed .g-thumb::after{content:attr(data-label);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,32,.5);color:#fff;font-size:12px;font-weight:800;border-radius:inherit;}
   /* 메뉴 정보 토글 버튼 */
   .d-info-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:8px 13px;border:none;border-radius:9px;background:#EEEEF0;color:var(--ink2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
   .d-info-btn:active{transform:scale(.97);}
@@ -895,6 +909,10 @@
   <button class="ds-chip on" id="min-group" onclick="setMinOrder('group')">그룹 8,000원</button>
   <button class="ds-chip" id="min-store" onclick="setMinOrder('store')">매장별 5,000원</button>
   <button class="ds-chip" id="min-off" onclick="setMinOrder('off')">끔</button>
+  <span class="ds-div"></span>
+  <span class="lbl">배치(브랜드)</span>
+  <button class="ds-chip on" id="grid-list" onclick="setGrid('list')">1열</button>
+  <button class="ds-chip" id="grid-grid" onclick="setGrid('grid')">2열</button>
   <span class="ds-div"></span>
   <span class="lbl">노출순서(브랜드)</span>
   <button class="ds-chip on" id="sort-fixed" onclick="setSort('fixed')">순서대로</button>
@@ -1121,6 +1139,7 @@ let S = {
   fCat:'전체',         // 홈 분류 필터 (전체/푸드/음료/디저트 → store.cat)
   fZone:'전체',        // 홈 구역 필터 (전체/A~D구역 → store.cat2)
   filter2Open:false,   // 상세 필터(필터2) 펼침 여부 — 기본 접힘, 원하는 사용자만 확장
+  gridCols:'list',     // 브랜드 설정 매장 그룹 배치: list(1열) | grid(2열)
   sortMode:'fixed',    // 브랜드 설정 매장 노출 순서: fixed(순서대로) | random(페이지 열 때마다 랜덤)
   openFirst:false,     // 브랜드 설정 영업중 매장 우선(영업종료·일시중지는 하단)
   _homeOrder:null,     // 랜덤 노출 시 이번 진입의 매장 순서 캐시
@@ -1279,7 +1298,7 @@ function scHome(){
       <div class="zonebar">${cats2.map(c=>`<button class="${S.fZone===c?'on':''}" onclick="setHomeFilter('zone','${c}')">${c}</button>`).join('')}</div>
     </div>
     <!-- 매장 목록 (검색 or 분류·구역 필터 + 브랜드 설정: 순서대로/랜덤 + 영업중 우선) -->
-    <div class="storelist">${storelistHTML()}</div>
+    <div class="storelist ${S.gridCols==='grid'?'grid':''}">${storelistHTML()}</div>
     <div style="height:${(S.payScope==='unified'&&S.cart.length)?150:78}px"></div>
   </div>
   ${histFab()}
@@ -1315,10 +1334,31 @@ function scardHTML(s){
     <div class="s-body">
       <div class="s-hero">${s.rep}</div>
       <div class="s-sub">${s.name}</div>
-      <div class="s-meta"><span class="s-loc">📍 ${s.loc}</span></div>
+      <div class="s-meta"><span class="s-loc"><span class="s-loc-ic">📍</span>${s.loc}</span></div>
     </div>
   </button>`;
 }
+// 2열(그리드) 카드 — 사장님사이트에서 2열 배치 선택 시 · 대표메뉴 사진+명+매장/위치+가격
+function scardGridHTML(s){
+  const paused = s.open && s.paused;
+  const dimmed = !s.open || paused;
+  const label = !s.open ? '영업종료' : (paused ? '준비중' : '');
+  const rep = (s.menus||[]).find(m=>m.name===s.rep) || (s.menus||[])[0];
+  const price = rep ? rep.price : null;
+  const hasThumb = s.thumb && String(s.thumb).trim();
+  const tap = !s.open
+    ? `toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
+    : paused
+      ? `toast('지금은 잠시 준비 중이에요.','곧 다시 열어요. 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
+      : `openStore('${s.id}')`;
+  return `<button class="gcard ${dimmed?'dimmed':''}" onclick="${tap}">
+    <div class="g-thumb${paused?' paused':''}${hasThumb?'':' noimg'}" data-label="${label}" style="${hasThumb?`background-image:url('${s.thumb}');`:''}background-color:var(--bg)"></div>
+    <div class="g-hero">${s.rep}</div>
+    <div class="g-sub"><span class="s-loc"><span class="s-loc-ic">📍</span>${s.loc}</span></div>
+    ${price!=null?`<div class="g-price nums">${won(price)}</div>`:''}
+  </button>`;
+}
+function setGrid(v){ S.gridCols=v; ['list','grid'].forEach(k=>document.getElementById('grid-'+k).classList.toggle('on',k===v)); render(); }
 function pickChip(el){ el.parentNode.querySelectorAll('.cchip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); }
 // 홈 매장 목록 — ① 분류·구역 필터 → ② 노출 순서(랜덤/순서대로) → ③ 영업중 우선
 function homeStores(){
@@ -1353,7 +1393,7 @@ function toggleFilter2(){ S.filter2Open=!S.filter2Open; render(); }
 // 매장 목록 렌더 (검색어/필터 반영 · 결과 없으면 안내)
 function storelistHTML(){
   const list=homeStores();
-  if(list.length) return list.map(scardHTML).join('');
+  if(list.length) return list.map(S.gridCols==='grid'?scardGridHTML:scardHTML).join('');
   const q=(S.searchOpen&&S.searchQ)?S.searchQ.trim():'';
   return q
     ? `<div class="storelist-empty">‘${q}’ 검색 결과가 없어요<div class="se-sub">매장명 또는 메뉴명으로 다시 검색해 보세요</div></div>`

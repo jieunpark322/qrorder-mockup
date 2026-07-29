@@ -1254,13 +1254,9 @@ function histFab(){
   return `<div class="hist-fabwrap" style="bottom:${cartBarShown?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
 }
 function scardHTML(s){
-  // 대기 표시는 브랜드 설정(우선)을 따름 — 매장 개별 설정을 덮어씀
+  // 매장 그룹(홈) 목록에는 대기 정보 미노출 — 대기가 긴 매장이 선택에서 불리해지지 않도록
+  // (대기 인원/시간은 매장 상세 화면에서만 표시)
   const paused = s.open && s.paused;          // 영업 일시중지(준비중)
-  let waitTxt='';
-  if(s.open && !paused && S.brandWait!=='off'){
-    const v = S.brandWait==='time' ? s.waitTime : s.waitCount;
-    if(v) waitTxt = `${S.brandWait==='time'?'':'대기 '}${v}`;
-  }
   // 영업중은 별도 뱃지 없음(기본) · 영업종료/준비중은 dimming + 썸네일 오버레이로 표시
   const dimmed = !s.open || paused;
   const label = !s.open ? '영업종료' : (paused ? '준비중' : '');
@@ -1274,7 +1270,7 @@ function scardHTML(s){
     <div class="s-body">
       <div class="s-hero">${s.rep}</div>
       <div class="s-sub">${s.name}</div>
-      <div class="s-meta"><span class="s-loc">📍 ${s.loc}</span>${waitTxt?`<span class="s-wait">⏳ ${waitTxt}</span>`:''}</div>
+      <div class="s-meta"><span class="s-loc">📍 ${s.loc}</span></div>
     </div>
   </button>`;
 }
@@ -1402,7 +1398,7 @@ function scStore(){
       ${s.menus.length===0
         ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
         : cats.map(c=>`<div class="catsec-h">${c}</div>${s.menus.filter(m=>(m.cat||'메뉴')===c).map(m=>mcardHTML(s.id,m,blocked)).join('')}`).join('')}
-      ${bannerPos==='bottom' ? bannerHTML : ''}
+      ${bannerHTML}
       <div style="height:78px"></div>
     `}
   </div>

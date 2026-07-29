@@ -1897,10 +1897,10 @@ function timePickerHTML(){
   const brk = s.brkStart!=null ? ` · 브레이크 ${fmtMin(s.brkStart)}~${fmtMin(s.brkEnd)}` : '';
   return `
     <div class="tp-wrap">
-      <div class="tp-sub">시간대</div>
+      <div class="tp-sub">시간</div>
       <div class="tp-row">${hourRow}</div>
-      <div class="tp-sub">분 (5분 단위)</div>
-      <div class="tp-row">${S.pickupH==null?`<div class="tp-empty">먼저 시간대를 선택해 주세요</div>`:minRow}</div>
+      <div class="tp-sub">분</div>
+      <div class="tp-row">${S.pickupH==null?`<div class="tp-empty">먼저 시간을 선택해 주세요</div>`:minRow}</div>
       ${S.pickupTime?`<div class="tp-note">✅ 수령 시간 <b>${S.pickupTime}</b>로 예약할게요</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
       <div class="tp-hint">영업 시간 ${fmtMin(s.ohStart)}~${fmtMin(s.ohEnd)}${brk} 외에는 선택할 수 없어요</div>
     </div>`;

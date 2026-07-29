@@ -526,6 +526,10 @@
   .fm-t{font-size:22px;font-weight:900;line-height:1.35;}
   .fm-b{font-size:15px;color:var(--ink2);margin-top:14px;line-height:1.7;}
   .fm-btn{margin-top:26px;background:var(--ink);color:#fff;border:none;border-radius:12px;padding:15px 30px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;}
+  /* 완료 화면 하단 2버튼 (더 주문하기 · 주문 내역 보기) */
+  .done-btns{display:flex;gap:10px;max-width:340px;margin:28px auto 0;}
+  .done-btns .fm-btn{flex:1;margin-top:0;padding:15px 12px;}
+  .fm-btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);}
   .fm-note{margin-top:16px;font-size:12.5px;color:var(--ink4);}
 
   /* ── 하단 고정 CTA ───────────────────────── */
@@ -2156,7 +2160,10 @@ function scDone(){
       <div class="mp-b">통합 결제했지만 준비·픽업은 <b>매장별</b>이에요(통합 결제는 배달 매장이 없어 항상 포장 픽업). <b>${sids.length}개 매장</b>에서 각각 준비돼 부스에서 따로 받게 되고, 준비 완료 <b>알림톡도 매장마다 따로</b> 도착해요.</div>
       <div class="mp-list">${sids.map(sid=>`<div class="mp-row"><span class="mp-s">${store(sid).logo} ${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
     </div>`:''}
-    <button class="fm-btn" style="margin-top:26px;background:var(--blue)" onclick="go('history')">주문 내역 보기</button>
+    <div class="done-btns">
+      <button class="fm-btn ghost" onclick="go(S.mode==='group'?'home':'store')">더 주문하기</button>
+      <button class="fm-btn" style="background:var(--blue)" onclick="go('history')">주문 내역 보기</button>
+    </div>
   </div>`;
 }
 

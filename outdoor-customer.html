@@ -124,6 +124,9 @@
   .storelist-empty{text-align:center;color:var(--ink3);font-size:15px;font-weight:700;padding:52px 20px;}
   .storelist-empty .se-sub{font-size:13px;color:var(--ink4);font-weight:500;margin-top:8px;}
   .s-thumb{width:82px;height:82px;border-radius:13px;flex-shrink:0;background-size:cover;background-position:center;position:relative;display:flex;align-items:center;justify-content:center;font-size:34px;}
+  /* 썸네일은 실사(매장 사진) 기준 · 이미지 미등록 시 기본 이미지 플레이스홀더 */
+  .s-thumb.noimg{background:linear-gradient(135deg,#eceef1,#e0e3e8);}
+  .s-thumb.noimg::before{content:'🖼';font-size:26px;opacity:.38;}
   .s-logo{position:absolute;left:-6px;bottom:-6px;width:32px;height:32px;border-radius:9px;background:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:16px;}
   .s-body{flex:1;min-width:0;}
   .s-name{font-size:17px;font-weight:800;display:flex;align-items:center;gap:7px;}
@@ -495,6 +498,22 @@
   .cta-btn:disabled{background:var(--line);color:var(--ink4);}
   .cta-btn .amt{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:8px;font-size:14px;}
   .cta-sub{font-size:12px;color:var(--ink3);text-align:center;margin-bottom:9px;}
+  /* 하단 고정 바 — 담긴 게 있으면 장바구니 CTA(좌·색, 넓게) + 주문내역(우·소형), 없으면 주문내역만 우측 */
+  .bottombar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;z-index:40;
+    display:flex;gap:9px;align-items:stretch;justify-content:flex-end;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top,#fff 72%,rgba(255,255,255,0));pointer-events:none;}
+  .bottombar > *{pointer-events:auto;}
+  .bb-cart{flex:1;background:var(--persimmon);color:#fff;border:none;border-radius:14px;padding:16px 18px;
+    font-size:15.5px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:8px;
+    box-shadow:0 8px 20px rgba(232,80,30,.30);}
+  .bb-cart:active{transform:translateY(1px) scale(.995);}
+  .bb-cart .amt{margin-left:auto;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:8px;font-size:14px;font-weight:900;}
+  .bb-hist{background:#fff;color:var(--persimmon-d);border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px;font-size:14.5px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;
+    box-shadow:0 6px 18px rgba(20,20,25,.12);display:inline-flex;align-items:center;gap:7px;}
+  .bb-hist:active{transform:scale(.97);}
+  .bb-hist.compact{padding:16px 15px;font-size:13.5px;}
 
   /* 성인인증 모달 */
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center;}
@@ -1277,14 +1296,20 @@ function scHome(){
     <div class="storelist">${storelistHTML()}</div>
     <div style="height:${(S.payScope==='unified'&&S.cart.length)?150:78}px"></div>
   </div>
-  ${histFab()}
-  ${S.payScope==='unified'?cartBar():''}`;
+  ${bottomBar()}`;
 }
-// 주문 내역 진입 (device 컬럼 우측 하단 고정) · 매장 장바구니 바가 있으면 위로 띄움
-function histFab(){
-  // 장바구니 바(cta)가 깔리는 화면에서는 그 위로 띄움: 매장 화면 or 홈(통합주문)
-  const cartBarShown = S.cart.length && (S.screen==='store' || (S.screen==='home' && S.payScope==='unified'));
-  return `<div class="hist-fabwrap" style="bottom:${cartBarShown?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
+// 하단 고정 바 — 장바구니에 담긴 게 있으면 장바구니 CTA(좌·색, 넓게) + 주문내역(우·소형),
+// 없으면 주문내역만 우측 소형으로. 주문내역은 장바구니처럼 항상 하단 배치.
+function bottomBar(){
+  const cartActive = S.cart.length && (S.screen==='store' || (S.screen==='home' && S.payScope==='unified'));
+  let cartBtn='';
+  if(cartActive){
+    const cnt=S.cart.reduce((a,c)=>a+c.qty,0);
+    const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
+    const brk = S.payScope==='separate' ? `[${store(S.cart[0].store).name}] ` : '';
+    cartBtn = `<button class="bb-cart" onclick="go('cart')">🛒 ${brk}장바구니 ${cnt}개 <span class="amt">${won(sum)}</span></button>`;
+  }
+  return `<div class="bottombar ${cartActive?'has-cart':''}">${cartBtn}<button class="bb-hist ${cartActive?'compact':''}" onclick="go('history')">🧾 주문 내역</button></div>`;
 }
 function scardHTML(s){
   // 매장 그룹(홈) 목록에는 대기 정보 미노출 — 대기가 긴 매장이 선택에서 불리해지지 않도록
@@ -1299,7 +1324,7 @@ function scardHTML(s){
       ? `toast('지금은 잠시 준비 중이에요.','곧 다시 열어요. 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
       : `openStore('${s.id}')`;
   return `<button class="scard ${dimmed?'dimmed':''}" onclick="${tap}">
-    <div class="s-thumb${paused?' paused':''}" data-label="${label}" style="background-color:var(--bg)">${s.logo}</div>
+    <div class="s-thumb${paused?' paused':''}${(s.thumb&&String(s.thumb).trim())?'':' noimg'}" data-label="${label}" style="${(s.thumb&&String(s.thumb).trim())?`background-image:url('${s.thumb}');`:''}background-color:var(--bg)"></div>
     <div class="s-body">
       <div class="s-hero">${s.rep}</div>
       <div class="s-sub">${s.name}</div>
@@ -1451,8 +1476,7 @@ function scStore(){
       <div style="height:78px"></div>
     `}
   </div>
-  ${histFab()}
-  ${cartBar()}
+  ${bottomBar()}
   `;
 }
 function mcardHTML(sid,m,closed){
@@ -1474,7 +1498,7 @@ function mcardHTML(sid,m,closed){
       <div class="m-price">${price}</div>
       ${m.reuse?`<div class="m-reuse">♻️ 다회용기 제공</div>`:''}
     </div>
-    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${lowStock?'low':''}">${lowStock?`🔥 품절임박<br><b>${rightVal.n}개</b>`:`${rightVal.t}<br><b>${rightVal.n}개</b>`}</span></div>`:''}
+    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${lowStock?'low':''}">${lowStock?'🔥 ':''}${rightVal.t}<br><b>${rightVal.n}개</b></span></div>`:''}
   </button>`;
 }
 
@@ -1523,7 +1547,7 @@ function renderMenuSheet(){
       <span class="qnum">${S.tmpQty}</span>
       <button class="qbtn" onclick="S.tmpQty=Math.min(${m.left||20},S.tmpQty+1);renderMenuSheet()">＋</button>
     </div>
-    ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:10px;color:${m.left<=5?'var(--point)':'#e8590c'}">${m.left<=5?'🔥 품절임박! ':''}남은 수량 ${m.left}개 · 초과 선택 불가</div>`:''}`;
+    ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:10px;color:${m.left<=5?'var(--point)':'#e8590c'}">${m.left<=5?'🔥 ':''}남은 수량 ${m.left}개 · 초과 선택 불가</div>`:''}`;
   document.getElementById('menuSheetInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closeMenuSheet()">✕</button>
@@ -1572,13 +1596,6 @@ function closeAdult(){ document.getElementById('adultModal').classList.remove('o
 function doAuth(){ S.adult=true; closeAdult(); toast('성인 인증 완료 · 오늘 자정까지 유지'); addToCart(); }
 
 /* 하단 장바구니 바 (매장 페이지) */
-function cartBar(){
-  if(!S.cart.length) return '';
-  const cnt=S.cart.reduce((a,c)=>a+c.qty,0);
-  const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
-  const brk = S.payScope==='separate' ? `[${store(S.cart[0].store).name}] ` : '';
-  return `<div class="cta"><button class="cta-btn" onclick="go('cart')">🛒 ${brk}장바구니 ${cnt}개 <span class="amt">${won(sum)}</span></button></div>`;
-}
 
 /* ── 장바구니 ── */
 function scCart(){

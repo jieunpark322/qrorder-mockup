@@ -494,8 +494,13 @@
   .cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
   /* 주문 내역 플로팅 진입 버튼 (device 컬럼 우측 하단 정렬) */
   .hist-fabwrap{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:440px;display:flex;justify-content:flex-end;padding:0 16px;z-index:38;pointer-events:none;}
-  .hist-fab{pointer-events:auto;background:var(--persimmon);color:#fff;border:none;box-shadow:0 8px 22px rgba(92,140,218,.42);border-radius:24px;padding:12px 18px;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;}
-  .hist-fab:active{transform:scale(.96);}
+  /* 입체(3D) 버튼 — 상단 하이라이트 + 아래 두께(솔리드 엣지) + 드롭 그림자, 누르면 내려앉음 */
+  .hist-fab{pointer-events:auto;color:#fff;border:none;border-radius:24px;padding:13px 20px;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+    background:linear-gradient(180deg,#7BA3E4 0%,#5C8CDA 52%,#4E7DD0 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.45) inset, 0 -3px 6px rgba(38,72,140,.28) inset, 0 5px 0 #3357A8, 0 11px 20px rgba(51,87,168,.45);
+    transition:transform .06s ease, box-shadow .06s ease;}
+  .hist-fab:active{transform:translateY(4px);
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 -2px 5px rgba(38,72,140,.25) inset, 0 1px 0 #3357A8, 0 4px 10px rgba(51,87,168,.4);}
   .hist-fab:active{transform:scale(.96);}
   .cta-btn{width:100%;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:17px;font-size:16.5px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
   .cta-btn:disabled{background:var(--line);color:var(--ink4);}

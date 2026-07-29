@@ -539,9 +539,9 @@
   .hist-fab:active{transform:translateY(2px);
     box-shadow:0 1px 0 rgba(255,255,255,.3) inset, 0 -1px 4px rgba(38,72,140,.2) inset, 0 3px 8px rgba(51,87,168,.35);}
   .hist-fab:active{transform:scale(.96);}
-  .cta-btn{width:100%;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:17px;font-size:16.5px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .cta-btn{position:relative;width:100%;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:17px;font-size:16.5px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
   .cta-btn:disabled{background:var(--line);color:var(--ink4);}
-  .cta-btn .amt{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:8px;font-size:14px;}
+  .cta-btn .amt{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);padding:3px 10px;border-radius:8px;font-size:14px;}
   .cta-sub{font-size:12px;color:var(--ink3);text-align:center;margin-bottom:9px;}
 
   /* 성인인증 모달 */
@@ -1721,7 +1721,7 @@ function renderMenuSheet(){
     <div class="ms-foot">
       ${disabled
         ? `<button class="cta-btn" disabled>${m.soldout?'품절된 메뉴예요':'지금은 주문할 수 없어요'}</button>`
-        : `<button class="cta-btn" style="justify-content:space-between" onclick="addToCart()"><span>담기</span><span class="amt">${won(total)}</span></button>`}
+        : `<button class="cta-btn" onclick="addToCart()"><span>담기</span><span class="amt">${won(total)}</span></button>`}
     </div>`;
 }
 function addToCart(){

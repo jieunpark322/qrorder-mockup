@@ -199,6 +199,10 @@
   .mb-hot{color:#e8590c;background:#fff4e6;} .mb-new{color:#1971c2;background:#e7f5ff;} .mb-rec{color:#2f9e44;background:#ebfbee;}
   .m-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px;}
   .m-emoji{font-size:15px;}
+  /* 성인 메뉴 연령 배지 — 금지 마크(🔞) 대신 깔끔한 '19' 배지(3D) */
+  .age-badge{display:inline-flex;align-items:center;justify-content:center;min-width:21px;height:20px;padding:0 5px;border-radius:6px;
+    background:linear-gradient(160deg,#FF6B6B,#E03131);color:#fff;font-size:11px;font-weight:900;letter-spacing:-.03em;vertical-align:middle;
+    box-shadow:0 1px 3px rgba(224,49,49,.4), inset 0 1px 0 rgba(255,255,255,.35);margin-left:5px;}
   .m-desc{font-size:12.5px;color:var(--ink3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .m-price{margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .m-now{font-size:16px;font-weight:800;}
@@ -977,7 +981,7 @@
 <!-- 성인인증 시트 -->
 <div class="modal-bg" id="adultModal" onclick="if(event.target===this)closeAdult()">
   <div class="sheet">
-    <div class="sheet-t">🔞 성인 인증이 필요해요</div>
+    <div class="sheet-t">🍷 성인 인증이 필요해요</div>
     <div class="sheet-s">알코올 메뉴는 성인 인증 후에만 담을 수 있어요.<br>최초 1회 인증하면 오늘 자정까지 다시 인증하지 않아도 돼요.</div>
     <button class="authbtn" onclick="doAuth()"><span class="aic">📱</span><div><div>본인 명의 휴대폰 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">내국인 · 만 19세 이상</div></div></button>
     <button class="authbtn" onclick="doAuth()"><span class="aic">🛂</span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인 · 만 18세 이상</div></div></button>
@@ -1031,7 +1035,7 @@ const STORES = [
       {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null, allergy:'밀·대두·우유·달걀 함유', nutrition:'약 620kcal'},
       {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, nutrition:'약 380kcal', upsell:true},
       {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13', upsell:true},
-      {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'현장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
+      {id:'b4', name:'수제 흑맥주 500ml', emoji:'', desc:'현장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
       {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 준비', price:15000, left:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
     ]},
@@ -1127,7 +1131,7 @@ const STORES = [
     ohStart:660, ohEnd:1320,
     info:{ceo:'하정우', regno:'223-45-67801', address:'서울 마포구 성미산로 000 · D구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 22:00', origin:'맥아: 독일산 · 홉: 미국산'},
     menus:[
-      {id:'be1', name:'크래프트 IPA 500ml', emoji:'🔞', desc:'현장 한정 생맥주', price:8000, badges:['hot'], img:'🍺', photo:'https://loremflickr.com/320/320/ipa,beer?lock=121', adult:true, allergy:'보리·밀 함유'},
+      {id:'be1', name:'크래프트 IPA 500ml', emoji:'', desc:'현장 한정 생맥주', price:8000, badges:['hot'], img:'🍺', photo:'https://loremflickr.com/320/320/ipa,beer?lock=121', adult:true, allergy:'보리·밀 함유'},
       {id:'be2', name:'감자튀김', desc:'맥주 안주로 좋아요', price:5000, img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=122', upsell:true},
     ]},
   { id:'bunsik', name:'소프트분식', logo:'🥟', thumb:'https://loremflickr.com/240/240/tteokbokki?lock=13', cover:'https://loremflickr.com/760/430/tteokbokki,korean?lock=13',
@@ -1596,7 +1600,7 @@ function mcardHTML(sid,m,closed){
     <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">품절</div>':''}</div>
     <div class="m-body">
       ${badges?`<div class="m-badges">${badges}</div>`:''}
-      <div class="m-name">${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}</div>
+      <div class="m-name">${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}${m.adult?'<span class="age-badge">19</span>':''}</div>
       ${m.desc?`<div class="m-desc">${m.desc}</div>`:''}
       <div class="m-price">${price}</div>
       ${m.reuse?`<div class="m-reuse"><span class="mt-ic">♻️</span>다회용기 제공</div>`:''}
@@ -1657,7 +1661,7 @@ function renderMenuSheet(){
     <div class="ms-scroll">
       <div class="d-hero" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim-lg">품절</div>':''}</div>
       <div class="d-body">
-        <div class="d-name">${m.name} ${m.emoji||''}</div>
+        <div class="d-name">${m.name} ${m.emoji||''}${m.adult?'<span class="age-badge">19</span>':''}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
@@ -1665,7 +1669,7 @@ function renderMenuSheet(){
         </div>
         ${m.soldout?`<div class="ms-warn">😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.</div>`:''}
         ${(m.allergy||m.nutrition)&&S.infoOpen?`<div class="d-info">${[m.allergy?`🥜 알러지 유발성분: ${m.allergy}`:'',m.nutrition?`🔥 영양 정보: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
-        ${m.adult?`<div class="d-adult">🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}
+        ${m.adult?`<div class="d-adult"><span class="age-badge">19</span> 성인 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}
         ${m.reuse?`<div class="d-reuse">♻️ 다회용기로 제공되는 메뉴예요 · 사용 후 용기 반납이 필요해요</div>`:''}
         ${disabled?'':orderControls}
       </div>
@@ -1822,7 +1826,7 @@ function upsellRow(sid,m,showStore){
   const price = m.hh?m.hhPrice:m.price;
   return `<div class="citem" style="border:none;padding:10px 0">
     <div class="ci-th" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.photo?'':(m.img||'')}</div>
-    <div class="ci-b"><div class="ci-n">${m.name} ${m.emoji||''}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
+    <div class="ci-b"><div class="ci-n">${m.name} ${m.emoji||''}${m.adult?'<span class="age-badge">19</span>':''}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
     <button class="ghostbtn" style="width:auto;margin:0;padding:0 15px;white-space:nowrap" onclick="openMenu('${sid}','${m.id}')">담기</button>
   </div>`;
 }

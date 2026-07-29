@@ -448,11 +448,13 @@
   .oh-st-name{font-size:13.5px;font-weight:800;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .oh-st-head .st-badge{margin-left:auto;}
   .oh-st-barwrap{position:relative;margin-top:9px;}
-  .oh-st-barwrap.has-bubble{padding-top:34px;}
+  .oh-st-barwrap.has-bubble{padding-top:44px;}
   .oh-st-bar{display:flex;gap:4px;}
   .oh-st-seg{flex:1;height:5px;border-radius:3px;background:var(--line2);}
-  .oh-st-seg.on{background:var(--blue);}
-  .oh-st-seg.ready{background:var(--green);}
+  .oh-st-seg.past{background:#cddef7;}            /* 지나간 단계: 약한 톤온톤(블루) */
+  .oh-st-seg.cur{background:var(--blue);}         /* 현재 단계: 진한 블루 */
+  .oh-st-seg.past-ready{background:#bfe9d5;}      /* 지나간 단계(픽업 대기): 약한 톤온톤(그린) */
+  .oh-st-seg.cur-ready{background:var(--green);}  /* 현재 단계(픽업 대기): 진한 그린 */
   /* 상세 펼치기 안에서 메뉴 목록은 별도 파티션으로 분리 */
   .oh-menupart{margin-top:10px;padding:11px 12px;background:var(--bg);border-radius:10px;}
   .oh-menupart-h{font-size:11px;font-weight:800;color:var(--ink3);margin-bottom:6px;}
@@ -1226,7 +1228,7 @@ function render(){
     splash:scSplash, home:scHome, store:scStore, cart:scCart,
     checkout:scCheckout, done:scDone, history:scHistory,
     payfail:()=>full('💳','결제가 정상적으로 진행되지 않았어요','잔액 부족이나 한도 초과 등의 일시적인 오류일 수 있어요.<br>다른 결제 수단으로 다시 시도해 주세요.','결제 화면으로 돌아가기','checkout','장바구니·입력 정보는 그대로 유지돼요 · 선불형 전용 (후불형은 해당 없음)'),
-    expired:()=>full('⏱️','접속 시간이 만료되었어요','안전한 결제 환경을 위해 연결이 종료되었습니다.<br>QR 코드를 다시 한 번 스캔해 주세요.','QR 다시 스캔','splash','주문 당일 자정이 지나면 세션·내역이 삭제돼요'),
+    expired:()=>full('⏱️','접속 시간이 만료되었어요','안전한 결제 환경을 위해 연결이 종료되었습니다.<br>QR 코드를 다시 한 번 스캔해 주세요.','QR 다시 스캔','splash',''),
     loaderr:()=>full('📡','화면을 불러오지 못했어요','네트워크 연결이 불안정하거나 일시적인 시스템 오류일 수 있어요.<br>잠시 후 [새로고침] 버튼을 눌러 다시 시도해 주세요.','새로고침','splash','지속 실패 시 네트워크 상태를 확인해 주세요'),
   }[S.screen] || scHome;
   document.getElementById('device').innerHTML = `<div class="screen on">${scr()}</div>`;
@@ -1881,7 +1883,7 @@ function toggleAll(el){ const on=!el.querySelector('.chk').classList.contains('o
 /* 약관 전문 — '보기'로 열람 */
 const TERMS = {
   tos:{ t:'이용약관 동의', req:'필수', body:`<b>1. 목적</b><br>본 약관은 야외형 QR 주문 서비스 이용에 관한 사항을 정해요.<br><br><b>2. 주문·결제</b><br>메뉴 주문·결제는 매장·브랜드가 제공하는 조건을 따르며, 결제는 전자결제대행사(PG)를 통해 처리돼요(신용/체크카드·간편결제).<br><br><b>3. 취소·환불</b><br>상품 품절 등으로 주문이 취소되면 결제 금액은 자동 환불되며, 카드사 사정에 따라 영업일 3~7일이 소요될 수 있어요.<br><br><b>4. 이용자 의무</b><br>정확한 연락처를 입력해야 주문 알림을 받을 수 있어요.` },
-  privacy:{ t:'개인정보 수집·이용 동의', req:'필수', body:`<b>1. 수집 항목</b><br>휴대폰 번호 또는 이메일 주소, 주문 내역(메뉴·금액·시간)<br><br><b>2. 수집·이용 목적</b><br>주문 접수·조리 완료 알림 발송, 주문 확인 및 고객 문의 대응<br><br><b>3. 보유·이용 기간</b><br>당일 자정 경과 시 자동 삭제 (관련 법령에 따라 거래 기록은 별도 보관될 수 있어요)<br><br><b>4. 동의 거부 권리</b><br>동의를 거부할 수 있으나, 필수 항목 미동의 시 주문이 어려워요.` },
+  privacy:{ t:'개인정보 수집·이용 동의', req:'필수', body:`<b>1. 수집 항목</b><br>휴대폰 번호 또는 이메일 주소, 주문 내역(메뉴·금액·시간)<br><br><b>2. 수집·이용 목적</b><br>주문 접수·조리 완료 알림 발송, 주문 확인 및 고객 문의 대응<br><br><b>3. 보유·이용 기간</b><br>주문·알림 처리 목적 달성 후 지체 없이 파기 (관련 법령에 따라 거래 기록은 별도 보관될 수 있어요)<br><br><b>4. 동의 거부 권리</b><br>동의를 거부할 수 있으나, 필수 항목 미동의 시 주문이 어려워요.` },
 };
 function openTerms(key){
   const t=TERMS[key]; if(!t)return;
@@ -2069,7 +2071,10 @@ function stepBarHTML(status){
   const cur = status==='배달중' ? '준비완료' : status;   // 배달중은 3번째 칸에 매핑
   const idx = Math.max(0, HIST_STEPS.indexOf(cur));
   const bubble = canPickup(status);
-  const segs = HIST_STEPS.map((_,i)=>`<span class="oh-st-seg ${i<=idx?(bubble?'ready':'on'):''}"></span>`).join('');
+  const segs = HIST_STEPS.map((_,i)=>{
+    const c = i<idx ? (bubble?'past-ready':'past') : (i===idx ? (bubble?'cur-ready':'cur') : '');
+    return `<span class="oh-st-seg ${c}"></span>`;
+  }).join('');
   return `<div class="oh-st-barwrap ${bubble?'has-bubble':''}">
     ${bubble?`<span class="ms-bubble" style="left:62.5%">🔔 지금 받아 가세요</span>`:''}
     <div class="oh-st-bar">${segs}</div>
@@ -2157,7 +2162,7 @@ function stageSummaryHTML(P){
   const cur = S.histStage;
   const curLbl = (cur==='준비완료'&&S.service==='delivery')?'배달중':cur;
   const hint = cur
-    ? `<div class="oh-stage-hint"><b>${curLbl}</b> 단계만 보는 중<span class="reset" onclick="setHistStage(null)">전체 보기</span></div>`
+    ? `<div class="oh-stage-hint"><b>${curLbl}</b> 단계만 보는 중 · 다시 누르면 전체가 보여요</div>`
     : `<div class="oh-stage-hint">단계를 탭하면 해당 주문만 모아 볼 수 있어요</div>`;
   return `<div class="oh-lead">
     <div class="oh-stage">${cells}</div>
@@ -2205,7 +2210,7 @@ function scHistory(){
     ${body}
     <div class="oh-tail">
       <div class="oh-tail-row"><span>전체 합계 (누적)</span><b>${won(grand)}</b></div>
-      <div class="oh-tail-note">취소·환불 건은 합계에서 제외돼요 · 주문 내역은 당일 자정이 지나면 사라져요 📸</div>
+      <div class="oh-tail-note">취소·환불 건은 합계에서 제외돼요</div>
     </div>
     <div style="height:24px"></div>
   </div>`;
@@ -2237,7 +2242,7 @@ function openReceipt(id){
       <div class="rc-line dim"><span>결제수단</span><span>${p.pay}</span></div>
       ${canceled?`<div class="rc-cancelbox">↩️ ${p.cancel}</div>`:''}
       <div class="rc-hr"></div>
-      <div class="rc-foot">본 영수증은 전자적으로 발행된 거래 확인 내역이에요. 세금계산서·현금영수증과는 별개예요.<br>당일 자정 이후 자동 삭제되니 필요하면 화면을 캡처해 두세요 📸</div>
+      <div class="rc-foot">본 영수증은 전자적으로 발행된 거래 확인 내역이에요. 세금계산서·현금영수증과는 별개예요.</div>
     </div>`;
   document.getElementById('receiptModal').classList.add('on'); syncBgLock();
 }

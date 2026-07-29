@@ -1438,7 +1438,7 @@ function scHome(){
 // 주문 내역 진입 (device 컬럼 우측 하단 플로팅) · 매장 장바구니 바가 있으면 위로 띄움
 function histFab(){
   const cartBarShown = S.cart.length && (S.screen==='store' || (S.screen==='home' && S.payScope==='unified'));
-  return `<div class="hist-fabwrap" style="bottom:${cartBarShown?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
+  return `<div class="hist-fabwrap" style="bottom:calc(${cartBarShown?104:34}px + env(safe-area-inset-bottom))"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
 }
 // 하단 고정 장바구니 바
 function cartBar(){

@@ -1628,7 +1628,6 @@ function mcardHTML(sid,m,closed){
       <div class="m-price">${price}</div>
       ${m.reuse?`<div class="m-reuse"><span class="mt-ic">♻️</span>다회용기 제공</div>`:''}
     </div>
-    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${lowStock?'low':''}">${lowStock?'<span class="mlr-fire">🔥</span>':''}<span class="mlr-t">${rightVal.t}</span><b>${rightVal.n}개</b></span></div>`:''}
   </button>`;
 }
 
@@ -1678,7 +1677,7 @@ function renderMenuSheet(){
       <button class="qbtn ${atMax?'dim':''}" ${atMax?'disabled':''} onclick="S.tmpQty=Math.min(${maxQ},S.tmpQty+1);renderMenuSheet()">＋</button>
     </div>`; })()}
     ${m.maxOrder?`<div style="text-align:right;font-size:12.5px;font-weight:700;margin-top:8px;color:var(--ink3)">🛒 1회 최대 ${m.maxOrder}개까지 구매할 수 있어요.</div>`:''}
-    ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:6px;color:${m.left<=5?'var(--point)':'#e8590c'}">${m.left<=5?'🔥 ':''}품절까지 ${m.left}개 남았어요.</div>`:''}`;
+    ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:6px;color:${m.left<=5?'var(--point)':'#e8590c'}">🔥 품절까지 ${m.left}개 남았어요.</div>`:''}`;
   document.getElementById('menuSheetInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closeMenuSheet()">✕</button>

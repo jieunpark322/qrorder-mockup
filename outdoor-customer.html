@@ -2161,8 +2161,8 @@ function scDone(){
       <div class="mp-list">${sids.map(sid=>`<div class="mp-row"><span class="mp-s">${store(sid).logo} ${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
     </div>`:''}
     <div class="done-btns">
-      <button class="fm-btn ghost" onclick="go(S.mode==='group'?'home':'store')">더 주문하기</button>
-      <button class="fm-btn" style="background:var(--blue)" onclick="go('history')">주문 내역 보기</button>
+      <button class="fm-btn ghost" onclick="go('history')">주문 내역 보기</button>
+      <button class="fm-btn" style="background:var(--blue)" onclick="go(S.mode==='group'?'home':'store')">더 주문하기</button>
     </div>
   </div>`;
 }

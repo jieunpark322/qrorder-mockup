@@ -785,8 +785,8 @@
   /* ── 메뉴 카드: 정리된 태그·가격(뉴트럴 + 단일 액센트) ── */
   .m-badges{gap:5px;margin-bottom:6px;margin-left:-9px;}   /* 배지 좌측 패딩(9px)만큼 당겨 첫 배지 텍스트를 메뉴명 시작점과 정렬 */
   /* 상태 배지 — 이모지 없이 전부 동일한 옅은 단색 pill(플랫) · 쿠팡이츠/배민 톤 */
-  .m-tag{display:inline-flex;align-items:center;font-size:11px;font-weight:800;color:var(--blue-d);background:var(--blue-50);
-    padding:3px 9px;border-radius:7px;letter-spacing:-.02em;}
+  .m-tag{display:inline-flex;align-items:center;height:22px;box-sizing:border-box;font-size:11px;font-weight:800;color:var(--blue-d);background:var(--blue-50);
+    padding:0 9px;border-radius:7px;letter-spacing:-.02em;}
   .m-name{font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;}
   .m-price{margin-top:7px;gap:7px;align-items:center;}
   .m-now{font-family:var(--ui);font-weight:800;font-size:16px;color:var(--ink);}
@@ -795,9 +795,8 @@
   .d-price .d-sale{color:var(--point);}
   .m-was{font-size:13px;color:var(--ink4);text-decoration:line-through;}
   .m-promo{font-size:11px;font-weight:700;color:var(--point);background:var(--point-50);padding:3px 7px;border-radius:6px;}
-  .m-reuse{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:#177A4F;
-    padding:3px 9px 3px 7px;border-radius:20px;background:linear-gradient(160deg,#eefaf3,#d4f1e0);
-    box-shadow:0 2px 4px rgba(20,120,80,.18), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -1px 2px rgba(20,120,80,.12);}
+  .m-reuse{display:inline-flex;align-items:center;gap:3px;height:22px;box-sizing:border-box;font-size:11px;font-weight:800;color:#177A4F;
+    padding:0 9px 0 7px;border-radius:7px;background:#eafaf1;}
   .m-reuse .mt-ic{font-size:12px;line-height:1;}
   .m-right{padding-left:8px;}
   /* 남은 수량 배지 — 수량 자릿수·이모지 유무와 무관하게 고정 크기 + 입체(3D) · 텍스트는 항상 가운데 */

@@ -1714,7 +1714,6 @@ function renderMenuSheet(){
           ${(m.allergy||m.nutrition)?`<button class="d-info-btn" style="margin-top:0;flex-shrink:0" onclick="openMenuInfo()">메뉴 정보</button>`:''}
         </div>
         ${m.soldout?`<div class="ms-warn">😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.</div>`:''}
-        ${m.adult?`<div class="d-adult"><span class="age-badge">19</span> 성인 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}
         ${m.reuse?`<div class="d-reuse">♻️ 다회용기로 제공되는 메뉴예요 · 사용 후 용기 반납이 필요해요</div>`:''}
         ${disabled?'':orderControls}
       </div>

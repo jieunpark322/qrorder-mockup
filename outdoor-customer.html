@@ -749,14 +749,9 @@
 
   /* ── 메뉴 카드: 정리된 태그·가격(뉴트럴 + 단일 액센트) ── */
   .m-badges{gap:5px;margin-bottom:6px;}
-  /* 배지 — 3D 알약(아이콘 + 라벨): 그라데이션 + 상단 하이라이트/하단 음영(inset) + 드롭 그림자 */
-  .m-tag{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:var(--ink2);padding:3px 9px 3px 7px;border-radius:20px;
-    background:linear-gradient(160deg,#fafbfd,#eceef2);
-    box-shadow:0 2px 4px rgba(30,40,60,.14), inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 2px rgba(30,40,60,.08);}
-  .m-tag .mt-ic{font-size:11px;line-height:1;}
-  .m-tag.hot{color:#2F5BB0;background:linear-gradient(160deg,#f3f8ff,#dae7fc);}   /* 인기 · 키블루 */
-  .m-tag.rec{color:#177A4F;background:linear-gradient(160deg,#eefaf3,#d4f1e0);}   /* 추천 · 그린 */
-  .m-tag.new{color:#4A44C0;background:linear-gradient(160deg,#f5f4fe,#e3e1fb);}   /* 신메뉴 · 블루바이올렛 */
+  /* 상태 배지 — 이모지 없이 전부 동일한 옅은 단색 pill(플랫) · 쿠팡이츠/배민 톤 */
+  .m-tag{display:inline-flex;align-items:center;font-size:11px;font-weight:800;color:var(--blue-d);background:var(--blue-50);
+    padding:3px 9px;border-radius:7px;letter-spacing:-.02em;}
   .m-name{font-size:16px;font-weight:700;color:var(--ink);}
   .m-price{margin-top:7px;gap:7px;align-items:center;}
   .m-now{font-family:var(--ui);font-weight:800;font-size:16px;color:var(--ink);}
@@ -1588,8 +1583,8 @@ function scStore(){
 }
 function mcardHTML(sid,m,closed){
   // 태그는 뉴트럴 통일, 색은 가격/할인(퍼시몬) 하나로만 — 시각적 정리
-  const badgeMap={hot:['🔥','인기','hot'],new:['🆕','신메뉴','new'],rec:['👍','추천','rec']};
-  const badges = (m.badges||[]).map(b=>badgeMap[b]).filter(Boolean).map(([ic,t,c])=>`<span class="m-tag ${c}"><span class="mt-ic">${ic}</span>${t}</span>`).join('');
+  const badgeMap={hot:['인기','hot'],new:['신메뉴','new'],rec:['추천','rec']};
+  const badges = (m.badges||[]).map(b=>badgeMap[b]).filter(Boolean).map(([t,c])=>`<span class="m-tag ${c}">${t}</span>`).join('');
   let promo='', now=m.price, was='';
   if(m.hh){ promo='해피아워'; now=m.hhPrice; was=m.price; }
   else if(m.was){ was=m.was; }

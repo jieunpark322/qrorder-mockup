@@ -1781,8 +1781,7 @@ function scCart(){
       ${S.service==='delivery'
         ? `<div class="sect-sub">계신 자리로 스태프가 직접 가져다드려요.</div>
            <div class="deliver-fix">🛎️ 다음 화면에서 <b>받을 자리</b>를 입력해 주세요.</div>`
-        : `<div class="sect-sub">이 행사는 <b>포장 픽업</b> 서비스예요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>
-           <div class="seg">
+        : `<div class="seg">
              <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">즉시 포장</button>
              <button class="${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">포장 예약</button>
            </div>
@@ -1801,7 +1800,7 @@ function tryCheckout(){
   const act = S.bill==='post' ? '주문' : '결제';
   if(mi.on && mi.below){
     if(mi.basis==='group'){
-      toast(`조금만 더 담으면 ${act}할 수 있어요`, `매장 그룹 통합 ${act} 기준 최소 ${won(mi.min)}부터 가능해요.`);
+      toast(`${won(mi.min)} 이상 담으면 ${act}할 수 있어요.`);
     } else {
       toast(`조금만 더 담으면 ${act}할 수 있어요`, `매장에서 정한 최소 주문 금액을 채워야 ${act}할 수 있어요.`);
     }
@@ -1820,7 +1819,7 @@ function minInfo(){
   if(basis==='group' && S.payScope==='separate') basis='store';
   if(basis==='group'){
     const total=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
-    return {on:true,basis:'group',label:'매장 그룹(통합 결제) 기준',min:GROUP_MIN,below:total<GROUP_MIN,shortfall:Math.max(0,GROUP_MIN-total)};
+    return {on:true,basis:'group',label:'통합 결제 기준',min:GROUP_MIN,below:total<GROUP_MIN,shortfall:Math.max(0,GROUP_MIN-total)};
   }
   const bySt={}; S.cart.forEach(c=>{bySt[c.store]=(bySt[c.store]||0)+c.price*c.qty;});
   const shortStores=Object.keys(bySt).filter(sid=>bySt[sid]<STORE_MIN).map(sid=>({name:store(sid).name,need:STORE_MIN-bySt[sid]}));

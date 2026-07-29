@@ -2410,9 +2410,9 @@ function openReceipt(id){
       <div class="rc-barcode"><div class="rc-bars"></div><div class="rc-bc-no">${p.id} · 8801234 567890</div></div>
       <div class="rc-actions">
         <button class="rc-act" onclick="toast('영수증 이미지를 저장했어요')">영수증 저장</button>
-        <button class="rc-act naver" onclick="toast('네이버 영수증 리뷰로 이동','MY플레이스 영수증 인증 화면으로 연결돼요')">네이버 리뷰 남기기</button>
+        ${canceled?'':`<button class="rc-act naver" onclick="toast('네이버 영수증 리뷰로 이동','MY플레이스 영수증 인증 화면으로 연결돼요')">네이버 리뷰 남기기</button>`}
       </div>
-      <div class="rc-foot">전자영수증은 발송일로부터 <b>1년</b>까지 확인할 수 있어요 · 거래 기록은 관련 법령에 따라 보관돼요.<br>본 영수증은 전자적으로 발행된 거래 확인 내역이에요 · 세금계산서·현금영수증과는 별개예요. 고객 정보(이름·연락처)는 표기하지 않아요.</div>
+      <div class="rc-foot">전자영수증은 발송일로부터 <b>1년</b>까지 확인할 수 있어요 · 거래 기록은 관련 법령에 따라 보관돼요.<br>본 영수증은 전자적으로 발행된 거래 확인 내역이에요 · 세금계산서·현금영수증과는 별개예요. 고객 정보(이름·연락처)는 표기하지 않아요.${canceled?'<br>취소된 거래는 네이버 영수증 리뷰를 작성할 수 없어요.':''}</div>
     </div>`;
   document.getElementById('receiptModal').classList.add('on'); syncBgLock();
 }

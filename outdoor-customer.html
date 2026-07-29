@@ -162,6 +162,18 @@
   .cover-chip.open .sdot{background:#37e0a6;box-shadow:0 0 0 3px rgba(55,224,166,.35);}
   .cover-chip.break .sdot{background:var(--amber);}
   .cover-chip.closed .sdot{background:#ff6b6b;}
+  /* 영업 상태 배지 — 커버 우측 상단에 분리 배치 */
+  .cover-status{position:absolute;top:12px;right:12px;z-index:3;display:inline-flex;align-items:center;gap:5px;
+    font-size:12.5px;font-weight:800;color:#fff;background:rgba(0,0,0,.46);border:1px solid rgba(255,255,255,.3);
+    border-radius:20px;padding:5px 11px;text-shadow:0 1px 3px rgba(0,0,0,.4);}
+  .cover-status .sdot{width:7px;height:7px;border-radius:50%;background:#fff;}
+  .cover-status.open .sdot{background:#37e0a6;box-shadow:0 0 0 3px rgba(55,224,166,.35);}
+  .cover-status.break .sdot{background:var(--amber);}
+  .cover-status.closed .sdot{background:#ff6b6b;}
+  /* 대기 정보 — 칩이 아니라 친절한 문장 라인으로 분리 안내 */
+  .waitline{margin:11px 18px 0;background:var(--bg);border-radius:11px;padding:11px 14px;
+    font-size:13.5px;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:7px;}
+  .waitline b{color:var(--ink);font-weight:800;}
   .sbanner{margin:14px 18px 0;border-radius:12px;height:58px;background:linear-gradient(100deg,#6741d9,#9775fa);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;cursor:pointer;}
 
   /* ── 매장 탭 ───────────────────────── */
@@ -950,7 +962,7 @@ const STORES = [
     info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · 행사장 A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
       {id:'b1', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null, allergy:'밀·대두·우유·달걀 함유', nutrition:'약 620kcal'},
-      {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, hh:true, hhPrice:4400, nutrition:'약 380kcal', upsell:true},
+      {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, nutrition:'약 380kcal', upsell:true},
       {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13', upsell:true},
       {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
       {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 준비', price:15000, left:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
@@ -1221,7 +1233,6 @@ function scHome(){
   const banners = [
     {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'소프트 푸드트럭 페스티벌', s:'🎉 개장 기념 · 전 매장 10% 할인'},
     {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'야간 라이브 공연', s:'🎤 매일 저녁 8PM · B구역 무대'},
-    {img:'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#1971c2,#4dabf7)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'해피아워 타임', s:'☕ 15:00 ~ 17:00 · 음료 20% off'},
   ];
   const cats = ['전체','치킨','버거','피자','분식','한식','중식','일식','양식','멕시칸','아시안','디저트','음료','커피'];   // 필터1(음식 유형) — 많을 수 있어 가로 스크롤 + 더보기 힌트
   const cats2 = ['전체','A구역','B구역','C구역','D구역'];   // 상세필터 옵션 — 운영자 설정값(구역/브랜드/가격대 등 자유)
@@ -1371,8 +1382,12 @@ function scStore(){
     : stClosed ? {cls:'closed', label:'영업 종료'}
     : stPaused ? {cls:'break', label:'준비중 (영업 일시중지)'}
     : {cls:'open', label:'영업중'};
-  const waitVal = (!blocked && S.brandWait!=='off' && (S.brandWait==='time'?s.waitTime:s.waitCount))
-    ? (S.brandWait==='time'?s.waitTime:'대기 '+s.waitCount) : '';
+  // 대기 정보는 칩이 아니라 친절한 문장으로 안내 (영업 불가·off·값 없음이면 미표시)
+  const waitSentence = (!blocked && S.brandWait!=='off')
+    ? (S.brandWait==='time'
+        ? (s.waitTime ? `지금 주문하면 <b>${s.waitTime}</b> 정도 기다려요` : '')
+        : (s.waitCount ? `지금 앞에 <b>${s.waitCount}</b>이 기다리고 있어요` : ''))
+    : '';
   // 매장 배너(335×56)는 위치 옵션 없이 커버 이미지 아래에 고정 노출
   const bannerHTML = `
     <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링) -->
@@ -1394,13 +1409,9 @@ function scStore(){
   <div class="scroll">
     ${hasCover ? `
     <div class="cover has-info" style="background-image:url('${s.cover}');background-size:cover;background-position:center;background-color:#2c1250">
+      <span class="cover-status ${st.cls}"><span class="sdot"></span>${st.label}</span>
       <div class="cover-info">
         <div class="ci-name">${s.logo} ${s.name}</div>
-        <div class="ci-chips">
-          <span class="cover-chip ${st.cls}"><span class="sdot"></span>${st.label}</span>
-          ${waitVal ? `<span class="cover-chip">⏳ ${waitVal}</span>` : ''}
-          <span class="cover-chip">📍 ${s.loc}</span>
-        </div>
       </div>
     </div>` : `
     <div class="brandinfo nocover">
@@ -1414,10 +1425,9 @@ function scStore(){
             : stPaused
               ? `<span class="bstatus break"><span class="sdot"></span> 준비중 (영업 일시중지)</span>`
               : `<span class="bstatus open"><span class="sdot"></span> 영업중</span>`}
-        ${waitVal ? `<span class="bwait">⏳ ${waitVal}</span>` : ''}
       </div>
-      <div class="bloc">📍 ${s.loc}</div>
     </div>`}
+    ${waitSentence ? `<div class="waitline">🕒 ${waitSentence}</div>` : ''}
     ${bannerHTML}
     <!-- 탭 -->
     <div class="mtabs">
@@ -1811,7 +1821,7 @@ function scCheckout(){
     <!-- 금액 요약 (할인 세분화 · 통합/개별은 브랜드 설정) -->
     <div class="sect"><div class="sect-h" style="display:flex;justify-content:space-between;align-items:center">${post?'주문 금액 요약':'결제 금액 요약'}<span class="scope-chip">${S.payScope==='unified'?'여러 매장 통합 결제':'매장별 개별 결제'}</span></div>
       <div class="row"><span>상품 합계 (정가)</span><span class="v">${won(listSum)}</span></div>
-      ${itemDisc>0?`<div class="row"><span>상품 할인 (해피아워 등)</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
+      ${itemDisc>0?`<div class="row"><span>상품 할인</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
       ${coupon>0?`<div class="row"><span>🎟️ 쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>`:''}
       <div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-size:17px;font-weight:800;color:var(--ink)"><span>${post?'주문 금액':'최종 결제금액'}</span><span>${won(final)}</span></div>
       ${mi.on ? (mi.below

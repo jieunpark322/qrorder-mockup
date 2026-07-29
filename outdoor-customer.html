@@ -774,8 +774,8 @@
   .d-price .d-sale{color:var(--point);}
   .m-was{font-size:13px;color:var(--ink4);text-decoration:line-through;}
   .m-promo{font-size:11px;font-weight:700;color:var(--point);background:var(--point-50);padding:3px 7px;border-radius:6px;}
-  .m-reuse{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:#177A4F;margin-top:6px;
-    padding:4px 10px 4px 8px;border-radius:20px;background:linear-gradient(160deg,#eefaf3,#d4f1e0);
+  .m-reuse{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;color:#177A4F;margin-left:auto;
+    padding:3px 9px 3px 7px;border-radius:20px;background:linear-gradient(160deg,#eefaf3,#d4f1e0);
     box-shadow:0 2px 4px rgba(20,120,80,.18), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -1px 2px rgba(20,120,80,.12);}
   .m-reuse .mt-ic{font-size:12px;line-height:1;}
   .m-right{padding-left:8px;}
@@ -1622,11 +1622,10 @@ function mcardHTML(sid,m,closed){
   return `<button class="mcard ${m.soldout?'soldout':''}" onclick="openMenu('${sid}','${m.id}')">
     <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">품절</div>':''}</div>
     <div class="m-body">
-      ${badges?`<div class="m-badges">${badges}</div>`:''}
+      ${(badges || m.reuse)?`<div class="m-badges">${badges}${m.reuse?`<span class="m-reuse"><span class="mt-ic">♻️</span>다회용기</span>`:''}</div>`:''}
       <div class="m-name">${m.adult?'<span class="age-badge">19</span>':''}${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}</div>
       ${m.desc?`<div class="m-desc">${m.desc}</div>`:''}
       <div class="m-price">${price}</div>
-      ${m.reuse?`<div class="m-reuse"><span class="mt-ic">♻️</span>다회용기 제공</div>`:''}
     </div>
   </button>`;
 }

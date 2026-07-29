@@ -471,8 +471,12 @@
   .oh-st-seg.b{background:linear-gradient(180deg,#7FA6E6,#4E7DD0);}
   .oh-st-seg.g{background:linear-gradient(180deg,#52DDA8,#12B886);}
   .oh-st-seg.cur{box-shadow:0 2px 5px rgba(40,90,160,.30), inset 0 1px 0 rgba(255,255,255,.5);}
-  .oh-st-labels{display:flex;justify-content:space-between;margin-top:6px;}
-  .oh-st-labels span{font-size:11px;font-weight:600;color:var(--ink4);}
+  .oh-st-wrap{position:relative;}
+  .oh-st-wrap.has-bubble{padding-top:32px;}
+  .oh-pickup-bubble{position:absolute;top:0;left:62.5%;transform:translateX(-50%);white-space:nowrap;background:#12B886;color:#fff;font-size:12px;font-weight:800;padding:5px 11px;border-radius:9px;box-shadow:0 4px 10px rgba(18,184,134,.35);}
+  .oh-pickup-bubble::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#12B886;}
+  .oh-st-labels{display:flex;margin-top:6px;}
+  .oh-st-labels span{flex:1;text-align:center;font-size:11px;font-weight:600;color:var(--ink4);}
   .oh-st-labels .on-g{color:#0F6E56;font-weight:800;} .oh-st-labels .on-b{color:#185FA5;font-weight:800;}
   /* 상세 펼치기 안에서 메뉴 목록은 별도 파티션으로 분리 */
   .oh-menupart{margin-top:10px;padding:11px 12px;background:var(--bg);border-radius:10px;}
@@ -2209,7 +2213,12 @@ function stepBarHTML(status){
     const lbl = (st==='준비완료'&&isDelivery()) ? '배달중' : st;
     return `<span class="${i===idx?(green?'on-g':'on-b'):''}">${lbl}</span>`;
   }).join('');
-  return `<div class="oh-st-bar">${segs}</div><div class="oh-st-labels">${labels}</div>`;
+  const bubble = canPickup(status);
+  return `<div class="oh-st-wrap ${bubble?'has-bubble':''}">
+    ${bubble?`<span class="oh-pickup-bubble">🔔 지금 받아 가세요</span>`:''}
+    <div class="oh-st-bar">${segs}</div>
+    <div class="oh-st-labels">${labels}</div>
+  </div>`;
 }
 // 주문 내역 카드 1장 — 회차 수·매장 수와 무관하게 항상 같은 구조
 // (회차/시각 → 매장별 진행 스텝퍼 → 금액·버튼) · 연락처·주문번호·결제수단·메뉴는 '자세히 보기'로 접어둠
@@ -2252,7 +2261,6 @@ function storeRowsHTML(stores, showNames){
   const rows = byAction(stores).map(s=>`<div class="oh-st-row">
     ${showNames?`<div class="oh-st-head"><span class="oh-st-name">${store(s.sid).logo} ${store(s.sid).name}</span></div>`:''}
     ${stepBarHTML(s.status)}
-    ${canPickup(s.status)?`<div class="oh-pickup sm">🔔 지금 받아 가세요 · ${store(s.sid).loc}</div>`:''}
   </div>`).join('');
   return `<div class="oh-stores">${rows}</div>`;
 }
@@ -2292,7 +2300,7 @@ function stageSummaryHTML(P){
   const curLbl = (cur==='준비완료'&&S.service==='delivery')?'배달중':cur;
   const hint = cur
     ? `<div class="oh-stage-hint"><b>${curLbl}</b> 단계만 보는 중 · 다시 누르면 전체가 보여요</div>`
-    : `<div class="oh-stage-hint">단계를 탭하면 해당 주문만 모아 볼 수 있어요</div>`;
+    : '';
   return `<div class="oh-lead">
     <div class="oh-stage">${cells}</div>
     ${hint}

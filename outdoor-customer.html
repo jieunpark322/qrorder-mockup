@@ -146,7 +146,9 @@
   .cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.28),transparent 50%);}
   .brandinfo{padding:0 18px;margin-top:-30px;position:relative;z-index:3;}
   /* 커버 이미지 미등록: 커버 영역 없이 헤더 바로 아래에서 정상 여백으로 표시 */
-  .brandinfo.nocover{margin-top:16px;}
+  .brandinfo.nocover{margin-top:16px;position:relative;}
+  /* 커버 없을 때 우측 상단 상태 배지 — 밝은 배경에 맞춰 어두운 칩 */
+  .cover-status.dark{background:rgba(30,30,35,.82);border-color:rgba(255,255,255,.15);}
   .logo{width:70px;height:70px;border-radius:18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid #fff;}
   .bstore{font-size:23px;font-weight:800;margin-top:12px;}
   .bstatus{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;margin-top:6px;}
@@ -1600,17 +1602,9 @@ function scStore(){
       </div>
     </div>` : `
     <div class="brandinfo nocover">
+      <span class="cover-status dark ${st.cls}"><span class="sdot"></span>${st.label}</span>
       <div class="logo">${s.logo}</div>
       <div class="bstore">${s.name}</div>
-      <div class="bmeta">
-        ${stBreak
-          ? `<span class="bstatus break"><span class="sdot"></span> 브레이크 타임</span>`
-          : stClosed
-            ? `<span class="bstatus" style="color:var(--red)"><span class="sdot" style="background:var(--red)"></span> 영업 종료</span>`
-            : stPaused
-              ? `<span class="bstatus break"><span class="sdot"></span> 준비중 (영업 일시중지)</span>`
-              : `<span class="bstatus open"><span class="sdot"></span> 영업중</span>`}
-      </div>
     </div>`}
     ${waitSentence ? `<div class="waitline"><span class="wl-ic">🕒</span><span>${waitSentence}</span></div>` : ''}
     ${bannerHTML}

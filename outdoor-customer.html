@@ -323,7 +323,7 @@
   .pay-hint{font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6;}
   .chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;}
   .chk.on{background:var(--blue);border-color:var(--blue);}
-  .agree-all .chk.on{background:var(--green);border-color:var(--green);}
+  .agree-all .chk.on{background:var(--persimmon);border-color:var(--persimmon);}
 
   /* 결제수단 */
   .pay-opt{display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid var(--line);border-radius:11px;margin-bottom:9px;cursor:pointer;font-size:15px;font-weight:700;}
@@ -383,7 +383,7 @@
   .oh-viewtog .chk{width:20px;height:20px;border-radius:6px;}
   .oh-card{background:#fff;border-radius:16px;margin:12px 14px;border:1px solid var(--line);box-shadow:0 2px 10px rgba(20,20,25,.05);overflow:hidden;}
   .oh-card.cancel{opacity:.92;}
-  .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;background:linear-gradient(180deg,#fafafb,#fff);border-bottom:1px solid var(--line2);}
+  .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;background:var(--bg);border-bottom:1px solid var(--line);}
   .oh-top-l{display:flex;flex-direction:column;gap:4px;min-width:0;}
   .oh-ord-row{display:flex;align-items:baseline;gap:9px;}
   .oh-ord{font-size:15px;font-weight:900;color:var(--ink);}
@@ -507,7 +507,8 @@
   .rc-foot{font-size:11.5px;color:var(--ink4);line-height:1.6;margin-top:4px;}
   .rc-foot b{color:var(--ink2);}
   /* 전자영수증 정책 UI — 주문내역 가리기 · 가맹점 정보 · 인증 바코드 · 저장/리뷰 */
-  .rc-hidebtn{display:block;width:100%;margin-top:14px;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font-family:inherit;font-size:12.5px;font-weight:800;color:var(--ink2);cursor:pointer;}
+  .rc-topbar{display:flex;margin:0 0 12px;}
+  .rc-hidebtn{display:inline-flex;align-items:center;margin:0;padding:6px 13px;border:1px solid var(--line);border-radius:20px;background:var(--bg);font-family:inherit;font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;}
   .rc-hidden{font-size:13px;color:var(--ink3);text-align:center;padding:20px 0;font-weight:700;}
   .rc-biz{margin-bottom:10px;}
   .rc-biz-h{font-size:12.5px;font-weight:800;color:var(--ink);}
@@ -1779,8 +1780,8 @@ function scCart(){
     <!-- 수령 방식 (서비스 유형은 브랜드 설정 · 고객 선택 아님) -->
     <div class="sect"><div class="sect-h">수령 방식</div>
       ${S.service==='delivery'
-        ? `<div class="sect-sub">이 행사는 <b>자리로 받기(현장 배달)</b> 서비스예요. 주문하신 자리로 현장 스태프가 가져다드려요.</div>
-           <div class="deliver-fix">🛎️ 자리로 받기 · 다음 화면에서 <b>받을 자리</b>를 입력해요</div>`
+        ? `<div class="sect-sub">계신 자리로 스태프가 직접 가져다드려요.</div>
+           <div class="deliver-fix">🛎️ 다음 화면에서 <b>받을 자리</b>를 입력해 주세요.</div>`
         : `<div class="sect-sub">이 행사는 <b>포장 픽업</b> 서비스예요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>
            <div class="seg">
              <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">즉시 포장</button>
@@ -2219,7 +2220,7 @@ function stepBarHTML(status){
   const idx = stepIdx(status);
   const green = (status==='준비완료' || status==='수령완료');
   const fill = green ? 'g' : 'b';
-  const segs = HIST_STEPS.map((_,i)=>`<span class="oh-st-seg ${i<=idx?fill:''} ${i===idx?'cur':''}"></span>`).join('');
+  const segs = HIST_STEPS.map((_,i)=>`<span class="oh-st-seg ${i===idx?(fill+' cur'):''}"></span>`).join('');
   const labels = HIST_STEPS.map((st,i)=>{
     const lbl = (st==='준비완료'&&isDelivery()) ? '배달중' : st;
     return `<span class="${i===idx?(green?'on-g':'on-b'):''}">${lbl}</span>`;
@@ -2380,13 +2381,13 @@ function openReceipt(id){
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closeReceipt()">✕</button>
     <div class="rc-scroll">
+      <div class="rc-topbar"><button class="rc-hidebtn" onclick="toggleRcHide()">${hide?'주문 내역 보기':'주문 내역 가리기'}</button></div>
       <div class="rc-badge ${canceled?'cancel':''}">${canceled?'취소 전자영수증':'전자영수증'}</div>
       <div class="rc-title">${canceled?'주문이 취소되었어요':'결제가 완료되었어요'}</div>
       <div class="rc-meta">주문번호 <b>${p.id}</b><br>결제일시 ${p.paidAt}${canceled?`<br><span class="rc-cancel-at">취소일시 ${p.canceledAt}</span>`:''}</div>
-      <button class="rc-hidebtn" onclick="toggleRcHide()">${hide?'주문 내역 보기':'주문 내역 가리기'}</button>
       <div class="rc-hr"></div>
       ${hide
-        ? `<div class="rc-hidden">주문 내역을 가렸어요 · [주문 내역 보기]로 다시 볼 수 있어요</div>`
+        ? ``
         : `${Object.entries(groups).map(([sid,items])=>`
             <div class="rc-store">${store(sid).logo} ${store(sid).name}</div>
             ${items.map(it=>`<div class="rc-line"><span>${it.name}${it.opt?' · '+it.opt:''} ×${it.qty}</span><span>${won(it.price*it.qty)}</span></div>`).join('')}

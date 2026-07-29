@@ -200,9 +200,9 @@
   .m-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px;}
   .m-emoji{font-size:15px;}
   /* 성인 메뉴 연령 배지 — 금지 마크(🔞) 대신 깔끔한 '19' 배지(3D) */
-  .age-badge{display:inline-flex;align-items:center;justify-content:center;min-width:21px;height:20px;padding:0 5px;border-radius:6px;
-    background:linear-gradient(160deg,#FF6B6B,#E03131);color:#fff;font-size:11px;font-weight:900;letter-spacing:-.03em;vertical-align:middle;
-    box-shadow:0 1px 3px rgba(224,49,49,.4), inset 0 1px 0 rgba(255,255,255,.35);margin-left:5px;}
+  .age-badge{display:inline-flex;align-items:center;justify-content:center;width:21px;height:21px;padding:0;border-radius:50%;
+    background:linear-gradient(160deg,#FF6B6B,#E03131);color:#fff;font-size:10.5px;font-weight:900;letter-spacing:-.04em;vertical-align:middle;flex-shrink:0;
+    box-shadow:0 1px 3px rgba(224,49,49,.4), inset 0 1px 0 rgba(255,255,255,.35);margin-right:5px;}
   .m-desc{font-size:12.5px;color:var(--ink3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .m-price{margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .m-now{font-size:16px;font-weight:800;}
@@ -526,6 +526,20 @@
   /* 성인인증 모달 */
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center;}
   .modal-bg.on{display:flex;}
+  /* 가운데 사각 모달 (메뉴 정보 등) — X·배경 클릭으로 닫힘 */
+  .modal-center{align-items:center;z-index:320;padding:24px;}
+  .info-card{position:relative;background:#fff;width:min(340px,100%);max-height:80vh;overflow-y:auto;border-radius:20px;
+    padding:24px 22px 22px;box-shadow:0 24px 60px rgba(20,20,25,.32);animation:pop .22s cubic-bezier(.2,.8,.3,1.1);}
+  @keyframes pop{from{transform:scale(.9);opacity:0;}to{transform:none;opacity:1;}}
+  .info-card .ic-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:none;
+    background:var(--bg);color:var(--ink3);font-size:15px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;}
+  .info-card .ic-close:active{background:#E7E7EA;}
+  .info-card .ic-title{font-size:17px;font-weight:900;color:var(--ink);letter-spacing:-.02em;margin-bottom:16px;padding-right:34px;}
+  .info-card .ic-row{display:flex;gap:11px;padding:12px 0;border-top:1px solid var(--line2);}
+  .info-card .ic-row:first-of-type{border-top:none;}
+  .info-card .ic-ic{flex-shrink:0;}
+  .info-card .ic-k{font-size:12px;font-weight:800;color:var(--ink3);margin-bottom:3px;}
+  .info-card .ic-v{font-size:14px;font-weight:700;color:var(--ink);line-height:1.5;}
   .sheet{background:#fff;width:100%;max-width:440px;border-radius:22px 22px 0 0;padding:24px 22px calc(24px + env(safe-area-inset-bottom));animation:up .3s ease;}
   @keyframes up{from{transform:translateY(100%);}to{transform:none;}}
   .sheet-t{font-size:19px;font-weight:800;text-align:center;}
@@ -1006,6 +1020,9 @@
 <div class="modal-bg" id="noticeModal" onclick="if(event.target===this)closeNotice()">
   <div class="sheet sheet-receipt" id="noticeInner"></div>
 </div>
+<div class="modal-bg modal-center" id="infoModal" onclick="if(event.target===this)closeMenuInfo()">
+  <div class="info-card" id="infoInner"></div>
+</div>
 
 <!-- 약관 전문 시트 -->
 <div class="modal-bg" id="termsModal" onclick="if(event.target===this)closeTerms()">
@@ -1280,10 +1297,21 @@ function simState(st){
 }
 function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; S.infoOpen=false; showMenuSheet(); }
 function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); syncBgLock(); }
-function closeMenuSheet(){ document.getElementById('menuSheet').classList.remove('on'); syncBgLock(); }
+function closeMenuSheet(){ closeMenuInfo(); document.getElementById('menuSheet').classList.remove('on'); syncBgLock(); }
+// 메뉴 정보(알레르기·영양) 가운데 모달 — X·배경 클릭으로 닫힘
+function openMenuInfo(){
+  const m=S.curMenu; if(!m)return;
+  document.getElementById('infoInner').innerHTML = `
+    <button class="ic-close" onclick="closeMenuInfo()" aria-label="닫기">✕</button>
+    <div class="ic-title">메뉴 정보</div>
+    ${m.allergy?`<div class="ic-row"><span class="ic-ic">🥜</span><div><div class="ic-k">알레르기 유발성분</div><div class="ic-v">${m.allergy}</div></div></div>`:''}
+    ${m.nutrition?`<div class="ic-row"><span class="ic-ic">🔥</span><div><div class="ic-k">영양 정보</div><div class="ic-v">${m.nutrition}</div></div></div>`:''}`;
+  document.getElementById('infoModal').classList.add('on'); syncBgLock();
+}
+function closeMenuInfo(){ const el=document.getElementById('infoModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 // 시트/모달이 하나라도 열려 있으면 배경(페이지) 스크롤 잠금 → 상세 화면만 컨트롤
 function syncBgLock(){
-  const open=['menuSheet','adultModal','confirmModal','receiptModal','termsModal','payModal','noticeModal'].some(id=>document.getElementById(id).classList.contains('on'));
+  const open=['menuSheet','adultModal','confirmModal','receiptModal','termsModal','payModal','noticeModal','infoModal'].some(id=>document.getElementById(id).classList.contains('on'));
   document.documentElement.style.overflow=open?'hidden':'';
   document.body.style.overflow=open?'hidden':'';
 }
@@ -1595,7 +1623,7 @@ function mcardHTML(sid,m,closed){
     <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">품절</div>':''}</div>
     <div class="m-body">
       ${badges?`<div class="m-badges">${badges}</div>`:''}
-      <div class="m-name">${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}${m.adult?'<span class="age-badge">19</span>':''}</div>
+      <div class="m-name">${m.adult?'<span class="age-badge">19</span>':''}${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}</div>
       ${m.desc?`<div class="m-desc">${m.desc}</div>`:''}
       <div class="m-price">${price}</div>
       ${m.reuse?`<div class="m-reuse"><span class="mt-ic">♻️</span>다회용기 제공</div>`:''}
@@ -1649,7 +1677,7 @@ function renderMenuSheet(){
       <span class="qnum">${S.tmpQty}</span>
       <button class="qbtn ${atMax?'dim':''}" ${atMax?'disabled':''} onclick="S.tmpQty=Math.min(${maxQ},S.tmpQty+1);renderMenuSheet()">＋</button>
     </div>`; })()}
-    ${m.maxOrder?`<div style="text-align:right;font-size:12.5px;font-weight:700;margin-top:8px;color:var(--ink3)">🛒 1인 최대 ${m.maxOrder}개까지 구매할 수 있어요.</div>`:''}
+    ${m.maxOrder?`<div style="text-align:right;font-size:12.5px;font-weight:700;margin-top:8px;color:var(--ink3)">🛒 1회 최대 ${m.maxOrder}개까지 구매할 수 있어요.</div>`:''}
     ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:6px;color:${m.left<=5?'var(--point)':'#e8590c'}">${m.left<=5?'🔥 ':''}품절까지 ${m.left}개 남았어요.</div>`:''}`;
   document.getElementById('menuSheetInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
@@ -1657,14 +1685,13 @@ function renderMenuSheet(){
     <div class="ms-scroll">
       <div class="d-hero" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim-lg">품절</div>':''}</div>
       <div class="d-body">
-        <div class="d-name">${m.name} ${m.emoji||''}${m.adult?'<span class="age-badge">19</span>':''}</div>
+        <div class="d-name">${m.adult?'<span class="age-badge">19</span>':''}${m.name} ${m.emoji||''}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
-          ${(m.allergy||m.nutrition)?`<button class="d-info-btn ${S.infoOpen?'open':''}" style="margin-top:0;flex-shrink:0" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보</button>`:''}
+          ${(m.allergy||m.nutrition)?`<button class="d-info-btn" style="margin-top:0;flex-shrink:0" onclick="openMenuInfo()">메뉴 정보</button>`:''}
         </div>
         ${m.soldout?`<div class="ms-warn">😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.</div>`:''}
-        ${(m.allergy||m.nutrition)&&S.infoOpen?`<div class="d-info">${[m.allergy?`🥜 알러지 유발성분: ${m.allergy}`:'',m.nutrition?`🔥 영양 정보: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
         ${m.adult?`<div class="d-adult"><span class="age-badge">19</span> 성인 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}
         ${m.reuse?`<div class="d-reuse">♻️ 다회용기로 제공되는 메뉴예요 · 사용 후 용기 반납이 필요해요</div>`:''}
         ${disabled?'':orderControls}
@@ -1822,7 +1849,7 @@ function upsellRow(sid,m,showStore){
   const price = m.hh?m.hhPrice:m.price;
   return `<div class="citem" style="border:none;padding:10px 0">
     <div class="ci-th" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.photo?'':(m.img||'')}</div>
-    <div class="ci-b"><div class="ci-n">${m.name} ${m.emoji||''}${m.adult?'<span class="age-badge">19</span>':''}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
+    <div class="ci-b"><div class="ci-n">${m.adult?'<span class="age-badge">19</span>':''}${m.name} ${m.emoji||''}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
     <button class="ghostbtn" style="width:auto;margin:0;padding:0 15px;white-space:nowrap" onclick="openMenu('${sid}','${m.id}')">담기</button>
   </div>`;
 }

@@ -24,12 +24,7 @@
     --ui:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
     --shadow:0 2px 10px rgba(20,20,25,.05);
     --shadow-lg:0 12px 44px rgba(20,20,25,.14);
-    /* 타이포 6단 스케일 (본문 최소 15px) */
-    --t-title:22px; --t-lg:17px; --t-body:15px; --t-sub:14px; --t-meta:13px; --t-cap:11.5px;
   }
-  /* 단색 라인 아이콘 (currentColor 상속) */
-  .ic-svg{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:-3px;}
-  .nums{font-variant-numeric:tabular-nums;}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
   body{font-family:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
@@ -82,7 +77,7 @@
   .mb-t{font-size:20px;font-weight:900;letter-spacing:-.02em;text-shadow:0 1px 5px rgba(0,0,0,.55);}
   .mb-s{font-size:13.5px;font-weight:700;opacity:.96;margin-top:3px;text-shadow:0 1px 4px rgba(0,0,0,.55);}
   .mb-dots{position:absolute;bottom:14px;right:14px;display:flex;gap:5px;}
-  .mb-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);}
+  .mb-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);cursor:pointer;}
   .mb-dot.on{width:16px;border-radius:3px;background:#fff;}
 
   /* ── 공지문 ───────────────────────── */
@@ -189,22 +184,21 @@
   .m-reuse{font-size:11.5px;font-weight:700;color:#2f9e44;margin-top:5px;}
   .info-multi{white-space:pre-line;font-size:14.5px;color:var(--ink);line-height:1.8;}
   /* 매장 배너 롤링 (브랜드 → 매장) */
-  /* 매장 배너: 이미지 기반 · 3:1 비율(권장 1080×360) · 브랜드↔매장 크로스페이드 롤링 */
-  .sbanner-roll{position:relative;margin:14px 18px 0;aspect-ratio:1080/360;border-radius:14px;overflow:hidden;cursor:pointer;background:#e9ecef;box-shadow:var(--shadow);}
-  .sb-slide{position:absolute;inset:0;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;padding:13px 16px;opacity:0;animation:sbfade 8s infinite;}
+  /* 매장 배너: 이미지 기반 · 규격 335×56(권장) · 브랜드↔매장 크로스페이드 롤링 · 노출 위치(중간/하단)는 매장이 설정, 기본값 하단 */
+  .sbanner-roll{position:relative;margin:14px 18px 0;aspect-ratio:335/56;border-radius:10px;overflow:hidden;cursor:pointer;background:#e9ecef;box-shadow:var(--shadow);}
+  .sb-slide{position:absolute;inset:0;background-size:cover;background-position:center;display:flex;align-items:center;gap:8px;padding:0 12px;opacity:0;animation:sbfade 8s infinite;}
   .sb-slide:nth-child(2){animation-delay:4s;}
   @keyframes sbfade{0%,45%{opacity:1;}50%,100%{opacity:0;}}
-  .sb-tag{align-self:flex-start;margin-bottom:auto;font-size:10.5px;font-weight:800;background:rgba(255,255,255,.92);color:var(--ink);padding:3px 10px;border-radius:20px;}
-  .sb-txt{color:#fff;font-size:15px;font-weight:800;line-height:1.35;text-shadow:0 1px 5px rgba(0,0,0,.55);}
-  .sb-sub{color:rgba(255,255,255,.92);font-size:12px;font-weight:600;margin-top:3px;text-shadow:0 1px 5px rgba(0,0,0,.55);}
+  .sb-tag{flex-shrink:0;font-size:9.5px;font-weight:800;background:rgba(255,255,255,.92);color:var(--ink);padding:2px 8px;border-radius:20px;}
+  .sb-txt{flex:1;min-width:0;color:#fff;font-size:11.5px;font-weight:800;line-height:1.2;text-shadow:0 1px 5px rgba(0,0,0,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   /* 포장 예약 시간 슬롯 */
   .timeslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
   .tslot{position:relative;border:1.5px solid var(--line);border-radius:10px;padding:12px 0;font-size:15px;font-weight:700;background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);}
   .tslot.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);}
   .tslot.dis{color:var(--ink4);background:var(--bg);cursor:not-allowed;}
   .tslot .ts-x{font-size:10px;font-weight:800;color:var(--red);margin-top:2px;}
-  /* 조리완료 픽업 유도 */
-  .oh-pickup{background:#e6fcf5;border-top:1px solid #c3fae8;color:#0b7285;font-size:13.5px;font-weight:800;padding:11px 16px;line-height:1.5;}
+  /* 준비완료 픽업 유도 — 카드 안에 들어앉은 블록(전체 폭 띠가 아니라 여백을 둔 인셋) */
+  .oh-pickup{margin:12px 16px 0;padding:11px 13px;background:#e6fcf5;border:1px solid #c3fae8;border-radius:10px;color:#0b7285;font-size:13px;font-weight:800;line-height:1.5;display:flex;align-items:center;gap:7px;}
 
   /* ── 메뉴 상세 ───────────────────────── */
   .d-hero{aspect-ratio:1/1;max-height:300px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:80px;}
@@ -221,7 +215,7 @@
   .opt.on{border-color:var(--blue);background:var(--blue-50);font-weight:700;}
   .opt .dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;}
   .opt.on .dot{border-color:var(--blue);background:var(--blue);box-shadow:inset 0 0 0 3px #fff;}
-  .qty{display:flex;align-items:center;gap:16px;margin-top:20px;justify-content:center;}
+  .qty{display:flex;align-items:center;gap:16px;margin-top:20px;justify-content:flex-end;}
   .qbtn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:#fff;font-size:22px;cursor:pointer;font-family:inherit;}
   .qnum{font-size:22px;font-weight:800;min-width:30px;text-align:center;}
 
@@ -279,22 +273,6 @@
   .pay-div{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--ink4);font-size:13px;}
   .pay-div span{flex:1;height:1px;background:var(--line);}
   .pay-hint{font-size:12px;color:var(--ink4);margin-top:14px;line-height:1.6;}
-  .pay-mkt{display:flex;align-items:center;gap:9px;padding:11px 2px;cursor:pointer;}
-  .pay-mkt-ck{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;}
-  .pay-mkt-ck.on{background:var(--blue);border-color:var(--blue);}
-  .pay-mkt-t{flex:1;font-size:14px;color:var(--ink2);}
-  .pay-mkt-t b{font-size:10.5px;font-weight:800;color:var(--ink3);background:#F1F1F3;border-radius:5px;padding:2px 7px;margin-right:6px;}
-  .pay-coupon{background:#FFF8E6;border:1px solid #FFE3A3;border-radius:12px;padding:12px 14px;margin:4px 0 14px;}
-  .pcp-h{font-size:13px;font-weight:800;color:#92400e;margin-bottom:9px;}
-  .pcp-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;border:1.5px solid transparent;cursor:pointer;margin-bottom:5px;}
-  .pcp-row.on{background:#fff;border-color:#E6A817;}
-  .pcp-ck{width:20px;height:20px;border-radius:50%;border:2px solid #D1A050;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:900;}
-  .pcp-row.on .pcp-ck{background:#E6A817;border-color:#E6A817;}
-  .pcp-n{font-size:13px;font-weight:700;color:#78350f;}
-  .pcp-scope{font-size:10.5px;font-weight:800;color:#92400e;background:#fff;border:1px solid #FFE3A3;border-radius:5px;padding:1px 6px;margin-right:6px;}
-  .pcp-d{font-size:12px;color:#92400e;margin-top:2px;}
-  .pcp-clear{background:none;border:none;font-size:12px;color:#92400e;cursor:pointer;font-family:inherit;padding:4px 0 0;opacity:.7;text-decoration:underline;}
-  .pay-coupon-none{font-size:13px;color:var(--ink3);text-align:center;padding:6px 0 14px;}
   .chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;}
   .chk.on{background:var(--blue);border-color:var(--blue);}
   .agree-all .chk.on{background:var(--green);border-color:var(--green);}
@@ -330,6 +308,12 @@
   .ost.done .ost-lbl,.ost.cur .ost-lbl{color:var(--blue-d);}
   .ost-line{flex:1;height:2px;background:var(--line2);margin-top:12px;border-radius:2px;}
   .ost-line.done{background:var(--blue);}
+  /* 준비완료 구간에 붙는 말풍선 — '지금 받아 가세요'를 막대 위에 띄워 눈에 띄게 */
+  .ms-bubble{position:absolute;top:0;transform:translateX(-50%);
+    background:var(--green);color:#fff;font-size:11.5px;font-weight:800;letter-spacing:-.01em;
+    padding:6px 11px;border-radius:10px;white-space:nowrap;box-shadow:0 5px 14px rgba(30,142,95,.3);z-index:2;}
+  .ms-bubble::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+    border:5px solid transparent;border-top-color:var(--green);}
   /* 통합결제 다매장 픽업 인지 */
   .multi-pick{margin:16px auto 0;max-width:320px;text-align:left;background:#FFF8EC;border:1px solid #F5DFA8;border-radius:14px;padding:16px;}
   .multi-pick .mp-h{font-size:15px;font-weight:900;color:#9A6B08;}
@@ -344,12 +328,18 @@
 
   /* 주문내역 (결제건=회차 카드) */
   .oh-tabwrap{padding:12px 14px 2px;}
+  /* 보기 기준 전환 — 탭이 아니라 체크 한 줄로, 켜면 같은 목록을 매장 기준으로 다시 묶어 보여줌 */
+  .oh-viewtog{display:flex;align-items:center;gap:9px;margin:12px 14px 0;padding:11px 13px;background:#fff;
+    border:1px solid var(--line);border-radius:12px;font-size:13.5px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;width:calc(100% - 28px);text-align:left;}
+  .oh-viewtog.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);font-weight:800;}
+  .oh-viewtog .chk{width:20px;height:20px;border-radius:6px;}
   .oh-card{background:#fff;border-radius:16px;margin:12px 14px;border:1px solid var(--line);box-shadow:0 2px 10px rgba(20,20,25,.05);overflow:hidden;}
   .oh-card.cancel{opacity:.92;}
   .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;background:linear-gradient(180deg,#fafafb,#fff);border-bottom:1px solid var(--line2);}
   .oh-top-l{display:flex;flex-direction:column;gap:4px;min-width:0;}
   .oh-ord-row{display:flex;align-items:baseline;gap:9px;}
   .oh-ord{font-size:15px;font-weight:900;color:var(--ink);}
+  .oh-at{font-size:14px;font-weight:800;color:var(--ink2);}   /* 주문 시각(메인 정보) */
   .oh-store-name{font-size:16px;font-weight:900;color:var(--ink);}
   .oh-time{font-size:12.5px;color:var(--ink3);font-weight:600;}
   .oh-where{font-size:13px;color:var(--ink2);font-weight:600;}
@@ -389,6 +379,48 @@
   .oh-pickup.sm{margin:0 0 8px;padding:8px 11px;font-size:12.5px;}
   .oh-grand{display:flex;justify-content:space-between;align-items:center;background:#fff;margin:14px 14px 8px;border-radius:14px;border:1px solid var(--line);padding:16px;font-size:17px;font-weight:900;}
   .oh-hint{margin:12px 14px;font-size:12.5px;color:var(--ink3);line-height:1.65;background:#fff9e6;border:1px solid #ffe8a3;border-radius:10px;padding:13px;}
+  /* 주문내역 상단 요약 — 내가 주문한 매장들이 각 단계에 몇 곳씩 놓여 있는지 */
+  .oh-lead{margin:14px 14px 0;padding:14px 10px 12px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);}
+  .oh-stage{display:flex;align-items:stretch;}
+  .oh-stage-cell{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 2px;position:relative;}
+  .oh-stage-cell + .oh-stage-cell::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:1px;background:var(--line2);}
+  .oh-stage-n{font-size:20px;font-weight:900;color:var(--ink4);line-height:1.1;}
+  .oh-stage-lbl{font-size:10.5px;font-weight:700;color:var(--ink4);white-space:nowrap;}
+  .oh-stage-cell.on .oh-stage-n{color:var(--ink);}
+  .oh-stage-cell.on .oh-stage-lbl{color:var(--ink2);}
+  .oh-stage-cell.ready .oh-stage-n,.oh-stage-cell.ready .oh-stage-lbl{color:var(--green);}
+  .oh-stage-cancel{margin-top:11px;padding-top:9px;border-top:1px dashed var(--line);text-align:center;font-size:11.5px;font-weight:700;color:var(--red);}
+  /* 카드: 핵심(회차·시간·진행단계·금액)만 노출 · 나머지는 자세히 보기로 접힘 */
+  .oh-card.ready{border-color:#BFE9D3;box-shadow:0 3px 14px rgba(30,142,95,.13);}
+  .oh-meta{font-size:12.5px;color:var(--ink3);font-weight:600;}
+  .oh-sum-lite{font-size:15px;font-weight:900;color:var(--ink);}
+  .oh-ghost{background:none;border:none;color:var(--ink3);font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;padding:9px 4px;white-space:nowrap;}
+  .oh-ghost:active{opacity:.6;}
+  .oh-sub{padding:0 16px 12px;}
+  .oh-sub-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink3);padding:5px 0;}
+  .oh-sub-row .v{color:var(--ink2);font-weight:700;}
+  /* 카드 안 매장별 진행 영역 — 매장이 1곳이든 여러 곳이든 같은 구조(매장명 + 상태 + 4단계 막대) */
+  .oh-stores{padding:2px 16px 8px;}
+  .oh-st-row{padding:10px 0;border-top:1px dashed var(--line2);}
+  .oh-st-row:first-child{border-top:none;}
+  .oh-st-head{display:flex;align-items:center;gap:8px;}
+  .oh-st-name{font-size:13.5px;font-weight:800;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .oh-st-head .st-badge{margin-left:auto;}
+  .oh-st-barwrap{position:relative;margin-top:9px;}
+  .oh-st-barwrap.has-bubble{padding-top:34px;}
+  .oh-st-bar{display:flex;gap:4px;}
+  .oh-st-seg{flex:1;height:5px;border-radius:3px;background:var(--line2);}
+  .oh-st-seg.on{background:var(--blue);}
+  .oh-st-seg.ready{background:var(--green);}
+  /* 상세 펼치기 안에서 메뉴 목록은 별도 파티션으로 분리 */
+  .oh-menupart{margin-top:10px;padding:11px 12px;background:var(--bg);border-radius:10px;}
+  .oh-menupart-h{font-size:11px;font-weight:800;color:var(--ink3);margin-bottom:6px;}
+  .oh-menupart .oh-sub-row{padding:4px 0;color:var(--ink2);}
+  .oh-menupart .oh-sub-row .v{color:var(--ink);}
+  .oh-tail{margin:16px 14px 0;font-size:12.5px;color:var(--ink3);}
+  .oh-tail-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:11px 2px;border-top:1px solid var(--line);}
+  .oh-tail-row b{font-size:16px;font-weight:900;color:var(--ink);}
+  .oh-tail-note{font-size:11.5px;color:var(--ink4);line-height:1.6;padding:2px 2px 0;}
   /* 전자영수증 시트 */
   .sheet-receipt{padding:0;position:relative;max-height:86vh;}
   .rc-scroll{max-height:86vh;overflow-y:auto;padding:30px 22px 26px;}
@@ -558,7 +590,7 @@
 
   /* ── 주문내역 상태 뱃지 ── */
   .st-cook{color:var(--persimmon-d);background:#FFEAD9;} .st-done{color:var(--green);background:#E4F6EC;}
-  .oh-pickup{background:#E4F6EC;border-top-color:#BFEBD5;color:#0E7A54;}
+  .oh-pickup{background:#E4F6EC;border-color:#BFEBD5;color:#0E7A54;}
   .oh-hint{background:#FFF7E8;border-color:#F3DDA6;color:#7A4E12;}
 
   /* ── 상황 화면 ── */
@@ -616,7 +648,7 @@
   .m-left-r{color:var(--persimmon-d);background:var(--blue-50);}
   .st-cook{color:var(--persimmon);background:var(--blue-50);} .st-done{color:var(--green);background:#EAF6EF;}
   .st-pick{color:var(--ink3);background:#F1F1F3;} .st-rej{color:var(--red);background:#FDECEC;}
-  .oh-pickup{background:#EAF6EF;border-top-color:#D8EFE3;color:#157A52;}
+  .oh-pickup{background:#EAF6EF;border-color:#D8EFE3;color:#157A52;}
   .oh-hint{background:#F5F5F7;border-color:var(--line);color:var(--ink2);}
   .oh-tot{background:#FAFAFB;}
 
@@ -728,147 +760,69 @@
   .d-info-btn:active{transform:scale(.97);}
   .d-info-btn.open{background:#E4E4E7;color:var(--ink);}
 
-  /* ══════════════ 디자인 고도화 오버라이드 (홈: 카테고리·매장 카드·아이콘·타이포) ══════════════ */
-  /* 1) 카테고리 — 분류=pill, 구역=텍스트 탭 */
-  .filterset{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:16;}
-  .filterset .frow{display:flex;align-items:center;gap:8px;padding:10px 16px;min-height:56px;}
-  .filterset .frow.tabs{padding-top:2px;padding-bottom:8px;min-height:48px;}
-  .filterset .frow + .frow{border-top:none;}
-  .cchips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;}
-  .cchips::-webkit-scrollbar{display:none;}
-  .cchip{flex-shrink:0;min-height:44px;padding:0 17px;border-radius:999px;background:#fff;border:1px solid var(--line);
-    color:var(--ink2);font-size:var(--t-body);font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;letter-spacing:-.01em;}
-  .cchip.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:800;}
-  .ztab{flex-shrink:0;min-height:40px;padding:0 4px;background:none;border:none;box-shadow:none;
-    color:var(--ink3);font-size:var(--t-body);font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;}
-  .frow.tabs .cchips{gap:16px;}
-  .ztab.on{color:var(--ink);font-weight:800;}
-  .searchtog{flex-shrink:0;width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid var(--line);
-    display:flex;align-items:center;justify-content:center;color:var(--ink2);cursor:pointer;font-family:inherit;}
-  .searchtog .ic-svg{width:20px;height:20px;}
-  .searchtog:active{transform:scale(.95);}
-  .searchbar-inline{flex:1;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--blue);border-radius:12px;padding:12px 14px;min-height:48px;}
-  .searchbar-inline .ic{display:flex;color:var(--ink3);}
-  .searchbar-inline input{flex:1;min-width:0;border:none;background:none;font-size:var(--t-body);font-family:inherit;outline:none;color:var(--ink);}
+  /* ═══════════════ 매장 그룹페이지 · 공지/검색 (실사용 로컬앱 톤) ═══════════════ */
+  /* ── 공지: 탭 가능한 한 줄 배너 (풀블리드 · 그림자/배지 없음) ── */
+  .notice{display:flex;align-items:center;gap:9px;width:100%;margin:0;padding:12px 16px;
+    background:#fff;background-image:none;border:none;border-top:1px solid var(--line2);border-bottom:1px solid var(--line);
+    border-radius:0;box-shadow:none;font-family:var(--ui);text-align:left;cursor:pointer;line-height:1.4;}
+  .notice::before,.notice::after{content:none;}
+  .notice:active{background:var(--bg);}
+  .notice .nbell{position:relative;flex-shrink:0;display:flex;color:var(--persimmon-d);}
+  .notice .nbell svg{width:19px;height:19px;}
+  .notice .ndot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;
+    background:#FF3B30;border:1.5px solid #fff;}
+  .notice .ndot::after{content:'';position:absolute;inset:-2px;border-radius:50%;
+    border:1.5px solid rgba(255,59,48,.55);animation:ndotpulse 1.7s ease-out infinite;}
+  @keyframes ndotpulse{0%{transform:scale(.55);opacity:.85;}100%{transform:scale(1.7);opacity:0;}}
+  .notice .ntxt{flex:1;min-width:0;font-size:13.5px;color:var(--ink2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .notice .ntxt b{font-weight:700;color:var(--ink);}
+  .notice .nchev{flex-shrink:0;display:flex;color:var(--ink4);}
+  .notice .nchev svg{width:16px;height:16px;}
+  /* 읽은 뒤: 빨간 알림 점 제거 + 종 아이콘 톤다운 */
+  .notice.read .nbell{color:var(--ink3);}
+  .notice.read .ndot{display:none;}
 
-  /* 2) 매장 목록 — 헤어라인 리스트(테두리·그림자 제거), 행 높이 84 */
-  .storelist{padding:0 16px;}
-  .scard{display:flex;gap:14px;align-items:center;width:100%;background:none;border:none;border-radius:0;box-shadow:none;margin:0;
-    padding:16px 0;min-height:84px;border-bottom:1px solid var(--line);cursor:pointer;font-family:inherit;text-align:left;position:relative;}
-  .scard:last-child{border-bottom:none;}
-  .scard:active{background:var(--line2);}
-  .scard.dimmed{background:none;}
-  .s-thumb{width:64px;height:64px;border-radius:12px;flex-shrink:0;background-size:cover;background-position:center;position:relative;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}
-  .scard.dimmed .s-thumb::after{font-size:11.5px;}
-  .s-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
-  .s-hero{font-size:var(--t-lg);font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .s-sub{display:flex;align-items:center;gap:5px;font-size:var(--t-sub);font-weight:600;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .s-sub .ic-svg{width:15px;height:15px;color:var(--ink3);}
-  .s-meta{display:flex;align-items:center;gap:14px;font-size:var(--t-meta);color:var(--ink3);margin-top:2px;}
-  .s-meta .s-loc,.s-meta .s-wait{display:inline-flex;align-items:center;gap:4px;}
-  .s-meta .ic-svg{width:15px;height:15px;}
-  .s-loc{color:var(--ink3);font-weight:600;}
-  .s-wait{color:var(--persimmon-d);font-weight:700;}
-  .scard.dimmed .s-hero{color:var(--ink3);} .scard.dimmed .s-sub,.scard.dimmed .s-meta{color:var(--ink4);}
+  /* ── 검색 토글 버튼: 칩과 어울리는 뉴트럴 아이콘 버튼 (그림자 없음) ── */
+  .searchtog{width:38px;height:38px;border-radius:10px;background:var(--bg);border:1px solid var(--line);
+    color:var(--persimmon);box-shadow:none;font-size:0;}
+  .searchtog svg{width:18px;height:18px;}
+  .searchtog:active{background:#EAEAED;}
 
-  /* 3) 공지 — 헤어라인 카드(액센트 레일 제거) + 라인 아이콘 */
-  .notice{margin:14px 16px 2px;padding:14px 16px;display:flex;gap:11px;align-items:flex-start;
-    background:#fff;border:1px solid var(--line);border-radius:14px;color:var(--ink2);font-size:var(--t-sub);line-height:1.55;}
-  .notice::before{display:none;}
-  .notice .nic{display:flex;color:var(--blue-d);flex-shrink:0;margin-top:1px;}
-  .notice .nic .ic-svg{width:19px;height:19px;}
-  .notice b{color:var(--ink);font-weight:800;font-size:var(--t-body);}
-  .notice a{color:var(--blue-d);font-weight:700;text-decoration:none;white-space:nowrap;}
+  /* ── 펼침 검색창: 연회색 필드 (테두리/포커스 링 없음) ── */
+  .searchbar-inline{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);
+    border:none;border-radius:11px;padding:11px 13px;box-shadow:none;}
+  .searchbar-inline .ic{display:flex;flex-shrink:0;color:var(--ink3);font-size:0;}
+  .searchbar-inline .ic svg{width:17px;height:17px;}
+  .searchbar-inline input{font-size:15px;}
+  .searchbar-inline input::placeholder{color:var(--ink3);}
+  .searchbar-inline .clr{flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    width:20px;height:20px;border-radius:50%;background:#C7C7CD;color:#fff;font-size:0;border:none;}
+  .searchbar-inline .clr svg{width:11px;height:11px;}
+  .searchbar-inline .clr:active{background:#B4B4BB;}
 
-  /* 4) 아이콘 정렬 — CTA·FAB */
-  .cta-btn .ic-svg{width:19px;height:19px;margin-right:2px;vertical-align:-4px;}
-  .hist-fab .ic-svg{width:16px;height:16px;color:var(--persimmon-d);}
+  /* ── 상세 필터: 필터1 옆 버튼으로 접어두고, 탭하면 추가 필터 칩 노출 ── */
+  .f2-btn{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:38px;height:38px;
+    border-radius:10px;background:var(--bg);border:1px solid var(--line);
+    cursor:pointer;position:relative;}
+  .f2-btn svg{width:18px;height:18px;color:var(--persimmon);}
+  .f2-btn:active{background:#EAEAED;}
+  .f2-btn.open{background:var(--blue-50);border-color:#CFDDF6;}
+  .f2-btn.open svg{color:var(--persimmon-d);}
+  .f2-btn .f2-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;
+    background:var(--persimmon);border:1.5px solid #fff;display:none;}
+  .f2-btn.active .f2-dot{display:block;}
+  .f2-row{padding-top:2px;}
+  .f2-row .cchip.on{background:var(--persimmon);}
 
-  /* 5) 매장 그룹 2열 배치(브랜드 설정) — 대표메뉴 사진+명+매장/위치+가격 */
-  .storelist.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 14px;padding:16px;}
-  .gcard{display:flex;flex-direction:column;gap:5px;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;text-align:left;width:100%;position:relative;}
-  .gcard:active{opacity:.85;}
-  .g-thumb{width:100%;aspect-ratio:1/1;border-radius:14px;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);position:relative;margin-bottom:5px;}
-  .g-hero{font-size:var(--t-lg);font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .g-sub{font-size:var(--t-meta);font-weight:600;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .g-price{font-size:var(--t-lg);font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-top:2px;}
-  .gcard.dimmed .g-thumb{filter:grayscale(100%) brightness(.9);}
-  .gcard.dimmed .g-thumb::after{content:attr(data-label);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,28,32,.5);color:#fff;font-size:12px;font-weight:800;border-radius:inherit;}
-  .gcard.dimmed .g-thumb.paused::after{background:rgba(154,107,8,.66);}
-  .gcard.dimmed .g-hero{color:var(--ink3);} .gcard.dimmed .g-sub,.gcard.dimmed .g-price{color:var(--ink4);}
-
-  /* ══════════════ 디자인 고도화 오버라이드 · 전체 화면 (매장상세→장바구니→결제→완료→주문내역) ══════════════ */
-  /* 매장 로고: 큰 이모지 → 실제 썸네일 이미지 */
-  .logo{font-size:0;background-size:cover;background-position:center;background-color:var(--line2);}
-  /* 성인(19+) 태그 — 이모지 🔞 대체 */
-  .m-adult{display:inline-block;font-size:10px;font-weight:800;color:var(--point);background:var(--point-50);
-    border-radius:5px;padding:2px 6px;margin-left:7px;vertical-align:middle;letter-spacing:.02em;font-family:var(--ui);}
-  .d-name .m-adult{font-size:12px;padding:3px 8px;}
-  /* 오류 전체화면: 이모지 → 라인 아이콘 */
-  .fm-ic .ic-svg{width:54px;height:54px;stroke-width:1.35;color:var(--ink3);}
-  /* 장바구니 빈 화면 아이콘 */
-  .fullmsg .fm-ic .ic-svg{color:var(--ink4);}
-
-  /* 콜아웃 행: 리딩 라인 아이콘(.co-ic) + 본문 (플렉스 정렬) */
-  .cart-scope-note,.deliver-fix,.scope-note,.multi-note,.oh-pickup,.oh-cancelnote,
-  .oh-hint,.rc-cancelbox,.d-adult,.d-reuse,.ms-warn{display:flex;align-items:flex-start;gap:9px;}
-  .oh-pickup{align-items:center;}
-  .co-ic{flex-shrink:0;display:flex;margin-top:1px;}
-  .co-ic .ic-svg{width:17px;height:17px;stroke-width:1.8;}
-  .scope-note .co-ic{color:var(--ink3);}
-
-  /* 헤딩·라벨 안 인라인 아이콘(매장/위치) — 텍스트 크기에 맞춤 */
-  .store-group-h,.req-store-h,.oh-grp-h,.oh-store-name,.rc-store,.oh-where,.multi-pick .mp-h,.pcp-h,.mp-s{display:inline-flex;align-items:center;gap:6px;}
-  .store-group-h .ic-svg,.req-store-h .ic-svg,.oh-grp-h .ic-svg,.rc-store .ic-svg,.mp-s .ic-svg{width:16px;height:16px;color:var(--ink3);}
-  .oh-store-name .ic-svg{width:18px;height:18px;color:var(--ink3);}
-  .oh-where{color:var(--ink2);} .oh-where .ohw-ic{display:inline-flex;} .oh-where .ic-svg{width:15px;height:15px;color:var(--ink3);}
-  .multi-pick .mp-h .mp-h-ic .ic-svg{width:17px;height:17px;color:#9A6B08;}
-  .pcp-h .pcp-h-ic .ic-svg{width:15px;height:15px;color:#92400e;vertical-align:-2px;}
-  .bwait .ic-svg{width:14px;height:14px;} .bloc .ic-svg{width:15px;height:15px;color:var(--ink3);}
-
-  /* 알림 연락처 pill 안 아이콘 */
-  .oh-ct .ic-svg{width:13px;height:13px;vertical-align:-2px;margin-right:1px;}
-
-  /* 수령정보(완료) 행 */
-  .pickinfo{text-align:left;}
-  .pickinfo .pi-row{display:flex;align-items:flex-start;gap:9px;padding:3px 0;}
-  .pickinfo .pi-ic{flex-shrink:0;display:flex;margin-top:1px;color:var(--ink3);}
-  .pickinfo .pi-ic .ic-svg{width:17px;height:17px;}
-
-  /* 결제수단·알림채널·인증 버튼 아이콘 */
-  .pay-opt .pic{display:inline-flex;} .pay-opt .pic .ic-svg{width:21px;height:21px;color:var(--ink2);}
-  .pay-opt.on .pic .ic-svg{color:var(--persimmon-d);}
-  .kakaobtn .ic-svg{width:20px;height:20px;stroke-width:2;}
-  .seg button .ic-svg{width:16px;height:16px;vertical-align:-3px;margin-right:3px;}
-  .authbtn .aic{display:inline-flex;} .authbtn .aic .ic-svg{width:23px;height:23px;color:var(--ink);}
-  .d-info-btn .ic-svg{width:15px;height:15px;vertical-align:-3px;margin-right:2px;}
-  .oh-receipt .ic-svg{width:14px;height:14px;vertical-align:-2px;margin-right:2px;color:var(--persimmon-d);}
-
-  /* 메뉴 상세 정보 박스 — 라벨 볼드 + 헤어라인 */
-  .d-info{background:#FAFAFB;border-color:var(--line);}
-  .d-info b{color:var(--ink);font-weight:800;margin-right:5px;}
-
-  /* 체크아웃 선택 쿠폰 칩 — 뉴트럴 + 포인트 (앰버 인라인 스타일 대체) */
-  .coupon-chip{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;
-    background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 13px;}
-  .coupon-chip .cc-txt{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--ink);}
-  .coupon-chip .cc-scope{font-size:10.5px;font-weight:800;color:var(--ink3);background:#F3F3F5;border-radius:5px;padding:2px 7px;}
-  .coupon-chip .cc-ic{display:inline-flex;color:var(--point);} .coupon-chip .cc-ic .ic-svg{width:15px;height:15px;}
-  .coupon-chip .cc-clear{background:none;border:none;color:var(--ink3);font-size:12px;font-weight:700;
-    text-decoration:underline;cursor:pointer;font-family:inherit;flex-shrink:0;}
-
-  /* 스플래시: 이모지 제거 → 타이포 위계 강화 */
-  .sp-title{font-size:16px;font-weight:700;opacity:.82;letter-spacing:.01em;}
-  .sp-welcome{margin-top:10px;}
-
-  /* ══════════════ 홈 레이아웃 정돈 · 구역 탭 바 · 정렬 · 공지 여백 ══════════════ */
-  /* 1) 구역(서브 카테고리) 탭 — 매장 상세 탭처럼 활성 항목 아래 언더바 표시 */
-  .filterset .frow.tabs{padding:2px 16px 0;min-height:46px;align-items:stretch;}
-  .frow.tabs .cchips{gap:20px;padding-left:16px;align-items:stretch;}  /* 16px = 1행 [전체] pill 텍스트와 좌측 정렬 */
-  .ztab{min-height:44px;padding:0 2px;border-bottom:2.5px solid transparent;border-radius:0;align-items:center;transition:color .15s;}
-  .ztab.on{color:var(--ink);font-weight:800;border-bottom-color:var(--ink);}
-  /* 2) 공지 — 상하 여백 대칭(위=아래) */
-  .notice{margin:14px 16px;}
+  /* ── 가로 스크롤 카테고리: 오른쪽에 더 있으면 페이드+화살표 힌트 (끝이면 사라짐) ── */
+  .cchip-scroll{position:relative;flex:1;min-width:0;}
+  .cchip-scroll .cchips{width:100%;-webkit-mask-image:none;mask-image:none;}
+  .scroll-cue{position:absolute;top:0;right:0;height:100%;width:42px;display:flex;align-items:center;justify-content:flex-end;
+    background:linear-gradient(to right,rgba(255,255,255,0),#fff 62%);color:var(--ink3);pointer-events:none;
+    opacity:1;transition:opacity .2s ease;}
+  .scroll-cue svg{width:16px;height:16px;}
+  .cchip-scroll.at-end .scroll-cue{opacity:0;}
 </style>
 </head>
 <body>
@@ -892,10 +846,6 @@
   <button class="ds-chip" id="min-store" onclick="setMinOrder('store')">매장별 5,000원</button>
   <button class="ds-chip" id="min-off" onclick="setMinOrder('off')">끔</button>
   <span class="ds-div"></span>
-  <span class="lbl">배치(브랜드)</span>
-  <button class="ds-chip on" id="grid-list" onclick="setGrid('list')">1열</button>
-  <button class="ds-chip" id="grid-grid" onclick="setGrid('grid')">2열</button>
-  <span class="ds-div"></span>
   <span class="lbl">노출순서(브랜드)</span>
   <button class="ds-chip on" id="sort-fixed" onclick="setSort('fixed')">순서대로</button>
   <button class="ds-chip" id="sort-random" onclick="setSort('random')">랜덤</button>
@@ -918,10 +868,10 @@
 <!-- 성인인증 시트 -->
 <div class="modal-bg" id="adultModal" onclick="if(event.target===this)closeAdult()">
   <div class="sheet">
-    <div class="sheet-t">성인 인증이 필요해요</div>
+    <div class="sheet-t">🔞 성인 인증이 필요해요</div>
     <div class="sheet-s">알코올 메뉴는 성인 인증 후에만 담을 수 있어요.<br>최초 1회 인증하면 오늘 자정까지 다시 인증하지 않아도 돼요.</div>
-    <button class="authbtn" onclick="doAuth()"><span class="aic"><svg class="ic-svg" viewBox="0 0 24 24"><rect x="7" y="3.5" width="10" height="17" rx="2.4"/><path d="M10.5 17.5h3"/></svg></span><div><div>본인 명의 휴대폰 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">내국인 · 만 19세 이상</div></div></button>
-    <button class="authbtn" onclick="doAuth()"><span class="aic"><svg class="ic-svg" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/></svg></span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인 · 만 18세 이상</div></div></button>
+    <button class="authbtn" onclick="doAuth()"><span class="aic">📱</span><div><div>본인 명의 휴대폰 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">내국인 · 만 19세 이상</div></div></button>
+    <button class="authbtn" onclick="doAuth()"><span class="aic">🛂</span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인 · 만 18세 이상</div></div></button>
     <button class="ghostbtn" onclick="closeAdult()">닫기</button>
   </div>
 </div>
@@ -970,7 +920,7 @@ const STORES = [
       {id:'b2', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://loremflickr.com/320/320/fries?lock=12', left:5, hh:true, hhPrice:4400, nutrition:'약 380kcal', upsell:true},
       {id:'b3', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13', upsell:true},
       {id:'b4', name:'수제 흑맥주 500ml', emoji:'🔞', desc:'행사장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
-      {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료', price:15000, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
+      {id:'b6', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 준비', price:15000, left:8, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
       {id:'b5', name:'베이컨 랩', desc:'품절', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
     ]},
   { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=760&q=72',
@@ -981,7 +931,7 @@ const STORES = [
       {id:'c1', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true, upsell:true},
       {id:'c2', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true, allergy:'우유 함유', nutrition:'약 250kcal'},
       {id:'c3', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', photo:'https://loremflickr.com/320/320/lemonade?lock=19', left:3},
-      {id:'c4', name:'콜드브루', desc:'', price:5500, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20', upsell:true},
+      {id:'c4', name:'콜드브루', desc:'하루 30잔 준비', price:5500, left:12, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20', upsell:true},
     ]},
   { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=760&q=72',
     open:false, loc:'C구역 · 부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
@@ -1086,6 +1036,14 @@ const STORES = [
     ]},
 ];
 
+/* 공지 데이터 · id를 바꾸면(새 공지) 빨간 알림 점이 다시 표시됨 · 내용 수정만으로도 알리려면 id도 함께 갱신 */
+const NOTICE = {
+  id: 'rain-2026-07-24',   // ← 공지 버전/식별자. 새 공지를 올릴 때 이 값을 바꾸세요.
+  title: '우천 시 운영 안내',
+  body: '비가 올 경우 야외 좌석은 조기 마감될 수 있어요. 픽업 시 부스 위치를 확인해 주세요.',
+  url: 'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html'
+};
+
 let S = {
   mode:'group',      // group | single
   bill:'pre',        // pre | post
@@ -1099,11 +1057,11 @@ let S = {
   searchQ:'',          // 홈 검색어 (매장명·메뉴명)
   brandWait:'count',   // 브랜드 설정(우선): count(대기 인원) | time(대기 시간) | off(미표시)
   storeTab:'menu',     // 매장 페이지 탭: menu | info
-  histView:'store',    // 주문 내역 보기: store(매장별) | round(주문 회차별) · 매장별은 통합결제만
+  histByStore:false,   // 주문 내역 '매장별로 모아보기' 체크 여부 (기본 회차별 · 통합결제에서만 노출)
   service:'pickup',    // 서비스 유형: pickup(포장) | delivery(자리로 받기=현장 배달) · 매장·브랜드가 설정(고객 선택 아님) · 자리입력 기본 Off
   fCat:'전체',         // 홈 분류 필터 (전체/푸드/음료/디저트 → store.cat)
   fZone:'전체',        // 홈 구역 필터 (전체/A~D구역 → store.cat2)
-  gridCols:'list',     // 브랜드 설정 매장 그룹 배치: list(1열) | grid(2열)
+  filter2Open:false,   // 상세 필터(필터2) 펼침 여부 — 기본 접힘, 원하는 사용자만 확장
   sortMode:'fixed',    // 브랜드 설정 매장 노출 순서: fixed(순서대로) | random(페이지 열 때마다 랜덤)
   openFirst:false,     // 브랜드 설정 영업중 매장 우선(영업종료·일시중지는 하단)
   _homeOrder:null,     // 랜덤 노출 시 이번 진입의 매장 순서 캐시
@@ -1115,13 +1073,21 @@ let S = {
   contact:'',          // 입력한 휴대폰/이메일
   selCoupons:{},       // 스코프별 선택 쿠폰 { group:id, [storeId]:id } — 그룹/매장 쿠폰 동시 지원
   couponCode:'',       // 쿠폰 코드 입력값
-  mktConsent:false,    // 혜택(쿠폰·이벤트) 알림 수신 동의 → 연락처 입력 시 보유 쿠폰 노출 트리거
   pMid:'', pEnd:'', pEmail:'',  // 결제 시트 연락처 입력 (실시간 쿠폰 노출용)
   infoOpen:false,      // 메뉴 정보(알레르기·영양) 펼침 여부
   minBasis:'group',    // 최소 주문 금액 기준: group(매장 그룹=통합결제 총액) | store(매장별 소계) | off
   tmpQty:1, tmpOpt:0,
   loginType:'kakao', // kakao | phone | email
+  noticeRead:(()=>{try{return localStorage.getItem('outdoorNoticeReadId')===NOTICE.id;}catch(e){return false;}})(),  // 현재 공지(NOTICE.id)를 읽었는지 · id가 바뀌면 false → 빨간 점 재표시
 };
+
+/* 공지 열람 처리: 현재 공지 id를 저장 → 빨간 알림 점 제거 후 상세 페이지로 이동 */
+function readNotice(){
+  S.noticeRead=true;
+  try{localStorage.setItem('outdoorNoticeReadId',NOTICE.id);}catch(e){}
+  const n=document.querySelector('#device .notice'); if(n) n.classList.add('read');
+  window.open(NOTICE.url,'_blank','noopener');
+}
 
 const won = n => n.toLocaleString('ko-KR')+'원';
 const store = id => STORES.find(s=>s.id===id);
@@ -1147,7 +1113,7 @@ function setBrandWait(m){
 }
 function restart(){
   S.cart=[]; S.adult=false; S.searchOpen=false; S.searchQ=''; S.demoState='open'; S.fCat='전체'; S.fZone='전체';
-  S.selCoupons={}; S.couponCode=''; S.mktConsent=false; S.pMid=''; S.pEnd=''; S.pEmail='';
+  S.selCoupons={}; S.couponCode=''; S.pMid=''; S.pEnd=''; S.pEmail='';
   S.screen = S.mode==='group' ? 'splash' : 'store';
   S.curStore = S.mode==='group' ? 'burger' : 'burger';
   render();
@@ -1186,12 +1152,19 @@ function render(){
   const scr = {
     splash:scSplash, home:scHome, store:scStore, cart:scCart,
     checkout:scCheckout, done:scDone, history:scHistory,
-    payfail:()=>full(ICON.card,'결제가 정상적으로 진행되지 않았어요','잔액 부족이나 한도 초과 등의 일시적인 오류일 수 있어요.<br>다른 결제 수단으로 다시 시도해 주세요.','결제 화면으로 돌아가기','checkout','장바구니·입력 정보는 그대로 유지돼요 · 선불형 전용 (후불형은 해당 없음)'),
-    expired:()=>full(ICON.clock,'접속 시간이 만료되었어요','안전한 결제 환경을 위해 연결이 종료되었습니다.<br>QR 코드를 다시 한 번 스캔해 주세요.','QR 다시 스캔','splash','주문 당일 자정이 지나면 세션·내역이 삭제돼요'),
-    loaderr:()=>full(ICON.signal,'화면을 불러오지 못했어요','네트워크 연결이 불안정하거나 일시적인 시스템 오류일 수 있어요.<br>잠시 후 [새로고침] 버튼을 눌러 다시 시도해 주세요.','새로고침','splash','지속 실패 시 네트워크 상태를 확인해 주세요'),
+    payfail:()=>full('💳','결제가 정상적으로 진행되지 않았어요','잔액 부족이나 한도 초과 등의 일시적인 오류일 수 있어요.<br>다른 결제 수단으로 다시 시도해 주세요.','결제 화면으로 돌아가기','checkout','장바구니·입력 정보는 그대로 유지돼요 · 선불형 전용 (후불형은 해당 없음)'),
+    expired:()=>full('⏱️','접속 시간이 만료되었어요','안전한 결제 환경을 위해 연결이 종료되었습니다.<br>QR 코드를 다시 한 번 스캔해 주세요.','QR 다시 스캔','splash','주문 당일 자정이 지나면 세션·내역이 삭제돼요'),
+    loaderr:()=>full('📡','화면을 불러오지 못했어요','네트워크 연결이 불안정하거나 일시적인 시스템 오류일 수 있어요.<br>잠시 후 [새로고침] 버튼을 눌러 다시 시도해 주세요.','새로고침','splash','지속 실패 시 네트워크 상태를 확인해 주세요'),
   }[S.screen] || scHome;
   document.getElementById('device').innerHTML = `<div class="screen on">${scr()}</div>`;
   if(S.screen==='home') startBanner();
+  requestAnimationFrame(()=>document.querySelectorAll('#device .cchip-scroll .cchips').forEach(chipFade));
+}
+// 가로 스크롤 칩: 더 볼 게 남았는지에 따라 오른쪽 '더보기' 힌트(페이드+화살표) 표시 · 끝이면 숨김
+function chipFade(el){
+  const wrap=el.parentElement; if(!wrap||!wrap.classList.contains('cchip-scroll')) return;
+  const atEnd = el.scrollWidth<=el.clientWidth+1 || el.scrollLeft+el.clientWidth>=el.scrollWidth-2;
+  wrap.classList.toggle('at-end', atEnd);
 }
 
 /* ── 스플래시 (실제 축제 배경 사진 + 환영 문구) ── */
@@ -1200,79 +1173,56 @@ function scSplash(){
   const bg="linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.72)),url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=75')";
   return `<div class="splash-full" style="background-image:${bg}">
     <div class="sp-center">
+      <div class="sp-emoji">🎪</div>
       <div class="sp-title">소프트 푸드트럭 페스티벌</div>
-      <div class="sp-welcome">방문을 환영해요</div>
+      <div class="sp-welcome">방문을 환영해요! 🎉</div>
     </div>
   </div>`;
 }
 
 /* ── 그룹 홈 ── */
-/* ── 단색 라인 아이콘 세트 (이모지 대체) ── */
-const ICON = {
-  search:'<svg class="ic-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16 16"/></svg>',
-  pin:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 21s6.5-5.7 6.5-10.5A6.5 6.5 0 0 0 5.5 10.5C5.5 15.3 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.3"/></svg>',
-  clock:'<svg class="ic-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.6V12l3 1.8"/></svg>',
-  cart:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M4 5h2.2l1.9 10.2a1.6 1.6 0 0 0 1.6 1.3h7.8a1.6 1.6 0 0 0 1.6-1.3L20.5 8H7"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>',
-  receipt:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2z"/><path d="M9 8.5h6M9 12h6"/></svg>',
-  mega:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7"/></svg>',
-  bell:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M6.5 9.5a5.5 5.5 0 0 1 11 0c0 4.5 1.8 5.5 1.8 5.5H4.7s1.8-1 1.8-5.5z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>',
-  store:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M4 9.5 5.2 5h13.6L20 9.5M4 9.5h16M4 9.5v9.5h16V9.5M4 9.5a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/></svg>',
-  bag:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M6 8h12l-1 11.5H7z"/><path d="M9 8V6.2a3 3 0 0 1 6 0V8"/></svg>',
-  cal:'<svg class="ic-svg" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>',
-  tray:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M3.5 18.5h17"/><path d="M5 18.5a7 7 0 0 1 14 0"/><path d="M12 11.5v-1.4"/></svg>',
-  ticket:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M3.5 9V7.5a1 1 0 0 1 1-1h15a1 1 0 0 1 1 1V9a2 2 0 0 0 0 4v1.5a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1V13a2 2 0 0 0 0-4z"/><path d="M14.5 6.5v11" stroke-dasharray="1.6 2.2"/></svg>',
-  card:'<svg class="ic-svg" viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="2.2"/><path d="M3.5 10h17M7 14.5h4"/></svg>',
-  mail:'<svg class="ic-svg" viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="2.2"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/></svg>',
-  phone:'<svg class="ic-svg" viewBox="0 0 24 24"><rect x="7" y="3.5" width="10" height="17" rx="2.4"/><path d="M10.5 17.5h3"/></svg>',
-  chat:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M5 6.5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9.5L5 19z"/></svg>',
-  undo:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M8.5 7 5 10.5 8.5 14"/><path d="M5 10.5h9.5a4.5 4.5 0 0 1 0 9H11"/></svg>',
-  info:'<svg class="ic-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8h.01"/></svg>',
-  alert:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M12 4 2.9 20h18.2z"/><path d="M12 10v4.2M12 17.2h.01"/></svg>',
-  leaf:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z"/><path d="M9 15c2.5-1 4.5-3 5.5-6"/></svg>',
-  signal:'<svg class="ic-svg" viewBox="0 0 24 24"><path d="M4.5 12a10 10 0 0 1 15 0M7.8 15a6 6 0 0 1 8.4 0M12 18.3h.01"/></svg>',
-};
 function scHome(){
   // 실제 행사 배너: 배경 이미지 + 클릭 시 URL 랜딩 (이미지 로드 실패 시 fb 그라데이션이 대체)
   // 실제 운영 시 img/url은 브랜드가 등록한 배너 이미지·랜딩 주소로 교체
   const banners = [
-    {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'소프트 푸드트럭 페스티벌', s:'개장 기념 · 전 매장 10% 할인'},
-    {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'야간 라이브 공연', s:'매일 저녁 8PM · B구역 무대'},
-    {img:'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#1971c2,#4dabf7)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'해피아워 타임', s:'15:00 ~ 17:00 · 음료 20% 할인'},
+    {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'소프트 푸드트럭 페스티벌', s:'🎉 개장 기념 · 전 매장 10% 할인'},
+    {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'야간 라이브 공연', s:'🎤 매일 저녁 8PM · B구역 무대'},
+    {img:'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#1971c2,#4dabf7)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'해피아워 타임', s:'☕ 15:00 ~ 17:00 · 음료 20% off'},
   ];
-  const cats = ['전체','푸드','음료','디저트'];
-  const cats2 = ['전체','A구역','B구역','C구역','D구역'];
+  const cats = ['전체','치킨','버거','피자','분식','한식','중식','일식','양식','멕시칸','아시안','디저트','음료','커피'];   // 필터1(음식 유형) — 많을 수 있어 가로 스크롤 + 더보기 힌트
+  const cats2 = ['전체','A구역','B구역','C구역','D구역'];   // 상세필터 옵션 — 운영자 설정값(구역/브랜드/가격대 등 자유)
   return `
   <div class="scroll">
     <!-- 메인 배너 (화면 상단 밀착 · 최대 3장 자동 롤링 · 탭 시 URL 랜딩) -->
     <div class="mbanner">
       <div class="slides" id="banSlides">${banners.map(b=>`<div class="mb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.66)),url('${b.img}'),${b.fb};" onclick="window.open('${b.url}','_blank','noopener')"><div class="mb-txt"><div class="mb-t">${b.t}</div><div class="mb-s">${b.s}</div></div></div>`).join('')}</div>
-      <div class="mb-dots" id="banDots">${banners.map((_,i)=>`<div class="mb-dot ${i===0?'on':''}"></div>`).join('')}</div>
+      <div class="mb-dots" id="banDots">${banners.map((_,i)=>`<div class="mb-dot ${i===0?'on':''}" onclick="event.stopPropagation();goBanner(${i})"></div>`).join('')}</div>
     </div>
     <!-- 공지문 (링크: 하이퍼링크 or URL 직접입력 → 클릭 시 URL 랜딩) -->
-    <div class="notice">
-      <span class="nic">${ICON.mega}</span>
-      <div><b>우천 시 운영 안내</b><br>비가 오면 야외 좌석은 일찍 마감될 수 있어요. <a onclick="window.open('https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html','_blank','noopener')">자세히 보기</a></div>
-    </div>
-    <!-- 검색(접힘) + 카테고리 2단 (분류=pill · 구역=텍스트 탭) -->
+    <button class="notice ${S.noticeRead?'read':''}" onclick="readNotice()">
+      <span class="nbell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="ndot"></span></span>
+      <span class="ntxt"><b>${NOTICE.title}</b> ${NOTICE.body}</span>
+      <span class="nchev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>
+    <!-- 검색(접힘) + 필터 2단: 필터1은 상시 노출, 필터2(상세)는 접힘 → 토글로 확장 -->
     ${S.searchOpen ? `
     <div class="filterset"><div class="frow">
       <div class="searchbar-inline">
-        <span class="ic">${ICON.search}</span>
-        <input id="homeSearch" placeholder="매장·메뉴 검색" value="${S.searchQ||''}" oninput="onSearch(this.value)">
-        <button class="clr" onclick="toggleSearch()">✕</button>
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input id="homeSearch" placeholder="매장명·메뉴명 검색" value="${S.searchQ||''}" oninput="onSearch(this.value)">
+        <button class="clr" onclick="toggleSearch()" aria-label="검색 닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
       </div>
     </div></div>` : `
     <div class="filterset">
       <div class="frow">
-        <div class="cchips">${cats.map(c=>`<button class="cchip ${S.fCat===c?'on':''}" onclick="setHomeFilter('cat','${c}')">${c}</button>`).join('')}</div>
-        <button class="searchtog" onclick="toggleSearch()" aria-label="검색">${ICON.search}</button>
+        <button class="searchtog" onclick="toggleSearch()" aria-label="검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+        <button class="f2-btn ${S.filter2Open?'open':''} ${S.fZone!=='전체'?'active':''}" onclick="toggleFilter2()" aria-label="상세 필터" aria-expanded="${S.filter2Open?'true':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 4 21 4 14 12.5 14 19 10 21 10 12.5 3 4"/></svg><span class="f2-dot"></span></button>
+        <div class="cchip-scroll"><div class="cchips" id="f1chips" onscroll="chipFade(this)">${cats.map(c=>`<button class="cchip ${S.fCat===c?'on':''}" onclick="setHomeFilter('cat','${c}')">${c}</button>`).join('')}</div><span class="scroll-cue" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></div>
       </div>
-      <div class="frow tabs">
-        <div class="cchips">${cats2.map(c=>`<button class="ztab ${S.fZone===c?'on':''}" onclick="setHomeFilter('zone','${c}')">${c}</button>`).join('')}</div>
-      </div>
+      ${S.filter2Open ? `<div class="frow f2-row"><div class="cchips">${cats2.map(c=>`<button class="cchip ${S.fZone===c?'on':''}" onclick="setHomeFilter('zone','${c}')">${c}</button>`).join('')}</div></div>` : ''}
     </div>`}
     <!-- 매장 목록 (검색 or 분류·구역 필터 + 브랜드 설정: 순서대로/랜덤 + 영업중 우선) -->
-    <div class="storelist ${S.gridCols==='grid'?'grid':''}">${storelistHTML()}</div>
+    <div class="storelist">${storelistHTML()}</div>
     <div style="height:${(S.payScope==='unified'&&S.cart.length)?150:78}px"></div>
   </div>
   ${histFab()}
@@ -1282,11 +1232,16 @@ function scHome(){
 function histFab(){
   // 장바구니 바(cta)가 깔리는 화면에서는 그 위로 띄움: 매장 화면 or 홈(통합주문)
   const cartBarShown = S.cart.length && (S.screen==='store' || (S.screen==='home' && S.payScope==='unified'));
-  return `<div class="hist-fabwrap" style="bottom:${cartBarShown?96:20}px"><button class="hist-fab" onclick="go('history')">${ICON.receipt}주문 내역</button></div>`;
+  return `<div class="hist-fabwrap" style="bottom:${cartBarShown?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
 }
 function scardHTML(s){
-  // 매장 그룹(홈) 목록에는 대기 정보 미노출 — 대기 인원/시간은 매장 상세에서만 표시
+  // 대기 표시는 브랜드 설정(우선)을 따름 — 매장 개별 설정을 덮어씀
   const paused = s.open && s.paused;          // 영업 일시중지(준비중)
+  let waitTxt='';
+  if(s.open && !paused && S.brandWait!=='off'){
+    const v = S.brandWait==='time' ? s.waitTime : s.waitCount;
+    if(v) waitTxt = `${S.brandWait==='time'?'':'대기 '}${v}`;
+  }
   // 영업중은 별도 뱃지 없음(기본) · 영업종료/준비중은 dimming + 썸네일 오버레이로 표시
   const dimmed = !s.open || paused;
   const label = !s.open ? '영업종료' : (paused ? '준비중' : '');
@@ -1296,34 +1251,14 @@ function scardHTML(s){
       ? `toast('지금은 잠시 준비 중이에요.','곧 다시 열어요. 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
       : `openStore('${s.id}')`;
   return `<button class="scard ${dimmed?'dimmed':''}" onclick="${tap}">
-    <div class="s-thumb${paused?' paused':''}" data-label="${label}" style="background-image:url('${s.thumb}');background-size:cover;background-position:center;background-color:var(--bg)"></div>
+    <div class="s-thumb${paused?' paused':''}" data-label="${label}" style="background-color:var(--bg)">${s.logo}</div>
     <div class="s-body">
       <div class="s-hero">${s.rep}</div>
-      <div class="s-sub">${ICON.store}${s.name}</div>
-      <div class="s-meta"><span class="s-loc">${ICON.pin}${s.loc}</span></div>
+      <div class="s-sub">${s.name}</div>
+      <div class="s-meta"><span class="s-loc">📍 ${s.loc}</span>${waitTxt?`<span class="s-wait">⏳ ${waitTxt}</span>`:''}</div>
     </div>
   </button>`;
 }
-// 2열(그리드) 카드 — 사장님사이트에서 2열 배치 선택 시 · 대표메뉴 사진+명+매장/위치+가격
-function scardGridHTML(s){
-  const paused = s.open && s.paused;
-  const dimmed = !s.open || paused;
-  const label = !s.open ? '영업종료' : (paused ? '준비중' : '');
-  const rep = (s.menus||[]).find(m=>m.name===s.rep) || (s.menus||[])[0];
-  const price = rep ? (rep.fcfs?rep.fcfsPrice:(rep.hh?rep.hhPrice:rep.price)) : null;
-  const tap = !s.open
-    ? `toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
-    : paused
-      ? `toast('지금은 잠시 준비 중이에요.','곧 다시 열어요. 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
-      : `openStore('${s.id}')`;
-  return `<button class="gcard ${dimmed?'dimmed':''}" onclick="${tap}">
-    <div class="g-thumb${paused?' paused':''}" data-label="${label}" style="background-image:url('${s.thumb}');background-size:cover;background-position:center;background-color:var(--bg)"></div>
-    <div class="g-hero">${s.rep}</div>
-    <div class="g-sub">${s.name} · ${s.loc}</div>
-    ${price!=null?`<div class="g-price nums">${won(price)}</div>`:''}
-  </button>`;
-}
-function setGrid(v){ S.gridCols=v; ['list','grid'].forEach(k=>document.getElementById('grid-'+k).classList.toggle('on',k===v)); render(); }
 function pickChip(el){ el.parentNode.querySelectorAll('.cchip').forEach(c=>c.classList.remove('on')); el.classList.add('on'); }
 // 홈 매장 목록 — ① 분류·구역 필터 → ② 노출 순서(랜덤/순서대로) → ③ 영업중 우선
 function homeStores(){
@@ -1354,10 +1289,11 @@ function homeStores(){
 }
 // 홈 카테고리 필터 선택 (분류/구역 각각 단일 선택 · 전체=해제)
 function setHomeFilter(kind,val){ if(kind==='cat') S.fCat=val; else S.fZone=val; render(); }
+function toggleFilter2(){ S.filter2Open=!S.filter2Open; render(); }
 // 매장 목록 렌더 (검색어/필터 반영 · 결과 없으면 안내)
 function storelistHTML(){
   const list=homeStores();
-  if(list.length) return list.map(S.gridCols==='grid'?scardGridHTML:scardHTML).join('');
+  if(list.length) return list.map(scardHTML).join('');
   const q=(S.searchOpen&&S.searchQ)?S.searchQ.trim():'';
   return q
     ? `<div class="storelist-empty">‘${q}’ 검색 결과가 없어요<div class="se-sub">매장명 또는 메뉴명으로 다시 검색해 보세요</div></div>`
@@ -1374,13 +1310,21 @@ function toggleOpenFirst(){ S.openFirst=!S.openFirst; document.getElementById('s
 function toggleSearch(){ S.searchOpen=!S.searchOpen; S.searchQ=''; render(); if(S.searchOpen){ setTimeout(()=>{const i=document.getElementById('homeSearch'); if(i)i.focus();},60); } }
 
 let _banI=0;
+// 자동 4초 롤링(스펙 기준) + 점(dot) 탭으로 수동 넘김 가능 · 수동 조작 시 4초 타이머 재시작
+function goBanner(i){
+  _banI=i;
+  const sl=document.getElementById('banSlides'); if(!sl)return;
+  sl.style.transform=`translateX(-${_banI*100}%)`;
+  document.querySelectorAll('#banDots .mb-dot').forEach((d,k)=>d.classList.toggle('on',k===_banI));
+  startBanner();   // 수동 넘김 후 4초 자동 롤링 재시작
+}
 function startBanner(){
   clearInterval(window._ban);
   window._ban=setInterval(()=>{
     const sl=document.getElementById('banSlides'); if(!sl){clearInterval(window._ban);return;}
     _banI=(_banI+1)%3; sl.style.transform=`translateX(-${_banI*100}%)`;
     document.querySelectorAll('#banDots .mb-dot').forEach((d,i)=>d.classList.toggle('on',i===_banI));
-  },2600);
+  },4000);
 }
 
 /* ── 매장 페이지 ── */
@@ -1392,6 +1336,19 @@ function scStore(){
   const stPaused = S.demoState==='paused' || (s.open && s.paused && S.demoState==='open'); // 영업 일시중지(준비중)
   const blocked = stClosed || stBreak || stPaused;        // 모두: 메뉴판만, 주문 불가
   const cats = [...new Set(s.menus.map(m=>m.cat||'메뉴'))];
+  // 매장 배너는 항상 메뉴 리스트 하단에 고정 노출(위치 선택 옵션 없음)
+  const bannerHTML = `
+    <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링) -->
+    <div class="sbanner-roll" onclick="toast('배너 탭 → 지정 URL 랜딩')">
+      <div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('https://loremflickr.com/335/56/festival,foodtruck?lock=201')">
+        <span class="sb-tag">브랜드</span>
+        <div class="sb-txt">🎪 전 매장 공통 개장기념 이벤트 · 행사 기간 내내 전 부스 10% 할인</div>
+      </div>
+      <div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('https://loremflickr.com/335/56/burger,food?lock=202')">
+        <span class="sb-tag">매장</span>
+        <div class="sb-txt">🎁 첫 주문 시 사이드 500원 할인 · ${s.name} 단독 혜택</div>
+      </div>
+    </div>`;
   return `
   <div class="hdr">
     ${backBtn}
@@ -1400,7 +1357,7 @@ function scStore(){
   <div class="scroll">
     <div class="cover" style="background-image:url('${s.cover}');background-size:cover;background-position:center;background-color:#2c1250"></div>
     <div class="brandinfo">
-      <div class="logo" style="background-image:url('${s.thumb}')"></div>
+      <div class="logo">${s.logo}</div>
       <div class="bstore">${s.name}</div>
       <div class="bmeta">
         ${stBreak
@@ -1411,22 +1368,9 @@ function scStore(){
               ? `<span class="bstatus break"><span class="sdot"></span> 준비중 (영업 일시중지)</span>`
               : `<span class="bstatus open"><span class="sdot"></span> 영업중</span>`}
         ${(!blocked && S.brandWait!=='off' && (S.brandWait==='time'?s.waitTime:s.waitCount))
-          ? `<span class="bwait">${ICON.clock} ${S.brandWait==='time'?s.waitTime:'대기 '+s.waitCount}</span>` : ''}
+          ? `<span class="bwait">⏳ ${S.brandWait==='time'?s.waitTime:'대기 '+s.waitCount}</span>` : ''}
       </div>
-      <div class="bloc">${ICON.pin} ${s.loc}</div>
-    </div>
-    <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링) -->
-    <div class="sbanner-roll" onclick="toast('배너 탭 → 지정 URL 랜딩')">
-      <div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('https://loremflickr.com/1080/360/festival,foodtruck?lock=201')">
-        <span class="sb-tag">브랜드</span>
-        <div class="sb-txt">개장 기념 · 전 매장 10% 할인</div>
-        <div class="sb-sub">행사 기간 내내 전 부스 적용</div>
-      </div>
-      <div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('https://loremflickr.com/1080/360/burger,food?lock=202')">
-        <span class="sb-tag">매장</span>
-        <div class="sb-txt">첫 주문 시 사이드 500원 할인</div>
-        <div class="sb-sub">${s.name} 단독 혜택</div>
-      </div>
+      <div class="bloc">📍 ${s.loc}</div>
     </div>
     <!-- 탭 -->
     <div class="mtabs">
@@ -1434,11 +1378,12 @@ function scStore(){
       <button class="mtab ${S.storeTab==='info'?'on':''}" onclick="S.storeTab='info';render()">매장 정보</button>
     </div>
     ${S.storeTab==='info' ? storeInfoHTML(s) : `
-      ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn"><span class="co-ic">${ICON.alert}</span><span>다른 매장이에요 · 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요</span></div>` : ''}
+      ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn">⚠️ 다른 매장이에요 · 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요</div>` : ''}
       <div class="cattabs">${cats.map((c,i)=>`<button class="cchip ${i===0?'on':''}" onclick="pickChip(this)">${c}</button>`).join('')}</div>
       ${s.menus.length===0
         ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
         : cats.map(c=>`<div class="catsec-h">${c}</div>${s.menus.filter(m=>(m.cat||'메뉴')===c).map(m=>mcardHTML(s.id,m,blocked)).join('')}`).join('')}
+      ${bannerPos==='bottom' ? bannerHTML : ''}
       <div style="height:78px"></div>
     `}
   </div>
@@ -1454,18 +1399,18 @@ function mcardHTML(sid,m,closed){
   if(m.hh){ promo='해피아워'; now=m.hhPrice; was=m.price; }
   else if(m.was){ was=m.was; }
   const price = `${promo?`<span class="m-promo">${promo}</span>`:''}<span class="m-now ${(promo||was)?'sale':''}">${won(now)}</span>${was?`<span class="m-was">${won(was)}</span>`:''}`;
-  const rightVal = m.left!=null ? {t:'남은 수량', n:m.left} : null;
+  const rightVal = (m.left!=null ? {t:'남은 수량', n:m.left} : null);
   const lowStock = rightVal && rightVal.n<=5;   // 5개 이하 = 곧 품절 강조
   return `<button class="mcard ${m.soldout?'soldout':''}" onclick="openMenu('${sid}','${m.id}')">
     <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">품절</div>':''}</div>
     <div class="m-body">
       ${badges?`<div class="m-badges">${badges}</div>`:''}
-      <div class="m-name">${m.name}${m.adult?`<span class="m-adult">19+</span>`:''}</div>
+      <div class="m-name">${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}</div>
       ${m.desc?`<div class="m-desc">${m.desc}</div>`:''}
       <div class="m-price">${price}</div>
-      ${m.reuse?`<div class="m-reuse">${ICON.leaf} 다회용기 제공</div>`:''}
+      ${m.reuse?`<div class="m-reuse">♻️ 다회용기 제공</div>`:''}
     </div>
-    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${lowStock?'low':''}">${lowStock?`품절임박<br><b>${rightVal.n}개</b>`:`${rightVal.t}<br><b>${rightVal.n}개</b>`}</span></div>`:''}
+    ${(!m.soldout && rightVal)?`<div class="m-right"><span class="m-left-r ${lowStock?'low':''}">${lowStock?`🔥 품절임박<br><b>${rightVal.n}개</b>`:`${rightVal.t}<br><b>${rightVal.n}개</b>`}</span></div>`:''}
   </button>`;
 }
 
@@ -1483,7 +1428,7 @@ function storeInfoHTML(s){
       <div style="font-size:12px;color:var(--ink4);margin-top:8px">※ 원산지는 관련 법령에 따라 표기돼요</div>
     </div>
     <div class="sect"><div class="sect-h">매장 위치</div>
-      <div class="row"><span>행사장 위치</span><span class="v">${s.loc}</span></div>
+      <div class="row"><span>행사장 위치</span><span class="v">📍 ${s.loc}</span></div>
       <div style="font-size:14px;color:var(--ink2);margin-top:8px">${i.address||''}</div>
     </div>
     <div class="sect"><div class="sect-h">운영 시간</div>
@@ -1514,30 +1459,30 @@ function renderMenuSheet(){
       <span class="qnum">${S.tmpQty}</span>
       <button class="qbtn" onclick="S.tmpQty=Math.min(${m.left||20},S.tmpQty+1);renderMenuSheet()">＋</button>
     </div>
-    ${m.left!=null?`<div style="text-align:center;font-size:12.5px;font-weight:800;margin-top:10px;color:${m.left<=5?'var(--point)':'var(--persimmon-d)'}">${m.left<=5?'품절임박 · ':''}남은 수량 ${m.left}개 · 초과 선택 불가</div>`:''}`;
+    ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:10px;color:${m.left<=5?'var(--point)':'#e8590c'}">${m.left<=5?'🔥 품절임박! ':''}남은 수량 ${m.left}개 · 초과 선택 불가</div>`:''}`;
   document.getElementById('menuSheetInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closeMenuSheet()">✕</button>
     <div class="ms-scroll">
       <div class="d-hero" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim-lg">품절</div>':''}</div>
       <div class="d-body">
-        <div class="d-name">${m.name}${m.adult?`<span class="m-adult">19+</span>`:''}</div>
+        <div class="d-name">${m.name} ${m.emoji||''}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
-        <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
-        ${m.soldout?`<div class="ms-warn"><span class="co-ic">${ICON.info}</span><span>현재 품절된 메뉴예요 · 정보는 볼 수 있지만 주문은 할 수 없어요</span></div>`:''}
-        ${(m.allergy||m.nutrition)?`
-          <button class="d-info-btn ${S.infoOpen?'open':''}" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">${ICON.info} 알레르기 · 영양 정보</button>
-          ${S.infoOpen?`<div class="d-info">${[m.allergy?`<b>알레르기 유발성분</b> ${m.allergy}`:'',m.nutrition?`<b>영양 정보</b> ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
-        `:''}
-        ${m.adult?`<div class="d-adult"><span class="co-ic">${ICON.alert}</span><span>성인(19+) 알코올 메뉴 · 담기 전 성인 인증이 필요해요</span></div>`:''}
-        ${m.reuse?`<div class="d-reuse"><span class="co-ic">${ICON.leaf}</span><span>다회용기로 제공돼요 · 사용 후 용기를 반납해 주세요</span></div>`:''}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
+          ${(m.allergy||m.nutrition)?`<button class="d-info-btn ${S.infoOpen?'open':''}" style="margin-top:0;flex-shrink:0" onclick="S.infoOpen=!S.infoOpen;renderMenuSheet()">메뉴 정보</button>`:''}
+        </div>
+        ${m.soldout?`<div class="ms-warn">😢 현재 품절된 메뉴예요. 메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요.</div>`:''}
+        ${(m.allergy||m.nutrition)&&S.infoOpen?`<div class="d-info">${[m.allergy?`🥜 알러지 유발성분: ${m.allergy}`:'',m.nutrition?`🔥 영양 정보: ${m.nutrition}`:''].filter(Boolean).join('<br>')}</div>`:''}
+        ${m.adult?`<div class="d-adult">🔞 성인(19+) 알코올 메뉴 · 담기 시 성인 인증이 필요해요</div>`:''}
+        ${m.reuse?`<div class="d-reuse">♻️ 다회용기로 제공되는 메뉴예요 · 사용 후 용기 반납이 필요해요</div>`:''}
         ${disabled?'':orderControls}
       </div>
     </div>
     <div class="ms-foot">
       ${disabled
         ? `<button class="cta-btn" disabled>${m.soldout?'품절된 메뉴예요':'지금은 주문할 수 없어요'}</button>`
-        : `<button class="cta-btn" onclick="addToCart()">담기 <span class="amt">${won(total)}</span></button>`}
+        : `<button class="cta-btn" style="justify-content:space-between" onclick="addToCart()"><span>담기</span><span class="amt">${won(total)}</span></button>`}
     </div>`;
 }
 function addToCart(){
@@ -1552,7 +1497,7 @@ function addToCart(){
   const base=m.hh?m.hhPrice:m.price;
   const listBase=m.was||m.price;   // 정가(할인 전) — 금액 요약 할인 세분화용
   const add=S.tmpOpt===1?1500:0;
-  S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, img:m.img, photo:m.photo||'',
+  S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, emoji:m.emoji||'', img:m.img, photo:m.photo||'',
     opt:S.tmpOpt===1?'Large':'Regular', qty:S.tmpQty, price:(base+add), listPrice:(listBase+add),
     disc:(m.hh?'해피아워':(m.was?'할인':null))});
   toast('장바구니에 담았어요');
@@ -1567,17 +1512,14 @@ function cartBar(){
   if(!S.cart.length) return '';
   const cnt=S.cart.reduce((a,c)=>a+c.qty,0);
   const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
-  // 통합결제: 담긴 매장 수 + 담은 수량 함께 표시 / 개별결제: [매장] 라벨
-  const label = S.payScope==='separate'
-    ? `[${store(S.cart[0].store).name}] 장바구니 ${cnt}개`
-    : `${new Set(S.cart.map(c=>c.store)).size}개 매장 · ${cnt}개 담김`;
-  return `<div class="cta"><button class="cta-btn" onclick="go('cart')">${ICON.cart}${label} <span class="amt nums">${won(sum)}</span></button></div>`;
+  const brk = S.payScope==='separate' ? `[${store(S.cart[0].store).name}] ` : '';
+  return `<div class="cta"><button class="cta-btn" onclick="go('cart')">🛒 ${brk}장바구니 ${cnt}개 <span class="amt">${won(sum)}</span></button></div>`;
 }
 
 /* ── 장바구니 ── */
 function scCart(){
   if(!S.cart.length) return `<div class="hdr"><button class="bk" onclick="back()">‹</button><div class="ht">장바구니</div></div>
-    <div class="fullmsg"><div class="fm-ic">${ICON.cart}</div><div class="fm-t">장바구니가 비어 있어요</div><div class="fm-b">메뉴를 담고 주문을 진행해 보세요</div><button class="fm-btn" onclick="go('store')">메뉴 보러 가기</button></div>`;
+    <div class="fullmsg"><div class="fm-ic">🛒</div><div class="fm-t">장바구니가 비어 있어요</div><div class="fm-b">메뉴를 담고 주문을 진행해 보세요</div><button class="fm-btn" onclick="go('store')">메뉴 보러 가기</button></div>`;
   const groups={};
   S.cart.forEach((c,i)=>{ (groups[c.store]=groups[c.store]||[]).push({...c,idx:i}); });
   const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
@@ -1587,15 +1529,15 @@ function scCart(){
   <div class="hdr"><button class="bk" onclick="go('store')">‹</button><div class="ht">장바구니</div></div>
   <div class="scroll">
     ${S.payScope==='unified'
-      ? `<div class="scope-note"><span class="co-ic">${ICON.cart}</span><span>여러 매장 상품을 한 번에 담아 결제할 수 있어요</span></div>`
-      : `<div class="scope-note"><span class="co-ic">${ICON.cart}</span><span>한 매장씩 담아 매장별로 결제하는 방식이에요</span></div>`}
+      ? `<div class="scope-note">🧺 여러 매장 상품을 한 번에 담아 결제할 수 있어요</div>`
+      : `<div class="scope-note">🧺 한 매장씩 담아 매장별로 결제하는 방식이에요</div>`}
     <div class="sect">
       ${Object.entries(groups).map(([sid,items])=>`
-        ${showStoreH?`<div class="store-group-h">${ICON.store} ${store(sid).name}</div>`:''}
+        ${showStoreH?`<div class="store-group-h">🏪 ${store(sid).name}</div>`:''}
         ${items.map(c=>`<div class="citem">
           <div class="ci-th" style="background-image:url('${c.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${c.photo?'':(c.img||'')}</div>
           <div class="ci-b">
-            <div class="ci-n">${c.name}</div>
+            <div class="ci-n">${c.name} ${c.emoji||''}</div>
             <div class="ci-o">${c.opt}</div>
             <div class="ci-bot">
               <div class="stepper"><button onclick="chQty(${c.idx},-1)">−</button><b>${c.qty}</b><button onclick="chQty(${c.idx},1)">＋</button></div>
@@ -1610,7 +1552,7 @@ function scCart(){
     <div class="sect"><div class="sect-h">수령 방식</div>
       ${S.service==='delivery'
         ? `<div class="sect-sub">이 행사는 <b>자리로 받기(현장 배달)</b> 서비스예요. 주문하신 자리로 현장 스태프가 가져다드려요.</div>
-           <div class="deliver-fix"><span class="co-ic">${ICON.tray}</span><span>자리로 받기 · 다음 화면에서 <b>받을 자리</b>를 입력해요</span></div>`
+           <div class="deliver-fix">🛎️ 자리로 받기 · 다음 화면에서 <b>받을 자리</b>를 입력해요</div>`
         : `<div class="sect-sub">이 행사는 <b>포장 픽업</b> 서비스예요. 매장이 예약을 열어둔 경우 수령 시간을 지정할 수 있어요.</div>
            <div class="seg">
              <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">즉시 포장</button>
@@ -1655,13 +1597,17 @@ function minInfo(){
   const shortStores=Object.keys(bySt).filter(sid=>bySt[sid]<STORE_MIN).map(sid=>({name:store(sid).name,need:STORE_MIN-bySt[sid]}));
   return {on:true,basis:'store',label:'매장별 기준',min:STORE_MIN,below:shortStores.length>0,shortStores};
 }
-// 서비스 유형(매장·브랜드 설정) — 포장 루트 / 자리로 받기(현장 배달) 루트. 브랜드는 자리로 받기 설정된 매장을 그룹화. 고객 선택 아님(자리입력 기본 Off)
+// 서비스 유형(매장·브랜드 설정) — 포장 루트 / 자리로 받기(현장 배달) 루트. '배달' 설정 매장은 매장 그룹(통합 결제)에 편입될 수 없어 항상 개별 결제 단독 매장으로만 존재(고객 선택 아님, 자리입력 기본 Off)
 function setService(v){
   S.service=v; if(v==='delivery') S.pickup='now';
+  if(v==='delivery') S.payScope='separate'; // 배달 매장 = 통합 결제 옵션 자체가 없음
   ['pickup','delivery'].forEach(k=>document.getElementById('svc-'+k).classList.toggle('on',k===v));
+  ['unified','separate'].forEach(k=>document.getElementById('scope-'+k).classList.toggle('on',k===S.payScope));
+  document.getElementById('scope-unified').disabled = (v==='delivery');
   render();
 }
 function setScope(v){
+  if(v==='unified' && S.service==='delivery') return; // 배달 매장은 통합 결제 선택 불가
   S.payScope=v;
   ['unified','separate'].forEach(k=>document.getElementById('scope-'+k).classList.toggle('on',k===v));
   if(v==='separate'){ // 개별 방식이면 서로 다른 매장 혼합분은 최근 매장만 남김
@@ -1692,7 +1638,7 @@ function upsellRow(sid,m,showStore){
   const price = m.hh?m.hhPrice:m.price;
   return `<div class="citem" style="border:none;padding:10px 0">
     <div class="ci-th" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.photo?'':(m.img||'')}</div>
-    <div class="ci-b"><div class="ci-n">${m.name}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
+    <div class="ci-b"><div class="ci-n">${m.name} ${m.emoji||''}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
     <button class="ghostbtn" style="width:auto;margin:0;padding:0 15px;white-space:nowrap" onclick="openMenu('${sid}','${m.id}')">담기</button>
   </div>`;
 }
@@ -1727,7 +1673,7 @@ function timePickerHTML(){
       <div class="tp-row">${hourRow}</div>
       <div class="tp-sub">분 (5분 단위)</div>
       <div class="tp-row">${S.pickupH==null?`<div class="tp-empty">먼저 시간대를 선택해 주세요</div>`:minRow}</div>
-      ${S.pickupTime?`<div class="tp-note">수령 시간 <b>${S.pickupTime}</b>로 예약할게요</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
+      ${S.pickupTime?`<div class="tp-note">✅ 수령 시간 <b>${S.pickupTime}</b>로 예약할게요</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
       <div class="tp-hint">영업 시간 ${fmtMin(s.ohStart)}~${fmtMin(s.ohEnd)}${brk} 외에는 선택할 수 없어요</div>
     </div>`;
 }
@@ -1742,18 +1688,15 @@ function timeSlotsHTML(){
     <div style="font-size:12px;color:var(--ink4);margin-top:9px">예약 가능 시간대 중 선택 · 마감된 시간은 선택할 수 없어요</div>`;
 }
 
-/* ── 쿠폰 (내점형 기준 동기화 + 야외형 재정립) ──
-   scope: 'group'(브랜드/그룹 = 주문 전체 합계) | 매장id(매장 쿠폰 = 해당 매장 소계) — 둘 다 지원(동시 선택 가능)
-   발급 기준: 입력한 연락처로 발급된 쿠폰만 노출 (데모: ISSUED가 그 목록) */
+/* ── 쿠폰 (야외형: 1회용 쿠폰 코드 입력 방식만 지원) ──
+   scope: 'group'(브랜드/그룹 = 주문 전체 합계) | 매장id(매장 쿠폰 = 해당 매장 소계)
+   회원 적립/연락처 기반 발급 쿠폰 노출은 스펙에서 제외 · 코드 입력으로만 사용 처리 */
 const COUPONS = [
   { id:'CP001', name:'개장기념 감사 쿠폰',       scope:'group',  type:'amount', value:1000, minOrder:8000, desc:'전체 주문 8,000원 이상 시 1,000원 할인' },
   { id:'CP002', name:'음료 10% 할인',            scope:'group',  type:'rate',   value:10, maxDisc:3000, minOrder:0, desc:'전체 주문 최대 3,000원 할인' },
   { id:'CP003', name:'소프트버거 트럭 단독 할인', scope:'burger', type:'amount', value:2000, minOrder:5000, desc:'이 매장 5,000원 이상 시 2,000원 할인' },
-  { id:'CP004', name:'소프트커피 쿠폰',          scope:'coffee', type:'amount', value:1000, minOrder:0, desc:'이 매장에서 1,000원 할인' },
 ];
 const COUPON_CODES = { 'HELLO2026':'CP001', 'SOFT10':'CP002', 'BURGER2000':'CP003' };
-// 데모: 입력한 연락처로 발급된 쿠폰 id (실서비스는 서버에서 그 연락처 기준으로 내려줌)
-const ISSUED = ['CP001','CP002','CP003','CP004'];
 function cartSum(){ return S.cart.reduce((a,c)=>a+c.price*c.qty,0); }
 function storeSum(sid){ return S.cart.filter(c=>c.store===sid).reduce((a,c)=>a+c.price*c.qty,0); }
 function couponBase(cp){ return cp.scope==='group' ? cartSum() : storeSum(cp.scope); }
@@ -1763,21 +1706,14 @@ function couponAmt(cp){ const base=couponBase(cp); if(base<=0||base<cp.minOrder)
   return 0; }
 function selectedCoupons(){ return Object.values(S.selCoupons||{}).filter(Boolean).map(id=>COUPONS.find(c=>c.id===id)).filter(Boolean); }
 function couponDiscount(){ return selectedCoupons().reduce((a,cp)=>a+couponAmt(cp),0); }
-// 발급받은 쿠폰 중, 이번 주문에 적용 가능한 것(그룹 or 장바구니에 있는 매장)
-function availCoupons(){
-  const inCart=new Set(S.cart.map(c=>c.store));
-  return COUPONS.filter(cp=>ISSUED.includes(cp.id) && (cp.scope==='group' || inCart.has(cp.scope)));
-}
-function pickCoupon(id){ const cp=COUPONS.find(c=>c.id===id); if(!cp)return; S.selCoupons=S.selCoupons||{}; S.selCoupons[cp.scope]=(S.selCoupons[cp.scope]===id?null:id); refreshPaySheet(); render(); }
 function applyCode(){
   const code=(S.couponCode||'').trim().toUpperCase();
   if(!code) return toast('쿠폰 코드를 입력해 주세요');
   const cid=COUPON_CODES[code]; const cp=cid&&COUPONS.find(c=>c.id===cid);
   if(!cp) return toast('유효하지 않거나 만료된 쿠폰 코드예요');
   if(cp.scope!=='group' && !S.cart.some(c=>c.store===cp.scope)) return toast(`${store(cp.scope).name} 상품을 담아야 쓸 수 있는 쿠폰이에요`);
-  S.selCoupons=S.selCoupons||{}; S.selCoupons[cp.scope]=cp.id; S.couponCode=''; toast('쿠폰이 적용됐어요'); render();
+  S.selCoupons=S.selCoupons||{}; S.selCoupons[cp.scope]=cp.id; S.couponCode=''; toast('쿠폰이 적용됐어요 🎉'); render();
 }
-function toggleMkt(){ S.mktConsent=!S.mktConsent; refreshPaySheet(); }
 
 /* ── 주문 확인 및 결제 ── */
 function scCheckout(){
@@ -1794,8 +1730,8 @@ function scCheckout(){
   <div class="scroll">
     <!-- 주문 메뉴 -->
     <div class="sect"><div class="sect-h">주문 메뉴 · 수령 정보</div>
-      ${S.cart.map(c=>`<div class="row"><span>${c.name} · ${c.opt} × ${c.qty}</span><span class="v">${won(c.price*c.qty)}</span></div>`).join('')}
-      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">${S.service==='delivery'?'자리로 받기 (현장 배달)':(S.pickup==='reserve'?`포장 예약 · ${S.pickupTime||'시간 미선택'}`:'즉시 포장 픽업')}</span></div>
+      ${S.cart.map(c=>`<div class="row"><span>${c.name} ${c.emoji} · ${c.opt} × ${c.qty}</span><span class="v">${won(c.price*c.qty)}</span></div>`).join('')}
+      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">${S.service==='delivery'?'🛎️ 자리로 받기 (현장 배달)':(S.pickup==='reserve'?`📅 포장 예약 · ${S.pickupTime||'시간 미선택'}`:'🥡 즉시 포장 픽업')}</span></div>
     </div>
     <!-- 받을 자리 : 자리로 받기(현장 배달) 서비스일 때만 노출 · 사장님사이트 자리입력 기능 -->
     ${S.service==='delivery' ? `
@@ -1809,7 +1745,7 @@ function scCheckout(){
         return sids.length>1
           ? `<div class="sect-sub">매장마다 준비가 따로라, 요청사항도 <b>매장별로</b> 남겨 주세요.</div>
              ${sids.map(sid=>`<div class="req-store">
-               <div class="req-store-h">${ICON.store} ${store(sid).name}</div>
+               <div class="req-store-h">${store(sid).logo} ${store(sid).name}</div>
                <textarea class="field" maxlength="50" placeholder="이 매장에 전달할 요청사항" oninput="document.getElementById('rc-${sid}').textContent=this.value.length"></textarea>
                <div class="cnt"><span id="rc-${sid}">0</span>/50</div>
              </div>`).join('')}`
@@ -1817,32 +1753,32 @@ function scCheckout(){
              <div class="cnt"><span id="reqcnt">0</span>/50</div>`;
       })()}
     </div>
-    <!-- 쿠폰 코드 (보유 쿠폰은 결제 단계에서 연락처+수신동의 시 자동 노출) -->
+    <!-- 쿠폰 코드 (1회용 쿠폰 코드 입력으로만 적용 · 회원 적립 쿠폰 노출 없음) -->
     <div class="sect"><div class="sect-h">쿠폰 코드 <span class="scope-chip">선택</span></div>
       <div style="display:flex;gap:8px"><input class="field" placeholder="쿠폰 코드 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()"><button class="ghostbtn" style="width:auto;margin:0;padding:0 20px;white-space:nowrap" onclick="applyCode()">적용</button></div>
-      ${(()=>{ const sel=selectedCoupons(); if(!sel.length) return `<div style="font-size:12.5px;color:var(--ink4);margin-top:8px">혜택 알림에 동의하면 결제 단계에서 발급받은 쿠폰이 표시돼요.</div>`;
+      ${(()=>{ const sel=selectedCoupons(); if(!sel.length) return `<div style="font-size:12.5px;color:var(--ink3);margin-top:8px">보유한 쿠폰 코드가 있다면 입력해 주세요.</div>`;
         return sel.map(cp=>{ const d=couponAmt(cp); const sc=cp.scope==='group'?'전체':store(cp.scope).name;
-          return `<div class="coupon-chip"><span class="cc-txt"><span class="cc-scope">${sc}</span><span class="cc-ic">${ICON.ticket}</span> ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button class="cc-clear" onclick="S.selCoupons['${cp.scope}']=null;render()">해제</button></div>`;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;background:#FFF8E6;border:1px solid #FFE3A3;border-radius:10px;padding:10px 13px"><span style="font-size:13px;font-weight:800;color:#92400e"><span style="font-size:11px;background:#fff;border:1px solid #FFE3A3;border-radius:5px;padding:1px 6px;margin-right:6px">${sc}</span>🎟️ ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button style="background:none;border:none;color:#92400e;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit" onclick="S.selCoupons['${cp.scope}']=null;render()">해제</button></div>`;
         }).join('');
       })()}
     </div>
     <!-- 금액 요약 (할인 세분화 · 통합/개별은 브랜드 설정) -->
     <div class="sect"><div class="sect-h" style="display:flex;justify-content:space-between;align-items:center">${post?'주문 금액 요약':'결제 금액 요약'}<span class="scope-chip">${S.payScope==='unified'?'여러 매장 통합 결제':'매장별 개별 결제'}</span></div>
       <div class="row"><span>상품 합계 (정가)</span><span class="v">${won(listSum)}</span></div>
-      ${itemDisc>0?`<div class="row"><span>상품 할인 (해피아워 등)</span><span class="v" style="color:var(--point)">−${won(itemDisc)}</span></div>`:''}
-      ${coupon>0?`<div class="row"><span>쿠폰 할인</span><span class="v" style="color:var(--point)">−${won(coupon)}</span></div>`:''}
+      ${itemDisc>0?`<div class="row"><span>상품 할인 (해피아워 등)</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
+      ${coupon>0?`<div class="row"><span>🎟️ 쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>`:''}
       <div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-size:17px;font-weight:800;color:var(--ink)"><span>${post?'주문 금액':'최종 결제금액'}</span><span>${won(final)}</span></div>
       ${mi.on ? (mi.below
         ? (mi.basis==='group'
             ? `<div class="minwarn">최소 주문 금액 <b>${won(mi.min)}</b>까지 <b>${won(mi.shortfall)}</b> 남았어요 · 더 담으면 ${post?'주문':'결제'}할 수 있어요<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`
             : `<div class="minwarn">매장별 최소 주문 금액 <b>${won(mi.min)}</b> 미달 매장이 있어요<br>${mi.shortStores.map(x=>`· <b>${x.name}</b> ${won(x.need)} 더 담기`).join('<br>')}<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`)
-        : `<div class="minok">최소 주문 금액 ${won(mi.min)} 충족 · ${mi.label}</div>`) : ''}
+        : `<div class="minok">✓ 최소 주문 금액 ${won(mi.min)} 충족 · ${mi.label}</div>`) : ''}
     </div>
-    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note"><span class="co-ic">${ICON.store}</span><span>통합 결제지만 <b>매장별로 따로 준비·${S.service==='delivery'?'배달':'픽업'}</b>돼요 · 매장 수만큼 <b>알림톡이 따로</b> 오고, 각 매장에서 받게 돼요</span></div>`:''}
+    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note">🏪 통합 결제지만 <b>매장별로 따로 준비·픽업</b>돼요 · 매장 수만큼 <b>알림톡이 따로</b> 오고, 각 매장에서 받게 돼요 (통합 결제는 배달 매장이 없어 항상 포장 픽업)</div>`:''}
     <!-- 결제 수단 (선불형만) -->
     ${post?'':`<div class="sect"><div class="sect-h">결제 수단</div>
-      <div class="pay-opt on"><span class="pic">${ICON.card}</span> 신용/체크카드</div>
-      <div class="pay-opt" onclick="this.parentNode.querySelectorAll('.pay-opt').forEach(p=>p.classList.remove('on'));this.classList.add('on')"><span class="pic">${ICON.chat}</span> 간편결제 (카카오페이/네이버페이)</div>
+      <div class="pay-opt on"><span class="pic">💳</span> 신용/체크카드</div>
+      <div class="pay-opt" onclick="this.parentNode.querySelectorAll('.pay-opt').forEach(p=>p.classList.remove('on'));this.classList.add('on')"><span class="pic">🅿️</span> 간편결제 (카카오페이/네이버페이)</div>
     </div>`}
     <!-- 약관 (내점형 기준: 이용약관·개인정보·연령 필수 · 항목별 배지 + '보기' 전문 열람) -->
     <div class="sect"><div class="sect-h">약관 동의</div>
@@ -1865,7 +1801,6 @@ function toggleAll(el){ const on=!el.querySelector('.chk').classList.contains('o
 const TERMS = {
   tos:{ t:'이용약관 동의', req:'필수', body:`<b>1. 목적</b><br>본 약관은 야외형 QR 주문 서비스 이용에 관한 사항을 정해요.<br><br><b>2. 주문·결제</b><br>메뉴 주문·결제는 매장·브랜드가 제공하는 조건을 따르며, 결제는 전자결제대행사(PG)를 통해 처리돼요(신용/체크카드·간편결제).<br><br><b>3. 취소·환불</b><br>상품 품절 등으로 주문이 취소되면 결제 금액은 자동 환불되며, 카드사 사정에 따라 영업일 3~7일이 소요될 수 있어요.<br><br><b>4. 이용자 의무</b><br>정확한 연락처를 입력해야 주문 알림을 받을 수 있어요.` },
   privacy:{ t:'개인정보 수집·이용 동의', req:'필수', body:`<b>1. 수집 항목</b><br>휴대폰 번호 또는 이메일 주소, 주문 내역(메뉴·금액·시간)<br><br><b>2. 수집·이용 목적</b><br>주문 접수·조리 완료 알림 발송, 주문 확인 및 고객 문의 대응<br><br><b>3. 보유·이용 기간</b><br>당일 자정 경과 시 자동 삭제 (관련 법령에 따라 거래 기록은 별도 보관될 수 있어요)<br><br><b>4. 동의 거부 권리</b><br>동의를 거부할 수 있으나, 필수 항목 미동의 시 주문이 어려워요.` },
-  mkt:{ t:'쿠폰·이벤트 알림 수신 동의', req:'선택', body:`<b>1. 목적</b><br>할인 쿠폰, 이벤트·프로모션 소식을 알림톡·이메일로 보내드려요.<br><br><b>2. 수신 채널</b><br>카카오톡 알림톡 또는 입력하신 이메일<br><br><b>3. 철회</b><br>선택 항목이므로 동의하지 않아도 주문에는 영향이 없고, 동의 후에도 언제든 수신을 해지할 수 있어요.` },
 };
 function openTerms(key){
   const t=TERMS[key]; if(!t)return;
@@ -1885,33 +1820,19 @@ function closeTerms(){ const el=document.getElementById('termsModal'); if(el){ e
 /* ── 결제(알림 받을 방법) — 바텀시트: 화면 전환 없이 흐름을 짧게 ── */
 function paySheetHTML(){
   const post=S.bill==='post'; const act=post?'주문':'결제';
-  const emailValid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.pEmail||'');
-  const contactOk = S.alertCh==='email' ? emailValid : ((S.pMid||'').length===4 && (S.pEnd||'').length===4);
   const finalAmt = Math.max(0, cartSum()-couponDiscount());
-  // 연락처 입력 + 혜택 수신동의 → 보유 쿠폰 노출 (내점형 기준)
-  const couponReveal = (contactOk && S.mktConsent) ? (()=>{
-    const avail=availCoupons();   // 발급받은 쿠폰 중 이번 주문 적용 가능분(그룹 + 담긴 매장)
-    if(!avail.length) return `<div class="pay-coupon-none">입력하신 연락처로 발급된 쿠폰이 없어요.</div>`;
-    const anySel=selectedCoupons().length>0;
-    return `<div class="pay-coupon">
-      <div class="pcp-h"><span class="pcp-h-ic">${ICON.ticket}</span> 발급받은 쿠폰 ${avail.length}장 · 그룹/매장 각각 선택할 수 있어요</div>
-      ${avail.map(cp=>{ const sel=(S.selCoupons||{})[cp.scope]===cp.id; const sc=cp.scope==='group'?'전체':store(cp.scope).name; const amt=couponAmt(cp);
-        return `<div class="pcp-row ${sel?'on':''}" onclick="pickCoupon('${cp.id}')"><span class="pcp-ck">${sel?'✓':''}</span><div class="pcp-b"><div class="pcp-n"><span class="pcp-scope">${sc}</span>${cp.name}</div><div class="pcp-d">${cp.desc}${sel&&amt===0?' · 현재 조건 미충족':''}</div></div></div>`; }).join('')}
-      ${anySel?`<button class="pcp-clear" onclick="S.selCoupons={};refreshPaySheet();render()">쿠폰 모두 사용 안 함</button>`:''}
-    </div>`;
-  })() : '';
   return `
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closePaySheet()">✕</button>
     <div class="pay-scroll">
-      <div class="pay-t">어디로 알림을 보내드릴까요?</div>
+      <div class="pay-t">💬 어디로 알림을 보내드릴까요?</div>
       <div class="pay-s">호출번호와 조리 완료 알림에 사용돼요.${post?'':' 주문을 완료하려면 꼭 필요해요.'}</div>
-      <button class="kakaobtn" onclick="S.loginType='kakao';payConfirm()">${ICON.chat} 카카오톡으로 시작하기</button>
+      <button class="kakaobtn" onclick="S.loginType='kakao';payConfirm()">💬 카카오톡으로 시작하기</button>
       <div class="pay-kko-note">카카오 로그인 시 번호가 자동 수집돼요</div>
       <div class="pay-div"><span></span>또는 비회원으로 진행<span></span></div>
       <div class="seg" style="margin-bottom:14px">
-        <button class="${S.alertCh==='phone'?'on':''}" onclick="setAlert('phone')">${ICON.phone} 휴대폰</button>
-        <button class="${S.alertCh==='email'?'on':''}" onclick="setAlert('email')">${ICON.mail} 이메일</button>
+        <button class="${S.alertCh==='phone'?'on':''}" onclick="setAlert('phone')">📱 휴대폰</button>
+        <button class="${S.alertCh==='email'?'on':''}" onclick="setAlert('email')">✉️ 이메일</button>
       </div>
       ${S.alertCh==='email' ? `
       <input class="field" id="emailIn" type="email" placeholder="example@email.com" value="${S.pEmail||''}" oninput="onPayEmail(this)" style="margin-bottom:12px">
@@ -1924,8 +1845,6 @@ function paySheetHTML(){
         <input class="field pf-num" id="phoneEnd" inputmode="numeric" maxlength="4" placeholder="0000" value="${S.pEnd||''}" oninput="onPayPhone(this,'end')">
       </div>
       `}
-      <label class="pay-mkt" onclick="toggleMkt()"><span class="pay-mkt-ck ${S.mktConsent?'on':''}">${S.mktConsent?'✓':''}</span><span class="pay-mkt-t"><b>선택</b> 쿠폰·이벤트 알림 수신 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('mkt')">보기</a></label>
-      ${couponReveal}
       <button class="cta-btn" onclick="submitContact('${S.alertCh}')">${S.alertCh==='email'?'이 이메일로':'이 번호로'} ${won(finalAmt)} ${act}하기</button>
       <div class="pay-hint">${S.alertCh==='email'?'· 입력하신 이메일로 주문 확인·완료 알림을 보내드려요 (외국인 사용자 등)<br>· 이메일 형식 오류(도메인 누락 등) 시 진행 불가':'· 조리 완료 시 카카오톡 알림톡으로 알려드려요<br>· 앞자리는 010 고정 · 뒤 4자리+4자리(총 8자리)를 입력하면 진행돼요'}</div>
     </div>`;
@@ -1996,7 +1915,7 @@ function scDone(){
     <div class="done-ic">✓</div>
     <div class="done-t">${post?'주문이 접수되었어요!':'결제가 완료되었어요!'}</div>
     <div class="done-s">${post?'매장에서 주문을 확인하고 조리를 시작해요':'조리가 시작되면 알림으로 알려드릴게요'}</div>
-    ${(()=>{ const steps=S.service==='delivery'?['주문 접수','준비 중','배달 중','배달 완료']:['주문 접수','준비 중','픽업 대기','픽업 완료']; const cur=1;
+    ${(()=>{ const steps=S.service==='delivery'?['주문요청','준비중','배달중','수령완료']:['주문요청','준비중','준비완료','수령완료']; const cur=0;   // 결제 완료 직후=주문요청(매장 수락 전) · 라벨은 "주문 상태 스텝(공통 정의)" SSOT
       return `<div class="ord-steps">${steps.map((st,i)=>`${i?`<div class="ost-line ${i<=cur?'done':''}"></div>`:''}<div class="ost ${i<cur?'done':''} ${i===cur?'cur':''}"><div class="ost-dot">${i<cur?'✓':(i+1)}</div><div class="ost-lbl">${st}</div></div>`).join('')}</div>`; })()}
     <div class="callno">
       <div class="cl-lbl">내 호출번호</div>
@@ -2004,122 +1923,185 @@ function scDone(){
       <div class="cl-sub">${S.loginType==='email'?'주문 시 입력한 정보 기준':'휴대폰 번호 뒤 4자리'}</div>
     </div>
     <div class="pickinfo">
-      <div class="pi-row"><span class="pi-ic">${S.service==='delivery'?ICON.tray:(S.pickup==='reserve'?ICON.cal:ICON.bag)}</span><span>${S.service==='delivery'?`<b>자리로 받기</b> · 입력하신 자리로 현장 배달`:(S.pickup==='reserve'?`<b>포장 예약</b> · ${S.pickupTime||''} 수령`:'<b>즉시 포장 픽업</b>')} · ${loc}</span></div>
-      <div class="pi-row"><span class="pi-ic">${ICON.clock}</span><span>예상 조리 시간 약 12분</span></div>
-      <div class="pi-row"><span class="pi-ic">${ICON.chat}</span><span>조리 완료 시 ${multi?`매장마다 <b>${ch}</b>이 따로 와요`:`<b>${ch}</b>으로 알림`}</span></div>
+      ${S.service==='delivery'?`🛎️ <b>자리로 받기</b> · 입력하신 자리로 현장 배달`:(S.pickup==='reserve'?`📅 <b>포장 예약</b> · ${S.pickupTime||''} 수령`:'🥡 <b>즉시 포장 픽업</b>')} · ${loc}<br>
+      ⏱️ 예상 조리 시간 약 12분<br>
+      💬 조리 완료 시 ${multi?`매장마다 <b>${ch}</b>이 따로 와요`:`<b>${ch}</b>으로 알림`}
     </div>
     ${multi?`
     <div class="multi-pick">
-      <div class="mp-h"><span class="mp-h-ic">${ICON.store}</span> 매장별로 따로 ${S.service==='delivery'?'배달돼요':'받아요'}</div>
-      <div class="mp-b">통합 결제했지만 준비·${S.service==='delivery'?'배달':'픽업'}은 <b>매장별</b>이에요. <b>${sids.length}개 매장</b>에서 ${S.service==='delivery'?'각각 준비해 자리로 가져다드리고':'각각 준비돼 부스에서 따로 받게 되고'}, 준비 완료 <b>알림톡도 매장마다 따로</b> 도착해요.</div>
-      <div class="mp-list">${sids.map(sid=>`<div class="mp-row"><span class="mp-s">${ICON.store} ${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
+      <div class="mp-h">🏪 매장별로 따로 받아요</div>
+      <div class="mp-b">통합 결제했지만 준비·픽업은 <b>매장별</b>이에요(통합 결제는 배달 매장이 없어 항상 포장 픽업). <b>${sids.length}개 매장</b>에서 각각 준비돼 부스에서 따로 받게 되고, 준비 완료 <b>알림톡도 매장마다 따로</b> 도착해요.</div>
+      <div class="mp-list">${sids.map(sid=>`<div class="mp-row"><span class="mp-s">${store(sid).logo} ${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
     </div>`:''}
     <button class="fm-btn" style="margin-top:26px;background:var(--blue)" onclick="go('history')">주문 내역 보기</button>
   </div>`;
 }
 
 /* ── 주문 데이터 (결제건=회차=전자영수증 1건) ── */
-const ST_CLS = {'조리중':'st-cook','조리완료':'st-done','픽업완료':'st-pick','주문취소':'st-rej'};
+// 상태 라벨은 QR메뉴판 정책 "주문 상태 스텝(공통 정의)" SSOT를 그대로 사용(화면마다 다른 명칭 금지) · 진행 단계는 카드 내 진행 막대(아래 stepBarHTML)로 표시
+// 통합결제 회차는 한 번의 결제에 여러 매장이 섞이고, 매장마다 진행 단계가 서로 다를 수 있음
+// (정책 › 주문 상태 스텝: "통합 결제 건은 매장별로 준비중·준비완료·수령완료 중 서로 다른 상태가 동시에 보일 수 있음")
 function getPayments(){
   // 현재 장바구니를 최신 결제건으로 반영 (없으면 데모) · contact = 결제 시 입력한 연락처
   const live = (S.cart.length?S.cart:[{store:'burger',name:'더블 치즈버거',opt:'Regular',qty:1,price:9800}])
                 .map(c=>({store:c.store||'burger',name:c.name,opt:c.opt||'',qty:c.qty,price:c.price}));
-  return [
-    {id:'A1042', time:'방금 전', paidAt:'2026-07-21 14:32', status:'조리중', pay:'신용카드', contact:(S.contact||'010-1234-5678'), items:live},
-    {id:'A1039', time:'12분 전', paidAt:'2026-07-21 14:20', status:'조리완료', pickup:'B구역 1번 부스', pay:'카카오페이', contact:'010-9876-5432',
-      items:[{store:'coffee',name:'바닐라 라떼',opt:'',qty:1,price:4800},{store:'coffee',name:'아메리카노',opt:'ICE',qty:1,price:3500}]},
-    {id:'A1035', time:'55분 전', paidAt:'2026-07-21 13:37', status:'픽업완료', pay:'신용카드', contact:'sohee@email.com',
-      items:[{store:'burger',name:'수제 콜라',opt:'',qty:1,price:3000}]},
-    {id:'A1031', time:'41분 전', paidAt:'2026-07-21 13:11', status:'주문취소', canceledAt:'2026-07-21 13:14', pay:'신용카드', contact:'010-1234-5678',
-      cancel:'상품 품절로 자동 취소되었어요 · 결제 금액은 자동 환불 처리 (카드사 사정에 따라 영업일 3~7일 소요)',
-      items:[{store:'chicken',name:'후라이드 세트',opt:'',qty:1,price:8500}]},
+  const liveStores = Object.entries(grpByStore(live)).map(([sid,items])=>({sid,status:'주문요청',items}));
+  const raw = [
+    {id:'A1031', time:'1시간 20분 전', paidAt:'2026-07-21 13:12', canceledAt:'2026-07-21 13:15', pay:'신용카드', contact:'010-1234-5678',
+      cancel:'상품 품절로 자동 취소되었어요 · 결제 금액은 자동 환불 처리 (카드사 사정에 따라 영업일 3~7일 소요)', stores:[
+      {sid:'taco', status:'주문취소', items:[{name:'비프 타코 세트',opt:'',qty:1,price:8500}]},
+    ]},
+    {id:'A1035', time:'55분 전', paidAt:'2026-07-21 13:37', pay:'신용카드', contact:'sohee@email.com', stores:[
+      {sid:'burger', status:'수령완료', items:[{name:'수제 콜라',opt:'',qty:1,price:3000}]},
+      {sid:'ade', status:'수령완료', items:[{name:'자몽 에이드',opt:'',qty:1,price:4500}]},
+    ]},
+    // 통합결제 대표 예시 — 한 번의 결제에 3개 매장이 섞이고 각 매장 진행 단계가 모두 다름
+    {id:'A1039', time:'12분 전', paidAt:'2026-07-21 14:20', pay:'카카오페이', contact:'010-9876-5432', stores:[
+      {sid:'coffee', status:'준비완료', items:[{name:'바닐라 라떼',opt:'',qty:1,price:4800},{name:'아메리카노',opt:'ICE',qty:1,price:3500}]},
+      {sid:'chicken', status:'준비중', items:[{name:'후라이드 세트',opt:'',qty:1,price:8500}]},
+      {sid:'waffle', status:'수령완료', items:[{name:'플레인 와플',opt:'',qty:1,price:3500}]},
+    ]},
+    {id:'A1042', time:'방금 전', paidAt:'2026-07-21 14:32', pay:'신용카드', contact:(S.contact||'010-1234-5678'), stores:liveStores},
   ];
+  // 파생값: 회차 번호(결제 시각 오름차순으로 1차·2차…) · 평면 items(매장 태그 포함) · 회차 대표 상태(액션 우선 순서상 가장 앞선 매장 상태)
+  return raw.map((p,i)=>({
+    ...p,
+    round: i+1,
+    items: p.stores.flatMap(s=>s.items.map(it=>({...it,store:s.sid}))),
+    status: p.stores.map(s=>s.status).sort((a,b)=>(ACT_ORDER[a]??9)-(ACT_ORDER[b]??9))[0],
+  }));
 }
 const sumItems = items => items.reduce((a,c)=>a+c.price*c.qty,0);
 const payTotal = p => p.status==='주문취소' ? 0 : sumItems(p.items);
 const grpByStore = items => { const g={}; items.forEach(it=>{(g[it.store]=g[it.store]||[]).push(it);}); return g; };
 const ohLine = it => `<div class="oh-line"><span class="ohl-n">${it.name}${it.opt?' · '+it.opt:''}</span><span class="ohl-q">×${it.qty}</span><span class="ohl-p">${won(it.price*it.qty)}</span></div>`;
-const contactHTML = c => `<span class="oh-ct-lbl">알림 연락처</span><span class="oh-ct">${(c||'').includes('@')?ICON.mail:ICON.phone} ${c}</span>`;
-const storesLabel = items => { const ns=[...new Set(items.map(it=>store(it.store).name))]; return ns.length<=1?ns[0]:`${ns[0]} 외 ${ns.length-1}곳`; };
+const contactHTML = c => `<span class="oh-ct-lbl">알림 연락처</span><span class="oh-ct">${(c||'').includes('@')?'✉️':'📱'} ${c}</span>`;
 function toggleHistDetail(id){ S.histOpen=S.histOpen||{}; S.histOpen[id]=!S.histOpen[id]; render(); }
+// 진행 단계 — 정책 「주문 상태 스텝(공통 정의)」의 4단계 · 배달 주문은 3번째가 배달중 · 주문취소는 스텝에서 분기(별개 표기)
+const HIST_STEPS = ['주문요청','준비중','준비완료','수령완료'];
+const isDelivery = () => S.service==='delivery';
+const stepLabel = st => (st==='준비완료'&&isDelivery()) ? '배달중' : st;
+// '지금 받아 가세요' 말풍선은 포장·포장예약에만 · 배달은 자리로 가져다주므로 표시하지 않음(혼선 방지)
+const canPickup = status => status==='준비완료' && !isDelivery();
+// 진행 막대 — 4단계를 채워진 칸 수로 표현(라벨 반복 없이 상태 배지 하나로만 단계명을 알려줌)
+function stepBarHTML(status){
+  const cur = status==='배달중' ? '준비완료' : status;   // 배달중은 3번째 칸에 매핑
+  const idx = Math.max(0, HIST_STEPS.indexOf(cur));
+  const bubble = canPickup(status);
+  const segs = HIST_STEPS.map((_,i)=>`<span class="oh-st-seg ${i<=idx?(bubble?'ready':'on'):''}"></span>`).join('');
+  return `<div class="oh-st-barwrap ${bubble?'has-bubble':''}">
+    ${bubble?`<span class="ms-bubble" style="left:62.5%">🔔 지금 받아 가세요</span>`:''}
+    <div class="oh-st-bar">${segs}</div>
+  </div>`;
+}
+// 주문 내역 카드 1장 — 회차 수·매장 수와 무관하게 항상 같은 구조
+// (회차/시각 → 매장별 진행 스텝퍼 → 금액·버튼) · 연락처·주문번호·결제수단·메뉴는 '자세히 보기'로 접어둠
+// showNames: 매장명을 카드 안에 표시할지 (매장별로 모아보기에서는 섹션 헤더에 이미 있어 생략)
+function roundCardHTML(p, showNames){
+  const canceled=p.status==='주문취소', o=open(p.id);
+  const ready = p.stores.some(s=>canPickup(s.status));
+  const total = canceled?sumItems(p.items):payTotal(p);
+  return `<div class="oh-card ${canceled?'cancel':''} ${ready?'ready':''}">
+    <div class="oh-top">
+      <div class="oh-top-l">
+        <div class="oh-ord-row"><span class="oh-ord">${p.round}차 주문</span><span class="oh-at">${p.paidAt.slice(11,16)} 주문</span></div>
+      </div>
+      ${canceled?`<span class="st-badge st-rej">주문취소</span>`:''}
+    </div>
+    ${canceled
+      ? `<div class="oh-cancelnote" style="margin:12px 16px 0">↩️ ${p.cancel}</div>`
+      : storeRowsHTML(p.stores, showNames)}
+    ${o?`<div class="oh-sub">
+      <div class="oh-sub-row"><span>주문번호</span><span class="v">${p.id}</span></div>
+      <div class="oh-sub-row"><span>알림 연락처</span><span class="v">${p.contact}</span></div>
+      <div class="oh-sub-row"><span>결제수단</span><span class="v">${p.pay}</span></div>
+      ${p.stores.map(s=>`<div class="oh-menupart">
+        <div class="oh-menupart-h">${store(s.sid).logo} ${store(s.sid).name}</div>
+        ${s.items.map(it=>`<div class="oh-sub-row"><span>${it.name}${it.opt?' · '+it.opt:''} ×${it.qty}</span><span class="v">${won(it.price*it.qty)}</span></div>`).join('')}
+      </div>`).join('')}
+    </div>`:''}
+    <div class="oh-foot">
+      <span class="oh-sum-lite">${canceled?'취소 ':''}${won(total)}</span>
+      <div class="oh-foot-btns">
+        <button class="oh-ghost" onclick="toggleHistDetail('${p.id}')">${o?'접어서 보기 ▲':'자세히 보기 ▼'}</button>
+        <button class="oh-receipt sm" onclick="openReceipt('${p.id}')">🧾 영수증</button>
+      </div>
+    </div>
+  </div>`;
+}
+const open = id => !!(S.histOpen && S.histOpen[id]);
+// 카드 내부 — 매장마다 '매장명 + 상태 배지 + 진행 막대' 한 세트 (매장이 1곳이든 여러 곳이든 동일한 구조)
+function storeRowsHTML(stores, showNames){
+  const rows = byAction(stores).map(s=>`<div class="oh-st-row">
+    <div class="oh-st-head">
+      ${showNames?`<span class="oh-st-name">${store(s.sid).logo} ${store(s.sid).name}</span>`:''}
+      <span class="st-badge sm ${ST_BADGE[s.status]||''}">${stepLabel(s.status)}</span>
+    </div>
+    ${stepBarHTML(s.status)}
+  </div>`).join('');
+  return `<div class="oh-stores">${rows}</div>`;
+}
+const ST_BADGE = {'준비완료':'st-done','배달중':'st-done','준비중':'st-cook','주문요청':'st-cook','수령완료':'st-pick','주문취소':'st-rej'};
+// 액션 우선 정렬 — 지금 받으러 가야 하는 건이 항상 맨 위 (정책 › 통합결제 회차별 보드와 동일 기준)
+const ACT_ORDER = {'준비완료':0,'배달중':1,'준비중':2,'주문요청':3,'수령완료':4,'주문취소':5};
+const byAction = list => list.map((p,i)=>[p,i]).sort((a,b)=>(ACT_ORDER[a[0].status]??9)-(ACT_ORDER[b[0].status]??9)||a[1]-b[1]).map(x=>x[0]);
+// 상단 요약 — 주문한 '매장 단위'로 각 단계에 몇 곳이 놓여 있는지 집계 (취소는 단계에서 빼고 별도 표기)
+function stageSummaryHTML(P){
+  const units=[]; P.forEach(p=>p.stores.forEach(s=>units.push(s.status)));
+  const cnt = st => units.filter(x=>x===st).length;
+  const cells = HIST_STEPS.map(st=>{
+    const n = st==='준비완료' ? cnt('준비완료')+cnt('배달중') : cnt(st);
+    const cls = n===0 ? '' : (st==='준비완료' ? 'on ready' : 'on');
+    return `<div class="oh-stage-cell ${cls}"><span class="oh-stage-n">${n}</span><span class="oh-stage-lbl">${st==='준비완료'&&S.service==='delivery'?'배달중':st}</span></div>`;
+  }).join('');
+  const canceled = cnt('주문취소');
+  return `<div class="oh-lead">
+    <div class="oh-stage">${cells}</div>
+    ${canceled?`<div class="oh-stage-cancel">주문 취소 ${canceled}곳 (합계에서 제외)</div>`:''}
+  </div>`;
+}
 
-/* ── 내 주문 내역 (요약 + 상태 · 상세 버튼으로 메뉴 펼침) ── */
+/* ── 내 주문 내역 (핵심 정보만 메인 · 보조 정보는 접기 · 회차별/매장별 동일 카드) ── */
 function scHistory(){
   const unified = S.payScope==='unified';
-  const view = unified ? (S.histView||'round') : 'store';   // 매장별은 통합결제만 · 기본은 회차별
-  const P = getPayments();
-  const open = id => !!(S.histOpen && S.histOpen[id]);
-  const itemsBlock = groups => Object.entries(groups).map(([sid,items])=>`
-    <div class="oh-grp"><div class="oh-grp-h">${ICON.store} ${store(sid).name}</div>${items.map(ohLine).join('')}</div>`).join('');
+  // 기본은 회차별 · 통합결제일 때만 '매장별로 모아보기'를 켜서 같은 목록을 매장 기준으로 다시 묶을 수 있음
+  // (개별결제는 한 회차 = 한 매장이라 회차별 목록에 이미 매장이 그대로 드러나므로 전환 옵션 자체가 없음)
+  const view = (unified && S.histByStore) ? 'store' : 'round';
+  const P = getPayments().slice().sort((a,b)=>b.round-a.round);   // 최신 회차가 맨 위
   let body='';
 
   if(view==='round'){
-    // 회차(결제건)별 — 1 카드 = 1 결제 = 1 영수증 · 요약 후 상세 버튼으로 메뉴 표시
-    body = P.map(p=>{
-      const canceled=p.status==='주문취소', o=open(p.id);
-      const total = canceled?sumItems(p.items):payTotal(p);
-      return `<div class="oh-card ${canceled?'cancel':''}">
-        <div class="oh-top">
-          <div class="oh-top-l">
-            <div class="oh-ord-row"><span class="oh-ord">주문 #${p.id}</span><span class="oh-time">${p.time}</span></div>
-            <div class="oh-where"><span class="ohw-ic">${ICON.pin}</span>${storesLabel(p.items)}</div>
-            <div class="oh-contact">${contactHTML(p.contact)}</div>
-          </div>
-          <span class="st-badge ${ST_CLS[p.status]}">${p.status}</span>
-        </div>
-        ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup"><span class="co-ic">${ICON.bell}</span><span>조리가 끝났어요 · 지금 <b>${p.pickup}</b>에서 픽업해 주세요</span></div>`:''}
-        ${o?`<div class="oh-body">${itemsBlock(grpByStore(p.items))}${canceled?`<div class="oh-cancelnote"><span class="co-ic">${ICON.undo}</span><span>${p.cancel}</span></div>`:''}</div>`:''}
-        <div class="oh-foot">
-          <div class="oh-foot-sum">${canceled?'취소 금액':'결제금액'} <b>${won(total)}</b></div>
-          <div class="oh-foot-btns">
-            <button class="oh-detail" onclick="toggleHistDetail('${p.id}')">${o?'접기 ▲':'상세 ▼'}</button>
-            <button class="oh-receipt sm" onclick="openReceipt('${p.id}')">${ICON.receipt} 영수증</button>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
+    body = P.map(p=>roundCardHTML(p,true)).join('');
   } else {
-    // 매장별 — 매장 카드 안에서 결제건(회차)을 요약 + 상세 토글
+    // 매장별 — 회차를 매장 단위로 쪼개서(각 매장의 자기 상태로) 매장 섹션 헤더 아래 같은 카드를 나열
     const byStore={};
-    P.forEach(p=>{ const g=grpByStore(p.items); Object.entries(g).forEach(([sid,items])=>{ (byStore[sid]=byStore[sid]||[]).push({...p,items}); }); });
+    P.forEach(p=>p.stores.forEach(s=>{
+      (byStore[s.sid]=byStore[s.sid]||[]).push({...p, stores:[s], items:s.items.map(it=>({...it,store:s.sid})), status:s.status});
+    }));
     body = Object.entries(byStore).map(([sid,pays])=>{
       const stTotal = pays.reduce((a,p)=>a+payTotal(p),0);
-      return `<div class="oh-card">
-        <div class="oh-top">
-          <div class="oh-top-l"><span class="oh-store-name">${ICON.store} ${store(sid).name}</span></div>
-          <span class="st-badge ${ST_CLS[pays[0].status]}">${pays[0].status}</span>
-        </div>
-        <div class="oh-body">
-          ${pays.map(p=>{
-            const canceled=p.status==='주문취소', o=open(p.id);
-            const total = canceled?sumItems(p.items):payTotal(p);
-            return `<div class="oh-grp">
-              <div class="oh-grp-h split"><span class="oh-grp-ord">주문 #${p.id} · ${p.time}</span><span class="st-badge sm ${ST_CLS[p.status]}">${p.status}</span></div>
-              <div class="oh-contact sm">${contactHTML(p.contact)}</div>
-              ${(p.status==='조리완료'&&p.pickup)?`<div class="oh-pickup sm"><span class="co-ic">${ICON.bell}</span><span><b>${p.pickup}</b>에서 픽업해 주세요</span></div>`:''}
-              ${o?`${p.items.map(ohLine).join('')}${canceled?`<div class="oh-cancelnote"><span class="co-ic">${ICON.undo}</span><span>${p.cancel}</span></div>`:''}`:''}
-              <div class="oh-grp-foot"><span>${canceled?'취소 금액':'소계'} ${won(total)}</span><button class="oh-detail sm" onclick="toggleHistDetail('${p.id}')">${o?'접기':'상세'}</button></div>
-            </div>`;
-          }).join('')}
-        </div>
-        <div class="oh-foot"><div class="oh-foot-sum">매장 합계 <b>${won(stTotal)}</b></div></div>
-      </div>`;
+      return `<div class="store-group-h" style="justify-content:space-between;margin:16px 14px 0">
+        <span>${store(sid).logo} ${store(sid).name}</span><span>${won(stTotal)}</span>
+      </div>
+      ${pays.map(p=>roundCardHTML(p,false)).join('')}`;
     }).join('');
   }
   const grand = P.reduce((a,p)=>a+payTotal(p),0);
   return `
   <div class="hdr"><button class="bk" onclick="go(S.mode==='group'?'home':'store')">‹</button><div class="ht">주문 내역</div></div>
   <div class="scroll">
+    ${stageSummaryHTML(P)}
     ${unified
-      ? `<div class="oh-tabwrap"><div class="seg">
-          <button class="${view==='round'?'on':''}" onclick="S.histView='round';render()">주문 회차별</button>
-          <button class="${view==='store'?'on':''}" onclick="S.histView='store';render()">매장별</button>
-        </div></div>`
+      ? `<button class="oh-viewtog ${view==='store'?'on':''}" onclick="S.histByStore=!S.histByStore;render()">
+          <span class="chk ${view==='store'?'on':''}">${view==='store'?'✓':''}</span>
+          <span>매장별로 모아보기</span>
+        </button>`
       : ''}
-    <div class="oh-grand top"><span>전체 합계 (누적)</span><b>${won(grand)}</b></div>
-    <div class="oh-grand-note">${unified?'':'개별 결제는 매장 기준으로 보여드려요 · '}※ 취소·환불 건은 합계에서 제외돼요</div>
-    <div class="oh-hint"><span class="co-ic">${ICON.info}</span><span>영수증은 결제 1건 기준이라 <b>‘주문 회차별’</b>에서 확인할 수 있어요. <b>‘매장별’</b>은 매장 기준으로 정렬해 보는 화면이에요.<br>주문 내역은 당일 자정이 지나면 자동으로 사라지니, 필요하면 화면을 캡처해 두세요.</span></div>
     ${body}
+    <div class="oh-tail">
+      <div class="oh-tail-row"><span>전체 합계 (누적)</span><b>${won(grand)}</b></div>
+      <div class="oh-tail-note">취소·환불 건은 합계에서 제외돼요 · 주문 내역은 당일 자정이 지나면 사라져요 📸</div>
+    </div>
     <div style="height:24px"></div>
   </div>`;
 }
@@ -2140,7 +2122,7 @@ function openReceipt(id){
       <div class="rc-meta">주문번호 <b>${p.id}</b><br>결제일시 ${p.paidAt}${canceled?`<br><span class="rc-cancel-at">취소일시 ${p.canceledAt}</span>`:''}</div>
       <div class="rc-hr"></div>
       ${Object.entries(groups).map(([sid,items])=>`
-        <div class="rc-store">${ICON.store} ${store(sid).name}</div>
+        <div class="rc-store">${store(sid).logo} ${store(sid).name}</div>
         ${items.map(it=>`<div class="rc-line"><span>${it.name}${it.opt?' · '+it.opt:''} ×${it.qty}</span><span>${won(it.price*it.qty)}</span></div>`).join('')}
       `).join('')}
       <div class="rc-hr"></div>
@@ -2148,9 +2130,9 @@ function openReceipt(id){
       ${coupon?`<div class="rc-line"><span>쿠폰 할인</span><span>−${won(coupon)}</span></div>`:''}
       <div class="rc-line rc-total"><span>${canceled?'환불 예정 금액':'결제금액'}</span><span>${won(total)}</span></div>
       <div class="rc-line dim"><span>결제수단</span><span>${p.pay}</span></div>
-      ${canceled?`<div class="rc-cancelbox"><span class="co-ic">${ICON.undo}</span><span>${p.cancel}</span></div>`:''}
+      ${canceled?`<div class="rc-cancelbox">↩️ ${p.cancel}</div>`:''}
       <div class="rc-hr"></div>
-      <div class="rc-foot">본 영수증은 전자적으로 발행된 거래 확인 내역이에요. 세금계산서·현금영수증과는 별개예요.<br>당일 자정 이후 자동 삭제되니 필요하면 화면을 캡처해 두세요.</div>
+      <div class="rc-foot">본 영수증은 전자적으로 발행된 거래 확인 내역이에요. 세금계산서·현금영수증과는 별개예요.<br>당일 자정 이후 자동 삭제되니 필요하면 화면을 캡처해 두세요 📸</div>
     </div>`;
   document.getElementById('receiptModal').classList.add('on'); syncBgLock();
 }

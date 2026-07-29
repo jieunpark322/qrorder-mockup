@@ -503,6 +503,20 @@
   .rc-total{font-size:17px;font-weight:900;color:var(--ink);border-top:1px solid var(--line);margin-top:6px;padding-top:12px;}
   .rc-cancelbox{background:#fff0f0;border:1px solid #f5c6c6;border-radius:10px;padding:11px 13px;font-size:12.5px;color:#c0392b;font-weight:700;line-height:1.55;margin-top:12px;}
   .rc-foot{font-size:11.5px;color:var(--ink4);line-height:1.6;margin-top:4px;}
+  .rc-foot b{color:var(--ink2);}
+  /* 전자영수증 정책 UI — 주문내역 가리기 · 가맹점 정보 · 인증 바코드 · 저장/리뷰 */
+  .rc-hidebtn{display:block;width:100%;margin-top:14px;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font-family:inherit;font-size:12.5px;font-weight:800;color:var(--ink2);cursor:pointer;}
+  .rc-hidden{font-size:13px;color:var(--ink3);text-align:center;padding:20px 0;font-weight:700;}
+  .rc-biz{margin-bottom:10px;}
+  .rc-biz-h{font-size:12.5px;font-weight:800;color:var(--ink);}
+  .rc-biz-row{font-size:11.5px;color:var(--ink3);margin-top:2px;line-height:1.5;}
+  .rc-barcode{margin:14px 0;text-align:center;}
+  .rc-bars{height:52px;border-radius:2px;background:repeating-linear-gradient(90deg,#141414 0 2px,#fff 2px 4px,#141414 4px 7px,#fff 7px 9px,#141414 9px 10px,#fff 10px 13px,#141414 13px 15px,#fff 15px 18px);}
+  .rc-bc-no{font-size:11px;letter-spacing:3px;color:var(--ink3);margin-top:5px;}
+  .rc-actions{display:flex;gap:8px;margin:16px 0 10px;}
+  .rc-act{flex:1;padding:12px;border-radius:11px;border:1px solid var(--line);background:#fff;font-family:inherit;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;}
+  .rc-act.naver{background:#03C75A;color:#fff;border-color:#03C75A;}
+  .rc-act:active{transform:scale(.98);}
 
   /* 상황 전체화면 */
   .fullmsg{min-height:calc(100vh - 62px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 34px;}
@@ -1203,6 +1217,7 @@ let S = {
   storeTab:'menu',     // 매장 페이지 탭: menu | info
   histByStore:false,   // 주문 내역 '매장별로 모아보기' 체크 여부 (기본 회차별 · 통합결제에서만 노출)
   histStage:null,      // 주문 내역 상단 단계 필터 — null(전체) | 주문요청 | 준비중 | 준비완료 | 수령완료 (탭하면 해당 단계 주문만 표시)
+  rcHide:false,        // 전자영수증 '주문 내역 가리기' 상태 (프라이버시 보호)
   service:'pickup',    // 서비스 유형: pickup(포장) | delivery(자리로 받기=현장 배달) · 매장·브랜드가 설정(고객 선택 아님) · 자리입력 기본 Off
   fCat:'전체',         // 홈 분류 필터 (전체/푸드/음료/디저트 → store.cat)
   fZone:'전체',        // 홈 구역 필터 (전체/A~D구역 → store.cat2)
@@ -2360,6 +2375,11 @@ function openReceipt(id){
   const sub=sumItems(p.items);
   const coupon = canceled?0:1000;               // 데모: 취소건은 쿠폰 미적용 가정
   const total=Math.max(0,sub-coupon);
+  S._rcId=id;
+  const hide=!!S.rcHide;
+  const pay=p.pay||'';
+  // 결제수단 마스킹 — 카드: BIN 6 + 뒤 4(가운데 마스킹) · 간편결제: 결제수단명 + 승인번호
+  const payMasked = pay.includes('페이') ? `${pay} · 승인번호 18674347` : `${pay} · 123456-**-****-1234`;
   document.getElementById('receiptInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closeReceipt()">✕</button>
@@ -2367,22 +2387,36 @@ function openReceipt(id){
       <div class="rc-badge ${canceled?'cancel':''}">${canceled?'취소 전자영수증':'전자영수증'}</div>
       <div class="rc-title">${canceled?'주문이 취소되었어요':'결제가 완료되었어요'}</div>
       <div class="rc-meta">주문번호 <b>${p.id}</b><br>결제일시 ${p.paidAt}${canceled?`<br><span class="rc-cancel-at">취소일시 ${p.canceledAt}</span>`:''}</div>
+      <button class="rc-hidebtn" onclick="toggleRcHide()">${hide?'주문 내역 보기':'주문 내역 가리기'}</button>
       <div class="rc-hr"></div>
-      ${Object.entries(groups).map(([sid,items])=>`
-        <div class="rc-store">${store(sid).logo} ${store(sid).name}</div>
-        ${items.map(it=>`<div class="rc-line"><span>${it.name}${it.opt?' · '+it.opt:''} ×${it.qty}</span><span>${won(it.price*it.qty)}</span></div>`).join('')}
-      `).join('')}
-      <div class="rc-hr"></div>
-      <div class="rc-line"><span>상품 합계</span><span>${won(sub)}</span></div>
-      ${coupon?`<div class="rc-line"><span>쿠폰 할인</span><span>−${won(coupon)}</span></div>`:''}
+      ${hide
+        ? `<div class="rc-hidden">주문 내역을 가렸어요 · [주문 내역 보기]로 다시 볼 수 있어요</div>`
+        : `${Object.entries(groups).map(([sid,items])=>`
+            <div class="rc-store">${store(sid).logo} ${store(sid).name}</div>
+            ${items.map(it=>`<div class="rc-line"><span>${it.name}${it.opt?' · '+it.opt:''} ×${it.qty}</span><span>${won(it.price*it.qty)}</span></div>`).join('')}
+          `).join('')}
+          <div class="rc-hr"></div>
+          <div class="rc-line"><span>상품 합계</span><span>${won(sub)}</span></div>
+          ${coupon?`<div class="rc-line"><span>쿠폰 할인</span><span>−${won(coupon)}</span></div>`:''}`}
       <div class="rc-line rc-total"><span>${canceled?'환불 예정 금액':'결제금액'}</span><span>${won(total)}</span></div>
-      <div class="rc-line dim"><span>결제수단</span><span>${p.pay}</span></div>
+      <div class="rc-line dim"><span>결제수단</span><span>${payMasked}</span></div>
       ${canceled?`<div class="rc-cancelbox">↩️ ${p.cancel}</div>`:''}
       <div class="rc-hr"></div>
-      <div class="rc-foot">본 영수증은 전자적으로 발행된 거래 확인 내역이에요. 세금계산서·현금영수증과는 별개예요.</div>
+      ${Object.keys(groups).map(sid=>{const i=store(sid).info||{};return `<div class="rc-biz">
+        <div class="rc-biz-h">${store(sid).name}</div>
+        <div class="rc-biz-row">사업자등록번호 ${i.regno||'-'}</div>
+        ${i.address?`<div class="rc-biz-row">${i.address}</div>`:''}
+      </div>`;}).join('')}
+      <div class="rc-barcode"><div class="rc-bars"></div><div class="rc-bc-no">${p.id} · 8801234 567890</div></div>
+      <div class="rc-actions">
+        <button class="rc-act" onclick="toast('영수증 이미지를 저장했어요')">영수증 저장</button>
+        <button class="rc-act naver" onclick="toast('네이버 영수증 리뷰로 이동','MY플레이스 영수증 인증 화면으로 연결돼요')">네이버 리뷰 남기기</button>
+      </div>
+      <div class="rc-foot">전자영수증은 발송일로부터 <b>1년</b>까지 확인할 수 있어요 · 거래 기록은 관련 법령에 따라 보관돼요.<br>본 영수증은 전자적으로 발행된 거래 확인 내역이에요 · 세금계산서·현금영수증과는 별개예요. 고객 정보(이름·연락처)는 표기하지 않아요.</div>
     </div>`;
   document.getElementById('receiptModal').classList.add('on'); syncBgLock();
 }
+function toggleRcHide(){ S.rcHide=!S.rcHide; openReceipt(S._rcId); }
 function closeReceipt(){ const el=document.getElementById('receiptModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 
 /* ── 상황 전체화면 공통 ── */

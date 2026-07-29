@@ -500,25 +500,6 @@
   .cta-btn:disabled{background:var(--line);color:var(--ink4);}
   .cta-btn .amt{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:8px;font-size:14px;}
   .cta-sub{font-size:12px;color:var(--ink3);text-align:center;margin-bottom:9px;}
-  /* 하단 고정 바 — 담긴 게 있으면 장바구니 CTA(좌·색, 넓게) + 주문내역(우·소형), 없으면 주문내역만 우측 */
-  .bottombar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;z-index:40;
-    display:flex;gap:9px;align-items:stretch;justify-content:flex-end;
-    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
-    background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(20,20,25,.07);pointer-events:none;}
-  .bottombar > *{pointer-events:auto;}
-  .bb-cart{flex:1;background:var(--persimmon);color:#fff;border:none;border-radius:14px;padding:16px 18px;
-    font-size:15.5px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:8px;
-    box-shadow:0 8px 20px rgba(232,80,30,.30);}
-  .bb-cart:active{transform:translateY(1px) scale(.995);}
-  .bb-cart .amt{margin-left:auto;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:8px;font-size:14px;font-weight:900;}
-  .bb-hist{background:var(--persimmon);color:#fff;border:none;border-radius:14px;
-    padding:16px 18px;font-size:14.5px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;
-    box-shadow:0 8px 20px rgba(92,140,218,.30);display:inline-flex;align-items:center;justify-content:center;gap:7px;}
-  .bb-hist:active{transform:scale(.97);}
-  /* 장바구니와 함께일 때: 주문내역은 톤다운된 보조(틴트) 버튼 — 장바구니가 주 액션 */
-  .bb-hist.compact{background:var(--blue-50);color:var(--blue-d);border:1px solid #CFDDF6;box-shadow:none;padding:16px 15px;font-size:13.5px;}
-  /* 담긴 게 없으면 주문내역이 장바구니 자리를 대체해 전체 너비 솔리드 컬러 주 버튼으로 */
-  .bottombar:not(.has-cart) .bb-hist{flex:1;font-size:15.5px;}
 
   /* 성인인증 모달 */
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center;}
@@ -1301,21 +1282,21 @@ function scHome(){
     <div class="storelist">${storelistHTML()}</div>
     <div style="height:${(S.payScope==='unified'&&S.cart.length)?150:78}px"></div>
   </div>
-  ${bottomBar()}`;
+  ${histFab()}
+  ${S.payScope==='unified'?cartBar():''}`;
 }
-// 하단 고정 바 — 장바구니에 담긴 게 있으면 장바구니 CTA(좌·색, 넓게) + 주문내역(우·소형),
-// 없으면 주문내역만 우측 소형으로. 주문내역은 장바구니처럼 항상 하단 배치.
-function bottomBar(){
-  const cartActive = S.cart.length && (S.screen==='store' || (S.screen==='home' && S.payScope==='unified'));
-  let cartBtn='';
-  if(cartActive){
-    const cnt=S.cart.reduce((a,c)=>a+c.qty,0);
-    const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
-    const brk = S.payScope==='separate' ? `[${store(S.cart[0].store).name}] ` : '';
-    cartBtn = `<button class="bb-cart" onclick="go('cart')">🛒 ${brk}장바구니 ${cnt}개 <span class="amt">${won(sum)}</span></button>`;
-  }
-  const histBtn = `<button class="bb-hist ${cartActive?'compact':''}" onclick="go('history')">🧾 주문 내역</button>`;
-  return `<div class="bottombar ${cartActive?'has-cart':''}">${histBtn}${cartBtn}</div>`;
+// 주문 내역 진입 (device 컬럼 우측 하단 플로팅) · 매장 장바구니 바가 있으면 위로 띄움
+function histFab(){
+  const cartBarShown = S.cart.length && (S.screen==='store' || (S.screen==='home' && S.payScope==='unified'));
+  return `<div class="hist-fabwrap" style="bottom:${cartBarShown?96:20}px"><button class="hist-fab" onclick="go('history')">🧾 주문 내역</button></div>`;
+}
+// 하단 고정 장바구니 바
+function cartBar(){
+  if(!S.cart.length) return '';
+  const cnt=S.cart.reduce((a,c)=>a+c.qty,0);
+  const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
+  const brk = S.payScope==='separate' ? `[${store(S.cart[0].store).name}] ` : '';
+  return `<div class="cta"><button class="cta-btn" onclick="go('cart')">🛒 ${brk}장바구니 ${cnt}개 <span class="amt">${won(sum)}</span></button></div>`;
 }
 function scardHTML(s){
   // 매장 그룹(홈) 목록에는 대기 정보 미노출 — 대기가 긴 매장이 선택에서 불리해지지 않도록
@@ -1482,7 +1463,8 @@ function scStore(){
       <div style="height:78px"></div>
     `}
   </div>
-  ${bottomBar()}
+  ${histFab()}
+  ${cartBar()}
   `;
 }
 function mcardHTML(sid,m,closed){

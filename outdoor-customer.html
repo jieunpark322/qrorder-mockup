@@ -2551,6 +2551,53 @@ function full(ic,t,b,btn,target,note){
 }
 function back(){ go(S.mode==='group'?'home':'store'); }
 
+/* ── 바텀 시트 끌어내려 닫기 ──
+   손가락을 내리는 만큼 시트가 그대로 따라 내려가고(iOS 시트와 동일한 감각),
+   일정 거리 이상 내리면 닫히고 그보다 짧으면 제자리로 돌아감.
+   시트 안쪽 스크롤과 충돌하지 않도록 '내용이 맨 위(scrollTop 0)일 때'만 끌어내리기가 시작됨. */
+function attachSheetDrag(sheet, onClose){
+  if(!sheet || sheet._dragBound) return;
+  sheet._dragBound = true;
+  const TH = 90;   // 이 거리(px) 이상 내리면 닫힘
+  let y0=null, dy=0, dragging=false;
+  const scroller = () => sheet.querySelector('.ms-scroll, .pay-scroll, .rc-scroll');
+  const atTop = () => { const sc=scroller(); return !sc || sc.scrollTop<=0; };
+  const setY = v => { sheet.style.transform = v ? `translateY(${v}px)` : ''; };
+  const start = y => { if(!atTop()) return; y0=y; dy=0; dragging=false; sheet.style.transition='none'; sheet.style.animation='none'; };
+  const move = (y,ev) => {
+    if(y0==null) return;
+    dy = y - y0;
+    if(dy<=0){ if(!dragging) y0=y; return; }   // 위로 올리는 동작은 무시(기준점만 재설정)
+    dragging=true; setY(dy);
+    if(ev && ev.cancelable) ev.preventDefault();   // 끌어내리는 중 배경이 함께 스크롤되지 않게
+  };
+  const end = () => {
+    if(y0==null) return;
+    const shouldClose = dragging && dy>=TH;
+    y0=null; dy=0; dragging=false;
+    sheet.style.transition='transform .26s cubic-bezier(.4,0,.2,1)';
+    if(shouldClose){
+      setY(sheet.getBoundingClientRect().height);   // 손가락 방향(아래)으로 끝까지 밀어내며 닫힘
+      setTimeout(()=>{ sheet.style.transition=''; sheet.style.transform=''; sheet.style.animation=''; onClose(); }, 220);
+    } else {
+      setY(0);
+      setTimeout(()=>{ sheet.style.transition=''; sheet.style.animation=''; }, 260);
+    }
+  };
+  sheet.addEventListener('touchstart', e=>start(e.touches[0].clientY), {passive:true});
+  sheet.addEventListener('touchmove',  e=>move(e.touches[0].clientY, e), {passive:false});
+  sheet.addEventListener('touchend',   end);
+  sheet.addEventListener('touchcancel',end);
+  sheet.addEventListener('mousedown',  e=>start(e.clientY));           // 데스크톱 확인용 드래그
+  sheet.addEventListener('mousemove',  e=>{ if(y0!=null) move(e.clientY, e); });
+  sheet.addEventListener('mouseup',    end);
+  sheet.addEventListener('mouseleave', end);
+}
+// 바텀 시트는 HTML에 고정으로 있고 내용만 갈아끼우므로 시작 시 한 번만 연결
+[['menuSheetInner',closeMenuSheet],['receiptInner',closeReceipt],['noticeInner',closeNotice],
+ ['termsInner',closeTerms],['payInner',closePaySheet]]
+  .forEach(([id,fn])=>attachSheetDrag(document.getElementById(id), fn));
+
 /* ══════════════ 시작 ══════════════ */
 restart();
 </script>

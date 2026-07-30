@@ -866,7 +866,11 @@
   .blockbanner.break{background:#FBF1DB;color:#9A6B08;border:1px solid #F0DDA8;}
   /* 성인 메뉴 안내 (메뉴 상세) */
   .d-adult{margin-top:12px;background:#FDECEC;border:1px solid #F5C6C6;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:#C0392B;line-height:1.5;}
-  .d-reuse{margin-top:12px;background:#E6F6EE;border:1px solid #C7EAD8;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:#1E7A52;line-height:1.5;}
+  /* 안내 바 — 납작한 단색 테두리 상자 대신 입체감 있는 긴 bar에 문구를 얹음 */
+  .d-reuse{margin-top:12px;display:flex;align-items:center;gap:8px;border:none;border-radius:22px;padding:12px 16px;
+    font-size:13px;font-weight:700;color:#12603C;line-height:1.4;letter-spacing:-.01em;
+    background:linear-gradient(180deg,#F2FBF6 0%,#DFF3E8 55%,#CFEBDD 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 4px rgba(23,120,78,.10) inset, 0 2px 5px rgba(23,120,78,.13), 0 6px 14px rgba(23,120,78,.10);}
   /* 섹션 보조 설명 */
   .sect-sub{font-size:12.5px;color:var(--ink3);line-height:1.55;margin:-2px 0 11px;}
   .sect-sub b{color:var(--persimmon-d);font-weight:800;}
@@ -1786,7 +1790,7 @@ function renderMenuSheet(){
           <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
           ${(m.allergy||m.nutrition)?`<button class="d-info-btn" style="margin-top:0;flex-shrink:0" onclick="openMenuInfo()">메뉴 정보</button>`:''}
         </div>
-        ${m.reuse?`<div class="d-reuse">♻️ 다회용기로 제공되는 메뉴예요 · 사용 후 용기 반납이 필요해요</div>`:''}
+        ${m.reuse?`<div class="d-reuse">♻️ 사용 후 용기 반납이 필요한 다회용기 제공 메뉴예요.</div>`:''}
         ${disabled?'':orderControls}
       </div>
     </div>

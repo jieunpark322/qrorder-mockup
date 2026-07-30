@@ -2254,7 +2254,7 @@ function scCheckout(){
     <div class="sect"><div class="sect-h">요청사항</div>
       ${(()=>{ const sids=[...new Set(S.cart.map(c=>c.store))];
         return sids.length>1
-          ? `<div class="sect-sub">매장마다 준비가 따로라, 요청사항도 <b>매장별로</b> 남겨 주세요.</div>
+          ? `<div class="sect-sub">준비가 매장별로 진행되어 요청사항도 <b>매장별로</b> 입력해 주세요.</div>
              ${sids.map((sid,i)=>`<div class="req-store">
                <div class="req-store-h"><span class="store-no">${i+1}</span>${store(sid).name}</div>
                <textarea class="field" maxlength="50" placeholder="이 매장에 전달할 요청사항" oninput="document.getElementById('rc-${sid}').textContent=this.value.length"></textarea>

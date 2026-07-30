@@ -2216,10 +2216,10 @@ const stepLabel = st => (st==='준비완료'&&isDelivery()) ? '배달중' : st;
 const canPickup = status => status==='준비완료' && !isDelivery();
 // 현재 단계 인덱스(배달중은 3번째=준비완료 칸에 매핑)
 const stepIdx = status => { const cur = status==='배달중'?'준비완료':status; return Math.max(0, HIST_STEPS.indexOf(cur)); };
-// 시안 B — 세그먼트 바 + 4단계 라벨 (준비완료·수령완료=그린, 그 외=블루)
+// 시안 B — 세그먼트 바 + 4단계 라벨 (준비완료만 강조색, 나머지 단계는 전부 동일 색으로 통일)
 function stepBarHTML(status){
   const idx = stepIdx(status);
-  const green = (status==='준비완료' || status==='수령완료');
+  const green = status==='준비완료';
   const fill = green ? 'g' : 'b';
   const segs = HIST_STEPS.map((_,i)=>`<span class="oh-st-seg ${i===idx?(fill+' cur'):''}"></span>`).join('');
   const labels = HIST_STEPS.map((st,i)=>{

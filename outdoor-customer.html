@@ -2170,7 +2170,7 @@ function renderCouponPick(){
     <div class="ms-grab"><span></span></div>
     <button class="ms-close" onclick="closeCouponPick()">✕</button>
     <div class="sheet-t">어느 매장에 쓸까요?</div>
-    <div class="sheet-s">🎟️ ${cp.name}은 고른 매장 한 곳에만 적용돼요.</div>
+    <div class="sheet-s">할인은 선택하신 매장 한 곳에만 적용돼요.</div>
     <div style="margin-top:16px">${rows}</div>
     <button class="cta-btn" style="margin-top:6px" ${chosen?'':'disabled'} onclick="commitCoupon('${cp.id}','${chosen}')">${chosen?'적용하기':'매장을 선택해 주세요'}</button>`;
 }

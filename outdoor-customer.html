@@ -1024,16 +1024,29 @@
   .minwarn.multiline span + span{margin-top:3px;}
 
   /* 쿠폰 적용 매장 선택 — 담은 매장별 소계와 예상 할인액을 함께 보여줌 */
-  .cpick{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;cursor:pointer;font-family:inherit;text-align:left;
-    border:1px solid var(--line);border-radius:13px;padding:13px 15px;background:linear-gradient(180deg,#FFFFFF 0%,#F7F7F9 100%);
-    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 -1px 0 rgba(30,30,40,.05) inset, 0 2px 5px rgba(20,20,25,.06);}
+  #couponPickInner{position:relative;}
+  #couponPickInner .ms-close{background:rgba(0,0,0,.22);}
+  .cpick{width:100%;display:flex;align-items:center;gap:11px;margin-bottom:9px;cursor:pointer;font-family:inherit;text-align:left;
+    border:1px solid var(--line);border-radius:13px;padding:13px 15px;background:#fff;transition:border-color .12s, background .12s;}
   .cpick:active{transform:translateY(1px);}
-  .cpick-l{display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .cpick.on{border-color:var(--persimmon);border-width:1.5px;background:var(--blue-50);}
+  /* 매장 앞 번호 — 임의 이모지 대신 담은 매장이 몇 곳인지 자연스럽게 인지되도록 */
+  .cpick-no{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--bg);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--ink3);}
+  .cpick.on .cpick-no{background:var(--persimmon);border-color:var(--persimmon);color:#fff;}
+  .cpick-l{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;}
   .cpick-n{font-size:14.5px;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .cpick-s{font-size:12px;font-weight:600;color:var(--ink3);}
   .cpick-d{flex-shrink:0;font-size:15px;font-weight:900;color:#C0392B;}
-  .cpick.dis{opacity:.5;cursor:not-allowed;box-shadow:none;}
+  .cpick.dis{opacity:.5;cursor:not-allowed;}
   .cpick.dis .cpick-d{font-size:12px;font-weight:700;color:var(--ink3);}
+
+  /* 매장 번호 배지 — 매장 로고 이모지는 매장이 바뀌어도 그대로여서 오히려 오해를 부르므로,
+     담은 매장이 몇 곳인지 바로 세어지도록 번호로 표기 */
+  .store-no{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+    width:19px;height:19px;border-radius:50%;margin-right:7px;
+    background:var(--blue-50);color:var(--persimmon-d);font-size:11px;font-weight:800;line-height:1;vertical-align:-0.15em;}
+  .store-no.sm{width:16px;height:16px;font-size:10px;margin-right:5px;}
 
   /* ── 주문 내역 '매장별로 모아보기' — 매장명을 상위 제목으로, 회차는 카드 안 보조 정보로 ── */
   .oh-store-sec{margin-top:20px;}
@@ -2132,26 +2145,34 @@ function releaseCoupon(cid){
   if(S.couponScope) delete S.couponScope[cid];
   render();
 }
-/* 적용 매장 선택 시트 — 담은 매장별 소계와 예상 할인액을 함께 보여줌 */
+/* 적용 매장 선택 시트 — 매장을 고르면 바로 닫지 않고, [적용하기]를 눌러야 확정됨 */
 function openCouponPick(cid){
   const cp=COUPONS.find(c=>c.id===cid); if(!cp) return;
-  S._pickCid=cid;
-  const rows=cartStoreIds().map(sid=>{
+  S._pickCid=cid; S._pickSid=null;
+  renderCouponPick();
+  document.getElementById('couponPickModal').classList.add('on'); syncBgLock();
+}
+function pickCouponStore(sid){ S._pickSid=sid; renderCouponPick(); }
+function renderCouponPick(){
+  const cp=COUPONS.find(c=>c.id===S._pickCid); if(!cp) return;
+  const chosen=S._pickSid;
+  const rows=cartStoreIds().map((sid,i)=>{
     const sub=storeSum(sid);
     const disc=cp.type==='amount' ? Math.min(cp.value,sub) : Math.min(Math.round(sub*cp.value/100), cp.maxDisc||Infinity);
     const ok=sub>=(cp.minOrder||0);
-    return `<button class="cpick ${ok?'':'dis'}" ${ok?`onclick="commitCoupon('${cid}','${sid}')"`:'disabled'}>
-      <span class="cpick-l"><span class="cpick-n">${store(sid).logo} ${store(sid).name}</span><span class="cpick-s">담은 금액 ${won(sub)}</span></span>
+    return `<button class="cpick ${ok?'':'dis'} ${chosen===sid?'on':''}" ${ok?`onclick="pickCouponStore('${sid}')"`:'disabled'}>
+      <span class="cpick-no">${i+1}</span>
+      <span class="cpick-l"><span class="cpick-n">${store(sid).name}</span><span class="cpick-s">담은 금액 ${won(sub)}</span></span>
       <span class="cpick-d">${ok?`−${won(disc)}`:`${won(cp.minOrder)} 이상`}</span>
     </button>`;
   }).join('');
   document.getElementById('couponPickInner').innerHTML=`
     <div class="ms-grab"><span></span></div>
+    <button class="ms-close" onclick="closeCouponPick()">✕</button>
     <div class="sheet-t">어느 매장에 쓸까요?</div>
-    <div class="sheet-s">🎟️ ${cp.name} · 고른 매장 한 곳에만 적용돼요.</div>
+    <div class="sheet-s">🎟️ ${cp.name}은 고른 매장 한 곳에만 적용돼요.</div>
     <div style="margin-top:16px">${rows}</div>
-    <button class="ghostbtn" onclick="closeCouponPick()">닫기</button>`;
-  document.getElementById('couponPickModal').classList.add('on'); syncBgLock();
+    <button class="cta-btn" style="margin-top:6px" ${chosen?'':'disabled'} onclick="commitCoupon('${cp.id}','${chosen}')">${chosen?`${store(chosen).name}에 적용하기`:'매장을 선택해 주세요'}</button>`;
 }
 function closeCouponPick(){ const el=document.getElementById('couponPickModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 
@@ -2184,8 +2205,8 @@ function scCheckout(){
       ${(()=>{ const sids=[...new Set(S.cart.map(c=>c.store))];
         return sids.length>1
           ? `<div class="sect-sub">매장마다 준비가 따로라, 요청사항도 <b>매장별로</b> 남겨 주세요.</div>
-             ${sids.map(sid=>`<div class="req-store">
-               <div class="req-store-h">${store(sid).logo} ${store(sid).name}</div>
+             ${sids.map((sid,i)=>`<div class="req-store">
+               <div class="req-store-h"><span class="store-no">${i+1}</span>${store(sid).name}</div>
                <textarea class="field" maxlength="50" placeholder="이 매장에 전달할 요청사항" oninput="document.getElementById('rc-${sid}').textContent=this.value.length"></textarea>
                <div class="cnt"><span id="rc-${sid}">0</span>/50</div>
              </div>`).join('')}`
@@ -2403,7 +2424,7 @@ function scDone(){
     <div class="multi-pick">
       <div class="mp-h">🏪 매장별로 따로 받아요</div>
       <div class="mp-b"><b>${sids.length}개 매장</b>에서 각각 준비돼 부스에서 따로 받게 되고, 준비가 끝나면 <b>매장마다 따로</b> 알려드려요. (통합 결제는 배달 매장이 없어 항상 포장 픽업이에요)</div>
-      <div class="mp-list">${sids.map(sid=>`<div class="mp-row"><span class="mp-s">${store(sid).logo} ${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
+      <div class="mp-list">${sids.map((sid,i)=>`<div class="mp-row"><span class="mp-s"><span class="store-no">${i+1}</span>${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
     </div>`:''}
     <div class="done-btns">
       <button class="fm-btn ghost" onclick="go('history')">주문 내역 보기</button>
@@ -2499,8 +2520,8 @@ function roundCardHTML(p, showNames){
       <div class="oh-sub-row"><span>주문번호</span><span class="v">${p.id}</span></div>
       <div class="oh-sub-row"><span>알림 연락처</span><span class="v">${p.contact}</span></div>
       <div class="oh-sub-row"><span>결제수단</span><span class="v">${p.pay}</span></div>
-      ${p.stores.map(s=>`<div class="oh-menupart">
-        <div class="oh-menupart-h">${store(s.sid).logo} ${store(s.sid).name}</div>
+      ${p.stores.map((s,i)=>`<div class="oh-menupart">
+        <div class="oh-menupart-h">${p.stores.length>1?`<span class="store-no sm">${i+1}</span>`:''}${store(s.sid).name}</div>
         ${s.items.map(it=>`<div class="oh-sub-row"><span>${it.name}${it.opt?' · '+it.opt:''} ×${it.qty}</span><span class="v">${won(it.price*it.qty)}</span></div>`).join('')}
       </div>`).join('')}
     </div>`:''}

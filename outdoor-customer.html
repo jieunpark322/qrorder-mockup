@@ -985,6 +985,35 @@
     opacity:1;transition:opacity .2s ease;}
   .scroll-cue svg{width:16px;height:16px;}
   .cchip-scroll.at-end .scroll-cue{opacity:0;}
+
+  /* ── 고객 안내 bar (공통) ──────────────────────
+     납작한 단색 테두리 상자가 아니라, 입체감 있는 긴 bar 안에 문구를 얹는 방식으로 통일.
+     문구는 한 문장으로 쓰고, 부가 조건은 괄호로 덧붙임(불필요하게 두 문장으로 쪼개지 않음). */
+  .d-reuse,.scope-note,.multi-note,.deliver-fix,.cart-scope-note,.waitline,.minwarn,.minok{
+    display:flex;align-items:center;gap:8px;border:none;border-radius:22px;padding:12px 16px;
+    font-size:13px;font-weight:700;line-height:1.45;letter-spacing:-.01em;}
+  /* 초록 — 완료·친환경 */
+  .d-reuse,.minok{color:#12603C;background:linear-gradient(180deg,#F2FBF6 0%,#DFF3E8 55%,#CFEBDD 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 4px rgba(23,120,78,.10) inset, 0 2px 5px rgba(23,120,78,.13), 0 6px 14px rgba(23,120,78,.10);}
+  .minok{margin-top:12px;}
+  /* 파랑 — 일반 안내 */
+  .scope-note,.deliver-fix{color:#1B4E8F;background:linear-gradient(180deg,#F4F8FE 0%,#E3EDFB 55%,#D3E2F7 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 4px rgba(30,80,150,.10) inset, 0 2px 5px rgba(30,80,150,.13), 0 6px 14px rgba(30,80,150,.10);}
+  .scope-note{margin:12px 14px 0;}
+  /* 뉴트럴 — 대기 정보 */
+  .waitline{margin:11px 18px 0;color:var(--ink2);background:linear-gradient(180deg,#FCFCFD 0%,#F1F1F4 55%,#E7E7EB 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 -2px 4px rgba(30,30,40,.07) inset, 0 2px 5px rgba(30,30,40,.09), 0 6px 14px rgba(30,30,40,.07);}
+  .waitline b{color:var(--ink);font-weight:800;}
+  /* 앰버 — 알아두면 좋은 주의 */
+  .multi-note{margin:12px 0 0;color:#7A5A12;background:linear-gradient(180deg,#FFFCF4 0%,#FDF2DC 55%,#F8E7C4 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 4px rgba(150,110,20,.10) inset, 0 2px 5px rgba(150,110,20,.13), 0 6px 14px rgba(150,110,20,.10);}
+  /* 레드 — 진행 전 확인 필요 */
+  .minwarn,.cart-scope-note{color:#A32020;background:linear-gradient(180deg,#FEF6F6 0%,#FBE4E4 55%,#F7D2D2 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 4px rgba(160,40,40,.10) inset, 0 2px 5px rgba(160,40,40,.13), 0 6px 14px rgba(160,40,40,.10);}
+  .minwarn{margin-top:12px;}
+  .cart-scope-note{margin:12px 14px 0;}
+  /* 여러 줄이 필요한 경우(매장별 부족 목록 등)만 위 정렬로 전환 */
+  .minwarn.multiline{align-items:flex-start;flex-direction:column;gap:4px;}
 </style>
 </head>
 <body>
@@ -1086,7 +1115,7 @@ const STORES = [
   { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=760&q=72',
     open:true, desc:'매일 아침 손으로 반죽한 패티와 갓 구운 번으로 만드는 수제버거 트럭이에요.', loc:'부스 3번', waitCount:'12팀', waitTime:'약 15분', rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260, brkStart:900, brkEnd:960,   /* 영업 11:00~21:00, 브레이크 15:00~16:00 (분) */
-    info:{ceo:'김철수', regno:'123-45-67890', address:'서울 마포구 성미산로 000 · A구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
+    info:{ceo:'김철수', regno:'123-45-67890', bizAddr:'서울 마포구 월드컵로 12, 3층', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
       {id:'b1', cat:'버거', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null, allergy:'밀·대두·우유·달걀 함유', nutrition:'약 620kcal'},
       {id:'b5', cat:'버거', name:'베이컨 랩', desc:'바삭 베이컨 + 토르티야 랩', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
@@ -1098,7 +1127,7 @@ const STORES = [
   { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=760&q=72',
     open:true, desc:'매일 직접 로스팅한 원두로 내린 커피와 갓 구운 베이커리를 즐길 수 있는 동네 카페예요.', loc:'부스 1번', waitCount:'3팀', waitTime:'약 5분', rep:'핸드드립 아메리카노', cat:'음료', cat2:'B구역',
     ohStart:660, ohEnd:1260,   /* 영업 11:00~21:00 */
-    info:{ceo:'이영희', regno:'234-56-78901', address:'서울 마포구 성미산로 000 · B구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
+    info:{ceo:'이영희', regno:'234-56-78901', bizAddr:'서울 서대문구 연희로 44', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
     menus:[
       {id:'c1', cat:'커피', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true, upsell:true},
       {id:'c2', cat:'커피', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true, allergy:'우유 함유', nutrition:'약 250kcal'},
@@ -1108,11 +1137,11 @@ const STORES = [
   { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=760&q=72',
     open:false, desc:'겉은 바삭하고 속은 촉촉한, 매일 신선하게 튀겨내는 치킨 전문점이에요.', loc:'부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1200,   /* 영업 11:00~20:00 */
-    info:{ceo:'박민수', regno:'345-67-89012', address:'서울 마포구 성미산로 000 · C구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
+    info:{ceo:'박민수', regno:'345-67-89012', bizAddr:'경기 고양시 덕양구 화중로 21', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
   { id:'taco', name:'소프트타코', logo:'🌮', thumb:'https://loremflickr.com/240/240/taco?lock=4', cover:'https://loremflickr.com/760/430/taco,mexican?lock=4',
     open:true, desc:'정통 멕시칸 레시피 그대로, 즉석에서 만드는 타코와 나초를 맛볼 수 있어요.', loc:'부스 5번', waitCount:'6팀', waitTime:'약 10분', rep:'비프 타코', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'최지우', regno:'456-78-90123', address:'서울 마포구 성미산로 000 · A구역 5번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소고기: 호주산 · 토르티야(밀): 미국산'},
+    info:{ceo:'최지우', regno:'456-78-90123', bizAddr:'서울 용산구 이태원로 88, 1층', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소고기: 호주산 · 토르티야(밀): 미국산'},
     menus:[
       {id:'t1', cat:'타코', name:'비프 타코 2P', desc:'살사·과카몰리', price:6500, badges:['hot'], img:'🌮', photo:'https://loremflickr.com/320/320/taco?lock=41', upsell:true},
       {id:'t2', cat:'사이드', name:'나초 치즈', desc:'할라피뇨 추가 가능', price:6000, was:6000, img:'🧀', photo:'https://loremflickr.com/320/320/nachos?lock=42', left:4},
@@ -1120,7 +1149,7 @@ const STORES = [
   { id:'juice', name:'소프트주스바', logo:'🧃', thumb:'https://loremflickr.com/240/240/juice?lock=9', cover:'',   /* 커버 미등록 데모 — 상세에서 커버 영역 없이 표시 */
     open:true, desc:'매일 아침 들여온 제철 과일로 그 자리에서 바로 짜드리는 생과일 주스바예요.', loc:'부스 5번', waitCount:'2팀', waitTime:'약 3분', rep:'생과일 착즙주스', cat:'음료', cat2:'C구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'오세훈', regno:'890-12-34567', address:'서울 마포구 성미산로 000 · C구역 5번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'과일: 국내산'},
+    info:{ceo:'오세훈', regno:'890-12-34567', bizAddr:'서울 강서구 공항대로 210', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'과일: 국내산'},
     menus:[
       {id:'j1', cat:'생과일주스', name:'생오렌지 주스', desc:'착즙 그대로', price:5000, badges:['rec'], img:'🍊', photo:'https://loremflickr.com/320/320/orangejuice?lock=91', reuse:true, upsell:true},
       {id:'j2', cat:'스무디', name:'딸기 스무디', desc:'생딸기 듬뿍', price:6000, img:'🍓', photo:'https://loremflickr.com/320/320/strawberry,smoothie?lock=92'},
@@ -1128,7 +1157,7 @@ const STORES = [
   { id:'dessert', name:'소프트디저트', logo:'🍰', thumb:'https://loremflickr.com/240/240/dessert?lock=5', cover:'https://loremflickr.com/760/430/dessert,cake?lock=5',
     open:true, desc:'달콤한 시나몬 슈가를 듬뿍 입힌 즉석 수제 츄러스와 아이스크림을 즐길 수 있어요.', loc:'부스 4번', waitCount:'2팀', waitTime:'약 4분', rep:'수제 츄러스', cat:'디저트', cat2:'B구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'한소민', regno:'567-89-01234', address:'서울 마포구 성미산로 000 · B구역 4번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
+    info:{ceo:'한소민', regno:'567-89-01234', bizAddr:'서울 마포구 동교로 17, 2층', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
     menus:[
       {id:'de1', cat:'츄러스', name:'수제 츄러스', desc:'시나몬 슈가', price:4000, badges:['rec'], img:'🥨', photo:'https://loremflickr.com/320/320/churros?lock=51', reuse:true, upsell:true},
       {id:'de2', cat:'아이스크림', name:'소프트 아이스크림', desc:'바닐라 / 초코', price:3500, img:'🍦', photo:'https://loremflickr.com/320/320/icecream?lock=52'},
@@ -1136,7 +1165,7 @@ const STORES = [
   { id:'pizza', name:'소프트피자', logo:'🍕', thumb:'https://loremflickr.com/240/240/pizza?lock=6', cover:'https://loremflickr.com/760/430/pizza?lock=6',
     open:true, desc:'장작 화덕에서 바로 구워내는 얇고 바삭한 도우의 정통 이탈리안 피자예요.', loc:'부스 6번', waitCount:'9팀', waitTime:'약 12분', rep:'화덕 마르게리타', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'정우성', regno:'678-90-12345', address:'서울 마포구 성미산로 000 · A구역 6번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 치즈: 국내산 · 토마토: 이탈리아산'},
+    info:{ceo:'정우성', regno:'678-90-12345', bizAddr:'경기 성남시 분당구 판교로 55', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 치즈: 국내산 · 토마토: 이탈리아산'},
     menus:[
       {id:'p1', cat:'피자', name:'마르게리타 피자', desc:'화덕 도우 · 바질', price:9000, badges:['hot'], img:'🍕', photo:'https://loremflickr.com/320/320/margherita,pizza?lock=61', upsell:true},
       {id:'p2', cat:'피자', name:'페퍼로니 피자', desc:'더블 페퍼로니', price:10500, was:12000, img:'🍕', photo:'https://loremflickr.com/320/320/pepperoni,pizza?lock=62'},
@@ -1145,7 +1174,7 @@ const STORES = [
   { id:'ramen', name:'소프트라멘', logo:'🍜', thumb:'https://loremflickr.com/240/240/ramen?lock=7', cover:'https://loremflickr.com/760/430/ramen,noodle?lock=7',
     open:true, paused:true, desc:'12시간 우려낸 진한 돈코츠 육수로 끓여내는 정통 일본식 라멘 맛집이에요.', loc:'부스 2번', waitCount:'15팀', waitTime:'약 20분', rep:'돈코츠 라멘', cat:'푸드', cat2:'B구역',
     ohStart:660, ohEnd:1200,
-    info:{ceo:'강동원', regno:'789-01-23456', address:'서울 마포구 성미산로 000 · B구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'돼지고기: 국내산 · 면(밀): 국내산'},
+    info:{ceo:'강동원', regno:'789-01-23456', bizAddr:'서울 종로구 자하문로 9', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'돼지고기: 국내산 · 면(밀): 국내산'},
     menus:[
       {id:'r1', cat:'라멘', name:'돈코츠 라멘', desc:'진한 돼지사골 국물', price:8500, badges:['hot'], img:'🍜', photo:'https://loremflickr.com/320/320/tonkotsu,ramen?lock=71', reuse:true},
       {id:'r2', cat:'사이드', name:'차슈 추가', desc:'부드러운 차슈 3점', price:2500, img:'🥩', photo:'https://loremflickr.com/320/320/chashu,pork?lock=72', upsell:true},
@@ -1153,7 +1182,7 @@ const STORES = [
   { id:'hotdog', name:'소프트핫도그', logo:'🌭', thumb:'https://loremflickr.com/240/240/hotdog?lock=8', cover:'https://loremflickr.com/760/430/hotdog?lock=8',
     open:true, desc:'겉바속촉 큐브 감자를 통째로 올린 이 행사장 대표 명물 핫도그예요.', loc:'부스 3번', waitCount:'4팀', waitTime:'약 6분', rep:'명물 감자핫도그', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'손예진', regno:'890-12-34567', address:'서울 마포구 성미산로 000 · C구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소시지(돼지): 국내산 · 감자: 국내산'},
+    info:{ceo:'손예진', regno:'890-12-34567', bizAddr:'인천 남동구 구월로 130', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소시지(돼지): 국내산 · 감자: 국내산'},
     menus:[
       {id:'h1', cat:'핫도그', name:'감자 핫도그', desc:'겉바속촉 큐브감자', price:4500, badges:['hot'], img:'🌭', photo:'https://loremflickr.com/320/320/corndog?lock=81', upsell:true},
       {id:'h2', cat:'핫도그', name:'모짜렐라 핫도그', desc:'쭉 늘어나는 치즈', price:5000, badges:['rec'], img:'🧀', photo:'https://loremflickr.com/320/320/mozzarella,corndog?lock=82'},
@@ -1161,7 +1190,7 @@ const STORES = [
   { id:'ade', name:'소프트에이드', logo:'🥤', thumb:'https://loremflickr.com/240/240/lemonade?lock=9', cover:'https://loremflickr.com/760/430/lemonade,drink?lock=9',
     open:true, desc:'상큼한 제철 과일로 매장에서 직접 만드는 수제 에이드 전문점이에요.', loc:'부스 3번', waitCount:'2팀', waitTime:'약 3분', rep:'청포도 에이드', cat:'음료', cat2:'B구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'김태리', regno:'901-23-45678', address:'서울 마포구 성미산로 000 · B구역 3번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'청포도: 칠레산 · 레몬: 미국산'},
+    info:{ceo:'김태리', regno:'901-23-45678', bizAddr:'서울 광진구 능동로 62', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'청포도: 칠레산 · 레몬: 미국산'},
     menus:[
       {id:'a1', cat:'에이드', name:'청포도 에이드', desc:'상큼 톡톡', price:5000, badges:['rec'], img:'🍇', photo:'https://loremflickr.com/320/320/grape,ade?lock=91', reuse:true},
       {id:'a2', cat:'에이드', name:'자몽 에이드', desc:'상큼 쌉싸름', price:5000, was:5500, img:'🍊', photo:'https://loremflickr.com/320/320/grapefruit,ade?lock=92', upsell:true},
@@ -1169,7 +1198,7 @@ const STORES = [
   { id:'skewer', name:'소프트꼬치', logo:'🍢', thumb:'https://loremflickr.com/240/240/skewer?lock=10', cover:'https://loremflickr.com/760/430/skewer,grill?lock=10',
     open:true, desc:'숯불에 직접 구워 불맛 가득한 매콤달콤 닭꼬치를 맛볼 수 있어요.', loc:'부스 1번', waitCount:'7팀', waitTime:'약 10분', rep:'양념 닭꼬치', cat:'푸드', cat2:'D구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'조인성', regno:'012-34-56789', address:'서울 마포구 성미산로 000 · D구역 1번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'닭고기: 국내산'},
+    info:{ceo:'조인성', regno:'012-34-56789', bizAddr:'서울 동대문구 왕산로 15', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'닭고기: 국내산'},
     menus:[
       {id:'sk1', cat:'꼬치', name:'양념 닭꼬치', desc:'매콤달콤', price:3500, badges:['hot'], img:'🍢', photo:'https://loremflickr.com/320/320/chicken,skewer?lock=101', upsell:true},
       {id:'sk2', cat:'꼬치', name:'소금 닭꼬치', desc:'담백한 소금 구이', price:3500, img:'🍢', photo:'https://loremflickr.com/320/320/yakitori?lock=102'},
@@ -1177,7 +1206,7 @@ const STORES = [
   { id:'waffle', name:'소프트와플', logo:'🧇', thumb:'https://loremflickr.com/240/240/waffle?lock=11', cover:'https://loremflickr.com/760/430/waffle,dessert?lock=11',
     open:true, desc:'따뜻한 벨기에식 와플에 생크림을 듬뿍 올려드리는 디저트 트럭이에요.', loc:'부스 7번', waitCount:'5팀', waitTime:'약 7분', rep:'생크림 와플', cat:'디저트', cat2:'A구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'전지현', regno:'112-34-56780', address:'서울 마포구 성미산로 000 · A구역 7번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
+    info:{ceo:'전지현', regno:'112-34-56780', bizAddr:'서울 성동구 왕십리로 30, 4층', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
     menus:[
       {id:'w1', cat:'와플', name:'생크림 와플', desc:'딸기 토핑', price:6000, badges:['rec'], img:'🧇', photo:'https://loremflickr.com/320/320/waffle,cream?lock=111', reuse:true, upsell:true},
       {id:'w2', cat:'와플', name:'초코 와플', desc:'진한 벨기에 초코', price:6000, img:'🍫', photo:'https://loremflickr.com/320/320/chocolate,waffle?lock=112'},
@@ -1185,7 +1214,7 @@ const STORES = [
   { id:'beer', name:'소프트비어', logo:'🍺', thumb:'https://loremflickr.com/240/240/beer?lock=12', cover:'https://loremflickr.com/760/430/beer,craft?lock=12',
     open:true, desc:'직접 양조한 크래프트 비어를 시원하게 즐길 수 있는 행사장 펍이에요.', loc:'부스 2번', waitCount:'10팀', waitTime:'약 13분', rep:'수제 크래프트 비어', cat:'음료', cat2:'D구역',
     ohStart:660, ohEnd:1320,
-    info:{ceo:'하정우', regno:'223-45-67801', address:'서울 마포구 성미산로 000 · D구역 2번 부스', hours:'행사 기간 매일 11:00 ~ 22:00', origin:'맥아: 독일산 · 홉: 미국산'},
+    info:{ceo:'하정우', regno:'223-45-67801', bizAddr:'경기 부천시 원미구 중동로 77', hours:'행사 기간 매일 11:00 ~ 22:00', origin:'맥아: 독일산 · 홉: 미국산'},
     menus:[
       {id:'be1', cat:'맥주', name:'크래프트 IPA 500ml', emoji:'', desc:'현장 한정 생맥주', price:8000, badges:['hot'], img:'🍺', photo:'https://loremflickr.com/320/320/ipa,beer?lock=121', adult:true, allergy:'보리·밀 함유'},
       {id:'be2', cat:'안주', name:'감자튀김', desc:'맥주 안주로 좋아요', price:5000, img:'🍟', photo:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=320&h=320&q=72', upsell:true},
@@ -1193,7 +1222,7 @@ const STORES = [
   { id:'bunsik', name:'소프트분식', logo:'🥟', thumb:'https://loremflickr.com/240/240/tteokbokki?lock=13', cover:'https://loremflickr.com/760/430/tteokbokki,korean?lock=13',
     open:true, desc:'얼큰한 국물에 쫄깃한 떡을 넣고 즉석에서 끓여내는 분식 포장마차예요.', loc:'부스 4번', waitCount:'11팀', waitTime:'약 14분', rep:'국물 떡볶이', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1200,
-    info:{ceo:'마동석', regno:'334-56-78901', address:'서울 마포구 성미산로 000 · C구역 4번 부스', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'쌀떡: 국내산 · 고춧가루: 국내산'},
+    info:{ceo:'마동석', regno:'334-56-78901', bizAddr:'서울 관악구 봉천로 201', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'쌀떡: 국내산 · 고춧가루: 국내산'},
     menus:[
       {id:'bs1', cat:'분식', name:'국물 떡볶이', desc:'매운맛 조절 가능', price:5000, badges:['hot'], img:'🌶️', photo:'https://loremflickr.com/320/320/tteokbokki?lock=131', reuse:true},
       {id:'bs2', cat:'튀김', name:'모둠 튀김', desc:'바삭한 모둠 튀김', price:4000, badges:['rec'], img:'🍤', photo:'https://loremflickr.com/320/320/korean,fried?lock=132', upsell:true},
@@ -1201,7 +1230,7 @@ const STORES = [
   { id:'smoothie', name:'소프트스무디', logo:'🍓', thumb:'https://loremflickr.com/240/240/smoothie?lock=14', cover:'https://loremflickr.com/760/430/smoothie,fruit?lock=14',
     open:true, desc:'매일 손질한 생과일을 갈아 만드는 건강한 수제 스무디 전문점이에요.', loc:'부스 8번', waitCount:'3팀', waitTime:'약 5분', rep:'딸기 바나나 스무디', cat:'음료', cat2:'A구역',
     ohStart:660, ohEnd:1260,
-    info:{ceo:'아이유', regno:'445-67-89012', address:'서울 마포구 성미산로 000 · A구역 8번 부스', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'딸기: 국내산 · 바나나: 필리핀산'},
+    info:{ceo:'아이유', regno:'445-67-89012', bizAddr:'서울 송파구 백제고분로 41', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'딸기: 국내산 · 바나나: 필리핀산'},
     menus:[
       {id:'sm1', cat:'스무디', name:'딸기 바나나 스무디', desc:'생과일 100%', price:5500, badges:['rec'], img:'🍓', photo:'https://loremflickr.com/320/320/strawberry,smoothie?lock=141', reuse:true, upsell:true},
       {id:'sm2', cat:'스무디', name:'망고 스무디', desc:'진한 망고 과육', price:5500, img:'🥭', photo:'https://loremflickr.com/320/320/mango,smoothie?lock=142'},
@@ -1209,7 +1238,7 @@ const STORES = [
   { id:'bakery', name:'소프트베이커리', logo:'🥐', thumb:'https://loremflickr.com/240/240/bakery?lock=15', cover:'https://loremflickr.com/760/430/bakery,bread?lock=15',
     open:false, desc:'매일 새벽 구워내는 겹겹이 바삭한 버터 크루아상이 인기인 베이커리예요.', loc:'부스 5번', waitCount:'6팀', waitTime:'약 8분', rep:'버터 크루아상', cat:'디저트', cat2:'B구역',
     ohStart:600, ohEnd:1140,
-    info:{ceo:'박서준', regno:'556-78-90123', address:'서울 마포구 성미산로 000 · B구역 5번 부스', hours:'행사 기간 매일 10:00 ~ 19:00', origin:'밀: 프랑스산 · 버터: 프랑스산'},
+    info:{ceo:'박서준', regno:'556-78-90123', bizAddr:'서울 은평구 통일로 999, 1층', hours:'행사 기간 매일 10:00 ~ 19:00', origin:'밀: 프랑스산 · 버터: 프랑스산'},
     menus:[
       {id:'bk1', cat:'베이커리', name:'버터 크루아상', desc:'겹겹이 바삭한 결', price:4000, img:'🥐', photo:'https://loremflickr.com/320/320/croissant?lock=151'},
       {id:'bk2', cat:'베이커리', name:'소금빵', desc:'짭조름 고소', price:3500, img:'🥖', photo:'https://loremflickr.com/320/320/saltbread?lock=152'},
@@ -1471,7 +1500,8 @@ function histFabIcon(){
 function histFabFloat(){
   // 카트바 노출 조건은 화면마다 다름 — 홈은 통합결제일 때만, 매장 페이지는 담긴 게 있으면 항상 노출
   const cartBarShown = S.cart.length>0 && (S.screen!=='home' || S.payScope==='unified');
-  return `<div class="hist-fabwrap" style="bottom:calc(${cartBarShown?96:28}px + env(safe-area-inset-bottom))">${histFabIcon()}</div>`;
+  // 화면 맨 아래에 붙지 않도록 최소 여백(46px)을 두고, 그보다 더 내려가지 않음
+  return `<div class="hist-fabwrap" style="bottom:calc(${cartBarShown?104:46}px + env(safe-area-inset-bottom))">${histFabIcon()}</div>`;
 }
 // 하단 고정 장바구니 바
 function cartBar(){
@@ -1698,7 +1728,7 @@ function scStore(){
       <button class="mtab ${S.storeTab==='info'?'on':''}" onclick="S.storeTab='info';render()">매장 정보</button>
     </div>
     ${S.storeTab==='info' ? storeInfoHTML(s) : `
-      ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn">⚠️ 다른 매장이에요 · 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요</div>` : ''}
+      ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn">⚠️ 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요.</div>` : ''}
       <div class="cattabs">${cats.map(c=>`<button class="cchip ${c===activeCat?'on':''}" onclick="pickChip('${c}')">${c}</button>`).join('')}</div>
       ${s.menus.length===0
         ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
@@ -1739,17 +1769,19 @@ function storeInfoHTML(s){
       <div class="info-multi">${i.origin||'등록된 원산지 정보가 없어요'}</div>
       <div style="font-size:12px;color:var(--ink4);margin-top:8px">※ 원산지는 관련 법령에 따라 표기돼요</div>
     </div>
+    <!-- 매장 위치 = 사장님사이트에서 입력한 현장 간이 위치(부스 번호 등) · 사업자 신고 주소와는 별개 -->
     <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">${PIN}</span>매장 위치</div>
       <div class="row"><span>현장 위치</span><span class="v">${PIN} ${s.loc}</span></div>
-      <div style="font-size:14px;color:var(--ink2);margin-top:8px">${i.address||''}</div>
     </div>
     <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">🕒</span>운영 시간</div>
       <div class="info-multi">${i.hours||'-'}</div>
     </div>
+    <!-- 사업자 정보 = 사업자 등록 기준 정보 · 신고 주소(사업장 소재지)는 여기에만 표기 -->
     <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">🧾</span>사업자 정보</div>
       <div class="row"><span>상호</span><span class="v">${s.name}</span></div>
       <div class="row"><span>대표자</span><span class="v">${i.ceo||'-'}</span></div>
       <div class="row"><span>사업자등록번호</span><span class="v">${i.regno||'-'}</span></div>
+      <div class="row"><span>사업장 소재지</span><span class="v">${i.bizAddr||'-'}</span></div>
     </div>
   </div>`;
 }
@@ -1837,8 +1869,8 @@ function scCart(){
   <div class="hdr"><button class="bk" onclick="go('store')">‹</button><div class="ht">장바구니</div></div>
   <div class="scroll">
     ${S.payScope==='unified'
-      ? `<div class="scope-note">🧺 여러 매장 상품을 한 번에 담아 결제할 수 있어요</div>`
-      : `<div class="scope-note">🧺 한 매장씩 담아 매장별로 결제하는 방식이에요</div>`}
+      ? `<div class="scope-note">🧺 여러 매장 상품을 한 번에 담아 결제할 수 있어요.</div>`
+      : `<div class="scope-note">🧺 한 매장씩 담아 매장별로 결제하는 방식이에요.</div>`}
     <div class="sect">
       ${Object.entries(groups).map(([sid,items])=>`
         ${showStoreH?`<div class="store-group-h">🏪 ${store(sid).name}</div>`:''}
@@ -2091,11 +2123,11 @@ function scCheckout(){
       <div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-size:17px;font-weight:800;color:var(--ink)"><span>${post?'주문 금액':'최종 결제금액'}</span><span>${won(final)}</span></div>
       ${mi.on ? (mi.below
         ? (mi.basis==='group'
-            ? `<div class="minwarn">최소 주문 금액 <b>${won(mi.min)}</b>까지 <b>${won(mi.shortfall)}</b> 남았어요 · 더 담으면 ${post?'주문':'결제'}할 수 있어요<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`
-            : `<div class="minwarn">매장별 최소 주문 금액 <b>${won(mi.min)}</b> 미달 매장이 있어요<br>${mi.shortStores.map(x=>`· <b>${x.name}</b> ${won(x.need)} 더 담기`).join('<br>')}<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`)
-        : `<div class="minok">✓ ${won(mi.min)} 이상 담아서 ${post?'주문':'결제'}할 수 있어요<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`) : ''}
+            ? `<div class="minwarn"><b>${won(mi.shortfall)}</b> 더 담으면 ${post?'주문':'결제'}할 수 있어요. (통합 결제 ${won(mi.min)} 기준)</div>`
+            : `<div class="minwarn multiline"><span>아래 매장에 조금만 더 담으면 ${post?'주문':'결제'}할 수 있어요. (매장별 ${won(mi.min)} 기준)</span>${mi.shortStores.map(x=>`<span style="font-weight:600;opacity:.9">· <b>${x.name}</b> ${won(x.need)} 더 담기</span>`).join('')}</div>`)
+        : `<div class="minok">✓ ${won(mi.min)} 이상 담아서 ${post?'주문':'결제'}할 수 있어요. (${mi.label})</div>`) : ''}
     </div>
-    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note">🏪 통합 결제지만 <b>매장별로 따로 준비·픽업</b>돼요 · 매장 수만큼 <b>알림톡이 따로</b> 오고, 각 매장에서 받게 돼요 (통합 결제는 배달 매장이 없어 항상 포장 픽업)</div>`:''}
+    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note">🏪 한 번에 결제해도 준비와 픽업은 <b>매장별로 따로</b> 진행되어 <b>매장마다 알림톡이 따로</b> 도착해요.</div>`:''}
     <!-- 결제 수단 (선불형만) -->
     ${post?'':`<div class="sect"><div class="sect-h">결제 수단</div>
       <div class="pay-opt on"><span class="pic">💳</span> 신용/체크카드</div>
@@ -2528,7 +2560,7 @@ function openReceipt(id){
       ${Object.keys(groups).map(sid=>{const i=store(sid).info||{};return `<div class="rc-biz">
         <div class="rc-biz-h">${store(sid).name}</div>
         <div class="rc-biz-row">사업자등록번호 ${i.regno||'-'}</div>
-        ${i.address?`<div class="rc-biz-row">${i.address}</div>`:''}
+        ${i.bizAddr?`<div class="rc-biz-row">${i.bizAddr}</div>`:''}
       </div>`;}).join('')}
       <div class="rc-barcode"><div class="rc-bars"></div><div class="rc-bc-no">${p.id} · 8801234 567890</div></div>
       <div class="rc-actions">

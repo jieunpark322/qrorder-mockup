@@ -2196,7 +2196,7 @@ function scCheckout(){
     <!-- 쿠폰 코드 (1회용 쿠폰 코드 입력으로만 적용 · 회원 적립 쿠폰 노출 없음) -->
     <div class="sect"><div class="sect-h">쿠폰 코드 <span class="scope-chip">선택</span></div>
       <div style="display:flex;gap:8px"><input class="field" placeholder="쿠폰 코드 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()"><button class="ghostbtn" style="width:auto;margin:0;padding:0 20px;white-space:nowrap" onclick="applyCode()">적용</button></div>
-      ${(()=>{ const sel=selectedCoupons(); if(!sel.length) return `<div style="font-size:12.5px;color:var(--ink3);margin-top:8px">보유한 쿠폰 코드가 있다면 입력해 주세요.</div>`;
+      ${(()=>{ const sel=selectedCoupons(); if(!sel.length) return `<div style="font-size:12.5px;color:var(--ink3);margin-top:8px">보유한 쿠폰이 있다면 알맞은 코드 번호를 입력해 주세요.</div>`;
         return sel.map(cp=>{ const d=couponAmt(cp); const rs=couponScopeOf(cp); const sc=rs==='group'?'전체':store(rs).name;
           return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;background:#FFF8E6;border:1px solid #FFE3A3;border-radius:10px;padding:10px 13px"><span style="font-size:13px;font-weight:800;color:#92400e"><span style="font-size:11px;background:#fff;border:1px solid #FFE3A3;border-radius:5px;padding:1px 6px;margin-right:6px">${sc}</span>🎟️ ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button style="background:none;border:none;color:#92400e;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit" onclick="releaseCoupon('${cp.id}')">해제</button></div>`;
         }).join('');

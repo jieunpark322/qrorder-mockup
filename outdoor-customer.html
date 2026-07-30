@@ -394,11 +394,12 @@
 
   /* 주문내역 (결제건=회차 카드) */
   .oh-tabwrap{padding:12px 14px 2px;}
-  /* 보기 기준 전환 — 탭이 아니라 체크 한 줄로, 켜면 같은 목록을 매장 기준으로 다시 묶어 보여줌 */
-  .oh-viewtog{display:flex;align-items:center;gap:9px;margin:12px 14px 0;padding:11px 13px;background:#fff;
-    border:1px solid var(--line);border-radius:12px;font-size:13.5px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;width:calc(100% - 28px);text-align:left;}
-  .oh-viewtog.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);font-weight:800;}
-  .oh-viewtog .chk{width:20px;height:20px;border-radius:6px;}
+  /* 보기 기준 전환 — 목록 위 우측에 조용히 놓이는 설정 성격이라 배경·테두리 없이 텍스트+체크만 */
+  .oh-viewtog-row{display:flex;justify-content:flex-end;margin:12px 14px 0;}
+  .oh-viewtog{display:inline-flex;align-items:center;gap:7px;padding:4px 0;
+    background:none;border:none;font-size:13px;font-weight:700;color:var(--ink3);cursor:pointer;font-family:inherit;}
+  .oh-viewtog.on{color:var(--persimmon-d);font-weight:800;}
+  .oh-viewtog .chk{width:18px;height:18px;border-radius:5px;}
   .oh-card{background:#fff;border:1px solid var(--line);border-radius:14px;margin:14px 14px 0;padding:16px;}
   .oh-card.cancel{opacity:.92;}
   .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
@@ -2673,10 +2674,12 @@ function scHistory(){
   <div class="scroll">
     ${stageSummaryHTML(Pfull)}
     ${unified
-      ? `<button class="oh-viewtog ${view==='store'?'on':''}" onclick="S.histByStore=!S.histByStore;render()">
-          <span class="chk ${view==='store'?'on':''}">${view==='store'?IC.check:''}</span>
-          <span>매장별로 모아보기</span>
-        </button>`
+      ? `<div class="oh-viewtog-row">
+          <button class="oh-viewtog ${view==='store'?'on':''}" onclick="S.histByStore=!S.histByStore;render()" aria-pressed="${view==='store'}">
+            <span class="chk ${view==='store'?'on':''}">${view==='store'?IC.check:''}</span>
+            <span>매장별로 모아보기</span>
+          </button>
+        </div>`
       : ''}
     ${body}
     <div class="oh-tail">

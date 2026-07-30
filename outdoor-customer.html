@@ -782,11 +782,16 @@
   .seg{background:#F1F1F3;} .seg button.on{color:var(--ink);}
   .searchtog{background:#F3F3F5;} .store-group-h{background:var(--blue-50);color:var(--persimmon);}
 
-  /* CTA: 솔리드 퍼시몬 + 촉각 프레스 */
+  /* CTA: 입체(3D) 버튼 — 상단 하이라이트 + 하단 음영(inset) + 아래로 눌리는 촉각 프레스 */
   .cta{background:#fff;border-top:1px solid var(--line);box-shadow:none;}
-  .cta-btn{background:var(--persimmon);box-shadow:0 6px 16px rgba(92,140,218,.36);letter-spacing:-.01em;}
-  .cta-btn:active{background:var(--persimmon-d);transform:translateY(1px);}
-  .cta-btn:disabled{background:#E7E7EA;color:var(--ink4);box-shadow:none;}
+  .cta-btn{letter-spacing:-.01em;
+    background:linear-gradient(180deg,#7BA5E6 0%,#5C8CDA 52%,#3F6FC9 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.42) inset, 0 -3px 6px rgba(30,60,130,.30) inset, 0 3px 5px rgba(45,85,170,.30), 0 8px 18px rgba(45,85,170,.28);
+    transition:transform .08s ease, box-shadow .08s ease;}
+  .cta-btn:active{transform:translateY(2px);
+    background:linear-gradient(180deg,#6E9AE0 0%,#4F7ED2 52%,#3A66BC 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.34) inset, 0 -1px 4px rgba(30,60,130,.24) inset, 0 2px 5px rgba(45,85,170,.26);}
+  .cta-btn:disabled{background:#E7E7EA;color:var(--ink4);box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 -1px 0 rgba(0,0,0,.05) inset;transform:none;}
 
   /* 완료: 티켓 솔리드(퍼포레이션 유지) */
   .done-ic{background:#EAF6EF;color:var(--green);box-shadow:none;}
@@ -991,33 +996,56 @@
      문구는 한 문장으로 쓰고, 부가 조건은 괄호로 덧붙임(불필요하게 두 문장으로 쪼개지 않음). */
   /* 문구 안에 <b> 강조가 섞여 있어도 한 문단으로 자연스럽게 흐르도록 block 기준으로 둠
      (flex로 두면 <b>마다 별개 항목이 되어 단어가 조각조각 끊겨 보임) */
+  /* 테두리는 흐린 그림자로 뭉개지 않고 1px 실선으로 선명하게 · 입체감은 위/아래 inset만으로 최소한 */
   .d-reuse,.scope-note,.multi-note,.deliver-fix,.cart-scope-note,.waitline,.minwarn,.minok{
-    display:block;border:none;border-radius:22px;padding:12px 16px;
+    display:block;border-radius:14px;border:1px solid;padding:11px 14px;
     font-size:13px;font-weight:700;line-height:1.5;letter-spacing:-.01em;}
   .waitline .wl-ic{margin-right:5px;}
   /* 초록 — 완료·친환경 */
-  .d-reuse,.minok{color:#12603C;background:linear-gradient(180deg,#F2FBF6 0%,#DFF3E8 55%,#CFEBDD 100%);
-    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 4px rgba(23,120,78,.10) inset, 0 2px 5px rgba(23,120,78,.13), 0 6px 14px rgba(23,120,78,.10);}
+  .d-reuse,.minok{color:#12603C;border-color:#A9DCC2;background:linear-gradient(180deg,#F6FCF9 0%,#E4F4EB 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 -1px 0 rgba(23,120,78,.08) inset;}
   .minok{margin-top:12px;}
   /* 파랑 — 일반 안내 */
-  .scope-note,.deliver-fix{color:#1B4E8F;background:linear-gradient(180deg,#F4F8FE 0%,#E3EDFB 55%,#D3E2F7 100%);
-    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 4px rgba(30,80,150,.10) inset, 0 2px 5px rgba(30,80,150,.13), 0 6px 14px rgba(30,80,150,.10);}
+  .scope-note,.deliver-fix{color:#1B4E8F;border-color:#B8D1F0;background:linear-gradient(180deg,#F7FAFE 0%,#E8F1FC 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 -1px 0 rgba(30,80,150,.08) inset;}
   .scope-note{margin:12px 14px 0;}
   /* 뉴트럴 — 대기 정보 */
-  .waitline{margin:11px 18px 0;color:var(--ink2);background:linear-gradient(180deg,#FCFCFD 0%,#F1F1F4 55%,#E7E7EB 100%);
-    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 -2px 4px rgba(30,30,40,.07) inset, 0 2px 5px rgba(30,30,40,.09), 0 6px 14px rgba(30,30,40,.07);}
+  .waitline{margin:11px 18px 0;color:var(--ink2);border-color:#DEDEE3;background:linear-gradient(180deg,#FDFDFE 0%,#F2F2F5 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 -1px 0 rgba(30,30,40,.06) inset;}
   .waitline b{color:var(--ink);font-weight:800;}
   /* 앰버 — 알아두면 좋은 주의 */
-  .multi-note{margin:12px 0 0;color:#7A5A12;background:linear-gradient(180deg,#FFFCF4 0%,#FDF2DC 55%,#F8E7C4 100%);
-    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 4px rgba(150,110,20,.10) inset, 0 2px 5px rgba(150,110,20,.13), 0 6px 14px rgba(150,110,20,.10);}
+  .multi-note{margin:12px 14px 0;color:#7A5A12;border-color:#EFD79E;background:linear-gradient(180deg,#FFFDF7 0%,#FBF1DC 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 -1px 0 rgba(150,110,20,.08) inset;}
   /* 레드 — 진행 전 확인 필요 */
-  .minwarn,.cart-scope-note{color:#A32020;background:linear-gradient(180deg,#FEF6F6 0%,#FBE4E4 55%,#F7D2D2 100%);
-    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 4px rgba(160,40,40,.10) inset, 0 2px 5px rgba(160,40,40,.13), 0 6px 14px rgba(160,40,40,.10);}
+  .minwarn,.cart-scope-note{color:#A32020;border-color:#F2BFBF;background:linear-gradient(180deg,#FEF9F9 0%,#FBE8E8 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 -1px 0 rgba(160,40,40,.08) inset;}
   .minwarn{margin-top:12px;}
   .cart-scope-note{margin:12px 14px 0;}
   /* 여러 줄이 필요한 경우(매장별 부족 목록 등) — 각 항목을 줄바꿈 */
   .minwarn.multiline span{display:block;}
   .minwarn.multiline span + span{margin-top:3px;}
+
+  /* 쿠폰 적용 매장 선택 — 담은 매장별 소계와 예상 할인액을 함께 보여줌 */
+  .cpick{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;cursor:pointer;font-family:inherit;text-align:left;
+    border:1px solid var(--line);border-radius:13px;padding:13px 15px;background:linear-gradient(180deg,#FFFFFF 0%,#F7F7F9 100%);
+    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 -1px 0 rgba(30,30,40,.05) inset, 0 2px 5px rgba(20,20,25,.06);}
+  .cpick:active{transform:translateY(1px);}
+  .cpick-l{display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .cpick-n{font-size:14.5px;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cpick-s{font-size:12px;font-weight:600;color:var(--ink3);}
+  .cpick-d{flex-shrink:0;font-size:15px;font-weight:900;color:#C0392B;}
+  .cpick.dis{opacity:.5;cursor:not-allowed;box-shadow:none;}
+  .cpick.dis .cpick-d{font-size:12px;font-weight:700;color:var(--ink3);}
+
+  /* ── 주문 내역 '매장별로 모아보기' — 매장명을 상위 제목으로, 회차는 카드 안 보조 정보로 ── */
+  .oh-store-sec{margin-top:20px;}
+  .oh-store-sec:first-child{margin-top:6px;}
+  .oh-store-sec-h{display:flex;align-items:center;gap:8px;margin:0 14px 2px;padding:0 2px 9px;border-bottom:2px solid var(--ink);}
+  .ossh-name{font-size:17px;font-weight:900;color:var(--ink);letter-spacing:-.02em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ossh-loc{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--ink3);flex-shrink:0;}
+  .ossh-sum{margin-left:auto;font-size:15px;font-weight:900;color:var(--ink);flex-shrink:0;}
+  /* 매장별 보기에서 회차 라벨은 파란 배지를 벗고 옅은 보조 텍스트로 */
+  .oh-ord.sub{background:none;padding:0;font-size:13px;font-weight:700;color:var(--ink3);}
 </style>
 </head>
 <body>
@@ -1109,6 +1137,11 @@
 <!-- 결제(알림 받을 방법) 바텀시트 -->
 <div class="modal-bg" id="payModal" onclick="if(event.target===this)closePaySheet()">
   <div class="sheet sheet-receipt" id="payInner"></div>
+</div>
+
+<!-- 쿠폰 적용 매장 선택 시트 (통합 결제 + 여러 매장) -->
+<div class="modal-bg" id="couponPickModal" onclick="if(event.target===this)closeCouponPick()">
+  <div class="sheet" id="couponPickInner"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1302,6 +1335,7 @@ let S = {
   alertCh:'phone',     // 알림 채널: phone(카톡) | email
   contact:'',          // 입력한 휴대폰/이메일
   selCoupons:{},       // 스코프별 선택 쿠폰 { group:id, [storeId]:id } — 그룹/매장 쿠폰 동시 지원
+  couponScope:{},      // 'pick' 쿠폰이 실제로 적용된 매장 { [couponId]:storeId } — 손님이 고른 값
   couponCode:'',       // 쿠폰 코드 입력값
   pMid:'', pEnd:'', pEmail:'',  // 결제 시트 연락처 입력 (실시간 쿠폰 노출용)
   pEmailLocal:'', pEmailDomain:'', pEmailCustomDomain:'',  // 이메일 아이디·대표 도메인 선택(또는 직접입력)
@@ -1373,13 +1407,13 @@ function setBrandWait(m){
 }
 function restart(){
   S.cart=[]; S.adult=false; S.searchOpen=false; S.searchQ=''; S.demoState='open'; S.fCat='전체'; S.fZone='전체';
-  S.selCoupons={}; S.couponCode=''; S.pMid=''; S.pEnd=''; S.pEmail=''; S.pEmailLocal=''; S.pEmailDomain=''; S.pEmailCustomDomain='';
+  S.selCoupons={}; S.couponScope={}; S.couponCode=''; S.pMid=''; S.pEnd=''; S.pEmail=''; S.pEmailLocal=''; S.pEmailDomain=''; S.pEmailCustomDomain='';
   S.screen = S.mode==='group' ? 'splash' : 'store';
   S.curStore = S.mode==='group' ? 'burger' : 'burger';
   render();
   if(S.screen==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); }
 }
-function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); closeReceipt(); closeTerms(); closePaySheet(); closeNotice(); if(scr==='home') S._homeOrder=null; /* 홈 진입마다 랜덤 재배치 */ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
+function go(scr){ closeMenuSheet(); closeAdult(); closeConfirm(); closeReceipt(); closeTerms(); closePaySheet(); closeNotice(); closeCouponPick(); if(scr==='home') S._homeOrder=null; /* 홈 진입마다 랜덤 재배치 */ S.screen=scr; render(); document.getElementById('device').scrollTop=0; window.scrollTo(0,0);
   if(scr==='splash'){ clearTimeout(window._sp); window._sp=setTimeout(()=>{ if(S.screen==='splash'){go('home');} },1600); } }
 function openStore(id){ S.demoState='open'; S.curStore=id; S.storeTab='menu'; S.storeCat=null; go('store'); }
 // 영업종료·브레이크 데모: 전체화면이 아니라 매장 화면에서 메뉴판만 조회(주문 불가)
@@ -1405,7 +1439,7 @@ function openMenuInfo(){
 function closeMenuInfo(){ const el=document.getElementById('infoModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 // 시트/모달이 하나라도 열려 있으면 배경(페이지) 스크롤 잠금 → 상세 화면만 컨트롤
 function syncBgLock(){
-  const open=['menuSheet','adultModal','confirmModal','receiptModal','termsModal','payModal','noticeModal','infoModal'].some(id=>document.getElementById(id).classList.contains('on'));
+  const open=['menuSheet','adultModal','confirmModal','receiptModal','termsModal','payModal','noticeModal','infoModal','couponPickModal'].some(id=>document.getElementById(id).classList.contains('on'));
   document.documentElement.style.overflow=open?'hidden':'';
   document.body.style.overflow=open?'hidden':'';
 }
@@ -2047,30 +2081,81 @@ function timeSlotsHTML(){
 
 /* ── 쿠폰 (야외형: 1회용 쿠폰 코드 입력 방식만 지원) ──
    scope: 'group'(브랜드/그룹 = 주문 전체 합계) | 매장id(매장 쿠폰 = 해당 매장 소계)
+        | 'pick'(적용 매장을 손님이 직접 고르는 쿠폰 — 통합 결제에서 여러 매장을 담았을 때 선택창 노출)
+   'pick' 쿠폰은 할인이 특정 매장 하나에 귀속되므로, 통합 결제여도 정산 시 매장별 할인 부담을 나눠 계산할 필요가 없음
    회원 적립/연락처 기반 발급 쿠폰 노출은 스펙에서 제외 · 코드 입력으로만 사용 처리 */
 const COUPONS = [
   { id:'CP001', name:'개장기념 감사 쿠폰',       scope:'group',  type:'amount', value:1000, minOrder:8000, desc:'전체 주문 8,000원 이상 시 1,000원 할인' },
   { id:'CP002', name:'음료 10% 할인',            scope:'group',  type:'rate',   value:10, maxDisc:3000, minOrder:0, desc:'전체 주문 최대 3,000원 할인' },
   { id:'CP003', name:'소프트버거 트럭 단독 할인', scope:'burger', type:'amount', value:2000, minOrder:5000, desc:'이 매장 5,000원 이상 시 2,000원 할인' },
+  { id:'CP004', name:'행사 단독 2,000원 할인',    scope:'pick',   type:'amount', value:2000, minOrder:0,    desc:'원하는 매장 한 곳에 사용할 수 있어요' },
 ];
-const COUPON_CODES = { 'HELLO2026':'CP001', 'SOFT10':'CP002', 'BURGER2000':'CP003' };
+const COUPON_CODES = { 'HELLO2026':'CP001', 'SOFT10':'CP002', 'BURGER2000':'CP003', 'PICK2000':'CP004' };
 function cartSum(){ return S.cart.reduce((a,c)=>a+c.price*c.qty,0); }
 function storeSum(sid){ return S.cart.filter(c=>c.store===sid).reduce((a,c)=>a+c.price*c.qty,0); }
-function couponBase(cp){ return cp.scope==='group' ? cartSum() : storeSum(cp.scope); }
+// 'pick' 쿠폰은 손님이 고른 매장이 실제 적용 범위가 됨
+function couponScopeOf(cp){ return (S.couponScope && S.couponScope[cp.id]) || cp.scope; }
+function couponBase(cp){ const sc=couponScopeOf(cp); return sc==='group' ? cartSum() : storeSum(sc); }
 function couponAmt(cp){ const base=couponBase(cp); if(base<=0||base<cp.minOrder) return 0;
   if(cp.type==='amount') return Math.min(cp.value,base);
   if(cp.type==='rate') return Math.min(Math.round(base*cp.value/100), cp.maxDisc||Infinity);
   return 0; }
 function selectedCoupons(){ return Object.values(S.selCoupons||{}).filter(Boolean).map(id=>COUPONS.find(c=>c.id===id)).filter(Boolean); }
 function couponDiscount(){ return selectedCoupons().reduce((a,cp)=>a+couponAmt(cp),0); }
+const cartStoreIds = () => [...new Set(S.cart.map(c=>c.store))];
 function applyCode(){
   const code=(S.couponCode||'').trim().toUpperCase();
   if(!code) return toast('쿠폰 코드를 입력해 주세요');
   const cid=COUPON_CODES[code]; const cp=cid&&COUPONS.find(c=>c.id===cid);
   if(!cp) return toast('유효하지 않거나 만료된 쿠폰 코드예요');
+  if(cp.scope==='pick'){
+    const sids=cartStoreIds();
+    if(!sids.length) return toast('먼저 메뉴를 담아 주세요');
+    // 통합 결제로 여러 매장을 담았을 때만 선택창 · 한 매장이면 바로 그 매장에 적용
+    if(S.payScope==='unified' && sids.length>1) return openCouponPick(cp.id);
+    return commitCoupon(cp.id, sids[0]);
+  }
   if(cp.scope!=='group' && !S.cart.some(c=>c.store===cp.scope)) return toast(`${store(cp.scope).name} 상품을 담아야 쓸 수 있는 쿠폰이에요`);
-  S.selCoupons=S.selCoupons||{}; S.selCoupons[cp.scope]=cp.id; S.couponCode=''; toast('쿠폰이 적용됐어요 🎉'); render();
+  commitCoupon(cp.id, cp.scope);
 }
+// 쿠폰 확정 — 적용 범위(scope)를 기록하고 목록에 반영
+function commitCoupon(cid, scope){
+  const cp=COUPONS.find(c=>c.id===cid); if(!cp) return;
+  S.couponScope=S.couponScope||{}; S.couponScope[cid]=scope;
+  S.selCoupons=S.selCoupons||{}; S.selCoupons[scope]=cid;
+  S.couponCode=''; closeCouponPick();
+  toast('쿠폰이 적용됐어요 🎉', scope==='group'?'':`${store(scope).name}에 적용했어요`);
+  render();
+}
+function releaseCoupon(cid){
+  const cp=COUPONS.find(c=>c.id===cid); if(!cp) return;
+  const sc=couponScopeOf(cp);
+  if(S.selCoupons) S.selCoupons[sc]=null;
+  if(S.couponScope) delete S.couponScope[cid];
+  render();
+}
+/* 적용 매장 선택 시트 — 담은 매장별 소계와 예상 할인액을 함께 보여줌 */
+function openCouponPick(cid){
+  const cp=COUPONS.find(c=>c.id===cid); if(!cp) return;
+  S._pickCid=cid;
+  const rows=cartStoreIds().map(sid=>{
+    const sub=storeSum(sid);
+    const disc=cp.type==='amount' ? Math.min(cp.value,sub) : Math.min(Math.round(sub*cp.value/100), cp.maxDisc||Infinity);
+    const ok=sub>=(cp.minOrder||0);
+    return `<button class="cpick ${ok?'':'dis'}" ${ok?`onclick="commitCoupon('${cid}','${sid}')"`:'disabled'}>
+      <span class="cpick-l"><span class="cpick-n">${store(sid).logo} ${store(sid).name}</span><span class="cpick-s">담은 금액 ${won(sub)}</span></span>
+      <span class="cpick-d">${ok?`−${won(disc)}`:`${won(cp.minOrder)} 이상`}</span>
+    </button>`;
+  }).join('');
+  document.getElementById('couponPickInner').innerHTML=`
+    <div class="ms-grab"><span></span></div>
+    <div class="sheet-t">어느 매장에 쓸까요?</div>
+    <div class="sheet-s">🎟️ ${cp.name} · 고른 매장 한 곳에만 적용돼요.</div>
+    <div style="margin-top:16px">${rows}</div>
+    <button class="ghostbtn" onclick="closeCouponPick()">닫기</button>`;
+  document.getElementById('couponPickModal').classList.add('on'); syncBgLock();
+}
+function closeCouponPick(){ const el=document.getElementById('couponPickModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 
 /* ── 주문 확인 및 결제 ── */
 function scCheckout(){
@@ -2114,8 +2199,8 @@ function scCheckout(){
     <div class="sect"><div class="sect-h">쿠폰 코드 <span class="scope-chip">선택</span></div>
       <div style="display:flex;gap:8px"><input class="field" placeholder="쿠폰 코드 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()"><button class="ghostbtn" style="width:auto;margin:0;padding:0 20px;white-space:nowrap" onclick="applyCode()">적용</button></div>
       ${(()=>{ const sel=selectedCoupons(); if(!sel.length) return `<div style="font-size:12.5px;color:var(--ink3);margin-top:8px">보유한 쿠폰 코드가 있다면 입력해 주세요.</div>`;
-        return sel.map(cp=>{ const d=couponAmt(cp); const sc=cp.scope==='group'?'전체':store(cp.scope).name;
-          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;background:#FFF8E6;border:1px solid #FFE3A3;border-radius:10px;padding:10px 13px"><span style="font-size:13px;font-weight:800;color:#92400e"><span style="font-size:11px;background:#fff;border:1px solid #FFE3A3;border-radius:5px;padding:1px 6px;margin-right:6px">${sc}</span>🎟️ ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button style="background:none;border:none;color:#92400e;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit" onclick="S.selCoupons['${cp.scope}']=null;render()">해제</button></div>`;
+        return sel.map(cp=>{ const d=couponAmt(cp); const rs=couponScopeOf(cp); const sc=rs==='group'?'전체':store(rs).name;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;background:#FFF8E6;border:1px solid #FFE3A3;border-radius:10px;padding:10px 13px"><span style="font-size:13px;font-weight:800;color:#92400e"><span style="font-size:11px;background:#fff;border:1px solid #FFE3A3;border-radius:5px;padding:1px 6px;margin-right:6px">${sc}</span>🎟️ ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button style="background:none;border:none;color:#92400e;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit" onclick="releaseCoupon('${cp.id}')">해제</button></div>`;
         }).join('');
       })()}
     </div>
@@ -2404,7 +2489,8 @@ function roundCardHTML(p, showNames){
   return `<div class="oh-card ${canceled?'cancel':''} ${ready?'ready':''}">
     <div class="oh-top">
       <div class="oh-top-l">
-        <div class="oh-ord-row"><span class="oh-ord">${p.round}차 주문</span><span class="oh-at">${p.paidAt.slice(11,16)} 주문</span></div>
+        <!-- 매장별로 모아보기에서는 매장명이 상위 제목이므로 회차는 보조 정보로 낮춰 표기 -->
+        <div class="oh-ord-row"><span class="oh-ord ${showNames?'':'sub'}">${p.round}차 주문</span><span class="oh-at">${p.paidAt.slice(11,16)} 주문</span></div>
       </div>
       ${canceled?`<span class="st-badge st-rej">주문취소</span>`:''}
     </div>
@@ -2499,12 +2585,18 @@ function scHistory(){
     P.forEach(p=>p.stores.forEach(s=>{
       (byStore[s.sid]=byStore[s.sid]||[]).push({...p, stores:[s], items:s.items.map(it=>({...it,store:s.sid})), status:s.status});
     }));
+    // 매장별 보기에서는 매장명이 상위 제목 · 회차는 카드 안 보조 정보로 낮춤
     body = Object.entries(byStore).map(([sid,pays])=>{
+      const st = store(sid);
       const stTotal = pays.reduce((a,p)=>a+payTotal(p),0);
-      return `<div class="store-group-h" style="justify-content:space-between;margin:16px 14px 0">
-        <span>${store(sid).logo} ${store(sid).name}${store(sid).loc?` <span class="oh-st-loc">${PIN}${store(sid).loc}</span>`:''}</span><span>${won(stTotal)}</span>
-      </div>
-      ${pays.map(p=>roundCardHTML(p,false)).join('')}`;
+      return `<div class="oh-store-sec">
+        <div class="oh-store-sec-h">
+          <span class="ossh-name">${st.logo} ${st.name}</span>
+          ${st.loc?`<span class="ossh-loc">${PIN}${st.loc}</span>`:''}
+          <span class="ossh-sum">${won(stTotal)}</span>
+        </div>
+        ${pays.map(p=>roundCardHTML(p,false)).join('')}
+      </div>`;
     }).join('');
   }
   const grand = Pfull.reduce((a,p)=>a+payTotal(p),0);   // 누적 전체 합계는 필터와 무관하게 전체 기준

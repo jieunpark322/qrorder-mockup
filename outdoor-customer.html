@@ -381,9 +381,10 @@
     border:1px solid var(--line);border-radius:12px;font-size:13.5px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;width:calc(100% - 28px);text-align:left;}
   .oh-viewtog.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);font-weight:800;}
   .oh-viewtog .chk{width:20px;height:20px;border-radius:6px;}
-  .oh-card{background:#fff;border-radius:16px;margin:12px 14px;border:1px solid var(--line);box-shadow:0 2px 10px rgba(20,20,25,.05);overflow:hidden;}
+  .oh-card{margin:0 14px;padding:16px 0;}
+  .oh-card + .oh-card{border-top:1px solid var(--line);}
   .oh-card.cancel{opacity:.92;}
-  .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;}
+  .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 16px;}
   .oh-top-l{display:flex;flex-direction:column;gap:4px;min-width:0;}
   .oh-ord-row{display:flex;align-items:center;gap:9px;}
   .oh-ord{font-size:15px;font-weight:800;color:var(--blue-d);background:var(--blue-50);padding:4px 11px;border-radius:8px;}
@@ -420,7 +421,7 @@
   .oh-cancelnote .cn-main{font-size:12.5px;color:#c92a2a;font-weight:700;line-height:1.5;}
   .oh-cancelnote .cn-sub{font-size:12px;color:#c92a2a;opacity:.75;font-weight:500;line-height:1.5;margin-top:3px;}
   .oh-grp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:13px;font-weight:800;color:var(--ink);}
-  .oh-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--bg);border-top:1px solid var(--line2);}
+  .oh-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px 0;margin-top:13px;border-top:1px solid var(--line2);}
   .oh-foot-sum{font-size:14px;font-weight:700;color:var(--ink2);}
   .oh-foot-sum b{font-size:16px;font-weight:900;color:var(--ink);margin-left:4px;}
   .oh-receipt{background:#fff;border:1.5px solid var(--persimmon);color:var(--persimmon-d);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;}

@@ -283,6 +283,10 @@
   .phone3 .pf-fixed{flex:0 0 66px;background:#F2F2F4;color:var(--ink2);font-weight:800;}
   .phone3 .pf-num{flex:1;min-width:0;}
   .phone3 .pf-dash{color:var(--ink4);font-weight:700;}
+  .email3{display:flex;align-items:center;gap:7px;}
+  .email3 .ef-id{flex:1;min-width:0;}
+  .email3 .ef-at{color:var(--ink4);font-weight:700;flex-shrink:0;}
+  .email3 .ef-domain{flex:1.1;min-width:0;}
   .cnt{font-size:12px;color:var(--ink4);text-align:right;margin-top:5px;}
 
   /* 장바구니 아이템 */
@@ -471,6 +475,7 @@
   .oh-st-row:first-child{border-top:none;}
   .oh-st-head{display:flex;align-items:center;gap:8px;}
   .oh-st-name{font-size:13.5px;font-weight:800;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .oh-st-loc{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--ink3);flex-shrink:0;}
   /* 시안 B — 현재 단계 라벨(오른쪽) + 세그먼트 바 + 4단계 라벨 */
   .oh-step-lbl{margin-left:auto;font-size:13px;font-weight:800;white-space:nowrap;}
   .oh-step-lbl.g{color:#0F6E56;} .oh-step-lbl.b{color:#185FA5;}
@@ -550,8 +555,9 @@
     box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 -2px 5px rgba(30,30,110,.28) inset, 0 2px 4px rgba(50,50,140,.32), 0 4px 10px rgba(50,50,140,.38);
     transition:transform .08s ease;}
   .hist-icon:active{transform:scale(.94);}
-  /* 홈 배너 위 오버레이 배치 */
-  .mb-histfab{position:absolute;top:14px;right:14px;z-index:5;}
+  /* 매장 그룹(홈) — 우측 하단 플로팅 배치(장바구니 바 위) */
+  .hist-fabwrap{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:440px;display:flex;justify-content:flex-end;padding:0 16px;z-index:38;pointer-events:none;}
+  .hist-fabwrap .hist-icon{pointer-events:auto;}
   .cta-btn{position:relative;width:100%;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:17px;font-size:16.5px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
   .cta-btn:disabled{background:var(--line);color:var(--ink4);}
   .cta-btn .amt{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);padding:3px 10px;border-radius:8px;font-size:14px;}
@@ -876,10 +882,10 @@
   .s-loc-ic{font-size:11px;line-height:1;flex-shrink:0;}
   .s-wait{color:var(--persimmon);font-weight:700;}
   /* 매장 그룹 2열 배치(브랜드 설정) — 대표메뉴 사진+명+위치+가격 */
-  .storelist.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 14px;padding:16px;}
-  .gcard{display:flex;flex-direction:column;gap:5px;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;text-align:left;width:100%;position:relative;}
+  .storelist.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px;}
+  .gcard{display:flex;flex-direction:column;gap:5px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 10px 12px;cursor:pointer;font-family:inherit;text-align:left;width:100%;position:relative;box-shadow:0 2px 8px rgba(20,20,25,.04);}
   .gcard:active{opacity:.85;}
-  .g-thumb{width:100%;aspect-ratio:1/1;border-radius:14px;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);position:relative;margin-bottom:5px;display:flex;align-items:center;justify-content:center;}
+  .g-thumb{width:100%;aspect-ratio:1/1;border-radius:12px;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);position:relative;margin-bottom:5px;display:flex;align-items:center;justify-content:center;}
   .g-thumb.noimg{background:linear-gradient(135deg,#eceef1,#e0e3e8);}
   .g-thumb.noimg::before{content:'🖼';font-size:30px;opacity:.38;}
   .g-hero{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1029,7 +1035,7 @@
 </div>
 
 <!-- 메뉴 상세 바텀시트 -->
-<div class="modal-bg" id="menuSheet" onclick="if(event.target===this)closeMenuSheet()">
+<div class="modal-bg" id="menuSheet">
   <div class="sheet sheet-menu" id="menuSheetInner"></div>
 </div>
 
@@ -1244,6 +1250,7 @@ let S = {
   selCoupons:{},       // 스코프별 선택 쿠폰 { group:id, [storeId]:id } — 그룹/매장 쿠폰 동시 지원
   couponCode:'',       // 쿠폰 코드 입력값
   pMid:'', pEnd:'', pEmail:'',  // 결제 시트 연락처 입력 (실시간 쿠폰 노출용)
+  pEmailLocal:'', pEmailDomain:'', pEmailCustomDomain:'',  // 이메일 아이디·대표 도메인 선택(또는 직접입력)
   infoOpen:false,      // 메뉴 정보(알레르기·영양) 펼침 여부
   minBasis:'group',    // 최소 주문 금액 기준: group(매장 그룹=통합결제 총액) | store(매장별 소계) | off
   tmpQty:1, tmpOpt:0,
@@ -1312,7 +1319,7 @@ function setBrandWait(m){
 }
 function restart(){
   S.cart=[]; S.adult=false; S.searchOpen=false; S.searchQ=''; S.demoState='open'; S.fCat='전체'; S.fZone='전체';
-  S.selCoupons={}; S.couponCode=''; S.pMid=''; S.pEnd=''; S.pEmail='';
+  S.selCoupons={}; S.couponCode=''; S.pMid=''; S.pEnd=''; S.pEmail=''; S.pEmailLocal=''; S.pEmailDomain=''; S.pEmailCustomDomain='';
   S.screen = S.mode==='group' ? 'splash' : 'store';
   S.curStore = S.mode==='group' ? 'burger' : 'burger';
   render();
@@ -1406,7 +1413,6 @@ function scHome(){
     <div class="mbanner">
       <div class="slides" id="banSlides">${banners.map(b=>`<div class="mb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.66)),url('${b.img}'),${b.fb};" onclick="window.open('${b.url}','_blank','noopener')"><div class="mb-txt"><div class="mb-t">${b.t}</div><div class="mb-s">${b.s}</div></div></div>`).join('')}</div>
       <div class="mb-dots" id="banDots">${banners.map((_,i)=>`<div class="mb-dot ${i===0?'on':''}" onclick="event.stopPropagation();goBanner(${i})"></div>`).join('')}</div>
-      <div class="mb-histfab">${histFabIcon()}</div>
     </div>
     <!-- 공지문 (링크: 하이퍼링크 or URL 직접입력 → 클릭 시 URL 랜딩) -->
     <div class="notice ${S.noticeRead?'read':''}">
@@ -1437,11 +1443,16 @@ function scHome(){
     <div class="storelist ${S.gridCols==='grid'?'grid':''}">${storelistHTML()}</div>
     <div style="height:${(S.payScope==='unified'&&S.cart.length)?150:78}px"></div>
   </div>
+  ${histFabFloat()}
   ${S.payScope==='unified'?cartBar():''}`;
 }
-// 주문 내역 진입 아이콘 — 하단 장바구니 바와 겹치지 않도록 화면 상단(헤더/배너)에 배치
+// 주문 내역 진입 버튼 — 매장 단일 페이지는 헤더 안에 인라인 배치(histFabIcon), 매장 그룹(홈)은 우측 하단 플로팅(histFabFloat)
 function histFabIcon(){
   return `<button class="hist-icon" onclick="go('history')">🧾 주문 내역</button>`;
+}
+function histFabFloat(){
+  const cartBarShown = S.payScope==='unified' && S.cart.length;
+  return `<div class="hist-fabwrap" style="bottom:calc(${cartBarShown?96:28}px + env(safe-area-inset-bottom))">${histFabIcon()}</div>`;
 }
 // 하단 고정 장바구니 바
 function cartBar(){
@@ -1787,8 +1798,8 @@ function scCart(){
         ? `<div class="sect-sub">계신 자리로 스태프가 직접 가져다드려요.</div>
            <div class="deliver-fix">🛎️ 다음 화면에서 <b>받을 자리</b>를 입력해 주세요.</div>`
         : `<div class="seg">
-             <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">즉시 포장</button>
-             <button class="${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">포장 예약</button>
+             <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">바로 받기</button>
+             <button class="${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">예약하기</button>
            </div>
            ${S.pickup==='reserve' ? timePickerHTML()
              : `<div style="font-size:12.5px;color:var(--ink3);margin-top:10px">준비되면 부스에서 바로 픽업하는 방식이에요.</div>`}`}
@@ -1875,10 +1886,11 @@ function upsellRow(sid,m,showStore){
     <button class="ghostbtn" style="width:auto;margin:0;padding:0 15px;white-space:nowrap" onclick="openMenu('${sid}','${m.id}')">담기</button>
   </div>`;
 }
-/* 포장 예약: 시/분 직접 선택 (10분 단위, 내점형과 동일) · 매장 영업시간 밖은 선택 불가 */
+/* 포장 예약: 시/분 직접 선택 (10분 단위, 내점형과 동일) · 매장 영업시간 밖·이미 지난 시간은 선택 불가 */
 const pad2 = n => String(n).padStart(2,'0');
 const fmtMin = t => `${pad2(Math.floor(t/60))}:${pad2(t%60)}`;
-function validPickup(s,t){ return t>=s.ohStart && t<=s.ohEnd && !(s.brkStart!=null && t>=s.brkStart && t<s.brkEnd); }
+const nowMinutes = () => { const d=new Date(); return d.getHours()*60+d.getMinutes(); };
+function validPickup(s,t){ return t>=s.ohStart && t<=s.ohEnd && t>=nowMinutes() && !(s.brkStart!=null && t>=s.brkStart && t<s.brkEnd); }
 function pickHour(h){
   const s=store(S.curStore);
   if(h==null){ S.pickupH=null; S.pickupM=null; syncPickup(); render(); return; }
@@ -1896,10 +1908,12 @@ function syncPickup(){ S.pickupTime = (S.pickupH!=null && S.pickupM!=null) ? `${
 // 내점형 QR메뉴판과 동일한 UX: 시/분 네이티브 select 드롭다운 2개 + 확정 안내 문구
 function timePickerHTML(){
   const s=store(S.curStore);
+  const now=nowMinutes();
   const startH=Math.floor(s.ohStart/60)-1, endH=Math.floor(s.ohEnd/60)+1;   // 영업시간 밖도 1시간씩 보여줘 '선택 불가' 인지
   const hourOk = h => { for(let m=0;m<60;m+=10){ if(validPickup(s,h*60+m)) return true; } return false; };
-  const hours=[]; for(let h=Math.max(0,startH); h<=Math.min(23,endH); h++) hours.push(h);
-  const mins=[]; for(let m=0;m<60;m+=10) mins.push(m);
+  // 이미 지난 시각(현재 시각 이전)은 선택지 자체에서 제외 · 영업시간 밖(아직 지나지 않음)은 '마감' 표시로 남겨둠
+  const hours=[]; for(let h=Math.max(0,startH); h<=Math.min(23,endH); h++){ if(h*60+50>=now) hours.push(h); }
+  const mins=[]; for(let m=0;m<60;m+=10){ if(S.pickupH==null || S.pickupH*60+m>=now) mins.push(m); }
   const hourOpts = hours.map(h=>`<option value="${h}" ${!hourOk(h)?'disabled':''} ${S.pickupH===h?'selected':''}>${h}시${hourOk(h)?'':' · 마감'}</option>`).join('');
   const minOpts = mins.map(m=>{const dis=(S.pickupH==null)||!validPickup(s,S.pickupH*60+m); return `<option value="${m}" ${dis?'disabled':''} ${S.pickupM===m?'selected':''}>${pad2(m)}분${dis?' · 마감':''}</option>`;}).join('');
   const brk = s.brkStart!=null ? ` · 브레이크 ${fmtMin(s.brkStart)}~${fmtMin(s.brkEnd)}` : '';
@@ -1974,7 +1988,7 @@ function scCheckout(){
     <!-- 주문 메뉴 -->
     <div class="sect"><div class="sect-h">주문 메뉴 · 수령 정보</div>
       ${S.cart.map(c=>`<div class="row"><span>${c.name} ${c.emoji} · ${c.opt} × ${c.qty}</span><span class="v">${won(c.price*c.qty)}</span></div>`).join('')}
-      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">${S.service==='delivery'?'🛎️ 자리로 받기 (현장 배달)':(S.pickup==='reserve'?`📅 포장 예약 · ${S.pickupTime||'시간 미선택'}`:'🥡 즉시 포장 픽업')}</span></div>
+      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">${S.service==='delivery'?'🛎️ 자리로 받기 (현장 배달)':(S.pickup==='reserve'?`📅 예약하기 · ${S.pickupTime||'시간 미선택'}`:'🥡 바로 받기')}</span></div>
     </div>
     <!-- 받을 자리 : 자리로 받기(현장 배달) 서비스일 때만 노출 · 사장님사이트 자리입력 기능 -->
     ${S.service==='delivery' ? `
@@ -2094,7 +2108,17 @@ function paySheetHTML(){
         <button class="${S.alertCh==='email'?'on':''}" onclick="setAlert('email')">✉️ 이메일</button>
       </div>
       ${S.alertCh==='email' ? `
-      <input class="field" id="emailIn" type="email" placeholder="example@email.com" value="${S.pEmail||''}" oninput="onPayEmail(this)" style="margin-bottom:12px">
+      <div class="email3" style="margin-bottom:12px">
+        <input class="field ef-id" id="emailLocal" placeholder="example" value="${S.pEmailLocal||''}" oninput="onPayEmailLocal(this)">
+        <span class="ef-at">@</span>
+        ${S.pEmailDomain==='custom'
+          ? `<input class="field ef-domain" id="emailCustomDomain" placeholder="domain.com" value="${S.pEmailCustomDomain||''}" oninput="onPayEmailCustomDomain(this)">`
+          : `<select class="field ef-domain" id="emailDomainSel" onchange="onPayEmailDomainSelect(this)">
+              <option value="" ${!S.pEmailDomain?'selected':''}>선택</option>
+              ${EMAIL_DOMAINS.map(d=>`<option value="${d}" ${S.pEmailDomain===d?'selected':''}>${d}</option>`).join('')}
+              <option value="custom">${L('directInput')}</option>
+            </select>`}
+      </div>
       ` : `
       <div class="phone3" style="margin-bottom:12px">
         <input class="field pf-fixed" value="010" readonly tabindex="-1" aria-label="앞자리 010 고정">
@@ -2117,7 +2141,18 @@ function onPayPhone(el,which){
   const id = advance?'phoneEnd':(which==='mid'?'phoneMid':'phoneEnd');
   const n=document.getElementById(id); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); }
 }
-function onPayEmail(el){ S.pEmail=el.value; refreshPaySheet(); const n=document.getElementById('emailIn'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } }
+// 이메일 대표 도메인 선택(또는 직접입력) — 아이디+도메인을 조합해 최종 pEmail을 만듦
+const EMAIL_DOMAINS = ['naver.com','gmail.com','daum.net','hanmail.net','nate.com','kakao.com'];
+const I18N = { ko:{directInput:'직접입력'}, en:{directInput:'Enter manually'}, ja:{directInput:'直接入力'}, zh:{directInput:'手动输入'} };
+const L = key => { const lang=(navigator.language||'ko').slice(0,2); return (I18N[lang]||I18N.ko)[key] ?? I18N.ko[key]; };
+function syncEmail(){ const domain = S.pEmailDomain==='custom' ? (S.pEmailCustomDomain||'') : (S.pEmailDomain||''); S.pEmail = (S.pEmailLocal && domain) ? `${S.pEmailLocal}@${domain}` : ''; }
+function onPayEmailLocal(el){ S.pEmailLocal=el.value; syncEmail(); refreshPaySheet(); const n=document.getElementById('emailLocal'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } }
+function onPayEmailCustomDomain(el){ S.pEmailCustomDomain=el.value; syncEmail(); refreshPaySheet(); const n=document.getElementById('emailCustomDomain'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } }
+function onPayEmailDomainSelect(el){
+  S.pEmailDomain=el.value; if(el.value!=='custom') S.pEmailCustomDomain='';
+  syncEmail(); refreshPaySheet();
+  if(el.value==='custom'){ setTimeout(()=>{const n=document.getElementById('emailCustomDomain'); if(n) n.focus();},50); }
+}
 function openPaySheet(){ document.getElementById('payInner').innerHTML=paySheetHTML(); document.getElementById('payModal').classList.add('on'); syncBgLock(); }
 function closePaySheet(){ const el=document.getElementById('payModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 function refreshPaySheet(){ const el=document.getElementById('payModal'); if(el&&el.classList.contains('on')) document.getElementById('payInner').innerHTML=paySheetHTML(); }
@@ -2297,10 +2332,10 @@ function roundCardHTML(p, showNames){
 const open = id => !!(S.histOpen && S.histOpen[id]);
 // 카드 내부 — 매장마다 '매장명 + 상태 배지 + 진행 막대' 한 세트 (매장이 1곳이든 여러 곳이든 동일한 구조)
 function storeRowsHTML(stores, showNames){
-  const rows = byAction(stores).map(s=>`<div class="oh-st-row">
-    ${showNames?`<div class="oh-st-head"><span class="oh-st-name">${store(s.sid).logo} ${store(s.sid).name}</span></div>`:''}
+  const rows = byAction(stores).map(s=>{const st=store(s.sid); return `<div class="oh-st-row">
+    ${showNames?`<div class="oh-st-head"><span class="oh-st-name">${st.logo} ${st.name}</span>${st.loc?`<span class="oh-st-loc">${PIN}${st.loc}</span>`:''}</div>`:''}
     ${stepBarHTML(s.status)}
-  </div>`).join('');
+  </div>`;}).join('');
   return `<div class="oh-stores">${rows}</div>`;
 }
 const ST_BADGE = {'준비완료':'st-done','배달중':'st-done','준비중':'st-cook','주문요청':'st-cook','수령완료':'st-pick','주문취소':'st-rej'};
@@ -2367,7 +2402,7 @@ function scHistory(){
     body = Object.entries(byStore).map(([sid,pays])=>{
       const stTotal = pays.reduce((a,p)=>a+payTotal(p),0);
       return `<div class="store-group-h" style="justify-content:space-between;margin:16px 14px 0">
-        <span>${store(sid).logo} ${store(sid).name}</span><span>${won(stTotal)}</span>
+        <span>${store(sid).logo} ${store(sid).name}${store(sid).loc?` <span class="oh-st-loc">${PIN}${store(sid).loc}</span>`:''}</span><span>${won(stTotal)}</span>
       </div>
       ${pays.map(p=>roundCardHTML(p,false)).join('')}`;
     }).join('');

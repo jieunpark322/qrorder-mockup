@@ -1163,6 +1163,7 @@ const STORES = [
   { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=760&q=72',
     open:true, desc:'매일 아침 손으로 반죽한 패티와 갓 구운 번으로 만드는 수제버거 트럭이에요.', loc:'부스 3번', waitCount:'12팀', waitTime:'약 15분', rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260, brkStart:900, brkEnd:960,   /* 영업 11:00~21:00, 브레이크 15:00~16:00 (분) */
+    rvStart:690, rvEnd:1200,   /* 예약 가능 11:30~20:00 — 영업시간과 다르게 설정한 예시(마감 정리 시간 확보) */
     info:{ceo:'김철수', regno:'123-45-67890', bizAddr:'서울 마포구 월드컵로 12, 3층', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
       {id:'b1', cat:'버거', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null, allergy:'밀·대두·우유·달걀 함유', nutrition:'약 620kcal'},
@@ -2035,7 +2036,12 @@ function upsellRow(sid,m,showStore){
 const pad2 = n => String(n).padStart(2,'0');
 const fmtMin = t => `${pad2(Math.floor(t/60))}:${pad2(t%60)}`;
 const nowMinutes = () => { const d=new Date(); return d.getHours()*60+d.getMinutes(); };
-function validPickup(s,t){ return t>=s.ohStart && t<=s.ohEnd && t>=nowMinutes() && !(s.brkStart!=null && t>=s.brkStart && t<s.brkEnd); }
+/* 예약 가능 시간 — 사장님사이트에서 별도로 설정(rvStart/rvEnd) · 미설정 매장은 영업시간을 그대로 사용
+   (영업은 21시까지 하지만 예약은 20시까지만 받는 등, 마감 정리 시간을 확보할 수 있게 분리) */
+const rvStartOf = s => s.rvStart!=null ? s.rvStart : s.ohStart;
+const rvEndOf   = s => s.rvEnd  !=null ? s.rvEnd   : s.ohEnd;
+/* 선택 가능 판정 — ① 예약 가능 시간 내 ② 브레이크타임 아님 ③ 현재 시각 이후(리드타임 없음: 준비 시간은 매장이 판단) */
+function validPickup(s,t){ return t>=rvStartOf(s) && t<=rvEndOf(s) && t>=nowMinutes() && !(s.brkStart!=null && t>=s.brkStart && t<s.brkEnd); }
 function pickHour(h){
   const s=store(S.curStore);
   if(h==null){ S.pickupH=null; S.pickupM=null; syncPickup(); render(); return; }
@@ -2054,14 +2060,14 @@ function syncPickup(){ S.pickupTime = (S.pickupH!=null && S.pickupM!=null) ? `${
 function timePickerHTML(){
   const s=store(S.curStore);
   const now=nowMinutes();
-  const startH=Math.floor(s.ohStart/60)-1, endH=Math.floor(s.ohEnd/60)+1;   // 영업시간 밖도 1시간씩 보여줘 '선택 불가' 인지
+  const startH=Math.floor(rvStartOf(s)/60)-1, endH=Math.floor(rvEndOf(s)/60)+1;   // 예약 가능 시간 밖도 1시간씩 보여줘 '선택 불가' 인지
   const hourOk = h => { for(let m=0;m<60;m+=10){ if(validPickup(s,h*60+m)) return true; } return false; };
   // 이미 지난 시각(현재 시각 이전)은 선택지 자체에서 제외 · 영업시간 밖(아직 지나지 않음)은 '마감' 표시로 남겨둠
   const hours=[]; for(let h=Math.max(0,startH); h<=Math.min(23,endH); h++){ if(h*60+50>=now) hours.push(h); }
   const mins=[]; for(let m=0;m<60;m+=10){ if(S.pickupH==null || S.pickupH*60+m>=now) mins.push(m); }
   const hourOpts = hours.map(h=>`<option value="${h}" ${!hourOk(h)?'disabled':''} ${S.pickupH===h?'selected':''}>${h}시${hourOk(h)?'':' · 마감'}</option>`).join('');
   const minOpts = mins.map(m=>{const dis=(S.pickupH==null)||!validPickup(s,S.pickupH*60+m); return `<option value="${m}" ${dis?'disabled':''} ${S.pickupM===m?'selected':''}>${pad2(m)}분${dis?' · 마감':''}</option>`;}).join('');
-  const brk = s.brkStart!=null ? ` · 브레이크 ${fmtMin(s.brkStart)}~${fmtMin(s.brkEnd)}` : '';
+  const brk = s.brkStart!=null ? ` (브레이크 ${fmtMin(s.brkStart)}~${fmtMin(s.brkEnd)} 제외)` : '';
   return `
     <div class="tp-wrap">
       <div class="tp-label">수령 시간 <span class="req">필수</span></div>
@@ -2076,7 +2082,7 @@ function timePickerHTML(){
         </select>
       </div>
       ${S.pickupTime?`<div class="tp-note">📅 오늘 <b>${S.pickupTime}</b> 수령</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
-      <div class="tp-hint">영업 시간 ${fmtMin(s.ohStart)}~${fmtMin(s.ohEnd)}${brk} 외에는 선택할 수 없어요</div>
+      <div class="tp-hint">예약은 ${fmtMin(rvStartOf(s))}~${fmtMin(rvEndOf(s))}${brk} 사이로 받을 수 있어요.</div>
     </div>`;
 }
 function timeSlotsHTML(){

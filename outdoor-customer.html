@@ -228,11 +228,14 @@
   /* 매장 배너 롤링 (브랜드 → 매장) */
   /* 매장 배너: 이미지 기반 · 규격 335×56(권장) · 브랜드↔매장 크로스페이드 롤링 · 노출 위치(중간/하단)는 매장이 설정, 기본값 하단 */
   .sbanner-roll{position:relative;margin:14px 18px 0;aspect-ratio:335/56;border-radius:10px;overflow:hidden;cursor:pointer;background:#e9ecef;box-shadow:var(--shadow);}
-  .sb-slide{position:absolute;inset:0;background-size:cover;background-position:center;display:flex;align-items:center;gap:8px;padding:0 12px;opacity:0;animation:sbfade 8s infinite;}
-  .sb-slide:nth-child(2){animation-delay:4s;}
-  @keyframes sbfade{0%,45%{opacity:1;}50%,100%{opacity:0;}}
+  /* 메인 배너와 동일한 슬라이드 방식(가로 이동) — 4초 자동 롤링 + 점 탭·스와이프 수동 넘김 */
+  .sb-slides{display:flex;height:100%;transition:transform .4s cubic-bezier(.4,0,.2,1);}
+  .sb-slide{flex:0 0 100%;background-size:cover;background-position:center;display:flex;align-items:center;gap:8px;padding:0 12px;box-sizing:border-box;}
   .sb-tag{flex-shrink:0;font-size:9.5px;font-weight:800;background:rgba(255,255,255,.92);color:var(--ink);padding:2px 8px;border-radius:20px;}
   .sb-txt{flex:1;min-width:0;color:#fff;font-size:11.5px;font-weight:800;line-height:1.2;text-shadow:0 1px 5px rgba(0,0,0,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sb-dots{position:absolute;bottom:6px;right:9px;display:flex;gap:4px;z-index:2;}
+  .sb-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.5);cursor:pointer;}
+  .sb-dot.on{background:#fff;width:12px;border-radius:3px;}
   /* 포장 예약 시간 슬롯 */
   .timeslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
   .tslot{position:relative;border:1.5px solid var(--line);border-radius:10px;padding:12px 0;font-size:15px;font-weight:700;background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);}
@@ -245,7 +248,7 @@
   /* ── 메뉴 상세 ───────────────────────── */
   .d-hero{aspect-ratio:1/1;max-height:300px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:80px;}
   .d-body{padding:18px;}
-  .d-name{font-size:22px;font-weight:800;display:flex;align-items:center;gap:8px;}
+  .d-name{font-size:22px;font-weight:800;display:flex;align-items:center;gap:4px;}
   .d-desc{font-size:14px;color:var(--ink2);margin-top:8px;line-height:1.6;}
   .d-price{font-size:22px;font-weight:800;margin-top:12px;}
   .d-info{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px;color:var(--ink2);line-height:1.7;}
@@ -564,7 +567,7 @@
   .cta-sub{font-size:12px;color:var(--ink3);text-align:center;margin-bottom:9px;}
 
   /* 성인인증 모달 */
-  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center;}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:300;display:none;align-items:flex-end;justify-content:center;}
   .modal-bg.on{display:flex;}
   /* 가운데 사각 모달 (메뉴 정보 등) — X·배경 클릭으로 닫힘 */
   .modal-center{align-items:center;z-index:320;padding:24px;}
@@ -580,7 +583,9 @@
   .info-card .ic-ic{flex-shrink:0;}
   .info-card .ic-k{font-size:12px;font-weight:800;color:var(--ink3);margin-bottom:3px;}
   .info-card .ic-v{font-size:14px;font-weight:700;color:var(--ink);line-height:1.5;}
-  .sheet{background:#fff;width:100%;max-width:440px;border-radius:22px 22px 0 0;padding:24px 22px calc(24px + env(safe-area-inset-bottom));animation:up .3s ease;}
+  /* 시트 경계선: 상단이 어두운 메뉴 사진으로 꽉 찰 때도 뒷배경과 구분되도록 밝은 1px 링 + 어두운 헤일로를 함께 둠 */
+  .sheet{background:#fff;width:100%;max-width:440px;border-radius:22px 22px 0 0;padding:24px 22px calc(24px + env(safe-area-inset-bottom));animation:up .3s ease;
+    box-shadow:0 0 0 1px rgba(255,255,255,.5), 0 -12px 36px rgba(0,0,0,.5);}
   @keyframes up{from{transform:translateY(100%);}to{transform:none;}}
   .sheet-t{font-size:19px;font-weight:800;text-align:center;}
   .sheet-s{font-size:14px;color:var(--ink2);text-align:center;margin-top:8px;line-height:1.6;}
@@ -1216,6 +1221,19 @@ const NOTICE = {
   linkLabel: '행사 안내 페이지 보기'   // 링크 버튼/인라인 링크 문구 (url 없으면 링크 미표시)
 };
 
+/* 매장 그룹(홈) 메인 배너 — 브랜드가 등록한 배너 이미지·랜딩 주소 (최대 3장 · 4초 자동 롤링)
+   롤링 순환은 이 배열 길이를 기준으로 계산하므로, 장수를 늘리거나 줄여도 빈 화면이 생기지 않음 */
+const BANNERS = [
+  {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'소프트 푸드트럭 페스티벌', s:'🎉 개장 기념 · 전 매장 10% 할인'},
+  {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'야간 라이브 공연', s:'🎤 매일 저녁 8PM · B구역 무대'},
+];
+
+/* 매장 단일 페이지 긴 배너(335×56) — 브랜드 공통 배너 → 매장 단독 배너 순 롤링 */
+const SBANNERS = [
+  {tag:'브랜드', img:'https://loremflickr.com/335/56/festival,foodtruck?lock=201', txt:'🎪 전 매장 공통 개장기념 이벤트 · 행사 기간 내내 전 부스 10% 할인'},
+  {tag:'매장',   img:'https://loremflickr.com/335/56/burger,food?lock=202', txt:null},   // txt는 매장명이 들어가 렌더 시점에 생성
+];
+
 let S = {
   mode:'group',      // group | single
   bill:'pre',        // pre | post
@@ -1374,7 +1392,8 @@ function render(){
   }[S.screen] || scHome;
   document.getElementById('device').innerHTML = `<div class="screen on">${scr()}</div>`;
   if(S.screen==='home') startBanner();
-  requestAnimationFrame(()=>{ document.querySelectorAll('#device .cchip-scroll .cchips').forEach(chipFade); if(S.screen==='home') syncNotice(); });
+  if(S.screen==='store'){ _sbanI=0; startSBanner(); }
+  requestAnimationFrame(()=>{ document.querySelectorAll('#device .cchip-scroll .cchips').forEach(chipFade); bindBannerSwipe(); if(S.screen==='home') syncNotice(); });
 }
 // 가로 스크롤 칩: 더 볼 게 남았는지에 따라 오른쪽 '더보기' 힌트(페이드+화살표) 표시 · 끝이면 숨김
 function chipFade(el){
@@ -1399,11 +1418,7 @@ function scSplash(){
 /* ── 그룹 홈 ── */
 function scHome(){
   // 실제 행사 배너: 배경 이미지 + 클릭 시 URL 랜딩 (이미지 로드 실패 시 fb 그라데이션이 대체)
-  // 실제 운영 시 img/url은 브랜드가 등록한 배너 이미지·랜딩 주소로 교체
-  const banners = [
-    {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'소프트 푸드트럭 페스티벌', s:'🎉 개장 기념 · 전 매장 10% 할인'},
-    {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'야간 라이브 공연', s:'🎤 매일 저녁 8PM · B구역 무대'},
-  ];
+  const banners = BANNERS;
   const cats = ['전체','치킨','버거','피자','분식','한식','중식','일식','양식','멕시칸','아시안','디저트','음료','커피'];   // 필터1(음식 유형) — 많을 수 있어 가로 스크롤 + 더보기 힌트
   const cats2 = ['전체','A구역','B구역','C구역','D구역'];   // 상세필터 옵션 — 운영자 설정값(구역/브랜드/가격대 등 자유)
   return `
@@ -1552,9 +1567,10 @@ function toggleOpenFirst(){ S.openFirst=!S.openFirst; document.getElementById('s
 function toggleSearch(){ S.searchOpen=!S.searchOpen; S.searchQ=''; render(); if(S.searchOpen){ setTimeout(()=>{const i=document.getElementById('homeSearch'); if(i)i.focus();},60); } }
 
 let _banI=0;
-// 자동 4초 롤링(스펙 기준) + 점(dot) 탭으로 수동 넘김 가능 · 수동 조작 시 4초 타이머 재시작
+// 자동 4초 롤링(스펙 기준) + 점(dot) 탭·좌우 스와이프로 수동 넘김 가능 · 수동 조작 시 4초 타이머 재시작
 function goBanner(i){
-  _banI=i;
+  const n=BANNERS.length;
+  _banI=(i+n)%n;   // 양끝에서 순환 (첫 장에서 왼쪽 스와이프 → 마지막 장)
   const sl=document.getElementById('banSlides'); if(!sl)return;
   sl.style.transform=`translateX(-${_banI*100}%)`;
   document.querySelectorAll('#banDots .mb-dot').forEach((d,k)=>d.classList.toggle('on',k===_banI));
@@ -1564,9 +1580,54 @@ function startBanner(){
   clearInterval(window._ban);
   window._ban=setInterval(()=>{
     const sl=document.getElementById('banSlides'); if(!sl){clearInterval(window._ban);return;}
-    _banI=(_banI+1)%3; sl.style.transform=`translateX(-${_banI*100}%)`;
+    _banI=(_banI+1)%BANNERS.length; sl.style.transform=`translateX(-${_banI*100}%)`;   // 등록된 배너 장수 기준으로 순환(빈 화면 방지)
     document.querySelectorAll('#banDots .mb-dot').forEach((d,i)=>d.classList.toggle('on',i===_banI));
   },4000);
+}
+
+/* 매장 단일 페이지 긴 배너 — 메인 배너와 같은 규칙(4초 자동 + 점 탭·스와이프) */
+let _sbanI=0;
+function goSBanner(i){
+  const n=SBANNERS.length;
+  _sbanI=(i+n)%n;
+  const sl=document.getElementById('sbSlides'); if(!sl)return;
+  sl.style.transform=`translateX(-${_sbanI*100}%)`;
+  document.querySelectorAll('#sbDots .sb-dot').forEach((d,k)=>d.classList.toggle('on',k===_sbanI));
+  startSBanner();
+}
+function startSBanner(){
+  clearInterval(window._sban);
+  window._sban=setInterval(()=>{
+    const sl=document.getElementById('sbSlides'); if(!sl){clearInterval(window._sban);return;}
+    _sbanI=(_sbanI+1)%SBANNERS.length; sl.style.transform=`translateX(-${_sbanI*100}%)`;
+    document.querySelectorAll('#sbDots .sb-dot').forEach((d,i)=>d.classList.toggle('on',i===_sbanI));
+  },4000);
+}
+
+/* 배너 스와이프 — 손가락(터치)·마우스 드래그로 좌우 넘김
+   세로 스크롤과 충돌하지 않도록 '가로 이동이 세로보다 우세할 때'만 넘김으로 인정하고,
+   스와이프로 인정된 제스처는 배너 클릭(URL 랜딩)으로 이어지지 않게 막음 */
+function attachSwipe(el, onNext, onPrev){
+  if(!el || el._swipeBound) return;
+  el._swipeBound = true;
+  const TH=40;   // 이 거리(px) 이상 가로로 밀어야 넘김
+  let x0=null, y0=null, moved=false;
+  const start=(x,y)=>{ x0=x; y0=y; moved=false; };
+  const move=(x,y)=>{ if(x0==null) return; if(Math.abs(x-x0)>Math.abs(y-y0) && Math.abs(x-x0)>8) moved=true; };
+  const end=x=>{ if(x0==null) return; const dx=x-x0; x0=null; y0=null; if(moved && Math.abs(dx)>=TH){ dx<0?onNext():onPrev(); } };
+  el.addEventListener('touchstart',e=>{const t=e.touches[0];start(t.clientX,t.clientY);},{passive:true});
+  el.addEventListener('touchmove', e=>{const t=e.touches[0];move(t.clientX,t.clientY);},{passive:true});
+  el.addEventListener('touchend',  e=>{const t=e.changedTouches[0];end(t.clientX);});
+  el.addEventListener('mousedown', e=>start(e.clientX,e.clientY));
+  el.addEventListener('mousemove', e=>{ if(x0!=null) move(e.clientX,e.clientY); });
+  el.addEventListener('mouseup',   e=>end(e.clientX));
+  el.addEventListener('mouseleave',()=>{ x0=null; y0=null; });
+  el.addEventListener('click', e=>{ if(moved){ e.preventDefault(); e.stopPropagation(); moved=false; } }, true);
+}
+// 렌더 직후 현재 화면의 배너에 스와이프 연결
+function bindBannerSwipe(){
+  attachSwipe(document.querySelector('#device .mbanner'), ()=>goBanner(_banI+1), ()=>goBanner(_banI-1));
+  attachSwipe(document.querySelector('#device .sbanner-roll'), ()=>goSBanner(_sbanI+1), ()=>goSBanner(_sbanI-1));
 }
 
 /* ── 매장 페이지 ── */
@@ -1592,17 +1653,18 @@ function scStore(){
         : (s.waitCount ? `지금 앞에 <b>${s.waitCount}</b>이 기다리고 있어요` : ''))
     : '';
   // 매장 배너(335×56)는 위치 옵션 없이 커버 이미지 아래에 고정 노출
+  // 매장 배너 문구: 매장 단독 혜택 배너는 매장명이 들어가므로 렌더 시점에 생성
+  const sbTxt = i => SBANNERS[i].txt || `🎁 첫 주문 시 사이드 500원 할인 · ${s.name} 단독 혜택`;
   const bannerHTML = `
-    <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링) -->
+    <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링 · 4초 자동 + 점 탭·스와이프 수동) -->
     <div class="sbanner-roll" onclick="toast('배너 탭 → 지정 URL 랜딩')">
-      <div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('https://loremflickr.com/335/56/festival,foodtruck?lock=201')">
-        <span class="sb-tag">브랜드</span>
-        <div class="sb-txt">🎪 전 매장 공통 개장기념 이벤트 · 행사 기간 내내 전 부스 10% 할인</div>
+      <div class="sb-slides" id="sbSlides">
+        ${SBANNERS.map((b,i)=>`<div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('${b.img}')">
+          <span class="sb-tag">${b.tag}</span>
+          <div class="sb-txt">${sbTxt(i)}</div>
+        </div>`).join('')}
       </div>
-      <div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('https://loremflickr.com/335/56/burger,food?lock=202')">
-        <span class="sb-tag">매장</span>
-        <div class="sb-txt">🎁 첫 주문 시 사이드 500원 할인 · ${s.name} 단독 혜택</div>
-      </div>
+      <div class="sb-dots" id="sbDots">${SBANNERS.map((_,i)=>`<div class="sb-dot ${i===0?'on':''}" onclick="event.stopPropagation();goSBanner(${i})"></div>`).join('')}</div>
     </div>`;
   return `
   <div class="hdr">

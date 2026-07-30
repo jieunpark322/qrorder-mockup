@@ -836,19 +836,16 @@
   .scope-note{margin:12px 14px 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--ink2);box-shadow:var(--shadow);}
   .scope-chip{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--ink3);background:#F3F3F5;padding:3px 9px;border-radius:6px;letter-spacing:-.01em;}
 
-  /* 포장 예약 시/분 선택기 */
+  /* 포장 예약 시/분 선택기 — 내점형과 동일한 네이티브 select 드롭다운 UX */
   .tp-wrap{margin-top:14px;}
-  .tp-sub{font-size:12px;font-weight:700;color:var(--ink3);margin:12px 0 8px;}
-  .tp-sub:first-child{margin-top:0;}
-  .tp-row{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;min-height:44px;}
-  .tp-row::-webkit-scrollbar{display:none;}
-  .tp-chip{flex-shrink:0;border:1.5px solid var(--line);border-radius:10px;padding:10px 13px;font-size:14px;font-weight:700;background:#fff;color:var(--ink);cursor:pointer;font-family:inherit;white-space:nowrap;}
-  .tp-chip.on{border-color:var(--persimmon);background:var(--blue-50);color:var(--persimmon);}
-  .tp-chip.dis{color:var(--ink4);background:#F5F5F6;border-color:var(--line2);cursor:not-allowed;text-decoration:line-through;}
-  .tp-empty{font-size:13px;color:var(--ink3);padding:11px 2px;}
-  .tp-note{margin-top:14px;font-size:14px;font-weight:800;color:var(--ink);}
+  .tp-label{font-size:14px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px;margin-bottom:11px;}
+  .req{font-size:11px;font-weight:800;color:#e03131;background:#fff0f0;padding:3px 8px;border-radius:5px;}
+  .tp-selrow{display:flex;gap:8px;}
+  .timesel{flex:1;border:1.5px solid var(--line);border-radius:12px;padding:15px 13px;font-size:16.5px;font-weight:600;font-family:inherit;color:var(--ink);background:#fff;}
+  .timesel:focus{outline:none;border-color:var(--persimmon);}
+  .tp-note{margin-top:10px;font-size:13px;font-weight:600;color:var(--persimmon);}
   .tp-note.dim{font-weight:600;color:var(--ink3);}
-  .tp-note b{color:var(--persimmon);}
+  .tp-note b{font-weight:800;}
   .tp-hint{margin-top:6px;font-size:12px;color:var(--ink4);line-height:1.5;}
 
   /* 매장 상태: 브레이크 타임 & 영업종료/브레이크 공통 배너(메뉴판만) */
@@ -1883,32 +1880,42 @@ const fmtMin = t => `${pad2(Math.floor(t/60))}:${pad2(t%60)}`;
 function validPickup(s,t){ return t>=s.ohStart && t<=s.ohEnd && !(s.brkStart!=null && t>=s.brkStart && t<s.brkEnd); }
 function pickHour(h){
   const s=store(S.curStore);
+  if(h==null){ S.pickupH=null; S.pickupM=null; syncPickup(); render(); return; }
   S.pickupH=h;
   if(S.pickupM!=null && !validPickup(s,h*60+S.pickupM)) S.pickupM=null;   // 새 시간대에서 무효한 분 초기화
   syncPickup(); render();
 }
 function pickMin(m){
   const s=store(S.curStore);
+  if(m==null){ S.pickupM=null; syncPickup(); render(); return; }
   if(S.pickupH==null || !validPickup(s,S.pickupH*60+m)) return;
   S.pickupM=m; syncPickup(); render();
 }
 function syncPickup(){ S.pickupTime = (S.pickupH!=null && S.pickupM!=null) ? `${pad2(S.pickupH)}:${pad2(S.pickupM)}` : null; }
+// 내점형 QR메뉴판과 동일한 UX: 시/분 네이티브 select 드롭다운 2개 + 확정 안내 문구
 function timePickerHTML(){
   const s=store(S.curStore);
   const startH=Math.floor(s.ohStart/60)-1, endH=Math.floor(s.ohEnd/60)+1;   // 영업시간 밖도 1시간씩 보여줘 '선택 불가' 인지
   const hourOk = h => { for(let m=0;m<60;m+=5){ if(validPickup(s,h*60+m)) return true; } return false; };
   const hours=[]; for(let h=Math.max(0,startH); h<=Math.min(23,endH); h++) hours.push(h);
   const mins=[]; for(let m=0;m<60;m+=5) mins.push(m);
-  const hourRow = hours.map(h=>{const dis=!hourOk(h); return `<button class="tp-chip ${S.pickupH===h?'on':''} ${dis?'dis':''}" ${dis?'disabled':''} onclick="pickHour(${h})">${h}시</button>`;}).join('');
-  const minRow = mins.map(m=>{const dis=(S.pickupH==null)||!validPickup(s,S.pickupH*60+m); return `<button class="tp-chip ${S.pickupM===m?'on':''} ${dis?'dis':''}" ${dis?'disabled':''} onclick="pickMin(${m})">${pad2(m)}분</button>`;}).join('');
+  const hourOpts = hours.map(h=>`<option value="${h}" ${!hourOk(h)?'disabled':''} ${S.pickupH===h?'selected':''}>${h}시${hourOk(h)?'':' · 마감'}</option>`).join('');
+  const minOpts = mins.map(m=>{const dis=(S.pickupH==null)||!validPickup(s,S.pickupH*60+m); return `<option value="${m}" ${dis?'disabled':''} ${S.pickupM===m?'selected':''}>${pad2(m)}분${dis?' · 마감':''}</option>`;}).join('');
   const brk = s.brkStart!=null ? ` · 브레이크 ${fmtMin(s.brkStart)}~${fmtMin(s.brkEnd)}` : '';
   return `
     <div class="tp-wrap">
-      <div class="tp-sub">시간</div>
-      <div class="tp-row">${hourRow}</div>
-      <div class="tp-sub">분</div>
-      <div class="tp-row">${S.pickupH==null?`<div class="tp-empty">먼저 시간을 선택해 주세요</div>`:minRow}</div>
-      ${S.pickupTime?`<div class="tp-note">✅ 수령 시간 <b>${S.pickupTime}</b>로 예약할게요</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
+      <div class="tp-label">수령 시간 <span class="req">필수</span></div>
+      <div class="tp-selrow">
+        <select class="timesel" onchange="pickHour(this.value===''?null:Number(this.value))">
+          <option value="" ${S.pickupH==null?'selected':''}>시</option>
+          ${hourOpts}
+        </select>
+        <select class="timesel" onchange="pickMin(this.value===''?null:Number(this.value))" ${S.pickupH==null?'disabled':''}>
+          <option value="" ${S.pickupM==null?'selected':''}>분</option>
+          ${minOpts}
+        </select>
+      </div>
+      ${S.pickupTime?`<div class="tp-note">📅 오늘 <b>${S.pickupTime}</b> 수령</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
       <div class="tp-hint">영업 시간 ${fmtMin(s.ohStart)}~${fmtMin(s.ohEnd)}${brk} 외에는 선택할 수 없어요</div>
     </div>`;
 }

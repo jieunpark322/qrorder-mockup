@@ -1876,7 +1876,7 @@ function upsellRow(sid,m,showStore){
     <button class="ghostbtn" style="width:auto;margin:0;padding:0 15px;white-space:nowrap" onclick="openMenu('${sid}','${m.id}')">담기</button>
   </div>`;
 }
-/* 포장 예약: 시/분 직접 선택 (5분 단위) · 매장 영업시간 밖은 선택 불가 */
+/* 포장 예약: 시/분 직접 선택 (10분 단위, 내점형과 동일) · 매장 영업시간 밖은 선택 불가 */
 const pad2 = n => String(n).padStart(2,'0');
 const fmtMin = t => `${pad2(Math.floor(t/60))}:${pad2(t%60)}`;
 function validPickup(s,t){ return t>=s.ohStart && t<=s.ohEnd && !(s.brkStart!=null && t>=s.brkStart && t<s.brkEnd); }
@@ -1898,9 +1898,9 @@ function syncPickup(){ S.pickupTime = (S.pickupH!=null && S.pickupM!=null) ? `${
 function timePickerHTML(){
   const s=store(S.curStore);
   const startH=Math.floor(s.ohStart/60)-1, endH=Math.floor(s.ohEnd/60)+1;   // 영업시간 밖도 1시간씩 보여줘 '선택 불가' 인지
-  const hourOk = h => { for(let m=0;m<60;m+=5){ if(validPickup(s,h*60+m)) return true; } return false; };
+  const hourOk = h => { for(let m=0;m<60;m+=10){ if(validPickup(s,h*60+m)) return true; } return false; };
   const hours=[]; for(let h=Math.max(0,startH); h<=Math.min(23,endH); h++) hours.push(h);
-  const mins=[]; for(let m=0;m<60;m+=5) mins.push(m);
+  const mins=[]; for(let m=0;m<60;m+=10) mins.push(m);
   const hourOpts = hours.map(h=>`<option value="${h}" ${!hourOk(h)?'disabled':''} ${S.pickupH===h?'selected':''}>${h}시${hourOk(h)?'':' · 마감'}</option>`).join('');
   const minOpts = mins.map(m=>{const dis=(S.pickupH==null)||!validPickup(s,S.pickupH*60+m); return `<option value="${m}" ${dis?'disabled':''} ${S.pickupM===m?'selected':''}>${pad2(m)}분${dis?' · 마감':''}</option>`;}).join('');
   const brk = s.brkStart!=null ? ` · 브레이크 ${fmtMin(s.brkStart)}~${fmtMin(s.brkEnd)}` : '';

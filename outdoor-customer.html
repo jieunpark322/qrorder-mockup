@@ -17,6 +17,8 @@
     --b1:#5C5EDA; --b2:#5C6DDA; --b3:#5C7CDA; --b4:#5C8CDA; --b5:#5C9BDA; --b6:#5CAADA; --b7:#5CB9DA;
     --ink:#1E1E22; --ink2:#5C5C63; --ink3:#8C8C94; --ink4:#BDBDC4;
     --line:#EBEBEE; --line2:#F3F3F5; --bg:#F5F5F6; --card:#FFFFFF;
+    /* 이미지 미등록 플레이스홀더 아이콘 (CSS mask용 · OS 기본 이모지 대체) */
+    --ic-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4.5' width='18' height='15' rx='2'/%3E%3Ccircle cx='8.5' cy='10' r='1.6'/%3E%3Cpath d='m4.5 18 5-5 4.5 4.5 3-2.5 3.5 3'/%3E%3C/svg%3E");
     --green:#1E8E5F; --red:#DD3B3B; --amber:#D9930F;
     --festA:#5C8CDA; --festB:#5CB9DA;
     --point:#F2503E; --point-50:#FFEDE9;   /* 포인트 컬러 — 할인가·강조 전용(블루의 보색) */
@@ -126,7 +128,8 @@
   .s-thumb{width:82px;height:82px;border-radius:13px;flex-shrink:0;background-size:cover;background-position:center;position:relative;display:flex;align-items:center;justify-content:center;font-size:34px;}
   /* 썸네일은 실사(매장 사진) 기준 · 이미지 미등록 시 기본 이미지 플레이스홀더 */
   .s-thumb.noimg{background:linear-gradient(135deg,#eceef1,#e0e3e8);}
-  .s-thumb.noimg::before{content:'🖼';font-size:26px;opacity:.38;}
+  .s-thumb.noimg::before{content:'';width:26px;height:26px;opacity:.32;background:currentColor;color:var(--ink3);
+    -webkit-mask:var(--ic-image) center/contain no-repeat;mask:var(--ic-image) center/contain no-repeat;}
   .s-logo{position:absolute;left:-6px;bottom:-6px;width:32px;height:32px;border-radius:9px;background:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:16px;}
   .s-body{flex:1;min-width:0;}
   .s-name{font-size:17px;font-weight:800;display:flex;align-items:center;gap:7px;}
@@ -149,7 +152,9 @@
   .brandinfo.nocover{margin-top:16px;position:relative;}
   /* 커버 없을 때 우측 상단 상태 배지 — 밝은 배경에 맞춰 어두운 칩 */
   .cover-status.dark{background:rgba(30,30,35,.82);border-color:rgba(255,255,255,.15);}
-  .logo{width:70px;height:70px;border-radius:18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid #fff;}
+  .logo{width:70px;height:70px;border-radius:18px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;border:3px solid #fff;overflow:hidden;}
+  .logo img{width:100%;height:100%;object-fit:cover;}
+  .logo-ini{font-size:30px;font-weight:900;color:var(--persimmon);letter-spacing:-.02em;}
   .bstore{font-size:23px;font-weight:800;margin-top:12px;}
   .store-desc{font-size:13.5px;color:var(--ink2);line-height:1.5;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   .bstatus{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;margin-top:6px;}
@@ -208,7 +213,7 @@
   .mb-hot{color:#e8590c;background:#fff4e6;} .mb-new{color:#1971c2;background:#e7f5ff;} .mb-rec{color:#2f9e44;background:#ebfbee;}
   .m-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px;}
   .m-emoji{font-size:15px;}
-  /* 성인 메뉴 연령 배지 — 금지 마크(🔞) 대신 깔끔한 '19' 배지(3D) */
+  /* 성인 메뉴 연령 배지 — 금지 마크 대신 깔끔한 '19' 배지(3D) */
   .age-badge{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;padding:0;border-radius:50%;
     background:linear-gradient(160deg,#FF6B6B,#E03131);color:#fff;font-size:9px;font-weight:900;letter-spacing:-.05em;vertical-align:middle;flex-shrink:0;
     box-shadow:0 1px 3px rgba(224,49,49,.4), inset 0 1px 0 rgba(255,255,255,.35);margin-right:3px;}
@@ -294,7 +299,8 @@
 
   /* 장바구니 아이템 */
   .citem{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line2);}
-  .citem .ci-th{width:56px;height:56px;border-radius:10px;background-size:cover;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+  .citem .ci-th{width:56px;height:56px;border-radius:10px;background-size:cover;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .ph-ic{font-size:24px;color:var(--ink4);display:flex;}
   .citem .ci-b{flex:1;min-width:0;}
   .citem .ci-n{font-size:15px;font-weight:700;}
   .citem .ci-o{font-size:12.5px;color:var(--ink3);margin-top:3px;}
@@ -901,7 +907,8 @@
   .gcard:active{opacity:.85;}
   .g-thumb{width:100%;aspect-ratio:1/1;border-radius:12px;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);position:relative;margin-bottom:5px;display:flex;align-items:center;justify-content:center;}
   .g-thumb.noimg{background:linear-gradient(135deg,#eceef1,#e0e3e8);}
-  .g-thumb.noimg::before{content:'🖼';font-size:30px;opacity:.38;}
+  .g-thumb.noimg::before{content:'';width:30px;height:30px;opacity:.32;background:currentColor;color:var(--ink3);
+    -webkit-mask:var(--ic-image) center/contain no-repeat;mask:var(--ic-image) center/contain no-repeat;}
   .g-hero{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .gcard.dimmed .g-thumb{filter:grayscale(100%) brightness(.9);}
   .gcard.dimmed .s-sub,.gcard.dimmed .s-meta{color:var(--ink4);}
@@ -1106,10 +1113,10 @@
 <!-- 성인인증 시트 -->
 <div class="modal-bg" id="adultModal" onclick="if(event.target===this)closeAdult()">
   <div class="sheet">
-    <div class="sheet-t">🍷 성인 인증이 필요해요</div>
+    <div class="sheet-t">성인 인증이 필요해요</div>
     <div class="sheet-s">알코올 메뉴는 성인 인증 후에만 담을 수 있어요.<br>최초 1회 인증하면 오늘 자정까지 다시 인증하지 않아도 돼요.</div>
-    <button class="authbtn" onclick="doAuth()"><span class="aic">📱</span><div><div>본인 명의 휴대폰 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">내국인</div></div></button>
-    <button class="authbtn" onclick="doAuth()"><span class="aic">🛂</span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인</div></div></button>
+    <button class="authbtn" onclick="doAuth()"><span class="aic">${IC.phone}</span><div><div>본인 명의 휴대폰 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">내국인</div></div></button>
+    <button class="authbtn" onclick="doAuth()"><span class="aic">${IC.passport}</span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인</div></div></button>
     <button class="ghostbtn" onclick="closeAdult()">닫기</button>
   </div>
 </div>
@@ -1160,137 +1167,137 @@
 <script>
 /* ══════════════ 데이터 ══════════════ */
 const STORES = [
-  { id:'burger', name:'소프트버거 트럭', logo:'🍔', thumb:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=760&q=72',
+  { id:'burger', name:'소프트버거 트럭', thumb:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=760&q=72',
     open:true, desc:'매일 아침 손으로 반죽한 패티와 갓 구운 번으로 만드는 수제버거 트럭이에요.', loc:'부스 3번', waitCount:'12팀', waitTime:'약 15분', rep:'수제 더블패티 버거', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260, brkStart:900, brkEnd:960,   /* 영업 11:00~21:00, 브레이크 15:00~16:00 (분) */
     rvStart:690, rvEnd:1200,   /* 예약 가능 11:30~20:00 — 영업시간과 다르게 설정한 예시(마감 정리 시간 확보) */
     info:{ceo:'김철수', regno:'123-45-67890', bizAddr:'서울 마포구 월드컵로 12, 3층', hours:'행사 기간 매일 11:00 ~ 21:00\n(브레이크타임 15:00 ~ 16:00)', origin:'소고기: 국내산 (한우) · 감자: 미국산\n밀(빵): 미국산 · 돼지고기(베이컨): 국내산'},
     menus:[
-      {id:'b1', cat:'버거', name:'더블 치즈버거', emoji:'', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], img:'🍔', photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null, allergy:'밀·대두·우유·달걀 함유', nutrition:'약 620kcal'},
-      {id:'b5', cat:'버거', name:'베이컨 랩', desc:'바삭 베이컨 + 토르티야 랩', price:8500, img:'🌯', photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
-      {id:'b2', cat:'사이드', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], img:'🍟', photo:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=320&h=320&q=72', left:5, nutrition:'약 380kcal', upsell:true},
-      {id:'b3', cat:'음료', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, img:'🥤', photo:'https://loremflickr.com/320/320/cola,soda?lock=13', upsell:true},
-      {id:'b4', cat:'음료', name:'수제 흑맥주 500ml', emoji:'', desc:'현장 한정 크래프트 비어', price:7000, badges:['new'], img:'🍺', photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
-      {id:'b6', cat:'세트', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 준비', price:15000, left:8, maxOrder:2, badges:['hot'], img:'🍱', photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
+      {id:'b1', cat:'버거', name:'더블 치즈버거', desc:'두툼한 소고기 패티 2장 + 체다치즈', price:9800, was:11000, badges:['hot'], photo:'https://loremflickr.com/320/320/cheeseburger?lock=11', left:null, allergy:'밀·대두·우유·달걀 함유', nutrition:'약 620kcal'},
+      {id:'b5', cat:'버거', name:'베이컨 랩', desc:'바삭 베이컨 + 토르티야 랩', price:8500, photo:'https://loremflickr.com/320/320/wrap,burrito?lock=16', soldout:true},
+      {id:'b2', cat:'사이드', name:'트러플 감자튀김', desc:'트러플 오일 · 파마산', price:5500, badges:['rec'], photo:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=320&h=320&q=72', left:5, nutrition:'약 380kcal', upsell:true},
+      {id:'b3', cat:'음료', name:'수제 콜라', desc:'무설탕 옵션 선택 가능', price:3000, photo:'https://loremflickr.com/320/320/cola,soda?lock=13', upsell:true},
+      {id:'b4', cat:'음료', name:'수제 흑맥주 500ml', desc:'현장 한정 크래프트 비어', price:7000, badges:['new'], photo:'https://loremflickr.com/320/320/craftbeer?lock=14', adult:true, allergy:'보리·밀 함유'},
+      {id:'b6', cat:'세트', name:'오프닝 세트', desc:'버거 + 감자 + 음료 · 하루 20세트 준비', price:15000, left:8, maxOrder:2, badges:['hot'], photo:'https://loremflickr.com/320/320/burger,meal?lock=15'},
     ]},
-  { id:'coffee', name:'소프트커피', logo:'☕', thumb:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=760&q=72',
+  { id:'coffee', name:'소프트커피', thumb:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=760&q=72',
     open:true, desc:'매일 직접 로스팅한 원두로 내린 커피와 갓 구운 베이커리를 즐길 수 있는 동네 카페예요.', loc:'부스 1번', waitCount:'3팀', waitTime:'약 5분', rep:'핸드드립 아메리카노', cat:'음료', cat2:'B구역',
     ohStart:660, ohEnd:1260,   /* 영업 11:00~21:00 */
     info:{ceo:'이영희', regno:'234-56-78901', bizAddr:'서울 서대문구 연희로 44', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'원두: 콜롬비아·브라질산 · 우유: 국내산\n레몬: 미국산'},
     menus:[
-      {id:'c1', cat:'커피', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], img:'☕', photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true, upsell:true},
-      {id:'c2', cat:'커피', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, img:'🥛', photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true, allergy:'우유 함유', nutrition:'약 250kcal'},
-      {id:'c4', cat:'커피', name:'콜드브루', desc:'하루 30잔 준비', price:5500, left:12, badges:['rec'], img:'🧊', photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20', upsell:true},
-      {id:'c3', cat:'에이드', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], img:'🍋', photo:'https://loremflickr.com/320/320/lemonade?lock=19', left:3},
+      {id:'c1', cat:'커피', name:'아메리카노', desc:'ICE / HOT', price:3500, badges:['hot'], photo:'https://loremflickr.com/320/320/americano,coffee?lock=17', reuse:true, upsell:true},
+      {id:'c2', cat:'커피', name:'바닐라 라떼', desc:'바닐라 시럽 추가', price:4800, was:5300, photo:'https://loremflickr.com/320/320/latte?lock=18', reuse:true, allergy:'우유 함유', nutrition:'약 250kcal'},
+      {id:'c4', cat:'커피', name:'콜드브루', desc:'하루 30잔 준비', price:5500, left:12, badges:['rec'], photo:'https://loremflickr.com/320/320/coldbrew,coffee?lock=20', upsell:true},
+      {id:'c3', cat:'에이드', name:'수제 레몬에이드', desc:'', price:5000, badges:['rec'], photo:'https://loremflickr.com/320/320/lemonade?lock=19', left:3},
     ]},
-  { id:'chicken', name:'소프트치킨', logo:'🍗', thumb:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=760&q=72',
+  { id:'chicken', name:'소프트치킨', thumb:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=300&q=72', cover:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=760&q=72',
     open:false, desc:'겉은 바삭하고 속은 촉촉한, 매일 신선하게 튀겨내는 치킨 전문점이에요.', loc:'부스 2번', waitCount:'8팀', waitTime:'약 8분', rep:'바삭 후라이드', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1200,   /* 영업 11:00~20:00 */
     info:{ceo:'박민수', regno:'345-67-89012', bizAddr:'경기 고양시 덕양구 화중로 21', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'닭고기: 국내산 · 식용유: 국내산'}, menus:[] },
-  { id:'taco', name:'소프트타코', logo:'🌮', thumb:'https://loremflickr.com/240/240/taco?lock=4', cover:'https://loremflickr.com/760/430/taco,mexican?lock=4',
+  { id:'taco', name:'소프트타코', thumb:'https://loremflickr.com/240/240/taco?lock=4', cover:'https://loremflickr.com/760/430/taco,mexican?lock=4',
     open:true, desc:'정통 멕시칸 레시피 그대로, 즉석에서 만드는 타코와 나초를 맛볼 수 있어요.', loc:'부스 5번', waitCount:'6팀', waitTime:'약 10분', rep:'비프 타코', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260,
     info:{ceo:'최지우', regno:'456-78-90123', bizAddr:'서울 용산구 이태원로 88, 1층', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소고기: 호주산 · 토르티야(밀): 미국산'},
     menus:[
-      {id:'t1', cat:'타코', name:'비프 타코 2P', desc:'살사·과카몰리', price:6500, badges:['hot'], img:'🌮', photo:'https://loremflickr.com/320/320/taco?lock=41', upsell:true},
-      {id:'t2', cat:'사이드', name:'나초 치즈', desc:'할라피뇨 추가 가능', price:6000, was:6000, img:'🧀', photo:'https://loremflickr.com/320/320/nachos?lock=42', left:4},
+      {id:'t1', cat:'타코', name:'비프 타코 2P', desc:'살사·과카몰리', price:6500, badges:['hot'], photo:'https://loremflickr.com/320/320/taco?lock=41', upsell:true},
+      {id:'t2', cat:'사이드', name:'나초 치즈', desc:'할라피뇨 추가 가능', price:6000, was:6000, photo:'https://loremflickr.com/320/320/nachos?lock=42', left:4},
     ]},
-  { id:'juice', name:'소프트주스바', logo:'🧃', thumb:'https://loremflickr.com/240/240/juice?lock=9', cover:'',   /* 커버 미등록 데모 — 상세에서 커버 영역 없이 표시 */
+  { id:'juice', name:'소프트주스바', thumb:'https://loremflickr.com/240/240/juice?lock=9', cover:'',   /* 커버 미등록 데모 — 상세에서 커버 영역 없이 표시 */
     open:true, desc:'매일 아침 들여온 제철 과일로 그 자리에서 바로 짜드리는 생과일 주스바예요.', loc:'부스 5번', waitCount:'2팀', waitTime:'약 3분', rep:'생과일 착즙주스', cat:'음료', cat2:'C구역',
     ohStart:660, ohEnd:1260,
     info:{ceo:'오세훈', regno:'890-12-34567', bizAddr:'서울 강서구 공항대로 210', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'과일: 국내산'},
     menus:[
-      {id:'j1', cat:'생과일주스', name:'생오렌지 주스', desc:'착즙 그대로', price:5000, badges:['rec'], img:'🍊', photo:'https://loremflickr.com/320/320/orangejuice?lock=91', reuse:true, upsell:true},
-      {id:'j2', cat:'스무디', name:'딸기 스무디', desc:'생딸기 듬뿍', price:6000, img:'🍓', photo:'https://loremflickr.com/320/320/strawberry,smoothie?lock=92'},
+      {id:'j1', cat:'생과일주스', name:'생오렌지 주스', desc:'착즙 그대로', price:5000, badges:['rec'], photo:'https://loremflickr.com/320/320/orangejuice?lock=91', reuse:true, upsell:true},
+      {id:'j2', cat:'스무디', name:'딸기 스무디', desc:'생딸기 듬뿍', price:6000, photo:'https://loremflickr.com/320/320/strawberry,smoothie?lock=92'},
     ]},
-  { id:'dessert', name:'소프트디저트', logo:'🍰', thumb:'https://loremflickr.com/240/240/dessert?lock=5', cover:'https://loremflickr.com/760/430/dessert,cake?lock=5',
+  { id:'dessert', name:'소프트디저트', thumb:'https://loremflickr.com/240/240/dessert?lock=5', cover:'https://loremflickr.com/760/430/dessert,cake?lock=5',
     open:true, desc:'달콤한 시나몬 슈가를 듬뿍 입힌 즉석 수제 츄러스와 아이스크림을 즐길 수 있어요.', loc:'부스 4번', waitCount:'2팀', waitTime:'약 4분', rep:'수제 츄러스', cat:'디저트', cat2:'B구역',
     ohStart:660, ohEnd:1260,
     info:{ceo:'한소민', regno:'567-89-01234', bizAddr:'서울 마포구 동교로 17, 2층', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
     menus:[
-      {id:'de1', cat:'츄러스', name:'수제 츄러스', desc:'시나몬 슈가', price:4000, badges:['rec'], img:'🥨', photo:'https://loremflickr.com/320/320/churros?lock=51', reuse:true, upsell:true},
-      {id:'de2', cat:'아이스크림', name:'소프트 아이스크림', desc:'바닐라 / 초코', price:3500, img:'🍦', photo:'https://loremflickr.com/320/320/icecream?lock=52'},
+      {id:'de1', cat:'츄러스', name:'수제 츄러스', desc:'시나몬 슈가', price:4000, badges:['rec'], photo:'https://loremflickr.com/320/320/churros?lock=51', reuse:true, upsell:true},
+      {id:'de2', cat:'아이스크림', name:'소프트 아이스크림', desc:'바닐라 / 초코', price:3500, photo:'https://loremflickr.com/320/320/icecream?lock=52'},
     ]},
-  { id:'pizza', name:'소프트피자', logo:'🍕', thumb:'https://loremflickr.com/240/240/pizza?lock=6', cover:'https://loremflickr.com/760/430/pizza?lock=6',
+  { id:'pizza', name:'소프트피자', thumb:'https://loremflickr.com/240/240/pizza?lock=6', cover:'https://loremflickr.com/760/430/pizza?lock=6',
     open:true, desc:'장작 화덕에서 바로 구워내는 얇고 바삭한 도우의 정통 이탈리안 피자예요.', loc:'부스 6번', waitCount:'9팀', waitTime:'약 12분', rep:'화덕 마르게리타', cat:'푸드', cat2:'A구역',
     ohStart:660, ohEnd:1260,
     info:{ceo:'정우성', regno:'678-90-12345', bizAddr:'경기 성남시 분당구 판교로 55', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 치즈: 국내산 · 토마토: 이탈리아산'},
     menus:[
-      {id:'p1', cat:'피자', name:'마르게리타 피자', desc:'화덕 도우 · 바질', price:9000, badges:['hot'], img:'🍕', photo:'https://loremflickr.com/320/320/margherita,pizza?lock=61', upsell:true},
-      {id:'p2', cat:'피자', name:'페퍼로니 피자', desc:'더블 페퍼로니', price:10500, was:12000, img:'🍕', photo:'https://loremflickr.com/320/320/pepperoni,pizza?lock=62'},
-      {id:'p3', cat:'사이드', name:'갈릭 브레드', desc:'', price:4000, badges:['rec'], img:'🥖', photo:'https://loremflickr.com/320/320/garlicbread?lock=63', upsell:true},
+      {id:'p1', cat:'피자', name:'마르게리타 피자', desc:'화덕 도우 · 바질', price:9000, badges:['hot'], photo:'https://loremflickr.com/320/320/margherita,pizza?lock=61', upsell:true},
+      {id:'p2', cat:'피자', name:'페퍼로니 피자', desc:'더블 페퍼로니', price:10500, was:12000, photo:'https://loremflickr.com/320/320/pepperoni,pizza?lock=62'},
+      {id:'p3', cat:'사이드', name:'갈릭 브레드', desc:'', price:4000, badges:['rec'], photo:'https://loremflickr.com/320/320/garlicbread?lock=63', upsell:true},
     ]},
-  { id:'ramen', name:'소프트라멘', logo:'🍜', thumb:'https://loremflickr.com/240/240/ramen?lock=7', cover:'https://loremflickr.com/760/430/ramen,noodle?lock=7',
+  { id:'ramen', name:'소프트라멘', thumb:'https://loremflickr.com/240/240/ramen?lock=7', cover:'https://loremflickr.com/760/430/ramen,noodle?lock=7',
     open:true, paused:true, desc:'12시간 우려낸 진한 돈코츠 육수로 끓여내는 정통 일본식 라멘 맛집이에요.', loc:'부스 2번', waitCount:'15팀', waitTime:'약 20분', rep:'돈코츠 라멘', cat:'푸드', cat2:'B구역',
     ohStart:660, ohEnd:1200,
     info:{ceo:'강동원', regno:'789-01-23456', bizAddr:'서울 종로구 자하문로 9', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'돼지고기: 국내산 · 면(밀): 국내산'},
     menus:[
-      {id:'r1', cat:'라멘', name:'돈코츠 라멘', desc:'진한 돼지사골 국물', price:8500, badges:['hot'], img:'🍜', photo:'https://loremflickr.com/320/320/tonkotsu,ramen?lock=71', reuse:true},
-      {id:'r2', cat:'사이드', name:'차슈 추가', desc:'부드러운 차슈 3점', price:2500, img:'🥩', photo:'https://loremflickr.com/320/320/chashu,pork?lock=72', upsell:true},
+      {id:'r1', cat:'라멘', name:'돈코츠 라멘', desc:'진한 돼지사골 국물', price:8500, badges:['hot'], photo:'https://loremflickr.com/320/320/tonkotsu,ramen?lock=71', reuse:true},
+      {id:'r2', cat:'사이드', name:'차슈 추가', desc:'부드러운 차슈 3점', price:2500, photo:'https://loremflickr.com/320/320/chashu,pork?lock=72', upsell:true},
     ]},
-  { id:'hotdog', name:'소프트핫도그', logo:'🌭', thumb:'https://loremflickr.com/240/240/hotdog?lock=8', cover:'https://loremflickr.com/760/430/hotdog?lock=8',
+  { id:'hotdog', name:'소프트핫도그', thumb:'https://loremflickr.com/240/240/hotdog?lock=8', cover:'https://loremflickr.com/760/430/hotdog?lock=8',
     open:true, desc:'겉바속촉 큐브 감자를 통째로 올린 이 행사장 대표 명물 핫도그예요.', loc:'부스 3번', waitCount:'4팀', waitTime:'약 6분', rep:'명물 감자핫도그', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1260,
     info:{ceo:'손예진', regno:'890-12-34567', bizAddr:'인천 남동구 구월로 130', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'소시지(돼지): 국내산 · 감자: 국내산'},
     menus:[
-      {id:'h1', cat:'핫도그', name:'감자 핫도그', desc:'겉바속촉 큐브감자', price:4500, badges:['hot'], img:'🌭', photo:'https://loremflickr.com/320/320/corndog?lock=81', upsell:true},
-      {id:'h2', cat:'핫도그', name:'모짜렐라 핫도그', desc:'쭉 늘어나는 치즈', price:5000, badges:['rec'], img:'🧀', photo:'https://loremflickr.com/320/320/mozzarella,corndog?lock=82'},
+      {id:'h1', cat:'핫도그', name:'감자 핫도그', desc:'겉바속촉 큐브감자', price:4500, badges:['hot'], photo:'https://loremflickr.com/320/320/corndog?lock=81', upsell:true},
+      {id:'h2', cat:'핫도그', name:'모짜렐라 핫도그', desc:'쭉 늘어나는 치즈', price:5000, badges:['rec'], photo:'https://loremflickr.com/320/320/mozzarella,corndog?lock=82'},
     ]},
-  { id:'ade', name:'소프트에이드', logo:'🥤', thumb:'https://loremflickr.com/240/240/lemonade?lock=9', cover:'https://loremflickr.com/760/430/lemonade,drink?lock=9',
+  { id:'ade', name:'소프트에이드', thumb:'https://loremflickr.com/240/240/lemonade?lock=9', cover:'https://loremflickr.com/760/430/lemonade,drink?lock=9',
     open:true, desc:'상큼한 제철 과일로 매장에서 직접 만드는 수제 에이드 전문점이에요.', loc:'부스 3번', waitCount:'2팀', waitTime:'약 3분', rep:'청포도 에이드', cat:'음료', cat2:'B구역',
     ohStart:660, ohEnd:1260,
     info:{ceo:'김태리', regno:'901-23-45678', bizAddr:'서울 광진구 능동로 62', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'청포도: 칠레산 · 레몬: 미국산'},
     menus:[
-      {id:'a1', cat:'에이드', name:'청포도 에이드', desc:'상큼 톡톡', price:5000, badges:['rec'], img:'🍇', photo:'https://loremflickr.com/320/320/grape,ade?lock=91', reuse:true},
-      {id:'a2', cat:'에이드', name:'자몽 에이드', desc:'상큼 쌉싸름', price:5000, was:5500, img:'🍊', photo:'https://loremflickr.com/320/320/grapefruit,ade?lock=92', upsell:true},
+      {id:'a1', cat:'에이드', name:'청포도 에이드', desc:'상큼 톡톡', price:5000, badges:['rec'], photo:'https://loremflickr.com/320/320/grape,ade?lock=91', reuse:true},
+      {id:'a2', cat:'에이드', name:'자몽 에이드', desc:'상큼 쌉싸름', price:5000, was:5500, photo:'https://loremflickr.com/320/320/grapefruit,ade?lock=92', upsell:true},
     ]},
-  { id:'skewer', name:'소프트꼬치', logo:'🍢', thumb:'https://loremflickr.com/240/240/skewer?lock=10', cover:'https://loremflickr.com/760/430/skewer,grill?lock=10',
+  { id:'skewer', name:'소프트꼬치', thumb:'https://loremflickr.com/240/240/skewer?lock=10', cover:'https://loremflickr.com/760/430/skewer,grill?lock=10',
     open:true, desc:'숯불에 직접 구워 불맛 가득한 매콤달콤 닭꼬치를 맛볼 수 있어요.', loc:'부스 1번', waitCount:'7팀', waitTime:'약 10분', rep:'양념 닭꼬치', cat:'푸드', cat2:'D구역',
     ohStart:660, ohEnd:1260,
     info:{ceo:'조인성', regno:'012-34-56789', bizAddr:'서울 동대문구 왕산로 15', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'닭고기: 국내산'},
     menus:[
-      {id:'sk1', cat:'꼬치', name:'양념 닭꼬치', desc:'매콤달콤', price:3500, badges:['hot'], img:'🍢', photo:'https://loremflickr.com/320/320/chicken,skewer?lock=101', upsell:true},
-      {id:'sk2', cat:'꼬치', name:'소금 닭꼬치', desc:'담백한 소금 구이', price:3500, img:'🍢', photo:'https://loremflickr.com/320/320/yakitori?lock=102'},
+      {id:'sk1', cat:'꼬치', name:'양념 닭꼬치', desc:'매콤달콤', price:3500, badges:['hot'], photo:'https://loremflickr.com/320/320/chicken,skewer?lock=101', upsell:true},
+      {id:'sk2', cat:'꼬치', name:'소금 닭꼬치', desc:'담백한 소금 구이', price:3500, photo:'https://loremflickr.com/320/320/yakitori?lock=102'},
     ]},
-  { id:'waffle', name:'소프트와플', logo:'🧇', thumb:'https://loremflickr.com/240/240/waffle?lock=11', cover:'https://loremflickr.com/760/430/waffle,dessert?lock=11',
+  { id:'waffle', name:'소프트와플', thumb:'https://loremflickr.com/240/240/waffle?lock=11', cover:'https://loremflickr.com/760/430/waffle,dessert?lock=11',
     open:true, desc:'따뜻한 벨기에식 와플에 생크림을 듬뿍 올려드리는 디저트 트럭이에요.', loc:'부스 7번', waitCount:'5팀', waitTime:'약 7분', rep:'생크림 와플', cat:'디저트', cat2:'A구역',
     ohStart:660, ohEnd:1260,
     info:{ceo:'전지현', regno:'112-34-56780', bizAddr:'서울 성동구 왕십리로 30, 4층', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'밀: 미국산 · 우유: 국내산'},
     menus:[
-      {id:'w1', cat:'와플', name:'생크림 와플', desc:'딸기 토핑', price:6000, badges:['rec'], img:'🧇', photo:'https://loremflickr.com/320/320/waffle,cream?lock=111', reuse:true, upsell:true},
-      {id:'w2', cat:'와플', name:'초코 와플', desc:'진한 벨기에 초코', price:6000, img:'🍫', photo:'https://loremflickr.com/320/320/chocolate,waffle?lock=112'},
+      {id:'w1', cat:'와플', name:'생크림 와플', desc:'딸기 토핑', price:6000, badges:['rec'], photo:'https://loremflickr.com/320/320/waffle,cream?lock=111', reuse:true, upsell:true},
+      {id:'w2', cat:'와플', name:'초코 와플', desc:'진한 벨기에 초코', price:6000, photo:'https://loremflickr.com/320/320/chocolate,waffle?lock=112'},
     ]},
-  { id:'beer', name:'소프트비어', logo:'🍺', thumb:'https://loremflickr.com/240/240/beer?lock=12', cover:'https://loremflickr.com/760/430/beer,craft?lock=12',
+  { id:'beer', name:'소프트비어', thumb:'https://loremflickr.com/240/240/beer?lock=12', cover:'https://loremflickr.com/760/430/beer,craft?lock=12',
     open:true, desc:'직접 양조한 크래프트 비어를 시원하게 즐길 수 있는 행사장 펍이에요.', loc:'부스 2번', waitCount:'10팀', waitTime:'약 13분', rep:'수제 크래프트 비어', cat:'음료', cat2:'D구역',
     ohStart:660, ohEnd:1320,
     info:{ceo:'하정우', regno:'223-45-67801', bizAddr:'경기 부천시 원미구 중동로 77', hours:'행사 기간 매일 11:00 ~ 22:00', origin:'맥아: 독일산 · 홉: 미국산'},
     menus:[
-      {id:'be1', cat:'맥주', name:'크래프트 IPA 500ml', emoji:'', desc:'현장 한정 생맥주', price:8000, badges:['hot'], img:'🍺', photo:'https://loremflickr.com/320/320/ipa,beer?lock=121', adult:true, allergy:'보리·밀 함유'},
-      {id:'be2', cat:'안주', name:'감자튀김', desc:'맥주 안주로 좋아요', price:5000, img:'🍟', photo:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=320&h=320&q=72', upsell:true},
+      {id:'be1', cat:'맥주', name:'크래프트 IPA 500ml', desc:'현장 한정 생맥주', price:8000, badges:['hot'], photo:'https://loremflickr.com/320/320/ipa,beer?lock=121', adult:true, allergy:'보리·밀 함유'},
+      {id:'be2', cat:'안주', name:'감자튀김', desc:'맥주 안주로 좋아요', price:5000, photo:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=320&h=320&q=72', upsell:true},
     ]},
-  { id:'bunsik', name:'소프트분식', logo:'🥟', thumb:'https://loremflickr.com/240/240/tteokbokki?lock=13', cover:'https://loremflickr.com/760/430/tteokbokki,korean?lock=13',
+  { id:'bunsik', name:'소프트분식', thumb:'https://loremflickr.com/240/240/tteokbokki?lock=13', cover:'https://loremflickr.com/760/430/tteokbokki,korean?lock=13',
     open:true, desc:'얼큰한 국물에 쫄깃한 떡을 넣고 즉석에서 끓여내는 분식 포장마차예요.', loc:'부스 4번', waitCount:'11팀', waitTime:'약 14분', rep:'국물 떡볶이', cat:'푸드', cat2:'C구역',
     ohStart:660, ohEnd:1200,
     info:{ceo:'마동석', regno:'334-56-78901', bizAddr:'서울 관악구 봉천로 201', hours:'행사 기간 매일 11:00 ~ 20:00', origin:'쌀떡: 국내산 · 고춧가루: 국내산'},
     menus:[
-      {id:'bs1', cat:'분식', name:'국물 떡볶이', desc:'매운맛 조절 가능', price:5000, badges:['hot'], img:'🌶️', photo:'https://loremflickr.com/320/320/tteokbokki?lock=131', reuse:true},
-      {id:'bs2', cat:'튀김', name:'모둠 튀김', desc:'바삭한 모둠 튀김', price:4000, badges:['rec'], img:'🍤', photo:'https://loremflickr.com/320/320/korean,fried?lock=132', upsell:true},
+      {id:'bs1', cat:'분식', name:'국물 떡볶이', desc:'매운맛 조절 가능', price:5000, badges:['hot'], photo:'https://loremflickr.com/320/320/tteokbokki?lock=131', reuse:true},
+      {id:'bs2', cat:'튀김', name:'모둠 튀김', desc:'바삭한 모둠 튀김', price:4000, badges:['rec'], photo:'https://loremflickr.com/320/320/korean,fried?lock=132', upsell:true},
     ]},
-  { id:'smoothie', name:'소프트스무디', logo:'🍓', thumb:'https://loremflickr.com/240/240/smoothie?lock=14', cover:'https://loremflickr.com/760/430/smoothie,fruit?lock=14',
+  { id:'smoothie', name:'소프트스무디', thumb:'https://loremflickr.com/240/240/smoothie?lock=14', cover:'https://loremflickr.com/760/430/smoothie,fruit?lock=14',
     open:true, desc:'매일 손질한 생과일을 갈아 만드는 건강한 수제 스무디 전문점이에요.', loc:'부스 8번', waitCount:'3팀', waitTime:'약 5분', rep:'딸기 바나나 스무디', cat:'음료', cat2:'A구역',
     ohStart:660, ohEnd:1260,
     info:{ceo:'아이유', regno:'445-67-89012', bizAddr:'서울 송파구 백제고분로 41', hours:'행사 기간 매일 11:00 ~ 21:00', origin:'딸기: 국내산 · 바나나: 필리핀산'},
     menus:[
-      {id:'sm1', cat:'스무디', name:'딸기 바나나 스무디', desc:'생과일 100%', price:5500, badges:['rec'], img:'🍓', photo:'https://loremflickr.com/320/320/strawberry,smoothie?lock=141', reuse:true, upsell:true},
-      {id:'sm2', cat:'스무디', name:'망고 스무디', desc:'진한 망고 과육', price:5500, img:'🥭', photo:'https://loremflickr.com/320/320/mango,smoothie?lock=142'},
+      {id:'sm1', cat:'스무디', name:'딸기 바나나 스무디', desc:'생과일 100%', price:5500, badges:['rec'], photo:'https://loremflickr.com/320/320/strawberry,smoothie?lock=141', reuse:true, upsell:true},
+      {id:'sm2', cat:'스무디', name:'망고 스무디', desc:'진한 망고 과육', price:5500, photo:'https://loremflickr.com/320/320/mango,smoothie?lock=142'},
     ]},
-  { id:'bakery', name:'소프트베이커리', logo:'🥐', thumb:'https://loremflickr.com/240/240/bakery?lock=15', cover:'https://loremflickr.com/760/430/bakery,bread?lock=15',
+  { id:'bakery', name:'소프트베이커리', thumb:'https://loremflickr.com/240/240/bakery?lock=15', cover:'https://loremflickr.com/760/430/bakery,bread?lock=15',
     open:false, desc:'매일 새벽 구워내는 겹겹이 바삭한 버터 크루아상이 인기인 베이커리예요.', loc:'부스 5번', waitCount:'6팀', waitTime:'약 8분', rep:'버터 크루아상', cat:'디저트', cat2:'B구역',
     ohStart:600, ohEnd:1140,
     info:{ceo:'박서준', regno:'556-78-90123', bizAddr:'서울 은평구 통일로 999, 1층', hours:'행사 기간 매일 10:00 ~ 19:00', origin:'밀: 프랑스산 · 버터: 프랑스산'},
     menus:[
-      {id:'bk1', cat:'베이커리', name:'버터 크루아상', desc:'겹겹이 바삭한 결', price:4000, img:'🥐', photo:'https://loremflickr.com/320/320/croissant?lock=151'},
-      {id:'bk2', cat:'베이커리', name:'소금빵', desc:'짭조름 고소', price:3500, img:'🥖', photo:'https://loremflickr.com/320/320/saltbread?lock=152'},
+      {id:'bk1', cat:'베이커리', name:'버터 크루아상', desc:'겹겹이 바삭한 결', price:4000, photo:'https://loremflickr.com/320/320/croissant?lock=151'},
+      {id:'bk2', cat:'베이커리', name:'소금빵', desc:'짭조름 고소', price:3500, photo:'https://loremflickr.com/320/320/saltbread?lock=152'},
     ]},
 ];
 
@@ -1306,13 +1313,13 @@ const NOTICE = {
 /* 매장 그룹(홈) 메인 배너 — 브랜드가 등록한 배너 이미지·랜딩 주소 (최대 3장 · 4초 자동 롤링)
    롤링 순환은 이 배열 길이를 기준으로 계산하므로, 장수를 늘리거나 줄여도 빈 화면이 생기지 않음 */
 const BANNERS = [
-  {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'소프트 푸드트럭 페스티벌', s:'🎉 개장 기념 · 전 매장 10% 할인'},
-  {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'야간 라이브 공연', s:'🎤 매일 저녁 8PM · B구역 무대'},
+  {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'소프트 푸드트럭 페스티벌', s:'개장 기념 전 매장 10% 할인'},
+  {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'야간 라이브 공연', s:'매일 저녁 8PM, B구역 무대'},
 ];
 
 /* 매장 단일 페이지 긴 배너(335×56) — 브랜드 공통 배너 → 매장 단독 배너 순 롤링 */
 const SBANNERS = [
-  {tag:'브랜드', img:'https://loremflickr.com/335/56/festival,foodtruck?lock=201', txt:'🎪 전 매장 공통 개장기념 이벤트 · 행사 기간 내내 전 부스 10% 할인'},
+  {tag:'브랜드', img:'https://loremflickr.com/335/56/festival,foodtruck?lock=201', txt:'전 매장 공통 개장기념 이벤트, 행사 기간 내내 전 부스 10% 할인'},
   {tag:'매장',   img:'https://loremflickr.com/335/56/burger,food?lock=202', txt:null},   // txt는 매장명이 들어가 렌더 시점에 생성
 ];
 
@@ -1382,7 +1389,7 @@ function openNoticeSheet(){
   markNoticeRead();
   document.getElementById('noticeInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
-    <button class="ms-close" onclick="closeNotice()">✕</button>
+    <button class="ms-close" onclick="closeNotice()">${IC.close}</button>
     <div class="rc-scroll">
       <div class="nsheet-tag">공지</div>
       <div class="nsheet-title">${NOTICE.title}</div>
@@ -1394,8 +1401,43 @@ function openNoticeSheet(){
 function closeNotice(){ const el=document.getElementById('noticeModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
 
 const won = n => n.toLocaleString('ko-KR')+'원';
-// 위치 핀 아이콘 (솔리드 · 윈도우 기본 이모지 📍 대체) · 1em로 부모 글자 크기에 맞춰 스케일
-const PIN = '<svg viewBox="0 0 24 24" fill="currentColor" style="width:1em;height:1em;flex-shrink:0;vertical-align:-0.14em" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2a7.5 7.5 0 0 0-7.5 7.5c0 5.2 6.6 11.7 6.88 11.98a.88.88 0 0 0 1.24 0C12.9 21.2 19.5 14.7 19.5 9.5A7.5 7.5 0 0 0 12 2Zm0 10.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>';
+/* ══════════════ 아이콘 ══════════════
+   OS 기본 이모지는 쓰지 않고 인라인 SVG로 통일(플랫폼마다 모양이 달라지고 저작권 이슈도 없도록).
+   currentColor를 그대로 따르고 1em 기준이라 부모 글자 크기에 맞춰 스케일된다. */
+const _icBase = 'style="width:1em;height:1em;flex-shrink:0;vertical-align:-0.14em" aria-hidden="true"';
+const _sv = (d,w) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||1.9}" stroke-linecap="round" stroke-linejoin="round" ${_icBase}>${d}</svg>`;
+const _sf = d => `<svg viewBox="0 0 24 24" fill="currentColor" ${_icBase}>${d}</svg>`;
+const IC = {
+  pin:      _sf('<path fill-rule="evenodd" clip-rule="evenodd" d="M12 2a7.5 7.5 0 0 0-7.5 7.5c0 5.2 6.6 11.7 6.88 11.98a.88.88 0 0 0 1.24 0C12.9 21.2 19.5 14.7 19.5 9.5A7.5 7.5 0 0 0 12 2Zm0 10.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>'),
+  receipt:  _sv('<path d="M6 3h12v18l-2.5-1.6L13 21l-1-1.6L11 21l-2.5-1.6L6 21z"/><path d="M9.5 8h5M9.5 12h5"/>'),
+  ticket:   _sv('<path d="M3 9.5V7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2.5a2.5 2.5 0 0 0 0 5V17a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M12 8.5v7" stroke-dasharray="1.6 2"/>'),
+  recycle:  _sv('<path d="M8.5 5.5 12 2l3.5 3.5"/><path d="M12 2v7"/><path d="M5 12.5 2.5 17l4.5.5"/><path d="M19 12.5 21.5 17l-4.5.5"/><path d="M7 17.5h10"/>'),
+  clock:    _sv('<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>'),
+  store:    _sv('<path d="M4 9.5V20h16V9.5"/><path d="M2.5 9.5 5 4h14l2.5 5.5z"/><path d="M9.5 20v-5.5h5V20"/>'),
+  cart:     _sv('<circle cx="9.5" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.2l2.6 11.4h11.4l2.3-8.4H6"/>'),
+  bell:     _sv('<path d="M18 8.5a6 6 0 1 0-12 0c0 6-2.5 7.5-2.5 7.5h17S18 14.5 18 8.5"/><path d="M13.8 19.5a2 2 0 0 1-3.6 0"/>'),
+  calendar: _sv('<rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M3.5 10.5h17M8.5 3.5v4M15.5 3.5v4"/>'),
+  chat:     _sv('<path d="M20.5 12a8 8 0 0 1-8 8 8.4 8.4 0 0 1-3.6-.8L4 20.5l1.3-4.1A8 8 0 1 1 20.5 12"/>'),
+  phone:    _sv('<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/>'),
+  mail:     _sv('<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/>'),
+  card:     _sv('<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/>'),
+  wallet:   _sv('<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h13A2.5 2.5 0 0 1 21 7.5V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M16 12.5h3"/>'),
+  flame:    _sv('<path d="M12 2.5s5.5 4.5 5.5 9.5a5.5 5.5 0 0 1-11 0c0-2.2 1.3-4 2.5-5.3 0 2 1 3.3 2 3.3 1.3 0 1.8-1.6 1-7.5"/>'),
+  leaf:     _sv('<path d="M4 20c0-9 6-14 16-14 0 10-5 14-11 14a5 5 0 0 1-5-5"/><path d="M4.5 19.5C8 16 12 13.5 17 11.5"/>'),
+  image:    _sv('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="m4.5 18 5-5 4.5 4.5 3-2.5 3.5 3"/>'),
+  bag:      _sv('<path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M8.5 8V6a3.5 3.5 0 0 1 7 0v2"/>'),
+  undo:     _sv('<path d="M3.5 10.5h11a5 5 0 0 1 0 10H9"/><path d="m7 6.5-3.5 4L7 14.5"/>'),
+  warn:     _sv('<path d="M12 3.5 2.5 20h19z"/><path d="M12 9.5v5M12 17.4v.2"/>'),
+  check:    _sv('<path d="m4 12.5 5.5 5.5L20 6.5"/>', 2.4),
+  close:    _sv('<path d="M6 6l12 12M18 6 6 18"/>', 2.3),
+  signal:   _sv('<path d="M2.5 8.5a13 13 0 0 1 19 0"/><path d="M6 12.5a8.5 8.5 0 0 1 12 0"/><path d="M9.5 16.5a4 4 0 0 1 5 0"/><path d="M12 20.4v.2"/>'),
+  spark:    _sv('<path d="M12 2.5 13.9 9l6.6 1.9-6.6 1.9L12 19.4l-1.9-6.6L3.5 10.9 10.1 9z"/>'),
+  info:     _sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.9v.2"/>'),
+  passport: _sv('<rect x="5" y="2.5" width="14" height="19" rx="2"/><circle cx="12" cy="10" r="2.6"/><path d="M8.5 17.5h7"/>'),
+  seat:     _sv('<path d="M6 4.5h12v7H6z"/><path d="M4 11.5h16v5H4z"/><path d="M6.5 16.5V20M17.5 16.5V20"/>'),
+};
+// 하위 호환 — 기존 코드에서 쓰던 이름 유지
+const PIN = IC.pin;
 const store = id => STORES.find(s=>s.id===id);
 
 /* ══════════════ 라우팅 ══════════════ */
@@ -1442,10 +1484,10 @@ function closeMenuSheet(){ closeMenuInfo(); document.getElementById('menuSheet')
 function openMenuInfo(){
   const m=S.curMenu; if(!m)return;
   document.getElementById('infoInner').innerHTML = `
-    <button class="ic-close" onclick="closeMenuInfo()" aria-label="닫기">✕</button>
+    <button class="ic-close" onclick="closeMenuInfo()" aria-label="닫기">${IC.close}</button>
     <div class="ic-title">메뉴 정보</div>
-    ${m.allergy?`<div class="ic-row"><span class="ic-ic">🥜</span><div><div class="ic-k">알레르기 유발성분</div><div class="ic-v">${m.allergy}</div></div></div>`:''}
-    ${m.nutrition?`<div class="ic-row"><span class="ic-ic">🔥</span><div><div class="ic-k">영양 정보</div><div class="ic-v">${m.nutrition}</div></div></div>`:''}`;
+    ${m.allergy?`<div class="ic-row"><span class="ic-ic">${IC.warn}</span><div><div class="ic-k">알레르기 유발성분</div><div class="ic-v">${m.allergy}</div></div></div>`:''}
+    ${m.nutrition?`<div class="ic-row"><span class="ic-ic">${IC.info}</span><div><div class="ic-k">영양 정보</div><div class="ic-v">${m.nutrition}</div></div></div>`:''}`;
   document.getElementById('infoModal').classList.add('on'); syncBgLock();
 }
 function closeMenuInfo(){ const el=document.getElementById('infoModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }
@@ -1469,9 +1511,9 @@ function render(){
   const scr = {
     splash:scSplash, home:scHome, store:scStore, cart:scCart,
     checkout:scCheckout, done:scDone, history:scHistory,
-    payfail:()=>full('💳','결제가 정상적으로 진행되지 않았어요','잔액 부족이나 한도 초과 등의 일시적인 오류일 수 있어요.<br>다른 결제 수단으로 다시 시도해 주세요.','결제 화면으로 돌아가기','checkout','장바구니·입력 정보는 그대로 유지돼요 · 선불형 전용 (후불형은 해당 없음)'),
-    expired:()=>full('⏱️','접속 시간이 만료되었어요','안전한 결제 환경을 위해 연결이 종료되었습니다.<br>QR 코드를 다시 한 번 스캔해 주세요.','QR 다시 스캔','splash',''),
-    loaderr:()=>full('📡','화면을 불러오지 못했어요','네트워크 연결이 불안정하거나 일시적인 시스템 오류일 수 있어요.<br>잠시 후 [새로고침] 버튼을 눌러 다시 시도해 주세요.','새로고침','splash','지속 실패 시 네트워크 상태를 확인해 주세요'),
+    payfail:()=>full(IC.card,'결제가 정상적으로 진행되지 않았어요','잔액 부족이나 한도 초과 등의 일시적인 오류일 수 있어요.<br>다른 결제 수단으로 다시 시도해 주세요.','결제 화면으로 돌아가기','checkout','장바구니·입력 정보는 그대로 유지돼요 · 선불형 전용 (후불형은 해당 없음)'),
+    expired:()=>full(IC.clock,'접속 시간이 만료되었어요','안전한 결제 환경을 위해 연결이 종료되었습니다.<br>QR 코드를 다시 한 번 스캔해 주세요.','QR 다시 스캔','splash',''),
+    loaderr:()=>full(IC.signal,'화면을 불러오지 못했어요','네트워크 연결이 불안정하거나 일시적인 시스템 오류일 수 있어요.<br>잠시 후 [새로고침] 버튼을 눌러 다시 시도해 주세요.','새로고침','splash','지속 실패 시 네트워크 상태를 확인해 주세요'),
   }[S.screen] || scHome;
   document.getElementById('device').innerHTML = `<div class="screen on">${scr()}</div>`;
   if(S.screen==='home') startBanner();
@@ -1491,9 +1533,9 @@ function scSplash(){
   const bg="linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.72)),url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=75')";
   return `<div class="splash-full" style="background-image:${bg}">
     <div class="sp-center">
-      <div class="sp-emoji">🎪</div>
+      <div class="sp-emoji">${IC.store}</div>
       <div class="sp-title">소프트 푸드트럭 페스티벌</div>
-      <div class="sp-welcome">방문을 환영해요! 🎉</div>
+      <div class="sp-welcome">방문을 환영해요!</div>
     </div>
   </div>`;
 }
@@ -1545,7 +1587,7 @@ function scHome(){
 }
 // 주문 내역 진입 버튼 — 매장 단일 페이지는 헤더 안에 인라인 배치(histFabIcon), 매장 그룹(홈)은 우측 하단 플로팅(histFabFloat)
 function histFabIcon(){
-  return `<button class="hist-icon" onclick="go('history')">🧾 주문 내역</button>`;
+  return `<button class="hist-icon" onclick="go('history')">${IC.receipt} 주문 내역</button>`;
 }
 function histFabFloat(){
   // 카트바 노출 조건은 화면마다 다름 — 홈은 통합결제일 때만, 매장 페이지는 담긴 게 있으면 항상 노출
@@ -1738,7 +1780,7 @@ function scStore(){
     : '';
   // 매장 배너(335×56)는 위치 옵션 없이 커버 이미지 아래에 고정 노출
   // 매장 배너 문구: 매장 단독 혜택 배너는 매장명이 들어가므로 렌더 시점에 생성
-  const sbTxt = i => SBANNERS[i].txt || `🎁 첫 주문 시 사이드 500원 할인 · ${s.name} 단독 혜택`;
+  const sbTxt = i => SBANNERS[i].txt || `첫 주문 시 사이드 500원 할인, ${s.name} 단독 혜택`;
   const bannerHTML = `
     <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링 · 4초 자동 + 점 탭·스와이프 수동) -->
     <div class="sbanner-roll" onclick="toast('배너 탭 → 지정 URL 랜딩')">
@@ -1760,17 +1802,17 @@ function scStore(){
     <div class="cover has-info" style="background-image:url('${s.cover}');background-size:cover;background-position:center;background-color:#2c1250">
       <span class="cover-status ${st.cls}"><span class="sdot"></span>${st.label}</span>
       <div class="cover-info">
-        <div class="ci-name">${s.logo} ${s.name}</div>
+        <div class="ci-name">${s.name}</div>
         ${s.desc?`<div class="ci-desc">${s.desc}</div>`:''}
       </div>
     </div>` : `
     <div class="brandinfo nocover">
       <span class="cover-status dark ${st.cls}"><span class="sdot"></span>${st.label}</span>
-      <div class="logo">${s.logo}</div>
+      <div class="logo">${(s.thumb&&String(s.thumb).trim())?`<img src="${s.thumb}" alt="" onerror="this.remove()">`:`<span class="logo-ini">${s.name.slice(0,1)}</span>`}</div>
       <div class="bstore">${s.name}</div>
       ${s.desc?`<div class="store-desc">${s.desc}</div>`:''}
     </div>`}
-    ${waitSentence ? `<div class="waitline"><span class="wl-ic">🕒</span><span>${waitSentence}</span></div>` : ''}
+    ${waitSentence ? `<div class="waitline"><span class="wl-ic">${IC.clock}</span><span>${waitSentence}</span></div>` : ''}
     ${bannerHTML}
     <!-- 탭 -->
     <div class="mtabs">
@@ -1778,7 +1820,7 @@ function scStore(){
       <button class="mtab ${S.storeTab==='info'?'on':''}" onclick="S.storeTab='info';render()">매장 정보</button>
     </div>
     ${S.storeTab==='info' ? storeInfoHTML(s) : `
-      ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn">⚠️ 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요.</div>` : ''}
+      ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn">${IC.warn} 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요.</div>` : ''}
       <div class="cattabs">${cats.map(c=>`<button class="cchip ${c===activeCat?'on':''}" onclick="pickChip('${c}')">${c}</button>`).join('')}</div>
       ${s.menus.length===0
         ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
@@ -1803,8 +1845,8 @@ function mcardHTML(sid,m,closed){
   return `<button class="mcard ${m.soldout?'soldout':''}" onclick="openMenu('${sid}','${m.id}')">
     <div class="m-thumb" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.soldout?'<div class="so-dim">품절</div>':(m.left!=null&&m.left<=10?`<div class="m-thumb-tag">${m.left}개 남음</div>`:'')}</div>
     <div class="m-body">
-      ${(badges || m.reuse)?`<div class="m-badges">${badges}${m.reuse?`<span class="m-reuse"><span class="mt-ic">♻️</span>다회용기</span>`:''}</div>`:''}
-      <div class="m-name">${m.adult?'<span class="age-badge">19</span>':''}${m.name} ${m.emoji?`<span class="m-emoji">${m.emoji}</span>`:''}</div>
+      ${(badges || m.reuse)?`<div class="m-badges">${badges}${m.reuse?`<span class="m-reuse"><span class="mt-ic">${IC.recycle}</span>다회용기</span>`:''}</div>`:''}
+      <div class="m-name">${m.adult?'<span class="age-badge">19</span>':''}${m.name}</div>
       ${m.desc?`<div class="m-desc">${m.desc}</div>`:''}
       <div class="m-price">${price}</div>
     </div>
@@ -1815,7 +1857,7 @@ function mcardHTML(sid,m,closed){
 function storeInfoHTML(s){
   const i=s.info||{};
   return `<div style="padding-bottom:8px">
-    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">🌱</span>원산지 정보</div>
+    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">${IC.leaf}</span>원산지 정보</div>
       <div class="info-multi">${i.origin||'등록된 원산지 정보가 없어요'}</div>
       <div style="font-size:12px;color:var(--ink4);margin-top:8px">※ 원산지는 관련 법령에 따라 표기돼요</div>
     </div>
@@ -1823,11 +1865,11 @@ function storeInfoHTML(s){
     <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">${PIN}</span>매장 위치</div>
       <div class="row"><span>현장 위치</span><span class="v">${PIN} ${s.loc}</span></div>
     </div>
-    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">🕒</span>운영 시간</div>
+    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">${IC.clock}</span>운영 시간</div>
       <div class="info-multi">${i.hours||'-'}</div>
     </div>
     <!-- 사업자 정보 = 사업자 등록 기준 정보 · 신고 주소(사업장 소재지)는 여기에만 표기 -->
-    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">🧾</span>사업자 정보</div>
+    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">${IC.receipt}</span>사업자 정보</div>
       <div class="row"><span>상호</span><span class="v">${s.name}</span></div>
       <div class="row"><span>대표자</span><span class="v">${i.ceo||'-'}</span></div>
       <div class="row"><span>사업자등록번호</span><span class="v">${i.regno||'-'}</span></div>
@@ -1858,21 +1900,21 @@ function renderMenuSheet(){
       <span class="qnum">${S.tmpQty}</span>
       <button class="qbtn ${atMax?'dim':''}" ${atMax?'disabled':''} onclick="S.tmpQty=Math.min(${maxQ},S.tmpQty+1);renderMenuSheet()">＋</button>
     </div>`; })()}
-    ${m.maxOrder?`<div style="text-align:right;font-size:12.5px;font-weight:700;margin-top:8px;color:var(--ink3)">🛒 1회 최대 ${m.maxOrder}개까지 구매할 수 있어요.</div>`:''}
-    ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:6px;color:${m.left<=5?'var(--point)':'#e8590c'}">🔥 품절까지 ${m.left}개 남았어요.</div>`:''}`;
+    ${m.maxOrder?`<div style="text-align:right;font-size:12.5px;font-weight:700;margin-top:8px;color:var(--ink3)">${IC.cart} 1회 최대 ${m.maxOrder}개까지 구매할 수 있어요.</div>`:''}
+    ${m.left!=null?`<div style="text-align:right;font-size:12.5px;font-weight:800;margin-top:6px;color:${m.left<=5?'var(--point)':'#e8590c'}">${IC.flame} 품절까지 ${m.left}개 남았어요.</div>`:''}`;
   document.getElementById('menuSheetInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
-    <button class="ms-close" onclick="closeMenuSheet()">✕</button>
+    <button class="ms-close" onclick="closeMenuSheet()">${IC.close}</button>
     <div class="ms-scroll">
       <div class="d-hero" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)"></div>
       <div class="d-body">
-        <div class="d-name">${m.adult?'<span class="age-badge">19</span>':''}${m.name} ${m.emoji||''}</div>
+        <div class="d-name">${m.adult?'<span class="age-badge">19</span>':''}${m.name}</div>
         ${m.desc?`<div class="d-desc">${m.desc}</div>`:''}
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <div class="d-price">${isSale?`<span class="d-was">${won(listPx)}</span> `:''}<span class="${isSale?'d-sale':''}">${won(base)}</span></div>
           ${(m.allergy||m.nutrition)?`<button class="d-info-btn" style="margin-top:0;flex-shrink:0" onclick="openMenuInfo()">메뉴 정보</button>`:''}
         </div>
-        ${m.reuse?`<div class="d-reuse">♻️ 사용 후 용기 반납이 필요한 다회용기 제공 메뉴예요.</div>`:''}
+        ${m.reuse?`<div class="d-reuse">${IC.recycle} 사용 후 용기 반납이 필요한 다회용기 제공 메뉴예요.</div>`:''}
         ${disabled?'':orderControls}
       </div>
     </div>
@@ -1894,7 +1936,7 @@ function addToCart(){
   const base=m.hh?m.hhPrice:m.price;
   const listBase=m.was||m.price;   // 정가(할인 전) — 금액 요약 할인 세분화용
   const add=S.tmpOpt===1?1500:0;
-  S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, emoji:m.emoji||'', img:m.img, photo:m.photo||'',
+  S.cart.push({store:S.curStore, storeName:store(S.curStore).name, menu:m.id, name:m.name, photo:m.photo||'',
     opt:S.tmpOpt===1?'Large':'Regular', qty:S.tmpQty, price:(base+add), listPrice:(listBase+add),
     disc:(m.hh?'해피아워':(m.was?'할인':null))});
   toast('장바구니에 담았어요');
@@ -1909,7 +1951,7 @@ function doAuth(){ S.adult=true; closeAdult(); toast('성인 인증 완료 · �
 /* ── 장바구니 ── */
 function scCart(){
   if(!S.cart.length) return `<div class="hdr"><button class="bk" onclick="back()">‹</button><div class="ht">장바구니</div></div>
-    <div class="fullmsg"><div class="fm-ic">🛒</div><div class="fm-t">장바구니가 비어 있어요</div><div class="fm-b">메뉴를 담고 주문을 진행해 보세요</div><button class="fm-btn" onclick="go('store')">메뉴 보러 가기</button></div>`;
+    <div class="fullmsg"><div class="fm-ic">${IC.cart}</div><div class="fm-t">장바구니가 비어 있어요</div><div class="fm-b">메뉴를 담고 주문을 진행해 보세요</div><button class="fm-btn" onclick="go('store')">메뉴 보러 가기</button></div>`;
   const groups={};
   S.cart.forEach((c,i)=>{ (groups[c.store]=groups[c.store]||[]).push({...c,idx:i}); });
   const sum=S.cart.reduce((a,c)=>a+c.price*c.qty,0);
@@ -1919,13 +1961,13 @@ function scCart(){
   <div class="hdr"><button class="bk" onclick="go('store')">‹</button><div class="ht">장바구니</div></div>
   <div class="scroll">
     ${S.payScope==='unified'
-      ? `<div class="scope-note">🧺 여러 매장 상품을 한 번에 담아 결제할 수 있어요.</div>`
-      : `<div class="scope-note">🧺 한 매장씩 담아 매장별로 결제하는 방식이에요.</div>`}
+      ? `<div class="scope-note">${IC.cart} 여러 매장 상품을 한 번에 담아 결제할 수 있어요.</div>`
+      : `<div class="scope-note">${IC.cart} 한 매장씩 담아 매장별로 결제하는 방식이에요.</div>`}
     <div class="sect">
       ${Object.entries(groups).map(([sid,items])=>`
-        ${showStoreH?`<div class="store-group-h">🏪 ${store(sid).name}</div>`:''}
+        ${showStoreH?`<div class="store-group-h">${IC.store} ${store(sid).name}</div>`:''}
         ${items.map(c=>`<div class="citem">
-          <div class="ci-th" style="background-image:url('${c.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${c.photo?'':(c.img||'')}</div>
+          <div class="ci-th" style="background-image:url('${c.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${c.photo?'':`<span class="ph-ic">${IC.image}</span>`}</div>
           <div class="ci-b">
             <div class="ci-n">${c.name} ${c.emoji||''}</div>
             <div class="ci-o">${c.opt}</div>
@@ -1934,7 +1976,7 @@ function scCart(){
               <b>${won(c.price*c.qty)}</b>
             </div>
           </div>
-          <button style="border:none;background:none;color:var(--ink4);font-size:18px;cursor:pointer;align-self:flex-start" onclick="delItem(${c.idx})">✕</button>
+          <button style="border:none;background:none;color:var(--ink4);font-size:18px;cursor:pointer;align-self:flex-start" onclick="delItem(${c.idx})">${IC.close}</button>
         </div>`).join('')}
       `).join('')}
     </div>
@@ -1942,7 +1984,7 @@ function scCart(){
     <div class="sect"><div class="sect-h">수령 방식</div>
       ${S.service==='delivery'
         ? `<div class="sect-sub">계신 자리로 스태프가 직접 가져다드려요.</div>
-           <div class="deliver-fix">🛎️ 다음 화면에서 <b>받을 자리</b>를 입력해 주세요.</div>`
+           <div class="deliver-fix">${IC.seat} 다음 화면에서 <b>받을 자리</b>를 입력해 주세요.</div>`
         : `<div class="seg">
              <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">바로 받기</button>
              <button class="${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">예약하기</button>
@@ -2027,8 +2069,8 @@ function computeUpsell(){
 function upsellRow(sid,m,showStore){
   const price = m.hh?m.hhPrice:m.price;
   return `<div class="citem" style="border:none;padding:10px 0">
-    <div class="ci-th" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.photo?'':(m.img||'')}</div>
-    <div class="ci-b"><div class="ci-n">${m.adult?'<span class="age-badge">19</span>':''}${m.name} ${m.emoji||''}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
+    <div class="ci-th" style="background-image:url('${m.photo||''}');background-size:cover;background-position:center;background-color:var(--bg)">${m.photo?'':`<span class="ph-ic">${IC.image}</span>`}</div>
+    <div class="ci-b"><div class="ci-n">${m.adult?'<span class="age-badge">19</span>':''}${m.name}</div><div class="ci-o">${showStore?store(sid).name+' · ':''}${won(price)}</div></div>
     <button class="ghostbtn" style="width:auto;margin:0;padding:0 15px;white-space:nowrap" onclick="openMenu('${sid}','${m.id}')">담기</button>
   </div>`;
 }
@@ -2081,7 +2123,7 @@ function timePickerHTML(){
           ${minOpts}
         </select>
       </div>
-      ${S.pickupTime?`<div class="tp-note">📅 오늘 <b>${S.pickupTime}</b> 수령</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
+      ${S.pickupTime?`<div class="tp-note">${IC.calendar} 오늘 <b>${S.pickupTime}</b> 수령</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
       <div class="tp-hint">예약은 ${fmtMin(rvStartOf(s))}~${fmtMin(rvEndOf(s))}${brk} 사이로 받을 수 있어요.</div>
     </div>`;
 }
@@ -2141,7 +2183,7 @@ function commitCoupon(cid, scope){
   S.couponScope=S.couponScope||{}; S.couponScope[cid]=scope;
   S.selCoupons=S.selCoupons||{}; S.selCoupons[scope]=cid;
   S.couponCode=''; closeCouponPick();
-  toast('쿠폰이 적용됐어요 🎉', scope==='group'?'':`${store(scope).name}에 적용했어요`);
+  toast('쿠폰이 적용됐어요', scope==='group'?'':`${store(scope).name}에 적용했어요`);
   render();
 }
 function releaseCoupon(cid){
@@ -2174,7 +2216,7 @@ function renderCouponPick(){
   }).join('');
   document.getElementById('couponPickInner').innerHTML=`
     <div class="ms-grab"><span></span></div>
-    <button class="ms-close" onclick="closeCouponPick()">✕</button>
+    <button class="ms-close" onclick="closeCouponPick()">${IC.close}</button>
     <div class="sheet-t">어느 매장에 쓸까요?</div>
     <div class="sheet-s">할인은 선택하신 매장 한 곳에만 적용돼요.</div>
     <div style="margin-top:16px">${rows}</div>
@@ -2198,7 +2240,7 @@ function scCheckout(){
     <!-- 주문 메뉴 -->
     <div class="sect"><div class="sect-h">주문 메뉴 · 수령 정보</div>
       ${S.cart.map(c=>`<div class="row"><span>${c.name} ${c.emoji} · ${c.opt} × ${c.qty}</span><span class="v">${won(c.price*c.qty)}</span></div>`).join('')}
-      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">${S.service==='delivery'?'🛎️ 자리로 받기 (현장 배달)':(S.pickup==='reserve'?`📅 예약하기 · ${S.pickupTime||'시간 미선택'}`:'🥡 바로 받기')}</span></div>
+      <div class="row" style="border-top:1px solid var(--line2);margin-top:6px;padding-top:12px"><span>수령 방식</span><span class="v">${S.service==='delivery'?`${IC.seat} 자리로 받기 (현장 배달)`:(S.pickup==='reserve'?`${IC.calendar} 예약하기 (${S.pickupTime||'시간 미선택'})`:`${IC.bag} 바로 받기`)}</span></div>
     </div>
     <!-- 받을 자리 : 자리로 받기(현장 배달) 서비스일 때만 노출 · 사장님사이트 자리입력 기능 -->
     ${S.service==='delivery' ? `
@@ -2225,7 +2267,7 @@ function scCheckout(){
       <div style="display:flex;gap:8px"><input class="field" placeholder="쿠폰 코드 입력" value="${S.couponCode}" oninput="S.couponCode=this.value" onkeydown="if(event.key==='Enter')applyCode()"><button class="ghostbtn" style="width:auto;margin:0;padding:0 20px;white-space:nowrap" onclick="applyCode()">적용</button></div>
       ${(()=>{ const sel=selectedCoupons(); if(!sel.length) return `<div style="font-size:12.5px;color:var(--ink3);margin-top:8px">보유한 쿠폰이 있다면 알맞은 코드 번호를 입력해 주세요.</div>`;
         return sel.map(cp=>{ const d=couponAmt(cp); const rs=couponScopeOf(cp); const sc=rs==='group'?'전체':store(rs).name;
-          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;background:#FFF8E6;border:1px solid #FFE3A3;border-radius:10px;padding:10px 13px"><span style="font-size:13px;font-weight:800;color:#92400e"><span style="font-size:11px;background:#fff;border:1px solid #FFE3A3;border-radius:5px;padding:1px 6px;margin-right:6px">${sc}</span>🎟️ ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button style="background:none;border:none;color:#92400e;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit" onclick="releaseCoupon('${cp.id}')">해제</button></div>`;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;background:#FFF8E6;border:1px solid #FFE3A3;border-radius:10px;padding:10px 13px"><span style="font-size:13px;font-weight:800;color:#92400e"><span style="font-size:11px;background:#fff;border:1px solid #FFE3A3;border-radius:5px;padding:1px 6px;margin-right:6px">${sc}</span>${IC.ticket} ${cp.name} ${d>0?`(−${won(d)})`:'(조건 미충족)'}</span><button style="background:none;border:none;color:#92400e;font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit" onclick="releaseCoupon('${cp.id}')">해제</button></div>`;
         }).join('');
       })()}
     </div>
@@ -2233,27 +2275,27 @@ function scCheckout(){
     <div class="sect"><div class="sect-h" style="display:flex;justify-content:space-between;align-items:center">${post?'주문 금액 요약':'결제 금액 요약'}<span class="scope-chip">${S.payScope==='unified'?'여러 매장 통합 결제':'매장별 개별 결제'}</span></div>
       <div class="row"><span>상품 합계 (정가)</span><span class="v">${won(listSum)}</span></div>
       ${itemDisc>0?`<div class="row"><span>상품 할인</span><span class="v" style="color:var(--red)">−${won(itemDisc)}</span></div>`:''}
-      ${coupon>0?`<div class="row"><span>🎟️ 쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>`:''}
+      ${coupon>0?`<div class="row"><span>${IC.ticket} 쿠폰 할인</span><span class="v" style="color:var(--red)">−${won(coupon)}</span></div>`:''}
       <div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-size:17px;font-weight:800;color:var(--ink)"><span>${post?'주문 금액':'최종 결제금액'}</span><span>${won(final)}</span></div>
       ${mi.on ? (mi.below
         ? (mi.basis==='group'
             ? `<div class="minwarn"><b>${won(mi.shortfall)}</b> 더 담으면 ${post?'주문':'결제'}할 수 있어요. (통합 결제 ${won(mi.min)} 기준)</div>`
             : `<div class="minwarn multiline"><span>아래 매장에 조금만 더 담으면 ${post?'주문':'결제'}할 수 있어요. (매장별 ${won(mi.min)} 기준)</span>${mi.shortStores.map(x=>`<span style="font-weight:600;opacity:.9">· <b>${x.name}</b> ${won(x.need)} 더 담기</span>`).join('')}</div>`)
-        : `<div class="minok">✓ ${won(mi.min)} 이상 담아서 ${post?'주문':'결제'}할 수 있어요. (${mi.label})</div>`) : ''}
+        : `<div class="minok">${IC.check} ${won(mi.min)} 이상 담아서 ${post?'주문':'결제'}할 수 있어요. (${mi.label})</div>`) : ''}
     </div>
-    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note">🏪 한 번에 결제해도 준비와 픽업은 <b>매장별로 따로</b> 진행되어 <b>매장마다 따로</b> 알려드려요.</div>`:''}
+    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note">${IC.store} 한 번에 결제해도 준비와 픽업은 <b>매장별로 따로</b> 진행되어 <b>매장마다 따로</b> 알려드려요.</div>`:''}
     <!-- 결제 수단 (선불형만) -->
     ${post?'':`<div class="sect"><div class="sect-h">결제 수단</div>
-      <div class="pay-opt on"><span class="pic">💳</span> 신용/체크카드</div>
-      <div class="pay-opt" onclick="this.parentNode.querySelectorAll('.pay-opt').forEach(p=>p.classList.remove('on'));this.classList.add('on')"><span class="pic">🅿️</span> 간편결제 (카카오페이/네이버페이)</div>
+      <div class="pay-opt on"><span class="pic">${IC.card}</span> 신용/체크카드</div>
+      <div class="pay-opt" onclick="this.parentNode.querySelectorAll('.pay-opt').forEach(p=>p.classList.remove('on'));this.classList.add('on')"><span class="pic">${IC.wallet}</span> 간편결제 (카카오페이/네이버페이)</div>
     </div>`}
     <!-- 약관 (내점형 기준: 이용약관·개인정보·연령 필수 · 항목별 배지 + '보기' 전문 열람) -->
     <div class="sect"><div class="sect-h">약관 동의</div>
-      <div class="agree-all ${allAgreed()?'on':''}" onclick="toggleAgreeAll()"><span class="chk ${allAgreed()?'on':''}">✓</span> 전체 동의하기</div>
+      <div class="agree-all ${allAgreed()?'on':''}" onclick="toggleAgreeAll()"><span class="chk ${allAgreed()?'on':''}">${IC.check}</span> 전체 동의하기</div>
       <div style="margin-top:8px">
-        ${post?'':`<div class="agree" onclick="toggleAgree('tos')"><span class="chk ${(S.agree&&S.agree.tos)?'on':''}">✓</span><span class="ag-req">필수</span><span class="ag-t">이용약관 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('tos')">보기</a></div>`}
-        <div class="agree" onclick="toggleAgree('privacy')"><span class="chk ${(S.agree&&S.agree.privacy)?'on':''}">✓</span><span class="ag-req">필수</span><span class="ag-t">개인정보 수집·이용 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('privacy')">보기</a></div>
-        <div class="agree" onclick="toggleAgree('age')"><span class="chk ${(S.agree&&S.agree.age)?'on':''}">✓</span><span class="ag-req">필수</span><span class="ag-t">만 14세 이상임을 확인합니다</span></div>
+        ${post?'':`<div class="agree" onclick="toggleAgree('tos')"><span class="chk ${(S.agree&&S.agree.tos)?'on':''}">${IC.check}</span><span class="ag-req">필수</span><span class="ag-t">이용약관 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('tos')">보기</a></div>`}
+        <div class="agree" onclick="toggleAgree('privacy')"><span class="chk ${(S.agree&&S.agree.privacy)?'on':''}">${IC.check}</span><span class="ag-req">필수</span><span class="ag-t">개인정보 수집·이용 동의</span><a class="ag-view" onclick="event.stopPropagation();openTerms('privacy')">보기</a></div>
+        <div class="agree" onclick="toggleAgree('age')"><span class="chk ${(S.agree&&S.agree.age)?'on':''}">${IC.check}</span><span class="ag-req">필수</span><span class="ag-t">만 14세 이상임을 확인합니다</span></div>
       </div>
       ${post?`<div style="font-size:12px;color:var(--ink4);margin-top:8px">후불형은 결제 관련 약관 없이 개인정보 동의·연령 확인만 받아요</div>`:''}
     </div>
@@ -2290,7 +2332,7 @@ function openTerms(key){
   const t=TERMS[key]; if(!t)return;
   document.getElementById('termsInner').innerHTML=`
     <div class="ms-grab"><span></span></div>
-    <button class="ms-close" onclick="closeTerms()">✕</button>
+    <button class="ms-close" onclick="closeTerms()">${IC.close}</button>
     <div class="rc-scroll">
       <div class="rc-badge" style="${t.req==='선택'?'background:#F1F1F3;color:var(--ink3)':'background:var(--blue-50);color:var(--persimmon-d)'}">${t.req}</div>
       <div class="rc-title">${t.t}</div>
@@ -2307,15 +2349,15 @@ function paySheetHTML(){
   const finalAmt = Math.max(0, cartSum()-couponDiscount());
   return `
     <div class="ms-grab"><span></span></div>
-    <button class="ms-close" onclick="closePaySheet()">✕</button>
+    <button class="ms-close" onclick="closePaySheet()">${IC.close}</button>
     <div class="pay-scroll">
-      <div class="pay-t">💬 어디로 알려드릴까요?</div>
+      <div class="pay-t">${IC.chat} 어디로 알려드릴까요?</div>
       <div class="pay-s">준비가 다 되면 바로 알려드릴게요.${post?'':' 주문을 마무리하려면 꼭 필요해요.'}</div>
-      <button class="kakaobtn" onclick="S.loginType='kakao';payConfirm()">💬 카카오톡으로 시작하기</button>
+      <button class="kakaobtn" onclick="S.loginType='kakao';payConfirm()">${IC.chat} 카카오톡으로 시작하기</button>
       <div class="pay-div"><span></span>또는 비회원으로 진행<span></span></div>
       <div class="seg" style="margin-bottom:14px">
-        <button class="${S.alertCh==='phone'?'on':''}" onclick="setAlert('phone')">📱 휴대폰</button>
-        <button class="${S.alertCh==='email'?'on':''}" onclick="setAlert('email')">✉️ 이메일</button>
+        <button class="${S.alertCh==='phone'?'on':''}" onclick="setAlert('phone')">${IC.phone} 휴대폰</button>
+        <button class="${S.alertCh==='email'?'on':''}" onclick="setAlert('email')">${IC.mail} 이메일</button>
       </div>
       ${S.alertCh==='email' ? `
       <div class="email3" style="margin-bottom:12px">
@@ -2416,11 +2458,11 @@ function scDone(){
   return `
   <div class="hdr"><div class="ht" style="flex:1;text-align:center">주문 완료</div></div>
   <div class="scroll done-wrap">
-    <div class="done-ic">✓</div>
+    <div class="done-ic">${IC.check}</div>
     <div class="done-t">${post?'주문이 접수되었어요!':'결제가 완료되었어요!'}</div>
     <div class="done-s">${post?'매장에서 주문을 확인하고 준비를 시작해요':'준비가 완료되면 알림으로 알려드릴게요'}</div>
     ${(()=>{ const steps=S.service==='delivery'?['주문요청','준비중','배달중','수령완료']:['주문요청','준비중','준비완료','수령완료']; const cur=0;   // 결제 완료 직후=주문요청(매장 수락 전) · 라벨은 "주문 상태 스텝(공통 정의)" SSOT
-      return `<div class="ord-steps">${steps.map((st,i)=>`${i?`<div class="ost-line ${i<=cur?'done':''}"></div>`:''}<div class="ost ${i<cur?'done':''} ${i===cur?'cur':''}"><div class="ost-dot">${i<cur?'✓':(i+1)}</div><div class="ost-lbl">${st}</div></div>`).join('')}</div>`; })()}
+      return `<div class="ord-steps">${steps.map((st,i)=>`${i?`<div class="ost-line ${i<=cur?'done':''}"></div>`:''}<div class="ost ${i<cur?'done':''} ${i===cur?'cur':''}"><div class="ost-dot">${i<cur?IC.check:(i+1)}</div><div class="ost-lbl">${st}</div></div>`).join('')}</div>`; })()}
     <div class="callno">
       <div class="cl-lbl">내 호출번호</div>
       <div class="cl-num">${callNo}</div>
@@ -2428,7 +2470,7 @@ function scDone(){
     </div>
     ${multi?`
     <div class="multi-pick">
-      <div class="mp-h">🏪 매장별로 따로 받아요</div>
+      <div class="mp-h">${IC.store} 매장별로 따로 받아요</div>
       <div class="mp-b"><b>${sids.length}개 매장</b>에서 각각 준비돼 부스에서 따로 받게 되고, 준비가 끝나면 <b>매장마다 따로</b> 알려드려요. (통합 결제는 배달 매장이 없어 항상 포장 픽업이에요)</div>
       <div class="mp-list">${sids.map((sid,i)=>`<div class="mp-row"><span class="mp-s"><span class="store-no">${i+1}</span>${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
     </div>`:''}
@@ -2477,7 +2519,7 @@ const sumItems = items => items.reduce((a,c)=>a+c.price*c.qty,0);
 const payTotal = p => p.status==='주문취소' ? 0 : sumItems(p.items);
 const grpByStore = items => { const g={}; items.forEach(it=>{(g[it.store]=g[it.store]||[]).push(it);}); return g; };
 const ohLine = it => `<div class="oh-line"><span class="ohl-n">${it.name}${it.opt?' · '+it.opt:''}</span><span class="ohl-q">×${it.qty}</span><span class="ohl-p">${won(it.price*it.qty)}</span></div>`;
-const contactHTML = c => `<span class="oh-ct-lbl">알림 연락처</span><span class="oh-ct">${(c||'').includes('@')?'✉️':'📱'} ${c}</span>`;
+const contactHTML = c => `<span class="oh-ct-lbl">알림 연락처</span><span class="oh-ct">${(c||'').includes('@')?IC.mail:IC.phone} ${c}</span>`;
 function toggleHistDetail(id){ S.histOpen=S.histOpen||{}; S.histOpen[id]=!S.histOpen[id]; render(); }
 // 진행 단계 — 정책 「주문 상태 스텝(공통 정의)」의 4단계 · 배달 주문은 3번째가 배달중 · 주문취소는 스텝에서 분기(별개 표기)
 const HIST_STEPS = ['주문요청','준비중','준비완료','수령완료'];
@@ -2499,7 +2541,7 @@ function stepBarHTML(status){
   }).join('');
   const bubble = canPickup(status);
   return `<div class="oh-st-wrap ${bubble?'has-bubble':''}">
-    ${bubble?`<span class="oh-pickup-bubble">🔔 지금 받아 가세요</span>`:''}
+    ${bubble?`<span class="oh-pickup-bubble">${IC.bell} 지금 받아 가세요</span>`:''}
     <div class="oh-st-bar">${segs}</div>
     <div class="oh-st-labels">${labels}</div>
   </div>`;
@@ -2520,7 +2562,7 @@ function roundCardHTML(p, showNames){
       ${canceled?`<span class="st-badge st-rej">주문취소</span>`:''}
     </div>
     ${canceled
-      ? `<div class="oh-cancelnote" style="margin:0 0 4px"><div class="cn-main">↩️ ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`
+      ? `<div class="oh-cancelnote" style="margin:0 0 4px"><div class="cn-main">${IC.undo} ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`
       : storeRowsHTML(p.stores, showNames)}
     ${o?`<div class="oh-sub">
       <div class="oh-sub-row"><span>주문번호</span><span class="v">${p.id}</span></div>
@@ -2535,7 +2577,7 @@ function roundCardHTML(p, showNames){
       <span class="oh-sum-lite">${canceled?'취소 ':''}${won(total)}</span>
       <div class="oh-foot-btns">
         <button class="oh-ghost" onclick="toggleHistDetail('${p.id}')">${o?'접어서 보기 ▲':'자세히 보기 ▼'}</button>
-        <button class="oh-receipt sm" onclick="openReceipt('${p.id}')">🧾 영수증</button>
+        <button class="oh-receipt sm" onclick="openReceipt('${p.id}')">${IC.receipt} 영수증</button>
       </div>
     </div>
   </div>`;
@@ -2544,7 +2586,7 @@ const open = id => !!(S.histOpen && S.histOpen[id]);
 // 카드 내부 — 매장마다 '매장명 + 상태 배지 + 진행 막대' 한 세트 (매장이 1곳이든 여러 곳이든 동일한 구조)
 function storeRowsHTML(stores, showNames){
   const rows = byAction(stores).map(s=>{const st=store(s.sid); return `<div class="oh-st-row">
-    ${showNames?`<div class="oh-st-head"><span class="oh-st-name">${st.logo} ${st.name}</span>${st.loc?`<span class="oh-st-loc">${PIN}${st.loc}</span>`:''}</div>`:''}
+    ${showNames?`<div class="oh-st-head"><span class="oh-st-name">${st.name}</span>${st.loc?`<span class="oh-st-loc">${PIN}${st.loc}</span>`:''}</div>`:''}
     ${stepBarHTML(s.status)}
   </div>`;}).join('');
   return `<div class="oh-stores">${rows}</div>`;
@@ -2616,7 +2658,7 @@ function scHistory(){
       const stTotal = pays.reduce((a,p)=>a+payTotal(p),0);
       return `<div class="oh-store-sec">
         <div class="oh-store-sec-h">
-          <span class="ossh-name">${st.logo} ${st.name}</span>
+          <span class="ossh-name">${st.name}</span>
           ${st.loc?`<span class="ossh-loc">${PIN}${st.loc}</span>`:''}
           <span class="ossh-sum">${won(stTotal)}</span>
         </div>
@@ -2631,7 +2673,7 @@ function scHistory(){
     ${stageSummaryHTML(Pfull)}
     ${unified
       ? `<button class="oh-viewtog ${view==='store'?'on':''}" onclick="S.histByStore=!S.histByStore;render()">
-          <span class="chk ${view==='store'?'on':''}">${view==='store'?'✓':''}</span>
+          <span class="chk ${view==='store'?'on':''}">${view==='store'?IC.check:''}</span>
           <span>매장별로 모아보기</span>
         </button>`
       : ''}
@@ -2658,7 +2700,7 @@ function openReceipt(id){
   const payMasked = pay.includes('페이') ? `${pay} · 승인번호 18674347` : `${pay} · 123456-**-****-1234`;
   document.getElementById('receiptInner').innerHTML = `
     <div class="ms-grab"><span></span></div>
-    <button class="ms-close" onclick="closeReceipt()">✕</button>
+    <button class="ms-close" onclick="closeReceipt()">${IC.close}</button>
     <div class="rc-scroll">
       <div class="rc-topbar"><button class="rc-hidebtn" onclick="toggleRcHide()">${hide?'주문 내역 보기':'주문 내역 가리기'}</button></div>
       <div class="rc-badge ${canceled?'cancel':''}">${canceled?'취소 전자영수증':'전자영수증'}</div>
@@ -2668,7 +2710,7 @@ function openReceipt(id){
       ${hide
         ? ``
         : `${Object.entries(groups).map(([sid,items])=>`
-            <div class="rc-store">${store(sid).logo} ${store(sid).name}</div>
+            <div class="rc-store">${store(sid).name}</div>
             ${items.map(it=>`<div class="rc-line"><span>${it.name}${it.opt?' · '+it.opt:''} ×${it.qty}</span><span>${won(it.price*it.qty)}</span></div>`).join('')}
           `).join('')}
           <div class="rc-hr"></div>
@@ -2676,7 +2718,7 @@ function openReceipt(id){
           ${coupon?`<div class="rc-line"><span>쿠폰 할인</span><span>−${won(coupon)}</span></div>`:''}`}
       <div class="rc-line rc-total"><span>${canceled?'환불 예정 금액':'결제금액'}</span><span>${won(total)}</span></div>
       <div class="rc-line dim"><span>결제수단</span><span>${payMasked}</span></div>
-      ${canceled?`<div class="rc-cancelbox"><div class="cn-main">↩️ ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`:''}
+      ${canceled?`<div class="rc-cancelbox"><div class="cn-main">${IC.undo} ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`:''}
       <div class="rc-hr"></div>
       ${Object.keys(groups).map(sid=>{const i=store(sid).info||{};return `<div class="rc-biz">
         <div class="rc-biz-h">${store(sid).name}</div>

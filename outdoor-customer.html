@@ -312,6 +312,8 @@
   .ag-req.opt{color:var(--ink3);background:#F1F1F3;}
   .ag-t{flex:1;min-width:0;}
   .ag-view{font-size:12.5px;color:var(--ink3);text-decoration:underline;font-weight:600;flex-shrink:0;cursor:pointer;}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+  .agree-shake{animation:shake .5s ease;}
   .terms-body{font-size:13.5px;color:var(--ink2);line-height:1.7;}
   .terms-body b{color:var(--ink);font-weight:800;}
   /* 결제(알림 받을 방법) 바텀시트 */
@@ -2034,14 +2036,28 @@ function scCheckout(){
     </div>
   </div>
   <div class="cta">
-    <button class="cta-btn" ${(belowMin||!allAgreed())?'disabled':''} onclick="openPaySheet()">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : (!allAgreed()?'필수 약관에 동의해 주세요' : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`)}</button>
+    <button class="cta-btn" ${belowMin?'disabled':''} onclick="${belowMin?'':'tryPayGate()'}">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`}</button>
   </div>`;
 }
-// 약관 동의 — 상태 기반 (필수: 이용약관[선불형만]·개인정보·연령) · 전부 체크 전엔 결제 버튼 비활성화
+// 약관 동의 — 상태 기반 (필수: 이용약관[선불형만]·개인정보·연령)
 function agreeKeys(){ return S.bill==='post' ? ['privacy','age'] : ['tos','privacy','age']; }
 function allAgreed(){ return agreeKeys().every(k=>S.agree&&S.agree[k]); }
 function toggleAgree(k){ S.agree=S.agree||{}; S.agree[k]=!S.agree[k]; render(); }
 function toggleAgreeAll(){ S.agree=S.agree||{}; const all=allAgreed(); agreeKeys().forEach(k=>S.agree[k]=!all); render(); }
+// 내점형과 동일한 UX: 버튼은 항상 눌러지고, 미동의 상태로 누르면 흔들림 + 토스트로 안내
+function tryPayGate(){
+  if(!allAgreed()){
+    toast('필수 약관에 동의해 주세요');
+    document.querySelectorAll('.agree, .agree-all').forEach(row=>{
+      row.classList.add('agree-shake');
+      setTimeout(()=>row.classList.remove('agree-shake'), 600);
+    });
+    const first=document.querySelector('.agree-all');
+    if(first) first.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  openPaySheet();
+}
 /* 약관 전문 — '보기'로 열람 */
 const TERMS = {
   tos:{ t:'이용약관 동의', req:'필수', body:`<b>1. 목적</b><br>본 약관은 야외형 QR 주문 서비스 이용에 관한 사항을 정해요.<br><br><b>2. 주문·결제</b><br>메뉴 주문·결제는 매장·브랜드가 제공하는 조건을 따르며, 결제는 전자결제대행사(PG)를 통해 처리돼요(신용/체크카드·간편결제).<br><br><b>3. 취소·환불</b><br>상품 품절 등으로 주문이 취소되면 결제 금액은 자동 환불되며, 카드사 사정에 따라 영업일 3~7일이 소요될 수 있어요.<br><br><b>4. 이용자 의무</b><br>정확한 연락처를 입력해야 주문 알림을 받을 수 있어요.` },

@@ -2248,7 +2248,7 @@ function roundCardHTML(p, showNames){
       ${canceled?`<span class="st-badge st-rej">주문취소</span>`:''}
     </div>
     ${canceled
-      ? `<div class="oh-cancelnote" style="margin:12px 16px 0"><div class="cn-main">↩️ ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`
+      ? `<div class="oh-cancelnote" style="margin:12px 16px 14px"><div class="cn-main">↩️ ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`
       : storeRowsHTML(p.stores, showNames)}
     ${o?`<div class="oh-sub">
       <div class="oh-sub-row"><span>주문번호</span><span class="v">${p.id}</span></div>

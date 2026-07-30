@@ -416,7 +416,9 @@
   .oh-line .ohl-n{flex:1;min-width:0;}
   .oh-line .ohl-q{color:var(--ink3);font-size:13px;font-weight:700;}
   .oh-line .ohl-p{font-weight:700;color:var(--ink);}
-  .oh-cancelnote{font-size:12.5px;color:#c92a2a;font-weight:700;margin-top:8px;line-height:1.55;background:#fff0f0;border-radius:8px;padding:9px 11px;}
+  .oh-cancelnote{margin-top:8px;background:#fff0f0;border-radius:8px;padding:10px 11px;}
+  .oh-cancelnote .cn-main{font-size:12.5px;color:#c92a2a;font-weight:700;line-height:1.5;}
+  .oh-cancelnote .cn-sub{font-size:12px;color:#c92a2a;opacity:.75;font-weight:500;line-height:1.5;margin-top:3px;}
   .oh-grp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:13px;font-weight:800;color:var(--ink);}
   .oh-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--bg);border-top:1px solid var(--line2);}
   .oh-foot-sum{font-size:14px;font-weight:700;color:var(--ink2);}
@@ -503,7 +505,9 @@
   .rc-line{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:4px 0;color:var(--ink2);}
   .rc-line.dim{color:var(--ink3);}
   .rc-total{font-size:17px;font-weight:900;color:var(--ink);border-top:1px solid var(--line);margin-top:6px;padding-top:12px;}
-  .rc-cancelbox{background:#fff0f0;border:1px solid #f5c6c6;border-radius:10px;padding:11px 13px;font-size:12.5px;color:#c0392b;font-weight:700;line-height:1.55;margin-top:12px;}
+  .rc-cancelbox{background:#fff0f0;border:1px solid #f5c6c6;border-radius:10px;padding:11px 13px;margin-top:12px;}
+  .rc-cancelbox .cn-main{font-size:12.5px;color:#c0392b;font-weight:700;line-height:1.5;}
+  .rc-cancelbox .cn-sub{font-size:12px;color:#c0392b;opacity:.75;font-weight:500;line-height:1.5;margin-top:3px;}
   .rc-foot{font-size:11.5px;color:var(--ink4);line-height:1.6;margin-top:4px;}
   .rc-foot b{color:var(--ink2);}
   /* 전자영수증 정책 UI — 주문내역 가리기 · 가맹점 정보 · 인증 바코드 · 저장/리뷰 */
@@ -2175,7 +2179,7 @@ function getPayments(){
   const liveStores = Object.entries(grpByStore(live)).map(([sid,items])=>({sid,status:'주문요청',items}));
   const raw = [
     {id:'A1031', time:'1시간 20분 전', paidAt:'2026-07-21 13:12', canceledAt:'2026-07-21 13:15', pay:'신용카드', contact:'010-1234-5678',
-      cancel:'상품 품절로 자동 취소되었어요 · 결제 금액은 자동 환불 처리 (카드사 사정에 따라 영업일 3~7일 소요)', stores:[
+      cancelMain:'상품 품절로 주문이 취소되었어요', cancelSub:'결제 금액은 자동으로 환불돼요. (카드사에 따라 3~7일 소요)', stores:[
       {sid:'taco', status:'주문취소', items:[{name:'비프 타코 세트',opt:'',qty:1,price:8500}]},
     ]},
     {id:'A1035', time:'55분 전', paidAt:'2026-07-21 13:37', pay:'신용카드', contact:'sohee@email.com', stores:[
@@ -2244,7 +2248,7 @@ function roundCardHTML(p, showNames){
       ${canceled?`<span class="st-badge st-rej">주문취소</span>`:''}
     </div>
     ${canceled
-      ? `<div class="oh-cancelnote" style="margin:12px 16px 0">↩️ ${p.cancel}</div>`
+      ? `<div class="oh-cancelnote" style="margin:12px 16px 0"><div class="cn-main">↩️ ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`
       : storeRowsHTML(p.stores, showNames)}
     ${o?`<div class="oh-sub">
       <div class="oh-sub-row"><span>주문번호</span><span class="v">${p.id}</span></div>
@@ -2394,7 +2398,7 @@ function openReceipt(id){
           ${coupon?`<div class="rc-line"><span>쿠폰 할인</span><span>−${won(coupon)}</span></div>`:''}`}
       <div class="rc-line rc-total"><span>${canceled?'환불 예정 금액':'결제금액'}</span><span>${won(total)}</span></div>
       <div class="rc-line dim"><span>결제수단</span><span>${payMasked}</span></div>
-      ${canceled?`<div class="rc-cancelbox">↩️ ${p.cancel}</div>`:''}
+      ${canceled?`<div class="rc-cancelbox"><div class="cn-main">↩️ ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`:''}
       <div class="rc-hr"></div>
       ${Object.keys(groups).map(sid=>{const i=store(sid).info||{};return `<div class="rc-biz">
         <div class="rc-biz-h">${store(sid).name}</div>

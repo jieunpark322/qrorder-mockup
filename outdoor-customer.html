@@ -2029,7 +2029,7 @@ function scCheckout(){
         ? (mi.basis==='group'
             ? `<div class="minwarn">최소 주문 금액 <b>${won(mi.min)}</b>까지 <b>${won(mi.shortfall)}</b> 남았어요 · 더 담으면 ${post?'주문':'결제'}할 수 있어요<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`
             : `<div class="minwarn">매장별 최소 주문 금액 <b>${won(mi.min)}</b> 미달 매장이 있어요<br>${mi.shortStores.map(x=>`· <b>${x.name}</b> ${won(x.need)} 더 담기`).join('<br>')}<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`)
-        : `<div class="minok">✓ 최소 주문 금액 ${won(mi.min)} 충족 · ${mi.label}</div>`) : ''}
+        : `<div class="minok">✓ ${won(mi.min)} 이상 담아서 ${post?'주문':'결제'}할 수 있어요<br><span style="font-weight:600;opacity:.85">· ${mi.label}</span></div>`) : ''}
     </div>
     ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note">🏪 통합 결제지만 <b>매장별로 따로 준비·픽업</b>돼요 · 매장 수만큼 <b>알림톡이 따로</b> 오고, 각 매장에서 받게 돼요 (통합 결제는 배달 매장이 없어 항상 포장 픽업)</div>`:''}
     <!-- 결제 수단 (선불형만) -->

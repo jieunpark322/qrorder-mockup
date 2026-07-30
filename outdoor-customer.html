@@ -381,11 +381,9 @@
     border:1px solid var(--line);border-radius:12px;font-size:13.5px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;width:calc(100% - 28px);text-align:left;}
   .oh-viewtog.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);font-weight:800;}
   .oh-viewtog .chk{width:20px;height:20px;border-radius:6px;}
-  .oh-card{margin:0 14px;padding:16px 0;}
-  .oh-card + .oh-card{border-top:1px solid var(--line);}
+  .oh-card{background:#fff;border:1px solid var(--line);border-radius:14px;margin:14px 14px 0;padding:16px;}
   .oh-card.cancel{opacity:.92;}
-  .oh-content-box{background:#fff;border-radius:14px;border:1px solid var(--line);box-shadow:0 2px 10px rgba(20,20,25,.05);margin-top:10px;overflow:hidden;}
-  .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 16px;}
+  .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
   .oh-top-l{display:flex;flex-direction:column;gap:4px;min-width:0;}
   .oh-ord-row{display:flex;align-items:center;gap:9px;}
   .oh-ord{font-size:15px;font-weight:800;color:var(--blue-d);background:var(--blue-50);padding:4px 11px;border-radius:8px;}
@@ -422,7 +420,7 @@
   .oh-cancelnote .cn-main{font-size:12.5px;color:#c92a2a;font-weight:700;line-height:1.5;}
   .oh-cancelnote .cn-sub{font-size:12px;color:#c92a2a;opacity:.75;font-weight:500;line-height:1.5;margin-top:3px;}
   .oh-grp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:13px;font-weight:800;color:var(--ink);}
-  .oh-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px 16px;margin-top:13px;border-top:1px solid var(--line2);}
+  .oh-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:13px;margin-top:13px;border-top:1px solid var(--line2);}
   .oh-foot-sum{font-size:14px;font-weight:700;color:var(--ink2);}
   .oh-foot-sum b{font-size:16px;font-weight:900;color:var(--ink);margin-left:4px;}
   .oh-receipt{background:#fff;border:1.5px solid var(--persimmon);color:var(--persimmon-d);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;white-space:nowrap;}
@@ -460,11 +458,11 @@
   .oh-sum-lite{font-size:15px;font-weight:900;color:var(--ink);}
   .oh-ghost{background:none;border:none;color:var(--ink3);font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;padding:9px 4px;white-space:nowrap;}
   .oh-ghost:active{opacity:.6;}
-  .oh-sub{padding:0 16px 12px;}
+  .oh-sub{padding:0 0 4px;}
   .oh-sub-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink3);padding:5px 0;}
   .oh-sub-row .v{color:var(--ink2);font-weight:700;}
   /* 카드 안 매장별 진행 영역 — 매장이 1곳이든 여러 곳이든 같은 구조(매장명 + 상태 + 4단계 막대) */
-  .oh-stores{padding:14px 16px 8px;}
+  .oh-stores{padding:0;}
   .oh-st-row{padding:10px 0;border-top:1px dashed var(--line2);}
   .oh-st-row:first-child{border-top:none;}
   .oh-st-head{display:flex;align-items:center;gap:8px;}
@@ -2249,9 +2247,8 @@ function roundCardHTML(p, showNames){
       </div>
       ${canceled?`<span class="st-badge st-rej">주문취소</span>`:''}
     </div>
-    <div class="oh-content-box">
     ${canceled
-      ? `<div class="oh-cancelnote" style="margin:12px 16px 14px"><div class="cn-main">↩️ ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`
+      ? `<div class="oh-cancelnote" style="margin:0 0 4px"><div class="cn-main">↩️ ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`
       : storeRowsHTML(p.stores, showNames)}
     ${o?`<div class="oh-sub">
       <div class="oh-sub-row"><span>주문번호</span><span class="v">${p.id}</span></div>
@@ -2268,7 +2265,6 @@ function roundCardHTML(p, showNames){
         <button class="oh-ghost" onclick="toggleHistDetail('${p.id}')">${o?'접어서 보기 ▲':'자세히 보기 ▼'}</button>
         <button class="oh-receipt sm" onclick="openReceipt('${p.id}')">🧾 영수증</button>
       </div>
-    </div>
     </div>
   </div>`;
 }

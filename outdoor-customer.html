@@ -1451,7 +1451,8 @@ function histFabIcon(){
   return `<button class="hist-icon" onclick="go('history')">🧾 주문 내역</button>`;
 }
 function histFabFloat(){
-  const cartBarShown = S.payScope==='unified' && S.cart.length;
+  // 카트바 노출 조건은 화면마다 다름 — 홈은 통합결제일 때만, 매장 페이지는 담긴 게 있으면 항상 노출
+  const cartBarShown = S.cart.length>0 && (S.screen!=='home' || S.payScope==='unified');
   return `<div class="hist-fabwrap" style="bottom:calc(${cartBarShown?96:28}px + env(safe-area-inset-bottom))">${histFabIcon()}</div>`;
 }
 // 하단 고정 장바구니 바
@@ -1610,7 +1611,6 @@ function scStore(){
   <div class="hdr">
     ${backBtn}
     <div class="ht">${s.name}</div>
-    ${histFabIcon()}
   </div>
   <div class="scroll">
     ${hasCover ? `
@@ -1643,6 +1643,7 @@ function scStore(){
       <div style="height:78px"></div>
     `}
   </div>
+  ${histFabFloat()}
   ${cartBar()}
   `;
 }

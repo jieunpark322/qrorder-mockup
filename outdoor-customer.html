@@ -2216,7 +2216,7 @@ function scCheckout(){
             : `<div class="minwarn multiline"><span>아래 매장에 조금만 더 담으면 ${post?'주문':'결제'}할 수 있어요. (매장별 ${won(mi.min)} 기준)</span>${mi.shortStores.map(x=>`<span style="font-weight:600;opacity:.9">· <b>${x.name}</b> ${won(x.need)} 더 담기</span>`).join('')}</div>`)
         : `<div class="minok">✓ ${won(mi.min)} 이상 담아서 ${post?'주문':'결제'}할 수 있어요. (${mi.label})</div>`) : ''}
     </div>
-    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note">🏪 한 번에 결제해도 준비와 픽업은 <b>매장별로 따로</b> 진행되어 <b>매장마다 알림톡이 따로</b> 도착해요.</div>`:''}
+    ${(S.payScope==='unified' && new Set(S.cart.map(c=>c.store)).size>1)?`<div class="multi-note">🏪 한 번에 결제해도 준비와 픽업은 <b>매장별로 따로</b> 진행되어 <b>매장마다 따로</b> 알려드려요.</div>`:''}
     <!-- 결제 수단 (선불형만) -->
     ${post?'':`<div class="sect"><div class="sect-h">결제 수단</div>
       <div class="pay-opt on"><span class="pic">💳</span> 신용/체크카드</div>
@@ -2404,7 +2404,7 @@ function scDone(){
     ${multi?`
     <div class="multi-pick">
       <div class="mp-h">🏪 매장별로 따로 받아요</div>
-      <div class="mp-b">통합 결제했지만 준비·픽업은 <b>매장별</b>이에요(통합 결제는 배달 매장이 없어 항상 포장 픽업). <b>${sids.length}개 매장</b>에서 각각 준비돼 부스에서 따로 받게 되고, 준비 완료 <b>알림톡도 매장마다 따로</b> 도착해요.</div>
+      <div class="mp-b"><b>${sids.length}개 매장</b>에서 각각 준비돼 부스에서 따로 받게 되고, 준비가 끝나면 <b>매장마다 따로</b> 알려드려요. (통합 결제는 배달 매장이 없어 항상 포장 픽업이에요)</div>
       <div class="mp-list">${sids.map(sid=>`<div class="mp-row"><span class="mp-s">${store(sid).logo} ${store(sid).name}</span><span class="mp-l">${store(sid).loc}</span></div>`).join('')}</div>
     </div>`:''}
     <div class="done-btns">

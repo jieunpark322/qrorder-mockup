@@ -536,6 +536,19 @@
   .oh-menupart{margin-top:10px;padding:11px 12px;background:var(--bg);border-radius:10px;}
   .oh-menupart-h{font-size:11px;font-weight:800;color:var(--ink3);margin-bottom:6px;}
   .oh-menupart .oh-sub-row{padding:4px 0;color:var(--ink2);}
+
+  /* 호출번호 — 부스에서 실제로 불리는 번호라 상세의 첫 줄에 크게 */
+  .oh-sub-row.callrow{align-items:center;padding:8px 0 9px;margin-bottom:3px;
+    border-bottom:1px solid var(--line);color:var(--ink2);font-weight:700;}
+  .oh-sub-row.callrow .callno{font-size:19px;font-weight:900;color:var(--ready-d);
+    letter-spacing:.06em;font-variant-numeric:tabular-nums;}
+  .oh-callhint{font-size:11.5px;line-height:1.55;color:var(--ink3);margin:-1px 0 4px;}
+
+  /* 수령 예약 — 스텝바 위에 예약 시각을 병기(즉시 수령 건과 한눈에 구분) */
+  .oh-resv{display:inline-flex;align-items:center;gap:6px;margin:0 0 11px;
+    background:var(--blue-50);color:var(--persimmon-d);border-radius:9px;padding:6px 11px;
+    font-size:12px;font-weight:700;}
+  .oh-resv b{font-weight:900;}
   .oh-menupart .oh-sub-row .v{color:var(--ink);}
   .oh-tail{margin:16px 14px 0;font-size:12.5px;color:var(--ink3);}
   .oh-tail-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:11px 2px;border-top:1px solid var(--line);}
@@ -2627,22 +2640,32 @@ function getPayments(){
   const live = (S.cart.length?S.cart:[{store:'burger',name:'더블 치즈버거',opt:'Regular',qty:1,price:9800}])
                 .map(c=>({store:c.store||'burger',name:c.name,opt:c.opt||'',qty:c.qty,price:c.price}));
   const liveStores = Object.entries(grpByStore(live)).map(([sid,items])=>({sid,status:'주문요청',items}));
+  // 최신 회차의 연락처·호출번호는 결제 시 실제 입력값을 따름 (주문완료 화면의 호출번호 규칙과 동일)
+  const liveContact = S.contact || (S.alertCh==='email' ? 'sohee@email.com' : '010-1234-5678');
+  const liveDigits  = liveContact.replace(/\D/g,'');
+  const liveCallNo  = S.loginType==='kakao' ? '3821'
+                    : (S.alertCh!=='email' && liveDigits.length>=4 ? liveDigits.slice(-4) : '0417');
+  // callNo = 손님 호출(식별) 번호 · 휴대폰이면 뒤 4자리, 이메일만 입력한 건은 시스템이 발급한 랜덤 4자리
+  // reserveAt = 포장 예약 건의 수령 예약 시각 (즉시 수령 건은 null)
   const raw = [
-    {id:'A1031', time:'1시간 20분 전', paidAt:'2026-07-21 13:12', canceledAt:'2026-07-21 13:15', pay:'신용카드', contact:'010-1234-5678',
+    {id:'A1031', time:'1시간 20분 전', paidAt:'2026-07-21 13:12', canceledAt:'2026-07-21 13:15', pay:'신용카드', contact:'010-1234-5678', callNo:'5678', reserveAt:null,
       cancelMain:'상품 품절로 주문이 취소되었어요', cancelSub:'결제 금액은 자동으로 환불돼요. (카드사에 따라 3~7일 소요)', stores:[
       {sid:'taco', status:'주문취소', items:[{name:'비프 타코 세트',opt:'',qty:1,price:8500}]},
     ]},
-    {id:'A1035', time:'55분 전', paidAt:'2026-07-21 13:37', pay:'신용카드', contact:'sohee@email.com', stores:[
+    // 이메일로만 주문한 건 — 호출번호가 랜덤 발급되는 케이스 · 포장 예약 건이기도 함
+    {id:'A1035', time:'55분 전', paidAt:'2026-07-21 13:37', pay:'신용카드', contact:'sohee@email.com', callNo:'0417', reserveAt:'13:50', stores:[
       {sid:'burger', status:'수령완료', items:[{name:'수제 콜라',opt:'',qty:1,price:3000}]},
       {sid:'ade', status:'수령완료', items:[{name:'자몽 에이드',opt:'',qty:1,price:4500}]},
     ]},
     // 통합결제 대표 예시 — 한 번의 결제에 3개 매장이 섞이고 각 매장 진행 단계가 모두 다름
-    {id:'A1039', time:'12분 전', paidAt:'2026-07-21 14:20', pay:'카카오페이', contact:'010-9876-5432', stores:[
+    {id:'A1039', time:'12분 전', paidAt:'2026-07-21 14:20', pay:'카카오페이', contact:'010-9876-5432', callNo:'5432', reserveAt:null, stores:[
       {sid:'coffee', status:'준비완료', items:[{name:'바닐라 라떼',opt:'',qty:1,price:4800},{name:'아메리카노',opt:'ICE',qty:1,price:3500}]},
       {sid:'chicken', status:'준비중', items:[{name:'후라이드 세트',opt:'',qty:1,price:8500}]},
       {sid:'waffle', status:'수령완료', items:[{name:'플레인 와플',opt:'',qty:1,price:3500}]},
     ]},
-    {id:'A1042', time:'방금 전', paidAt:'2026-07-21 14:32', pay:'신용카드', contact:(S.contact||'010-1234-5678'), stores:liveStores},
+    // 최신 회차는 실제 조작을 그대로 반영 — 예약하기로 시간을 골랐으면 그 시각이 예약 정보로 들어감
+    {id:'A1042', time:'방금 전', paidAt:'2026-07-21 14:32', pay:'신용카드', contact:liveContact, callNo:liveCallNo,
+      reserveAt:(S.service!=='delivery' && S.pickup==='reserve' && S.pickupTime) ? S.pickupTime : null, stores:liveStores},
   ];
   // 파생값: 회차 번호(결제 시각 오름차순으로 1차·2차…) · 평면 items(매장 태그 포함) · 회차 대표 상태(액션 우선 순서상 가장 앞선 매장 상태)
   return raw.map((p,i)=>({
@@ -2707,18 +2730,24 @@ function roundCardHTML(p, showNames, key){
       <span class="oh-fold-chev">${IC.chevron}</span>
     </button>
     ${fold ? '' : `
+    ${(!canceled && p.reserveAt)?`<div class="oh-resv">${IC.calendar} 오늘 <b>${p.reserveAt}</b> 수령 예약</div>`:''}
     ${canceled
       ? `<div class="oh-cancelnote" style="margin:0 0 4px"><div class="cn-main">${IC.undo} ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`
       : storeRowsHTML(p.stores, showNames)}
-    ${o?`<div class="oh-sub">
+    ${o?(()=>{
+      const isMail = String(p.contact||'').includes('@');
+      return `<div class="oh-sub">
+      <div class="oh-sub-row callrow"><span>${IC.bell} 호출번호</span><span class="v callno">${p.callNo}</span></div>
+      <div class="oh-sub-row"><span>${isMail?'알림 이메일':'알림 연락처'}</span><span class="v">${p.contact}</span></div>
+      ${isMail?`<div class="oh-callhint">이메일로만 주문해 호출번호를 새로 발급했어요. 부스에서 이 번호를 말씀해 주세요.</div>`:''}
       <div class="oh-sub-row"><span>주문번호</span><span class="v">${p.id}</span></div>
-      <div class="oh-sub-row"><span>알림 연락처</span><span class="v">${p.contact}</span></div>
       <div class="oh-sub-row"><span>결제수단</span><span class="v">${p.pay}</span></div>
+      ${p.reserveAt?`<div class="oh-sub-row"><span>수령 예약</span><span class="v">오늘 ${p.reserveAt}</span></div>`:''}
       ${p.stores.map((s,i)=>`<div class="oh-menupart">
         <div class="oh-menupart-h">${p.stores.length>1?`<span class="store-no sm">${i+1}</span>`:''}${store(s.sid).name}</div>
         ${s.items.map(it=>`<div class="oh-sub-row"><span>${it.name}${it.opt?` (${it.opt})`:''} ×${it.qty}</span><span class="v">${won(it.price*it.qty)}</span></div>`).join('')}
       </div>`).join('')}
-    </div>`:''}`}
+    </div>`;})():''}`}
     <div class="oh-foot">
       <span class="oh-sum-lite">${canceled?'취소 ':''}${won(total)}</span>
       <div class="oh-foot-btns">

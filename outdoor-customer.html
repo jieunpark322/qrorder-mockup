@@ -252,7 +252,7 @@
   .timeslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
   .tslot{position:relative;border:1.5px solid var(--line);border-radius:10px;padding:12px 0;font-size:15px;font-weight:700;background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);}
   .tslot.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);}
-  .tslot.dis{color:var(--ink4);background:var(--bg);cursor:not-allowed;}
+  .tslot.dis,.tslot:disabled{color:var(--ink4);background:var(--bg);cursor:not-allowed;}
   .tslot .ts-x{font-size:10px;font-weight:800;color:var(--red);margin-top:2px;}
   /* 준비완료 픽업 유도 — 카드 안에 들어앉은 블록(전체 폭 띠가 아니라 여백을 둔 인셋) */
   .oh-pickup{margin:12px 16px 0;padding:11px 13px;background:#e6fcf5;border:1px solid #c3fae8;border-radius:10px;color:#0b7285;font-size:13px;font-weight:800;line-height:1.5;display:flex;align-items:center;gap:7px;}
@@ -320,6 +320,18 @@
   .seg{display:flex;background:var(--bg);border-radius:11px;padding:4px;gap:4px;}
   .seg button{flex:1;padding:11px 0;border:none;background:none;font-size:14px;font-weight:700;color:var(--ink3);border-radius:8px;cursor:pointer;font-family:inherit;}
   .seg button.on{background:#fff;color:var(--ink);font-weight:800;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+
+  /* 수령 방식 — 라디오 카드(선택 즉시 카드 안에서 다음 단계가 펼쳐짐, 별도 영역으로 튀지 않음) */
+  .pk-opt{display:flex;align-items:flex-start;gap:12px;border:1.5px solid var(--line2);border-radius:13px;padding:14px 15px;cursor:pointer;}
+  .pk-opt + .pk-opt{margin-top:10px;}
+  .pk-opt.on{border-color:var(--blue);}
+  .pk-radio{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:2px solid var(--line2);margin-top:1px;position:relative;}
+  .pk-opt.on .pk-radio{border-color:var(--blue);}
+  .pk-opt.on .pk-radio::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--blue);}
+  .pk-txt{display:flex;flex-direction:column;gap:3px;}
+  .pk-txt b{font-size:15px;font-weight:800;color:var(--ink);}
+  .pk-txt span{font-size:12.5px;color:var(--ink3);}
+  .pk-opt .tp-wrap{margin-top:14px;}
 
   /* 카카오 알림톡 강조 */
   .kakao-note{margin:12px 0 0;display:flex;gap:11px;align-items:center;background:#FEE500;border-radius:12px;padding:13px 14px;font-size:13.5px;font-weight:700;color:#3c1e1e;line-height:1.45;}
@@ -565,7 +577,7 @@
 
   /* ── 하단 고정 CTA ───────────────────────── */
   /* 하단 결제/장바구니: 화면 위아래로 스크롤해도 항상 보이는 플로팅(뷰포트 고정) */
-  .cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
+  .cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;box-shadow:0 -8px 20px rgba(20,20,25,.07);padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
   /* 주문 내역 진입 버튼 — 하단(장바구니)과 완전히 분리해 화면 상단에 배치 · 아이콘만으로는 인지가 어려워 텍스트 라벨 병기 */
   .hist-icon{pointer-events:auto;flex-shrink:0;color:#fff;border:none;border-radius:18px;padding:8px 13px;font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
     background:linear-gradient(180deg,#7A7CF0 0%,#5C5EDA 55%,#4547B0 100%);
@@ -710,7 +722,7 @@
   .oh-rnd-h{color:var(--persimmon-d);}
 
   /* ── CTA: 퍼시몬 그라데이션 + 촉각 프레스 ── */
-  .cta{background:var(--card);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(28,16,6,.06);}
+  .cta{background:var(--card);box-shadow:0 -8px 24px rgba(28,16,6,.06);}
   .cta-btn{background:linear-gradient(180deg,#FF6A2C,var(--persimmon-d));box-shadow:0 8px 20px rgba(232,80,30,.34);letter-spacing:.01em;}
   .cta-btn:active{transform:translateY(1px) scale(.994);}
   .cta-btn:disabled{background:var(--line);color:var(--ink4);box-shadow:none;}
@@ -796,7 +808,7 @@
   .searchtog{background:#F3F3F5;} .store-group-h{background:var(--blue-50);color:var(--persimmon);}
 
   /* CTA: 입체(3D) 버튼 — 상단 하이라이트 + 하단 음영(inset) + 아래로 눌리는 촉각 프레스 */
-  .cta{background:#fff;border-top:1px solid var(--line);box-shadow:none;}
+  .cta{background:#fff;box-shadow:0 -8px 20px rgba(20,20,25,.07);}
   .cta-btn{letter-spacing:-.01em;
     background:linear-gradient(180deg,#7BA5E6 0%,#5C8CDA 52%,#3F6FC9 100%);
     box-shadow:0 1px 0 rgba(255,255,255,.42) inset, 0 -3px 6px rgba(30,60,130,.30) inset, 0 3px 5px rgba(45,85,170,.30), 0 8px 18px rgba(45,85,170,.28);
@@ -865,13 +877,10 @@
   .scope-note{margin:12px 14px 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--ink2);box-shadow:var(--shadow);}
   .scope-chip{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--ink3);background:#F3F3F5;padding:3px 9px;border-radius:6px;letter-spacing:-.01em;}
 
-  /* 포장 예약 시/분 선택기 — 내점형과 동일한 네이티브 select 드롭다운 UX */
+  /* 포장 예약 시간 선택기 — 받을 수 있는 시간을 한 번의 탭으로 바로 고르는 슬롯 그리드 */
   .tp-wrap{margin-top:14px;}
   .tp-label{font-size:14px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px;margin-bottom:11px;}
   .req{font-size:11px;font-weight:800;color:#e03131;background:#fff0f0;padding:3px 8px;border-radius:5px;}
-  .tp-selrow{display:flex;gap:8px;}
-  .timesel{flex:1;border:1.5px solid var(--line);border-radius:12px;padding:15px 13px;font-size:16.5px;font-weight:600;font-family:inherit;color:var(--ink);background:#fff;}
-  .timesel:focus{outline:none;border-color:var(--persimmon);}
   .tp-note{margin-top:10px;font-size:13px;font-weight:600;color:var(--persimmon);}
   .tp-note.dim{font-weight:600;color:var(--ink3);}
   .tp-note b{font-weight:800;}
@@ -2051,12 +2060,17 @@ function scCart(){
       ${S.service==='delivery'
         ? `<div class="sect-sub">계신 자리로 스태프가 직접 가져다드려요.</div>
            <div class="deliver-fix">${IC.seat} 다음 화면에서 <b>받을 자리</b>를 입력해 주세요.</div>`
-        : `<div class="seg">
-             <button class="${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">바로 받기</button>
-             <button class="${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">예약하기</button>
+        : `<div class="pk-opt ${S.pickup!=='reserve'?'on':''}" onclick="S.pickup='now';render()">
+             <span class="pk-radio"></span>
+             <div class="pk-txt"><b>바로 받기</b><span>준비되면 부스에서 바로 픽업하는 방식이에요.</span></div>
            </div>
-           ${S.pickup==='reserve' ? timePickerHTML()
-             : `<div style="font-size:12.5px;color:var(--ink3);margin-top:10px">준비되면 부스에서 바로 픽업하는 방식이에요.</div>`}`}
+           <div class="pk-opt ${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">
+             <span class="pk-radio"></span>
+             <div class="pk-txt">
+               <b>예약하기</b><span>원하는 시간에 맞춰 미리 받을 수 있어요.</span>
+               ${S.pickup==='reserve' ? timeSlotPickerHTML() : ''}
+             </div>
+           </div>`}
     </div>
     ${(()=>{ const up=computeUpsell(); return up.length?`<div class="sect"><div class="sect-h">함께 담으면 좋아요</div>${up.map(({sid,m})=>upsellRow(sid,m,S.payScope==='unified')).join('')}</div>`:''; })()}
   </div>
@@ -2150,58 +2164,31 @@ const rvStartOf = s => s.rvStart!=null ? s.rvStart : s.ohStart;
 const rvEndOf   = s => s.rvEnd  !=null ? s.rvEnd   : s.ohEnd;
 /* 선택 가능 판정 — ① 예약 가능 시간 내 ② 브레이크타임 아님 ③ 현재 시각 이후(리드타임 없음: 준비 시간은 매장이 판단) */
 function validPickup(s,t){ return t>=rvStartOf(s) && t<=rvEndOf(s) && t>=nowMinutes() && !(s.brkStart!=null && t>=s.brkStart && t<s.brkEnd); }
-function pickHour(h){
+// 시/분을 따로 고르는 두 단계 선택 대신, 받을 수 있는 시간을 바로 눌러 고르는 한 번의 탭으로 단순화
+function pickSlot(t){
   const s=store(S.curStore);
-  if(h==null){ S.pickupH=null; S.pickupM=null; syncPickup(); render(); return; }
-  S.pickupH=h;
-  if(S.pickupM!=null && !validPickup(s,h*60+S.pickupM)) S.pickupM=null;   // 새 시간대에서 무효한 분 초기화
-  syncPickup(); render();
-}
-function pickMin(m){
-  const s=store(S.curStore);
-  if(m==null){ S.pickupM=null; syncPickup(); render(); return; }
-  if(S.pickupH==null || !validPickup(s,S.pickupH*60+m)) return;
-  S.pickupM=m; syncPickup(); render();
+  if(!validPickup(s,t)) return;
+  S.pickupH=Math.floor(t/60); S.pickupM=t%60; syncPickup(); render();
 }
 function syncPickup(){ S.pickupTime = (S.pickupH!=null && S.pickupM!=null) ? `${pad2(S.pickupH)}:${pad2(S.pickupM)}` : null; }
-// 내점형 QR메뉴판과 동일한 UX: 시/분 네이티브 select 드롭다운 2개 + 확정 안내 문구
-function timePickerHTML(){
+function timeSlotPickerHTML(){
   const s=store(S.curStore);
+  const start=rvStartOf(s), end=rvEndOf(s);
+  // 예약 가능 시간 앞뒤로 20분씩 더 보여줘 '왜 여기부터 선택 불가인지' 경계를 인지할 수 있게 함
+  const from=Math.max(0,start-20), to=Math.min(23*60+50,end+20);
   const now=nowMinutes();
-  const startH=Math.floor(rvStartOf(s)/60)-1, endH=Math.floor(rvEndOf(s)/60)+1;   // 예약 가능 시간 밖도 1시간씩 보여줘 '선택 불가' 인지
-  const hourOk = h => { for(let m=0;m<60;m+=10){ if(validPickup(s,h*60+m)) return true; } return false; };
-  // 이미 지난 시각(현재 시각 이전)은 선택지 자체에서 제외 · 영업시간 밖(아직 지나지 않음)은 '마감' 표시로 남겨둠
-  const hours=[]; for(let h=Math.max(0,startH); h<=Math.min(23,endH); h++){ if(h*60+50>=now) hours.push(h); }
-  const mins=[]; for(let m=0;m<60;m+=10){ if(S.pickupH==null || S.pickupH*60+m>=now) mins.push(m); }
-  const hourOpts = hours.map(h=>`<option value="${h}" ${!hourOk(h)?'disabled':''} ${S.pickupH===h?'selected':''}>${h}시${hourOk(h)?'':' (마감)'}</option>`).join('');
-  const minOpts = mins.map(m=>{const dis=(S.pickupH==null)||!validPickup(s,S.pickupH*60+m); return `<option value="${m}" ${dis?'disabled':''} ${S.pickupM===m?'selected':''}>${pad2(m)}분${dis?' (마감)':''}</option>`;}).join('');
+  const slots=[]; for(let t=from; t<=to; t+=10){ if(t>=now) slots.push(t); }
   const brk = s.brkStart!=null ? ` (브레이크 ${fmtMin(s.brkStart)}~${fmtMin(s.brkEnd)} 제외)` : '';
   return `
-    <div class="tp-wrap">
+    <div class="tp-wrap" onclick="event.stopPropagation()">
       <div class="tp-label">수령 시간 <span class="req">필수</span></div>
-      <div class="tp-selrow">
-        <select class="timesel" onchange="pickHour(this.value===''?null:Number(this.value))">
-          <option value="" ${S.pickupH==null?'selected':''}>시</option>
-          ${hourOpts}
-        </select>
-        <select class="timesel" onchange="pickMin(this.value===''?null:Number(this.value))" ${S.pickupH==null?'disabled':''}>
-          <option value="" ${S.pickupM==null?'selected':''}>분</option>
-          ${minOpts}
-        </select>
-      </div>
+      <div class="timeslots">${slots.map(t=>{
+        const ok=validPickup(s,t), lbl=fmtMin(t), cur=S.pickupTime===lbl;
+        return `<button class="tslot ${cur?'on':''}" ${ok?'':'disabled'} onclick="pickSlot(${t})">${lbl}${ok?'':'<span class="ts-x">마감</span>'}</button>`;
+      }).join('')}</div>
       ${S.pickupTime?`<div class="tp-note">${IC.calendar} 오늘 <b>${S.pickupTime}</b> 수령</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
-      <div class="tp-hint">예약은 ${fmtMin(rvStartOf(s))}~${fmtMin(rvEndOf(s))}${brk} 사이로 받을 수 있어요.</div>
+      <div class="tp-hint">예약은 ${fmtMin(start)}~${fmtMin(end)}${brk} 사이로 받을 수 있어요.</div>
     </div>`;
-}
-function timeSlotsHTML(){
-  const slots=['12:30','13:00','13:30','14:00','14:30','15:00'];
-  const closedSlots=['12:30'];   // 예약 가능 시간 마감 예시
-  return `<div style="font-size:13.5px;font-weight:800;margin:14px 0 9px">수령 예약 시간 선택</div>
-    <div class="timeslots">${slots.map(t=>{
-      const dis=closedSlots.includes(t);
-      return `<button class="tslot ${S.pickupTime===t?'on':''} ${dis?'dis':''}" ${dis?'disabled':''} onclick="S.pickupTime='${t}';render()">${t}${dis?'<div class="ts-x">마감</div>':''}</button>`;
-    }).join('')}</div>
-    <div style="font-size:12px;color:var(--ink4);margin-top:9px">마감된 시간은 선택할 수 없어요</div>`;
 }
 
 /* ── 쿠폰 (야외형: 1회용 쿠폰 코드 입력 방식만 지원) ──

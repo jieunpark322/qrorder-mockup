@@ -249,8 +249,9 @@
   .sb-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.5);cursor:pointer;}
   .sb-dot.on{background:#fff;width:12px;border-radius:3px;}
   /* 포장 예약 시간 슬롯 */
-  .timeslots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-  .tslot{position:relative;border:1.5px solid var(--line);border-radius:10px;padding:12px 0;font-size:15px;font-weight:700;background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .timeslots{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .timeslots::-webkit-scrollbar{display:none;}
+  .tslot{flex-shrink:0;position:relative;border:1.5px solid var(--line);border-radius:10px;padding:12px 18px;font-size:15px;font-weight:700;background:#fff;cursor:pointer;font-family:inherit;color:var(--ink);white-space:nowrap;}
   .tslot.on{border-color:var(--blue);background:var(--blue-50);color:var(--blue-d);}
   .tslot.dis,.tslot:disabled{color:var(--ink4);background:var(--bg);cursor:not-allowed;}
   .tslot .ts-x{font-size:10px;font-weight:800;color:var(--red);margin-top:2px;}

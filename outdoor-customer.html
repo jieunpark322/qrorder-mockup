@@ -284,6 +284,7 @@
   .sect-h{font-size:16px;font-weight:800;margin-bottom:12px;}
   /* 3D 아이콘 배지 — 베벨(상단 하이라이트+하단 음영) + 드롭 그림자로 입체감 · 이모지를 담아 표현 */
   .sect-h-ic{display:flex;align-items:center;}
+  .biz-chev{display:inline-flex;color:var(--ink3);transition:transform .15s ease;flex-shrink:0;}
   .ic3d{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;
     font-size:16px;line-height:1;margin-right:9px;vertical-align:middle;flex-shrink:0;
     background:linear-gradient(150deg,#ffffff,#eef1f6 58%,#dfe4ec);
@@ -1946,15 +1947,22 @@ function storeInfoHTML(s){
     <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">${IC.clock}</span>운영 시간</div>
       <div class="info-multi">${i.hours||'-'}</div>
     </div>
-    <!-- 사업자 정보 = 사업자 등록 기준 정보 · 신고 주소(사업장 소재지)는 여기에만 표기 -->
-    <div class="sect"><div class="sect-h sect-h-ic"><span class="ic3d">${IC.receipt}</span>사업자 정보</div>
+    <!-- 사업자 정보 = 사업자 등록 기준 정보 · 신고 주소(사업장 소재지)는 여기에만 표기 · 실사용 빈도 낮아 기본은 접어둠 -->
+    <div class="sect">
+      <button class="sect-h sect-h-ic biz-h" onclick="toggleBizInfo()" style="width:100%;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;text-align:left;justify-content:space-between;${S.bizInfoOpen?'margin-bottom:12px':'margin-bottom:0'}">
+        <span style="display:flex;align-items:center"><span class="ic3d">${IC.receipt}</span>사업자 정보</span>
+        <span class="biz-chev" style="${S.bizInfoOpen?'transform:rotate(180deg)':''}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </button>
+      ${S.bizInfoOpen ? `
       <div class="row"><span>상호</span><span class="v">${s.name}</span></div>
       <div class="row"><span>대표자</span><span class="v">${i.ceo||'-'}</span></div>
       <div class="row"><span>사업자등록번호</span><span class="v">${i.regno||'-'}</span></div>
       <div class="row"><span>사업장 소재지</span><span class="v">${i.bizAddr||'-'}</span></div>
+      ` : ''}
     </div>
   </div>`;
 }
+function toggleBizInfo(){ S.bizInfoOpen=!S.bizInfoOpen; render(); }
 
 /* ── 메뉴 상세 (바텀시트) ── */
 function renderMenuSheet(){
@@ -2367,6 +2375,11 @@ function scCheckout(){
     </div>
   </div>
   <div class="cta">
+    <!-- 다회용기 반납 안내 — 메뉴 상세에서만 보이고 체크아웃에선 없어져 잊기 쉬우므로 결제 직전 한 번 더, 대기정보와 별도 줄로 안내 -->
+    ${(()=>{
+      const reuse = S.cart.some(c=>{ const mm=store(c.store).menus.find(x=>x.id===c.menu); return mm && mm.reuse; });
+      return reuse ? `<div class="waitline"><span class="wl-ic">${IC.recycle}</span><span>다회용기는 사용 후 매장에 반납해 주세요.</span></div>` : '';
+    })()}
     <!-- 대기 정보 — 약관과 무관한 보조 안내라 약관 섹션과 분리해 버튼 바로 위에 배치(결제 직전 마지막 안내) · 매장 상세와 동일하게 문장 하나만 노출 -->
     ${(()=>{
       const sids=[...new Set(S.cart.map(c=>c.store))];

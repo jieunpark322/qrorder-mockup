@@ -186,7 +186,6 @@
   .waitline{margin:11px 18px 0;background:var(--bg);border-radius:11px;padding:11px 14px;
     font-size:13.5px;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:7px;}
   .waitline b{color:var(--ink);font-weight:800;}
-  .waitline.multiline > div + div{margin-top:6px;}
   .sbanner{margin:14px 18px 0;border-radius:12px;height:58px;background:linear-gradient(100deg,#6741d9,#9775fa);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;cursor:pointer;}
 
   /* ── 매장 탭 ───────────────────────── */
@@ -1015,6 +1014,7 @@
   .minok{margin-top:10px;color:#1E7A52;}
   .scope-note b,.multi-note b,.deliver-fix b,.waitline b,.minok b{color:var(--ink2);font-weight:800;}
   .waitline .wl-ic{margin-right:4px;}
+  .cta .waitline{margin:0 0 10px;}   /* .cta 바 안에서는 좌우 패딩을 부모가 이미 갖고 있어 자체 여백 제거 */
 
   /* (B) 강조 — 반드시 인지해야 하는 경우만 상자로 (테두리는 1px 실선으로 선명하게) */
   .d-reuse,.cart-scope-note,.minwarn{
@@ -1312,11 +1312,61 @@ const NOTICE = {
   linkLabel: '행사 안내 페이지 보기'   // 링크 버튼/인라인 링크 문구 (url 없으면 링크 미표시)
 };
 
+// SVG 포스터를 배너 배경 이미지로 쓰기 위한 data URI 변환 — 행사명·설명이 이미지 안에 그려지므로
+// 화면에는 별도 텍스트 노드 없이 '이미지 한 장'으로만 존재함(스크린리더·DOM에 텍스트로 잡히지 않음)
+function svgDataUri(svg){ return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg))); }
+const POSTER_FOOD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="bgFood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8590c"/><stop offset="1" stop-color="#ff922b"/>
+    </linearGradient>
+    <filter id="blurFood"><feGaussianBlur stdDeviation="34"/></filter>
+  </defs>
+  <rect width="600" height="600" fill="url(#bgFood)"/>
+  <circle cx="486" cy="126" r="150" fill="#fff" opacity=".10" filter="url(#blurFood)"/>
+  <circle cx="76" cy="200" r="92" fill="#fff" opacity=".08" filter="url(#blurFood)"/>
+  <circle cx="530" cy="440" r="64" fill="#fff" opacity=".10" filter="url(#blurFood)"/>
+  <g transform="translate(414,494)">
+    <rect x="0" y="0" width="156" height="72" rx="10" fill="#b23a02"/>
+    <rect x="12" y="14" width="48" height="34" rx="4" fill="#ff922b"/>
+    <rect x="70" y="14" width="48" height="34" rx="4" fill="#ff922b"/>
+    <circle cx="32" cy="80" r="15" fill="#3d1c02"/><circle cx="124" cy="80" r="15" fill="#3d1c02"/>
+  </g>
+  <text x="46" y="402" font-family="'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif" font-size="40" font-weight="800" fill="#fff" letter-spacing="-1">소프트 푸드트럭 페스티벌</text>
+  <rect x="44" y="430" width="336" height="46" rx="23" fill="#fff" opacity=".16"/>
+  <text x="66" y="460" font-family="'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif" font-size="20" font-weight="700" fill="#fff">개장 기념 전 매장 10% 할인</text>
+</svg>`;
+const POSTER_LIVE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="bgLive" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6741d9"/><stop offset="1" stop-color="#9775fa"/>
+    </linearGradient>
+    <linearGradient id="beam1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="blurLive"><feGaussianBlur stdDeviation="30"/></filter>
+  </defs>
+  <rect width="600" height="600" fill="url(#bgLive)"/>
+  <polygon points="200,0 130,320 300,320" fill="url(#beam1)"/>
+  <polygon points="360,0 300,300 470,300" fill="url(#beam1)"/>
+  <circle cx="500" cy="140" r="130" fill="#fff" opacity=".08" filter="url(#blurLive)"/>
+  <circle cx="90" cy="470" r="80" fill="#fff" opacity=".08" filter="url(#blurLive)"/>
+  <g transform="translate(452,486)">
+    <rect x="30" y="30" width="8" height="60" fill="#2c1a63"/>
+    <circle cx="34" cy="20" r="22" fill="#2c1a63"/>
+    <circle cx="34" cy="20" r="13" fill="#9775fa"/>
+  </g>
+  <text x="46" y="402" font-family="'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif" font-size="40" font-weight="800" fill="#fff" letter-spacing="-1">야간 라이브 공연</text>
+  <rect x="44" y="430" width="300" height="46" rx="23" fill="#fff" opacity=".16"/>
+  <text x="66" y="460" font-family="'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif" font-size="19" font-weight="700" fill="#fff">매일 저녁 8PM, B구역 무대</text>
+</svg>`;
+
 /* 매장 그룹(홈) 메인 배너 — 브랜드가 등록한 배너 이미지·랜딩 주소 (최대 3장 · 4초 자동 롤링)
-   롤링 순환은 이 배열 길이를 기준으로 계산하므로, 장수를 늘리거나 줄여도 빈 화면이 생기지 않음 */
+   롤링 순환은 이 배열 길이를 기준으로 계산하므로, 장수를 늘리거나 줄여도 빈 화면이 생기지 않음
+   실제 서비스에서는 사장님/주최측이 업로드한 포스터형 이미지 그대로가 img 값이 됨(행사명·설명이 이미지 안에 포함) */
 const BANNERS = [
-  {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html'},
-  {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html'},
+  {img:svgDataUri(POSTER_FOOD), fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html'},
+  {img:svgDataUri(POSTER_LIVE), fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html'},
 ];
 
 /* 매장 단일 페이지 긴 배너(335×56) — 브랜드 공통 배너 → 매장 단독 배너 순 롤링 */
@@ -1448,13 +1498,6 @@ function waitSentenceFor(s){
   return S.brandWait==='time'
     ? (s.waitTime ? `지금 주문하면 <b>${s.waitTime}</b> 정도 기다려요` : '')
     : (s.waitCount ? `지금 앞에 <b>${s.waitCount}</b>이 기다리고 있어요` : '');
-}
-// 여러 매장이 섞인 화면(체크아웃)에서 나열할 때 쓰는 매장명 결합용 짧은 버전
-function waitRowFor(s){
-  if(S.brandWait==='off') return '';
-  return S.brandWait==='time'
-    ? (s.waitTime ? `<b>${s.waitTime}</b> 정도 기다려요` : '')
-    : (s.waitCount ? `앞에 <b>${s.waitCount}</b>이 기다리고 있어요` : '');
 }
 
 /* ══════════════ 라우팅 ══════════════ */
@@ -2312,17 +2355,14 @@ function scCheckout(){
       </div>
       ${post?`<div style="font-size:12px;color:var(--ink4);margin-top:8px">후불형은 결제 관련 약관 없이 개인정보 동의와 연령 확인만 받아요</div>`:''}
     </div>
-    <!-- 대기 정보 — 결제 직전 마지막으로 한 번 더 안내(매장 상세와 동일 로직) -->
-    ${(()=>{
-      const sids=[...new Set(S.cart.map(c=>c.store))];
-      const rows = sids.map((sid,i)=>({i, s:store(sid), row:waitRowFor(store(sid))})).filter(x=>x.row);
-      if(!rows.length) return '';
-      return rows.length>1
-        ? `<div class="waitline multiline">${rows.map(x=>`<div><span class="wl-ic">${IC.clock}</span><span class="store-no sm">${x.i+1}</span><b>${x.s.name}</b> ${x.row}</div>`).join('')}</div>`
-        : `<div class="waitline"><span class="wl-ic">${IC.clock}</span><span>${waitSentenceFor(rows[0].s)}</span></div>`;
-    })()}
   </div>
   <div class="cta">
+    <!-- 대기 정보 — 약관과 무관한 보조 안내라 약관 섹션과 분리해 버튼 바로 위에 배치(결제 직전 마지막 안내) · 매장 상세와 동일하게 문장 하나만 노출 -->
+    ${(()=>{
+      const sids=[...new Set(S.cart.map(c=>c.store))];
+      const first = sids.map(sid=>store(sid)).find(s=>waitSentenceFor(s));
+      return first ? `<div class="waitline"><span class="wl-ic">${IC.clock}</span><span>${waitSentenceFor(first)}</span></div>` : '';
+    })()}
     <button class="cta-btn" ${belowMin?'disabled':''} onclick="${belowMin?'':'tryPayGate()'}">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`}</button>
   </div>`;
 }
@@ -2425,8 +2465,14 @@ function onPayEmailLocal(el){ S.pEmailLocal=el.value; syncEmail(); refreshPayShe
 function onPayEmailCustomDomain(el){ S.pEmailCustomDomain=el.value; syncEmail(); refreshPaySheet(); const n=document.getElementById('emailCustomDomain'); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } }
 function onPayEmailDomainSelect(el){
   S.pEmailDomain=el.value; if(el.value!=='custom') S.pEmailCustomDomain='';
-  syncEmail(); refreshPaySheet();
-  if(el.value==='custom'){ setTimeout(()=>{const n=document.getElementById('emailCustomDomain'); if(n) n.focus();},50); }
+  syncEmail();
+  const custom = el.value==='custom';
+  // select 자신의 change 처리(피커 닫힘)가 끝난 다음 틱에 다시 그려야 함 — 같은 이벤트 안에서 DOM을 바꾸면
+  // 모바일 브라우저에서 select 피커가 닫히지 못하고 계속 다시 뜨는 현상이 생김
+  setTimeout(()=>{
+    refreshPaySheet();
+    if(custom){ const n=document.getElementById('emailCustomDomain'); if(n) n.focus(); }
+  }, 0);
 }
 function openPaySheet(){ document.getElementById('payInner').innerHTML=paySheetHTML(); document.getElementById('payModal').classList.add('on'); syncBgLock(); }
 function closePaySheet(){ const el=document.getElementById('payModal'); if(el){ el.classList.remove('on'); syncBgLock(); } }

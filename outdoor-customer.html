@@ -1109,9 +1109,14 @@
   .stc-chev.up{transform:rotate(180deg);}
   .stc.folded .stc-chev.lg{transform:rotate(-90deg);}
 
-  /* '지금 받아 가세요' — 회차별 보기의 말풍선과 같은 보라 계열(같은 뜻은 같은 색) */
-  .stc-cta{display:flex;align-items:center;gap:6px;margin:0 16px 13px;
-    background:var(--ready-50);color:var(--ready-d);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;}
+  /* '지금 받아 가세요' — 회차별 보기의 말풍선과 완전히 같은 컴포넌트(채움·타이포·반경·그림자 동일).
+     회차별에서는 꼬리가 스텝바의 '준비완료' 칸을 가리키고, 여기서는 헤더의 '준비완료' 배지를 가리킨다. */
+  .stc-ctawrap{display:flex;justify-content:flex-end;margin:9px 16px 14px;}
+  .stc-cta{position:relative;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+    background:var(--ready);color:#fff;font-size:12px;font-weight:800;padding:5px 11px;border-radius:9px;
+    box-shadow:0 4px 10px rgba(92,94,218,.35);}
+  .stc-cta::after{content:'';position:absolute;bottom:100%;right:20px;
+    border:5px solid transparent;border-bottom-color:var(--ready);}
 
   .stc-rows{border-top:1px solid var(--line2);padding:0 16px;}
   .stc-row + .stc-row{border-top:1px solid var(--line2);}
@@ -2808,7 +2813,7 @@ function storeCardHTML(sid, pays){
       <span class="stc-chev lg">${IC.chevron}</span>
     </button>
     ${fold?'':`
-      ${ready?`<div class="stc-cta">${IC.bell} 지금 받아 가세요</div>`:''}
+      ${ready?`<div class="stc-ctawrap"><span class="stc-cta">${IC.bell} 지금 받아 가세요</span></div>`:''}
       <div class="stc-rows">${rows}</div>`}
   </div>`;
 }

@@ -1553,7 +1553,7 @@ function simState(st){
   S.demoState=st; S.curStore='burger'; S.storeTab='menu'; go('store');
   if(st==='closed') toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');
   else if(st==='break') toast('지금은 브레이크 타임이에요.','잠시 후 다시 열어요. 메뉴는 둘러볼 수 있어요.');
-  else if(st==='paused') toast('지금은 잠시 준비 중이에요.','곧 다시 열어요. 메뉴는 둘러볼 수 있어요.');
+  else if(st==='paused') toast('지금은 준비 중이지만, 메뉴 둘러보기는 가능해요.');
 }
 function openMenu(sid,mid){ const m=store(sid).menus.find(x=>x.id===mid); S.curStore=sid; S.curMenu=m; S.tmpQty=1; S.tmpOpt=0; S.infoOpen=false; showMenuSheet(); if(m&&m.soldout) toast('현재 품절된 메뉴예요','메뉴 정보는 확인할 수 있지만 주문은 할 수 없어요'); }
 function showMenuSheet(){ renderMenuSheet(); document.getElementById('menuSheet').classList.add('on'); syncBgLock(); }
@@ -1692,7 +1692,7 @@ function scardHTML(s){
   const tap = !s.open
     ? `toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
     : paused
-      ? `toast('지금은 잠시 준비 중이에요.','곧 다시 열어요. 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
+      ? `toast('지금은 준비 중이지만, 메뉴 둘러보기는 가능해요.');openStore('${s.id}')`
       : `openStore('${s.id}')`;
   return `<button class="scard ${dimmed?'dimmed':''}" onclick="${tap}">
     <div class="s-thumb${paused?' paused':''}${(s.thumb&&String(s.thumb).trim())?'':' noimg'}" data-label="${label}" style="${(s.thumb&&String(s.thumb).trim())?`background-image:url('${s.thumb}');`:''}background-color:var(--bg)"></div>
@@ -1712,7 +1712,7 @@ function scardGridHTML(s){
   const tap = !s.open
     ? `toast('지금은 주문할 수 없어요.','영업이 끝났지만, 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
     : paused
-      ? `toast('지금은 잠시 준비 중이에요.','곧 다시 열어요. 메뉴는 둘러볼 수 있어요.');openStore('${s.id}')`
+      ? `toast('지금은 준비 중이지만, 메뉴 둘러보기는 가능해요.');openStore('${s.id}')`
       : `openStore('${s.id}')`;
   return `<button class="gcard ${dimmed?'dimmed':''}" onclick="${tap}">
     <div class="g-thumb${paused?' paused':''}${hasThumb?'':' noimg'}" data-label="${label}" style="${hasThumb?`background-image:url('${s.thumb}');`:''}background-color:var(--bg)"></div>

@@ -22,6 +22,9 @@
     --green:#1E8E5F; --red:#DD3B3B; --amber:#D9930F;
     --festA:#5C8CDA; --festB:#5CB9DA;
     --point:#F2503E; --point-50:#FFEDE9;   /* 포인트 컬러 — 할인가·강조 전용(블루의 보색) */
+    /* 준비완료(받으러 갈 차례) 전용 컬러 — 손님이 가장 먼저 알아채야 하는 단계라 다른 단계와 색을 분리한다.
+       회차별·매장별 두 보기가 같은 값을 쓰도록 토큰으로 고정 */
+    --ready:#5C5EDA; --ready-d:#4547B0; --ready-lt:#7A7CF0; --ready-50:#EFEFFE; --ready-line:#C7C8F5;
     --display:'Black Han Sans','Pretendard',sans-serif;
     --ui:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
     --shadow:0 2px 10px rgba(20,20,25,.05);
@@ -451,7 +454,7 @@
   .oh-grand-note{font-size:12px;color:var(--ink4);margin:0 16px 4px;text-align:right;}
   .st-badge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap;}
   .st-badge.sm{font-size:11px;padding:2px 8px;}
-  .st-cook{color:#e8590c;background:#fff4e6;} .st-done{color:var(--green);background:#e6fcf5;} .st-pick{color:var(--ink3);background:var(--bg);} .st-rej{color:var(--red);background:#fff0f0;}
+  .st-cook{color:#e8590c;background:#fff4e6;} .st-done{color:var(--ready-d);background:var(--ready-50);} .st-pick{color:var(--ink3);background:var(--bg);} .st-rej{color:var(--red);background:#fff0f0;}
   .oh-body{padding:4px 16px;}
   .oh-grp{padding:12px 0;border-bottom:1px dashed var(--line2);}
   .oh-grp:last-child{border-bottom:none;}
@@ -484,14 +487,14 @@
   .oh-stage-lbl{font-size:10.5px;font-weight:700;color:var(--ink4);white-space:nowrap;}
   .oh-stage-cell.on .oh-stage-n{color:var(--ink);}
   .oh-stage-cell.on .oh-stage-lbl{color:var(--ink2);}
-  .oh-stage-cell.ready .oh-stage-n,.oh-stage-cell.ready .oh-stage-lbl{color:#5C5EDA;}
+  .oh-stage-cell.ready .oh-stage-n,.oh-stage-cell.ready .oh-stage-lbl{color:var(--ready);}
   /* 단계 셀을 탭 가능한 필터로 — 건수가 있는 단계만 눌러 해당 주문만 모아 봄 */
   .oh-stage-cell.tap{cursor:pointer;border-radius:10px;padding-top:4px;padding-bottom:4px;transition:background .12s,transform .08s;}
   .oh-stage-cell.tap:active{transform:scale(.94);}
   .oh-stage-cell.sel{background:var(--blue-50);}
   .oh-stage-cell.sel .oh-stage-n,.oh-stage-cell.sel .oh-stage-lbl{color:var(--blue-d);}
   .oh-stage-cell.sel.ready{background:#ecedfa;}
-  .oh-stage-cell.sel.ready .oh-stage-n,.oh-stage-cell.sel.ready .oh-stage-lbl{color:#5C5EDA;}
+  .oh-stage-cell.sel.ready .oh-stage-n,.oh-stage-cell.sel.ready .oh-stage-lbl{color:var(--ready);}
   /* 주문취소 셀 — 취소 건이 있을 때만 수령완료 오른쪽에 붙는 요약(빨강) */
   .oh-stage-cell.cancel .oh-stage-n,.oh-stage-cell.cancel .oh-stage-lbl{color:var(--red);}
   .oh-stage-cell.sel.cancel{background:#fdeaea;}
@@ -499,7 +502,7 @@
   .oh-stage-hint{margin-top:11px;padding-top:9px;border-top:1px dashed var(--line);text-align:center;font-size:11.5px;font-weight:700;color:var(--ink4);line-height:1.4;}
   .oh-stage-hint .reset{color:var(--blue-d);text-decoration:underline;cursor:pointer;margin-left:6px;}
   /* 카드: 핵심(회차·시간·진행단계·금액)만 노출 · 나머지는 자세히 보기로 접힘 */
-  .oh-card.ready{border-color:#BFE9D3;box-shadow:0 3px 14px rgba(30,142,95,.13);}
+  .oh-card.ready{border-color:var(--ready-line);box-shadow:0 3px 14px rgba(92,94,218,.15);}
   .oh-meta{font-size:12.5px;color:var(--ink3);font-weight:600;}
   .oh-sum-lite{font-size:15px;font-weight:900;color:var(--ink);}
   .oh-ghost{background:none;border:none;color:var(--ink3);font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;padding:9px 4px;white-space:nowrap;}
@@ -520,15 +523,15 @@
   .oh-st-bar{display:flex;gap:5px;margin-top:9px;}
   .oh-st-seg{flex:1;height:7px;border-radius:4px;background:#e2e5ea;box-shadow:inset 0 1px 1px rgba(255,255,255,.6);}
   .oh-st-seg.b{background:linear-gradient(180deg,#7FA6E6,#4E7DD0);}
-  .oh-st-seg.g{background:linear-gradient(180deg,#7A7CF0,#5C5EDA);}
+  .oh-st-seg.g{background:linear-gradient(180deg,var(--ready-lt),var(--ready));}
   .oh-st-seg.cur{box-shadow:0 2px 5px rgba(40,90,160,.30), inset 0 1px 0 rgba(255,255,255,.5);}
   .oh-st-wrap{position:relative;}
   .oh-st-wrap.has-bubble{padding-top:32px;}
-  .oh-pickup-bubble{position:absolute;top:0;left:62.5%;transform:translateX(-50%);white-space:nowrap;background:#5C5EDA;color:#fff;font-size:12px;font-weight:800;padding:5px 11px;border-radius:9px;box-shadow:0 4px 10px rgba(92,94,218,.35);}
-  .oh-pickup-bubble::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#5C5EDA;}
+  .oh-pickup-bubble{position:absolute;top:0;left:62.5%;transform:translateX(-50%);white-space:nowrap;background:var(--ready);color:#fff;font-size:12px;font-weight:800;padding:5px 11px;border-radius:9px;box-shadow:0 4px 10px rgba(92,94,218,.35);}
+  .oh-pickup-bubble::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--ready);}
   .oh-st-labels{display:flex;margin-top:6px;}
   .oh-st-labels span{flex:1;text-align:center;font-size:11px;font-weight:600;color:var(--ink4);}
-  .oh-st-labels .on-g{color:#4547B0;font-weight:800;} .oh-st-labels .on-b{color:#185FA5;font-weight:800;}
+  .oh-st-labels .on-g{color:var(--ready-d);font-weight:800;} .oh-st-labels .on-b{color:#185FA5;font-weight:800;}
   /* 상세 펼치기 안에서 메뉴 목록은 별도 파티션으로 분리 */
   .oh-menupart{margin-top:10px;padding:11px 12px;background:var(--bg);border-radius:10px;}
   .oh-menupart-h{font-size:11px;font-weight:800;color:var(--ink3);margin-bottom:6px;}
@@ -747,7 +750,7 @@
   .callno .cl-num{font-size:62px;letter-spacing:3px;}
 
   /* ── 주문내역 상태 뱃지 ── */
-  .st-cook{color:var(--persimmon-d);background:#FFEAD9;} .st-done{color:var(--green);background:#E4F6EC;}
+  .st-cook{color:var(--persimmon-d);background:#FFEAD9;} .st-done{color:var(--ready-d);background:var(--ready-50);}
   .oh-pickup{background:#E4F6EC;border-color:#BFEBD5;color:#0E7A54;}
   .oh-hint{background:#FFF7E8;border-color:#F3DDA6;color:#7A4E12;}
 
@@ -804,7 +807,7 @@
   .s-badge.open{color:var(--green);background:#EAF6EF;} .s-badge.closed{color:var(--red);background:#FDECEC;}
   .s-tag{background:#F3F3F5;color:var(--ink2);} .s-tag.wait{color:var(--persimmon);background:var(--blue-50);}
   .m-left-r{color:var(--persimmon-d);background:var(--blue-50);}
-  .st-cook{color:var(--persimmon);background:var(--blue-50);} .st-done{color:var(--green);background:#EAF6EF;}
+  .st-cook{color:var(--persimmon);background:var(--blue-50);} .st-done{color:var(--ready-d);background:var(--ready-50);}
   .st-pick{color:var(--ink3);background:#F1F1F3;} .st-rej{color:var(--red);background:#FDECEC;}
   .oh-pickup{background:#EAF6EF;border-color:#D8EFE3;color:#157A52;}
   .oh-hint{background:#F5F5F7;border-color:var(--line);color:var(--ink2);}
@@ -1085,10 +1088,11 @@
   /* ── 주문 내역 '매장별로 모아보기' — 매장 하나 = 카드 하나 ──
      매장 헤더(썸네일·상태·합계)가 주인공이고, 그 매장의 주문은 카드 안에서 한 줄씩 압축해 나열한다.
      받을 준비가 끝난 매장은 카드 테두리를 초록으로 살려 목록에서 바로 눈에 띄게 한다. */
-  .stc{background:var(--card);border:1px solid var(--line);border-radius:15px;margin:0 14px 11px;overflow:hidden;}
-  .stc.ready{border-color:rgba(30,142,95,.42);box-shadow:0 0 0 2.5px rgba(30,142,95,.09);}
+  /* 카드 geometry(반경·여백·패딩)와 준비완료 강조는 회차 카드(.oh-card)와 동일하게 맞춰 두 보기의 톤을 통일 */
+  .stc{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:14px 14px 0;overflow:hidden;}
+  .stc.ready{border-color:var(--ready-line);box-shadow:0 3px 14px rgba(92,94,218,.15);}
 
-  .stc-hd{display:flex;align-items:center;gap:11px;width:100%;padding:13px 14px;
+  .stc-hd{display:flex;align-items:center;gap:11px;width:100%;padding:15px 16px;
     background:none;border:none;font-family:inherit;text-align:left;cursor:pointer;color:inherit;}
   .stc-th{flex-shrink:0;width:42px;height:42px;border-radius:11px;background:var(--line2);
     background-size:cover;background-position:center;
@@ -1097,18 +1101,19 @@
   .stc-hi{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
   .stc-nm{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.01em;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .stc-lo{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--ink3);}
+  .stc-lo{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--ink3);}
   .stc-rt{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
-  .stc-sum{font-size:14.5px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .stc-sum{font-size:15px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;}
   .stc-chev{display:inline-flex;flex-shrink:0;color:var(--ink4);font-size:15px;transition:transform .15s ease;}
   .stc-chev.lg{font-size:17px;}
   .stc-chev.up{transform:rotate(180deg);}
   .stc.folded .stc-chev.lg{transform:rotate(-90deg);}
 
-  .stc-cta{display:flex;align-items:center;gap:6px;margin:0 14px 12px;
-    background:#EAF6EF;color:var(--green);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;}
+  /* '지금 받아 가세요' — 회차별 보기의 말풍선과 같은 보라 계열(같은 뜻은 같은 색) */
+  .stc-cta{display:flex;align-items:center;gap:6px;margin:0 16px 13px;
+    background:var(--ready-50);color:var(--ready-d);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;}
 
-  .stc-rows{border-top:1px solid var(--line2);padding:0 14px;}
+  .stc-rows{border-top:1px solid var(--line2);padding:0 16px;}
   .stc-row + .stc-row{border-top:1px solid var(--line2);}
   .stc-line{display:flex;align-items:center;gap:9px;width:100%;padding:11px 0;
     background:none;border:none;font-family:inherit;text-align:left;cursor:pointer;color:inherit;}
@@ -2693,12 +2698,12 @@ const stepIdx = status => { const cur = status==='배달중'?'준비완료':stat
 // 시안 B — 세그먼트 바 + 4단계 라벨 (준비완료만 강조색, 나머지 단계는 전부 동일 색으로 통일)
 function stepBarHTML(status){
   const idx = stepIdx(status);
-  const green = status==='준비완료';
-  const fill = green ? 'g' : 'b';
+  const isReady = status==='준비완료';          // 준비완료만 전용 컬러(--ready)로 강조
+  const fill = isReady ? 'g' : 'b';
   const segs = HIST_STEPS.map((_,i)=>`<span class="oh-st-seg ${i===idx?(fill+' cur'):''}"></span>`).join('');
   const labels = HIST_STEPS.map((st,i)=>{
     const lbl = (st==='준비완료'&&isDelivery()) ? '배달중' : st;
-    return `<span class="${i===idx?(green?'on-g':'on-b'):''}">${lbl}</span>`;
+    return `<span class="${i===idx?(isReady?'on-g':'on-b'):''}">${lbl}</span>`;
   }).join('');
   const bubble = canPickup(status);
   return `<div class="oh-st-wrap ${bubble?'has-bubble':''}">

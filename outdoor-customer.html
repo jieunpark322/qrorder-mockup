@@ -208,6 +208,11 @@
   /* ── 메뉴 카드 ───────────────────────── */
   .catsec-h{padding:18px 18px 6px;font-size:16px;font-weight:800;}
   .mcard{display:flex;gap:13px;padding:14px 16px;background:#fff;cursor:pointer;border-bottom:1px solid var(--line2);width:100%;border:none;font-family:inherit;text-align:left;align-items:center;position:relative;}
+  /* 메뉴 탭에서는 목록 끝~하단 장바구니 바 사이에 회색이 끼지 않도록 스크롤 영역 자체를 메뉴판과 같은 흰 바탕으로 둠.
+     (커버·배너는 자체 배경을 가지므로 그대로 덮어 그려짐 · 매장 정보 탭은 섹션 구분을 위해 회색 유지) */
+  .scroll.menu-pane{background:#fff;}
+  .menu-tail{height:78px;}
+  .menu-empty{text-align:center;color:var(--ink3);padding:60px 20px;}
   .mcard:active{background:var(--bg);}
   .mcard.soldout{opacity:1;}   /* 카드 전체 dimming 없음 — 품절은 이미지 오버레이로만 표시 */
   .m-thumb{width:76px;height:76px;border-radius:12px;flex-shrink:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;position:relative;}
@@ -1923,7 +1928,7 @@ function scStore(){
     ${backBtn}
     <div class="ht">${s.name}</div>
   </div>
-  <div class="scroll">
+  <div class="scroll ${S.storeTab==='info'?'':'menu-pane'}">
     ${hasCover ? `
     <div class="cover has-info" style="background-image:url('${s.cover}');background-size:cover;background-position:center;background-color:#2c1250">
       <span class="cover-status ${st.cls}"><span class="sdot"></span>${st.label}</span>
@@ -1949,9 +1954,10 @@ function scStore(){
       ${(S.payScope==='separate' && S.cart.length && S.cart[0].store!==S.curStore) ? `<div class="cart-scope-note warn">${IC.warn} 이 매장 메뉴를 담으면 <b>[${store(S.cart[0].store).name}]</b>에 담은 상품이 사라져요.</div>` : ''}
       ${cats.length>1?`<div class="cattabs">${cats.map(c=>`<button class="cchip ${c===activeCat?'on':''}" onclick="pickChip('${c}')">${c}</button>`).join('')}</div>`:''}
       ${s.menus.length===0
-        ? `<div style="text-align:center;color:var(--ink3);padding:60px 20px">등록된 메뉴가 없어요</div>`
+        ? `<div class="menu-empty">등록된 메뉴가 없어요</div>`
         : s.menus.filter(m=>m.cat===activeCat).map(m=>mcardHTML(s.id,m,blocked)).join('')}
-      <div style="height:78px"></div>
+      <!-- 목록 끝~하단 장바구니 바 사이를 메뉴판과 같은 흰 바탕으로 이어, 회색 띠가 끼어 바가 잘린 조각처럼 보이지 않게 함 -->
+      <div class="menu-tail"></div>
     `}
   </div>
   ${histFabFloat()}

@@ -2100,6 +2100,12 @@ function tryCheckout(){
     }
     return;
   }
+  if(S.service!=='delivery' && S.pickup==='reserve' && !S.pickupTime){
+    toast('예약 시간을 선택해 주세요');
+    const card=document.querySelectorAll('.pk-opt')[1];
+    if(card){ card.classList.add('agree-shake'); card.scrollIntoView({block:'center',behavior:'smooth'}); setTimeout(()=>card.classList.remove('agree-shake'),500); }
+    return;
+  }
   S.agree={};   // 결제 진입 시 약관 동의 초기화(필수 동의 전 결제 버튼 비활성화)
   go('checkout');
 }

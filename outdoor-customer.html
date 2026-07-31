@@ -420,8 +420,17 @@
   .oh-viewtog .chk{width:18px;height:18px;border-radius:5px;}
   .oh-card{background:#fff;border:1px solid var(--line);border-radius:14px;margin:14px 14px 0;padding:16px;}
   .oh-card.cancel{opacity:.92;}
-  .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+  /* 회차 카드 헤더 = 접기 토글 버튼 (버튼 기본 스타일 초기화 후 기존 레이아웃 유지) */
+  .oh-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;
+    width:100%;background:none;border:none;padding:0;font-family:inherit;text-align:left;cursor:pointer;color:inherit;}
   .oh-top-l{display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .oh-fold-chev{display:inline-flex;flex-shrink:0;margin-left:auto;color:var(--ink4);font-size:17px;
+    transition:transform .15s ease;}
+  .oh-card.folded .oh-fold-chev{transform:rotate(-90deg);}
+  .oh-card.folded .oh-top{margin-bottom:0;}
+  .oh-card.folded .oh-foot{margin-top:10px;padding-top:10px;}
+  .ghost-chev{display:inline-flex;vertical-align:-.15em;margin-left:2px;transition:transform .15s ease;}
+  .ghost-chev.up{transform:rotate(180deg);}
   .oh-ord-row{display:flex;align-items:center;gap:9px;}
   .oh-ord{font-size:15px;font-weight:800;color:var(--blue-d);background:var(--blue-50);padding:4px 11px;border-radius:8px;}
   .oh-at{font-size:14px;font-weight:800;color:var(--ink2);}   /* 주문 시각(메인 정보) */
@@ -1076,7 +1085,13 @@
   /* ── 주문 내역 '매장별로 모아보기' — 매장명을 상위 제목으로, 회차는 카드 안 보조 정보로 ── */
   .oh-store-sec{margin-top:20px;}
   .oh-store-sec:first-child{margin-top:6px;}
-  .oh-store-sec-h{display:flex;align-items:center;gap:8px;margin:0 14px 2px;padding:0 2px 9px;border-bottom:2px solid var(--ink);}
+  /* 매장 섹션 헤더 = 접기 토글 버튼 */
+  .oh-store-sec-h{display:flex;align-items:center;gap:8px;margin:0 14px 2px;padding:0 2px 9px;border-bottom:2px solid var(--ink);
+    width:calc(100% - 28px);background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;text-align:left;cursor:pointer;color:inherit;}
+  .ossh-cnt{flex-shrink:0;font-size:11.5px;font-weight:800;color:var(--ink3);background:var(--line2);border-radius:6px;padding:2px 7px;}
+  .ossh-chev{display:inline-flex;flex-shrink:0;color:var(--ink3);font-size:17px;transition:transform .15s ease;}
+  .oh-store-sec.folded .ossh-chev{transform:rotate(-90deg);}
+  .oh-store-sec.folded .oh-store-sec-h{border-bottom-color:var(--line);}
   .ossh-name{font-size:17px;font-weight:900;color:var(--ink);letter-spacing:-.02em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .ossh-loc{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--ink3);flex-shrink:0;}
   .ossh-sum{margin-left:auto;font-size:15px;font-weight:900;color:var(--ink);flex-shrink:0;}
@@ -1506,6 +1521,7 @@ const IC = {
   seat:     _sv('<path d="M6 4.5h12v7H6z"/><path d="M4 11.5h16v5H4z"/><path d="M6.5 16.5V20M17.5 16.5V20"/>'),
   refresh:  _sv('<path d="M20.5 6v5.5H15"/><path d="M3.5 18v-5.5H9"/><path d="M4.8 9.5a7.5 7.5 0 0 1 13-3.5l2.7 2.5"/><path d="M19.2 14.5a7.5 7.5 0 0 1-13 3.5l-2.7-2.5"/>'),
   arrowLeft:_sv('<path d="M20 12H4"/><path d="m10.5 5.5-6.5 6.5 6.5 6.5"/>', 2.3),
+  chevron:  _sv('<polyline points="6 9 12 15 18 9"/>', 2.4),
   home:     _sv('<path d="m3.5 10.5 8.5-7 8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-6.5h5V20"/>'),
 };
 // 하위 호환 — 기존 코드에서 쓰던 이름 유지
@@ -2631,6 +2647,12 @@ const grpByStore = items => { const g={}; items.forEach(it=>{(g[it.store]=g[it.s
 const ohLine = it => `<div class="oh-line"><span class="ohl-n">${it.name}${it.opt?` (${it.opt})`:''}</span><span class="ohl-q">×${it.qty}</span><span class="ohl-p">${won(it.price*it.qty)}</span></div>`;
 const contactHTML = c => `<span class="oh-ct-lbl">알림 연락처</span><span class="oh-ct">${(c||'').includes('@')?IC.mail:IC.phone} ${c}</span>`;
 function toggleHistDetail(id){ S.histOpen=S.histOpen||{}; S.histOpen[id]=!S.histOpen[id]; render(); }
+/* 접기 상태 — 기본은 모두 펼침(값 없음=펼침), true면 접힘
+   회차 카드 키는 '결제id__매장id'로 구성해, 매장별 보기에서 같은 회차가 여러 매장에 나와도 서로 독립적으로 접힘 */
+function toggleRoundFold(key){ S.histFold=S.histFold||{}; S.histFold[key]=!S.histFold[key]; render(); }
+function toggleStoreFold(sid){ S.histStoreFold=S.histStoreFold||{}; S.histStoreFold[sid]=!S.histStoreFold[sid]; render(); }
+const folded      = k   => !!(S.histFold && S.histFold[k]);
+const storeFolded = sid => !!(S.histStoreFold && S.histStoreFold[sid]);
 // 진행 단계 — 정책 「주문 상태 스텝(공통 정의)」의 4단계 · 배달 주문은 3번째가 배달중 · 주문취소는 스텝에서 분기(별개 표기)
 const HIST_STEPS = ['주문요청','준비중','준비완료','수령완료'];
 const isDelivery = () => S.service==='delivery';
@@ -2659,18 +2681,21 @@ function stepBarHTML(status){
 // 주문 내역 카드 1장 — 회차 수·매장 수와 무관하게 항상 같은 구조
 // (회차/시각 → 매장별 진행 스텝퍼 → 금액·버튼) · 연락처·주문번호·결제수단·메뉴는 '자세히 보기'로 접어둠
 // showNames: 매장명을 카드 안에 표시할지 (매장별로 모아보기에서는 섹션 헤더에 이미 있어 생략)
-function roundCardHTML(p, showNames){
-  const canceled=p.status==='주문취소', o=open(p.id);
+function roundCardHTML(p, showNames, key){
+  const k = key || p.id;                       // 매장별 보기에서는 '결제id__매장id'가 넘어와 카드끼리 상태가 섞이지 않음
+  const canceled=p.status==='주문취소', o=open(k), fold=folded(k);
   const ready = p.stores.some(s=>canPickup(s.status));
   const total = canceled?sumItems(p.items):payTotal(p);
-  return `<div class="oh-card ${canceled?'cancel':''} ${ready?'ready':''}">
-    <div class="oh-top">
+  return `<div class="oh-card ${canceled?'cancel':''} ${ready?'ready':''} ${fold?'folded':''}">
+    <button class="oh-top" onclick="toggleRoundFold('${k}')" aria-expanded="${!fold}">
       <div class="oh-top-l">
         <!-- 매장별로 모아보기에서는 매장명이 상위 제목이므로 회차는 보조 정보로 낮춰 표기 -->
         <div class="oh-ord-row"><span class="oh-ord ${showNames?'':'sub'}">${p.round}차 주문</span><span class="oh-at">${p.paidAt.slice(11,16)} 주문</span></div>
       </div>
       ${canceled?`<span class="st-badge st-rej">주문취소</span>`:''}
-    </div>
+      <span class="oh-fold-chev">${IC.chevron}</span>
+    </button>
+    ${fold ? '' : `
     ${canceled
       ? `<div class="oh-cancelnote" style="margin:0 0 4px"><div class="cn-main">${IC.undo} ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`
       : storeRowsHTML(p.stores, showNames)}
@@ -2682,11 +2707,11 @@ function roundCardHTML(p, showNames){
         <div class="oh-menupart-h">${p.stores.length>1?`<span class="store-no sm">${i+1}</span>`:''}${store(s.sid).name}</div>
         ${s.items.map(it=>`<div class="oh-sub-row"><span>${it.name}${it.opt?` (${it.opt})`:''} ×${it.qty}</span><span class="v">${won(it.price*it.qty)}</span></div>`).join('')}
       </div>`).join('')}
-    </div>`:''}
+    </div>`:''}`}
     <div class="oh-foot">
       <span class="oh-sum-lite">${canceled?'취소 ':''}${won(total)}</span>
       <div class="oh-foot-btns">
-        <button class="oh-ghost" onclick="toggleHistDetail('${p.id}')">${o?'접어서 보기 ▲':'자세히 보기 ▼'}</button>
+        ${fold?'':`<button class="oh-ghost" onclick="toggleHistDetail('${k}')">자세히 보기<span class="ghost-chev ${o?'up':''}">${IC.chevron}</span></button>`}
         <button class="oh-receipt sm" onclick="openReceipt('${p.id}')">${IC.receipt} 영수증</button>
       </div>
     </div>
@@ -2767,13 +2792,16 @@ function scHistory(){
     body = Object.entries(byStore).map(([sid,pays])=>{
       const st = store(sid);
       const stTotal = pays.reduce((a,p)=>a+payTotal(p),0);
-      return `<div class="oh-store-sec">
-        <div class="oh-store-sec-h">
+      const sf = storeFolded(sid);
+      return `<div class="oh-store-sec ${sf?'folded':''}">
+        <button class="oh-store-sec-h" onclick="toggleStoreFold('${sid}')" aria-expanded="${!sf}">
           <span class="ossh-name">${st.name}</span>
           ${st.loc?`<span class="ossh-loc">${PIN}${st.loc}</span>`:''}
+          ${sf?`<span class="ossh-cnt">${pays.length}건</span>`:''}
           <span class="ossh-sum">${won(stTotal)}</span>
-        </div>
-        ${pays.map(p=>roundCardHTML(p,false)).join('')}
+          <span class="ossh-chev">${IC.chevron}</span>
+        </button>
+        ${sf?'':pays.map(p=>roundCardHTML(p,false,`${p.id}__${sid}`)).join('')}
       </div>`;
     }).join('');
   }

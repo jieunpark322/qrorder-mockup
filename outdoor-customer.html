@@ -2422,11 +2422,17 @@ function scCheckout(){
       const reuse = S.cart.some(c=>{ const mm=store(c.store).menus.find(x=>x.id===c.menu); return mm && mm.reuse; });
       return reuse ? `<div class="waitline reuse-line"><span class="wl-ic">${IC.recycle}</span><span>다회용기는 사용 후 반납해 주세요.</span></div>` : '';
     })()}
-    <!-- 대기 정보 — 약관과 무관한 보조 안내라 약관 섹션과 분리해 버튼 바로 위에 배치(결제 직전 마지막 안내) · 매장 상세와 동일하게 문장 하나만 노출 -->
+    <!-- 대기 정보 — 약관과 무관한 보조 안내라 약관 섹션과 분리해 버튼 바로 위에 배치(결제 직전 마지막 안내)
+         여러 매장을 담았을 때 한 매장 값을 대표로 보여주면 그 수치가 주문 전체를 뜻하는 것처럼 오해되므로,
+         구체적인 수치 대신 '매장마다 다르다'는 사실만 안내한다 -->
     ${(()=>{
       const sids=[...new Set(S.cart.map(c=>c.store))];
-      const first = sids.map(sid=>store(sid)).find(s=>waitSentenceFor(s));
-      return first ? `<div class="waitline"><span class="wl-ic">${IC.clock}</span><span>${waitSentenceFor(first)}</span></div>` : '';
+      const withWait = sids.map(sid=>store(sid)).filter(s=>waitSentenceFor(s));
+      if(!withWait.length) return '';
+      const txt = sids.length>1
+        ? '매장마다 대기 시간이 달라 준비가 끝난 매장부터 알려드려요.'
+        : waitSentenceFor(withWait[0]);
+      return `<div class="waitline"><span class="wl-ic">${IC.clock}</span><span>${txt}</span></div>`;
     })()}
     <button class="cta-btn" ${belowMin?'disabled':''} onclick="${belowMin?'':'tryPayGate()'}">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`}</button>
   </div>`;

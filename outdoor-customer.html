@@ -55,6 +55,8 @@
   .hdr{position:sticky;top:0;z-index:30;background:#fff;display:flex;align-items:center;gap:10px;padding:14px 14px;border-bottom:1px solid var(--line);}
   .hdr .bk{border:none;background:none;font-size:22px;cursor:pointer;color:var(--ink);width:30px;padding:0;font-family:inherit;}
   .hdr .ht{font-size:17px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .oh-sync{font-size:11.5px;color:var(--ink4);white-space:nowrap;}
+  .oh-refresh{border:none;background:none;padding:6px;margin:-6px -4px -6px 0;font-size:18px;color:var(--ink3);cursor:pointer;display:flex;}
   /* 시스템 자동 번역: 사용자가 고르는 게 아니라 접속 언어로 자동 적용됨을 알리는 수동 표시 */
   .autotrans{font-size:11.5px;font-weight:700;color:var(--ink3);background:var(--bg);border-radius:20px;padding:5px 11px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
   .autotrans .adot{width:6px;height:6px;border-radius:50%;background:var(--green);}
@@ -72,12 +74,10 @@
 
   /* ── 메인 배너 (그룹) ───────────────────────── */
   .mbanner{position:relative;overflow:hidden;background:#e9ecef;}
+  .mbanner::after{content:'';position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.35));pointer-events:none;}
   .mbanner .slides{display:flex;transition:transform .5s ease;}
   /* 배너: 세로 1 : 가로 1 정사각 비율 (실제 스펙은 등록 이미지 비율에 따라 세로 높이 자동 조정) */
   .mb-slide{min-width:100%;aspect-ratio:1/1;background-size:cover;background-position:center;background-color:#2c1250;display:flex;align-items:flex-end;cursor:pointer;}
-  .mb-txt{padding:15px 18px;color:#fff;}
-  .mb-t{font-size:20px;font-weight:900;letter-spacing:-.02em;text-shadow:0 1px 5px rgba(0,0,0,.55);}
-  .mb-s{font-size:13.5px;font-weight:700;opacity:.96;margin-top:3px;text-shadow:0 1px 4px rgba(0,0,0,.55);}
   .mb-dots{position:absolute;bottom:14px;right:14px;display:flex;gap:5px;}
   .mb-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);cursor:pointer;}
   .mb-dot.on{width:16px;border-radius:3px;background:#fff;}
@@ -186,6 +186,7 @@
   .waitline{margin:11px 18px 0;background:var(--bg);border-radius:11px;padding:11px 14px;
     font-size:13.5px;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:7px;}
   .waitline b{color:var(--ink);font-weight:800;}
+  .waitline.multiline > div + div{margin-top:6px;}
   .sbanner{margin:14px 18px 0;border-radius:12px;height:58px;background:linear-gradient(100deg,#6741d9,#9775fa);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;cursor:pointer;}
 
   /* ── 매장 탭 ───────────────────────── */
@@ -627,7 +628,7 @@
   .device{box-shadow:var(--shadow-lg);}
 
   /* ── 디스플레이 타이포 (포스터/메뉴판 감성) ── */
-  .sp-title,.sp-welcome,.mb-t,.done-t,.fm-t,.sect-h,.catsec-h,.d-name,
+  .sp-title,.sp-welcome,.done-t,.fm-t,.sect-h,.catsec-h,.d-name,
   .sheet-t,.callno .cl-num,.d-price,.m-now,.oh-tot,.opt-h{font-family:var(--display);font-weight:400;letter-spacing:.005em;}
   /* 매장명·헤더는 가독성 위해 Pretendard 강조체 (디스플레이 폰트 미적용) */
   .hdr .ht{font-family:var(--ui);font-weight:800;font-size:18px;letter-spacing:-.02em;}
@@ -635,7 +636,7 @@
   .s-name{font-family:var(--ui);font-weight:800;letter-spacing:-.02em;}
   .sect-h{font-size:18px;} .catsec-h{font-size:20px;}
   .sp-title{font-size:22px;opacity:.95;} .sp-welcome{font-size:30px;line-height:1.15;margin-top:6px;}
-  .mb-t{font-size:26px;} .d-name{font-size:25px;} .done-t{font-size:27px;} .fm-t{font-size:26px;line-height:1.25;}
+  .d-name{font-size:25px;} .done-t{font-size:27px;} .fm-t{font-size:26px;line-height:1.25;}
   .m-now{font-size:18px;color:var(--persimmon-d);} .d-price{font-size:26px;color:var(--persimmon-d);}
   .catsec-h{color:var(--ink);position:relative;padding-left:30px;}
   .catsec-h::before{content:'';position:absolute;left:18px;top:50%;transform:translateY(-45%);width:6px;height:18px;border-radius:3px;background:linear-gradient(var(--persimmon),var(--mustard));}
@@ -654,7 +655,6 @@
 
   /* ── 헤더 / 배너 ── */
   .hdr{background:var(--card);border-bottom:1px solid var(--line);}
-  .mb-t{text-shadow:0 2px 8px rgba(0,0,0,.6);}
 
   /* ── 공지: 크래프트 게시판 + '공지' 도장 스탬프 + 축제 테이프 엣지 ── */
   .notice{position:relative;display:block;margin:14px;padding:14px 16px 14px 20px;
@@ -741,7 +741,7 @@
   .catsec-h{padding:18px 18px 8px;color:var(--ink);font-size:17px;} .catsec-h::before{content:none;}
   .sect-h{font-size:16px;} .d-name{font-size:21px;} .done-t{font-size:22px;} .fm-t{font-size:21px;}
   .m-now{font-size:16px;color:var(--ink);} .d-price{font-size:22px;color:var(--ink);}
-  .sp-title{opacity:.9;} .mb-t{font-size:25px;} .callno .cl-num{font-size:58px;}
+  .sp-title{opacity:.9;} .callno .cl-num{font-size:58px;}
   .oh-rnd-h{color:var(--ink2);}
 
   /* 데모바: 뉴트럴 차콜 */
@@ -1315,8 +1315,8 @@ const NOTICE = {
 /* 매장 그룹(홈) 메인 배너 — 브랜드가 등록한 배너 이미지·랜딩 주소 (최대 3장 · 4초 자동 롤링)
    롤링 순환은 이 배열 길이를 기준으로 계산하므로, 장수를 늘리거나 줄여도 빈 화면이 생기지 않음 */
 const BANNERS = [
-  {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'소프트 푸드트럭 페스티벌', s:'개장 기념 전 매장 10% 할인'},
-  {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html', t:'야간 라이브 공연', s:'매일 저녁 8PM, B구역 무대'},
+  {img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#e8590c,#ff922b)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html'},
+  {img:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=70', fb:'linear-gradient(120deg,#6741d9,#9775fa)', url:'https://jieunpark322.github.io/qrorder-mockup/outdoor-overview.html'},
 ];
 
 /* 매장 단일 페이지 긴 배너(335×56) — 브랜드 공통 배너 → 매장 단독 배너 순 롤링 */
@@ -1437,10 +1437,25 @@ const IC = {
   info:     _sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.9v.2"/>'),
   passport: _sv('<rect x="5" y="2.5" width="14" height="19" rx="2"/><circle cx="12" cy="10" r="2.6"/><path d="M8.5 17.5h7"/>'),
   seat:     _sv('<path d="M6 4.5h12v7H6z"/><path d="M4 11.5h16v5H4z"/><path d="M6.5 16.5V20M17.5 16.5V20"/>'),
+  refresh:  _sv('<path d="M20.5 6v5.5H15"/><path d="M3.5 18v-5.5H9"/><path d="M4.8 9.5a7.5 7.5 0 0 1 13-3.5l2.7 2.5"/><path d="M19.2 14.5a7.5 7.5 0 0 1-13 3.5l-2.7-2.5"/>'),
 };
 // 하위 호환 — 기존 코드에서 쓰던 이름 유지
 const PIN = IC.pin;
 const store = id => STORES.find(s=>s.id===id);
+// 대기 정보 문장 — 매장 상세와 결제 직전 화면에서 동일 로직 재사용(off·값 없음이면 미표시)
+function waitSentenceFor(s){
+  if(S.brandWait==='off') return '';
+  return S.brandWait==='time'
+    ? (s.waitTime ? `지금 주문하면 <b>${s.waitTime}</b> 정도 기다려요` : '')
+    : (s.waitCount ? `지금 앞에 <b>${s.waitCount}</b>이 기다리고 있어요` : '');
+}
+// 여러 매장이 섞인 화면(체크아웃)에서 나열할 때 쓰는 매장명 결합용 짧은 버전
+function waitRowFor(s){
+  if(S.brandWait==='off') return '';
+  return S.brandWait==='time'
+    ? (s.waitTime ? `<b>${s.waitTime}</b> 정도 기다려요` : '')
+    : (s.waitCount ? `앞에 <b>${s.waitCount}</b>이 기다리고 있어요` : '');
+}
 
 /* ══════════════ 라우팅 ══════════════ */
 function setMode(m){
@@ -1550,9 +1565,9 @@ function scHome(){
   const cats2 = ['전체','A구역','B구역','C구역','D구역'];   // 상세필터 옵션 — 운영자 설정값(구역/브랜드/가격대 등 자유)
   return `
   <div class="scroll">
-    <!-- 메인 배너 (화면 상단 밀착 · 최대 3장 자동 롤링 · 탭 시 URL 랜딩) -->
+    <!-- 메인 배너: 사장님/주최측이 업로드한 이미지만 노출되는 영역(별도 텍스트 입력 없음) · 최대 3장 자동 롤링 · 탭 시 URL 랜딩 -->
     <div class="mbanner">
-      <div class="slides" id="banSlides">${banners.map(b=>`<div class="mb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.66)),url('${b.img}'),${b.fb};" onclick="window.open('${b.url}','_blank','noopener')"><div class="mb-txt"><div class="mb-t">${b.t}</div><div class="mb-s">${b.s}</div></div></div>`).join('')}</div>
+      <div class="slides" id="banSlides">${banners.map(b=>`<div class="mb-slide" style="background-image:url('${b.img}'),${b.fb};" onclick="window.open('${b.url}','_blank','noopener')" role="img" aria-label="배너 이미지"></div>`).join('')}</div>
       <div class="mb-dots" id="banDots">${banners.map((_,i)=>`<div class="mb-dot ${i===0?'on':''}" onclick="event.stopPropagation();goBanner(${i})"></div>`).join('')}</div>
     </div>
     <!-- 공지문 (링크: 하이퍼링크 or URL 직접입력 → 클릭 시 URL 랜딩) -->
@@ -1775,17 +1790,13 @@ function scStore(){
     : stPaused ? {cls:'break', label:'준비중 (영업 일시중지)'}
     : {cls:'open', label:'영업중'};
   // 대기 정보는 칩이 아니라 친절한 문장으로 안내 (영업 불가·off·값 없음이면 미표시)
-  const waitSentence = (!blocked && S.brandWait!=='off')
-    ? (S.brandWait==='time'
-        ? (s.waitTime ? `지금 주문하면 <b>${s.waitTime}</b> 정도 기다려요` : '')
-        : (s.waitCount ? `지금 앞에 <b>${s.waitCount}</b>이 기다리고 있어요` : ''))
-    : '';
+  const waitSentence = blocked ? '' : waitSentenceFor(s);
   // 매장 배너(335×56)는 위치 옵션 없이 커버 이미지 아래에 고정 노출
   // 매장 배너 문구: 매장 단독 혜택 배너는 매장명이 들어가므로 렌더 시점에 생성
   const sbTxt = i => SBANNERS[i].txt || `첫 주문 시 사이드 500원 할인, ${s.name} 단독 혜택`;
   const bannerHTML = `
     <!-- 매장 배너 (브랜드 공통 배너 → 매장 배너 순 롤링 · 4초 자동 + 점 탭·스와이프 수동) -->
-    <div class="sbanner-roll" onclick="toast('배너를 누르면 지정한 주소로 이동해요')">
+    <div class="sbanner-roll">
       <div class="sb-slides" id="sbSlides">
         ${SBANNERS.map((b,i)=>`<div class="sb-slide" style="background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.62)),url('${b.img}')">
           <span class="sb-tag">${b.tag}</span>
@@ -2301,6 +2312,15 @@ function scCheckout(){
       </div>
       ${post?`<div style="font-size:12px;color:var(--ink4);margin-top:8px">후불형은 결제 관련 약관 없이 개인정보 동의와 연령 확인만 받아요</div>`:''}
     </div>
+    <!-- 대기 정보 — 결제 직전 마지막으로 한 번 더 안내(매장 상세와 동일 로직) -->
+    ${(()=>{
+      const sids=[...new Set(S.cart.map(c=>c.store))];
+      const rows = sids.map((sid,i)=>({i, s:store(sid), row:waitRowFor(store(sid))})).filter(x=>x.row);
+      if(!rows.length) return '';
+      return rows.length>1
+        ? `<div class="waitline multiline">${rows.map(x=>`<div><span class="wl-ic">${IC.clock}</span><span class="store-no sm">${x.i+1}</span><b>${x.s.name}</b> ${x.row}</div>`).join('')}</div>`
+        : `<div class="waitline"><span class="wl-ic">${IC.clock}</span><span>${waitSentenceFor(rows[0].s)}</span></div>`;
+    })()}
   </div>
   <div class="cta">
     <button class="cta-btn" ${belowMin?'disabled':''} onclick="${belowMin?'':'tryPayGate()'}">${belowMin?(mi.basis==='group'?`최소 ${won(mi.min)}부터 ${post?'주문':'결제'} 가능`:'매장별 최소 금액을 채워 주세요') : `${post?'주문하기':'결제하기'} <span class="amt">${won(final)}</span>`}</button>
@@ -2396,7 +2416,8 @@ function onPayPhone(el,which){
   const n=document.getElementById(id); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); }
 }
 // 이메일 대표 도메인 선택(또는 직접입력) — 아이디+도메인을 조합해 최종 pEmail을 만듦
-const EMAIL_DOMAINS = ['naver.com','gmail.com','daum.net','hanmail.net','nate.com','kakao.com'];
+// 외국인 이용객 비중이 높은 행사 특성상 실사용률 기준 gmail·outlook·icloud·yahoo·hotmail 순으로 상위 노출 (직접입력은 select 마크업에서 별도 처리)
+const EMAIL_DOMAINS = ['gmail.com','outlook.com','icloud.com','yahoo.com','hotmail.com'];
 const I18N = { ko:{directInput:'직접입력'}, en:{directInput:'Enter manually'}, ja:{directInput:'直接入力'}, zh:{directInput:'手动输入'} };
 const L = key => { const lang=(navigator.language||'ko').slice(0,2); return (I18N[lang]||I18N.ko)[key] ?? I18N.ko[key]; };
 function syncEmail(){ const domain = S.pEmailDomain==='custom' ? (S.pEmailCustomDomain||'') : (S.pEmailDomain||''); S.pEmail = (S.pEmailLocal && domain) ? `${S.pEmailLocal}@${domain}` : ''; }
@@ -2484,6 +2505,22 @@ function scDone(){
 }
 
 /* ── 주문 데이터 (결제건=회차=전자영수증 1건) ── */
+// 주문 내역은 진행 상태가 실시간으로 바뀌는 화면 → 페이지를 열어둔 채로 있어도 최신 상태를 확인할 수 있도록 자동 갱신 + 수동 새로고침 제공
+function fmtAgo(ts){
+  if(!ts) return '';
+  const s = Math.max(0, Math.round((Date.now()-ts)/1000));
+  if(s<10) return '방금 확인';
+  if(s<60) return `${s}초 전 확인`;
+  return `${Math.round(s/60)}분 전 확인`;
+}
+function refreshHistory(manual){
+  S.histLastSync = Date.now();
+  if(manual){ toast('최신 상태로 확인했어요'); }
+  render();
+}
+// 주문 내역 화면에 머무르는 동안 30초마다 조용히 자동 갱신(수동 새로고침은 확인 토스트 표시)
+setInterval(()=>{ if(S.screen==='history') refreshHistory(false); }, 30000);
+
 // 상태 라벨은 QR메뉴판 정책 "주문 상태 스텝(공통 정의)" SSOT를 그대로 사용(화면마다 다른 명칭 금지) · 진행 단계는 카드 내 진행 막대(아래 stepBarHTML)로 표시
 // 통합결제 회차는 한 번의 결제에 여러 매장이 섞이고, 매장마다 진행 단계가 서로 다를 수 있음
 // (정책 › 주문 상태 스텝: "통합 결제 건은 매장별로 준비중·준비완료·수령완료 중 서로 다른 상태가 동시에 보일 수 있음")
@@ -2638,6 +2675,7 @@ function stageSummaryHTML(P){
 
 /* ── 내 주문 내역 (핵심 정보만 메인 · 보조 정보는 접기 · 회차별/매장별 동일 카드) ── */
 function scHistory(){
+  if(!S.histLastSync) S.histLastSync = Date.now();   // 화면 진입 시 최초 확인 시각 기록
   const unified = S.payScope==='unified';
   // 기본은 회차별 · 통합결제일 때만 '매장별로 모아보기'를 켜서 같은 목록을 매장 기준으로 다시 묶을 수 있음
   // (개별결제는 한 회차 = 한 매장이라 회차별 목록에 이미 매장이 그대로 드러나므로 전환 옵션 자체가 없음)
@@ -2670,7 +2708,10 @@ function scHistory(){
   }
   const grand = Pfull.reduce((a,p)=>a+payTotal(p),0);   // 누적 전체 합계는 필터와 무관하게 전체 기준
   return `
-  <div class="hdr"><button class="bk" onclick="go(S.mode==='group'?'home':'store')">‹</button><div class="ht">주문 내역</div></div>
+  <div class="hdr"><button class="bk" onclick="go(S.mode==='group'?'home':'store')">‹</button><div class="ht">주문 내역</div>
+    <span class="oh-sync">${fmtAgo(S.histLastSync)}</span>
+    <button class="oh-refresh" onclick="refreshHistory(true)" aria-label="새로고침">${IC.refresh}</button>
+  </div>
   <div class="scroll">
     ${stageSummaryHTML(Pfull)}
     ${unified

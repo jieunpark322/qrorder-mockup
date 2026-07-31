@@ -1124,7 +1124,10 @@
   .stg-nm{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.02em;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .stg-lo{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--ink3);}
-  .stg-sum{flex-shrink:0;font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+  /* 상태 배지와 금액은 글자 수가 달라도 세로로 줄이 맞도록 각각 고정 폭 열로 둔다
+     (금액이 '0원'~'12,800원'까지 폭이 크게 달라 그대로 두면 배지 위치가 행마다 튐) */
+  .stg-st{flex-shrink:0;display:flex;justify-content:flex-end;min-width:62px;}
+  .stg-sum{flex-shrink:0;min-width:66px;text-align:right;font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
   .stg-chev{display:inline-flex;flex-shrink:0;color:var(--ink4);font-size:15px;transition:transform .15s ease;}
   .stg.folded .stg-chev{transform:rotate(-90deg);}
   /* 그룹 안 첫 카드는 헤더에 자연스럽게 이어붙도록 위 여백을 줄임 */
@@ -2806,7 +2809,7 @@ function storeCardHTML(sid, pays){
         <span class="stg-nm">${st.name}</span>
         <span class="stg-lo">${PIN}${st.loc}${fold?` · ${pays.length}건`:''}</span>
       </span>
-      <span class="st-badge ${STATUS_BADGE(lead)}">${lead}</span>
+      <span class="stg-st"><span class="st-badge ${STATUS_BADGE(lead)}">${lead}</span></span>
       <span class="stg-sum">${won(total)}</span>
       <span class="stg-chev">${IC.chevron}</span>
     </button>

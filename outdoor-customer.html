@@ -54,6 +54,10 @@
   /* ── 공통 헤더 ───────────────────────── */
   .hdr{position:sticky;top:0;z-index:30;background:#fff;display:flex;align-items:center;gap:10px;padding:14px 14px;border-bottom:1px solid var(--line);}
   .hdr .bk{border:none;background:none;font-size:22px;cursor:pointer;color:var(--ink);width:30px;padding:0;font-family:inherit;}
+  /* 결제 화면 전용 이동 컨트롤 — 이전 단계(화살표) + 매장 그룹으로(홈) 두 버튼을 한 상자에 묶어 노출 */
+  .nav-combo{display:flex;align-items:stretch;border:1px solid var(--line2);border-radius:10px;overflow:hidden;flex-shrink:0;}
+  .nc-btn{border:none;background:#fff;color:var(--ink2);font-size:17px;padding:0;width:36px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .nc-div{width:1px;background:var(--line2);}
   .hdr .ht{font-size:17px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .oh-sync{font-size:11.5px;color:var(--ink4);white-space:nowrap;}
   .oh-refresh{border:none;background:none;padding:6px;margin:-6px -4px -6px 0;font-size:18px;color:var(--ink3);cursor:pointer;display:flex;}
@@ -1488,6 +1492,8 @@ const IC = {
   passport: _sv('<rect x="5" y="2.5" width="14" height="19" rx="2"/><circle cx="12" cy="10" r="2.6"/><path d="M8.5 17.5h7"/>'),
   seat:     _sv('<path d="M6 4.5h12v7H6z"/><path d="M4 11.5h16v5H4z"/><path d="M6.5 16.5V20M17.5 16.5V20"/>'),
   refresh:  _sv('<path d="M20.5 6v5.5H15"/><path d="M3.5 18v-5.5H9"/><path d="M4.8 9.5a7.5 7.5 0 0 1 13-3.5l2.7 2.5"/><path d="M19.2 14.5a7.5 7.5 0 0 1-13 3.5l-2.7-2.5"/>'),
+  arrowLeft:_sv('<path d="M20 12H4"/><path d="m10.5 5.5-6.5 6.5 6.5 6.5"/>', 2.3),
+  home:     _sv('<path d="m3.5 10.5 8.5-7 8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-6.5h5V20"/>'),
 };
 // 하위 호환 — 기존 코드에서 쓰던 이름 유지
 const PIN = IC.pin;
@@ -2291,7 +2297,14 @@ function scCheckout(){
   const mi = minInfo();
   const belowMin = mi.on && mi.below;
   return `
-  <div class="hdr"><button class="bk" onclick="go('cart')">‹</button><div class="ht">${post?'주문 확인':'주문 확인 및 결제'}</div></div>
+  <div class="hdr">
+    <div class="nav-combo">
+      <button class="nc-btn" onclick="go('cart')" aria-label="이전 단계로">${IC.arrowLeft}</button>
+      <span class="nc-div"></span>
+      <button class="nc-btn" onclick="go(S.mode==='group'?'home':'store')" aria-label="매장 그룹으로">${IC.home}</button>
+    </div>
+    <div class="ht">${post?'주문 확인':'주문 확인 및 결제'}</div>
+  </div>
   <div class="scroll">
     <!-- 주문 메뉴 -->
     <div class="sect"><div class="sect-h">주문 메뉴와 수령 정보</div>

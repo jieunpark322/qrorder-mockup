@@ -1133,8 +1133,9 @@
   <div class="sheet">
     <div class="sheet-t">성인 인증이 필요해요</div>
     <div class="sheet-s">알코올 메뉴는 성인 인증 후에만 담을 수 있어요.<br>최초 1회 인증하면 오늘 자정까지 다시 인증하지 않아도 돼요.</div>
-    <button class="authbtn" onclick="doAuth()"><span class="aic">${IC.phone}</span><div><div>본인 명의 휴대폰 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">내국인</div></div></button>
-    <button class="authbtn" onclick="doAuth()"><span class="aic">${IC.passport}</span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인</div></div></button>
+    <!-- 정적 HTML이라 ${IC.x} 템플릿 치환이 일어나지 않음 → SVG를 직접 인라인 (IC.phone / IC.passport와 동일 경로) -->
+    <button class="authbtn" onclick="doAuth()"><span class="aic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;flex-shrink:0;vertical-align:-0.14em" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></span><div><div>본인 명의 휴대폰 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">내국인</div></div></button>
+    <button class="authbtn" onclick="doAuth()"><span class="aic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;flex-shrink:0;vertical-align:-0.14em" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2"/><circle cx="12" cy="10" r="2.6"/><path d="M8.5 17.5h7"/></svg></span><div><div>여권 인증</div><div style="font-size:12px;color:var(--ink3);font-weight:600;">외국인</div></div></button>
     <button class="ghostbtn" onclick="closeAdult()">닫기</button>
   </div>
 </div>

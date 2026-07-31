@@ -1560,10 +1560,14 @@ function waitSentenceFor(s){
 }
 
 /* ══════════════ 라우팅 ══════════════ */
+/* 아래 두 설정은 현재 데모바에 칩이 없어 UI에서 호출되지 않는다.
+   과거 칩 id를 그대로 참조하고 있어 호출 시 예외가 나고, 그 시점엔 이미 상태만 바뀐 뒤라
+   화면과 상태가 어긋난 채 남는다. 칩이 없어도 안전하게 동작하도록 존재 여부를 확인한다. */
 function setMode(m){
   S.mode=m;
-  document.getElementById('mode-group').classList.toggle('on',m==='group');
-  document.getElementById('mode-single').classList.toggle('on',m==='single');
+  const chip = k => document.getElementById('mode-'+k);
+  chip('group')?.classList.toggle('on',m==='group');
+  chip('single')?.classList.toggle('on',m==='single');
   S.payScope = m==='group' ? 'unified' : 'separate';
   restart();
 }
@@ -1575,7 +1579,7 @@ function setBill(b){
 }
 function setBrandWait(m){
   S.brandWait=m;
-  ['count','time','off'].forEach(k=>document.getElementById('wait-'+k).classList.toggle('on',k===m));
+  ['count','time','off'].forEach(k=>document.getElementById('wait-'+k)?.classList.toggle('on',k===m));
   render();
 }
 function restart(){

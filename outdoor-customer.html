@@ -1082,21 +1082,50 @@
     background:var(--blue-50);color:var(--persimmon-d);font-size:11px;font-weight:800;line-height:1;vertical-align:-0.15em;}
   .store-no.sm{width:16px;height:16px;font-size:10px;margin-right:5px;}
 
-  /* ── 주문 내역 '매장별로 모아보기' — 매장명을 상위 제목으로, 회차는 카드 안 보조 정보로 ── */
-  .oh-store-sec{margin-top:20px;}
-  .oh-store-sec:first-child{margin-top:6px;}
-  /* 매장 섹션 헤더 = 접기 토글 버튼 */
-  .oh-store-sec-h{display:flex;align-items:center;gap:8px;margin:0 14px 2px;padding:0 2px 9px;border-bottom:2px solid var(--ink);
-    width:calc(100% - 28px);background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;text-align:left;cursor:pointer;color:inherit;}
-  .ossh-cnt{flex-shrink:0;font-size:11.5px;font-weight:800;color:var(--ink3);background:var(--line2);border-radius:6px;padding:2px 7px;}
-  .ossh-chev{display:inline-flex;flex-shrink:0;color:var(--ink3);font-size:17px;transition:transform .15s ease;}
-  .oh-store-sec.folded .ossh-chev{transform:rotate(-90deg);}
-  .oh-store-sec.folded .oh-store-sec-h{border-bottom-color:var(--line);}
-  .ossh-name{font-size:17px;font-weight:900;color:var(--ink);letter-spacing:-.02em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .ossh-loc{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--ink3);flex-shrink:0;}
-  .ossh-sum{margin-left:auto;font-size:15px;font-weight:900;color:var(--ink);flex-shrink:0;}
-  /* 매장별 보기에서 회차 라벨은 파란 배지를 벗고 옅은 보조 텍스트로 */
-  .oh-ord.sub{background:none;padding:0;font-size:13px;font-weight:700;color:var(--ink3);}
+  /* ── 주문 내역 '매장별로 모아보기' — 매장 하나 = 카드 하나 ──
+     매장 헤더(썸네일·상태·합계)가 주인공이고, 그 매장의 주문은 카드 안에서 한 줄씩 압축해 나열한다.
+     받을 준비가 끝난 매장은 카드 테두리를 초록으로 살려 목록에서 바로 눈에 띄게 한다. */
+  .stc{background:var(--card);border:1px solid var(--line);border-radius:15px;margin:0 14px 11px;overflow:hidden;}
+  .stc.ready{border-color:rgba(30,142,95,.42);box-shadow:0 0 0 2.5px rgba(30,142,95,.09);}
+
+  .stc-hd{display:flex;align-items:center;gap:11px;width:100%;padding:13px 14px;
+    background:none;border:none;font-family:inherit;text-align:left;cursor:pointer;color:inherit;}
+  .stc-th{flex-shrink:0;width:42px;height:42px;border-radius:11px;background:var(--line2);
+    background-size:cover;background-position:center;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:16px;font-weight:800;color:var(--ink3);}
+  .stc-hi{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+  .stc-nm{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.01em;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .stc-lo{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--ink3);}
+  .stc-rt{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+  .stc-sum{font-size:14.5px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .stc-chev{display:inline-flex;flex-shrink:0;color:var(--ink4);font-size:15px;transition:transform .15s ease;}
+  .stc-chev.lg{font-size:17px;}
+  .stc-chev.up{transform:rotate(180deg);}
+  .stc.folded .stc-chev.lg{transform:rotate(-90deg);}
+
+  .stc-cta{display:flex;align-items:center;gap:6px;margin:0 14px 12px;
+    background:#EAF6EF;color:var(--green);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;}
+
+  .stc-rows{border-top:1px solid var(--line2);padding:0 14px;}
+  .stc-row + .stc-row{border-top:1px solid var(--line2);}
+  .stc-line{display:flex;align-items:center;gap:9px;width:100%;padding:11px 0;
+    background:none;border:none;font-family:inherit;text-align:left;cursor:pointer;color:inherit;}
+  .stc-rnd{flex-shrink:0;font-size:10.5px;font-weight:800;color:var(--ink4);}
+  .stc-mn{flex:1;min-width:0;font-size:12.8px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .stc-st{flex-shrink:0;font-size:10.5px;padding:2px 7px;}
+  .stc-pr{flex-shrink:0;font-size:12.5px;font-weight:700;color:var(--ink2);font-variant-numeric:tabular-nums;}
+  .stc-row.cx .stc-mn{color:var(--ink4);text-decoration:line-through;}
+  .stc-row.cx .stc-pr{color:var(--red);}
+
+  .stc-detail{padding:2px 0 12px;}
+  .stc-dr{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2);padding:5px 0;}
+  .stc-dr .v{font-weight:700;color:var(--ink);}
+  .stc-dr.meta{color:var(--ink3);font-size:11.5px;}
+  .stc-dr.meta .v{font-weight:600;color:var(--ink2);}
+  .stc-dr.meta:first-of-type{margin-top:7px;padding-top:9px;border-top:1px solid var(--line2);}
+  .stc-rc{margin-top:11px;}
 </style>
 </head>
 <body>
@@ -2718,6 +2747,66 @@ function roundCardHTML(p, showNames, key){
   </div>`;
 }
 const open = id => !!(S.histOpen && S.histOpen[id]);
+
+/* ══ 매장별 모아보기 — 매장 카드형 ══
+   회차별 보기가 '한 번의 주문'을 단위로 본다면, 이 보기는 '매장'이 단위다.
+   그래서 회차 카드를 재사용하지 않고, 매장 헤더(상태·합계)를 주인공으로 두고
+   그 매장의 주문은 카드 안에서 한 줄씩 압축해 나열한다. */
+const STATUS_BADGE = st => st==='준비완료' ? 'st-done'
+                         : st==='수령완료' ? 'st-pick'
+                         : st==='주문취소' ? 'st-rej' : 'st-cook';
+// 매장 대표 상태 = 손님이 가장 먼저 행동해야 하는 상태
+const leadStatus = pays => pays.map(p=>p.status).sort((a,b)=>(ACT_ORDER[a]??9)-(ACT_ORDER[b]??9))[0];
+
+function storeCardHTML(sid, pays){
+  const st = store(sid);
+  const total = pays.reduce((a,p)=>a+payTotal(p),0);
+  const fold  = storeFolded(sid);
+  const lead  = leadStatus(pays);
+  const ready = canPickup(lead);
+  // 한 매장에 상태가 섞여 있을 때만 행마다 상태를 덧붙임(대개는 헤더 배지 하나로 충분)
+  const mixed = new Set(pays.map(p=>p.status)).size > 1;
+
+  const rows = byAction(pays).map(p=>{
+    const k = `${p.id}__${sid}`, o = open(k), cx = p.status==='주문취소';
+    const menus = p.items.map(it=>`${it.name}${it.opt?` (${it.opt})`:''}`).join(', ');
+    return `<div class="stc-row ${cx?'cx':''}">
+      <button class="stc-line" onclick="toggleHistDetail('${k}')" aria-expanded="${o}">
+        <span class="stc-rnd">${p.round}차</span>
+        <span class="stc-mn">${menus}</span>
+        ${mixed?`<span class="st-badge stc-st ${STATUS_BADGE(p.status)}">${p.status}</span>`:''}
+        <span class="stc-pr">${cx?'취소':won(sumItems(p.items))}</span>
+        <span class="stc-chev ${o?'up':''}">${IC.chevron}</span>
+      </button>
+      ${o?`<div class="stc-detail">
+        ${cx?`<div class="oh-cancelnote" style="margin:0 0 10px"><div class="cn-main">${IC.undo} ${p.cancelMain}</div><div class="cn-sub">${p.cancelSub}</div></div>`:''}
+        ${p.items.map(it=>`<div class="stc-dr"><span>${it.name}${it.opt?` (${it.opt})`:''} ×${it.qty}</span><span class="v">${won(it.price*it.qty)}</span></div>`).join('')}
+        <div class="stc-dr meta"><span>주문번호</span><span class="v">${p.id}</span></div>
+        <div class="stc-dr meta"><span>주문시각</span><span class="v">${p.paidAt.slice(11,16)}</span></div>
+        <div class="stc-dr meta"><span>결제수단</span><span class="v">${p.pay}</span></div>
+        <button class="oh-receipt sm stc-rc" onclick="event.stopPropagation();openReceipt('${p.id}')">${IC.receipt} 영수증</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
+
+  return `<div class="stc ${ready?'ready':''} ${fold?'folded':''}">
+    <button class="stc-hd" onclick="toggleStoreFold('${sid}')" aria-expanded="${!fold}">
+      <span class="stc-th${st.thumb?'':' noimg'}" style="${st.thumb?`background-image:url('${st.thumb}')`:''}">${st.thumb?'':st.name.slice(0,1)}</span>
+      <span class="stc-hi">
+        <span class="stc-nm">${st.name}</span>
+        <span class="stc-lo">${PIN}${st.loc}${fold?` · ${pays.length}건`:''}</span>
+      </span>
+      <span class="stc-rt">
+        <span class="st-badge ${STATUS_BADGE(lead)}">${lead}</span>
+        <span class="stc-sum">${won(total)}</span>
+      </span>
+      <span class="stc-chev lg">${IC.chevron}</span>
+    </button>
+    ${fold?'':`
+      ${ready?`<div class="stc-cta">${IC.bell} 지금 받아 가세요</div>`:''}
+      <div class="stc-rows">${rows}</div>`}
+  </div>`;
+}
 // 카드 내부 — 매장마다 '매장명 + 상태 배지 + 진행 막대' 한 세트 (매장이 1곳이든 여러 곳이든 동일한 구조)
 function storeRowsHTML(stores, showNames){
   const rows = byAction(stores).map(s=>{const st=store(s.sid); return `<div class="oh-st-row">
@@ -2789,21 +2878,11 @@ function scHistory(){
       (byStore[s.sid]=byStore[s.sid]||[]).push({...p, stores:[s], items:s.items.map(it=>({...it,store:s.sid})), status:s.status});
     }));
     // 매장별 보기에서는 매장명이 상위 제목 · 회차는 카드 안 보조 정보로 낮춤
-    body = Object.entries(byStore).map(([sid,pays])=>{
-      const st = store(sid);
-      const stTotal = pays.reduce((a,p)=>a+payTotal(p),0);
-      const sf = storeFolded(sid);
-      return `<div class="oh-store-sec ${sf?'folded':''}">
-        <button class="oh-store-sec-h" onclick="toggleStoreFold('${sid}')" aria-expanded="${!sf}">
-          <span class="ossh-name">${st.name}</span>
-          ${st.loc?`<span class="ossh-loc">${PIN}${st.loc}</span>`:''}
-          ${sf?`<span class="ossh-cnt">${pays.length}건</span>`:''}
-          <span class="ossh-sum">${won(stTotal)}</span>
-          <span class="ossh-chev">${IC.chevron}</span>
-        </button>
-        ${sf?'':pays.map(p=>roundCardHTML(p,false,`${p.id}__${sid}`)).join('')}
-      </div>`;
-    }).join('');
+    // 매장 카드형 — 매장이 주인공이므로 회차 카드를 그대로 쓰지 않고 매장 단위 카드로 다시 짬
+    // 정렬은 회차별 보기와 동일하게 '액션 우선'(받으러 갈 매장이 위로)
+    body = Object.entries(byStore)
+      .sort((a,b)=>(ACT_ORDER[leadStatus(a[1])]??9)-(ACT_ORDER[leadStatus(b[1])]??9))
+      .map(([sid,pays])=>storeCardHTML(sid,pays)).join('');
   }
   const grand = Pfull.reduce((a,p)=>a+payTotal(p),0);   // 누적 전체 합계는 필터와 무관하게 전체 기준
   return `

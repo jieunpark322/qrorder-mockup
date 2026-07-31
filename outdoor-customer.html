@@ -1014,6 +1014,8 @@
     opacity:1;transition:opacity .2s ease;}
   .scroll-cue svg{width:16px;height:16px;}
   .cchip-scroll.at-end .scroll-cue{opacity:0;}
+  .tslot-scroll{position:relative;}
+  .tslot-scroll.at-end .scroll-cue{opacity:0;}
 
   /* ── 고객 안내 문구 ──────────────────────
      기본은 배경·테두리 없는 '그냥 안내 문장'. 색 상자로 감싸면 화면이 금방 산만해지고 AI가 찍어낸 느낌이 나므로,
@@ -1598,9 +1600,9 @@ function render(){
   if(S.screen==='store'){ _sbanI=0; startSBanner(); }
   requestAnimationFrame(()=>{ document.querySelectorAll('#device .cchip-scroll .cchips').forEach(chipFade); bindBannerSwipe(); if(S.screen==='home') syncNotice(); });
 }
-// 가로 스크롤 칩: 더 볼 게 남았는지에 따라 오른쪽 '더보기' 힌트(페이드+화살표) 표시 · 끝이면 숨김
+// 가로 스크롤 목록(카테고리 칩·시간 슬롯 공용): 더 볼 게 남았는지에 따라 오른쪽 '더보기' 힌트(페이드+화살표) 표시 · 끝이면 숨김
 function chipFade(el){
-  const wrap=el.parentElement; if(!wrap||!wrap.classList.contains('cchip-scroll')) return;
+  const wrap=el.parentElement; if(!wrap||!(wrap.classList.contains('cchip-scroll')||wrap.classList.contains('tslot-scroll'))) return;
   const atEnd = el.scrollWidth<=el.clientWidth+1 || el.scrollLeft+el.clientWidth>=el.scrollWidth-2;
   wrap.classList.toggle('at-end', atEnd);
 }
@@ -2068,7 +2070,7 @@ function scCart(){
            <div class="pk-opt ${S.pickup==='reserve'?'on':''}" onclick="S.pickup='reserve';render()">
              <span class="pk-radio"></span>
              <div class="pk-txt">
-               <b>예약하기</b><span>원하는 시간에 맞춰 미리 받을 수 있어요.</span>
+               <b>예약하기</b><span>원하는 시간에 받을 수 있도록 미리 주문하는 방식이에요.</span>
                ${S.pickup==='reserve' ? timeSlotPickerHTML() : ''}
              </div>
            </div>`}
@@ -2183,10 +2185,13 @@ function timeSlotPickerHTML(){
   return `
     <div class="tp-wrap" onclick="event.stopPropagation()">
       <div class="tp-label">수령 시간 <span class="req">필수</span></div>
-      <div class="timeslots">${slots.map(t=>{
-        const ok=validPickup(s,t), lbl=fmtMin(t), cur=S.pickupTime===lbl;
-        return `<button class="tslot ${cur?'on':''}" ${ok?'':'disabled'} onclick="pickSlot(${t})">${lbl}${ok?'':'<span class="ts-x">마감</span>'}</button>`;
-      }).join('')}</div>
+      <div class="tslot-scroll">
+        <div class="timeslots" onscroll="chipFade(this)">${slots.map(t=>{
+          const ok=validPickup(s,t), lbl=fmtMin(t), cur=S.pickupTime===lbl;
+          return `<button class="tslot ${cur?'on':''}" ${ok?'':'disabled'} onclick="pickSlot(${t})">${lbl}${ok?'':'<span class="ts-x">마감</span>'}</button>`;
+        }).join('')}</div>
+        <span class="scroll-cue" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </div>
       ${S.pickupTime?`<div class="tp-note">${IC.calendar} 오늘 <b>${S.pickupTime}</b> 수령</div>`:`<div class="tp-note dim">받을 시간을 선택해 주세요</div>`}
       <div class="tp-hint">예약은 ${fmtMin(start)}~${fmtMin(end)}${brk} 사이로 받을 수 있어요.</div>
     </div>`;

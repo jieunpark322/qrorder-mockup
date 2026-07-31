@@ -604,10 +604,15 @@
   /* 하단 결제/장바구니: 화면 위아래로 스크롤해도 항상 보이는 플로팅(뷰포트 고정) */
   .cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;box-shadow:0 -8px 20px rgba(20,20,25,.07);padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
   /* 주문 내역 진입 버튼 — 하단(장바구니)과 완전히 분리해 화면 상단에 배치 · 아이콘만으로는 인지가 어려워 텍스트 라벨 병기 */
-  .hist-icon{pointer-events:auto;flex-shrink:0;color:#fff;border:none;border-radius:18px;padding:8px 13px;font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+  /* 주문 내역 플로팅 버튼 — 정원(1:1) · 아이콘 위 / 라벨 아래로 쌓아 원형을 유지하면서도 무슨 버튼인지 읽히게 함 */
+  .hist-icon{pointer-events:auto;flex-shrink:0;width:62px;height:62px;border-radius:50%;padding:0;
+    color:#fff;border:none;font-family:inherit;cursor:pointer;
+    display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
     background:linear-gradient(180deg,#9496FF 0%,#6D6FF3 55%,#5254D6 100%);
-    box-shadow:0 1px 0 rgba(255,255,255,.45) inset, 0 -2px 5px rgba(40,40,150,.20) inset, 0 2px 4px rgba(70,70,220,.30), 0 4px 12px rgba(70,70,220,.38);
+    box-shadow:0 1px 0 rgba(255,255,255,.45) inset, 0 -2px 6px rgba(40,40,150,.20) inset, 0 3px 6px rgba(70,70,220,.28), 0 7px 18px rgba(70,70,220,.36);
     transition:transform .08s ease;}
+  .hist-icon .hi-ic{display:inline-flex;font-size:21px;line-height:1;}
+  .hist-icon .hi-t{font-size:9.5px;font-weight:800;letter-spacing:-.04em;line-height:1;white-space:nowrap;}
   .hist-icon:active{transform:scale(.94);}
   /* 매장 그룹(홈) — 우측 하단 플로팅 배치(장바구니 바 위) */
   .hist-fabwrap{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:440px;display:flex;justify-content:flex-end;padding:0 16px;z-index:38;pointer-events:none;}
@@ -1712,7 +1717,7 @@ function scHome(){
 }
 // 주문 내역 진입 버튼 — 매장 단일 페이지는 헤더 안에 인라인 배치(histFabIcon), 매장 그룹(홈)은 우측 하단 플로팅(histFabFloat)
 function histFabIcon(){
-  return `<button class="hist-icon" onclick="go('history')">${IC.receipt} 주문 내역</button>`;
+  return `<button class="hist-icon" onclick="go('history')" aria-label="주문 내역"><span class="hi-ic">${IC.receipt}</span><span class="hi-t">주문내역</span></button>`;
 }
 function histFabFloat(){
   // 카트바 노출 조건은 화면마다 다름 — 홈은 통합결제일 때만, 매장 페이지는 담긴 게 있으면 항상 노출

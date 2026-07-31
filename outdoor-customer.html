@@ -607,7 +607,7 @@
 
   /* ── 하단 고정 CTA ───────────────────────── */
   /* 하단 결제/장바구니: 화면 위아래로 스크롤해도 항상 보이는 플로팅(뷰포트 고정) */
-  .cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;box-shadow:0 -8px 20px rgba(20,20,25,.07);padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
+  .cta{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;background:#fff;box-shadow:none;padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:40;}
   /* 주문 내역 진입 버튼 — 하단(장바구니)과 완전히 분리해 화면 상단에 배치 · 아이콘만으로는 인지가 어려워 텍스트 라벨 병기 */
   /* 주문 내역 플로팅 버튼 — 정원(1:1) · 아이콘 위 / 라벨 아래로 쌓아 원형을 유지하면서도 무슨 버튼인지 읽히게 함 */
   .hist-icon{pointer-events:auto;flex-shrink:0;width:62px;height:62px;border-radius:50%;padding:0;
@@ -666,7 +666,7 @@
   .ms-warn{margin-top:12px;background:#fff0f0;border:1px solid #ffc9c9;border-radius:10px;padding:12px 14px;font-size:13.5px;font-weight:700;color:#c92a2a;line-height:1.55;}
   .ms-warn.amber{background:#fff8e6;border-color:#ffe3a3;color:#92400e;}
   .sheet-menu .d-body{padding:16px 18px 20px;}
-  .ms-foot{flex-shrink:0;border-top:1px solid var(--line);padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#fff;}
+  .ms-foot{flex-shrink:0;border-top:none;padding:4px 16px calc(14px + env(safe-area-inset-bottom));background:#fff;}
 
   .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(42,32,26,.95);color:#fff;padding:13px 22px;border-radius:24px;font-size:14px;font-weight:700;z-index:400;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;}
   .toast.on{opacity:1;bottom:110px;}
@@ -757,7 +757,7 @@
   .oh-rnd-h{color:var(--persimmon-d);}
 
   /* ── CTA: 퍼시몬 그라데이션 + 촉각 프레스 ── */
-  .cta{background:var(--card);box-shadow:0 -8px 24px rgba(28,16,6,.06);}
+  .cta{background:var(--card);box-shadow:none;}
   .cta-btn{background:linear-gradient(180deg,#FF6A2C,var(--persimmon-d));box-shadow:0 8px 20px rgba(232,80,30,.34);letter-spacing:.01em;}
   .cta-btn:active{transform:translateY(1px) scale(.994);}
   .cta-btn:disabled{background:var(--line);color:var(--ink4);box-shadow:none;}
@@ -843,7 +843,7 @@
   .searchtog{background:#F3F3F5;} .store-group-h{background:var(--blue-50);color:var(--persimmon);}
 
   /* CTA: 입체(3D) 버튼 — 상단 하이라이트 + 하단 음영(inset) + 아래로 눌리는 촉각 프레스 */
-  .cta{background:#fff;box-shadow:0 -8px 20px rgba(20,20,25,.07);}
+  .cta{background:#fff;box-shadow:none;}
   .cta-btn{letter-spacing:-.01em;
     background:linear-gradient(180deg,#7BA5E6 0%,#5C8CDA 52%,#3F6FC9 100%);
     box-shadow:0 1px 0 rgba(255,255,255,.42) inset, 0 -3px 6px rgba(30,60,130,.30) inset, 0 3px 5px rgba(45,85,170,.30), 0 8px 18px rgba(45,85,170,.28);

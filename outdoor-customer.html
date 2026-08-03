@@ -300,12 +300,14 @@
   .field{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:13px 14px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink);outline:none;}
   .field:focus{border-color:var(--blue);}
   textarea.field{resize:none;min-height:70px;}
-  /* 휴대폰 3박스 입력 (010 고정 + 4자리 + 4자리) */
-  .phone3{display:flex;align-items:center;gap:8px;}
+  /* 휴대폰 입력 (010 고정 + 한 자리씩 4칸 + 4칸) — 남은 자릿수가 눈으로 세어지도록 칸을 나눔 */
+  .phone3{display:flex;align-items:center;gap:6px;}
   .phone3 .field{text-align:center;padding:13px 6px;letter-spacing:.08em;}
-  .phone3 .pf-fixed{flex:0 0 66px;background:#F2F2F4;color:var(--ink2);font-weight:800;}
-  .phone3 .pf-num{flex:1;min-width:0;}
-  .phone3 .pf-dash{color:var(--ink4);font-weight:700;}
+  .phone3 .pf-fixed{flex:0 0 52px;background:#F2F2F4;color:var(--ink2);font-weight:800;padding:13px 0;}
+  .phone3 .pf-dash{color:var(--ink4);font-weight:700;flex-shrink:0;}
+  .phone3 .pf-grp{display:flex;gap:4px;flex:1;min-width:0;}
+  .phone3 .pf-d{flex:1;min-width:0;padding:13px 0;letter-spacing:0;font-size:16px;font-weight:800;}
+  .phone3 .pf-d:focus{border-color:var(--persimmon);}
   .email3{display:flex;align-items:center;gap:7px;}
   .email3 .ef-id{flex:1;min-width:0;}
   .email3 .ef-at{color:var(--ink4);font-weight:700;flex-shrink:0;}
@@ -2523,26 +2525,55 @@ function paySheetHTML(){
             </select>`}
       </div>
       ` : `
-      <div class="phone3" style="margin-bottom:12px">
+      ${(()=>{
+        // 뒤 8자리를 한 자리씩 8칸으로 나눠, 몇 자를 넣었고 몇 자가 남았는지 눈으로 바로 세어지게 함
+        const d=((S.pMid||'')+(S.pEnd||'')).replace(/\D/g,'');
+        const box=i=>`<input class="field pf-d" id="pd${i}" inputmode="numeric" maxlength="1" value="${d[i]||''}"
+          aria-label="휴대폰 뒤 8자리 중 ${i+1}번째 자리"
+          oninput="onPayDigit(this,${i})" onkeydown="onPayDigitKey(event,${i})" onpaste="onPayDigitPaste(event)">`;
+        return `<div class="phone3" style="margin-bottom:12px">
         <input class="field pf-fixed" value="010" readonly tabindex="-1" aria-label="앞자리 010 고정">
         <span class="pf-dash">–</span>
-        <input class="field pf-num" id="phoneMid" inputmode="numeric" maxlength="4" placeholder="0000" value="${S.pMid||''}" oninput="onPayPhone(this,'mid')">
+        <span class="pf-grp">${[0,1,2,3].map(box).join('')}</span>
         <span class="pf-dash">–</span>
-        <input class="field pf-num" id="phoneEnd" inputmode="numeric" maxlength="4" placeholder="0000" value="${S.pEnd||''}" oninput="onPayPhone(this,'end')">
-      </div>
+        <span class="pf-grp">${[4,5,6,7].map(box).join('')}</span>
+      </div>`;})()}
       `}
       <button class="cta-btn" onclick="submitContact('${S.alertCh}')">${won(finalAmt)} ${act}하기</button>
       ${S.alertCh==='email'?'':'<div class="pay-hint">준비가 완료되면 카카오톡으로 알려드려요.<br>앞자리 010은 고정이고, 뒤 4자리와 4자리를 입력하면 진행돼요.</div>'}
     </div>`;
 }
-// 결제 시트 연락처 입력 → 상태 저장 후 시트만 갱신(쿠폰 실시간 노출) · 포커스 유지
-function onPayPhone(el,which){
-  const v=el.value.replace(/\D/g,'');
-  if(which==='mid') S.pMid=v; else S.pEnd=v;
-  const advance = which==='mid' && v.length>=4;
-  refreshPaySheet();
-  const id = advance?'phoneEnd':(which==='mid'?'phoneMid':'phoneEnd');
-  const n=document.getElementById(id); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); }
+/* 휴대폰 뒤 8자리 — 한 자리씩 8칸
+   칸마다 시트를 다시 그리면 포커스가 튀므로, 여기서는 상태만 갱신하고 DOM에서 직접 다음 칸으로 이동한다.
+   (휴대폰 번호는 시트의 다른 표시값에 영향을 주지 않아 재렌더가 필요 없음) */
+const PD_LEN = 8;
+const pdBox = i => document.getElementById('pd'+i);
+function syncPhoneDigits(){
+  let s='';
+  for(let i=0;i<PD_LEN;i++) s += (pdBox(i)?.value || '');
+  S.pMid=s.slice(0,4); S.pEnd=s.slice(4,8);
+}
+function onPayDigit(el,i){
+  el.value = el.value.replace(/\D/g,'').slice(-1);   // 숫자 1자리만 남김(덮어쓰기 입력도 자연스럽게)
+  syncPhoneDigits();
+  if(el.value && i<PD_LEN-1){ const n=pdBox(i+1); if(n){ n.focus(); n.select(); } }
+}
+function onPayDigitKey(e,i){
+  const k=e.key;
+  if(k==='Backspace' && !e.target.value && i>0){   // 빈 칸에서 지우면 앞 칸으로 이동하며 지움
+    e.preventDefault(); const p=pdBox(i-1);
+    if(p){ p.value=''; syncPhoneDigits(); p.focus(); }
+  } else if(k==='ArrowLeft' && i>0){ e.preventDefault(); pdBox(i-1)?.focus(); }
+  else if(k==='ArrowRight' && i<PD_LEN-1){ e.preventDefault(); pdBox(i+1)?.focus(); }
+}
+function onPayDigitPaste(e){
+  const raw=((e.clipboardData||window.clipboardData)?.getData('text')||'').replace(/\D/g,'');
+  if(!raw) return;
+  e.preventDefault();
+  const d=raw.replace(/^010/,'').slice(0,PD_LEN);   // 010을 포함해 붙여넣어도 뒤 8자리만 채움
+  for(let i=0;i<PD_LEN;i++){ const n=pdBox(i); if(n) n.value=d[i]||''; }
+  syncPhoneDigits();
+  pdBox(Math.min(d.length,PD_LEN-1))?.focus();
 }
 // 이메일 대표 도메인 선택(또는 직접입력) — 아이디+도메인을 조합해 최종 pEmail을 만듦
 // 외국인 이용객 비중이 높은 행사 특성상 실사용률 기준 gmail·outlook·icloud·yahoo·hotmail 순으로 상위 노출 (직접입력은 select 마크업에서 별도 처리)

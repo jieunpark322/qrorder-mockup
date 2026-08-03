@@ -2540,7 +2540,7 @@ function paySheetHTML(){
       </div>`;})()}
       `}
       <button class="cta-btn" onclick="submitContact('${S.alertCh}')">${won(finalAmt)} ${act}하기</button>
-      ${S.alertCh==='email'?'':'<div class="pay-hint">준비가 완료되면 카카오톡으로 알려드려요.<br>앞자리 010은 고정이고, 뒤 4자리와 4자리를 입력하면 진행돼요.</div>'}
+      ${S.alertCh==='email'?'':'<div class="pay-hint">준비가 완료되면 카카오톡으로 알려드려요.</div>'}
     </div>`;
 }
 /* 휴대폰 뒤 8자리 — 한 자리씩 8칸
@@ -2603,7 +2603,7 @@ function phoneAuto(el,nextId){ el.value=el.value.replace(/\D/g,''); if(el.value.
 function submitContact(type){
   if(type==='phone'){
     const mid=(S.pMid||'').replace(/\D/g,''), end=(S.pEnd||'').replace(/\D/g,'');
-    if(mid.length!==4 || end.length!==4) return toast('휴대폰 뒤 8자리(4자리 + 4자리)를 정확히 입력해 주세요');
+    if(mid.length!==4 || end.length!==4) return toast('휴대폰 번호를 다시 확인해 주세요');
     const v=`010-${mid}-${end}`;
     S.loginType='phone'; S.contact=v; openConfirm('입력하신 정보가 맞나요?', `이 번호로 주문 확인과 완료 알림을 보내드려요<br><b style="color:var(--ink);font-size:17px">${v}</b>`, '확인했어요.', '다시 입력할게요.', payConfirm);
   } else {
